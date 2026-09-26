@@ -23,6 +23,7 @@ def main() -> None:
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument("--block", action="store_true", help="annotate as blocked, keep unticked")
     mode.add_argument("--note", action="store_true", help="annotate only, keep current state")
+    mode.add_argument("--untick", action="store_true", help="revert to unticked (evidence incomplete)")
     args = parser.parse_args()
 
     lines = TASKBOOK.read_text(encoding="utf-8").splitlines()
@@ -30,17 +31,20 @@ def main() -> None:
     for i, line in enumerate(lines):
         if not pattern.match(line):
             continue
-        if not (args.block or args.note):
+        if args.untick:
+            lines[i] = line.replace("- [x]", "- [ ]", 1)
+        elif not (args.block or args.note):
             lines[i] = line.replace("- [ ]", "- [x]", 1)
         # drop previous annotations of this item, then add the new one
         j = i + 1
         while j < len(lines) and lines[j].startswith("  - "):
             j += 1
-        prefix = "BLOCKED" if args.block else ("备注" if args.note else "证据")
+        prefix = "BLOCKED" if args.block else ("进展" if (args.note or args.untick) else "证据")
         text = args.evidence if args.evidence.startswith(("BLOCKED", "NOT_RUN")) else f"{prefix}：{args.evidence}"
         lines[i + 1 : j] = [f"  - {text}"]
         TASKBOOK.write_text("\n".join(lines) + "\n", encoding="utf-8")
-        print(f"{args.task_id}: {'blocked' if args.block else 'noted' if args.note else 'ticked'}")
+        state = "blocked" if args.block else "noted" if args.note else "unticked" if args.untick else "ticked"
+        print(f"{args.task_id}: {state}")
         return
     raise SystemExit(f"task {args.task_id} not found in {TASKBOOK}")
 

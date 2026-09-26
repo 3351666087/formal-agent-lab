@@ -65,7 +65,8 @@
 - [ ] **P1-010** 建立 contracts、model-core、solver-adapters、orchestrator、platform-api、web、sdk、evaluation、neutral-environment 等模块边界。
 - [ ] **P1-011** API、Worker、Web 按运行职责部署；内部包保持模块化接口，并由实际部署职责决定服务边界。
 - [ ] **P1-012** 扩展模块通过注册表与能力声明接入。核心包保持插件无关，扩展差异集中在正式接口与元数据中。
-- [ ] **P1-013** Environment 主线使用项目自带纯数据模拟器；所有已声明能力都对应真实实现与可验证结果。
+- [x] **P1-013** Environment 主线使用项目自带纯数据模拟器；所有已声明能力都对应真实实现与可验证结果。
+  - 证据：主线环境为 formal-lab.env.ir-world（packages/neutral-environment，纯数据 IR 模拟器）；声明能力 env.snapshot_restore/observation_delay/truth_overrides/seeded_variation 均有测试（packages/neutral-environment/tests/test_ir_world.py，docs/execution/evidence/M2-core-tests.log）
 
 ## 3. 直接复用的仓库及改造落点
 
@@ -75,10 +76,14 @@
 
 来源：[Z3Prover/z3](https://github.com/Z3Prover/z3)，调研时主许可证为 MIT。
 
-- [ ] **P1-020** 核对版本、许可证、Python API 与项目兼容性，固定实际版本。
-- [ ] **P1-021** 复用 Python 绑定与官方有限约束示例；在 **solver-adapters/z3** 实现 IR 编译器，通过官方绑定复用求解器能力。
-- [ ] **P1-022** 实现有界目标可达性、单步前置条件检查、有界不变量反例搜索；分别声明量词、边界与结果语义。
-- [ ] **P1-023** 保存求解状态、步数、耗时、超时原因、变量映射与可解释见证；unknown、超时、未支持分别使用独立结果状态保存。
+- [x] **P1-020** 核对版本、许可证、Python API 与项目兼容性，固定实际版本。
+  - 证据：z3-solver==5.1.0.0（MIT），uv.lock 固定；Python API 经 import z3 使用，差分测试通过（docs/execution/evidence/M2-core-tests.log）
+- [x] **P1-021** 复用 Python 绑定与官方有限约束示例；在 **solver-adapters/z3** 实现 IR 编译器，通过官方绑定复用求解器能力。
+  - 证据：packages/solver-adapters/z3/src/formal_lab_solver_z3/compiler.py：IR→Z3 编译器，复用官方 Python 绑定（Solver/If/Int/Bool），不修改求解器
+- [x] **P1-022** 实现有界目标可达性、单步前置条件检查、有界不变量反例搜索；分别声明量词、边界与结果语义。
+  - 证据：verifier.py 实现 GOAL_REACHABILITY(EXISTS_PATH) / INVARIANT_VIOLATION(ALL_PATHS) / ACTION_PRECONDITION(SINGLE_STEP)，语义与边界写在模块文档与 BoundedCheckResult.semantics/bound/assumptions；test_z3_engine.py
+- [x] **P1-023** 保存求解状态、步数、耗时、超时原因、变量映射与可解释见证；unknown、超时、未支持分别使用独立结果状态保存。
+  - 证据：BoundedCheckResult 保存 solver_status/steps_explored/elapsed_ms/timeout_ms/reason_unknown/variable_mapping/witness(含解释器重放)；UNKNOWN(timeout) 与 UNSUPPORTED 分别测试（test_timeout_yields_unknown_with_reason / test_unsupported_profile_feature）
 
 ### 3.2 Temporal：持久实验编排
 
@@ -124,42 +129,62 @@
 | RunManifest | 实际固定的模型/插件/环境版本、配置、预算、种子、状态与产物 |
 
 - [ ] **P1-040** 从单一契约来源生成其余语言类型；提交生成命令，并在 CI 检查漂移。
-- [ ] **P1-041** 实现稳定接口：ModelFrontend.compile、Planner.propose、Verifier.check、Environment.reset/observe/step/snapshot/restore/close、Evaluator.score、ArtifactStore.put/get。
+- [x] **P1-041** 实现稳定接口：ModelFrontend.compile、Planner.propose、Verifier.check、Environment.reset/observe/step/snapshot/restore/close、Evaluator.score、ArtifactStore.put/get。
+  - 证据：接口定义 packages/contracts/src/formal_lab_contracts/interfaces.py；实现：IRJsonFrontend.compile、Z3BoundedPlanner/EddDispatchPlanner/LLMPlanner.propose、Z3Verifier.check、IRWorldEnvironment.reset/observe/step/snapshot/restore/close、GenericEvaluator/SchedulingScorer.score、Local/S3ArtifactStore.put/get
 - [ ] **P1-042** 每个接口给出可运行示例；Environment 示例仅调用纯数据模拟器。
-- [ ] **P1-043** 定义统一错误：输入无效、版本不匹配、不支持、超时、结果未知、取消、可/不可重试失败。
-- [ ] **P1-044** 扩展字段须有命名空间、版本与 schema；核心对象持续保持强类型结构。
-- [ ] **P1-045** 实现 capabilities 协商；未支持语义返回显式 UNSUPPORTED 结果。
+- [x] **P1-043** 定义统一错误：输入无效、版本不匹配、不支持、超时、结果未知、取消、可/不可重试失败。
+  - 证据：formal_lab_contracts.errors：INVALID_INPUT/VERSION_MISMATCH/UNSUPPORTED/TIMEOUT/RESULT_UNKNOWN/CANCELLED/RETRYABLE_FAILURE/NON_RETRYABLE_FAILURE(+NOT_FOUND/CONFLICT)，异常↔ErrorInfo 往返测试 test_error_model_round_trip_and_retryability
+- [x] **P1-044** 扩展字段须有命名空间、版本与 schema；核心对象持续保持强类型结构。
+  - 证据：ExtensibleModel.extensions：反向 DNS 命名空间 + version + schema_id，JSON Schema propertyNames 约束，保留 formal-lab.core.*；核心对象 extra=forbid（fixtures invalid/unknown-core-field, bad-extension-namespace）
+- [x] **P1-045** 实现 capabilities 协商；未支持语义返回显式 UNSUPPORTED 结果。
+  - 证据：capabilities.negotiate + PluginRegistry.negotiate；test_capability_negotiation；Verifier 对未支持 profile/feature 返回 verdict=UNSUPPORTED（非异常）
 - [ ] **P1-046** 编辑模型产生新版本；运行固定引用版本；旧实验持续引用其原始版本与解释。
 - [ ] **P1-047** 导出 **contracts/v1/**、**docs/contracts/v1.md**，固定契约摘要并写入交接。
 
 ### 4.1 精确结果语义
 
-- [ ] **P1-048** query_kind 至少区分 GOAL_REACHABILITY、INVARIANT_VIOLATION、ACTION_PRECONDITION，并分别表达“存在路径”与“所有路径满足性质”的查询语义。
-- [ ] **P1-049** 搜索结果使用 WITNESS、NO_WITNESS_WITHIN_BOUND、UNKNOWN、UNSUPPORTED；NO_WITNESS_WITHIN_BOUND 始终携带查询边界并按有界结论展示。
-- [ ] **P1-050** 单步前提结果区分 APPLICABLE、INAPPLICABLE、UNKNOWN、UNSUPPORTED；证据不足保持未知。
-- [ ] **P1-051** 普通检查结果表示模型内结论，并预留类型化扩展槽供后续能力追加。
+- [x] **P1-048** query_kind 至少区分 GOAL_REACHABILITY、INVARIANT_VIOLATION、ACTION_PRECONDITION，并分别表达“存在路径”与“所有路径满足性质”的查询语义。
+  - 证据：QueryKind 三类 + QuerySemantics EXISTS_PATH/ALL_PATHS/SINGLE_STEP，模型校验器强制一致（semantic-invalid/semantics-mismatch）
+- [x] **P1-049** 搜索结果使用 WITNESS、NO_WITNESS_WITHIN_BOUND、UNKNOWN、UNSUPPORTED；NO_WITNESS_WITHIN_BOUND 始终携带查询边界并按有界结论展示。
+  - 证据：SearchVerdict WITNESS/NO_WITNESS_WITHIN_BOUND/UNKNOWN/UNSUPPORTED；NO_WITNESS 结果总带 bound 与“有界结论”解释（test_goal_not_reachable_within_bound_is_bounded_conclusion）
+- [x] **P1-050** 单步前提结果区分 APPLICABLE、INAPPLICABLE、UNKNOWN、UNSUPPORTED；证据不足保持未知。
+  - 证据：PreconditionVerdict APPLICABLE/INAPPLICABLE/UNKNOWN/UNSUPPORTED；未知项作为自由变量，结论不一致时 UNKNOWN（test_precondition_with_unknowns_matches_interpreter）
+- [x] **P1-051** 普通检查结果表示模型内结论，并预留类型化扩展槽供后续能力追加。
+  - 证据：BoundedCheckResult.scope=MODEL_INTERNAL + extensions 类型化扩展槽
 
 ## 5. 中性有限状态 IR 与可用引擎
 
 必做语义 profile 为 **deterministic_finite_v1**：有限实体集合；布尔、枚举、有界整数；纯表达式 AST；离散逻辑步；显式动作顺序；确定性效果。用能力矩阵说明时间、并发、概率与部分观测支持范围。
 
-- [ ] **P1-060** 实现解析、类型与引用检查、规范化序列化和版本摘要；表达式采用纯 AST 与显式解释器执行。
-- [ ] **P1-061** 实现纯 Python 参考解释器，与 Z3 编译器独立实现同一语义。
-- [ ] **P1-062** 实现初始状态、动作适用性、状态转移、目标条件与有限步轨迹。
-- [ ] **P1-063** 小状态空间比较解释器穷举与 Z3 查询；求解见证必须能被解释器重放。
-- [ ] **P1-064** 概率、并发等当前 profile 之外的语义返回 UNSUPPORTED，并记录对应扩展接口与能力矩阵。
+- [x] **P1-060** 实现解析、类型与引用检查、规范化序列化和版本摘要；表达式采用纯 AST 与显式解释器执行。
+  - 证据：formal_lab_model.checker（解析/类型/引用检查，ModelIssue 带路径）、frontend.canonical_ir/ir_digest（规范化 + sha256）；纯 AST + 显式解释器；test_model_core.py
+- [x] **P1-061** 实现纯 Python 参考解释器，与 Z3 编译器独立实现同一语义。
+  - 证据：formal_lab_model.interpreter（纯 Python，闭包编译 AST）；Z3 编译器独立实现同一语义，仅共享静态符号表
+- [x] **P1-062** 实现初始状态、动作适用性、状态转移、目标条件与有限步轨迹。
+  - 证据：Interpreter.initial_state/precondition/step/apply/successors/holds/replay；test_lamp_semantics_and_domain_guard / test_two_jobs_*
+- [x] **P1-063** 小状态空间比较解释器穷举与 Z3 查询；求解见证必须能被解释器重放。
+  - 证据：60 个随机模型 + 合成目标：解释器 BFS 与 Z3 在判定与最短见证长度一致，见证经解释器重放 CONFIRMED；反空洞守卫要求 ≥40 个深度≥2 见证（test_differential_*，docs/execution/evidence/M2-core-tests.log）
+- [x] **P1-064** 概率、并发等当前 profile 之外的语义返回 UNSUPPORTED，并记录对应扩展接口与能力矩阵。
+  - 证据：profile 外语义（features / semantic_profile）→ 前端 Unsupported、Verifier verdict=UNSUPPORTED 并给出 extension_point；能力矩阵见 docs/architecture/capability-matrix.md（由代码生成）
 - [ ] **P1-065** truth state 与 Observation 为不同对象；用延迟产线状态演示未知，并在 UI 与文档中将其解释为实验语义。
-- [ ] **P1-066** 实现通用效果比较：符合、存在差异、信息不足；保存字段级差异与证据。
+  - 进展：真值状态与 Observation 已分离并有测试（test_observation_delay_produces_stale_facts_and_unknowns）；UI 与文档中的解释尚未完成
+- [x] **P1-066** 实现通用效果比较：符合、存在差异、信息不足；保存字段级差异与证据。
+  - 证据：formal_lab_model.compare.compare_effects：MATCH/DIFFERENT/INSUFFICIENT_INFORMATION + 字段级 FieldDiff；每步 EFFECT_COMPARED 事件；expectation-mismatch 场景 effect_mismatches>0
 
 ## 6. 必做样例：生产调度实验
 
 建立 **examples/neutral-scheduling/**。实体为订单、工序、机器、工位和有限资源。动作是分配工序、推进逻辑时间、暂停/恢复模拟机器、重排队列。条件包括资源容量、工序依赖与机器容量。目标是完成订单并降低模拟延期成本。环境完全由项目内纯数据模型驱动。
 
-- [ ] **P1-070** 提供正常调度、资源不足、状态延迟、预期与模拟结果不一致四个场景。
-- [ ] **P1-071** 实现确定性规则策略和 Z3 规划策略，共用 Planner 接口。
-- [ ] **P1-072** 实现通用 LLM 策略适配：结构化观测与候选 schema 输入，ActionProposal 输出；当前示例策略只作用于生产调度环境。
-- [ ] **P1-073** 无模型 API 配置时，规则和符号策略仍可完整运行；模型替身单独标注并与真实模型实验结果分开。
-- [ ] **P1-074** 有可用配置时做一次真实模型集成检查；无配置留下入口及未测记录，继续其余工作。
+- [x] **P1-070** 提供正常调度、资源不足、状态延迟、预期与模拟结果不一致四个场景。
+  - 证据：examples/neutral-scheduling：normal / resource-shortage / state-delay / expectation-mismatch（scenarios.py），规则与 Z3 策略全部 SUCCEEDED（test_scenarios_complete_with_non_stub_strategies）
+- [x] **P1-071** 实现确定性规则策略和 Z3 规划策略，共用 Planner 接口。
+  - 证据：EddDispatchPlanner（RULE）与 Z3BoundedPlanner（SYMBOLIC）共用 Planner 接口
+- [x] **P1-072** 实现通用 LLM 策略适配：结构化观测与候选 schema 输入，ActionProposal 输出；当前示例策略只作用于生产调度环境。
+  - 证据：formal_lab_strategies.llm_planner：结构化观测 + 候选 JSON Schema 输入，ActionProposal 输出；HTTP 级 mock 测试 test_llm_planner.py
+- [x] **P1-073** 无模型 API 配置时，规则和符号策略仍可完整运行；模型替身单独标注并与真实模型实验结果分开。
+  - 证据：无 FAL_LLM_API_KEY 时 LLM 策略显式报错，规则/符号策略完整运行；StubModelClient 结果标注 LLM_STUB（test_llm_stub_results_are_labelled, test_unconfigured_llm_is_explicit）
+- [x] **P1-074** 有可用配置时做一次真实模型集成检查；无配置留下入口及未测记录，继续其余工作。
+  - 证据：用户提供的 OpenAI 兼容中转站 + gpt-5.6-sol：normal 场景 14 步 SUCCEEDED，14 次调用 / 104,039 tokens，全部来源 LLM（docs/execution/evidence/P1-074-llm-integration.json，tests/integration/test_llm_real.py）
 - [ ] **P1-075** 使用同一模拟器、预算与评分函数比较策略，保存实际结果。
 
 ## 7. 平台后端与运行时

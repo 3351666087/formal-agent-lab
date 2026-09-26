@@ -7,8 +7,10 @@ contract objects; persistence, eventing and orchestration belong to the platform
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import Any, Protocol, runtime_checkable
 
+from .common import StateScalar
 from .objects import (
     ActionOutcome,
     ActionProposal,
@@ -20,18 +22,38 @@ from .objects import (
     MetricDefinition,
     MetricResult,
     ModelPackage,
+    ModelRef,
     ModelSource,
     Observation,
     PlanningContext,
     PluginDescriptor,
     ScenarioManifest,
 )
-from .common import StateScalar
 
 
 @runtime_checkable
 class Plugin(Protocol):
     descriptor: PluginDescriptor
+
+
+class PluginServices(Protocol):
+    """Resources the platform hands to plugin factories: `create(config, services) -> plugin`."""
+
+    def get_model(self, ref: ModelRef) -> ModelPackage:
+        """Load a model package by reference (digest-checked)."""
+        ...
+
+    def pinned_model(self) -> ModelPackage:
+        """The model package pinned by the current run / scenario."""
+        ...
+
+    def get_setting(self, key: str) -> str | None:
+        """Deployment setting (e.g. FAL_LLM_BASE_URL); secrets never appear in contract objects."""
+        ...
+
+
+class PluginFactory(Protocol):
+    def __call__(self, config: dict[str, Any], services: PluginServices) -> Plugin: ...
 
 
 @runtime_checkable
@@ -91,3 +113,17 @@ class ArtifactStore(Protocol):
     def get(self, ref: ArtifactRef) -> bytes: ...
 
     def describe(self) -> dict[str, Any]: ...
+
+
+@dataclass(frozen=True)
+class PluginRegistration:
+    """What a plugin module exports (via the `formal_lab.plugins` entry-point group).
+
+    The entry point names a zero-argument callable returning a list of registrations.
+    """
+
+    descriptor: PluginDescriptor
+    factory: PluginFactory
+
+
+ENTRY_POINT_GROUP = "formal_lab.plugins"
