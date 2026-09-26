@@ -89,11 +89,16 @@
 
 来源：[temporalio/temporal](https://github.com/temporalio/temporal)、[temporalio/sdk-python](https://github.com/temporalio/sdk-python)。集成时逐项核对所用版本许可。
 
-- [ ] **P1-024** 使用官方服务与 Python SDK 实现 **ExperimentWorkflow**，编排能力直接建立在 Temporal 之上。
-- [ ] **P1-025** 数据库、对象存储、模型调用、求解与模拟器操作放入 Activities；工作流聚焦可重放编排。
-- [ ] **P1-026** 实现启动、暂停、继续、取消、预算耗尽及 Worker 重启恢复；暂停在声明的逻辑步边界生效。
-- [ ] **P1-027** 使用稳定 run_id、step_id、operation_id；重试采用幂等键保持事件、计数和模拟器推进的一致性。
-- [ ] **P1-028** 已发起但结果未知的步骤先读操作记录协调；仅对声明为可幂等重试的步骤重试。
+- [x] **P1-024** 使用官方服务与 Python SDK 实现 **ExperimentWorkflow**，编排能力直接建立在 Temporal 之上。
+  - 证据：packages/orchestrator/src/formal_lab_orchestrator/workflow.py ExperimentWorkflow（temporalio==1.33.0 官方 SDK + temporal CLI 1.9.1 dev server/Server 1.32.0）；集成测试 docs/execution/evidence/M5-platform-integration.log
+- [x] **P1-025** 数据库、对象存储、模型调用、求解与模拟器操作放入 Activities；工作流聚焦可重放编排。
+  - 证据：数据库/对象存储/模型调用/求解/模拟器全部在 activities（activities.py → formal_lab_api.services.execution）；工作流仅编排、信号与查询
+- [x] **P1-026** 实现启动、暂停、继续、取消、预算耗尽及 Worker 重启恢复；暂停在声明的逻辑步边界生效。
+  - 证据：启动/暂停（逻辑步边界）/继续/取消/预算耗尽/Worker SIGKILL 重启恢复均有集成测试（test_pause_takes_effect_at_step_boundary_and_resume, test_cancel_keeps_evidence, test_budget_override_exhausts, test_worker_crash_is_recovered_without_duplicates；docs/execution/evidence/M5-platform-integration.log；docs/execution/evidence/P1-123-worker-crash-recovery.md）
+- [x] **P1-027** 使用稳定 run_id、step_id、operation_id；重试采用幂等键保持事件、计数和模拟器推进的一致性。
+  - 证据：确定性 id：step_id=<run>:s<n>，operation_id=<run>:s<n>:propose|apply，事件 idempotency_key 唯一约束；重试后无重复事件/计数（assert_consistent）
+- [x] **P1-028** 已发起但结果未知的步骤先读操作记录协调；仅对声明为可幂等重试的步骤重试。
+  - 证据：operations 账本：propose 结果（含模型调用）先持久化，重试复用；apply 与快照/事件/计数同事务提交，未知结果按记录协调；Temporal 心跳超时重试证据见 P1-123-worker-crash-recovery.md
 
 ### 3.3 Inspect：中性任务评测与日志
 
@@ -189,15 +194,24 @@
 
 ## 7. 平台后端与运行时
 
-- [ ] **P1-080** 实现项目、模型版本、场景、策略配置、运行、产物及指标的持久 CRUD 和数据库迁移。
-- [ ] **P1-081** 状态机区分已创建、排队、运行、暂停中、已暂停、取消中、已取消、成功、失败和预算结束。
-- [ ] **P1-082** 启动时固定模型、配置、策略与环境版本，创建真实 RunManifest。
-- [ ] **P1-083** 实现有序事件、序号查询、SSE 与断线续传；去重和恢复后保持顺序。
-- [ ] **P1-084** 实现步数、墙钟时间、模型调用及 tokens 预算；每类运行记录其适用预算维度。
-- [ ] **P1-085** 实现 ArtifactStore 本地与 S3 兼容适配，大对象通过 ArtifactRef 存储，数据库事件保存引用与摘要。
-- [ ] **P1-086** 失败/取消保留现场与证据，环境按生命周期关闭。
-- [ ] **P1-087** 提供普通日志、错误、健康检查和运行诊断。
-- [ ] **P1-088** 插件系统加载启动时已安装并登记的模块，注册、版本和能力信息进入统一目录。
+- [x] **P1-080** 实现项目、模型版本、场景、策略配置、运行、产物及指标的持久 CRUD 和数据库迁移。
+  - 证据：PostgreSQL + Alembic（formal_lab_api/migrations/versions/0001_initial_schema.py）：projects/models/model_versions/scenarios/strategy_configs/runs/run_events/operations/env_snapshots/artifacts/metrics/checks/plugin_catalog；REST CRUD 见 formal_lab_api/app.py；docs/execution/evidence/M5-platform-integration.log
+- [x] **P1-081** 状态机区分已创建、排队、运行、暂停中、已暂停、取消中、已取消、成功、失败和预算结束。
+  - 证据：RunStatus 十态 + services/events.py ALLOWED 转移表；集成测试覆盖 QUEUED/RUNNING/PAUSING/PAUSED/CANCELLING/CANCELLED/SUCCEEDED/FAILED/BUDGET_EXHAUSTED（docs/execution/evidence/M5-platform-integration.log）
+- [x] **P1-082** 启动时固定模型、配置、策略与环境版本，创建真实 RunManifest。
+  - 证据：formal_lab_runtime.manifest.make_manifest 固定模型摘要/版本、场景快照+摘要、各角色插件版本与描述符摘要、预算、种子、平台版本与源码修订（test_run_is_persisted_with_pinned_manifest）
+- [x] **P1-083** 实现有序事件、序号查询、SSE 与断线续传；去重和恢复后保持顺序。
+  - 证据：gap-free seq（行锁分配）、idempotency_key 去重、GET /runs/{id}/events?after_seq=、SSE /events/stream + Last-Event-ID 续传（test_sse_live_stream_and_reconnect）
+- [x] **P1-084** 实现步数、墙钟时间、模型调用及 tokens 预算；每类运行记录其适用预算维度。
+  - 证据：步数/墙钟（扣除暂停时长）/模型调用/tokens 预算；manifest.config.budget_dimensions 按策略能力记录适用维度（test_budget_dimensions, test_budget_override_exhausts）
+- [x] **P1-085** 实现 ArtifactStore 本地与 S3 兼容适配，大对象通过 ArtifactRef 存储，数据库事件保存引用与摘要。
+  - 证据：LocalArtifactStore + S3ArtifactStore（SeaweedFS 4.47 实测 test_s3_artifact_store_roundtrip）；快照/模型调用记录以 ArtifactRef 存储，事件只含引用与摘要
+- [x] **P1-086** 失败/取消保留现场与证据，环境按生命周期关闭。
+  - 证据：取消/失败保留快照、事件与部分指标（test_cancel_keeps_evidence, test_non_retryable_failure_finalizes_as_failed_with_evidence）；finish_run 关闭环境
+- [x] **P1-087** 提供普通日志、错误、健康检查和运行诊断。
+  - 证据：结构化日志（var/log/*.log）、统一 ErrorInfo 错误、/health、/api/v1/health/ready（DB/Temporal/对象存储）、/runs/{id}/diagnostics（工作流描述+操作记录）
+- [x] **P1-088** 插件系统加载启动时已安装并登记的模块，注册、版本和能力信息进入统一目录。
+  - 证据：entry point 注册表 + plugin_catalog 表（API/Worker 启动时同步），GET /api/v1/plugins 返回版本/能力/描述符摘要/来源
 
 ## 8. Web：六个真实功能区
 

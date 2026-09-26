@@ -107,3 +107,19 @@ def test_local_artifact_store_roundtrip(tmp_path):
     (tmp_path / ref.digest.value[:2] / ref.digest.value).write_bytes(b"tampered")
     with pytest.raises(Exception, match="digest"):
         store.get(ref)
+
+
+def test_budget_dimensions():
+    from formal_lab_contracts import Budget, BudgetUsage
+    from formal_lab_runtime.engine import budget_exhausted
+
+    b = Budget(max_steps=10, max_wall_seconds=5, max_model_calls=3, max_tokens=100)
+    rule_dims = ["steps", "wall_seconds"]
+    llm_dims = rule_dims + ["model_calls", "tokens"]
+    assert budget_exhausted(b, BudgetUsage(steps=9, wall_seconds=4.9), rule_dims) is None
+    assert "step" in budget_exhausted(b, BudgetUsage(steps=10), rule_dims)
+    assert "wall-clock" in budget_exhausted(b, BudgetUsage(wall_seconds=5.0), rule_dims)
+    many_calls = BudgetUsage(model_calls=3, input_tokens=90, output_tokens=20)
+    assert budget_exhausted(b, many_calls, rule_dims) is None  # not an applicable dimension for rule runs
+    assert "model-call" in budget_exhausted(b, many_calls, llm_dims)
+    assert "token" in budget_exhausted(b, BudgetUsage(model_calls=1, input_tokens=90, output_tokens=20), llm_dims)

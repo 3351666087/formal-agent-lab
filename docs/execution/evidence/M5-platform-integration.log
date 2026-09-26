@@ -1,0 +1,32 @@
+# platform integration test run
+date: 2026-09-26T15:18:21Z
+revision: 0cb1b12 + cancellation fix (committed next)
+services: postgres:16-alpine, temporalio/temporal:1.9.1 (server 1.32.0), chrislusf/seaweedfs:4.47
+command: uv run pytest tests/integration -m integration -v
+
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-9.1.1, pluggy-1.6.0 -- /home/null3351.guest/.venvs/formal-agent-lab/bin/python
+rootdir: /Users/null3351/Code/formal-agent-lab
+configfile: pyproject.toml
+plugins: asyncio-1.4.0, timeout-2.4.0, anyio-4.15.1
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=session, asyncio_default_test_loop_scope=session
+timeout: 300.0s
+timeout method: signal
+timeout func_only: False
+collecting ... collected 13 items / 1 deselected / 12 selected
+
+tests/integration/test_platform_runs.py::test_run_is_persisted_with_pinned_manifest PASSED
+tests/integration/test_platform_runs.py::test_duplicate_submission_returns_same_run PASSED
+tests/integration/test_platform_runs.py::test_sse_live_stream_and_reconnect PASSED
+tests/integration/test_platform_runs.py::test_pause_takes_effect_at_step_boundary_and_resume PASSED
+tests/integration/test_platform_runs.py::test_cancel_keeps_evidence PASSED
+tests/integration/test_platform_runs.py::test_worker_crash_is_recovered_without_duplicates PASSED
+tests/integration/test_platform_runs.py::test_rerun_creates_new_run_with_lineage PASSED
+tests/integration/test_platform_runs.py::test_budget_override_exhausts PASSED
+tests/integration/test_platform_runs.py::test_model_versions_are_immutable_and_runs_keep_their_version PASSED
+tests/integration/test_platform_runs.py::test_error_semantics PASSED
+tests/integration/test_platform_runs.py::test_non_retryable_failure_finalizes_as_failed_with_evidence PASSED
+tests/integration/test_platform_runs.py::test_s3_artifact_store_roundtrip PASSED
+
+================= 12 passed, 1 deselected in 93.37s (0:01:33) ==================
+exit_code: 0

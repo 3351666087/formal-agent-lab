@@ -205,6 +205,8 @@ def run_step(run_id: str, step: int) -> dict[str, Any]:
         done = _op(s, apply_id)
         if done is not None and done.status == "COMPLETED":
             return dict(done.result or {})
+        if RunStatus(run.status) in TERMINAL_RUN_STATUSES:  # finalised meanwhile: never append after the end
+            return _stop_result(run) or {"terminal": True, "status": run.status, "finalized": True}
         if ex.snapshot is not None and ex.observation is not None:
             _store_snapshot(s, run_id, step, ex.snapshot)
         append_events(s, run, ex.events)

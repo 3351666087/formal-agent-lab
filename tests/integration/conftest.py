@@ -146,6 +146,8 @@ def demo(stack: Stack) -> dict:
     projects = stack.get("/projects")
     project = next(p for p in projects if p["name"] == "生产调度示例")
     scenarios = {s["name"]: s for s in stack.get(f"/projects/{project['id']}/scenarios")}
-    strategies = {s["plugin_id"] + (":stub" if s["config"].get("client") == "stub" else ""): s
-                  for s in stack.get(f"/projects/{project['id']}/strategies")}
+    seeded = {"EDD 规则": "formal-lab.example.scheduling.edd-dispatch", "Z3 有界规划": "formal-lab.planner.z3-bounded",
+              "LLM（真实模型）": "formal-lab.planner.llm", "LLM 替身（stub）": "formal-lab.planner.llm:stub"}
+    strategies = {seeded[s["name"]]: s for s in stack.get(f"/projects/{project['id']}/strategies")
+                  if s["name"] in seeded}
     return {"project": project["id"], "scenarios": scenarios, "strategies": strategies}

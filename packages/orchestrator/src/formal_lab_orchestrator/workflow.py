@@ -13,7 +13,8 @@ from typing import Any
 
 from temporalio import workflow
 from temporalio.common import RetryPolicy
-from temporalio.exceptions import ActivityError, ApplicationError
+from temporalio.exceptions import ActivityError, ApplicationError, CancelledError
+from temporalio.workflow import ActivityCancellationType
 
 NON_RETRYABLE = ["INVALID_INPUT", "VERSION_MISMATCH", "UNSUPPORTED", "NOT_FOUND", "CONFLICT",
                  "NON_RETRYABLE_FAILURE", "CANCELLED"]
@@ -27,7 +28,10 @@ HEARTBEAT_TIMEOUT = timedelta(seconds=20)  # a crashed worker is detected within
 
 
 def _opts(timeout: timedelta = STEP_TIMEOUT) -> dict[str, Any]:
-    return {"start_to_close_timeout": timeout, "heartbeat_timeout": HEARTBEAT_TIMEOUT, "retry_policy": RETRY}
+    # WAIT_CANCELLATION_COMPLETED: a cancel request lets the in-flight step finish (or observe the request),
+    # so cancellation takes effect at a logical-step boundary and never races the finalisation.
+    return {"start_to_close_timeout": timeout, "heartbeat_timeout": HEARTBEAT_TIMEOUT, "retry_policy": RETRY,
+            "cancellation_type": ActivityCancellationType.WAIT_CANCELLATION_COMPLETED}
 
 
 @workflow.defn(name="ExperimentWorkflow")
@@ -81,17 +85,22 @@ class ExperimentWorkflow:
                     workflow.continue_as_new({"run_id": run_id, "next_step": self.step,
                                               "pause_requested": self.pause_requested})
         except asyncio.CancelledError:
-            self.phase = "cancelling"
-            return await workflow.execute_activity(
-                "finalize_run", args=[run_id, "CANCELLED", "cancelled by user", None], **_opts(timedelta(minutes=2)))
+            return await self._cancelled(run_id)
         except ActivityError as err:
             cause = err.cause
+            if isinstance(cause, CancelledError):  # workflow cancelled while an activity was in flight
+                return await self._cancelled(run_id)
             message = str(cause) if cause is not None else str(err)
             code = cause.type if isinstance(cause, ApplicationError) else "NON_RETRYABLE_FAILURE"
             self.phase = "failing"
             return await workflow.execute_activity(
                 "finalize_run", args=[run_id, "FAILED", f"{code}: {message}", {"code": code, "message": message}],
                 **_opts(timedelta(minutes=2)))
+
+    async def _cancelled(self, run_id: str) -> dict[str, Any]:
+        self.phase = "cancelling"
+        return await workflow.execute_activity(
+            "finalize_run", args=[run_id, "CANCELLED", "cancelled by user", None], **_opts(timedelta(minutes=2)))
 
     async def _finish(self, run_id: str, res: dict[str, Any]) -> dict[str, Any]:
         self.phase = "finalizing"

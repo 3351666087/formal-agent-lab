@@ -190,3 +190,27 @@ def test_error_semantics(stack, demo):
     finished = stack.get(f"/projects/{demo['project']}/runs", params={"status": "SUCCEEDED"})[0]
     conflict = stack.client.post(f"/runs/{finished['id']}/pause")
     assert conflict.status_code == 409 and conflict.json()["error"]["code"] == "CONFLICT"
+
+
+def test_non_retryable_failure_finalizes_as_failed_with_evidence(stack, demo):
+    st = stack.post(f"/projects/{demo['project']}/strategies",
+                    {"name": f"broken-{uuid.uuid4().hex[:6]}", "plugin_id": Z3, "config": {"goal_property": "no_such_goal"}})
+    run = stack.post(f"/projects/{demo['project']}/runs",
+                     {"scenario_id": demo["scenarios"]["正常调度"]["id"], "strategy_config_id": st["id"]})
+    done = stack.wait_status(run["id"], {"FAILED", "SUCCEEDED"}, timeout=90)
+    assert done["status"] == "FAILED"
+    assert done["error"]["code"] == "INVALID_INPUT" and "goal" in done["error"]["message"]
+    events = assert_consistent(stack, run["id"])
+    assert events[-1]["event_type"] == "RUN_FAILED"
+
+
+def test_s3_artifact_store_roundtrip(stack):
+    from formal_lab_runtime.artifacts import S3ArtifactStore
+
+    store = S3ArtifactStore(bucket="formal-lab-it", endpoint_url="http://127.0.0.1:8333",
+                            access_key="fal-dev-access", secret_key="fal-dev-secret-key")
+    store.ensure_bucket()
+    blob = uuid.uuid4().hex.encode() * 1000
+    ref = store.put(blob, name="it.bin", media_type="application/octet-stream", format_version="t@1")
+    assert ref.uri.startswith("s3://formal-lab-it/") and ref.size_bytes == len(blob)
+    assert store.get(ref) == blob
