@@ -1,0 +1,38 @@
+# Backing services for local development and integration tests (make services-up).
+# Ports are bound to 127.0.0.1 only (single-user local development profile).
+name: fal-dev
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: fal
+      POSTGRES_PASSWORD: fal
+      POSTGRES_DB: fal
+    ports: ["127.0.0.1:5432:5432"]
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fal -d fal"]
+      interval: 2s
+      retries: 30
+
+  temporal:
+    image: temporalio/temporal:1.9.1
+    command: ["server", "start-dev", "--ip", "0.0.0.0", "--db-filename", "/data/temporal.db", "--ui-port", "8233"]
+    ports: ["127.0.0.1:7233:7233", "127.0.0.1:8233:8233"]
+    volumes: [temporaldata:/data]
+    user: "0:0"
+
+  s3:
+    image: chrislusf/seaweedfs:4.47
+    command: ["mini", "-dir=/data", "-s3.port=8333"]
+    environment:
+      AWS_ACCESS_KEY_ID: fal-dev-access
+      AWS_SECRET_ACCESS_KEY: fal-dev-secret-key
+      S3_BUCKET: formal-lab-artifacts
+    ports: ["127.0.0.1:8333:8333"]
+    volumes: [s3data:/data]
+
+volumes:
+  pgdata: {}
+  temporaldata: {}
+  s3data: {}

@@ -936,19 +936,19 @@ export interface Extensions {
  * Namespaced, versioned extension payload. `schema_id` names the JSON Schema that validates `data`.
  *
  * This interface was referenced by `Extensions`'s JSON-Schema definition
- * via the `patternProperty` "^[a-z0-9]+(\.[a-z0-9_-]+)+$".
+ * via the `patternProperty` "^[a-z0-9][a-z0-9-]*(\.[a-z0-9_-]+)+$".
  *
  * This interface was referenced by `Extensions1`'s JSON-Schema definition
- * via the `patternProperty` "^[a-z0-9]+(\.[a-z0-9_-]+)+$".
+ * via the `patternProperty` "^[a-z0-9][a-z0-9-]*(\.[a-z0-9_-]+)+$".
  *
  * This interface was referenced by `Extensions2`'s JSON-Schema definition
- * via the `patternProperty` "^[a-z0-9]+(\.[a-z0-9_-]+)+$".
+ * via the `patternProperty` "^[a-z0-9][a-z0-9-]*(\.[a-z0-9_-]+)+$".
  *
  * This interface was referenced by `Extensions3`'s JSON-Schema definition
- * via the `patternProperty` "^[a-z0-9]+(\.[a-z0-9_-]+)+$".
+ * via the `patternProperty` "^[a-z0-9][a-z0-9-]*(\.[a-z0-9_-]+)+$".
  *
  * This interface was referenced by `Extensions4`'s JSON-Schema definition
- * via the `patternProperty` "^[a-z0-9]+(\.[a-z0-9_-]+)+$".
+ * via the `patternProperty` "^[a-z0-9][a-z0-9-]*(\.[a-z0-9_-]+)+$".
  *
  * This interface was referenced by `FormalLabContractsV1`'s JSON-Schema
  * via the `definition` "Extension".

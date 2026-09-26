@@ -48,3 +48,26 @@ test-integration: ## tests against PostgreSQL + Temporal (make services-up first
 	$(UV_RUN) pytest -m integration -q
 
 test: test-unit test-integration ## all tests except real-LLM calls
+
+# ----------------------------------------------------------------- local services
+.PHONY: services-up services-down dev-up dev-down dev-status migrate seed
+services-up: ## start PostgreSQL, Temporal and the S3 store; apply migrations
+	scripts/dev.sh services
+
+services-down: ## stop backing services
+	scripts/dev.sh services-down
+
+migrate: ## apply database migrations
+	$(PY) -m formal_lab_api.migrate upgrade
+
+seed: ## create the neutral-scheduling demo project
+	$(PY) -m formal_lab_api.seed
+
+dev-up: ## start services, API (:8000), worker and web dev server (:5173)
+	scripts/dev.sh up
+
+dev-down: ## stop API, worker and web
+	scripts/dev.sh down
+
+dev-status: ## show process status
+	scripts/dev.sh status

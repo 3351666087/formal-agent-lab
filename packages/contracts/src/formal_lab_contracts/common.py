@@ -20,7 +20,7 @@ JsonScalar = bool | int | float | str | None
 ID_PATTERN = r"^[A-Za-z0-9][A-Za-z0-9._:@/-]{0,254}$"
 PLUGIN_ID_PATTERN = r"^[a-z0-9]+([.-][a-z0-9]+)*(/[a-z0-9]+([.-][a-z0-9]+)*)?$"
 SEMVER_PATTERN = r"^[0-9]+\.[0-9]+\.[0-9]+([-+][0-9A-Za-z.-]+)?$"
-NAMESPACE_PATTERN = r"^[a-z0-9]+(\.[a-z0-9_-]+)+$"
+NAMESPACE_PATTERN = r"^[a-z0-9][a-z0-9-]*(\.[a-z0-9_-]+)+$"
 NAME_PATTERN = r"^[A-Za-z_][A-Za-z0-9_]*$"
 
 # Constraints are expressed as JSON-Schema-visible patterns so every contract consumer enforces them.

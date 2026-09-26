@@ -1,0 +1,442 @@
+"""FastAPI application: REST + SSE over the shared services and contracts."""
+
+from __future__ import annotations
+
+import asyncio
+import json
+import logging
+from contextlib import asynccontextmanager
+from typing import Any
+
+from fastapi import Body, FastAPI, Header, Query, Request
+from fastapi.concurrency import run_in_threadpool
+from fastapi.encoders import jsonable_encoder
+from fastapi.exceptions import RequestValidationError
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse, Response, StreamingResponse
+from formal_lab_contracts import CONTRACT_VERSION, TERMINAL_RUN_STATUSES, RunStatus
+from formal_lab_contracts.errors import HTTP_STATUS, ErrorCode, ErrorInfo, FieldError, FormalLabError, NotFound
+from sqlalchemy import select, text
+
+from .db import CheckRow, Model, ModelVersion, Project, Run, Scenario, StrategyConfig, session_scope
+from .orchestration import TemporalOrchestrator
+from .services import catalog, modeling, runs, scenarios
+from .services.common import artifact_store, get_or_404
+from .services.events import list_events, to_trace_event
+from .settings import get_settings
+
+log = logging.getLogger("formal_lab.api")
+API = "/api/v1"
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    settings = get_settings()
+    logging.basicConfig(level=settings.log_level, format="%(asctime)s %(levelname)s %(name)s %(message)s")
+    app.state.orchestrator = TemporalOrchestrator(settings)
+    try:
+        await run_in_threadpool(_sync_catalog)
+    except Exception:
+        log.exception("plugin catalog sync failed (database unavailable?)")
+    yield
+
+
+def _sync_catalog() -> None:
+    with session_scope() as s:
+        catalog.sync_catalog(s)
+
+
+def create_app() -> FastAPI:
+    settings = get_settings()
+    app = FastAPI(title="formal-agent-lab platform API", version="0.1.0", lifespan=lifespan,
+                  description=f"Contracts: {CONTRACT_VERSION}. Deployment profile: {settings.deployment_profile}.")
+    app.add_middleware(CORSMiddleware, allow_origins=[o for o in settings.cors_origins.split(",") if o],
+                       allow_methods=["*"], allow_headers=["*"], expose_headers=["*"])
+
+    @app.exception_handler(FormalLabError)
+    async def _fl_error(_: Request, exc: FormalLabError) -> JSONResponse:
+        info = exc.to_info()
+        return JSONResponse(status_code=HTTP_STATUS[info.code], content={"error": info.model_dump(mode="json")})
+
+    @app.exception_handler(RequestValidationError)
+    async def _validation(_: Request, exc: RequestValidationError) -> JSONResponse:
+        info = ErrorInfo(code=ErrorCode.INVALID_INPUT, message="request validation failed", retryable=False,
+                         field_errors=[FieldError(path="/" + "/".join(map(str, e["loc"])), message=e["msg"])
+                                       for e in exc.errors()])
+        return JSONResponse(status_code=422, content={"error": info.model_dump(mode="json")})
+
+    @app.exception_handler(Exception)
+    async def _unexpected(_: Request, exc: Exception) -> JSONResponse:
+        log.exception("unhandled error")
+        info = ErrorInfo(code=ErrorCode.NON_RETRYABLE_FAILURE, message=f"{type(exc).__name__}: {exc}", retryable=False)
+        return JSONResponse(status_code=500, content={"error": info.model_dump(mode="json")})
+
+    _routes(app)
+    return app
+
+
+def db(fn, *args: Any, **kwargs: Any):
+    """Run a sync service call inside a transaction in the thread pool."""
+
+    def call():
+        with session_scope() as s:
+            return jsonable_encoder(fn(s, *args, **kwargs))
+
+    return run_in_threadpool(call)
+
+
+def _routes(app: FastAPI) -> None:  # noqa: C901 - route table
+    orch = lambda: app.state.orchestrator  # noqa: E731
+
+    # ------------------------------------------------------------------ meta / health
+    @app.get("/health")
+    async def health() -> dict[str, str]:
+        return {"status": "ok"}
+
+    @app.get(f"{API}/health/ready")
+    async def ready() -> JSONResponse:
+        def check_db():
+            with session_scope() as s:
+                s.execute(text("select 1"))
+            return {"ok": True}
+
+        try:
+            database = await run_in_threadpool(check_db)
+        except Exception as exc:
+            database = {"ok": False, "error": str(exc)}
+        temporal = await orch().health()
+        try:
+            store = {"ok": True, **artifact_store().describe()}
+        except Exception as exc:
+            store = {"ok": False, "error": str(exc)}
+        ok = database["ok"] and temporal["ok"] and store["ok"]
+        return JSONResponse(status_code=200 if ok else 503,
+                            content=jsonable_encoder({"ready": ok, "database": database, "temporal": temporal,
+                                                      "artifact_store": store}))
+
+    @app.get(f"{API}/meta")
+    async def meta() -> dict[str, Any]:
+        from formal_lab_model.capability_matrix import MATRIX
+        from formal_lab_runtime.manifest import PLATFORM_VERSION, source_revision
+        from formal_lab_runtime.settings import llm_configured, get_setting
+        from formal_lab_contracts.schema_export import build_schemas, contract_digest
+
+        settings = get_settings()
+        return {
+            "platform_version": PLATFORM_VERSION, "source_revision": source_revision(),
+            "contract_version": CONTRACT_VERSION, "contract_digest": contract_digest(build_schemas())["digest"],
+            "deployment_profile": settings.deployment_profile,
+            "capability_level": "single-user local development: loopback-bound services, no authentication, "
+                                "no multi-tenant isolation",
+            "llm": {"configured": llm_configured(), "model": get_setting("FAL_LLM_MODEL") if llm_configured() else None},
+            "capability_matrix": [r.model_dump() for r in MATRIX],
+            "plugin_load_errors": catalog.load_errors(),
+        }
+
+    @app.get(f"{API}/plugins")
+    async def plugins(interface: str | None = None) -> list[dict[str, Any]]:
+        return jsonable_encoder(catalog.catalog(interface))
+
+    # ------------------------------------------------------------------ projects
+    @app.get(f"{API}/projects")
+    async def list_projects():
+        return await db(lambda s: [modeling.project_dict(p, s) for p in
+                                   s.scalars(select(Project).order_by(Project.created_at.desc()))])
+
+    @app.post(f"{API}/projects", status_code=201)
+    async def create_project(body: dict[str, Any] = Body(...)):
+        return await db(lambda s: modeling.project_dict(
+            modeling.create_project(s, body.get("name", ""), body.get("description"), body.get("group")), s))
+
+    @app.get(f"{API}/projects/{{project_id}}")
+    async def get_project(project_id: str):
+        return await db(lambda s: modeling.project_dict(get_or_404(s, Project, project_id, "project"), s))
+
+    @app.patch(f"{API}/projects/{{project_id}}")
+    async def patch_project(project_id: str, body: dict[str, Any] = Body(...)):
+        return await db(lambda s: modeling.project_dict(modeling.update_project(s, project_id, **body), s))
+
+    @app.delete(f"{API}/projects/{{project_id}}", status_code=204)
+    async def delete_project(project_id: str):
+        def go(s):
+            s.delete(get_or_404(s, Project, project_id, "project"))
+
+        await db(go)
+        return Response(status_code=204)
+
+    # ------------------------------------------------------------------ models
+    @app.post(f"{API}/models/validate")
+    async def validate_model(body: dict[str, Any] = Body(...)):
+        return await run_in_threadpool(modeling.validate_ir, body.get("ir", body))
+
+    @app.get(f"{API}/projects/{{project_id}}/models")
+    async def list_models(project_id: str):
+        return await db(lambda s: [modeling.model_dict(m) for m in
+                                   s.scalars(select(Model).where(Model.project_id == project_id)
+                                             .order_by(Model.created_at))])
+
+    @app.post(f"{API}/projects/{{project_id}}/models", status_code=201)
+    async def create_model(project_id: str, body: dict[str, Any] = Body(...)):
+        def go(s):
+            m, v = modeling.create_model(s, project_id, package_id=body["package_id"], name=body.get("name"),
+                                         ir=body["ir"], description=body.get("description"))
+            return {**modeling.model_dict(m), "version": modeling.version_dict(v)}
+
+        return await db(go)
+
+    @app.get(f"{API}/models/{{model_id}}")
+    async def get_model(model_id: str):
+        def go(s):
+            m = get_or_404(s, Model, model_id, "model")
+            return {**modeling.model_dict(m),
+                    "versions": [modeling.version_dict(v, full=False) for v in modeling.list_versions(s, model_id)]}
+
+        return await db(go)
+
+    @app.post(f"{API}/models/{{model_id}}/versions", status_code=201)
+    async def add_version(model_id: str, body: dict[str, Any] = Body(...)):
+        return await db(lambda s: modeling.version_dict(modeling.add_version(
+            s, model_id, ir=body["ir"], note=body.get("note"), parent_version=body.get("parent_version"))))
+
+    @app.get(f"{API}/models/{{model_id}}/versions/{{version}}")
+    async def get_version(model_id: str, version: int):
+        return await db(lambda s: modeling.version_details(modeling.get_version(s, model_id, version)))
+
+    @app.get(f"{API}/models/{{model_id}}/diff")
+    async def diff(model_id: str, from_version: int = Query(alias="from"), to_version: int = Query(alias="to")):
+        return await db(lambda s: modeling.diff_versions(s, model_id, from_version, to_version))
+
+    @app.post(f"{API}/model-versions/{{version_id}}/checks", status_code=201)
+    async def run_check(version_id: str, body: dict[str, Any] = Body(...)):
+        return await db(lambda s: modeling.check_dict(modeling.run_check(
+            s, version_id, body["query"], body.get("state"), body.get("unknown_paths"))))
+
+    @app.get(f"{API}/model-versions/{{version_id}}/checks")
+    async def list_checks(version_id: str):
+        return await db(lambda s: [modeling.check_dict(c) for c in s.scalars(
+            select(CheckRow).where(CheckRow.model_version_id == version_id).order_by(CheckRow.created_at.desc()))])
+
+    # ------------------------------------------------------------------ scenarios / strategies
+    @app.get(f"{API}/projects/{{project_id}}/scenarios")
+    async def list_scenarios(project_id: str):
+        return await db(lambda s: [scenarios.scenario_dict(x, s) for x in scenarios.list_scenarios(s, project_id)])
+
+    @app.post(f"{API}/projects/{{project_id}}/scenarios", status_code=201)
+    async def create_scenario(project_id: str, body: dict[str, Any] = Body(...)):
+        return await db(lambda s: scenarios.scenario_dict(scenarios.create_scenario(s, project_id, body), s))
+
+    @app.get(f"{API}/scenarios/{{scenario_id}}")
+    async def get_scenario(scenario_id: str):
+        return await db(lambda s: scenarios.scenario_dict(get_or_404(s, Scenario, scenario_id, "scenario"), s))
+
+    @app.put(f"{API}/scenarios/{{scenario_id}}")
+    async def update_scenario(scenario_id: str, body: dict[str, Any] = Body(...)):
+        return await db(lambda s: scenarios.scenario_dict(scenarios.update_scenario(s, scenario_id, body), s))
+
+    @app.post(f"{API}/scenarios/{{scenario_id}}/copy", status_code=201)
+    async def copy_scenario(scenario_id: str, body: dict[str, Any] = Body(default={})):
+        return await db(lambda s: scenarios.scenario_dict(scenarios.copy_scenario(s, scenario_id, body.get("name")), s))
+
+    @app.delete(f"{API}/scenarios/{{scenario_id}}", status_code=204)
+    async def delete_scenario(scenario_id: str):
+        await db(lambda s: s.delete(get_or_404(s, Scenario, scenario_id, "scenario")))
+        return Response(status_code=204)
+
+    @app.get(f"{API}/projects/{{project_id}}/strategies")
+    async def list_strategies(project_id: str):
+        return await db(lambda s: [scenarios.strategy_dict(x) for x in scenarios.list_strategies(s, project_id)])
+
+    @app.post(f"{API}/projects/{{project_id}}/strategies", status_code=201)
+    async def create_strategy(project_id: str, body: dict[str, Any] = Body(...)):
+        return await db(lambda s: scenarios.strategy_dict(scenarios.upsert_strategy(s, project_id, body)))
+
+    @app.put(f"{API}/strategies/{{strategy_id}}")
+    async def update_strategy(strategy_id: str, body: dict[str, Any] = Body(...)):
+        def go(s):
+            row = get_or_404(s, StrategyConfig, strategy_id, "strategy")
+            return scenarios.strategy_dict(scenarios.upsert_strategy(s, row.project_id, body, strategy_id))
+
+        return await db(go)
+
+    @app.delete(f"{API}/strategies/{{strategy_id}}", status_code=204)
+    async def delete_strategy(strategy_id: str):
+        await db(lambda s: s.delete(get_or_404(s, StrategyConfig, strategy_id, "strategy")))
+        return Response(status_code=204)
+
+    @app.get(f"{API}/strategies/{{strategy_id}}/compatibility")
+    async def strategy_compat(strategy_id: str, scenario_id: str):
+        return await db(lambda s: scenarios.compatibility(s, strategy_id, scenario_id))
+
+    # ------------------------------------------------------------------ runs
+    async def _start(run: dict[str, Any]) -> dict[str, Any]:
+        if run["status"] != RunStatus.CREATED.value:
+            return run
+        await orch().start(run["id"], f"run-{run['id']}")
+        return await db(lambda s: runs.run_dict(runs.mark_queued(s, run["id"]), s))
+
+    @app.post(f"{API}/projects/{{project_id}}/runs", status_code=201)
+    async def create_run(project_id: str, response: Response, body: dict[str, Any] = Body(...),
+                         idempotency_key: str | None = Header(default=None)):
+        def go(s):
+            run, created = runs.create_run(s, project_id, body, client_request_id=idempotency_key)
+            return {"run": runs.run_dict(run, s), "created": created}
+
+        res = await db(go)
+        if not res["created"]:
+            response.status_code = 200
+        return await _start(res["run"])
+
+    @app.post(f"{API}/runs/{{run_id}}/start")
+    async def start_run(run_id: str):
+        return await _start(await db(lambda s: runs.run_dict(get_or_404(s, Run, run_id, "run"), s)))
+
+    @app.get(f"{API}/projects/{{project_id}}/runs")
+    async def list_runs(project_id: str, status: str | None = None, scenario_id: str | None = None,
+                        matrix_id: str | None = None):
+        return await db(lambda s: [runs.run_dict(r, s) for r in runs.list_runs(
+            s, project_id, status=status, scenario_id=scenario_id, matrix_id=matrix_id)])
+
+    @app.get(f"{API}/runs/{{run_id}}")
+    async def get_run(run_id: str):
+        return await db(lambda s: runs.run_dict(get_or_404(s, Run, run_id, "run"), s, full=True))
+
+    @app.get(f"{API}/runs/{{run_id}}/events")
+    async def get_events(run_id: str, after_seq: int = 0, limit: int = Query(default=500, le=5000),
+                         event_type: list[str] | None = Query(default=None), step: int | None = None):
+        def go(s):
+            get_or_404(s, Run, run_id, "run")
+            return [to_trace_event(e).model_dump(mode="json")
+                    for e in list_events(s, run_id, after_seq=after_seq, limit=limit, event_types=event_type,
+                                         step=step)]
+
+        return await db(go)
+
+    @app.get(f"{API}/runs/{{run_id}}/steps/{{step}}")
+    async def get_step(run_id: str, step: int):
+        return await db(lambda s: runs.step_detail(s, run_id, step))
+
+    @app.get(f"{API}/runs/{{run_id}}/events/stream")
+    async def stream_events(request: Request, run_id: str, after_seq: int = 0,
+                            last_event_id: str | None = Header(default=None)):
+        await db(lambda s: get_or_404(s, Run, run_id, "run").id)
+        start = int(last_event_id) if last_event_id and last_event_id.isdigit() else after_seq
+        poll = get_settings().sse_poll_seconds
+
+        def fetch(after: int):
+            # Read the status BEFORE the events: under READ COMMITTED, a terminal status observed here
+            # guarantees that the events committed with it are visible to the following query.
+            with session_scope() as s:
+                status = s.scalar(select(Run.status).where(Run.id == run_id))
+                rows = list_events(s, run_id, after_seq=after, limit=200)
+                return [to_trace_event(r).model_dump(mode="json") for r in rows], status
+
+        async def gen():
+            cursor, idle = start, 0.0
+            yield "retry: 2000\n\n"
+            while True:
+                if await request.is_disconnected():
+                    return
+                events, status = await run_in_threadpool(fetch, cursor)
+                for ev in events:
+                    cursor = ev["seq"]
+                    yield f"id: {ev['seq']}\nevent: {ev['event_type']}\ndata: {json.dumps(ev, ensure_ascii=False)}\n\n"
+                if not events:
+                    if RunStatus(status) in TERMINAL_RUN_STATUSES:
+                        yield f"event: end\ndata: {json.dumps({'status': status, 'last_seq': cursor})}\n\n"
+                        return
+                    idle += poll
+                    if idle >= 15:
+                        idle = 0.0
+                        yield ": keep-alive\n\n"
+                    await asyncio.sleep(poll)
+                else:
+                    idle = 0.0
+
+        return StreamingResponse(gen(), media_type="text/event-stream",
+                                 headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
+
+    @app.post(f"{API}/runs/{{run_id}}/pause")
+    async def pause_run(run_id: str):
+        res = await db(lambda s: runs.run_dict(runs.request_pause(s, run_id), s))
+        if res["status"] == RunStatus.PAUSING.value:
+            await orch().signal(f"run-{run_id}", "pause")
+        return res
+
+    @app.post(f"{API}/runs/{{run_id}}/resume")
+    async def resume_run(run_id: str):
+        res = await db(lambda s: runs.run_dict(runs.request_resume(s, run_id), s))
+        await orch().signal(f"run-{run_id}", "resume")
+        return res
+
+    @app.post(f"{API}/runs/{{run_id}}/cancel")
+    async def cancel_run(run_id: str):
+        def go(s):
+            run, needs = runs.request_cancel(s, run_id)
+            return {"run": runs.run_dict(run, s), "needs": needs}
+
+        res = await db(go)
+        if res["needs"]:
+            await orch().cancel(f"run-{run_id}")
+        return res["run"]
+
+    @app.post(f"{API}/runs/{{run_id}}/rerun", status_code=201)
+    async def rerun(run_id: str):
+        def go(s):
+            src = get_or_404(s, Run, run_id, "run")
+            run, _ = runs.create_run(s, src.project_id, {}, source_run=src)
+            return runs.run_dict(run, s)
+
+        return await _start(await db(go))
+
+    @app.get(f"{API}/runs/{{run_id}}/diagnostics")
+    async def diagnostics(run_id: str):
+        def go(s):
+            from .db import Operation
+
+            run = get_or_404(s, Run, run_id, "run")
+            ops = s.scalars(select(Operation).where(Operation.run_id == run_id)
+                            .order_by(Operation.updated_at.desc()).limit(10))
+            return {"run": runs.run_dict(run, s), "events": runs.run_events_count(s, run_id),
+                    "recent_operations": [{"operation_id": o.operation_id, "status": o.status,
+                                           "attempts": o.attempts, "updated_at": o.updated_at} for o in ops]}
+
+        base = await db(go)
+        try:
+            base["workflow"] = await orch().describe(f"run-{run_id}")
+        except FormalLabError as exc:
+            base["workflow"] = {"error": exc.message}
+        return jsonable_encoder(base)
+
+    @app.get(f"{API}/artifacts/{{digest}}")
+    async def get_artifact(digest: str):
+        def go(s):
+            from .db import Artifact
+
+            row = s.scalar(select(Artifact).where(Artifact.digest == digest))
+            if row is None:
+                raise NotFound(f"artifact {digest} not found")
+            return row.ref
+
+        ref = await db(go)
+        from formal_lab_contracts import ArtifactRef
+
+        data = await run_in_threadpool(artifact_store().get, ArtifactRef.model_validate(ref))
+        return Response(content=data, media_type=ref["media_type"],
+                        headers={"X-Artifact-Digest": digest, "X-Format-Version": ref["format_version"]})
+
+    _ = ModelVersion  # imported for type completeness
+
+
+app = create_app()
+
+
+def main() -> None:
+    import uvicorn
+
+    settings = get_settings()
+    uvicorn.run("formal_lab_api.app:app", host=settings.api_host, port=settings.api_port,
+                log_level=settings.log_level.lower())
+
+
+if __name__ == "__main__":
+    main()

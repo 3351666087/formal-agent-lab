@@ -437,7 +437,7 @@
     "extensions": {
       "description": "namespaced extension slots; keys are reverse-DNS namespaces, formal-lab.core.* is reserved",
       "patternProperties": {
-        "^[a-z0-9]+(\\.[a-z0-9_-]+)+$": {
+        "^[a-z0-9][a-z0-9-]*(\\.[a-z0-9_-]+)+$": {
           "$ref": "#/$defs/Extension"
         }
       },
@@ -445,7 +445,7 @@
         "not": {
           "pattern": "^formal[-_]lab\\.core"
         },
-        "pattern": "^[a-z0-9]+(\\.[a-z0-9_-]+)+$"
+        "pattern": "^[a-z0-9][a-z0-9-]*(\\.[a-z0-9_-]+)+$"
       },
       "title": "Extensions",
       "type": "object"

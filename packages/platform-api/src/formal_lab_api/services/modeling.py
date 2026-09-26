@@ -1,0 +1,204 @@
+"""Projects, models and immutable model versions, validation, diffs and bounded checks."""
+
+from __future__ import annotations
+
+from typing import Any
+
+from formal_lab_contracts import CheckQuery, ModelIR, ModelPackage, ModelSource, PluginRef
+from formal_lab_contracts.errors import Conflict, InvalidInput
+from formal_lab_model import action_specs, check_model, diff_models, ir_digest, parse_ir
+from formal_lab_model.capability_matrix import MATRIX
+from formal_lab_model.frontend import SOURCE_FORMAT, build_package
+from sqlalchemy import func, select
+from sqlalchemy.orm import Session
+
+from ..db import CheckRow, Model, ModelVersion, Project, Run, Scenario
+from .common import get_or_404, new_id, registry
+
+DEFAULT_VERIFIER = PluginRef(plugin_id="formal-lab.verifier.z3-bmc", version="1.0.0")
+
+
+# ------------------------------------------------------------------------ projects
+
+
+def project_dict(p: Project, s: Session | None = None) -> dict[str, Any]:
+    out = {"id": p.id, "name": p.name, "description": p.description, "group": p.group,
+           "created_at": p.created_at, "updated_at": p.updated_at}
+    if s is not None:
+        out["counts"] = {
+            "models": s.scalar(select(func.count()).select_from(Model).where(Model.project_id == p.id)),
+            "scenarios": s.scalar(select(func.count()).select_from(Scenario).where(Scenario.project_id == p.id)),
+            "runs": s.scalar(select(func.count()).select_from(Run).where(Run.project_id == p.id)),
+        }
+    return out
+
+
+def create_project(s: Session, name: str, description: str | None = None, group: str | None = None) -> Project:
+    if not name.strip():
+        raise InvalidInput("project name is required")
+    p = Project(id=new_id("prj"), name=name.strip(), description=description, group=group)
+    s.add(p)
+    s.flush()
+    return p
+
+
+def update_project(s: Session, project_id: str, **fields: Any) -> Project:
+    p = get_or_404(s, Project, project_id, "project")
+    for k in ("name", "description", "group"):
+        if fields.get(k) is not None:
+            setattr(p, k, fields[k])
+    return p
+
+
+# ------------------------------------------------------------------------ validation
+
+
+def validate_ir(data: dict[str, Any] | str) -> dict[str, Any]:
+    """Type-check without saving; returns issues (never raises for model errors)."""
+    try:
+        ir = parse_ir(data)
+    except InvalidInput as exc:
+        return {"valid": False, "schema_errors": [e.model_dump() for e in exc.field_errors], "issues": []}
+    checked = check_model(ir)
+    out: dict[str, Any] = {"valid": not checked.issues, "schema_errors": [],
+                           "issues": [i.model_dump() for i in checked.issues], "digest": ir_digest(ir).value}
+    if not checked.issues:
+        out["summary"] = {
+            "state_locations": len(checked.state_paths()),
+            "ground_actions": len(checked.ground_actions),
+            "properties": {pid: p.kind for pid, p in checked.properties.items()},
+            "domains": {k: len(v) for k, v in checked.domains.items()},
+        }
+    return out
+
+
+# ------------------------------------------------------------------------ models / versions
+
+
+def model_dict(m: Model) -> dict[str, Any]:
+    return {"id": m.id, "project_id": m.project_id, "package_id": m.package_id, "name": m.name,
+            "description": m.description, "latest_version": m.latest_version, "created_at": m.created_at,
+            "updated_at": m.updated_at}
+
+
+def version_dict(v: ModelVersion, *, full: bool = True) -> dict[str, Any]:
+    out = {"id": v.id, "model_id": v.model_id, "version": v.version, "digest": v.digest,
+           "semantic_profile": v.semantic_profile, "parent_version": v.parent_version, "note": v.note,
+           "created_at": v.created_at}
+    if full:
+        out["package"] = v.package
+    return out
+
+
+def package_of(v: ModelVersion) -> ModelPackage:
+    return ModelPackage.model_validate(v.package)
+
+
+def create_model(s: Session, project_id: str, *, package_id: str, name: str | None, ir: dict[str, Any],
+                 description: str | None = None, origin: str = "api") -> tuple[Model, ModelVersion]:
+    get_or_404(s, Project, project_id, "project")
+    if s.scalar(select(Model).where(Model.project_id == project_id, Model.package_id == package_id)):
+        raise Conflict(f"model {package_id!r} already exists in this project")
+    model = Model(id=new_id("mdl"), project_id=project_id, package_id=package_id, name=name or package_id,
+                  description=description)
+    s.add(model)
+    s.flush()
+    version = add_version(s, model.id, ir=ir, note="initial version", origin=origin)
+    return model, version
+
+
+def add_version(s: Session, model_id: str, *, ir: dict[str, Any] | ModelIR, note: str | None = None,
+                parent_version: int | None = None, origin: str = "editor") -> ModelVersion:
+    """Editing a model = inserting a new immutable version. Unchanged content returns the latest version."""
+    model = s.get(Model, model_id, with_for_update=True)
+    if model is None:
+        raise InvalidInput(f"model {model_id} not found")
+    parsed = ir if isinstance(ir, ModelIR) else parse_ir(ir)
+    digest = ir_digest(parsed).value
+    if model.latest_version:
+        latest = s.scalar(select(ModelVersion).where(ModelVersion.model_id == model_id,
+                                                     ModelVersion.version == model.latest_version))
+        if latest is not None and latest.digest == digest:
+            return latest
+    version = model.latest_version + 1
+    package = build_package(parsed, package_id=model.package_id, version=version,
+                            source=ModelSource(format=SOURCE_FORMAT, text=parsed.model_dump_json(indent=2),
+                                               origin=origin, parent_version=parent_version or
+                                               (model.latest_version or None)))
+    row = ModelVersion(id=new_id("mv"), model_id=model_id, version=version, digest=digest,
+                       semantic_profile=package.semantic_profile, package=package.model_dump(mode="json"),
+                       parent_version=parent_version or (model.latest_version or None), note=note)
+    model.latest_version = version
+    s.add(row)
+    s.flush()
+    return row
+
+
+def get_version(s: Session, model_id: str, version: int) -> ModelVersion:
+    row = s.scalar(select(ModelVersion).where(ModelVersion.model_id == model_id, ModelVersion.version == version))
+    if row is None:
+        raise InvalidInput(f"model {model_id} has no version {version}")
+    return row
+
+
+def list_versions(s: Session, model_id: str) -> list[ModelVersion]:
+    return list(s.scalars(select(ModelVersion).where(ModelVersion.model_id == model_id)
+                          .order_by(ModelVersion.version)))
+
+
+def diff_versions(s: Session, model_id: str, a: int, b: int) -> list[dict[str, Any]]:
+    va, vb = get_version(s, model_id, a), get_version(s, model_id, b)
+    return [c.model_dump() for c in diff_models(package_of(va).ir, package_of(vb).ir)]
+
+
+def version_details(v: ModelVersion) -> dict[str, Any]:
+    package = package_of(v)
+    checked = check_model(package.ir)
+    return {
+        **version_dict(v),
+        "action_specs": [spec.model_dump(mode="json") for spec in action_specs(checked)],
+        "summary": {"state_locations": len(checked.state_paths()), "ground_actions": len(checked.ground_actions)},
+        "capability_matrix": [row.model_dump() for row in MATRIX],
+    }
+
+
+# ------------------------------------------------------------------------ checks
+
+
+def run_check(s: Session, model_version_id: str, query: dict[str, Any],
+              state: dict[str, Any] | None = None, unknown_paths: list[str] | None = None,
+              verifier: PluginRef | None = None) -> CheckRow:
+    v = get_or_404(s, ModelVersion, model_version_id, "model version")
+    model = get_or_404(s, Model, v.model_id, "model")
+    package = package_of(v)
+    q = CheckQuery.model_validate(query)
+    ref = verifier or DEFAULT_VERIFIER
+    services = _Services(package)
+    plugin = registry().create(ref, {}, services)
+    result = plugin.check(package, q, state=state, unknown_paths=unknown_paths)
+    row = CheckRow(id=result.check_id, project_id=model.project_id, model_version_id=v.id,
+                   query=q.model_dump(mode="json"), result=result.model_dump(mode="json"), verdict=str(result.verdict))
+    s.add(row)
+    s.flush()
+    return row
+
+
+def check_dict(c: CheckRow) -> dict[str, Any]:
+    return {"id": c.id, "model_version_id": c.model_version_id, "query": c.query, "verdict": c.verdict,
+            "result": c.result, "created_at": c.created_at}
+
+
+class _Services:
+    def __init__(self, package: ModelPackage):
+        self.package = package
+
+    def pinned_model(self) -> ModelPackage:
+        return self.package
+
+    def get_model(self, ref):
+        return self.package
+
+    def get_setting(self, key: str) -> str | None:
+        from formal_lab_runtime.settings import get_setting
+
+        return get_setting(key)

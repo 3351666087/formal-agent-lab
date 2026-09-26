@@ -260,57 +260,126 @@ def compute_candidates(rc: RunComponents, belief: Belief) -> list[CandidateActio
     return out
 
 
-def execute_step(rc: RunComponents, snapshot: EnvironmentSnapshot, step: int, usage: BudgetUsage) -> StepExecution:
-    """Execute logical step `step` starting from `snapshot` (the state after step-1)."""
+@dataclass
+class PlanPhase:
+    """Everything decided before touching the environment. Persisted as the step's `propose` operation so a
+    retried activity reuses it (no second model call, no double-counted tokens)."""
+
+    step: int
+    observation: Observation | None = None
+    candidates: list[CandidateAction] = field(default_factory=list)
+    proposal: ActionProposal | None = None
+    usage_delta: ModelUsage = field(default_factory=ModelUsage)
+    model_calls: list[dict[str, Any]] = field(default_factory=list)
+    events: list[EventDraft] = field(default_factory=list)
+    terminal: RunStatus | None = None
+    terminal_reason: str | None = None
+    elapsed_s: float = 0.0
+
+    def to_json(self) -> dict[str, Any]:
+        return {
+            "step": self.step,
+            "observation": self.observation.model_dump(mode="json") if self.observation else None,
+            "candidates": [c.model_dump(mode="json") for c in self.candidates],
+            "proposal": self.proposal.model_dump(mode="json") if self.proposal else None,
+            "usage_delta": self.usage_delta.model_dump(),
+            "model_calls": self.model_calls,
+            "events": [{"key": e.key, "event_type": e.event_type.value, "step": e.step, "payload": e.payload,
+                        "parents": e.parents, "actor_id": e.actor_id} for e in self.events],
+            "terminal": self.terminal.value if self.terminal else None,
+            "terminal_reason": self.terminal_reason,
+            "elapsed_s": self.elapsed_s,
+        }
+
+    @classmethod
+    def from_json(cls, data: dict[str, Any]) -> PlanPhase:
+        return cls(
+            step=data["step"],
+            observation=Observation.model_validate(data["observation"]) if data["observation"] else None,
+            candidates=[CandidateAction.model_validate(c) for c in data["candidates"]],
+            proposal=ActionProposal.model_validate(data["proposal"]) if data["proposal"] else None,
+            usage_delta=ModelUsage.model_validate(data["usage_delta"]),
+            model_calls=data["model_calls"],
+            events=[EventDraft(e["key"], EventType(e["event_type"]), e["step"], e["payload"], e["parents"],
+                               e["actor_id"]) for e in data["events"]],
+            terminal=RunStatus(data["terminal"]) if data["terminal"] else None,
+            terminal_reason=data["terminal_reason"],
+            elapsed_s=data.get("elapsed_s", 0.0),
+        )
+
+
+def plan_step(rc: RunComponents, snapshot: EnvironmentSnapshot, step: int, usage: BudgetUsage) -> PlanPhase:
+    """Budget check, observation, candidates and the strategy's proposal for logical step `step`."""
     t0 = time.perf_counter()
     m = rc.manifest
     run_id, sid = m.run_id, step_id(m.run_id, step)
-    ex = StepExecution(step=step)
+    plan = PlanPhase(step=step)
     dims = list(m.config.get("budget_dimensions", ["steps", "wall_seconds"]))
     reason = budget_exhausted(m.budget, usage, dims)
     if reason:
-        ex.terminal, ex.terminal_reason = RunStatus.BUDGET_EXHAUSTED, reason  # terminal event emitted by finish_run
-        return ex
+        plan.terminal, plan.terminal_reason = RunStatus.BUDGET_EXHAUSTED, reason  # terminal event: finish_run
+        return plan
 
     rc.env.restore(snapshot)
     prev_key = event_key(run_id, step - 1, "comparison") if step > 1 else event_key(run_id, 0, "observation")
     obs = rc.env.observe(rc.actor_id)
-    ex.observation = obs
+    plan.observation = obs
     belief = belief_from_observation(obs, rc.checked)
-    ex.events.append(EventDraft(event_key(run_id, step, "observation"), EventType.OBSERVATION, step,
-                                {"observation": obs.model_dump(mode="json"),
-                                 "belief": {"unknown_paths": belief.unknown_paths, "stale_paths": belief.stale_paths}},
-                                [prev_key], rc.actor_id))
-
-    ex.candidates = compute_candidates(rc, belief)
-    counts = {v.value: sum(c.belief_applicability == v for c in ex.candidates) for v in PreconditionVerdict}
-    ex.events.append(EventDraft(event_key(run_id, step, "candidates"), EventType.CANDIDATES, step,
-                                {"candidates": [c.model_dump(mode="json") for c in ex.candidates], "counts": counts},
-                                [event_key(run_id, step, "observation")], rc.actor_id))
-    viable = [c for c in ex.candidates if c.belief_applicability in (PreconditionVerdict.APPLICABLE,
-                                                                     PreconditionVerdict.UNKNOWN)]
+    plan.events.append(EventDraft(event_key(run_id, step, "observation"), EventType.OBSERVATION, step,
+                                  {"observation": obs.model_dump(mode="json"),
+                                   "belief": {"unknown_paths": belief.unknown_paths,
+                                              "stale_paths": belief.stale_paths}},
+                                  [prev_key], rc.actor_id))
+    plan.candidates = compute_candidates(rc, belief)
+    counts = {v.value: sum(c.belief_applicability == v for c in plan.candidates) for v in PreconditionVerdict}
+    plan.events.append(EventDraft(event_key(run_id, step, "candidates"), EventType.CANDIDATES, step,
+                                  {"candidates": [c.model_dump(mode="json") for c in plan.candidates],
+                                   "counts": counts},
+                                  [event_key(run_id, step, "observation")], rc.actor_id))
+    viable = [c for c in plan.candidates if c.belief_applicability in (PreconditionVerdict.APPLICABLE,
+                                                                       PreconditionVerdict.UNKNOWN)]
     if not viable and any(sc.kind == StopConditionKind.NO_APPLICABLE_ACTION for sc in m.scenario.stop_conditions):
-        ex.terminal, ex.terminal_reason = RunStatus.FAILED, "no applicable action on the actor's belief"
-        ex.snapshot = rc.env.snapshot()
-        ex.elapsed_s = time.perf_counter() - t0
-        return ex
+        plan.terminal, plan.terminal_reason = RunStatus.FAILED, "no applicable action on the actor's belief"
+        plan.elapsed_s = time.perf_counter() - t0
+        return plan
 
     context = PlanningContext(run_id=run_id, step=step, step_id=sid, actor_id=rc.actor_id, observation=obs,
-                              action_specs=rc.specs, candidates=ex.candidates, model=m.model, budget=m.budget,
+                              action_specs=rc.specs, candidates=plan.candidates, model=m.model, budget=m.budget,
                               usage=usage, seed=m.seed)
     planner = rc.planners[rc.actor_id]
     proposal = planner.propose(context)
-    ex.proposal = proposal
-    ex.usage_delta = proposal.usage
+    plan.proposal = proposal
+    plan.usage_delta = proposal.usage
     for call in getattr(planner, "last_calls", []) or []:
-        ex.model_calls.append({"call_id": call.call_id, "model": call.model, "request": call.request,
-                               "response": call.raw_text, "input_tokens": call.input_tokens,
-                               "output_tokens": call.output_tokens, "latency_ms": call.latency_ms})
-    ex.events.append(EventDraft(event_key(run_id, step, "proposal"), EventType.ACTION_PROPOSED, step,
-                                {"proposal": proposal.model_dump(mode="json"),
-                                 "model_call_ids": proposal.source.model_call_ids},
-                                [event_key(run_id, step, "candidates")], rc.actor_id))
+        plan.model_calls.append({"call_id": call.call_id, "model": call.model, "request": call.request,
+                                 "response": call.raw_text, "input_tokens": call.input_tokens,
+                                 "output_tokens": call.output_tokens, "latency_ms": call.latency_ms})
+    plan.events.append(EventDraft(event_key(run_id, step, "proposal"), EventType.ACTION_PROPOSED, step,
+                                  {"proposal": proposal.model_dump(mode="json"),
+                                   "model_call_ids": proposal.source.model_call_ids},
+                                  [event_key(run_id, step, "candidates")], rc.actor_id))
+    plan.elapsed_s = time.perf_counter() - t0
+    return plan
 
+
+def apply_step(rc: RunComponents, snapshot: EnvironmentSnapshot, plan: PlanPhase) -> StepExecution:
+    """Precondition check, environment transition, effect comparison and stop conditions (pure w.r.t. the
+    snapshot: re-running it after a crash yields identical results)."""
+    t0 = time.perf_counter()
+    m = rc.manifest
+    step = plan.step
+    run_id, sid = m.run_id, step_id(m.run_id, step)
+    ex = StepExecution(step=step, observation=plan.observation, candidates=plan.candidates, proposal=plan.proposal,
+                       usage_delta=plan.usage_delta, model_calls=plan.model_calls, events=list(plan.events),
+                       terminal=plan.terminal, terminal_reason=plan.terminal_reason)
+    if plan.terminal is not None or plan.proposal is None or plan.observation is None:
+        if plan.observation is not None:
+            rc.env.restore(snapshot)
+            ex.snapshot = rc.env.snapshot()
+        return ex
+    proposal = plan.proposal
+    rc.env.restore(snapshot)
+    belief = belief_from_observation(plan.observation, rc.checked)
     ex.precheck = rc.verifier.check(
         rc.package,
         CheckQuery(kind="ACTION_PRECONDITION", action=proposal.action, initial_state="GIVEN_STATE",
@@ -321,7 +390,6 @@ def execute_step(rc: RunComponents, snapshot: EnvironmentSnapshot, step: int, us
                                 {"purpose": "precondition of the proposed action on the actor's belief",
                                  "result": ex.precheck.model_dump(mode="json")},
                                 [event_key(run_id, step, "proposal")]))
-
     try:
         ga = rc.interp.ground(proposal.action.action_type, dict(proposal.action.params))
         predicted = rc.interp.step(ga, belief.state)
@@ -330,8 +398,7 @@ def execute_step(rc: RunComponents, snapshot: EnvironmentSnapshot, step: int, us
     except KeyError:
         expected_post, written = None, []
 
-    op_id = f"{sid}:apply"
-    outcome = rc.env.step(proposal, operation_id=op_id)
+    outcome = rc.env.step(proposal, operation_id=f"{sid}:apply")
     next_obs = rc.env.observe(rc.actor_id)
     ex.snapshot = rc.env.snapshot()
     ex.comparison = compare_effects(
@@ -350,15 +417,19 @@ def execute_step(rc: RunComponents, snapshot: EnvironmentSnapshot, step: int, us
                                 {"comparison": ex.comparison.model_dump(mode="json"),
                                  "observation_after": next_obs.model_dump(mode="json")},
                                 [event_key(run_id, step, "outcome")], rc.actor_id))
-
     for sc in m.scenario.stop_conditions:
         if sc.kind == StopConditionKind.GOAL_REACHED and sc.property_id and ex.properties.get(sc.property_id):
             ex.terminal, ex.terminal_reason = RunStatus.SUCCEEDED, f"goal {sc.property_id!r} reached"
         elif (sc.kind == StopConditionKind.INVARIANT_VIOLATED and sc.property_id
               and ex.properties.get(sc.property_id) is False):
             ex.terminal, ex.terminal_reason = RunStatus.FAILED, f"invariant {sc.property_id!r} violated"
-    ex.elapsed_s = time.perf_counter() - t0
+    ex.elapsed_s = plan.elapsed_s + time.perf_counter() - t0
     return ex
+
+
+def execute_step(rc: RunComponents, snapshot: EnvironmentSnapshot, step: int, usage: BudgetUsage) -> StepExecution:
+    """Execute logical step `step` starting from `snapshot` (the state after step-1)."""
+    return apply_step(rc, snapshot, plan_step(rc, snapshot, step, usage))
 
 
 def failure_status(exc: BaseException) -> tuple[RunStatus, str]:
