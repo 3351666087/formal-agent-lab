@@ -1,0 +1,1724 @@
+{
+  "$defs": {
+    "ActionOutcome": {
+      "additionalProperties": false,
+      "properties": {
+        "action": {
+          "$ref": "#/$defs/GroundAction"
+        },
+        "effect_applied": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "null when it is unknown whether the effect took place",
+          "title": "Effect Applied"
+        },
+        "effect_comparison": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/EffectComparison"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "error": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ErrorInfo"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "evidence": {
+          "items": {
+            "$ref": "#/$defs/EvidenceRef"
+          },
+          "title": "Evidence",
+          "type": "array"
+        },
+        "operation_id": {
+          "title": "Operation Id",
+          "type": "string"
+        },
+        "proposal_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Proposal Id"
+        },
+        "result": {
+          "additionalProperties": true,
+          "title": "Result",
+          "type": "object"
+        },
+        "revision_after": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Revision After"
+        },
+        "revision_before": {
+          "minimum": 0,
+          "title": "Revision Before",
+          "type": "integer"
+        },
+        "run_id": {
+          "title": "Run Id",
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/$defs/OutcomeStatus"
+        },
+        "step_id": {
+          "title": "Step Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "operation_id",
+        "run_id",
+        "step_id",
+        "action",
+        "status",
+        "effect_applied",
+        "revision_before"
+      ],
+      "title": "ActionOutcome",
+      "type": "object"
+    },
+    "ActionProposal": {
+      "additionalProperties": false,
+      "properties": {
+        "action": {
+          "$ref": "#/$defs/GroundAction"
+        },
+        "actor_id": {
+          "title": "Actor Id",
+          "type": "string"
+        },
+        "based_on_revision": {
+          "description": "observation state_revision the proposal relied on",
+          "minimum": 0,
+          "title": "Based On Revision",
+          "type": "integer"
+        },
+        "candidates_considered": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Candidates Considered"
+        },
+        "proposal_id": {
+          "title": "Proposal Id",
+          "type": "string"
+        },
+        "rationale": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Rationale"
+        },
+        "run_id": {
+          "title": "Run Id",
+          "type": "string"
+        },
+        "source": {
+          "$ref": "#/$defs/ProposalSource"
+        },
+        "step": {
+          "minimum": 0,
+          "title": "Step",
+          "type": "integer"
+        },
+        "step_id": {
+          "title": "Step Id",
+          "type": "string"
+        },
+        "usage": {
+          "$ref": "#/$defs/ModelUsage"
+        }
+      },
+      "required": [
+        "proposal_id",
+        "run_id",
+        "step_id",
+        "step",
+        "actor_id",
+        "action",
+        "based_on_revision",
+        "source"
+      ],
+      "title": "ActionProposal",
+      "type": "object"
+    },
+    "ArtifactRef": {
+      "additionalProperties": false,
+      "description": "Pointer to a large object held by an ArtifactStore (never inlined into events).",
+      "properties": {
+        "digest": {
+          "$ref": "#/$defs/Digest"
+        },
+        "format_version": {
+          "minLength": 1,
+          "title": "Format Version",
+          "type": "string"
+        },
+        "media_type": {
+          "minLength": 3,
+          "title": "Media Type",
+          "type": "string"
+        },
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Name"
+        },
+        "size_bytes": {
+          "minimum": 0,
+          "title": "Size Bytes",
+          "type": "integer"
+        },
+        "uri": {
+          "description": "object location, e.g. file://… or s3://bucket/key",
+          "minLength": 1,
+          "title": "Uri",
+          "type": "string"
+        }
+      },
+      "required": [
+        "uri",
+        "media_type",
+        "size_bytes",
+        "digest",
+        "format_version"
+      ],
+      "title": "ArtifactRef",
+      "type": "object"
+    },
+    "BackendInfo": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "version": {
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "version"
+      ],
+      "title": "BackendInfo",
+      "type": "object"
+    },
+    "BoundedCheckResult": {
+      "additionalProperties": false,
+      "properties": {
+        "action_digest": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Digest"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "assumptions": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Assumptions",
+          "type": "array"
+        },
+        "backend": {
+          "$ref": "#/$defs/BackendInfo"
+        },
+        "bound": {
+          "$ref": "#/$defs/CheckBound"
+        },
+        "check_id": {
+          "title": "Check Id",
+          "type": "string"
+        },
+        "contract_version": {
+          "const": "formal-lab-contracts/v1",
+          "default": "formal-lab-contracts/v1",
+          "title": "Contract Version",
+          "type": "string"
+        },
+        "explanation": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Explanation"
+        },
+        "extensions": {
+          "description": "namespaced extension slots; keys are reverse-DNS namespaces, formal-lab.core.* is reserved",
+          "patternProperties": {
+            "^[a-z0-9]+(\\.[a-z0-9_-]+)+$": {
+              "$ref": "#/$defs/Extension"
+            }
+          },
+          "propertyNames": {
+            "not": {
+              "pattern": "^formal[-_]lab\\.core"
+            },
+            "pattern": "^[a-z0-9]+(\\.[a-z0-9_-]+)+$"
+          },
+          "title": "Extensions",
+          "type": "object"
+        },
+        "model_digest": {
+          "$ref": "#/$defs/Digest"
+        },
+        "query": {
+          "$ref": "#/$defs/CheckQuery"
+        },
+        "scope": {
+          "const": "MODEL_INTERNAL",
+          "default": "MODEL_INTERNAL",
+          "description": "conclusion holds for the model, not for the real system",
+          "title": "Scope",
+          "type": "string"
+        },
+        "semantics": {
+          "$ref": "#/$defs/QuerySemantics"
+        },
+        "state_digest": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Digest"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "stats": {
+          "$ref": "#/$defs/SolverStats"
+        },
+        "unsupported": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/UnsupportedInfo"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "variable_mapping": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "solver symbol → state path",
+          "title": "Variable Mapping",
+          "type": "object"
+        },
+        "verdict": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SearchVerdict"
+            },
+            {
+              "$ref": "#/$defs/PreconditionVerdict"
+            }
+          ],
+          "title": "Verdict"
+        },
+        "witness": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Witness"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "check_id",
+        "query",
+        "semantics",
+        "verdict",
+        "bound",
+        "model_digest",
+        "backend",
+        "stats"
+      ],
+      "title": "BoundedCheckResult",
+      "type": "object"
+    },
+    "Budget": {
+      "additionalProperties": false,
+      "properties": {
+        "max_model_calls": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Max Model Calls"
+        },
+        "max_steps": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Max Steps"
+        },
+        "max_tokens": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Max Tokens"
+        },
+        "max_wall_seconds": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Max Wall Seconds"
+        }
+      },
+      "title": "Budget",
+      "type": "object"
+    },
+    "BudgetUsage": {
+      "additionalProperties": false,
+      "properties": {
+        "input_tokens": {
+          "default": 0,
+          "title": "Input Tokens",
+          "type": "integer"
+        },
+        "model_calls": {
+          "default": 0,
+          "title": "Model Calls",
+          "type": "integer"
+        },
+        "output_tokens": {
+          "default": 0,
+          "title": "Output Tokens",
+          "type": "integer"
+        },
+        "steps": {
+          "default": 0,
+          "title": "Steps",
+          "type": "integer"
+        },
+        "wall_seconds": {
+          "default": 0.0,
+          "title": "Wall Seconds",
+          "type": "number"
+        }
+      },
+      "title": "BudgetUsage",
+      "type": "object"
+    },
+    "CheckBound": {
+      "additionalProperties": false,
+      "properties": {
+        "max_steps": {
+          "description": "maximum path length explored (0 for single-step queries)",
+          "minimum": 0,
+          "title": "Max Steps",
+          "type": "integer"
+        },
+        "timeout_ms": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Timeout Ms"
+        }
+      },
+      "required": [
+        "max_steps"
+      ],
+      "title": "CheckBound",
+      "type": "object"
+    },
+    "CheckQuery": {
+      "additionalProperties": false,
+      "properties": {
+        "action": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/GroundAction"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "action for ACTION_PRECONDITION"
+        },
+        "bound": {
+          "$ref": "#/$defs/CheckBound"
+        },
+        "initial_state": {
+          "default": "MODEL_INITIAL",
+          "enum": [
+            "MODEL_INITIAL",
+            "GIVEN_STATE"
+          ],
+          "title": "Initial State",
+          "type": "string"
+        },
+        "kind": {
+          "$ref": "#/$defs/QueryKind"
+        },
+        "property_id": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z_][A-Za-z0-9_]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "goal / invariant property to query",
+          "title": "Property Id"
+        }
+      },
+      "required": [
+        "kind",
+        "bound"
+      ],
+      "title": "CheckQuery",
+      "type": "object"
+    },
+    "ComparisonVerdict": {
+      "enum": [
+        "MATCH",
+        "DIFFERENT",
+        "INSUFFICIENT_INFORMATION"
+      ],
+      "title": "ComparisonVerdict",
+      "type": "string"
+    },
+    "Digest": {
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": {
+          "const": "sha256",
+          "default": "sha256",
+          "title": "Algorithm",
+          "type": "string"
+        },
+        "value": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "Digest",
+      "type": "object"
+    },
+    "EffectComparison": {
+      "additionalProperties": false,
+      "properties": {
+        "diffs": {
+          "items": {
+            "$ref": "#/$defs/FieldDiff"
+          },
+          "title": "Diffs",
+          "type": "array"
+        },
+        "evidence": {
+          "items": {
+            "$ref": "#/$defs/EvidenceRef"
+          },
+          "title": "Evidence",
+          "type": "array"
+        },
+        "expected_by": {
+          "description": "what produced the expectation, e.g. model:<package>@<version>",
+          "title": "Expected By",
+          "type": "string"
+        },
+        "verdict": {
+          "$ref": "#/$defs/ComparisonVerdict"
+        }
+      },
+      "required": [
+        "verdict",
+        "expected_by"
+      ],
+      "title": "EffectComparison",
+      "type": "object"
+    },
+    "EnvironmentSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "config": {
+          "additionalProperties": true,
+          "title": "Config",
+          "type": "object"
+        },
+        "plugin": {
+          "$ref": "#/$defs/PluginRef"
+        }
+      },
+      "required": [
+        "plugin"
+      ],
+      "title": "EnvironmentSpec",
+      "type": "object"
+    },
+    "ErrorCode": {
+      "enum": [
+        "INVALID_INPUT",
+        "VERSION_MISMATCH",
+        "UNSUPPORTED",
+        "TIMEOUT",
+        "RESULT_UNKNOWN",
+        "CANCELLED",
+        "RETRYABLE_FAILURE",
+        "NON_RETRYABLE_FAILURE",
+        "NOT_FOUND",
+        "CONFLICT"
+      ],
+      "title": "ErrorCode",
+      "type": "string"
+    },
+    "ErrorInfo": {
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "$ref": "#/$defs/ErrorCode"
+        },
+        "details": {
+          "additionalProperties": true,
+          "title": "Details",
+          "type": "object"
+        },
+        "field_errors": {
+          "items": {
+            "$ref": "#/$defs/FieldError"
+          },
+          "title": "Field Errors",
+          "type": "array"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        },
+        "retryable": {
+          "title": "Retryable",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "code",
+        "message",
+        "retryable"
+      ],
+      "title": "ErrorInfo",
+      "type": "object"
+    },
+    "EvidenceRef": {
+      "additionalProperties": false,
+      "description": "Reference to something that supports a claim: an event, artifact, check or snapshot.",
+      "properties": {
+        "artifact": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ArtifactRef"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "id": {
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "event",
+            "artifact",
+            "check",
+            "snapshot",
+            "operation",
+            "model_call"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Note"
+        }
+      },
+      "required": [
+        "kind",
+        "id"
+      ],
+      "title": "EvidenceRef",
+      "type": "object"
+    },
+    "Extension": {
+      "additionalProperties": false,
+      "description": "Namespaced, versioned extension payload. `schema_id` names the JSON Schema that validates `data`.",
+      "properties": {
+        "data": {
+          "additionalProperties": true,
+          "title": "Data",
+          "type": "object"
+        },
+        "schema_id": {
+          "minLength": 1,
+          "title": "Schema Id",
+          "type": "string"
+        },
+        "version": {
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+([-+][0-9A-Za-z.-]+)?$",
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "version",
+        "schema_id",
+        "data"
+      ],
+      "title": "Extension",
+      "type": "object"
+    },
+    "Fact": {
+      "additionalProperties": false,
+      "properties": {
+        "observed_at_step": {
+          "minimum": 0,
+          "title": "Observed At Step",
+          "type": "integer"
+        },
+        "path": {
+          "description": "state location path, e.g. op_status[o1_cut]",
+          "title": "Path",
+          "type": "string"
+        },
+        "source": {
+          "default": "DIRECT",
+          "enum": [
+            "DIRECT",
+            "DELAYED"
+          ],
+          "title": "Source",
+          "type": "string"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "title": "Value"
+        }
+      },
+      "required": [
+        "path",
+        "value",
+        "observed_at_step"
+      ],
+      "title": "Fact",
+      "type": "object"
+    },
+    "FieldDiff": {
+      "additionalProperties": false,
+      "properties": {
+        "expected": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Expected"
+        },
+        "observed": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Observed"
+        },
+        "path": {
+          "title": "Path",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "MATCH",
+            "DIFFERENT",
+            "UNKNOWN"
+          ],
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "path",
+        "expected",
+        "observed",
+        "status"
+      ],
+      "title": "FieldDiff",
+      "type": "object"
+    },
+    "FieldError": {
+      "additionalProperties": false,
+      "properties": {
+        "message": {
+          "title": "Message",
+          "type": "string"
+        },
+        "path": {
+          "title": "Path",
+          "type": "string"
+        }
+      },
+      "required": [
+        "path",
+        "message"
+      ],
+      "title": "FieldError",
+      "type": "object"
+    },
+    "GroundAction": {
+      "additionalProperties": false,
+      "properties": {
+        "action_type": {
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*$",
+          "title": "Action Type",
+          "type": "string"
+        },
+        "params": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "title": "Params",
+          "type": "object"
+        }
+      },
+      "required": [
+        "action_type"
+      ],
+      "title": "GroundAction",
+      "type": "object"
+    },
+    "ModelRef": {
+      "additionalProperties": false,
+      "properties": {
+        "digest": {
+          "$ref": "#/$defs/Digest"
+        },
+        "package_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:@/-]{0,254}$",
+          "title": "Package Id",
+          "type": "string"
+        },
+        "version": {
+          "minimum": 1,
+          "title": "Version",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "package_id",
+        "version",
+        "digest"
+      ],
+      "title": "ModelRef",
+      "type": "object"
+    },
+    "ModelUsage": {
+      "additionalProperties": false,
+      "properties": {
+        "input_tokens": {
+          "default": 0,
+          "title": "Input Tokens",
+          "type": "integer"
+        },
+        "model_calls": {
+          "default": 0,
+          "title": "Model Calls",
+          "type": "integer"
+        },
+        "output_tokens": {
+          "default": 0,
+          "title": "Output Tokens",
+          "type": "integer"
+        }
+      },
+      "title": "ModelUsage",
+      "type": "object"
+    },
+    "Objective": {
+      "additionalProperties": false,
+      "properties": {
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Description"
+        },
+        "metric_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Metric Id"
+        },
+        "property_id": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z_][A-Za-z0-9_]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Property Id"
+        }
+      },
+      "title": "Objective",
+      "type": "object"
+    },
+    "Observation": {
+      "additionalProperties": false,
+      "properties": {
+        "actor_id": {
+          "title": "Actor Id",
+          "type": "string"
+        },
+        "evidence": {
+          "items": {
+            "$ref": "#/$defs/EvidenceRef"
+          },
+          "title": "Evidence",
+          "type": "array"
+        },
+        "facts": {
+          "items": {
+            "$ref": "#/$defs/Fact"
+          },
+          "title": "Facts",
+          "type": "array"
+        },
+        "run_id": {
+          "title": "Run Id",
+          "type": "string"
+        },
+        "semantics": {
+          "default": "Facts are what the actor observed (possibly stale, see observed_at_step); unknowns are locations whose current value the actor cannot know at this step. The environment truth state is a separate object that agents never receive.",
+          "title": "Semantics",
+          "type": "string"
+        },
+        "state_revision": {
+          "minimum": 0,
+          "title": "State Revision",
+          "type": "integer"
+        },
+        "step": {
+          "description": "logical step at which the observation is taken",
+          "minimum": 0,
+          "title": "Step",
+          "type": "integer"
+        },
+        "unknowns": {
+          "items": {
+            "$ref": "#/$defs/UnknownItem"
+          },
+          "title": "Unknowns",
+          "type": "array"
+        }
+      },
+      "required": [
+        "run_id",
+        "actor_id",
+        "step",
+        "state_revision",
+        "facts"
+      ],
+      "title": "Observation",
+      "type": "object"
+    },
+    "OutcomeStatus": {
+      "enum": [
+        "APPLIED",
+        "REJECTED",
+        "FAILED_RETRYABLE",
+        "FAILED_NON_RETRYABLE",
+        "TIMED_OUT",
+        "UNKNOWN",
+        "CANCELLED"
+      ],
+      "title": "OutcomeStatus",
+      "type": "string"
+    },
+    "Participant": {
+      "additionalProperties": false,
+      "properties": {
+        "actor_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:@/-]{0,254}$",
+          "title": "Actor Id",
+          "type": "string"
+        },
+        "role": {
+          "default": "operator",
+          "title": "Role",
+          "type": "string"
+        },
+        "strategy": {
+          "$ref": "#/$defs/StrategySpec"
+        }
+      },
+      "required": [
+        "actor_id",
+        "strategy"
+      ],
+      "title": "Participant",
+      "type": "object"
+    },
+    "PluginRef": {
+      "additionalProperties": false,
+      "properties": {
+        "plugin_id": {
+          "pattern": "^[a-z0-9]+([.-][a-z0-9]+)*(/[a-z0-9]+([.-][a-z0-9]+)*)?$",
+          "title": "Plugin Id",
+          "type": "string"
+        },
+        "version": {
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+([-+][0-9A-Za-z.-]+)?$",
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "plugin_id",
+        "version"
+      ],
+      "title": "PluginRef",
+      "type": "object"
+    },
+    "PreconditionVerdict": {
+      "enum": [
+        "APPLICABLE",
+        "INAPPLICABLE",
+        "UNKNOWN",
+        "UNSUPPORTED"
+      ],
+      "title": "PreconditionVerdict",
+      "type": "string"
+    },
+    "ProposalSource": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "$ref": "#/$defs/ProposalSourceKind"
+        },
+        "model": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "model identifier for LLM / LLM_STUB sources",
+          "title": "Model"
+        },
+        "model_call_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Model Call Ids",
+          "type": "array"
+        },
+        "strategy": {
+          "$ref": "#/$defs/PluginRef"
+        }
+      },
+      "required": [
+        "kind",
+        "strategy"
+      ],
+      "title": "ProposalSource",
+      "type": "object"
+    },
+    "ProposalSourceKind": {
+      "enum": [
+        "RULE",
+        "SYMBOLIC",
+        "LLM",
+        "LLM_STUB",
+        "HUMAN",
+        "EXTERNAL"
+      ],
+      "title": "ProposalSourceKind",
+      "type": "string"
+    },
+    "QueryKind": {
+      "enum": [
+        "GOAL_REACHABILITY",
+        "INVARIANT_VIOLATION",
+        "ACTION_PRECONDITION"
+      ],
+      "title": "QueryKind",
+      "type": "string"
+    },
+    "QuerySemantics": {
+      "enum": [
+        "EXISTS_PATH",
+        "ALL_PATHS",
+        "SINGLE_STEP"
+      ],
+      "title": "QuerySemantics",
+      "type": "string"
+    },
+    "RunStatus": {
+      "enum": [
+        "CREATED",
+        "QUEUED",
+        "RUNNING",
+        "PAUSING",
+        "PAUSED",
+        "CANCELLING",
+        "CANCELLED",
+        "SUCCEEDED",
+        "FAILED",
+        "BUDGET_EXHAUSTED"
+      ],
+      "title": "RunStatus",
+      "type": "string"
+    },
+    "ScenarioManifest": {
+      "additionalProperties": false,
+      "properties": {
+        "budget": {
+          "$ref": "#/$defs/Budget"
+        },
+        "contract_version": {
+          "const": "formal-lab-contracts/v1",
+          "default": "formal-lab-contracts/v1",
+          "title": "Contract Version",
+          "type": "string"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Description"
+        },
+        "environment": {
+          "$ref": "#/$defs/EnvironmentSpec"
+        },
+        "extensions": {
+          "description": "namespaced extension slots; keys are reverse-DNS namespaces, formal-lab.core.* is reserved",
+          "patternProperties": {
+            "^[a-z0-9]+(\\.[a-z0-9_-]+)+$": {
+              "$ref": "#/$defs/Extension"
+            }
+          },
+          "propertyNames": {
+            "not": {
+              "pattern": "^formal[-_]lab\\.core"
+            },
+            "pattern": "^[a-z0-9]+(\\.[a-z0-9_-]+)+$"
+          },
+          "title": "Extensions",
+          "type": "object"
+        },
+        "model": {
+          "$ref": "#/$defs/ModelRef"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "objectives": {
+          "items": {
+            "$ref": "#/$defs/Objective"
+          },
+          "title": "Objectives",
+          "type": "array"
+        },
+        "participants": {
+          "items": {
+            "$ref": "#/$defs/Participant"
+          },
+          "minItems": 1,
+          "title": "Participants",
+          "type": "array"
+        },
+        "revision": {
+          "default": 1,
+          "minimum": 1,
+          "title": "Revision",
+          "type": "integer"
+        },
+        "scenario_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:@/-]{0,254}$",
+          "title": "Scenario Id",
+          "type": "string"
+        },
+        "seed": {
+          "default": 0,
+          "title": "Seed",
+          "type": "integer"
+        },
+        "stop_conditions": {
+          "items": {
+            "$ref": "#/$defs/StopCondition"
+          },
+          "title": "Stop Conditions",
+          "type": "array"
+        }
+      },
+      "required": [
+        "scenario_id",
+        "name",
+        "model",
+        "environment",
+        "participants",
+        "budget"
+      ],
+      "title": "ScenarioManifest",
+      "type": "object"
+    },
+    "SearchVerdict": {
+      "enum": [
+        "WITNESS",
+        "NO_WITNESS_WITHIN_BOUND",
+        "UNKNOWN",
+        "UNSUPPORTED"
+      ],
+      "title": "SearchVerdict",
+      "type": "string"
+    },
+    "SolverStats": {
+      "additionalProperties": false,
+      "properties": {
+        "elapsed_ms": {
+          "default": 0.0,
+          "title": "Elapsed Ms",
+          "type": "number"
+        },
+        "reason_unknown": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reason Unknown"
+        },
+        "solver_status": {
+          "description": "raw backend status, e.g. sat / unsat / unknown / not-run",
+          "title": "Solver Status",
+          "type": "string"
+        },
+        "steps_explored": {
+          "default": 0,
+          "title": "Steps Explored",
+          "type": "integer"
+        },
+        "timeout_ms": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Timeout Ms"
+        }
+      },
+      "required": [
+        "solver_status"
+      ],
+      "title": "SolverStats",
+      "type": "object"
+    },
+    "StepRecord": {
+      "additionalProperties": false,
+      "properties": {
+        "checks": {
+          "items": {
+            "$ref": "#/$defs/BoundedCheckResult"
+          },
+          "title": "Checks",
+          "type": "array"
+        },
+        "observation": {
+          "$ref": "#/$defs/Observation"
+        },
+        "outcome": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ActionOutcome"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "proposal": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ActionProposal"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "step": {
+          "title": "Step",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "step",
+        "observation",
+        "proposal",
+        "outcome"
+      ],
+      "title": "StepRecord",
+      "type": "object"
+    },
+    "StopCondition": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "$ref": "#/$defs/StopConditionKind"
+        },
+        "property_id": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z_][A-Za-z0-9_]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Property Id"
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "title": "StopCondition",
+      "type": "object"
+    },
+    "StopConditionKind": {
+      "enum": [
+        "GOAL_REACHED",
+        "INVARIANT_VIOLATED",
+        "NO_APPLICABLE_ACTION"
+      ],
+      "title": "StopConditionKind",
+      "type": "string"
+    },
+    "StrategySpec": {
+      "additionalProperties": false,
+      "properties": {
+        "config": {
+          "additionalProperties": true,
+          "title": "Config",
+          "type": "object"
+        },
+        "plugin": {
+          "$ref": "#/$defs/PluginRef"
+        }
+      },
+      "required": [
+        "plugin"
+      ],
+      "title": "StrategySpec",
+      "type": "object"
+    },
+    "UnknownItem": {
+      "additionalProperties": false,
+      "properties": {
+        "last_known": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Fact"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "path": {
+          "title": "Path",
+          "type": "string"
+        },
+        "reason": {
+          "enum": [
+            "OBSERVATION_DELAY",
+            "NOT_OBSERVABLE",
+            "NOT_YET_OBSERVED"
+          ],
+          "title": "Reason",
+          "type": "string"
+        }
+      },
+      "required": [
+        "path",
+        "reason"
+      ],
+      "title": "UnknownItem",
+      "type": "object"
+    },
+    "UnsupportedInfo": {
+      "additionalProperties": false,
+      "properties": {
+        "extension_point": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "interface through which support can be added",
+          "title": "Extension Point"
+        },
+        "feature": {
+          "title": "Feature",
+          "type": "string"
+        },
+        "reason": {
+          "title": "Reason",
+          "type": "string"
+        }
+      },
+      "required": [
+        "feature",
+        "reason"
+      ],
+      "title": "UnsupportedInfo",
+      "type": "object"
+    },
+    "Witness": {
+      "additionalProperties": false,
+      "properties": {
+        "replay": {
+          "default": "NOT_REPLAYED",
+          "enum": [
+            "CONFIRMED",
+            "REFUTED",
+            "NOT_REPLAYED"
+          ],
+          "title": "Replay",
+          "type": "string"
+        },
+        "replay_note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Replay Note"
+        },
+        "steps": {
+          "items": {
+            "$ref": "#/$defs/WitnessStep"
+          },
+          "title": "Steps",
+          "type": "array"
+        }
+      },
+      "required": [
+        "steps"
+      ],
+      "title": "Witness",
+      "type": "object"
+    },
+    "WitnessStep": {
+      "additionalProperties": false,
+      "properties": {
+        "action": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/GroundAction"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "action leading into this state (null for step 0)"
+        },
+        "state": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "title": "State",
+          "type": "object"
+        },
+        "step": {
+          "title": "Step",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "step",
+        "action",
+        "state"
+      ],
+      "title": "WitnessStep",
+      "type": "object"
+    }
+  },
+  "$id": "https://formal-lab.dev/contracts/v1/EpisodeRecord.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Input to Evaluator.score: everything needed to compute metrics deterministically.",
+  "properties": {
+    "environment_summary": {
+      "additionalProperties": true,
+      "title": "Environment Summary",
+      "type": "object"
+    },
+    "final_step": {
+      "title": "Final Step",
+      "type": "integer"
+    },
+    "final_truth_state": {
+      "additionalProperties": {
+        "anyOf": [
+          {
+            "type": "boolean"
+          },
+          {
+            "type": "integer"
+          },
+          {
+            "type": "string"
+          }
+        ]
+      },
+      "title": "Final Truth State",
+      "type": "object"
+    },
+    "run_id": {
+      "title": "Run Id",
+      "type": "string"
+    },
+    "scenario": {
+      "$ref": "#/$defs/ScenarioManifest"
+    },
+    "status": {
+      "$ref": "#/$defs/RunStatus"
+    },
+    "steps": {
+      "items": {
+        "$ref": "#/$defs/StepRecord"
+      },
+      "title": "Steps",
+      "type": "array"
+    },
+    "usage": {
+      "$ref": "#/$defs/BudgetUsage"
+    }
+  },
+  "required": [
+    "run_id",
+    "scenario",
+    "status",
+    "steps",
+    "final_truth_state",
+    "final_step",
+    "usage"
+  ],
+  "title": "EpisodeRecord",
+  "type": "object"
+}

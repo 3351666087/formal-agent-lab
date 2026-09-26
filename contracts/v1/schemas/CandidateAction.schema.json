@@ -1,0 +1,76 @@
+{
+  "$defs": {
+    "GroundAction": {
+      "additionalProperties": false,
+      "properties": {
+        "action_type": {
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*$",
+          "title": "Action Type",
+          "type": "string"
+        },
+        "params": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "title": "Params",
+          "type": "object"
+        }
+      },
+      "required": [
+        "action_type"
+      ],
+      "title": "GroundAction",
+      "type": "object"
+    },
+    "PreconditionVerdict": {
+      "enum": [
+        "APPLICABLE",
+        "INAPPLICABLE",
+        "UNKNOWN",
+        "UNSUPPORTED"
+      ],
+      "title": "PreconditionVerdict",
+      "type": "string"
+    }
+  },
+  "$id": "https://formal-lab.dev/contracts/v1/CandidateAction.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "action": {
+      "$ref": "#/$defs/GroundAction"
+    },
+    "belief_applicability": {
+      "$ref": "#/$defs/PreconditionVerdict",
+      "description": "applicability judged on the actor's observation (unknown facts stay UNKNOWN)"
+    },
+    "label": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Label"
+    }
+  },
+  "required": [
+    "action",
+    "belief_applicability"
+  ],
+  "title": "CandidateAction",
+  "type": "object"
+}

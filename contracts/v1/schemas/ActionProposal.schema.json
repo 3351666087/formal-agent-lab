@@ -1,0 +1,205 @@
+{
+  "$defs": {
+    "GroundAction": {
+      "additionalProperties": false,
+      "properties": {
+        "action_type": {
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*$",
+          "title": "Action Type",
+          "type": "string"
+        },
+        "params": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "title": "Params",
+          "type": "object"
+        }
+      },
+      "required": [
+        "action_type"
+      ],
+      "title": "GroundAction",
+      "type": "object"
+    },
+    "ModelUsage": {
+      "additionalProperties": false,
+      "properties": {
+        "input_tokens": {
+          "default": 0,
+          "title": "Input Tokens",
+          "type": "integer"
+        },
+        "model_calls": {
+          "default": 0,
+          "title": "Model Calls",
+          "type": "integer"
+        },
+        "output_tokens": {
+          "default": 0,
+          "title": "Output Tokens",
+          "type": "integer"
+        }
+      },
+      "title": "ModelUsage",
+      "type": "object"
+    },
+    "PluginRef": {
+      "additionalProperties": false,
+      "properties": {
+        "plugin_id": {
+          "pattern": "^[a-z0-9]+([.-][a-z0-9]+)*(/[a-z0-9]+([.-][a-z0-9]+)*)?$",
+          "title": "Plugin Id",
+          "type": "string"
+        },
+        "version": {
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+([-+][0-9A-Za-z.-]+)?$",
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "plugin_id",
+        "version"
+      ],
+      "title": "PluginRef",
+      "type": "object"
+    },
+    "ProposalSource": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "$ref": "#/$defs/ProposalSourceKind"
+        },
+        "model": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "model identifier for LLM / LLM_STUB sources",
+          "title": "Model"
+        },
+        "model_call_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Model Call Ids",
+          "type": "array"
+        },
+        "strategy": {
+          "$ref": "#/$defs/PluginRef"
+        }
+      },
+      "required": [
+        "kind",
+        "strategy"
+      ],
+      "title": "ProposalSource",
+      "type": "object"
+    },
+    "ProposalSourceKind": {
+      "enum": [
+        "RULE",
+        "SYMBOLIC",
+        "LLM",
+        "LLM_STUB",
+        "HUMAN",
+        "EXTERNAL"
+      ],
+      "title": "ProposalSourceKind",
+      "type": "string"
+    }
+  },
+  "$id": "https://formal-lab.dev/contracts/v1/ActionProposal.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "action": {
+      "$ref": "#/$defs/GroundAction"
+    },
+    "actor_id": {
+      "title": "Actor Id",
+      "type": "string"
+    },
+    "based_on_revision": {
+      "description": "observation state_revision the proposal relied on",
+      "minimum": 0,
+      "title": "Based On Revision",
+      "type": "integer"
+    },
+    "candidates_considered": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Candidates Considered"
+    },
+    "proposal_id": {
+      "title": "Proposal Id",
+      "type": "string"
+    },
+    "rationale": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Rationale"
+    },
+    "run_id": {
+      "title": "Run Id",
+      "type": "string"
+    },
+    "source": {
+      "$ref": "#/$defs/ProposalSource"
+    },
+    "step": {
+      "minimum": 0,
+      "title": "Step",
+      "type": "integer"
+    },
+    "step_id": {
+      "title": "Step Id",
+      "type": "string"
+    },
+    "usage": {
+      "$ref": "#/$defs/ModelUsage"
+    }
+  },
+  "required": [
+    "proposal_id",
+    "run_id",
+    "step_id",
+    "step",
+    "actor_id",
+    "action",
+    "based_on_revision",
+    "source"
+  ],
+  "title": "ActionProposal",
+  "type": "object"
+}

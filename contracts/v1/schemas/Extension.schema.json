@@ -1,0 +1,30 @@
+{
+  "$id": "https://formal-lab.dev/contracts/v1/Extension.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Namespaced, versioned extension payload. `schema_id` names the JSON Schema that validates `data`.",
+  "properties": {
+    "data": {
+      "additionalProperties": true,
+      "title": "Data",
+      "type": "object"
+    },
+    "schema_id": {
+      "minLength": 1,
+      "title": "Schema Id",
+      "type": "string"
+    },
+    "version": {
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+([-+][0-9A-Za-z.-]+)?$",
+      "title": "Version",
+      "type": "string"
+    }
+  },
+  "required": [
+    "version",
+    "schema_id",
+    "data"
+  ],
+  "title": "Extension",
+  "type": "object"
+}

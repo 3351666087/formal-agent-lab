@@ -1,0 +1,126 @@
+{
+  "$defs": {
+    "CheckBound": {
+      "additionalProperties": false,
+      "properties": {
+        "max_steps": {
+          "description": "maximum path length explored (0 for single-step queries)",
+          "minimum": 0,
+          "title": "Max Steps",
+          "type": "integer"
+        },
+        "timeout_ms": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Timeout Ms"
+        }
+      },
+      "required": [
+        "max_steps"
+      ],
+      "title": "CheckBound",
+      "type": "object"
+    },
+    "GroundAction": {
+      "additionalProperties": false,
+      "properties": {
+        "action_type": {
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*$",
+          "title": "Action Type",
+          "type": "string"
+        },
+        "params": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "title": "Params",
+          "type": "object"
+        }
+      },
+      "required": [
+        "action_type"
+      ],
+      "title": "GroundAction",
+      "type": "object"
+    },
+    "QueryKind": {
+      "enum": [
+        "GOAL_REACHABILITY",
+        "INVARIANT_VIOLATION",
+        "ACTION_PRECONDITION"
+      ],
+      "title": "QueryKind",
+      "type": "string"
+    }
+  },
+  "$id": "https://formal-lab.dev/contracts/v1/CheckQuery.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "action": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/GroundAction"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "action for ACTION_PRECONDITION"
+    },
+    "bound": {
+      "$ref": "#/$defs/CheckBound"
+    },
+    "initial_state": {
+      "default": "MODEL_INITIAL",
+      "enum": [
+        "MODEL_INITIAL",
+        "GIVEN_STATE"
+      ],
+      "title": "Initial State",
+      "type": "string"
+    },
+    "kind": {
+      "$ref": "#/$defs/QueryKind"
+    },
+    "property_id": {
+      "anyOf": [
+        {
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "goal / invariant property to query",
+      "title": "Property Id"
+    }
+  },
+  "required": [
+    "kind",
+    "bound"
+  ],
+  "title": "CheckQuery",
+  "type": "object"
+}

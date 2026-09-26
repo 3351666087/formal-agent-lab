@@ -1,0 +1,122 @@
+{
+  "$defs": {
+    "EventType": {
+      "enum": [
+        "RUN_CREATED",
+        "RUN_QUEUED",
+        "RUN_STARTED",
+        "OBSERVATION",
+        "CANDIDATES",
+        "ACTION_PROPOSED",
+        "CHECK_COMPLETED",
+        "ACTION_OUTCOME",
+        "EFFECT_COMPARED",
+        "STATE_SNAPSHOT",
+        "RUN_PAUSING",
+        "RUN_PAUSED",
+        "RUN_RESUMED",
+        "RUN_CANCELLING",
+        "RUN_CANCELLED",
+        "BUDGET_EXHAUSTED",
+        "RUN_SUCCEEDED",
+        "RUN_FAILED",
+        "METRICS_COMPUTED",
+        "LOG"
+      ],
+      "title": "EventType",
+      "type": "string"
+    }
+  },
+  "$id": "https://formal-lab.dev/contracts/v1/TraceEvent.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "actor_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Actor Id"
+    },
+    "causal_parents": {
+      "description": "event ids this event was caused by",
+      "items": {
+        "type": "string"
+      },
+      "title": "Causal Parents",
+      "type": "array"
+    },
+    "event_id": {
+      "title": "Event Id",
+      "type": "string"
+    },
+    "event_type": {
+      "$ref": "#/$defs/EventType"
+    },
+    "idempotency_key": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Idempotency Key"
+    },
+    "logical_step": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Logical Step"
+    },
+    "payload": {
+      "additionalProperties": true,
+      "title": "Payload",
+      "type": "object"
+    },
+    "payload_schema": {
+      "description": "schema id of payload, e.g. formal-lab/events/ACTION_PROPOSED@1",
+      "title": "Payload Schema",
+      "type": "string"
+    },
+    "run_id": {
+      "title": "Run Id",
+      "type": "string"
+    },
+    "seq": {
+      "description": "monotonic per-run sequence number, gap-free",
+      "minimum": 1,
+      "title": "Seq",
+      "type": "integer"
+    },
+    "wall_time": {
+      "format": "date-time",
+      "title": "Wall Time",
+      "type": "string"
+    }
+  },
+  "required": [
+    "event_id",
+    "run_id",
+    "seq",
+    "event_type",
+    "wall_time",
+    "payload_schema"
+  ],
+  "title": "TraceEvent",
+  "type": "object"
+}

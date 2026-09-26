@@ -1,0 +1,58 @@
+{
+  "budget": {
+    "max_model_calls": null,
+    "max_steps": 5,
+    "max_tokens": null,
+    "max_wall_seconds": 30.0
+  },
+  "contract_version": "formal-lab-contracts/v1",
+  "description": null,
+  "environment": {
+    "config": {},
+    "plugin": {
+      "plugin_id": "formal-lab.env.ir-world",
+      "version": "1.0.0"
+    }
+  },
+  "extensions": {},
+  "model": {
+    "digest": {
+      "algorithm": "sha256",
+      "value": "c26aecb61632ad0029b34c1648b468a26be83b33502177fe12e05b076580a3e9"
+    },
+    "package_id": "lamp",
+    "version": 1
+  },
+  "name": "lamp basic",
+  "objectives": [
+    {
+      "description": null,
+      "metric_id": null,
+      "property_id": "lit"
+    }
+  ],
+  "participants": [
+    {
+      "actor_id": "agent",
+      "role": "operator",
+      "strategy": {
+        "config": {
+          "horizon": 3
+        },
+        "plugin": {
+          "plugin_id": "formal-lab.planner.z3-bounded",
+          "version": "1.0.0"
+        }
+      }
+    }
+  ],
+  "revision": 1,
+  "scenario_id": "lamp-basic",
+  "seed": 7,
+  "stop_conditions": [
+    {
+      "kind": "GOAL_REACHED",
+      "property_id": "lit"
+    }
+  ]
+}

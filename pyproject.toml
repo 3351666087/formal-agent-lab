@@ -1,0 +1,81 @@
+[project]
+name = "formal-agent-lab"
+version = "0.1.0"
+description = "General experiment platform and finite-state modelling engine (phase 1)"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "formal-lab-contracts",
+    "formal-lab-model-core",
+    "formal-lab-solver-z3",
+    "formal-lab-neutral-env",
+    "formal-lab-strategies",
+    "formal-lab-evaluation",
+    "formal-lab-runtime",
+    "formal-lab-platform-api",
+    "formal-lab-orchestrator",
+    "formal-lab-sdk",
+    "formal-lab-example-scheduling",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.4",
+    "pytest-asyncio>=1.2",
+    "pytest-timeout>=2.4",
+    "ruff>=0.14",
+    "jsonschema>=4.25",
+    "fal-example-external-plugin",
+]
+
+[tool.uv]
+package = false
+
+[tool.uv.workspace]
+members = [
+    "packages/contracts",
+    "packages/model-core",
+    "packages/solver-adapters/z3",
+    "packages/neutral-environment",
+    "packages/strategies",
+    "packages/evaluation",
+    "packages/runtime",
+    "packages/platform-api",
+    "packages/orchestrator",
+    "packages/sdk",
+    "examples/neutral-scheduling",
+    "examples/external-plugin",
+]
+
+[tool.uv.sources]
+formal-lab-contracts = { workspace = true }
+formal-lab-model-core = { workspace = true }
+formal-lab-solver-z3 = { workspace = true }
+formal-lab-neutral-env = { workspace = true }
+formal-lab-strategies = { workspace = true }
+formal-lab-evaluation = { workspace = true }
+formal-lab-runtime = { workspace = true }
+formal-lab-platform-api = { workspace = true }
+formal-lab-orchestrator = { workspace = true }
+formal-lab-sdk = { workspace = true }
+formal-lab-example-scheduling = { workspace = true }
+fal-example-external-plugin = { workspace = true }
+
+[tool.pytest.ini_options]
+testpaths = ["tests", "packages", "examples"]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "session"
+asyncio_default_test_loop_scope = "session"
+timeout = 300
+markers = [
+    "integration: needs PostgreSQL / Temporal services (make services-up)",
+    "llm: calls the configured real LLM endpoint",
+]
+addopts = "-ra --strict-markers"
+
+[tool.ruff]
+line-length = 110
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM", "RUF"]
+ignore = ["E501", "RUF001", "RUF002", "RUF003"]

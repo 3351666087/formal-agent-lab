@@ -1,0 +1,1420 @@
+{
+  "$defs": {
+    "ActionSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "action_type": {
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*$",
+          "title": "Action Type",
+          "type": "string"
+        },
+        "cost": {
+          "default": 1.0,
+          "minimum": 0,
+          "title": "Cost",
+          "type": "number"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Description"
+        },
+        "effects": {
+          "items": {
+            "discriminator": {
+              "mapping": {
+                "assign": "#/$defs/AssignEffect",
+                "forall": "#/$defs/ForallEffect",
+                "when": "#/$defs/WhenEffect"
+              },
+              "propertyName": "kind"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/AssignEffect"
+              },
+              {
+                "$ref": "#/$defs/WhenEffect"
+              },
+              {
+                "$ref": "#/$defs/ForallEffect"
+              }
+            ]
+          },
+          "title": "Effects",
+          "type": "array"
+        },
+        "expected_effects": {
+          "description": "human-readable expected effects",
+          "items": {
+            "type": "string"
+          },
+          "title": "Expected Effects",
+          "type": "array"
+        },
+        "label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Label"
+        },
+        "params_schema": {
+          "additionalProperties": true,
+          "description": "JSON Schema of the parameter object",
+          "title": "Params Schema",
+          "type": "object"
+        },
+        "precondition_expr": {
+          "anyOf": [
+            {
+              "discriminator": {
+                "mapping": {
+                  "add": "#/$defs/ApplyExpr",
+                  "and": "#/$defs/ApplyExpr",
+                  "const": "#/$defs/ConstExpr",
+                  "count": "#/$defs/QuantExpr",
+                  "eq": "#/$defs/ApplyExpr",
+                  "exists": "#/$defs/QuantExpr",
+                  "forall": "#/$defs/QuantExpr",
+                  "ge": "#/$defs/ApplyExpr",
+                  "gt": "#/$defs/ApplyExpr",
+                  "implies": "#/$defs/ApplyExpr",
+                  "ite": "#/$defs/ApplyExpr",
+                  "le": "#/$defs/ApplyExpr",
+                  "lt": "#/$defs/ApplyExpr",
+                  "max": "#/$defs/ApplyExpr",
+                  "min": "#/$defs/ApplyExpr",
+                  "mul": "#/$defs/ApplyExpr",
+                  "ne": "#/$defs/ApplyExpr",
+                  "neg": "#/$defs/ApplyExpr",
+                  "not": "#/$defs/ApplyExpr",
+                  "or": "#/$defs/ApplyExpr",
+                  "ref": "#/$defs/RefExpr",
+                  "sub": "#/$defs/ApplyExpr",
+                  "sum": "#/$defs/QuantExpr",
+                  "var": "#/$defs/VarExpr"
+                },
+                "propertyName": "op"
+              },
+              "oneOf": [
+                {
+                  "$ref": "#/$defs/ConstExpr"
+                },
+                {
+                  "$ref": "#/$defs/VarExpr"
+                },
+                {
+                  "$ref": "#/$defs/RefExpr"
+                },
+                {
+                  "$ref": "#/$defs/ApplyExpr"
+                },
+                {
+                  "$ref": "#/$defs/QuantExpr"
+                }
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Precondition Expr"
+        },
+        "preconditions": {
+          "description": "human-readable preconditions",
+          "items": {
+            "type": "string"
+          },
+          "title": "Preconditions",
+          "type": "array"
+        },
+        "retry": {
+          "$ref": "#/$defs/RetrySemantics",
+          "default": "RECONCILE_THEN_RETRY"
+        },
+        "timeout_seconds": {
+          "default": 30.0,
+          "exclusiveMinimum": 0,
+          "title": "Timeout Seconds",
+          "type": "number"
+        }
+      },
+      "required": [
+        "action_type",
+        "params_schema"
+      ],
+      "title": "ActionSpec",
+      "type": "object"
+    },
+    "ApplyExpr": {
+      "additionalProperties": false,
+      "properties": {
+        "args": {
+          "items": {
+            "discriminator": {
+              "mapping": {
+                "add": "#/$defs/ApplyExpr",
+                "and": "#/$defs/ApplyExpr",
+                "const": "#/$defs/ConstExpr",
+                "count": "#/$defs/QuantExpr",
+                "eq": "#/$defs/ApplyExpr",
+                "exists": "#/$defs/QuantExpr",
+                "forall": "#/$defs/QuantExpr",
+                "ge": "#/$defs/ApplyExpr",
+                "gt": "#/$defs/ApplyExpr",
+                "implies": "#/$defs/ApplyExpr",
+                "ite": "#/$defs/ApplyExpr",
+                "le": "#/$defs/ApplyExpr",
+                "lt": "#/$defs/ApplyExpr",
+                "max": "#/$defs/ApplyExpr",
+                "min": "#/$defs/ApplyExpr",
+                "mul": "#/$defs/ApplyExpr",
+                "ne": "#/$defs/ApplyExpr",
+                "neg": "#/$defs/ApplyExpr",
+                "not": "#/$defs/ApplyExpr",
+                "or": "#/$defs/ApplyExpr",
+                "ref": "#/$defs/RefExpr",
+                "sub": "#/$defs/ApplyExpr",
+                "sum": "#/$defs/QuantExpr",
+                "var": "#/$defs/VarExpr"
+              },
+              "propertyName": "op"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/ConstExpr"
+              },
+              {
+                "$ref": "#/$defs/VarExpr"
+              },
+              {
+                "$ref": "#/$defs/RefExpr"
+              },
+              {
+                "$ref": "#/$defs/ApplyExpr"
+              },
+              {
+                "$ref": "#/$defs/QuantExpr"
+              }
+            ]
+          },
+          "minItems": 1,
+          "title": "Args",
+          "type": "array"
+        },
+        "op": {
+          "enum": [
+            "not",
+            "and",
+            "or",
+            "implies",
+            "eq",
+            "ne",
+            "lt",
+            "le",
+            "gt",
+            "ge",
+            "add",
+            "sub",
+            "mul",
+            "neg",
+            "min",
+            "max",
+            "ite"
+          ],
+          "title": "Op",
+          "type": "string"
+        }
+      },
+      "required": [
+        "op",
+        "args"
+      ],
+      "title": "ApplyExpr",
+      "type": "object"
+    },
+    "ArtifactRef": {
+      "additionalProperties": false,
+      "description": "Pointer to a large object held by an ArtifactStore (never inlined into events).",
+      "properties": {
+        "digest": {
+          "$ref": "#/$defs/Digest"
+        },
+        "format_version": {
+          "minLength": 1,
+          "title": "Format Version",
+          "type": "string"
+        },
+        "media_type": {
+          "minLength": 3,
+          "title": "Media Type",
+          "type": "string"
+        },
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Name"
+        },
+        "size_bytes": {
+          "minimum": 0,
+          "title": "Size Bytes",
+          "type": "integer"
+        },
+        "uri": {
+          "description": "object location, e.g. file://… or s3://bucket/key",
+          "minLength": 1,
+          "title": "Uri",
+          "type": "string"
+        }
+      },
+      "required": [
+        "uri",
+        "media_type",
+        "size_bytes",
+        "digest",
+        "format_version"
+      ],
+      "title": "ArtifactRef",
+      "type": "object"
+    },
+    "AssignEffect": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "assign",
+          "default": "assign",
+          "title": "Kind",
+          "type": "string"
+        },
+        "target": {
+          "$ref": "#/$defs/AssignTarget"
+        },
+        "value": {
+          "discriminator": {
+            "mapping": {
+              "add": "#/$defs/ApplyExpr",
+              "and": "#/$defs/ApplyExpr",
+              "const": "#/$defs/ConstExpr",
+              "count": "#/$defs/QuantExpr",
+              "eq": "#/$defs/ApplyExpr",
+              "exists": "#/$defs/QuantExpr",
+              "forall": "#/$defs/QuantExpr",
+              "ge": "#/$defs/ApplyExpr",
+              "gt": "#/$defs/ApplyExpr",
+              "implies": "#/$defs/ApplyExpr",
+              "ite": "#/$defs/ApplyExpr",
+              "le": "#/$defs/ApplyExpr",
+              "lt": "#/$defs/ApplyExpr",
+              "max": "#/$defs/ApplyExpr",
+              "min": "#/$defs/ApplyExpr",
+              "mul": "#/$defs/ApplyExpr",
+              "ne": "#/$defs/ApplyExpr",
+              "neg": "#/$defs/ApplyExpr",
+              "not": "#/$defs/ApplyExpr",
+              "or": "#/$defs/ApplyExpr",
+              "ref": "#/$defs/RefExpr",
+              "sub": "#/$defs/ApplyExpr",
+              "sum": "#/$defs/QuantExpr",
+              "var": "#/$defs/VarExpr"
+            },
+            "propertyName": "op"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/ConstExpr"
+            },
+            {
+              "$ref": "#/$defs/VarExpr"
+            },
+            {
+              "$ref": "#/$defs/RefExpr"
+            },
+            {
+              "$ref": "#/$defs/ApplyExpr"
+            },
+            {
+              "$ref": "#/$defs/QuantExpr"
+            }
+          ],
+          "title": "Value"
+        }
+      },
+      "required": [
+        "target",
+        "value"
+      ],
+      "title": "AssignEffect",
+      "type": "object"
+    },
+    "AssignTarget": {
+      "additionalProperties": false,
+      "properties": {
+        "index": {
+          "items": {
+            "discriminator": {
+              "mapping": {
+                "add": "#/$defs/ApplyExpr",
+                "and": "#/$defs/ApplyExpr",
+                "const": "#/$defs/ConstExpr",
+                "count": "#/$defs/QuantExpr",
+                "eq": "#/$defs/ApplyExpr",
+                "exists": "#/$defs/QuantExpr",
+                "forall": "#/$defs/QuantExpr",
+                "ge": "#/$defs/ApplyExpr",
+                "gt": "#/$defs/ApplyExpr",
+                "implies": "#/$defs/ApplyExpr",
+                "ite": "#/$defs/ApplyExpr",
+                "le": "#/$defs/ApplyExpr",
+                "lt": "#/$defs/ApplyExpr",
+                "max": "#/$defs/ApplyExpr",
+                "min": "#/$defs/ApplyExpr",
+                "mul": "#/$defs/ApplyExpr",
+                "ne": "#/$defs/ApplyExpr",
+                "neg": "#/$defs/ApplyExpr",
+                "not": "#/$defs/ApplyExpr",
+                "or": "#/$defs/ApplyExpr",
+                "ref": "#/$defs/RefExpr",
+                "sub": "#/$defs/ApplyExpr",
+                "sum": "#/$defs/QuantExpr",
+                "var": "#/$defs/VarExpr"
+              },
+              "propertyName": "op"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/ConstExpr"
+              },
+              {
+                "$ref": "#/$defs/VarExpr"
+              },
+              {
+                "$ref": "#/$defs/RefExpr"
+              },
+              {
+                "$ref": "#/$defs/ApplyExpr"
+              },
+              {
+                "$ref": "#/$defs/QuantExpr"
+              }
+            ]
+          },
+          "title": "Index",
+          "type": "array"
+        },
+        "var": {
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*$",
+          "title": "Var",
+          "type": "string"
+        }
+      },
+      "required": [
+        "var"
+      ],
+      "title": "AssignTarget",
+      "type": "object"
+    },
+    "Budget": {
+      "additionalProperties": false,
+      "properties": {
+        "max_model_calls": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Max Model Calls"
+        },
+        "max_steps": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Max Steps"
+        },
+        "max_tokens": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Max Tokens"
+        },
+        "max_wall_seconds": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Max Wall Seconds"
+        }
+      },
+      "title": "Budget",
+      "type": "object"
+    },
+    "BudgetUsage": {
+      "additionalProperties": false,
+      "properties": {
+        "input_tokens": {
+          "default": 0,
+          "title": "Input Tokens",
+          "type": "integer"
+        },
+        "model_calls": {
+          "default": 0,
+          "title": "Model Calls",
+          "type": "integer"
+        },
+        "output_tokens": {
+          "default": 0,
+          "title": "Output Tokens",
+          "type": "integer"
+        },
+        "steps": {
+          "default": 0,
+          "title": "Steps",
+          "type": "integer"
+        },
+        "wall_seconds": {
+          "default": 0.0,
+          "title": "Wall Seconds",
+          "type": "number"
+        }
+      },
+      "title": "BudgetUsage",
+      "type": "object"
+    },
+    "CandidateAction": {
+      "additionalProperties": false,
+      "properties": {
+        "action": {
+          "$ref": "#/$defs/GroundAction"
+        },
+        "belief_applicability": {
+          "$ref": "#/$defs/PreconditionVerdict",
+          "description": "applicability judged on the actor's observation (unknown facts stay UNKNOWN)"
+        },
+        "label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Label"
+        }
+      },
+      "required": [
+        "action",
+        "belief_applicability"
+      ],
+      "title": "CandidateAction",
+      "type": "object"
+    },
+    "ConstExpr": {
+      "additionalProperties": false,
+      "properties": {
+        "domain": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z_][A-Za-z0-9_]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "enum or entity set of a symbolic value; required when ambiguous",
+          "title": "Domain"
+        },
+        "op": {
+          "const": "const",
+          "default": "const",
+          "title": "Op",
+          "type": "string"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "title": "Value"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "ConstExpr",
+      "type": "object"
+    },
+    "Digest": {
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": {
+          "const": "sha256",
+          "default": "sha256",
+          "title": "Algorithm",
+          "type": "string"
+        },
+        "value": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "Digest",
+      "type": "object"
+    },
+    "EvidenceRef": {
+      "additionalProperties": false,
+      "description": "Reference to something that supports a claim: an event, artifact, check or snapshot.",
+      "properties": {
+        "artifact": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ArtifactRef"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "id": {
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "event",
+            "artifact",
+            "check",
+            "snapshot",
+            "operation",
+            "model_call"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Note"
+        }
+      },
+      "required": [
+        "kind",
+        "id"
+      ],
+      "title": "EvidenceRef",
+      "type": "object"
+    },
+    "Fact": {
+      "additionalProperties": false,
+      "properties": {
+        "observed_at_step": {
+          "minimum": 0,
+          "title": "Observed At Step",
+          "type": "integer"
+        },
+        "path": {
+          "description": "state location path, e.g. op_status[o1_cut]",
+          "title": "Path",
+          "type": "string"
+        },
+        "source": {
+          "default": "DIRECT",
+          "enum": [
+            "DIRECT",
+            "DELAYED"
+          ],
+          "title": "Source",
+          "type": "string"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "title": "Value"
+        }
+      },
+      "required": [
+        "path",
+        "value",
+        "observed_at_step"
+      ],
+      "title": "Fact",
+      "type": "object"
+    },
+    "ForallEffect": {
+      "additionalProperties": false,
+      "properties": {
+        "domain": {
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*$",
+          "title": "Domain",
+          "type": "string"
+        },
+        "effects": {
+          "items": {
+            "discriminator": {
+              "mapping": {
+                "assign": "#/$defs/AssignEffect",
+                "forall": "#/$defs/ForallEffect",
+                "when": "#/$defs/WhenEffect"
+              },
+              "propertyName": "kind"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/AssignEffect"
+              },
+              {
+                "$ref": "#/$defs/WhenEffect"
+              },
+              {
+                "$ref": "#/$defs/ForallEffect"
+              }
+            ]
+          },
+          "minItems": 1,
+          "title": "Effects",
+          "type": "array"
+        },
+        "kind": {
+          "const": "forall",
+          "default": "forall",
+          "title": "Kind",
+          "type": "string"
+        },
+        "var": {
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*$",
+          "title": "Var",
+          "type": "string"
+        },
+        "where": {
+          "anyOf": [
+            {
+              "discriminator": {
+                "mapping": {
+                  "add": "#/$defs/ApplyExpr",
+                  "and": "#/$defs/ApplyExpr",
+                  "const": "#/$defs/ConstExpr",
+                  "count": "#/$defs/QuantExpr",
+                  "eq": "#/$defs/ApplyExpr",
+                  "exists": "#/$defs/QuantExpr",
+                  "forall": "#/$defs/QuantExpr",
+                  "ge": "#/$defs/ApplyExpr",
+                  "gt": "#/$defs/ApplyExpr",
+                  "implies": "#/$defs/ApplyExpr",
+                  "ite": "#/$defs/ApplyExpr",
+                  "le": "#/$defs/ApplyExpr",
+                  "lt": "#/$defs/ApplyExpr",
+                  "max": "#/$defs/ApplyExpr",
+                  "min": "#/$defs/ApplyExpr",
+                  "mul": "#/$defs/ApplyExpr",
+                  "ne": "#/$defs/ApplyExpr",
+                  "neg": "#/$defs/ApplyExpr",
+                  "not": "#/$defs/ApplyExpr",
+                  "or": "#/$defs/ApplyExpr",
+                  "ref": "#/$defs/RefExpr",
+                  "sub": "#/$defs/ApplyExpr",
+                  "sum": "#/$defs/QuantExpr",
+                  "var": "#/$defs/VarExpr"
+                },
+                "propertyName": "op"
+              },
+              "oneOf": [
+                {
+                  "$ref": "#/$defs/ConstExpr"
+                },
+                {
+                  "$ref": "#/$defs/VarExpr"
+                },
+                {
+                  "$ref": "#/$defs/RefExpr"
+                },
+                {
+                  "$ref": "#/$defs/ApplyExpr"
+                },
+                {
+                  "$ref": "#/$defs/QuantExpr"
+                }
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Where"
+        }
+      },
+      "required": [
+        "var",
+        "domain",
+        "effects"
+      ],
+      "title": "ForallEffect",
+      "type": "object"
+    },
+    "GroundAction": {
+      "additionalProperties": false,
+      "properties": {
+        "action_type": {
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*$",
+          "title": "Action Type",
+          "type": "string"
+        },
+        "params": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "title": "Params",
+          "type": "object"
+        }
+      },
+      "required": [
+        "action_type"
+      ],
+      "title": "GroundAction",
+      "type": "object"
+    },
+    "ModelRef": {
+      "additionalProperties": false,
+      "properties": {
+        "digest": {
+          "$ref": "#/$defs/Digest"
+        },
+        "package_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:@/-]{0,254}$",
+          "title": "Package Id",
+          "type": "string"
+        },
+        "version": {
+          "minimum": 1,
+          "title": "Version",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "package_id",
+        "version",
+        "digest"
+      ],
+      "title": "ModelRef",
+      "type": "object"
+    },
+    "Observation": {
+      "additionalProperties": false,
+      "properties": {
+        "actor_id": {
+          "title": "Actor Id",
+          "type": "string"
+        },
+        "evidence": {
+          "items": {
+            "$ref": "#/$defs/EvidenceRef"
+          },
+          "title": "Evidence",
+          "type": "array"
+        },
+        "facts": {
+          "items": {
+            "$ref": "#/$defs/Fact"
+          },
+          "title": "Facts",
+          "type": "array"
+        },
+        "run_id": {
+          "title": "Run Id",
+          "type": "string"
+        },
+        "semantics": {
+          "default": "Facts are what the actor observed (possibly stale, see observed_at_step); unknowns are locations whose current value the actor cannot know at this step. The environment truth state is a separate object that agents never receive.",
+          "title": "Semantics",
+          "type": "string"
+        },
+        "state_revision": {
+          "minimum": 0,
+          "title": "State Revision",
+          "type": "integer"
+        },
+        "step": {
+          "description": "logical step at which the observation is taken",
+          "minimum": 0,
+          "title": "Step",
+          "type": "integer"
+        },
+        "unknowns": {
+          "items": {
+            "$ref": "#/$defs/UnknownItem"
+          },
+          "title": "Unknowns",
+          "type": "array"
+        }
+      },
+      "required": [
+        "run_id",
+        "actor_id",
+        "step",
+        "state_revision",
+        "facts"
+      ],
+      "title": "Observation",
+      "type": "object"
+    },
+    "PreconditionVerdict": {
+      "enum": [
+        "APPLICABLE",
+        "INAPPLICABLE",
+        "UNKNOWN",
+        "UNSUPPORTED"
+      ],
+      "title": "PreconditionVerdict",
+      "type": "string"
+    },
+    "QuantExpr": {
+      "additionalProperties": false,
+      "description": "forall/exists → bool, count → number of satisfying members, sum → sum of an int body.",
+      "properties": {
+        "body": {
+          "discriminator": {
+            "mapping": {
+              "add": "#/$defs/ApplyExpr",
+              "and": "#/$defs/ApplyExpr",
+              "const": "#/$defs/ConstExpr",
+              "count": "#/$defs/QuantExpr",
+              "eq": "#/$defs/ApplyExpr",
+              "exists": "#/$defs/QuantExpr",
+              "forall": "#/$defs/QuantExpr",
+              "ge": "#/$defs/ApplyExpr",
+              "gt": "#/$defs/ApplyExpr",
+              "implies": "#/$defs/ApplyExpr",
+              "ite": "#/$defs/ApplyExpr",
+              "le": "#/$defs/ApplyExpr",
+              "lt": "#/$defs/ApplyExpr",
+              "max": "#/$defs/ApplyExpr",
+              "min": "#/$defs/ApplyExpr",
+              "mul": "#/$defs/ApplyExpr",
+              "ne": "#/$defs/ApplyExpr",
+              "neg": "#/$defs/ApplyExpr",
+              "not": "#/$defs/ApplyExpr",
+              "or": "#/$defs/ApplyExpr",
+              "ref": "#/$defs/RefExpr",
+              "sub": "#/$defs/ApplyExpr",
+              "sum": "#/$defs/QuantExpr",
+              "var": "#/$defs/VarExpr"
+            },
+            "propertyName": "op"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/ConstExpr"
+            },
+            {
+              "$ref": "#/$defs/VarExpr"
+            },
+            {
+              "$ref": "#/$defs/RefExpr"
+            },
+            {
+              "$ref": "#/$defs/ApplyExpr"
+            },
+            {
+              "$ref": "#/$defs/QuantExpr"
+            }
+          ],
+          "title": "Body"
+        },
+        "domain": {
+          "description": "entity set or enum to range over",
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*$",
+          "title": "Domain",
+          "type": "string"
+        },
+        "op": {
+          "enum": [
+            "forall",
+            "exists",
+            "count",
+            "sum"
+          ],
+          "title": "Op",
+          "type": "string"
+        },
+        "var": {
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*$",
+          "title": "Var",
+          "type": "string"
+        },
+        "where": {
+          "anyOf": [
+            {
+              "discriminator": {
+                "mapping": {
+                  "add": "#/$defs/ApplyExpr",
+                  "and": "#/$defs/ApplyExpr",
+                  "const": "#/$defs/ConstExpr",
+                  "count": "#/$defs/QuantExpr",
+                  "eq": "#/$defs/ApplyExpr",
+                  "exists": "#/$defs/QuantExpr",
+                  "forall": "#/$defs/QuantExpr",
+                  "ge": "#/$defs/ApplyExpr",
+                  "gt": "#/$defs/ApplyExpr",
+                  "implies": "#/$defs/ApplyExpr",
+                  "ite": "#/$defs/ApplyExpr",
+                  "le": "#/$defs/ApplyExpr",
+                  "lt": "#/$defs/ApplyExpr",
+                  "max": "#/$defs/ApplyExpr",
+                  "min": "#/$defs/ApplyExpr",
+                  "mul": "#/$defs/ApplyExpr",
+                  "ne": "#/$defs/ApplyExpr",
+                  "neg": "#/$defs/ApplyExpr",
+                  "not": "#/$defs/ApplyExpr",
+                  "or": "#/$defs/ApplyExpr",
+                  "ref": "#/$defs/RefExpr",
+                  "sub": "#/$defs/ApplyExpr",
+                  "sum": "#/$defs/QuantExpr",
+                  "var": "#/$defs/VarExpr"
+                },
+                "propertyName": "op"
+              },
+              "oneOf": [
+                {
+                  "$ref": "#/$defs/ConstExpr"
+                },
+                {
+                  "$ref": "#/$defs/VarExpr"
+                },
+                {
+                  "$ref": "#/$defs/RefExpr"
+                },
+                {
+                  "$ref": "#/$defs/ApplyExpr"
+                },
+                {
+                  "$ref": "#/$defs/QuantExpr"
+                }
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Where"
+        }
+      },
+      "required": [
+        "op",
+        "var",
+        "domain",
+        "body"
+      ],
+      "title": "QuantExpr",
+      "type": "object"
+    },
+    "RefExpr": {
+      "additionalProperties": false,
+      "description": "Reads an action parameter or a quantifier-bound variable.",
+      "properties": {
+        "name": {
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*$",
+          "title": "Name",
+          "type": "string"
+        },
+        "op": {
+          "const": "ref",
+          "default": "ref",
+          "title": "Op",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "title": "RefExpr",
+      "type": "object"
+    },
+    "RetrySemantics": {
+      "enum": [
+        "IDEMPOTENT",
+        "RECONCILE_THEN_RETRY",
+        "NOT_RETRYABLE"
+      ],
+      "title": "RetrySemantics",
+      "type": "string"
+    },
+    "UnknownItem": {
+      "additionalProperties": false,
+      "properties": {
+        "last_known": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Fact"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "path": {
+          "title": "Path",
+          "type": "string"
+        },
+        "reason": {
+          "enum": [
+            "OBSERVATION_DELAY",
+            "NOT_OBSERVABLE",
+            "NOT_YET_OBSERVED"
+          ],
+          "title": "Reason",
+          "type": "string"
+        }
+      },
+      "required": [
+        "path",
+        "reason"
+      ],
+      "title": "UnknownItem",
+      "type": "object"
+    },
+    "VarExpr": {
+      "additionalProperties": false,
+      "description": "Reads a state variable or a constant table at the given index.",
+      "properties": {
+        "index": {
+          "items": {
+            "discriminator": {
+              "mapping": {
+                "add": "#/$defs/ApplyExpr",
+                "and": "#/$defs/ApplyExpr",
+                "const": "#/$defs/ConstExpr",
+                "count": "#/$defs/QuantExpr",
+                "eq": "#/$defs/ApplyExpr",
+                "exists": "#/$defs/QuantExpr",
+                "forall": "#/$defs/QuantExpr",
+                "ge": "#/$defs/ApplyExpr",
+                "gt": "#/$defs/ApplyExpr",
+                "implies": "#/$defs/ApplyExpr",
+                "ite": "#/$defs/ApplyExpr",
+                "le": "#/$defs/ApplyExpr",
+                "lt": "#/$defs/ApplyExpr",
+                "max": "#/$defs/ApplyExpr",
+                "min": "#/$defs/ApplyExpr",
+                "mul": "#/$defs/ApplyExpr",
+                "ne": "#/$defs/ApplyExpr",
+                "neg": "#/$defs/ApplyExpr",
+                "not": "#/$defs/ApplyExpr",
+                "or": "#/$defs/ApplyExpr",
+                "ref": "#/$defs/RefExpr",
+                "sub": "#/$defs/ApplyExpr",
+                "sum": "#/$defs/QuantExpr",
+                "var": "#/$defs/VarExpr"
+              },
+              "propertyName": "op"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/ConstExpr"
+              },
+              {
+                "$ref": "#/$defs/VarExpr"
+              },
+              {
+                "$ref": "#/$defs/RefExpr"
+              },
+              {
+                "$ref": "#/$defs/ApplyExpr"
+              },
+              {
+                "$ref": "#/$defs/QuantExpr"
+              }
+            ]
+          },
+          "title": "Index",
+          "type": "array"
+        },
+        "name": {
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*$",
+          "title": "Name",
+          "type": "string"
+        },
+        "op": {
+          "const": "var",
+          "default": "var",
+          "title": "Op",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "title": "VarExpr",
+      "type": "object"
+    },
+    "WhenEffect": {
+      "additionalProperties": false,
+      "properties": {
+        "condition": {
+          "discriminator": {
+            "mapping": {
+              "add": "#/$defs/ApplyExpr",
+              "and": "#/$defs/ApplyExpr",
+              "const": "#/$defs/ConstExpr",
+              "count": "#/$defs/QuantExpr",
+              "eq": "#/$defs/ApplyExpr",
+              "exists": "#/$defs/QuantExpr",
+              "forall": "#/$defs/QuantExpr",
+              "ge": "#/$defs/ApplyExpr",
+              "gt": "#/$defs/ApplyExpr",
+              "implies": "#/$defs/ApplyExpr",
+              "ite": "#/$defs/ApplyExpr",
+              "le": "#/$defs/ApplyExpr",
+              "lt": "#/$defs/ApplyExpr",
+              "max": "#/$defs/ApplyExpr",
+              "min": "#/$defs/ApplyExpr",
+              "mul": "#/$defs/ApplyExpr",
+              "ne": "#/$defs/ApplyExpr",
+              "neg": "#/$defs/ApplyExpr",
+              "not": "#/$defs/ApplyExpr",
+              "or": "#/$defs/ApplyExpr",
+              "ref": "#/$defs/RefExpr",
+              "sub": "#/$defs/ApplyExpr",
+              "sum": "#/$defs/QuantExpr",
+              "var": "#/$defs/VarExpr"
+            },
+            "propertyName": "op"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/ConstExpr"
+            },
+            {
+              "$ref": "#/$defs/VarExpr"
+            },
+            {
+              "$ref": "#/$defs/RefExpr"
+            },
+            {
+              "$ref": "#/$defs/ApplyExpr"
+            },
+            {
+              "$ref": "#/$defs/QuantExpr"
+            }
+          ],
+          "title": "Condition"
+        },
+        "kind": {
+          "const": "when",
+          "default": "when",
+          "title": "Kind",
+          "type": "string"
+        },
+        "otherwise": {
+          "items": {
+            "discriminator": {
+              "mapping": {
+                "assign": "#/$defs/AssignEffect",
+                "forall": "#/$defs/ForallEffect",
+                "when": "#/$defs/WhenEffect"
+              },
+              "propertyName": "kind"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/AssignEffect"
+              },
+              {
+                "$ref": "#/$defs/WhenEffect"
+              },
+              {
+                "$ref": "#/$defs/ForallEffect"
+              }
+            ]
+          },
+          "title": "Otherwise",
+          "type": "array"
+        },
+        "then": {
+          "items": {
+            "discriminator": {
+              "mapping": {
+                "assign": "#/$defs/AssignEffect",
+                "forall": "#/$defs/ForallEffect",
+                "when": "#/$defs/WhenEffect"
+              },
+              "propertyName": "kind"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/AssignEffect"
+              },
+              {
+                "$ref": "#/$defs/WhenEffect"
+              },
+              {
+                "$ref": "#/$defs/ForallEffect"
+              }
+            ]
+          },
+          "title": "Then",
+          "type": "array"
+        }
+      },
+      "required": [
+        "condition"
+      ],
+      "title": "WhenEffect",
+      "type": "object"
+    }
+  },
+  "$id": "https://formal-lab.dev/contracts/v1/PlanningContext.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "action_specs": {
+      "items": {
+        "$ref": "#/$defs/ActionSpec"
+      },
+      "title": "Action Specs",
+      "type": "array"
+    },
+    "actor_id": {
+      "title": "Actor Id",
+      "type": "string"
+    },
+    "budget": {
+      "$ref": "#/$defs/Budget"
+    },
+    "candidates": {
+      "items": {
+        "$ref": "#/$defs/CandidateAction"
+      },
+      "title": "Candidates",
+      "type": "array"
+    },
+    "model": {
+      "$ref": "#/$defs/ModelRef"
+    },
+    "observation": {
+      "$ref": "#/$defs/Observation"
+    },
+    "run_id": {
+      "title": "Run Id",
+      "type": "string"
+    },
+    "seed": {
+      "title": "Seed",
+      "type": "integer"
+    },
+    "step": {
+      "title": "Step",
+      "type": "integer"
+    },
+    "step_id": {
+      "title": "Step Id",
+      "type": "string"
+    },
+    "usage": {
+      "$ref": "#/$defs/BudgetUsage"
+    }
+  },
+  "required": [
+    "run_id",
+    "step",
+    "step_id",
+    "actor_id",
+    "observation",
+    "action_specs",
+    "candidates",
+    "model",
+    "budget",
+    "usage",
+    "seed"
+  ],
+  "title": "PlanningContext",
+  "type": "object"
+}

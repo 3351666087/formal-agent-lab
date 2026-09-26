@@ -1,0 +1,537 @@
+{
+  "$defs": {
+    "BackendInfo": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "version": {
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "version"
+      ],
+      "title": "BackendInfo",
+      "type": "object"
+    },
+    "CheckBound": {
+      "additionalProperties": false,
+      "properties": {
+        "max_steps": {
+          "description": "maximum path length explored (0 for single-step queries)",
+          "minimum": 0,
+          "title": "Max Steps",
+          "type": "integer"
+        },
+        "timeout_ms": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Timeout Ms"
+        }
+      },
+      "required": [
+        "max_steps"
+      ],
+      "title": "CheckBound",
+      "type": "object"
+    },
+    "CheckQuery": {
+      "additionalProperties": false,
+      "properties": {
+        "action": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/GroundAction"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "action for ACTION_PRECONDITION"
+        },
+        "bound": {
+          "$ref": "#/$defs/CheckBound"
+        },
+        "initial_state": {
+          "default": "MODEL_INITIAL",
+          "enum": [
+            "MODEL_INITIAL",
+            "GIVEN_STATE"
+          ],
+          "title": "Initial State",
+          "type": "string"
+        },
+        "kind": {
+          "$ref": "#/$defs/QueryKind"
+        },
+        "property_id": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z_][A-Za-z0-9_]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "goal / invariant property to query",
+          "title": "Property Id"
+        }
+      },
+      "required": [
+        "kind",
+        "bound"
+      ],
+      "title": "CheckQuery",
+      "type": "object"
+    },
+    "Digest": {
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": {
+          "const": "sha256",
+          "default": "sha256",
+          "title": "Algorithm",
+          "type": "string"
+        },
+        "value": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "Digest",
+      "type": "object"
+    },
+    "Extension": {
+      "additionalProperties": false,
+      "description": "Namespaced, versioned extension payload. `schema_id` names the JSON Schema that validates `data`.",
+      "properties": {
+        "data": {
+          "additionalProperties": true,
+          "title": "Data",
+          "type": "object"
+        },
+        "schema_id": {
+          "minLength": 1,
+          "title": "Schema Id",
+          "type": "string"
+        },
+        "version": {
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+([-+][0-9A-Za-z.-]+)?$",
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "version",
+        "schema_id",
+        "data"
+      ],
+      "title": "Extension",
+      "type": "object"
+    },
+    "GroundAction": {
+      "additionalProperties": false,
+      "properties": {
+        "action_type": {
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*$",
+          "title": "Action Type",
+          "type": "string"
+        },
+        "params": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "title": "Params",
+          "type": "object"
+        }
+      },
+      "required": [
+        "action_type"
+      ],
+      "title": "GroundAction",
+      "type": "object"
+    },
+    "PreconditionVerdict": {
+      "enum": [
+        "APPLICABLE",
+        "INAPPLICABLE",
+        "UNKNOWN",
+        "UNSUPPORTED"
+      ],
+      "title": "PreconditionVerdict",
+      "type": "string"
+    },
+    "QueryKind": {
+      "enum": [
+        "GOAL_REACHABILITY",
+        "INVARIANT_VIOLATION",
+        "ACTION_PRECONDITION"
+      ],
+      "title": "QueryKind",
+      "type": "string"
+    },
+    "QuerySemantics": {
+      "enum": [
+        "EXISTS_PATH",
+        "ALL_PATHS",
+        "SINGLE_STEP"
+      ],
+      "title": "QuerySemantics",
+      "type": "string"
+    },
+    "SearchVerdict": {
+      "enum": [
+        "WITNESS",
+        "NO_WITNESS_WITHIN_BOUND",
+        "UNKNOWN",
+        "UNSUPPORTED"
+      ],
+      "title": "SearchVerdict",
+      "type": "string"
+    },
+    "SolverStats": {
+      "additionalProperties": false,
+      "properties": {
+        "elapsed_ms": {
+          "default": 0.0,
+          "title": "Elapsed Ms",
+          "type": "number"
+        },
+        "reason_unknown": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reason Unknown"
+        },
+        "solver_status": {
+          "description": "raw backend status, e.g. sat / unsat / unknown / not-run",
+          "title": "Solver Status",
+          "type": "string"
+        },
+        "steps_explored": {
+          "default": 0,
+          "title": "Steps Explored",
+          "type": "integer"
+        },
+        "timeout_ms": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Timeout Ms"
+        }
+      },
+      "required": [
+        "solver_status"
+      ],
+      "title": "SolverStats",
+      "type": "object"
+    },
+    "UnsupportedInfo": {
+      "additionalProperties": false,
+      "properties": {
+        "extension_point": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "interface through which support can be added",
+          "title": "Extension Point"
+        },
+        "feature": {
+          "title": "Feature",
+          "type": "string"
+        },
+        "reason": {
+          "title": "Reason",
+          "type": "string"
+        }
+      },
+      "required": [
+        "feature",
+        "reason"
+      ],
+      "title": "UnsupportedInfo",
+      "type": "object"
+    },
+    "Witness": {
+      "additionalProperties": false,
+      "properties": {
+        "replay": {
+          "default": "NOT_REPLAYED",
+          "enum": [
+            "CONFIRMED",
+            "REFUTED",
+            "NOT_REPLAYED"
+          ],
+          "title": "Replay",
+          "type": "string"
+        },
+        "replay_note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Replay Note"
+        },
+        "steps": {
+          "items": {
+            "$ref": "#/$defs/WitnessStep"
+          },
+          "title": "Steps",
+          "type": "array"
+        }
+      },
+      "required": [
+        "steps"
+      ],
+      "title": "Witness",
+      "type": "object"
+    },
+    "WitnessStep": {
+      "additionalProperties": false,
+      "properties": {
+        "action": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/GroundAction"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "action leading into this state (null for step 0)"
+        },
+        "state": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "title": "State",
+          "type": "object"
+        },
+        "step": {
+          "title": "Step",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "step",
+        "action",
+        "state"
+      ],
+      "title": "WitnessStep",
+      "type": "object"
+    }
+  },
+  "$id": "https://formal-lab.dev/contracts/v1/BoundedCheckResult.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "action_digest": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Digest"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "assumptions": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Assumptions",
+      "type": "array"
+    },
+    "backend": {
+      "$ref": "#/$defs/BackendInfo"
+    },
+    "bound": {
+      "$ref": "#/$defs/CheckBound"
+    },
+    "check_id": {
+      "title": "Check Id",
+      "type": "string"
+    },
+    "contract_version": {
+      "const": "formal-lab-contracts/v1",
+      "default": "formal-lab-contracts/v1",
+      "title": "Contract Version",
+      "type": "string"
+    },
+    "explanation": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Explanation"
+    },
+    "extensions": {
+      "description": "namespaced extension slots; keys are reverse-DNS namespaces, formal-lab.core.* is reserved",
+      "patternProperties": {
+        "^[a-z0-9]+(\\.[a-z0-9_-]+)+$": {
+          "$ref": "#/$defs/Extension"
+        }
+      },
+      "propertyNames": {
+        "not": {
+          "pattern": "^formal[-_]lab\\.core"
+        },
+        "pattern": "^[a-z0-9]+(\\.[a-z0-9_-]+)+$"
+      },
+      "title": "Extensions",
+      "type": "object"
+    },
+    "model_digest": {
+      "$ref": "#/$defs/Digest"
+    },
+    "query": {
+      "$ref": "#/$defs/CheckQuery"
+    },
+    "scope": {
+      "const": "MODEL_INTERNAL",
+      "default": "MODEL_INTERNAL",
+      "description": "conclusion holds for the model, not for the real system",
+      "title": "Scope",
+      "type": "string"
+    },
+    "semantics": {
+      "$ref": "#/$defs/QuerySemantics"
+    },
+    "state_digest": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Digest"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "stats": {
+      "$ref": "#/$defs/SolverStats"
+    },
+    "unsupported": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/UnsupportedInfo"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "variable_mapping": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "description": "solver symbol → state path",
+      "title": "Variable Mapping",
+      "type": "object"
+    },
+    "verdict": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/SearchVerdict"
+        },
+        {
+          "$ref": "#/$defs/PreconditionVerdict"
+        }
+      ],
+      "title": "Verdict"
+    },
+    "witness": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Witness"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    }
+  },
+  "required": [
+    "check_id",
+    "query",
+    "semantics",
+    "verdict",
+    "bound",
+    "model_digest",
+    "backend",
+    "stats"
+  ],
+  "title": "BoundedCheckResult",
+  "type": "object"
+}

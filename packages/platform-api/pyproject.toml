@@ -1,0 +1,13 @@
+[project]
+name = "formal-lab-platform-api"
+version = "0.1.0"
+description = "Platform API: persistence, services, REST and SSE"
+requires-python = ">=3.12"
+dependencies = ["formal-lab-runtime", "fastapi>=0.141", "uvicorn[standard]>=0.54", "sqlalchemy>=2.1", "alembic>=1.20", "psycopg[binary]>=3.3", "temporalio==1.33.0", "pydantic-settings>=2.11"]
+
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/formal_lab_api"]
