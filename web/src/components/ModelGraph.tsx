@@ -7,7 +7,7 @@ type Node = { id: string; col: number; label: string; sub: string; kind: string;
 type Edge = { from: string; to: string; kind: "index" | "write" | "read" };
 
 const COLS = ["领域（实体/枚举）", "状态与常量", "动作", "性质"];
-const W = 210, H = 34, GAPX = 70, GAPY = 10, TOP = 30;
+const W = 200, H = 34, GAPX = 56, GAPY = 10, TOP = 30;
 
 export function ModelGraph({ ir, onSelect }: { ir: ModelIR; onSelect?: (id: string) => void }) {
   const [sel, setSel] = useState<string | null>(null);
@@ -37,7 +37,8 @@ export function ModelGraph({ ir, onSelect }: { ir: ModelIR; onSelect?: (id: stri
         <span className="muted">点击节点查看定义并高亮关联</span>
       </div>
       <div className="svg-wrap">
-        <svg width={width} height={height} role="img" aria-label="模型结构图" style={{ display: "block" }}>
+        <svg viewBox={`0 0 ${width} ${height}`} width="100%" role="img" aria-label="模型结构图"
+          style={{ display: "block", minWidth: 760, maxWidth: width }}>
           {COLS.map((c, i) => <text key={c} x={i * (W + GAPX)} y={14} fontSize="12" fill="var(--muted)">{c}</text>)}
           {edges.map((e, i) => {
             const a = pos[e.from], b = pos[e.to];

@@ -177,7 +177,7 @@ function Budget({ label, used, max, applies }: { label: string; used: number; ma
 function EventTable({ events, selected, onSelect }: { events: import("@formal-lab/contracts").TraceEvent[]; selected: number | null; onSelect: (n: number) => void }) {
   return (
     <div className="table-wrap tall">
-      <table className="table" aria-label="事件">
+      <table className="table wide" aria-label="事件">
         <thead><tr><th className="num">seq</th><th>类型</th><th className="num">步</th><th>时间</th><th>因果父事件</th></tr></thead>
         <tbody>{events.map((e) => (
           <tr key={e.seq} className={`selectable ${e.logical_step === selected ? "selected" : ""}`} tabIndex={0}

@@ -22,6 +22,23 @@ import pytest
 ROOT = Path(__file__).resolve().parents[2]
 LOG_DIR = ROOT / "var" / "log" / "integration"
 
+# Integration tests use their own database and artifact root so they never touch development data.
+# (Set before any formal_lab_api import: settings are cached per process.)
+BASE_DB = os.environ.get("FAL_DATABASE_URL", "postgresql+psycopg://fal:fal@127.0.0.1:5432/fal")
+TEST_DB = BASE_DB.rsplit("/", 1)[0] + "/fal_it"
+os.environ["FAL_DATABASE_URL"] = TEST_DB
+os.environ["FAL_ARTIFACT_ROOT"] = str(ROOT / "var" / "it-artifacts")
+
+
+def _ensure_test_database() -> None:
+    import psycopg
+
+    admin = BASE_DB.replace("postgresql+psycopg://", "postgresql://")
+    with psycopg.connect(admin, autocommit=True) as conn:
+        exists = conn.execute("select 1 from pg_database where datname = 'fal_it'").fetchone()
+        if not exists:
+            conn.execute("create database fal_it")
+
 
 def _free_port() -> int:
     with socket.socket() as sock:
@@ -127,6 +144,10 @@ def _services_ready() -> str | None:
 
 @pytest.fixture(scope="session")
 def stack() -> Iterator[Stack]:
+    try:
+        _ensure_test_database()
+    except Exception as exc:
+        pytest.skip(f"backing services not running (make services-up): {exc}")
     problem = _services_ready()
     if problem:
         pytest.skip(f"backing services not running (make services-up): {problem}")

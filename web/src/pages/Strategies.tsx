@@ -37,7 +37,7 @@ export function StrategiesPage() {
         <QueryState q={strategies} empty={<Empty title="还没有策略配置" action={<button className="btn sm primary" onClick={() => setEditing("new")}>新建</button>} />}>
           {(list) => (
             <div className="table-wrap">
-              <table className="table">
+              <table className="table wide">
                 <thead><tr><th>名称</th><th>插件</th><th>类别</th><th>配置</th>{compatScenario && <th>兼容性</th>}<th /></tr></thead>
                 <tbody>{list.map((s) => (
                   <tr key={s.id}>

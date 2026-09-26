@@ -175,8 +175,8 @@
   - 证据：60 个随机模型 + 合成目标：解释器 BFS 与 Z3 在判定与最短见证长度一致，见证经解释器重放 CONFIRMED；反空洞守卫要求 ≥40 个深度≥2 见证（test_differential_*，docs/execution/evidence/M2-core-tests.log）
 - [x] **P1-064** 概率、并发等当前 profile 之外的语义返回 UNSUPPORTED，并记录对应扩展接口与能力矩阵。
   - 证据：profile 外语义（features / semantic_profile）→ 前端 Unsupported、Verifier verdict=UNSUPPORTED 并给出 extension_point；能力矩阵见 docs/architecture/capability-matrix.md（由代码生成）
-- [ ] **P1-065** truth state 与 Observation 为不同对象；用延迟产线状态演示未知，并在 UI 与文档中将其解释为实验语义。
-  - 进展：真值状态与 Observation 已分离并有测试（test_observation_delay_produces_stale_facts_and_unknowns）；UI 与文档中的解释尚未完成
+- [x] **P1-065** truth state 与 Observation 为不同对象；用延迟产线状态演示未知，并在 UI 与文档中将其解释为实验语义。
+  - 证据：真值状态只在环境与证据中，Observation 为独立对象；状态延迟场景演示未知；UI 以“已观测/过期/未知(上次已知)”标注并在回放中并列真值快照（参与者不可见）；文档 docs/architecture/observation-semantics.md；UI 测试 docs/execution/evidence/M7-web-ui.log
 - [x] **P1-066** 实现通用效果比较：符合、存在差异、信息不足；保存字段级差异与证据。
   - 证据：formal_lab_model.compare.compare_effects：MATCH/DIFFERENT/INSUFFICIENT_INFORMATION + 字段级 FieldDiff；每步 EFFECT_COMPARED 事件；expectation-mismatch 场景 effect_mismatches>0
 
@@ -228,13 +228,20 @@
 | 证据与回放 | 因果时间线、产物预览、差异报告、按步回放 |
 | 基准对比 | 同场景/预算/种子比较、指标、缺失值与统计范围 |
 
-- [ ] **P1-090** 六个区域均接真实 API，提供加载、空数据、错误、禁用与完成状态。
-- [ ] **P1-091** 模型/场景编辑可保存、刷新恢复并实际启动实验。
-- [ ] **P1-092** 长实验通过 SSE 更新；刷新重连后继续查看。
-- [ ] **P1-093** 图、表、事件互相定位；动作详情显示输入、前提、判断及效果。
-- [ ] **P1-094** 检查范围可见，区分已观测、有界结论、预测和未知。
-- [ ] **P1-095** 标签、状态字段、动作显示与指标由插件元数据扩展；核心 UI 通过 schema 和注册表渲染生产调度样例。
-- [ ] **P1-096** 完成基本响应式和键盘操作，检查实际截图，并将遮挡、溢出和图表可读性纳入 UI 验收。
+- [x] **P1-090** 六个区域均接真实 API，提供加载、空数据、错误、禁用与完成状态。
+  - 证据：六个区域（模型工作台/场景管理/策略注册表/实验运行台/证据与回放/基准对比）均调用真实 API，含加载、空数据、错误（NOT_FOUND）、禁用（终态暂停按钮）与完成状态；Playwright 测试 docs/execution/evidence/M7-web-ui.log，截图 docs/execution/evidence/ui
+- [x] **P1-091** 模型/场景编辑可保存、刷新恢复并实际启动实验。
+  - 证据：模型表单编辑→刷新恢复草稿→保存为新版本→刷新后仍在；场景种子修改保存为新修订→刷新保持→“运行实验”启动（test_model_workbench_edit_check_and_persist, test_scenario_edit_persists_and_starts_run）；该测试发现并修复了场景草稿被覆盖的缺陷
+- [x] **P1-092** 长实验通过 SSE 更新；刷新重连后继续查看。
+  - 证据：运行台用 EventSource(SSE) 实时更新，运行中途刷新页面后先分页加载历史再按最后 seq 续传，最终事件数与 API event_seq 一致（test_run_console_live_sse_resume_after_reload）
+- [x] **P1-093** 图、表、事件互相定位；动作详情显示输入、前提、判断及效果。
+  - 证据：时间线/状态图表/事件表/步骤表点击互相定位到步骤，←/→ 键切换；步骤详情展示观测输入、候选、前提检查、决策依据与效果（字段级预测 vs 观测）
+- [x] **P1-094** 检查范围可见，区分已观测、有界结论、预测和未知。
+  - 证据：图例与徽标区分 已观测/过期/未知/预测/有界结论/模型内结论；检查结果显示边界、假设与语义（EXISTS_PATH/ALL_PATHS/SINGLE_STEP）
+- [x] **P1-095** 标签、状态字段、动作显示与指标由插件元数据扩展；核心 UI 通过 schema 和注册表渲染生产调度样例。
+  - 证据：标签/状态字段/动作显示/指标名全部来自模型 IR 标签与插件 PluginDescriptor.ui（web/src/labels.ts），核心 UI 无调度专用代码；插件配置表单由 config_schema 渲染（SchemaForm）
+- [x] **P1-096** 完成基本响应式和键盘操作，检查实际截图，并将遮挡、溢出和图表可读性纳入 UI 验收。
+  - 证据：桌面 1440 与手机 375 下 7 个页面无横向溢出（自动断言），手机抽屉导航、Tab 方向键、Esc 关闭对话框；人工检查截图后修复了结构图第四列被裁切、图表标签重叠、窄屏表格逐字换行、侧栏背景截断（docs/execution/evidence/ui）
 
 ## 9. 评测、回放、CLI 与 SDK
 
@@ -252,7 +259,8 @@
   - 证据：fal CLI：model validate/push、run start/show/events/step/cancel/pause/resume/rerun、matrix run/report、export/import、replay verify/view/step（test_sdk_cli_replay.py）
 - [x] **P1-106** Python SDK 和包外插件样例仅使用公开接口完成注册。
   - 证据：formal_lab_sdk.Client + formal_lab_sdk.plugins 公开接口；examples/external-plugin（仅依赖 formal-lab-sdk，entry point 注册）被目录发现并完成实验，提案来源 EXTERNAL（test_external_plugin_registered_through_public_interfaces）
-- [ ] **P1-107** Web、CLI、SDK 共用服务与契约，三种入口共用同一服务与契约实现。
+- [x] **P1-107** Web、CLI、SDK 共用服务与契约，三种入口共用同一服务与契约实现。
+  - 证据：Web（fetch /api/v1）、CLI（formal_lab_sdk.Client）、SDK 共用同一 FastAPI 服务层与 formal-lab-contracts/v1（TS 类型由同一 Pydantic 源生成）
 
 ## 10. 构建、部署与发行基础
 
@@ -273,7 +281,8 @@
 - [ ] **P1-121** 引擎：可达、不可达、不变量反例、超时/未知均有真实验证。
 - [ ] **P1-122** 语义：解释器与 Z3 小模型对照，见证可回放。
 - [ ] **P1-123** 运行：持久化、Worker 恢复、取消、重复提交、断线续传正确。
-- [ ] **P1-124** 产品：UI 创建运行并查看结果，CLI 导出，SDK 读取。
+- [x] **P1-124** 产品：UI 创建运行并查看结果，CLI 导出，SDK 读取。
+  - 证据：UI 创建并完成实验（Playwright：场景页“运行实验”与运行台“启动”），CLI 导出回放包（fal export），SDK 读取 manifest/事件/步骤（test_sdk_builds_project_from_scratch_and_reads_results）
 - [x] **P1-125** 评测：至少两种非替身策略在多个固定种子/场景下产生可比结果。
   - 证据：CLI 矩阵：3 场景 × EDD 规则/Z3 规划 × 种子 1,2,3，18 run 全部 SUCCEEDED，delay_cost 等 9 对配对比较；来源 RULE/SYMBOLIC（非替身）
 - [x] **P1-126** 回放：离线查看原事件；重新运行产生新 ID，并保留原结果及来源关系。

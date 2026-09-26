@@ -109,13 +109,13 @@ function Report({ mid, pid }: { mid: string; pid: string }) {
       <div className="card">
         <div className="card-head"><h3 className="grow">聚合（{def?.label}）</h3><span className="small muted">{def?.aggregation}</span></div>
         <div className="table-wrap">
-          <table className="table">
+          <table className="table wide">
             <thead><tr><th>场景</th><th>策略</th><th>预算</th><th className="num">值</th><th>区间</th><th className="num">n</th><th className="num">缺失</th><th className="num">不适用</th><th>来源</th></tr></thead>
             <tbody>{r.aggregates.map((a, i) => {
               const m = a.metrics[chosen!];
               return <tr key={i}><td>{a.scenario_label}</td><td>{a.strategy_label}</td><td className="small">{a.budget}</td>
                 <td className="num">{m?.result.value !== null && m?.result.value !== undefined ? fmtNum(m.result.value, 3) : <span className="badge" title={m?.result.missing_reason ?? ""}>缺失</span>}</td>
-                <td className="small">{m?.result.ci ? `[${fmtNum(m.result.ci.low)}, ${fmtNum(m.result.ci.high)}]` : <span className="muted" title={m?.notes.ci_note}>—</span>}</td>
+                <td className="small tight">{m?.result.ci ? `[${fmtNum(m.result.ci.low)}, ${fmtNum(m.result.ci.high)}]` : <span className="muted" title={m?.notes.ci_note}>—</span>}</td>
                 <td className="num">{m?.result.sample_size ?? 0}</td><td className="num">{m?.notes.missing ?? 0}</td><td className="num">{m?.notes.not_applicable ?? 0}</td>
                 <td>{a.source_kinds.map((k) => <span key={k} className={`badge ${k === "LLM_STUB" ? "warn" : ""}`}>{k}</span>)}</td></tr>;
             })}</tbody>
@@ -126,13 +126,13 @@ function Report({ mid, pid }: { mid: string; pid: string }) {
       <div className="card">
         <div className="card-head"><h3 className="grow">配对比较（{def?.label}）</h3></div>
         <div className="table-wrap">
-          <table className="table">
+          <table className="table wide">
             <thead><tr><th>A</th><th>B</th><th className="num">配对数</th><th className="num">未配对</th><th className="num">B−A 均值</th><th>区间</th><th>更优</th><th>显著性</th></tr></thead>
             <tbody>{r.comparisons.filter((c) => c.metric_id === chosen).map((c, i) => (
-              <tr key={i}><td>{c.a}</td><td>{c.b}</td><td className="num">{c.n_pairs}</td><td className="num">{c.unpaired}</td>
+              <tr key={i}><td className="tight">{c.a}</td><td className="tight">{c.b}</td><td className="num">{c.n_pairs}</td><td className="num">{c.unpaired}</td>
                 <td className="num">{fmtNum(c.mean_diff_b_minus_a, 3)}</td>
-                <td className="small">{c.ci ? `[${fmtNum(c.ci.low)}, ${fmtNum(c.ci.high)}]` : "—"}</td>
-                <td>{c.better ?? <span className="muted">持平</span>}</td>
+                <td className="small tight">{c.ci ? `[${fmtNum(c.ci.low)}, ${fmtNum(c.ci.high)}]` : "—"}</td>
+                <td className="tight">{c.better ?? <span className="muted">持平</span>}</td>
                 <td className="small">{c.test.reported ? <span className={`badge ${c.test.significant ? "ok" : ""}`} title={c.test.method}>p={fmtNum(c.test.p_value, 4)}</span>
                   : <span className="muted">{c.test.reason ?? "未报告"}</span>}</td></tr>))}</tbody>
           </table>
@@ -140,7 +140,7 @@ function Report({ mid, pid }: { mid: string; pid: string }) {
       </div>
       <details className="card pad"><summary><strong>全部实验（{r.cells.length}）</strong></summary>
         <div className="table-wrap tall" style={{ marginTop: 8 }}>
-          <table className="table"><thead><tr><th>场景</th><th>策略</th><th className="num">种子</th><th>预算</th><th>状态</th><th>实验</th></tr></thead>
+          <table className="table wide"><thead><tr><th>场景</th><th>策略</th><th className="num">种子</th><th>预算</th><th>状态</th><th>实验</th></tr></thead>
             <tbody>{r.cells.map((c) => (
               <tr key={c.run_id}><td className="small">{c.scenario}</td><td className="small">{c.strategy}</td><td className="num">{c.seed}</td>
                 <td className="small">{c.budget}</td><td><StatusBadge status={c.status} /></td>

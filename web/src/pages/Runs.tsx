@@ -51,7 +51,7 @@ export function RunsPage() {
         <QueryState q={runs} empty={<Empty title="没有符合条件的实验" />}>
           {(list) => (
             <div className="table-wrap">
-              <table className="table">
+              <table className="table wide">
                 <thead><tr><th>实验</th><th>状态</th><th>场景</th><th>策略</th><th className="num">种子</th><th className="num">步</th>
                   <th className="num">延期成本</th><th className="num">目标</th><th>来源</th><th>创建</th></tr></thead>
                 <tbody>{list.map((r) => (
@@ -59,7 +59,7 @@ export function RunsPage() {
                     onKeyDown={(e) => { if (e.key === "Enter") navigate(`/p/${pid}/runs/${r.id}`); }}>
                     <td><Link to={`/p/${pid}/runs/${r.id}`} onClick={(e) => e.stopPropagation()}><code>{shortId(r.id)}</code></Link></td>
                     <td><StatusBadge status={r.status} /></td>
-                    <td>{r.scenario_name}</td>
+                    <td className="tight">{r.scenario_name}</td>
                     <td className="small"><code>{r.strategy?.plugin_id.replace("formal-lab.", "")}</code></td>
                     <td className="num">{r.seed}</td>
                     <td className="num">{r.last_step}</td>

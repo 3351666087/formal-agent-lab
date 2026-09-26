@@ -65,29 +65,29 @@ function ScenarioEditor({ pid, sid }: { pid: string; sid: string }) {
   });
   const modelDetail = useQuery({ queryKey: ["model", modelId], enabled: Boolean(modelId), queryFn: () => get<ModelSummary>(`/models/${modelId}`) });
 
+  // new scenario: build a default draft once the project's models are known
   useEffect(() => {
-    if (isNew) {
-      if (!draft && models.data?.length) {
-        const m = models.data[0];
-        setModelId(m.id);
-        get<ModelSummary>(`/models/${m.id}`).then((md) => setDraft({
-          name: "新场景", description: "", model_version_id: md.versions!.at(-1)!.id,
-          environment: { plugin: { plugin_id: "formal-lab.env.ir-world", version: "1.0.0" }, config: {} },
-          participants: [{ actor_id: "agent", role: "operator", strategy: { plugin: { plugin_id: "formal-lab.planner.z3-bounded", version: "1.0.0" }, config: {} } }],
-          objectives: [], budget: { max_steps: 60, max_wall_seconds: 600, max_model_calls: null, max_tokens: null }, seed: 0,
-          stop_conditions: [{ kind: "NO_APPLICABLE_ACTION", property_id: null }],
-        } as unknown as Draft));
-      }
-      return;
-    }
-    if (scenario.data) {
-      const m = scenario.data.manifest;
-      setModelId(scenario.data.model_id ?? "");
-      setDraft({ name: m.name, description: m.description ?? "", model_version_id: scenario.data.model_version_id,
-        environment: m.environment, participants: m.participants, objectives: m.objectives, budget: m.budget, seed: m.seed,
-        stop_conditions: m.stop_conditions });
-    }
-  }, [scenario.data, isNew, models.data, draft]);
+    if (!isNew || draft || !models.data?.length) return;
+    const m = models.data[0];
+    setModelId(m.id);
+    get<ModelSummary>(`/models/${m.id}`).then((md) => setDraft({
+      name: "新场景", description: "", model_version_id: md.versions!.at(-1)!.id,
+      environment: { plugin: { plugin_id: "formal-lab.env.ir-world", version: "1.0.0" }, config: {} },
+      participants: [{ actor_id: "agent", role: "operator", strategy: { plugin: { plugin_id: "formal-lab.planner.z3-bounded", version: "1.0.0" }, config: {} } }],
+      objectives: [], budget: { max_steps: 60, max_wall_seconds: 600, max_model_calls: null, max_tokens: null }, seed: 0,
+      stop_conditions: [{ kind: "NO_APPLICABLE_ACTION", property_id: null }],
+    } as unknown as Draft));
+  }, [isNew, draft, models.data]);
+
+  // existing scenario: (re)initialise the draft only when the server copy changes — never on local edits
+  useEffect(() => {
+    if (isNew || !scenario.data) return;
+    const m = scenario.data.manifest;
+    setModelId(scenario.data.model_id ?? "");
+    setDraft({ name: m.name, description: m.description ?? "", model_version_id: scenario.data.model_version_id,
+      environment: m.environment, participants: m.participants, objectives: m.objectives, budget: m.budget, seed: m.seed,
+      stop_conditions: m.stop_conditions });
+  }, [isNew, scenario.data]);
 
   const save = useMutation({
     mutationFn: () => isNew ? post<Scenario>(`/projects/${pid}/scenarios`, draft)

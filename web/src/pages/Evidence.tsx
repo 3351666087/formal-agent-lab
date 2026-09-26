@@ -204,7 +204,7 @@ function DiffReport({ events, labels }: { events: TraceEvent[]; labels: ReturnTy
         <span className="muted small">预测来自运行固定的信念模型；观测来自环境。</span></div>
       {rows.length === 0 ? <Empty title="所有可比较字段均符合预期" /> : (
         <div className="table-wrap tall">
-          <table className="table">
+          <table className="table wide">
             <thead><tr><th className="num">步</th><th>动作</th><th>位置</th><th>预测</th><th>观测</th><th>结论</th></tr></thead>
             <tbody>{rows.map((r, i) => (
               <tr key={i}><td className="num">{r.step}</td><td className="small">{r.action ? labels.actionText(r.action as never) : "—"}</td>
