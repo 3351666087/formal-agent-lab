@@ -6,12 +6,13 @@ import path from "node:path";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, "../../..");
-const bundle = JSON.parse(await readFile(path.join(root, "contracts/v1/bundle.schema.json"), "utf8"));
+// Types describe what the platform emits (serialization view); ajv tests validate against bundle.schema.json.
+const bundle = JSON.parse(await readFile(path.join(root, "contracts/v1/bundle.serialization.schema.json"), "utf8"));
 const digest = JSON.parse(await readFile(path.join(root, "contracts/v1/DIGEST.json"), "utf8"));
 const objects = JSON.parse(await readFile(path.join(root, "contracts/v1/objects.json"), "utf8"));
 
 const types = await compile(bundle, "FormalLabContractsV1", {
-  bannerComment: "/* eslint-disable */\n// GENERATED from contracts/v1/bundle.schema.json by scripts/generate.mjs — do not edit.",
+  bannerComment: "/* eslint-disable */\n// GENERATED from contracts/v1/bundle.serialization.schema.json by scripts/generate.mjs — do not edit.",
   additionalProperties: false,
   unreachableDefinitions: true,
   strictIndexSignatures: true,

@@ -34,7 +34,8 @@ Name = Annotated[str, StringConstraints(pattern=NAME_PATTERN)]
 class ContractModel(BaseModel):
     """Base for all contract objects: unknown fields are rejected (extensions go in `extensions`)."""
 
-    model_config = ConfigDict(extra="forbid", populate_by_name=True, use_enum_values=False)
+    model_config = ConfigDict(extra="forbid", populate_by_name=True, use_enum_values=False,
+                              json_schema_serialization_defaults_required=True)
 
 
 class Digest(ContractModel):

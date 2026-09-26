@@ -1,5 +1,5 @@
 /* eslint-disable */
-// GENERATED from contracts/v1/bundle.schema.json by scripts/generate.mjs — do not edit.
+// GENERATED from contracts/v1/bundle.serialization.schema.json by scripts/generate.mjs — do not edit.
 
 export type ActionType = string;
 /**
@@ -592,7 +592,7 @@ export type WallTime = string;
 export type RetrySemantics1 = "IDEMPOTENT" | "RECONCILE_THEN_RETRY" | "NOT_RETRYABLE";
 
 /**
- * formal-lab-contracts/v1: all contract types (generated, do not edit)
+ * formal-lab-contracts/v1: all contract types as serialized by the platform (generated, do not edit)
  */
 export interface FormalLabContractsV1 {
   ActionOutcome?: ActionOutcome;
@@ -628,13 +628,13 @@ export interface FormalLabContractsV1 {
 export interface ActionOutcome {
   action: GroundAction;
   effect_applied: EffectApplied;
-  effect_comparison?: EffectComparison | null;
-  error?: ErrorInfo | null;
-  evidence?: Evidence1;
+  effect_comparison: EffectComparison | null;
+  error: ErrorInfo | null;
+  evidence: Evidence1;
   operation_id: OperationId;
-  proposal_id?: ProposalId;
-  result?: Result;
-  revision_after?: RevisionAfter;
+  proposal_id: ProposalId;
+  result: Result;
+  revision_after: RevisionAfter;
   revision_before: RevisionBefore;
   run_id: RunId;
   status: OutcomeStatus;
@@ -646,7 +646,7 @@ export interface ActionOutcome {
  */
 export interface GroundAction {
   action_type: ActionType;
-  params?: Params;
+  params: Params;
 }
 export interface Params {
   [k: string]: boolean | number | string | undefined;
@@ -656,8 +656,8 @@ export interface Params {
  * via the `definition` "EffectComparison".
  */
 export interface EffectComparison {
-  diffs?: Diffs;
-  evidence?: Evidence;
+  diffs: Diffs;
+  evidence: Evidence;
   expected_by: ExpectedBy;
   verdict: ComparisonVerdict;
 }
@@ -678,10 +678,10 @@ export interface FieldDiff {
  * via the `definition` "EvidenceRef".
  */
 export interface EvidenceRef {
-  artifact?: ArtifactRef | null;
+  artifact: ArtifactRef | null;
   id: Id;
   kind: Kind;
-  note?: Note;
+  note: Note;
 }
 /**
  * Pointer to a large object held by an ArtifactStore (never inlined into events).
@@ -693,7 +693,7 @@ export interface ArtifactRef {
   digest: Digest;
   format_version: FormatVersion;
   media_type: MediaType;
-  name?: Name;
+  name: Name;
   size_bytes: SizeBytes;
   uri: Uri;
 }
@@ -702,7 +702,7 @@ export interface ArtifactRef {
  * via the `definition` "Digest".
  */
 export interface Digest {
-  algorithm?: Algorithm;
+  algorithm: Algorithm;
   value: Value;
 }
 /**
@@ -711,8 +711,8 @@ export interface Digest {
  */
 export interface ErrorInfo {
   code: ErrorCode;
-  details?: Details;
-  field_errors?: FieldErrors;
+  details: Details;
+  field_errors: FieldErrors;
   message: Message1;
   retryable: Retryable;
 }
@@ -738,14 +738,14 @@ export interface ActionProposal {
   action: GroundAction;
   actor_id: ActorId;
   based_on_revision: BasedOnRevision;
-  candidates_considered?: CandidatesConsidered;
+  candidates_considered: CandidatesConsidered;
   proposal_id: ProposalId1;
-  rationale?: Rationale;
+  rationale: Rationale;
   run_id: RunId1;
   source: ProposalSource;
   step: Step;
   step_id: StepId1;
-  usage?: ModelUsage;
+  usage: ModelUsage;
 }
 /**
  * This interface was referenced by `FormalLabContractsV1`'s JSON-Schema
@@ -753,8 +753,8 @@ export interface ActionProposal {
  */
 export interface ProposalSource {
   kind: ProposalSourceKind;
-  model?: Model;
-  model_call_ids?: ModelCallIds;
+  model: Model;
+  model_call_ids: ModelCallIds;
   strategy: PluginRef;
 }
 /**
@@ -770,9 +770,9 @@ export interface PluginRef {
  * via the `definition` "ModelUsage".
  */
 export interface ModelUsage {
-  input_tokens?: InputTokens;
-  model_calls?: ModelCalls;
-  output_tokens?: OutputTokens;
+  input_tokens: InputTokens;
+  model_calls: ModelCalls;
+  output_tokens: OutputTokens;
 }
 /**
  * This interface was referenced by `FormalLabContractsV1`'s JSON-Schema
@@ -780,23 +780,23 @@ export interface ModelUsage {
  */
 export interface ActionSpec {
   action_type: ActionType1;
-  cost?: Cost;
-  description?: Description;
-  effects?: Effects;
-  expected_effects?: ExpectedEffects;
-  label?: Label;
+  cost: Cost;
+  description: Description;
+  effects: Effects;
+  expected_effects: ExpectedEffects;
+  label: Label;
   params_schema: ParamsSchema;
-  precondition_expr?: PreconditionExpr;
-  preconditions?: Preconditions;
-  retry?: RetrySemantics;
-  timeout_seconds?: TimeoutSeconds;
+  precondition_expr: PreconditionExpr;
+  preconditions: Preconditions;
+  retry: RetrySemantics;
+  timeout_seconds: TimeoutSeconds;
 }
 /**
  * This interface was referenced by `FormalLabContractsV1`'s JSON-Schema
  * via the `definition` "AssignEffect".
  */
 export interface AssignEffect {
-  kind?: Kind1;
+  kind: Kind1;
   target: AssignTarget;
   value: Value2;
 }
@@ -805,7 +805,7 @@ export interface AssignEffect {
  * via the `definition` "AssignTarget".
  */
 export interface AssignTarget {
-  index?: Index;
+  index: Index;
   var: Var1;
 }
 /**
@@ -813,8 +813,8 @@ export interface AssignTarget {
  * via the `definition` "ConstExpr".
  */
 export interface ConstExpr {
-  domain?: Domain;
-  op?: Op;
+  domain: Domain;
+  op: Op;
   value: Value1;
 }
 /**
@@ -824,9 +824,9 @@ export interface ConstExpr {
  * via the `definition` "VarExpr".
  */
 export interface VarExpr {
-  index?: Index1;
+  index: Index1;
   name: Name2;
-  op?: Op4;
+  op: Op4;
 }
 /**
  * Reads an action parameter or a quantifier-bound variable.
@@ -836,7 +836,7 @@ export interface VarExpr {
  */
 export interface RefExpr {
   name: Name1;
-  op?: Op1;
+  op: Op1;
 }
 /**
  * This interface was referenced by `FormalLabContractsV1`'s JSON-Schema
@@ -857,7 +857,7 @@ export interface QuantExpr {
   domain: Domain1;
   op: Op2;
   var: Var;
-  where?: Where;
+  where: Where;
 }
 /**
  * This interface was referenced by `FormalLabContractsV1`'s JSON-Schema
@@ -865,9 +865,9 @@ export interface QuantExpr {
  */
 export interface WhenEffect {
   condition: Condition;
-  kind?: Kind2;
-  otherwise?: Otherwise;
-  then?: Then;
+  kind: Kind2;
+  otherwise: Otherwise;
+  then: Then;
 }
 /**
  * This interface was referenced by `FormalLabContractsV1`'s JSON-Schema
@@ -876,9 +876,9 @@ export interface WhenEffect {
 export interface ForallEffect {
   domain: Domain2;
   effects: Effects1;
-  kind?: Kind3;
+  kind: Kind3;
   var: Var2;
-  where?: Where1;
+  where: Where1;
 }
 /**
  * JSON Schema of the parameter object
@@ -891,24 +891,24 @@ export interface ParamsSchema {
  * via the `definition` "BoundedCheckResult".
  */
 export interface BoundedCheckResult {
-  action_digest?: Digest | null;
-  assumptions?: Assumptions;
+  action_digest: Digest | null;
+  assumptions: Assumptions;
   backend: BackendInfo;
   bound: CheckBound;
   check_id: CheckId;
-  contract_version?: ContractVersion;
-  explanation?: Explanation;
-  extensions?: Extensions;
+  contract_version: ContractVersion;
+  explanation: Explanation;
+  extensions: Extensions;
   model_digest: Digest;
   query: CheckQuery;
-  scope?: Scope;
+  scope: Scope;
   semantics: QuerySemantics;
-  state_digest?: Digest | null;
+  state_digest: Digest | null;
   stats: SolverStats;
-  unsupported?: UnsupportedInfo | null;
-  variable_mapping?: VariableMapping;
+  unsupported: UnsupportedInfo | null;
+  variable_mapping: VariableMapping;
   verdict: Verdict;
-  witness?: Witness | null;
+  witness: Witness | null;
 }
 /**
  * This interface was referenced by `FormalLabContractsV1`'s JSON-Schema
@@ -924,7 +924,7 @@ export interface BackendInfo {
  */
 export interface CheckBound {
   max_steps: MaxSteps;
-  timeout_ms?: TimeoutMs;
+  timeout_ms: TimeoutMs;
 }
 /**
  * namespaced extension slots; keys are reverse-DNS namespaces, formal-lab.core.* is reserved
@@ -969,29 +969,29 @@ export interface CheckQuery {
   /**
    * action for ACTION_PRECONDITION
    */
-  action?: GroundAction | null;
+  action: GroundAction | null;
   bound: CheckBound;
-  initial_state?: InitialState;
+  initial_state: InitialState;
   kind: QueryKind;
-  property_id?: PropertyId;
+  property_id: PropertyId;
 }
 /**
  * This interface was referenced by `FormalLabContractsV1`'s JSON-Schema
  * via the `definition` "SolverStats".
  */
 export interface SolverStats {
-  elapsed_ms?: ElapsedMs;
-  reason_unknown?: ReasonUnknown;
+  elapsed_ms: ElapsedMs;
+  reason_unknown: ReasonUnknown;
   solver_status: SolverStatus;
-  steps_explored?: StepsExplored;
-  timeout_ms?: TimeoutMs1;
+  steps_explored: StepsExplored;
+  timeout_ms: TimeoutMs1;
 }
 /**
  * This interface was referenced by `FormalLabContractsV1`'s JSON-Schema
  * via the `definition` "UnsupportedInfo".
  */
 export interface UnsupportedInfo {
-  extension_point?: ExtensionPoint;
+  extension_point: ExtensionPoint;
   feature: Feature;
   reason: Reason;
 }
@@ -1006,8 +1006,8 @@ export interface VariableMapping {
  * via the `definition` "Witness".
  */
 export interface Witness {
-  replay?: Replay;
-  replay_note?: ReplayNote;
+  replay: Replay;
+  replay_note: ReplayNote;
   steps: Steps;
 }
 /**
@@ -1030,11 +1030,11 @@ export interface State {
  * via the `definition` "BudgetUsage".
  */
 export interface BudgetUsage {
-  input_tokens?: InputTokens1;
-  model_calls?: ModelCalls1;
-  output_tokens?: OutputTokens1;
-  steps?: Steps1;
-  wall_seconds?: WallSeconds;
+  input_tokens: InputTokens1;
+  model_calls: ModelCalls1;
+  output_tokens: OutputTokens1;
+  steps: Steps1;
+  wall_seconds: WallSeconds;
 }
 /**
  * This interface was referenced by `FormalLabContractsV1`'s JSON-Schema
@@ -1043,7 +1043,7 @@ export interface BudgetUsage {
 export interface CandidateAction {
   action: GroundAction;
   belief_applicability: PreconditionVerdict1;
-  label?: Label1;
+  label: Label1;
 }
 /**
  * This interface was referenced by `FormalLabContractsV1`'s JSON-Schema
@@ -1051,9 +1051,9 @@ export interface CandidateAction {
  */
 export interface CapabilityNegotiation {
   compatible: Compatible;
-  granted?: Granted;
-  missing_optional?: MissingOptional;
-  missing_required?: MissingRequired;
+  granted: Granted;
+  missing_optional: MissingOptional;
+  missing_required: MissingRequired;
   plugin_id: PluginId1;
   plugin_version: PluginVersion;
 }
@@ -1063,8 +1063,8 @@ export interface CapabilityNegotiation {
  */
 export interface CapabilityRequirement {
   id: Id1;
-  min_version?: MinVersion;
-  optional?: Optional;
+  min_version: MinVersion;
+  optional: Optional;
 }
 /**
  * This interface was referenced by `FormalLabContractsV1`'s JSON-Schema
@@ -1087,7 +1087,7 @@ export interface Data1 {
  * via the `definition` "EpisodeRecord".
  */
 export interface EpisodeRecord {
-  environment_summary?: EnvironmentSummary;
+  environment_summary: EnvironmentSummary;
   final_step: FinalStep;
   final_truth_state: FinalTruthState;
   run_id: RunId2;
@@ -1108,35 +1108,35 @@ export interface FinalTruthState {
  */
 export interface ScenarioManifest {
   budget: Budget;
-  contract_version?: ContractVersion1;
-  description?: Description1;
+  contract_version: ContractVersion1;
+  description: Description1;
   environment: EnvironmentSpec;
-  extensions?: Extensions1;
+  extensions: Extensions1;
   model: ModelRef;
   name: Name4;
-  objectives?: Objectives;
+  objectives: Objectives;
   participants: Participants;
-  revision?: Revision;
+  revision: Revision;
   scenario_id: ScenarioId;
-  seed?: Seed;
-  stop_conditions?: StopConditions;
+  seed: Seed;
+  stop_conditions: StopConditions;
 }
 /**
  * This interface was referenced by `FormalLabContractsV1`'s JSON-Schema
  * via the `definition` "Budget".
  */
 export interface Budget {
-  max_model_calls?: MaxModelCalls;
-  max_steps?: MaxSteps1;
-  max_tokens?: MaxTokens;
-  max_wall_seconds?: MaxWallSeconds;
+  max_model_calls: MaxModelCalls;
+  max_steps: MaxSteps1;
+  max_tokens: MaxTokens;
+  max_wall_seconds: MaxWallSeconds;
 }
 /**
  * This interface was referenced by `FormalLabContractsV1`'s JSON-Schema
  * via the `definition` "EnvironmentSpec".
  */
 export interface EnvironmentSpec {
-  config?: Config;
+  config: Config;
   plugin: PluginRef;
 }
 export interface Config {
@@ -1162,9 +1162,9 @@ export interface ModelRef {
  * via the `definition` "Objective".
  */
 export interface Objective {
-  description?: Description2;
-  metric_id?: MetricId;
-  property_id?: PropertyId1;
+  description: Description2;
+  metric_id: MetricId;
+  property_id: PropertyId1;
 }
 /**
  * This interface was referenced by `FormalLabContractsV1`'s JSON-Schema
@@ -1172,7 +1172,7 @@ export interface Objective {
  */
 export interface Participant {
   actor_id: ActorId1;
-  role?: Role;
+  role: Role;
   strategy: StrategySpec;
 }
 /**
@@ -1180,7 +1180,7 @@ export interface Participant {
  * via the `definition` "StrategySpec".
  */
 export interface StrategySpec {
-  config?: Config1;
+  config: Config1;
   plugin: PluginRef;
 }
 export interface Config1 {
@@ -1192,14 +1192,14 @@ export interface Config1 {
  */
 export interface StopCondition {
   kind: StopConditionKind;
-  property_id?: PropertyId2;
+  property_id: PropertyId2;
 }
 /**
  * This interface was referenced by `FormalLabContractsV1`'s JSON-Schema
  * via the `definition` "StepRecord".
  */
 export interface StepRecord {
-  checks?: Checks;
+  checks: Checks;
   observation: Observation;
   outcome: ActionOutcome | null;
   proposal: ActionProposal | null;
@@ -1211,13 +1211,13 @@ export interface StepRecord {
  */
 export interface Observation {
   actor_id: ActorId2;
-  evidence?: Evidence2;
+  evidence: Evidence2;
   facts: Facts;
   run_id: RunId3;
-  semantics?: Semantics;
+  semantics: Semantics;
   state_revision: StateRevision1;
   step: Step3;
-  unknowns?: Unknowns;
+  unknowns: Unknowns;
 }
 /**
  * This interface was referenced by `FormalLabContractsV1`'s JSON-Schema
@@ -1226,7 +1226,7 @@ export interface Observation {
 export interface Fact {
   observed_at_step: ObservedAtStep;
   path: Path2;
-  source?: Source;
+  source: Source;
   value: Value3;
 }
 /**
@@ -1234,7 +1234,7 @@ export interface Fact {
  * via the `definition` "UnknownItem".
  */
 export interface UnknownItem {
-  last_known?: Fact | null;
+  last_known: Fact | null;
   path: Path3;
   reason: Reason1;
 }
@@ -1244,30 +1244,30 @@ export interface UnknownItem {
  */
 export interface MetricDefinition {
   aggregation: Aggregation;
-  description?: Description3;
+  description: Description3;
   direction: MetricDirection;
   label: Label2;
   metric_id: MetricId1;
   unit: Unit;
-  value_type?: ValueType;
-  version?: Version4;
+  value_type: ValueType;
+  version: Version4;
 }
 /**
  * This interface was referenced by `FormalLabContractsV1`'s JSON-Schema
  * via the `definition` "MetricResult".
  */
 export interface MetricResult {
-  aggregation?: Aggregation | null;
-  ci?: ConfidenceInterval | null;
-  evidence?: Evidence3;
+  aggregation: Aggregation | null;
+  ci: ConfidenceInterval | null;
+  evidence: Evidence3;
   metric_id: MetricId2;
   metric_version: MetricVersion;
-  missing_count?: MissingCount;
-  missing_reason?: MissingReason;
-  sample_size?: SampleSize;
+  missing_count: MissingCount;
+  missing_reason: MissingReason;
+  sample_size: SampleSize;
   status: MetricStatus;
   subject: Subject;
-  unit?: Unit1;
+  unit: Unit1;
   value: Value4;
 }
 /**
@@ -1287,14 +1287,14 @@ export interface ConfidenceInterval {
  */
 export interface ModelIR {
   actions: Actions;
-  constants?: Constants;
-  description?: Description6;
-  entity_sets?: EntitySets;
-  enums?: Enums;
-  features?: Features;
+  constants: Constants;
+  description: Description6;
+  entity_sets: EntitySets;
+  enums: Enums;
+  features: Features;
   name: Name11;
-  properties?: Properties;
-  semantic_profile?: SemanticProfile;
+  properties: Properties;
+  semantic_profile: SemanticProfile;
   state: State1;
 }
 /**
@@ -1302,15 +1302,15 @@ export interface ModelIR {
  * via the `definition` "ActionDecl".
  */
 export interface ActionDecl {
-  cost?: Cost1;
-  description?: Description4;
-  effects?: Effects2;
-  label?: Label3;
+  cost: Cost1;
+  description: Description4;
+  effects: Effects2;
+  label: Label3;
   name: Name5;
-  params?: Params1;
-  precondition?: Precondition;
-  retry?: Retry;
-  timeout_seconds?: TimeoutSeconds1;
+  params: Params1;
+  precondition: Precondition;
+  retry: Retry;
+  timeout_seconds: TimeoutSeconds1;
 }
 /**
  * This interface was referenced by `FormalLabContractsV1`'s JSON-Schema
@@ -1325,14 +1325,14 @@ export interface ParamDecl {
  * via the `definition` "BoolType".
  */
 export interface BoolType {
-  kind?: Kind4;
+  kind: Kind4;
 }
 /**
  * This interface was referenced by `FormalLabContractsV1`'s JSON-Schema
  * via the `definition` "IntType".
  */
 export interface IntType {
-  kind?: Kind5;
+  kind: Kind5;
   max: Max;
   min: Min;
 }
@@ -1341,7 +1341,7 @@ export interface IntType {
  * via the `definition` "EnumType".
  */
 export interface EnumType {
-  kind?: Kind6;
+  kind: Kind6;
   name: Name7;
 }
 /**
@@ -1349,7 +1349,7 @@ export interface EnumType {
  * via the `definition` "EntityType".
  */
 export interface EntityType {
-  kind?: Kind7;
+  kind: Kind7;
   set: Set;
 }
 /**
@@ -1357,8 +1357,8 @@ export interface EntityType {
  * via the `definition` "ConstantDecl".
  */
 export interface ConstantDecl {
-  description?: Description5;
-  index?: Index2;
+  description: Description5;
+  index: Index2;
   name: Name8;
   type: Type1;
   value: ValueTable;
@@ -1370,8 +1370,8 @@ export interface ConstantDecl {
  * via the `definition` "ValueTable".
  */
 export interface ValueTable {
-  cells?: Cells;
-  default?: Default;
+  cells: Cells;
+  default: Default;
 }
 /**
  * This interface was referenced by `FormalLabContractsV1`'s JSON-Schema
@@ -1386,8 +1386,8 @@ export interface CellValue {
  * via the `definition` "EntitySetDecl".
  */
 export interface EntitySetDecl {
-  description?: Description7;
-  label?: Label4;
+  description: Description7;
+  label: Label4;
   members: Members;
   name: Name9;
 }
@@ -1396,7 +1396,7 @@ export interface EntitySetDecl {
  * via the `definition` "EnumDecl".
  */
 export interface EnumDecl {
-  description?: Description8;
+  description: Description8;
   name: Name10;
   values: Values;
 }
@@ -1405,23 +1405,23 @@ export interface EnumDecl {
  * via the `definition` "PropertyDecl".
  */
 export interface PropertyDecl {
-  description?: Description9;
+  description: Description9;
   expr: Expr;
   id: Id2;
   kind: Kind8;
-  label?: Label5;
+  label: Label5;
 }
 /**
  * This interface was referenced by `FormalLabContractsV1`'s JSON-Schema
  * via the `definition` "StateVarDecl".
  */
 export interface StateVarDecl {
-  description?: Description10;
-  index?: Index4;
+  description: Description10;
+  index: Index4;
   initial: ValueTable;
-  label?: Label6;
+  label: Label6;
   name: Name12;
-  observable?: Observable;
+  observable: Observable;
   type: Type2;
 }
 /**
@@ -1429,11 +1429,11 @@ export interface StateVarDecl {
  * via the `definition` "ModelPackage".
  */
 export interface ModelPackage {
-  compiled?: Compiled;
-  contract_version?: ContractVersion2;
+  compiled: Compiled;
+  contract_version: ContractVersion2;
   created_at: CreatedAt;
   digest: Digest1;
-  extensions?: Extensions2;
+  extensions: Extensions2;
   frontend: PluginRef1;
   ir: ModelIR;
   package_id: PackageId1;
@@ -1446,11 +1446,11 @@ export interface ModelPackage {
  * via the `definition` "CompiledArtifact".
  */
 export interface CompiledArtifact {
-  artifact?: ArtifactRef | null;
+  artifact: ArtifactRef | null;
   backend: Backend;
   backend_version: BackendVersion;
   digest: Digest;
-  stats?: Stats;
+  stats: Stats;
 }
 export interface Stats {
   [k: string]: unknown | undefined;
@@ -1459,7 +1459,7 @@ export interface Stats {
  * sha256 of the canonical IR
  */
 export interface Digest1 {
-  algorithm?: Algorithm;
+  algorithm: Algorithm;
   value: Value;
 }
 /**
@@ -1480,12 +1480,12 @@ export interface PluginRef1 {
  * via the `definition` "ModelSource".
  */
 export interface ModelSource {
-  artifact?: ArtifactRef | null;
-  author?: Author;
+  artifact: ArtifactRef | null;
+  author: Author;
   format: Format;
-  origin?: Origin;
-  parent_version?: ParentVersion;
-  text?: Text;
+  origin: Origin;
+  parent_version: ParentVersion;
+  text: Text;
 }
 /**
  * This interface was referenced by `FormalLabContractsV1`'s JSON-Schema
@@ -1509,19 +1509,19 @@ export interface PlanningContext {
  * via the `definition` "PluginDescriptor".
  */
 export interface PluginDescriptor {
-  capabilities?: Capabilities;
-  config_schema?: ConfigSchema;
-  contract_version?: ContractVersion3;
+  capabilities: Capabilities;
+  config_schema: ConfigSchema;
+  contract_version: ContractVersion3;
   entrypoint: Entrypoint;
-  extensions?: Extensions3;
-  input_schema?: InputSchema;
+  extensions: Extensions3;
+  input_schema: InputSchema;
   interface: PluginInterface;
-  interface_version?: InterfaceVersion;
-  license?: License;
-  output_schema?: OutputSchema;
+  interface_version: InterfaceVersion;
+  license: License;
+  output_schema: OutputSchema;
   plugin_id: PluginId2;
-  semantic_profiles?: SemanticProfiles;
-  source?: Source1;
+  semantic_profiles: SemanticProfiles;
+  source: Source1;
   ui: PluginUi;
   version: Version7;
 }
@@ -1531,8 +1531,8 @@ export interface PluginDescriptor {
  */
 export interface Capability {
   id: Id3;
-  params?: Params2;
-  version?: Version6;
+  params: Params2;
+  version: Version6;
 }
 export interface Params2 {
   [k: string]: unknown | undefined;
@@ -1553,15 +1553,15 @@ export interface Extensions3 {
  * via the `definition` "PluginUi".
  */
 export interface PluginUi {
-  action_display?: ActionDisplay;
-  action_labels?: ActionLabels;
-  category?: Category;
-  description?: Description11;
-  entity_labels?: EntityLabels;
+  action_display: ActionDisplay;
+  action_labels: ActionLabels;
+  category: Category;
+  description: Description11;
+  entity_labels: EntityLabels;
   label: Label7;
-  metric_labels?: MetricLabels;
-  state_labels?: StateLabels;
-  value_labels?: ValueLabels;
+  metric_labels: MetricLabels;
+  state_labels: StateLabels;
+  value_labels: ValueLabels;
 }
 /**
  * action type → template, e.g. '分配 {op} → {machine}'
@@ -1598,14 +1598,14 @@ export interface ValueLabels {
  * via the `definition` "RunManifest".
  */
 export interface RunManifest {
-  artifacts?: Artifacts;
+  artifacts: Artifacts;
   budget: Budget;
-  budget_usage?: BudgetUsage;
-  config?: Config2;
-  contract_version?: ContractVersion4;
+  budget_usage: BudgetUsage;
+  config: Config2;
+  contract_version: ContractVersion4;
   created_at: CreatedAt1;
-  extensions?: Extensions4;
-  matrix_id?: MatrixId;
+  extensions: Extensions4;
+  matrix_id: MatrixId;
   model: ModelRef;
   participants: Participants1;
   platform: PlatformInfo;
@@ -1615,9 +1615,9 @@ export interface RunManifest {
   scenario: ScenarioManifest1;
   scenario_digest: Digest;
   seed: Seed2;
-  source_run_id?: SourceRunId;
+  source_run_id: SourceRunId;
   status: RunStatus;
-  status_reason?: StatusReason;
+  status_reason: StatusReason;
 }
 export interface Config2 {
   [k: string]: unknown | undefined;
@@ -1633,7 +1633,7 @@ export interface Extensions4 {
  * via the `definition` "PlatformInfo".
  */
 export interface PlatformInfo {
-  source_revision?: SourceRevision;
+  source_revision: SourceRevision;
   version: Version8;
 }
 /**
@@ -1653,31 +1653,31 @@ export interface PluginPin {
  */
 export interface ScenarioManifest1 {
   budget: Budget;
-  contract_version?: ContractVersion1;
-  description?: Description1;
+  contract_version: ContractVersion1;
+  description: Description1;
   environment: EnvironmentSpec;
-  extensions?: Extensions1;
+  extensions: Extensions1;
   model: ModelRef;
   name: Name4;
-  objectives?: Objectives;
+  objectives: Objectives;
   participants: Participants;
-  revision?: Revision;
+  revision: Revision;
   scenario_id: ScenarioId;
-  seed?: Seed;
-  stop_conditions?: StopConditions;
+  seed: Seed;
+  stop_conditions: StopConditions;
 }
 /**
  * This interface was referenced by `FormalLabContractsV1`'s JSON-Schema
  * via the `definition` "TraceEvent".
  */
 export interface TraceEvent {
-  actor_id?: ActorId4;
-  causal_parents?: CausalParents;
+  actor_id: ActorId4;
+  causal_parents: CausalParents;
   event_id: EventId;
   event_type: EventType;
-  idempotency_key?: IdempotencyKey;
-  logical_step?: LogicalStep;
-  payload?: Payload;
+  idempotency_key: IdempotencyKey;
+  logical_step: LogicalStep;
+  payload: Payload;
   payload_schema: PayloadSchema;
   run_id: RunId6;
   seq: Seq;

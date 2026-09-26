@@ -2,7 +2,7 @@
 import type { BoundedCheckResult, Expr, RunManifest, TraceEvent } from "../src/index.ts";
 import { CONTRACT_VERSION, RUN_STATUSES } from "../src/index.ts";
 
-const expr: Expr = { op: "and", args: [{ op: "var", name: "on", index: [] }, { op: "const", value: true }] };
+const expr: Expr = { op: "and", args: [{ op: "var", name: "on", index: [] }, { op: "const", value: true, domain: null }] };
 
 export function isTerminal(m: Pick<RunManifest, "status">): boolean {
   return ["SUCCEEDED", "FAILED", "CANCELLED", "BUDGET_EXHAUSTED"].includes(m.status);

@@ -73,6 +73,18 @@ def build_schemas() -> dict[str, str]:
         "$defs": bundle["$defs"],
     }
     files["bundle.schema.json"] = _dump(bundle)
+    # Serialization view: what the platform emits (fields with defaults are always present). TypeScript types
+    # for consumers are generated from this view; validators use the validation bundle above.
+    _, out_bundle = models_json_schema([(m, "serialization") for m in ALL_MODELS], ref_template="#/$defs/{model}")
+    files["bundle.serialization.schema.json"] = _dump({
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "$id": "https://formal-lab.dev/contracts/v1/bundle.serialization.schema.json",
+        "title": "FormalLabContractsV1",
+        "description": f"{CONTRACT_VERSION}: all contract types as serialized by the platform (generated, do not edit)",
+        "type": "object",
+        "properties": {m.__name__: {"$ref": f"#/$defs/{m.__name__}"} for m in ALL_MODELS},
+        "$defs": out_bundle["$defs"],
+    })
     files["objects.json"] = _dump(
         {
             "contract_version": CONTRACT_VERSION,

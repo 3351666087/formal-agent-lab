@@ -414,6 +414,19 @@ def _routes(app: FastAPI) -> None:
             base["workflow"] = {"error": exc.message}
         return jsonable_encoder(base)
 
+    @app.get(f"{API}/runs/{{run_id}}/artifacts")
+    async def run_artifacts(run_id: str):
+        def go(s):
+            from .db import Artifact, Snapshot
+
+            get_or_404(s, Run, run_id, "run")
+            steps = {x.artifact["digest"]["value"]: x.step for x in s.scalars(select(Snapshot).where(Snapshot.run_id == run_id))}
+            return [{"kind": a.kind, "digest": a.digest, "ref": a.ref, "step": steps.get(a.ref["digest"]["value"]),
+                     "created_at": a.created_at}
+                    for a in s.scalars(select(Artifact).where(Artifact.run_id == run_id).order_by(Artifact.id))]
+
+        return await db(go)
+
     @app.get(f"{API}/artifacts/{{digest}}")
     async def get_artifact(digest: str):
         def go(s):
