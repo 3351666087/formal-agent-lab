@@ -56,9 +56,13 @@ class _Choice:
 
 
 class Z3Model:
-    def __init__(self, model: CheckedModel):
+    """Z3 encoding of one checked model. Owns a private z3.Context: Z3 contexts are not thread-safe, so a
+    Z3Model must only be used by one thread at a time (callers cache one per thread)."""
+
+    def __init__(self, model: CheckedModel, ctx: z3.Context | None = None):
         if model.issues:
             raise CompileError("model has issues")
+        self.ctx = ctx or z3.Context()
         self.m = model
         self.codes = {d: {name: i for i, name in enumerate(members)} for d, members in model.domains.items()}
         self.consts: dict[str, StateScalar] = {}
@@ -82,7 +86,7 @@ class Z3Model:
         for path in self.state_paths:
             ty = self.family_of[path].ty
             name = f"{path}@{t}"
-            out[path] = z3.Bool(name) if isinstance(ty, TBool) else z3.Int(name)
+            out[path] = z3.Bool(name, self.ctx) if isinstance(ty, TBool) else z3.Int(name, self.ctx)
         return out
 
     def domain_constraints(self, S: dict[str, z3.ExprRef]) -> list[z3.BoolRef]:
@@ -98,10 +102,10 @@ class Z3Model:
     def encode_value(self, path: str, value: StateScalar) -> Any:
         ty = self.family_of[path].ty
         if isinstance(ty, TSym):
-            return z3.IntVal(self.codes[ty.domain][value])  # type: ignore[index]
+            return z3.IntVal(self.codes[ty.domain][value], self.ctx)  # type: ignore[index]
         if isinstance(ty, TBool):
-            return z3.BoolVal(bool(value))
-        return z3.IntVal(int(value))
+            return z3.BoolVal(bool(value), self.ctx)
+        return z3.IntVal(int(value), self.ctx)
 
     def decode_value(self, path: str, value: z3.ExprRef) -> StateScalar:
         ty = self.family_of[path].ty
@@ -118,7 +122,7 @@ class Z3Model:
     # ------------------------------------------------------------------ expressions
     def _sym_code(self, x: ZSym, domain: str) -> Any:
         if isinstance(x.term, str):
-            return z3.IntVal(self.codes[domain][x.term])
+            return z3.IntVal(self.codes[domain][x.term], self.ctx)
         if isinstance(x.term, _Choice):
             ch = x.term
             return z3.If(ch.cond, self._sym_code(ch.then, domain), self._sym_code(ch.other, domain))
@@ -155,10 +159,8 @@ class Z3Model:
         result = None
         for combo in itertools.product(*[self.m.domains[d] for d in fam.index]):
             path = f"{name}[{','.join(combo)}]"
-            cond = z3.And(*[z3.BoolVal(True) if (isinstance(i.term, str) and i.term == member)
-                            else (z3.BoolVal(False) if isinstance(i.term, str)
-                                  else i.term == self.codes[d][member])
-                            for i, member, d in zip(index, combo, fam.index, strict=True)])
+            cond = _and([(i.term == member) if isinstance(i.term, str) else (i.term == self.codes[d][member])
+                         for i, member, d in zip(index, combo, fam.index, strict=True)])
             val = self._location(path, fam, S)
             result = val if result is None else self._ite(cond, val, result)
         return result
@@ -182,7 +184,7 @@ class Z3Model:
             return ZSym(domain, z3.If(c, self._sym_code(a, domain), self._sym_code(b, domain)))
         return z3.If(c, a, b)
 
-    def expr(self, e: Any, S: dict[str, z3.ExprRef], env: dict[str, Any]) -> Any:  # noqa: C901
+    def expr(self, e: Any, S: dict[str, z3.ExprRef], env: dict[str, Any]) -> Any:
         if isinstance(e, ConstExpr):
             val = e.value
             if isinstance(val, str):
@@ -308,17 +310,17 @@ class Z3Model:
         for path, val in nxt.items():
             ty = self.family_of[path].ty
             if isinstance(ty, TInt):
-                guards.append(z3.And(val >= ty.lo, val <= ty.hi))
+                guards.append(_and([val >= ty.lo, val <= ty.hi]))  # may be python bools: keep ctx-safe
         return _and([pre, *guards])
 
     def transition(self, t: int, S: dict[str, z3.ExprRef], S2: dict[str, z3.ExprRef]) -> tuple[z3.ArithRef, list]:
-        act = z3.Int(f"act@{t}")
+        act = z3.Int(f"act@{t}", self.ctx)
         cons: list[Any] = [act >= 0, act < len(self.actions)]
         per_path: dict[str, list[tuple[int, Any]]] = {}
         for i in range(len(self.actions)):
             nxt = self.next_values(i, S)
             en = self.enabled(i, S, nxt)
-            cons.append(z3.Implies(act == i, _to_z3_bool(en)))
+            cons.append(z3.Implies(act == i, self.as_bool(en)))
             for path, val in nxt.items():
                 per_path.setdefault(path, []).append((i, val))
         for path in self.state_paths:
@@ -329,14 +331,16 @@ class Z3Model:
         return act, cons
 
     def prop(self, property_id: str, S: dict[str, z3.ExprRef]) -> Any:
-        return _to_z3_bool(self.expr(self.m.properties[property_id].expr, S, {}))
+        return self.as_bool(self.expr(self.m.properties[property_id].expr, S, {}))
+
+    def as_bool(self, x: Any) -> z3.BoolRef:
+        return z3.BoolVal(x, self.ctx) if isinstance(x, bool) else x
+
+    def solver(self) -> z3.Solver:
+        return z3.Solver(ctx=self.ctx)
 
 
 # ---------------------------------------------------------------------- helpers over mixed python/z3 values
-
-
-def _to_z3_bool(x: Any) -> z3.BoolRef:
-    return z3.BoolVal(x) if isinstance(x, bool) else x
 
 
 def _not(x: Any) -> Any:

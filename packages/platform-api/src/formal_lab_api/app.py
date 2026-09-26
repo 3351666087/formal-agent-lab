@@ -15,10 +15,17 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, Response, StreamingResponse
 from formal_lab_contracts import CONTRACT_VERSION, TERMINAL_RUN_STATUSES, RunStatus
-from formal_lab_contracts.errors import HTTP_STATUS, ErrorCode, ErrorInfo, FieldError, FormalLabError, NotFound
+from formal_lab_contracts.errors import (
+    HTTP_STATUS,
+    ErrorCode,
+    ErrorInfo,
+    FieldError,
+    FormalLabError,
+    NotFound,
+)
 from sqlalchemy import select, text
 
-from .db import CheckRow, Model, ModelVersion, Project, Run, Scenario, StrategyConfig, session_scope
+from .db import CheckRow, Matrix, Model, ModelVersion, Project, Run, Scenario, StrategyConfig, session_scope
 from .orchestration import TemporalOrchestrator
 from .services import catalog, modeling, runs, scenarios
 from .services.common import artifact_store, get_or_404
@@ -85,7 +92,7 @@ def db(fn, *args: Any, **kwargs: Any):
     return run_in_threadpool(call)
 
 
-def _routes(app: FastAPI) -> None:  # noqa: C901 - route table
+def _routes(app: FastAPI) -> None:
     orch = lambda: app.state.orchestrator  # noqa: E731
 
     # ------------------------------------------------------------------ meta / health
@@ -116,10 +123,10 @@ def _routes(app: FastAPI) -> None:  # noqa: C901 - route table
 
     @app.get(f"{API}/meta")
     async def meta() -> dict[str, Any]:
+        from formal_lab_contracts.schema_export import build_schemas, contract_digest
         from formal_lab_model.capability_matrix import MATRIX
         from formal_lab_runtime.manifest import PLATFORM_VERSION, source_revision
-        from formal_lab_runtime.settings import llm_configured, get_setting
-        from formal_lab_contracts.schema_export import build_schemas, contract_digest
+        from formal_lab_runtime.settings import get_setting, llm_configured
 
         settings = get_settings()
         return {
@@ -423,6 +430,100 @@ def _routes(app: FastAPI) -> None:  # noqa: C901 - route table
         data = await run_in_threadpool(artifact_store().get, ArtifactRef.model_validate(ref))
         return Response(content=data, media_type=ref["media_type"],
                         headers={"X-Artifact-Digest": digest, "X-Format-Version": ref["format_version"]})
+
+    # ------------------------------------------------------------------ replay bundles
+    @app.get(f"{API}/runs/{{run_id}}/export")
+    async def export_run(run_id: str):
+        from .services import bundles
+
+        def go():
+            with session_scope() as s:
+                return bundles.export_run(s, run_id)
+
+        data, name = await run_in_threadpool(go)
+        return Response(content=data, media_type="application/zip",
+                        headers={"Content-Disposition": f'attachment; filename="{name}"'})
+
+    @app.post(f"{API}/projects/{{project_id}}/imports", status_code=201)
+    async def import_bundle(project_id: str, request: Request, matrix_id: str | None = None):
+        from .services import bundles
+
+        data = await request.body()
+        return await db(lambda s: runs.run_dict(bundles.import_bundle(s, project_id, data, matrix_id=matrix_id), s,
+                                                full=True))
+
+    # ------------------------------------------------------------------ matrices
+    @app.post(f"{API}/projects/{{project_id}}/matrices", status_code=201)
+    async def create_matrix(project_id: str, body: dict[str, Any] = Body(...)):
+        from .services import matrices
+
+        def go(s):
+            mx, created = matrices.create_matrix(s, project_id, body)
+            return {"matrix": matrices.matrix_dict(mx, s), "runs": [runs.run_dict(r, s) for r in created]}
+
+        res = await db(go)
+        for r in res["runs"]:
+            await _start(r)
+        return await db(lambda s: {"matrix": matrices.matrix_dict(s.get(Matrix, res["matrix"]["id"]), s),
+                                   "run_ids": [r["id"] for r in res["runs"]]})
+
+    @app.post(f"{API}/projects/{{project_id}}/matrices/imported", status_code=201)
+    async def create_imported_matrix(project_id: str, body: dict[str, Any] = Body(...)):
+        """Group imported runs (e.g. from an Inspect evaluation) into a matrix for reporting."""
+        from .services import matrices
+        from .services.common import new_id
+
+        def go(s):
+            get_or_404(s, Project, project_id, "project")
+            mx = Matrix(id=new_id("mtx"), project_id=project_id, name=body.get("name") or "imported",
+                        spec={"source": body.get("source", "import"), **(body.get("spec") or {})})
+            s.add(mx)
+            s.flush()
+            matrices.attach_runs(s, mx.id, body.get("run_ids", []))
+            return matrices.matrix_dict(mx, s)
+
+        return await db(go)
+
+    @app.get(f"{API}/projects/{{project_id}}/matrices")
+    async def list_matrices(project_id: str):
+        from .services import matrices
+
+        return await db(lambda s: [matrices.matrix_dict(m, s) for m in s.scalars(
+            select(Matrix).where(Matrix.project_id == project_id).order_by(Matrix.created_at.desc()))])
+
+    @app.get(f"{API}/matrices/{{matrix_id}}")
+    async def get_matrix(matrix_id: str):
+        from .services import matrices
+
+        return await db(lambda s: {**matrices.matrix_dict(get_or_404(s, Matrix, matrix_id, "matrix"), s),
+                                   "run_list": [runs.run_dict(r, s) for r in s.scalars(
+                                       select(Run).where(Run.matrix_id == matrix_id).order_by(Run.created_at))]})
+
+    @app.get(f"{API}/matrices/{{matrix_id}}/report")
+    async def matrix_report(matrix_id: str):
+        from .services import matrices
+
+        return await db(lambda s: matrices.report(s, matrix_id))
+
+    # ------------------------------------------------------------------ uploads (e.g. Inspect .eval logs)
+    @app.post(f"{API}/projects/{{project_id}}/artifacts", status_code=201)
+    async def upload_artifact(project_id: str, request: Request, name: str, kind: str = "upload",
+                              format_version: str = "opaque", matrix_id: str | None = None):
+        from .db import Artifact
+
+        data = await request.body()
+        media_type = request.headers.get("content-type", "application/octet-stream")
+
+        def go(s):
+            get_or_404(s, Project, project_id, "project")
+            ref = artifact_store().put(data, name=name, media_type=media_type, format_version=format_version)
+            s.add(Artifact(run_id=None, kind=kind, digest=ref.digest.value, ref=ref.model_dump(mode="json")))
+            if matrix_id:
+                mx = get_or_404(s, Matrix, matrix_id, "matrix")
+                mx.spec = {**mx.spec, "artifacts": [*mx.spec.get("artifacts", []), ref.model_dump(mode="json")]}
+            return ref.model_dump(mode="json")
+
+        return await db(go)
 
     _ = ModelVersion  # imported for type completeness
 

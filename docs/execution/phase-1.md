@@ -104,10 +104,14 @@
 
 来源：[UKGovernmentBEIS/inspect_ai](https://github.com/UKGovernmentBEIS/inspect_ai)、[官方文档](https://inspect.aisi.org.uk/)。调研时主许可证为 MIT。
 
-- [ ] **P1-029** 复用通用任务、模型适配和日志接口，将生产调度实验接入 Inspect，并保持评测对象为本阶段的纯数据实验。
-- [ ] **P1-030** 平台保持独立 RunManifest 与 MetricResult，并通过适配层与 Inspect 对象互转。
-- [ ] **P1-031** 关键结果由模拟器状态和确定性评分函数给出；LLM 描述仅作辅助说明。
-- [ ] **P1-032** 用真实中性任务验证导入、运行、评分、日志归档与平台展示。
+- [x] **P1-029** 复用通用任务、模型适配和日志接口，将生产调度实验接入 Inspect，并保持评测对象为本阶段的纯数据实验。
+  - 证据：inspect-ai==0.3.269（MIT）：Task/Sample 数据集/@solver/@scorer/mean+stderr/eval 与 .eval 日志；examples/neutral-scheduling/.../inspect_task.py 把纯数据调度实验接入 Inspect；InspectModelClient 复用 Inspect 模型适配（docs/execution/evidence/M6-eval-replay-sdk.log）
+- [x] **P1-030** 平台保持独立 RunManifest 与 MetricResult，并通过适配层与 Inspect 对象互转。
+  - 证据：formal_lab_eval.inspect_adapter：result_to_score（MetricResult→Score，缺失值只进 metadata）与 metric_results_from_log（EvalLog→MetricResult）互转，test_inspect_eval_round_trip 逐样本对照 bundle 指标
+- [x] **P1-031** 关键结果由模拟器状态和确定性评分函数给出；LLM 描述仅作辅助说明。
+  - 证据：关键指标由模拟器真值状态与确定性评分函数（GenericEvaluator、SchedulingScorer）给出；LLM rationale 仅作为提案说明保存
+- [x] **P1-032** 用真实中性任务验证导入、运行、评分、日志归档与平台展示。
+  - 证据：真实 inspect eval（CLI，mockllm 占位模型不参与决策）→ formal_lab_eval.inspect_import 导入 4 个样本 run、归档 .eval 日志为项目产物、生成 source=inspect 矩阵并出报告（test_inspect_evaluation_is_imported_and_reported）
 
 ### 3.4 复用记录
 
@@ -234,13 +238,20 @@
 
 ## 9. 评测、回放、CLI 与 SDK
 
-- [ ] **P1-100** 实现场景 × 策略 × 种子 × 预算矩阵，保存每个组合的真实状态。
-- [ ] **P1-101** 指标支持单位、方向、缺失值、样本数、聚合与配对比较。
-- [ ] **P1-102** 置信区间注明方法和样本；显著性仅在统计条件满足时报告，缺失值使用独立缺失语义参与聚合。
-- [ ] **P1-103** 分开实现事件回放和重新运行：前者查看原轨迹，后者产生新 run 并保留来源。
-- [ ] **P1-104** 导出自包含 replay 包，包含契约、manifest、事件、模型快照与必需产物；在空工作目录验证导入。
-- [ ] **P1-105** CLI 支持模型校验、运行/查看/取消实验、矩阵、导入导出和回放。
-- [ ] **P1-106** Python SDK 和包外插件样例仅使用公开接口完成注册。
+- [x] **P1-100** 实现场景 × 策略 × 种子 × 预算矩阵，保存每个组合的真实状态。
+  - 证据：formal_lab_eval.matrix.expand + POST /projects/{id}/matrices；每个组合一个真实 run，报告 cells 列出 run_id 与真实状态（CLI 18 格矩阵测试）
+- [x] **P1-101** 指标支持单位、方向、缺失值、样本数、聚合与配对比较。
+  - 证据：MetricDefinition 单位/方向/聚合；aggregate 输出 sample_size/missing_count；paired_compare 按 (场景, 种子, 预算) 配对（test_stats.py, test_cli_matrix_compares_two_non_stub_strategies）
+- [x] **P1-102** 置信区间注明方法和样本；显著性仅在统计条件满足时报告，缺失值使用独立缺失语义参与聚合。
+  - 证据：区间注明方法与 n（Wilson / percentile bootstrap，n≥3）；精确 Wilcoxon 仅在 ≥6 个非零配对差时报告，否则给出不报告原因；MISSING/NOT_APPLICABLE 独立语义（test_stats.py 含独立穷举对照）
+- [x] **P1-103** 分开实现事件回放和重新运行：前者查看原轨迹，后者产生新 run 并保留来源。
+  - 证据：回放：GET /runs/{id}/events、/steps/{n}、fal replay view/step（只读原轨迹）；重新运行：POST /runs/{id}/rerun 产生新 run，source_run_id 与 lineage.reruns 记录来源（test_rerun_creates_new_run_with_lineage）
+- [x] **P1-104** 导出自包含 replay 包，包含契约、manifest、事件、模型快照与必需产物；在空工作目录验证导入。
+  - 证据：formal-lab/replay-bundle@1：契约 schemas+DIGEST、manifest、events、模型快照、指标、快照/模型调用产物，全部带 sha256；空工作目录离线 verify/view/step（服务地址指向不可达端口），删除后导入新项目事件逐条一致（docs/execution/evidence/M6-eval-replay-sdk.log）
+- [x] **P1-105** CLI 支持模型校验、运行/查看/取消实验、矩阵、导入导出和回放。
+  - 证据：fal CLI：model validate/push、run start/show/events/step/cancel/pause/resume/rerun、matrix run/report、export/import、replay verify/view/step（test_sdk_cli_replay.py）
+- [x] **P1-106** Python SDK 和包外插件样例仅使用公开接口完成注册。
+  - 证据：formal_lab_sdk.Client + formal_lab_sdk.plugins 公开接口；examples/external-plugin（仅依赖 formal-lab-sdk，entry point 注册）被目录发现并完成实验，提案来源 EXTERNAL（test_external_plugin_registered_through_public_interfaces）
 - [ ] **P1-107** Web、CLI、SDK 共用服务与契约，三种入口共用同一服务与契约实现。
 
 ## 10. 构建、部署与发行基础
@@ -263,8 +274,10 @@
 - [ ] **P1-122** 语义：解释器与 Z3 小模型对照，见证可回放。
 - [ ] **P1-123** 运行：持久化、Worker 恢复、取消、重复提交、断线续传正确。
 - [ ] **P1-124** 产品：UI 创建运行并查看结果，CLI 导出，SDK 读取。
-- [ ] **P1-125** 评测：至少两种非替身策略在多个固定种子/场景下产生可比结果。
-- [ ] **P1-126** 回放：离线查看原事件；重新运行产生新 ID，并保留原结果及来源关系。
+- [x] **P1-125** 评测：至少两种非替身策略在多个固定种子/场景下产生可比结果。
+  - 证据：CLI 矩阵：3 场景 × EDD 规则/Z3 规划 × 种子 1,2,3，18 run 全部 SUCCEEDED，delay_cost 等 9 对配对比较；来源 RULE/SYMBOLIC（非替身）
+- [x] **P1-126** 回放：离线查看原事件；重新运行产生新 ID，并保留原结果及来源关系。
+  - 证据：离线查看导出包（无服务）；重新运行产生新 ID，原 run 保留并记录 lineage（test_cli_export_offline_replay_import_and_rerun, test_import_into_fresh_database_keeps_events_and_allows_rerun）
 - [ ] **P1-127** 部署：Compose 完整路径实测；Helm 渲染与安装验证状态分开记录。
 - [ ] **P1-128** 边界：主路径仅调用中性模拟器，没有扩展动作、外部目标执行器或伪装的自由命令工具。
 - [ ] **P1-129** 为关键行为写有意义的测试，避免大量镜像实现的单元测试掩盖端到端未接通。

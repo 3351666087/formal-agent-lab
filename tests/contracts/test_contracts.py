@@ -9,14 +9,13 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import formal_lab_contracts as c
 import jsonschema
 import pytest
-from pydantic import ValidationError
-
-import formal_lab_contracts as c
 from formal_lab_contracts import schema_export
 from formal_lab_contracts.capabilities import CapabilityRequirement, negotiate
 from formal_lab_contracts.errors import ErrorCode, FormalLabError, InvalidInput, Timeout
+from pydantic import ValidationError
 
 ROOT = Path(__file__).resolve().parents[2]
 FIXTURES = Path(__file__).parent / "fixtures"

@@ -19,7 +19,6 @@ from formal_lab_contracts.ir import (
     AssignEffect,
     BoolType,
     ConstExpr,
-    EntityType,
     EnumType,
     ForallEffect,
     IntType,

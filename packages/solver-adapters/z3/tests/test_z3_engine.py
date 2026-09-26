@@ -8,7 +8,6 @@ import pytest
 from formal_lab_contracts import CheckQuery, ModelIR, ModelSource
 from formal_lab_model import Interpreter, bfs, build_package, check_model
 from formal_lab_model.samples import lamp, random_model, two_jobs
-
 from formal_lab_solver_z3.verifier import Z3Verifier
 
 
@@ -173,3 +172,15 @@ def test_differential_single_step_on_reachable_states(seed):
         res = V.check(package, q("ACTION_PRECONDITION", k=0,
                                  action={"action_type": ga.action, "params": dict(ga.params)}), state=state)
         assert res.verdict == expected, (seed, ga.key, state)
+
+
+def test_concurrent_checks_do_not_share_z3_contexts():
+    """Regression: Z3 contexts are not thread-safe; parallel activities / Inspect samples must not crash."""
+    from concurrent.futures import ThreadPoolExecutor
+
+    package = pkg(two_jobs())
+    queries = [q("GOAL_REACHABILITY", "all_done", 8), q("INVARIANT_VIOLATION", "done_by_2", 6),
+               q("GOAL_REACHABILITY", "all_done", 4)] * 6
+    with ThreadPoolExecutor(max_workers=6) as pool:
+        verdicts = list(pool.map(lambda query: str(V.check(package, query).verdict), queries))
+    assert verdicts == ["WITNESS", "WITNESS", "NO_WITNESS_WITHIN_BOUND"] * 6

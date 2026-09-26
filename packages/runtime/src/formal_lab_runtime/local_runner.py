@@ -23,7 +23,16 @@ from formal_lab_contracts import (
     utcnow,
 )
 
-from .engine import EventDraft, event_id_for, event_key, execute_step, failure_status, finish_run, open_components, start_run
+from .engine import (
+    EventDraft,
+    event_id_for,
+    event_key,
+    execute_step,
+    failure_status,
+    finish_run,
+    open_components,
+    start_run,
+)
 from .registry import PluginRegistry, default_registry
 
 

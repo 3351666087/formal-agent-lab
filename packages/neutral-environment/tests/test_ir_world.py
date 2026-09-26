@@ -3,9 +3,8 @@ from __future__ import annotations
 import pytest
 from formal_lab_contracts import ActionProposal, ScenarioManifest
 from formal_lab_contracts.errors import Conflict, InvalidInput
-from formal_lab_example_scheduling.scenarios import model_package, scenario
-
 from formal_lab_env import IRWorldEnvironment
+from formal_lab_example_scheduling.scenarios import model_package, scenario
 
 
 class _Services:

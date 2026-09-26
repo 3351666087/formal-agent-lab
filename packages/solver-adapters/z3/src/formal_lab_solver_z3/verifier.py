@@ -12,6 +12,7 @@ Query semantics (all conclusions are MODEL_INTERNAL and bounded):
 
 from __future__ import annotations
 
+import threading
 import time
 import uuid
 from functools import lru_cache
@@ -19,15 +20,14 @@ from typing import Any
 
 import z3
 from formal_lab_contracts import (
+    QUERY_SEMANTICS,
     BackendInfo,
     BoundedCheckResult,
     CheckBound,
     CheckQuery,
-    GroundAction as CGroundAction,
     ModelPackage,
     PluginDescriptor,
     PreconditionVerdict,
-    QUERY_SEMANTICS,
     QueryKind,
     SearchVerdict,
     SolverStats,
@@ -36,6 +36,9 @@ from formal_lab_contracts import (
     Witness,
     WitnessStep,
     digest_of,
+)
+from formal_lab_contracts import (
+    GroundAction as CGroundAction,
 )
 from formal_lab_contracts import capabilities as caps
 from formal_lab_contracts.errors import InvalidInput
@@ -70,8 +73,8 @@ DESCRIPTOR = PluginDescriptor(
 )
 
 
-@lru_cache(maxsize=32)
-def _compiled(digest: str, ir_json: str) -> tuple[CheckedModel, Z3Model, Interpreter]:
+@lru_cache(maxsize=64)
+def _compiled(digest: str, ir_json: str, thread_id: int) -> tuple[CheckedModel, Z3Model, Interpreter]:
     from formal_lab_contracts import ModelIR
 
     checked = check_model(ModelIR.model_validate_json(ir_json))
@@ -79,7 +82,8 @@ def _compiled(digest: str, ir_json: str) -> tuple[CheckedModel, Z3Model, Interpr
 
 
 def compile_package(package: ModelPackage) -> tuple[CheckedModel, Z3Model, Interpreter]:
-    return _compiled(package.digest.value, package.ir.model_dump_json())
+    """Compiled model for the calling thread (each thread gets its own Z3 context)."""
+    return _compiled(package.digest.value, package.ir.model_dump_json(), threading.get_ident())
 
 
 def _to_contract_action(ga: GroundAction) -> CGroundAction:
@@ -149,7 +153,7 @@ class Z3Verifier:
         start_state = dict(state) if (query.initial_state == "GIVEN_STATE" and state) else interp.initial_state()
         if query.initial_state == "GIVEN_STATE" and state is None:
             raise InvalidInput("initial_state=GIVEN_STATE requires a state")
-        solver = z3.Solver()
+        solver = zm.solver()
         S = [zm.state_vars(0)]
         solver.add(*zm.domain_constraints(S[0]))
         solver.add(*zm.fix_state(S[0], start_state))
@@ -271,11 +275,10 @@ class Z3Verifier:
         S = zm.state_vars(0)
         known = {p: v for p, v in state.items() if p not in set(unknown_paths)}
         base = [*zm.domain_constraints(S), *zm.fix_state(S, known)]
-        enabled = zm.enabled(idx, S)
-        enabled = z3.BoolVal(enabled) if isinstance(enabled, bool) else enabled
+        enabled = zm.as_bool(zm.enabled(idx, S))
         results = {}
         for label, formula in (("can", enabled), ("cannot", z3.Not(enabled))):
-            solver = z3.Solver()
+            solver = zm.solver()
             solver.set("timeout", timeout_ms)
             solver.add(*base, formula)
             results[label] = solver.check()
@@ -317,4 +320,4 @@ def create(config: dict[str, Any] | None = None, services: Any = None) -> Z3Veri
     return Z3Verifier(**(config or {}))
 
 
-__all__ = ["DESCRIPTOR", "Z3Verifier", "compile_package", "create", "CheckBound"]
+__all__ = ["DESCRIPTOR", "CheckBound", "Z3Verifier", "compile_package", "create"]

@@ -19,6 +19,7 @@ from datetime import datetime
 from typing import Any
 
 from formal_lab_contracts import (
+    TERMINAL_RUN_STATUSES,
     ActionOutcome,
     ActionProposal,
     BoundedCheckResult,
@@ -29,7 +30,6 @@ from formal_lab_contracts import (
     RunManifest,
     RunStatus,
     StepRecord,
-    TERMINAL_RUN_STATUSES,
     digest_of,
     utcnow,
 )

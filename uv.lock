@@ -397,13 +397,17 @@ name = "formal-lab-evaluation"
 version = "0.1.0"
 source = { editable = "packages/evaluation" }
 dependencies = [
-    { name = "formal-lab-contracts" },
+    { name = "formal-lab-runtime" },
+    { name = "formal-lab-sdk" },
+    { name = "formal-lab-strategies" },
     { name = "inspect-ai" },
 ]
 
 [package.metadata]
 requires-dist = [
-    { name = "formal-lab-contracts", editable = "packages/contracts" },
+    { name = "formal-lab-runtime", editable = "packages/runtime" },
+    { name = "formal-lab-sdk", editable = "packages/sdk" },
+    { name = "formal-lab-strategies", editable = "packages/strategies" },
     { name = "inspect-ai", specifier = "==0.3.269" },
 ]
 
@@ -498,14 +502,12 @@ version = "0.1.0"
 source = { editable = "packages/runtime" }
 dependencies = [
     { name = "boto3" },
-    { name = "formal-lab-evaluation" },
     { name = "formal-lab-model-core" },
 ]
 
 [package.metadata]
 requires-dist = [
     { name = "boto3", specifier = ">=1.40" },
-    { name = "formal-lab-evaluation", editable = "packages/evaluation" },
     { name = "formal-lab-model-core", editable = "packages/model-core" },
 ]
 

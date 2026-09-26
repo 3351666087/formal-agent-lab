@@ -7,10 +7,9 @@ import logging
 import signal
 from concurrent.futures import ThreadPoolExecutor
 
+from formal_lab_api.settings import get_settings
 from temporalio.client import Client
 from temporalio.worker import Worker
-
-from formal_lab_api.settings import get_settings
 
 from .activities import ALL
 from .workflow import ExperimentWorkflow

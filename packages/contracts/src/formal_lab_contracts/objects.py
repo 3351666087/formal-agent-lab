@@ -16,7 +16,6 @@ from .common import (
     EvidenceRef,
     ExtensibleModel,
     Identifier,
-    JsonScalar,
     Name,
     PluginId,
     PluginRef,

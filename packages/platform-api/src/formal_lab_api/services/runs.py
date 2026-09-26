@@ -24,15 +24,18 @@ from .common import get_or_404, new_id, registry
 from .events import append_events, draft, list_events, lock_run, transition
 from .modeling import package_of
 
-EVALUATORS = {
-    "neutral-scheduling": [PluginRef(plugin_id="formal-lab.eval.generic", version="1.0.0"),
-                           PluginRef(plugin_id="formal-lab.example.scheduling.scorer", version="1.0.0")],
-}
-GENERIC = [PluginRef(plugin_id="formal-lab.eval.generic", version="1.0.0")]
-
 
 def evaluators_for(package_id: str, extra: list[dict[str, Any]] | None = None) -> list[PluginRef]:
-    refs = list(EVALUATORS.get(package_id, GENERIC))
+    """Evaluators whose descriptors declare they apply to this model package (or to all models)."""
+    from formal_lab_contracts import PluginInterface
+    from formal_lab_contracts.capabilities import EVAL_APPLIES_TO
+
+    refs: list[PluginRef] = []
+    for entry in registry().entries(PluginInterface.EVALUATOR):
+        for cap in entry.descriptor.capabilities:
+            if cap.id == EVAL_APPLIES_TO and (cap.params.get("all") or package_id in cap.params.get("package_ids", [])):
+                refs.append(entry.descriptor.ref())
+    refs.sort(key=lambda r: (r.plugin_id != "formal-lab.eval.generic", r.plugin_id))
     for e in extra or []:
         ref = PluginRef.model_validate(e)
         if ref not in refs:

@@ -65,7 +65,7 @@ class Interpreter:
         }
 
     # ------------------------------------------------------------------ expressions
-    def compile_expr(self, expr: Any) -> Evaluator:  # noqa: C901 - one branch per AST node
+    def compile_expr(self, expr: Any) -> Evaluator:
         if isinstance(expr, ConstExpr):
             value = expr.value
             return lambda s, e: value

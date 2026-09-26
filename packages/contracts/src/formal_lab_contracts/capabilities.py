@@ -25,6 +25,7 @@ ENV_OBSERVATION_DELAY = "env.observation_delay"
 ENV_TRUTH_OVERRIDES = "env.truth_overrides"
 ENV_SEEDED_VARIATION = "env.seeded_variation"
 EVAL_DETERMINISTIC = "eval.deterministic"
+EVAL_APPLIES_TO = "eval.applies_to"  # params: {"package_ids": [...]} or {"all": true}
 
 # Semantic features that are outside deterministic_finite_v1 (engines must answer UNSUPPORTED)
 FEATURE_PROBABILISTIC_EFFECTS = "probabilistic_effects"

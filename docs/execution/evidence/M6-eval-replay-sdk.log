@@ -1,0 +1,32 @@
+# SDK / CLI / replay / matrix / Inspect integration run
+date: 2026-09-26T15:39:36Z
+revision: dc02277 + M6 changes (committed next)
+inspect_ai: 0.3.269
+command: uv run pytest tests/integration/test_sdk_cli_replay.py packages/evaluation -m "integration or not integration" -v
+
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-9.1.1, pluggy-1.6.0 -- /home/null3351.guest/.venvs/formal-agent-lab/bin/python
+rootdir: /Users/null3351/Code/formal-agent-lab
+configfile: pyproject.toml
+plugins: asyncio-1.4.0, timeout-2.4.0, anyio-4.15.1
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=session, asyncio_default_test_loop_scope=session
+timeout: 300.0s
+timeout method: signal
+timeout func_only: False
+collecting ... collected 12 items
+
+tests/integration/test_sdk_cli_replay.py::test_sdk_builds_project_from_scratch_and_reads_results PASSED
+tests/integration/test_sdk_cli_replay.py::test_external_plugin_registered_through_public_interfaces PASSED
+tests/integration/test_sdk_cli_replay.py::test_cli_export_offline_replay_import_and_rerun PASSED
+tests/integration/test_sdk_cli_replay.py::test_import_into_fresh_database_keeps_events_and_allows_rerun PASSED
+tests/integration/test_sdk_cli_replay.py::test_cli_matrix_compares_two_non_stub_strategies PASSED
+tests/integration/test_sdk_cli_replay.py::test_inspect_evaluation_is_imported_and_reported PASSED
+packages/evaluation/tests/test_inspect_adapter.py::test_inspect_eval_round_trip PASSED
+packages/evaluation/tests/test_stats.py::test_aggregate_missing_semantics_and_intervals PASSED
+packages/evaluation/tests/test_stats.py::test_wilson_reference_values PASSED
+packages/evaluation/tests/test_stats.py::test_wilcoxon_exact_matches_independent_enumeration PASSED
+packages/evaluation/tests/test_stats.py::test_paired_comparison_reports_significance_only_when_conditions_hold PASSED
+packages/evaluation/tests/test_stats.py::test_matrix_expansion_and_report PASSED
+
+======================== 12 passed in 317.12s (0:05:17) ========================
+exit_code: 0

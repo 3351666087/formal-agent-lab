@@ -5,7 +5,6 @@ import json
 import pytest
 from formal_lab_contracts import ModelIR, ModelSource, Observation
 from formal_lab_contracts.errors import InvalidInput, Unsupported
-
 from formal_lab_model import (
     GroundAction,
     Interpreter,

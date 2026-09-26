@@ -4,7 +4,14 @@ from __future__ import annotations
 
 from collections.abc import Iterable
 
-from formal_lab_contracts import ComparisonVerdict, EffectComparison, EvidenceRef, FieldDiff, Observation, StateScalar
+from formal_lab_contracts import (
+    ComparisonVerdict,
+    EffectComparison,
+    EvidenceRef,
+    FieldDiff,
+    Observation,
+    StateScalar,
+)
 
 
 def compare_effects(

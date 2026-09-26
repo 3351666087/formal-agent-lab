@@ -8,7 +8,6 @@ from formal_lab_contracts import BudgetUsage, CandidateAction, Observation, Plan
 from formal_lab_contracts.errors import InvalidInput, NonRetryableFailure, RetryableFailure
 from formal_lab_example_scheduling.scenarios import model_package
 from formal_lab_model import action_specs, check_model
-
 from formal_lab_strategies import LLMPlanner, OpenAICompatibleClient, StubModelClient
 from formal_lab_strategies.llm_planner import create
 

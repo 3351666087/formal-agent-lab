@@ -1,6 +1,7 @@
 """formal-lab-contracts/v1 — the single source of truth for platform contracts."""
 
 from . import capabilities, errors, interfaces, ir
+from . import objects as _objects
 from .common import (
     CONTRACT_VERSION,
     ArtifactRef,
@@ -18,7 +19,6 @@ from .common import (
 )
 from .errors import ErrorCode, ErrorInfo, FormalLabError
 from .ir import DETERMINISTIC_FINITE_V1, ModelIR
-from . import objects as _objects
 from .objects import *  # noqa: F403
 
 __all__ = [

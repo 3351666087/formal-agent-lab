@@ -1,10 +1,9 @@
 from __future__ import annotations
 
 from alembic import context
-from sqlalchemy import engine_from_config, pool
-
 from formal_lab_api.db import Base
 from formal_lab_api.settings import get_settings
+from sqlalchemy import engine_from_config, pool
 
 config = context.config
 target_metadata = Base.metadata

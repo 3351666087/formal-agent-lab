@@ -11,7 +11,6 @@ from formal_lab_contracts.errors import FormalLabError
 from temporalio import activity
 from temporalio.exceptions import ApplicationError
 
-
 HEARTBEAT_EVERY_S = 5.0
 
 
