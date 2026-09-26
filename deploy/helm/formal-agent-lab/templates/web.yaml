@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "fal.fullname" . }}-web
+  labels: {{- include "fal.labels" . | nindent 4 }}
+    app.kubernetes.io/component: web
+spec:
+  replicas: {{ .Values.web.replicas }}
+  selector:
+    matchLabels: {{- include "fal.selector" (dict "root" . "component" "web") | nindent 6 }}
+  template:
+    metadata:
+      labels: {{- include "fal.selector" (dict "root" . "component" "web") | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: web
+          image: {{ include "fal.image" (dict "root" . "component" "web") }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: FAL_API_UPSTREAM
+              value: "{{ include "fal.fullname" . }}-api:{{ .Values.api.port }}"
+          ports: [{ name: http, containerPort: {{ .Values.web.port }} }]
+          readinessProbe: { httpGet: { path: /health, port: http }, periodSeconds: 10 }
+          resources: {{- toYaml .Values.web.resources | nindent 12 }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "fal.fullname" . }}-web
+  labels: {{- include "fal.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  selector: {{- include "fal.selector" (dict "root" . "component" "web") | nindent 4 }}
+  ports: [{ name: http, port: 80, targetPort: http }]

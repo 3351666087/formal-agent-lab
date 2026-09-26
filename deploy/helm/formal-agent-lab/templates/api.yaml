@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "fal.fullname" . }}-api
+  labels: {{- include "fal.labels" . | nindent 4 }}
+    app.kubernetes.io/component: api
+spec:
+  replicas: {{ .Values.api.replicas }}
+  selector:
+    matchLabels: {{- include "fal.selector" (dict "root" . "component" "api") | nindent 6 }}
+  template:
+    metadata:
+      labels: {{- include "fal.selector" (dict "root" . "component" "api") | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext: {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: api
+          image: {{ include "fal.image" (dict "root" . "component" "api") }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["fal-api"]
+          env:
+            {{- include "fal.env" . | nindent 12 }}
+            - name: FAL_API_HOST
+              value: "0.0.0.0"
+            - name: FAL_API_PORT
+              value: {{ .Values.api.port | quote }}
+            {{- with .Values.api.extraEnv }}{{ toYaml . | nindent 12 }}{{- end }}
+          ports: [{ name: http, containerPort: {{ .Values.api.port }} }]
+          readinessProbe: { httpGet: { path: /api/v1/health/ready, port: http }, periodSeconds: 10, timeoutSeconds: 5 }
+          livenessProbe: { httpGet: { path: /health, port: http }, periodSeconds: 20 }
+          securityContext: {{- toYaml .Values.securityContext | nindent 12 }}
+          resources: {{- toYaml .Values.api.resources | nindent 12 }}
+          {{- if ne .Values.externalServices.artifacts.backend "s3" }}
+          volumeMounts: [{ name: artifacts, mountPath: /var/lib/fal/artifacts }]
+          {{- end }}
+      {{- if ne .Values.externalServices.artifacts.backend "s3" }}
+      volumes: [{ name: artifacts, emptyDir: {} }]
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity: {{- toYaml . | nindent 8 }}
+      {{- end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "fal.fullname" . }}-api
+  labels: {{- include "fal.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  selector: {{- include "fal.selector" (dict "root" . "component" "api") | nindent 4 }}
+  ports: [{ name: http, port: {{ .Values.api.port }}, targetPort: http }]

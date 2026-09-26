@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["image", "externalServices", "api", "worker", "web"],
+  "properties": {
+    "externalServices": {
+      "type": "object",
+      "required": ["database", "temporal", "artifacts"],
+      "properties": {
+        "database": { "type": "object", "required": ["existingSecret", "urlKey"] },
+        "temporal": { "type": "object", "required": ["address", "namespace", "taskQueue"] },
+        "artifacts": {
+          "type": "object",
+          "required": ["backend"],
+          "properties": { "backend": { "enum": ["s3", "local"] } }
+        }
+      }
+    },
+    "api": { "type": "object", "properties": { "replicas": { "type": "integer", "minimum": 0 } } },
+    "worker": { "type": "object", "properties": { "replicas": { "type": "integer", "minimum": 0 } } },
+    "web": { "type": "object", "properties": { "replicas": { "type": "integer", "minimum": 0 } } }
+  }
+}

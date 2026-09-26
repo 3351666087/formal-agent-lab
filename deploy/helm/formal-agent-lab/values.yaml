@@ -1,0 +1,72 @@
+# Generic development deployment template. The chart does NOT run PostgreSQL, Temporal or object storage:
+# point it at existing services (externalServices) and existing Secrets.
+
+image:
+  registry: ""                # e.g. ghcr.io/your-org
+  tag: "0.1.0"
+  pullPolicy: IfNotPresent
+  api: { repository: formal-agent-lab/api, digest: "" }       # digest pins take precedence over tag
+  worker: { repository: formal-agent-lab/worker, digest: "" }
+  web: { repository: formal-agent-lab/web, digest: "" }
+imagePullSecrets: []
+
+deploymentProfile: helm-dev
+
+externalServices:
+  database:
+    # Secret key holding a SQLAlchemy URL, e.g. postgresql+psycopg://user:pass@host:5432/fal
+    existingSecret: formal-agent-lab-db
+    urlKey: database-url
+  temporal:
+    address: temporal-frontend.temporal.svc:7233
+    namespace: default
+    taskQueue: formal-lab-experiments
+  artifacts:
+    backend: s3               # s3 | local (local = emptyDir, only for throw-away installs)
+    s3:
+      endpoint: http://minio.storage.svc:9000
+      bucket: formal-lab-artifacts
+      region: us-east-1
+      existingSecret: formal-agent-lab-s3
+      accessKeyKey: access-key-id
+      secretKeyKey: secret-access-key
+
+llm:
+  enabled: false              # true → FAL_LLM_* from llm.existingSecret (base-url, api-key, model)
+  existingSecret: formal-agent-lab-llm
+
+migrations:
+  enabled: true               # Helm hook Job running `fal-migrate upgrade` before install/upgrade
+  backoffLimit: 3
+
+api:
+  replicas: 1
+  port: 8000
+  resources: { requests: { cpu: 100m, memory: 256Mi }, limits: { memory: 1Gi } }
+  extraEnv: []
+
+worker:
+  replicas: 1
+  resources: { requests: { cpu: 250m, memory: 512Mi }, limits: { memory: 2Gi } }
+  extraEnv: []
+
+web:
+  replicas: 1
+  port: 8080
+  resources: { requests: { cpu: 50m, memory: 64Mi }, limits: { memory: 256Mi } }
+
+service:
+  type: ClusterIP
+
+ingress:
+  enabled: false
+  className: ""
+  host: formal-agent-lab.local
+  annotations: {}
+  tls: []
+
+podSecurityContext: { runAsNonRoot: true, runAsUser: 999, runAsGroup: 999, fsGroup: 999 }
+securityContext: { allowPrivilegeEscalation: false, readOnlyRootFilesystem: false, capabilities: { drop: [ALL] } }
+nodeSelector: {}
+tolerations: []
+affinity: {}

@@ -1,0 +1,10 @@
+formal-agent-lab {{ .Chart.AppVersion }} installed as {{ .Release.Name }}.
+
+External services this release expects (not deployed by the chart):
+  PostgreSQL  secret {{ .Values.externalServices.database.existingSecret }}/{{ .Values.externalServices.database.urlKey }}
+  Temporal    {{ .Values.externalServices.temporal.address }} (namespace {{ .Values.externalServices.temporal.namespace }})
+  Artifacts   {{ .Values.externalServices.artifacts.backend }}{{ if eq .Values.externalServices.artifacts.backend "s3" }} {{ .Values.externalServices.artifacts.s3.endpoint }}/{{ .Values.externalServices.artifacts.s3.bucket }}{{ end }}
+
+Web UI:  kubectl port-forward svc/{{ include "fal.fullname" . }}-web 8080:80   → http://127.0.0.1:8080
+Readiness: kubectl port-forward svc/{{ include "fal.fullname" . }}-api 8000:{{ .Values.api.port }} ; curl 127.0.0.1:8000/api/v1/health/ready
+Seed the demo project: kubectl exec deploy/{{ include "fal.fullname" . }}-api -- python -m formal_lab_api.seed

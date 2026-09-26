@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "fal.fullname" . }}-worker
+  labels: {{- include "fal.labels" . | nindent 4 }}
+    app.kubernetes.io/component: worker
+spec:
+  replicas: {{ .Values.worker.replicas }}
+  selector:
+    matchLabels: {{- include "fal.selector" (dict "root" . "component" "worker") | nindent 6 }}
+  template:
+    metadata:
+      labels: {{- include "fal.selector" (dict "root" . "component" "worker") | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext: {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      terminationGracePeriodSeconds: 60   # lets in-flight activities finish; Temporal retries otherwise
+      containers:
+        - name: worker
+          image: {{ include "fal.image" (dict "root" . "component" "worker") }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["fal-worker"]
+          env:
+            {{- include "fal.env" . | nindent 12 }}
+            {{- with .Values.worker.extraEnv }}{{ toYaml . | nindent 12 }}{{- end }}
+          securityContext: {{- toYaml .Values.securityContext | nindent 12 }}
+          resources: {{- toYaml .Values.worker.resources | nindent 12 }}
+          {{- if ne .Values.externalServices.artifacts.backend "s3" }}
+          volumeMounts: [{ name: artifacts, mountPath: /var/lib/fal/artifacts }]
+          {{- end }}
+      {{- if ne .Values.externalServices.artifacts.backend "s3" }}
+      volumes: [{ name: artifacts, emptyDir: {} }]
+      {{- end }}

@@ -1,0 +1,22 @@
+{
+	admin off
+	auto_https off
+}
+
+:8080 {
+	encode gzip
+	handle /api/* {
+		# flush_interval -1 streams Server-Sent Events without buffering
+		reverse_proxy {$FAL_API_UPSTREAM:api:8000} {
+			flush_interval -1
+		}
+	}
+	handle /health {
+		respond "ok" 200
+	}
+	handle {
+		root * /srv
+		try_files {path} /index.html
+		file_server
+	}
+}

@@ -1,0 +1,99 @@
+# Full local stack (single-user local development profile): everything runs in containers, only the web
+# entry point is published, on the loopback interface.
+#   FAL_SOURCE_REVISION=$(git rev-parse HEAD) docker compose -f deploy/compose/docker-compose.yaml up -d --build --wait
+#   open http://127.0.0.1:8080
+name: formal-agent-lab
+
+x-platform-env: &platform-env
+  FAL_DATABASE_URL: postgresql+psycopg://fal:fal@postgres:5432/fal
+  FAL_TEMPORAL_ADDRESS: temporal:7233
+  FAL_TEMPORAL_NAMESPACE: default
+  FAL_TEMPORAL_TASK_QUEUE: formal-lab-experiments
+  FAL_ARTIFACT_BACKEND: s3
+  FAL_S3_ENDPOINT_URL: http://s3:8333
+  FAL_S3_BUCKET: formal-lab-artifacts
+  FAL_S3_ACCESS_KEY_ID: fal-compose-access
+  FAL_S3_SECRET_ACCESS_KEY: fal-compose-secret-key
+  FAL_DEPLOYMENT_PROFILE: compose-local
+  FAL_CORS_ORIGINS: http://127.0.0.1:8080
+
+x-python-build: &python-build
+  context: ../..
+  dockerfile: deploy/docker/python.Dockerfile
+  args:
+    FAL_SOURCE_REVISION: ${FAL_SOURCE_REVISION:-unknown}
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment: { POSTGRES_USER: fal, POSTGRES_PASSWORD: fal, POSTGRES_DB: fal }
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fal -d fal"]
+      interval: 2s
+      retries: 30
+
+  temporal:
+    image: temporalio/temporal:1.9.1
+    command: ["server", "start-dev", "--ip", "0.0.0.0", "--db-filename", "/data/temporal.db", "--ui-port", "8233"]
+    user: "0:0"
+    volumes: [temporaldata:/data]
+    healthcheck:
+      test: ["CMD", "temporal", "operator", "cluster", "health", "--address", "127.0.0.1:7233"]
+      interval: 3s
+      retries: 40
+
+  s3:
+    image: chrislusf/seaweedfs:4.47
+    command: ["mini", "-dir=/data", "-s3.port=8333"]
+    environment:
+      AWS_ACCESS_KEY_ID: fal-compose-access
+      AWS_SECRET_ACCESS_KEY: fal-compose-secret-key
+      S3_BUCKET: formal-lab-artifacts
+    volumes: [s3data:/data]
+
+  migrate:
+    image: formal-agent-lab/api:${FAL_IMAGE_TAG:-local}
+    build: { <<: *python-build, target: api }
+    environment: *platform-env
+    command: ["fal-migrate", "upgrade"]
+    depends_on: { postgres: { condition: service_healthy } }
+    restart: "no"
+
+  api:
+    image: formal-agent-lab/api:${FAL_IMAGE_TAG:-local}
+    build: { <<: *python-build, target: api }
+    environment: *platform-env
+    env_file: [{ path: ../../.env, required: false }]
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+      temporal: { condition: service_healthy }
+      s3: { condition: service_started }
+
+  worker:
+    image: formal-agent-lab/worker:${FAL_IMAGE_TAG:-local}
+    build: { <<: *python-build, target: worker }
+    environment: *platform-env
+    env_file: [{ path: ../../.env, required: false }]
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+      temporal: { condition: service_healthy }
+
+  web:
+    image: formal-agent-lab/web:${FAL_IMAGE_TAG:-local}
+    build:
+      context: ../..
+      dockerfile: deploy/docker/web.Dockerfile
+      args: { FAL_SOURCE_REVISION: "${FAL_SOURCE_REVISION:-unknown}" }
+    environment: { FAL_API_UPSTREAM: "api:8000" }
+    ports: ["127.0.0.1:${FAL_WEB_PORT:-8080}:8080"]
+    depends_on: { api: { condition: service_healthy } }
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8080/health"]
+      interval: 5s
+      retries: 20
+
+volumes:
+  pgdata: {}
+  temporaldata: {}
+  s3data: {}

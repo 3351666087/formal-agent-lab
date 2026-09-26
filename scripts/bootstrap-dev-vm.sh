@@ -8,6 +8,7 @@ NODE_VERSION=24.21.0
 PNPM_VERSION=12.6.0
 HELM_VERSION=4.3.0
 TEMPORAL_CLI_VERSION=1.9.1
+KUBECONFORM_VERSION=0.8.0
 
 PREFIX="${PREFIX:-$HOME/.local}"
 mkdir -p "$PREFIX/bin" "$PREFIX/opt"
@@ -60,6 +61,12 @@ if ! temporal --version 2>/dev/null | grep -q "$TEMPORAL_CLI_VERSION"; then
     | tar -xz -C "$PREFIX/bin" temporal
 fi
 
+if ! kubeconform -v 2>/dev/null | grep -q "$KUBECONFORM_VERSION"; then
+  log "kubeconform $KUBECONFORM_VERSION"
+  curl -fsSL "https://github.com/yannh/kubeconform/releases/download/v${KUBECONFORM_VERSION}/kubeconform-linux-${ARCH}.tar.gz" \
+    | tar -xz -C "$PREFIX/bin" kubeconform
+fi
+
 grep -q 'formal-agent-lab toolchain' "$HOME/.profile" 2>/dev/null || cat >> "$HOME/.profile" <<EOF
 
 # formal-agent-lab toolchain
@@ -68,4 +75,4 @@ EOF
 
 log "toolchain"
 printf '%-10s %s\n' uv "$(uv --version)" node "$(node --version)" pnpm "$(pnpm --version)" \
-  helm "$(helm version --short)" temporal "$(temporal --version)" python3 "$(python3 --version)" make "$(make --version | head -1)"
+  helm "$(helm version --short)" temporal "$(temporal --version)" kubeconform "$(kubeconform -v)" python3 "$(python3 --version)" make "$(make --version | head -1)"

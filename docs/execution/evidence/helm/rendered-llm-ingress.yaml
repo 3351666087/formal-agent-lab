@@ -1,0 +1,340 @@
+---
+# Source: formal-agent-lab/templates/api.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: fal-formal-agent-lab-api
+  labels:
+    app.kubernetes.io/name: formal-agent-lab
+    app.kubernetes.io/instance: fal
+    app.kubernetes.io/version: "0.1.0"
+    app.kubernetes.io/managed-by: Helm
+    helm.sh/chart: formal-agent-lab-0.1.0
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: formal-agent-lab
+    app.kubernetes.io/instance: fal
+    app.kubernetes.io/component: api
+  ports: [{ name: http, port: 8000, targetPort: http }]
+
+---
+# Source: formal-agent-lab/templates/web.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: fal-formal-agent-lab-web
+  labels:
+    app.kubernetes.io/name: formal-agent-lab
+    app.kubernetes.io/instance: fal
+    app.kubernetes.io/version: "0.1.0"
+    app.kubernetes.io/managed-by: Helm
+    helm.sh/chart: formal-agent-lab-0.1.0
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: formal-agent-lab
+    app.kubernetes.io/instance: fal
+    app.kubernetes.io/component: web
+  ports: [{ name: http, port: 80, targetPort: http }]
+
+---
+# Source: formal-agent-lab/templates/api.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fal-formal-agent-lab-api
+  labels:
+    app.kubernetes.io/name: formal-agent-lab
+    app.kubernetes.io/instance: fal
+    app.kubernetes.io/version: "0.1.0"
+    app.kubernetes.io/managed-by: Helm
+    helm.sh/chart: formal-agent-lab-0.1.0
+    app.kubernetes.io/component: api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: formal-agent-lab
+      app.kubernetes.io/instance: fal
+      app.kubernetes.io/component: api
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: formal-agent-lab
+        app.kubernetes.io/instance: fal
+        app.kubernetes.io/component: api
+    spec:
+      securityContext:
+        fsGroup: 999
+        runAsGroup: 999
+        runAsNonRoot: true
+        runAsUser: 999
+      containers:
+        - name: api
+          image: ghcr.io/example/formal-agent-lab/api@sha256:0000000000000000000000000000000000000000000000000000000000000000
+          imagePullPolicy: IfNotPresent
+          command: ["fal-api"]
+          env:
+            - name: FAL_DATABASE_URL
+              valueFrom: { secretKeyRef: { name: formal-agent-lab-db, key: database-url } }
+            - name: FAL_TEMPORAL_ADDRESS
+              value: "temporal-frontend.temporal.svc:7233"
+            - name: FAL_TEMPORAL_NAMESPACE
+              value: "default"
+            - name: FAL_TEMPORAL_TASK_QUEUE
+              value: "formal-lab-experiments"
+            - name: FAL_DEPLOYMENT_PROFILE
+              value: "helm-dev"
+            - name: FAL_ARTIFACT_BACKEND
+              value: "s3"
+            - name: FAL_S3_ENDPOINT_URL
+              value: "http://minio.storage.svc:9000"
+            - name: FAL_S3_BUCKET
+              value: "formal-lab-artifacts"
+            - name: FAL_S3_REGION
+              value: "us-east-1"
+            - name: FAL_S3_ACCESS_KEY_ID
+              valueFrom: { secretKeyRef: { name: formal-agent-lab-s3, key: access-key-id } }
+            - name: FAL_S3_SECRET_ACCESS_KEY
+              valueFrom: { secretKeyRef: { name: formal-agent-lab-s3, key: secret-access-key } }
+            - name: FAL_LLM_BASE_URL
+              valueFrom: { secretKeyRef: { name: formal-agent-lab-llm, key: base-url } }
+            - name: FAL_LLM_API_KEY
+              valueFrom: { secretKeyRef: { name: formal-agent-lab-llm, key: api-key } }
+            - name: FAL_LLM_MODEL
+              valueFrom: { secretKeyRef: { name: formal-agent-lab-llm, key: model } }
+            - name: FAL_API_HOST
+              value: "0.0.0.0"
+            - name: FAL_API_PORT
+              value: "8000"
+          ports: [{ name: http, containerPort: 8000 }]
+          readinessProbe: { httpGet: { path: /api/v1/health/ready, port: http }, periodSeconds: 10, timeoutSeconds: 5 }
+          livenessProbe: { httpGet: { path: /health, port: http }, periodSeconds: 20 }
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            readOnlyRootFilesystem: false
+          resources:
+            limits:
+              memory: 1Gi
+            requests:
+              cpu: 100m
+              memory: 256Mi
+
+---
+# Source: formal-agent-lab/templates/web.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fal-formal-agent-lab-web
+  labels:
+    app.kubernetes.io/name: formal-agent-lab
+    app.kubernetes.io/instance: fal
+    app.kubernetes.io/version: "0.1.0"
+    app.kubernetes.io/managed-by: Helm
+    helm.sh/chart: formal-agent-lab-0.1.0
+    app.kubernetes.io/component: web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: formal-agent-lab
+      app.kubernetes.io/instance: fal
+      app.kubernetes.io/component: web
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: formal-agent-lab
+        app.kubernetes.io/instance: fal
+        app.kubernetes.io/component: web
+    spec:
+      containers:
+        - name: web
+          image: ghcr.io/example/formal-agent-lab/web:0.1.0
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: FAL_API_UPSTREAM
+              value: "fal-formal-agent-lab-api:8000"
+          ports: [{ name: http, containerPort: 8080 }]
+          readinessProbe: { httpGet: { path: /health, port: http }, periodSeconds: 10 }
+          resources:
+            limits:
+              memory: 256Mi
+            requests:
+              cpu: 50m
+              memory: 64Mi
+
+---
+# Source: formal-agent-lab/templates/worker.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fal-formal-agent-lab-worker
+  labels:
+    app.kubernetes.io/name: formal-agent-lab
+    app.kubernetes.io/instance: fal
+    app.kubernetes.io/version: "0.1.0"
+    app.kubernetes.io/managed-by: Helm
+    helm.sh/chart: formal-agent-lab-0.1.0
+    app.kubernetes.io/component: worker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: formal-agent-lab
+      app.kubernetes.io/instance: fal
+      app.kubernetes.io/component: worker
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: formal-agent-lab
+        app.kubernetes.io/instance: fal
+        app.kubernetes.io/component: worker
+    spec:
+      securityContext:
+        fsGroup: 999
+        runAsGroup: 999
+        runAsNonRoot: true
+        runAsUser: 999
+      terminationGracePeriodSeconds: 60   # lets in-flight activities finish; Temporal retries otherwise
+      containers:
+        - name: worker
+          image: ghcr.io/example/formal-agent-lab/worker:0.1.0
+          imagePullPolicy: IfNotPresent
+          command: ["fal-worker"]
+          env:
+            - name: FAL_DATABASE_URL
+              valueFrom: { secretKeyRef: { name: formal-agent-lab-db, key: database-url } }
+            - name: FAL_TEMPORAL_ADDRESS
+              value: "temporal-frontend.temporal.svc:7233"
+            - name: FAL_TEMPORAL_NAMESPACE
+              value: "default"
+            - name: FAL_TEMPORAL_TASK_QUEUE
+              value: "formal-lab-experiments"
+            - name: FAL_DEPLOYMENT_PROFILE
+              value: "helm-dev"
+            - name: FAL_ARTIFACT_BACKEND
+              value: "s3"
+            - name: FAL_S3_ENDPOINT_URL
+              value: "http://minio.storage.svc:9000"
+            - name: FAL_S3_BUCKET
+              value: "formal-lab-artifacts"
+            - name: FAL_S3_REGION
+              value: "us-east-1"
+            - name: FAL_S3_ACCESS_KEY_ID
+              valueFrom: { secretKeyRef: { name: formal-agent-lab-s3, key: access-key-id } }
+            - name: FAL_S3_SECRET_ACCESS_KEY
+              valueFrom: { secretKeyRef: { name: formal-agent-lab-s3, key: secret-access-key } }
+            - name: FAL_LLM_BASE_URL
+              valueFrom: { secretKeyRef: { name: formal-agent-lab-llm, key: base-url } }
+            - name: FAL_LLM_API_KEY
+              valueFrom: { secretKeyRef: { name: formal-agent-lab-llm, key: api-key } }
+            - name: FAL_LLM_MODEL
+              valueFrom: { secretKeyRef: { name: formal-agent-lab-llm, key: model } }
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            readOnlyRootFilesystem: false
+          resources:
+            limits:
+              memory: 2Gi
+            requests:
+              cpu: 250m
+              memory: 512Mi
+
+---
+# Source: formal-agent-lab/templates/ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: fal-formal-agent-lab
+  labels:
+    app.kubernetes.io/name: formal-agent-lab
+    app.kubernetes.io/instance: fal
+    app.kubernetes.io/version: "0.1.0"
+    app.kubernetes.io/managed-by: Helm
+    helm.sh/chart: formal-agent-lab-0.1.0
+  annotations:
+    # Server-Sent Events: keep connections open and unbuffered
+    nginx.ingress.kubernetes.io/proxy-buffering: "off"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+spec:
+  rules:
+    - host: "formal-agent-lab.local"
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend: { service: { name: fal-formal-agent-lab-web, port: { number: 80 } } }
+---
+# Source: formal-agent-lab/templates/migrate-job.yaml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: fal-formal-agent-lab-migrate-1
+  labels:
+    app.kubernetes.io/name: formal-agent-lab
+    app.kubernetes.io/instance: fal
+    app.kubernetes.io/version: "0.1.0"
+    app.kubernetes.io/managed-by: Helm
+    helm.sh/chart: formal-agent-lab-0.1.0
+    app.kubernetes.io/component: migrate
+  annotations:
+    helm.sh/hook: pre-install,pre-upgrade
+    helm.sh/hook-weight: "-5"
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+spec:
+  backoffLimit: 3
+  template:
+    spec:
+      restartPolicy: Never
+      securityContext:
+        fsGroup: 999
+        runAsGroup: 999
+        runAsNonRoot: true
+        runAsUser: 999
+      containers:
+        - name: migrate
+          image: ghcr.io/example/formal-agent-lab/api@sha256:0000000000000000000000000000000000000000000000000000000000000000
+          command: ["fal-migrate", "upgrade"]
+          env:
+            - name: FAL_DATABASE_URL
+              valueFrom: { secretKeyRef: { name: formal-agent-lab-db, key: database-url } }
+            - name: FAL_TEMPORAL_ADDRESS
+              value: "temporal-frontend.temporal.svc:7233"
+            - name: FAL_TEMPORAL_NAMESPACE
+              value: "default"
+            - name: FAL_TEMPORAL_TASK_QUEUE
+              value: "formal-lab-experiments"
+            - name: FAL_DEPLOYMENT_PROFILE
+              value: "helm-dev"
+            - name: FAL_ARTIFACT_BACKEND
+              value: "s3"
+            - name: FAL_S3_ENDPOINT_URL
+              value: "http://minio.storage.svc:9000"
+            - name: FAL_S3_BUCKET
+              value: "formal-lab-artifacts"
+            - name: FAL_S3_REGION
+              value: "us-east-1"
+            - name: FAL_S3_ACCESS_KEY_ID
+              valueFrom: { secretKeyRef: { name: formal-agent-lab-s3, key: access-key-id } }
+            - name: FAL_S3_SECRET_ACCESS_KEY
+              valueFrom: { secretKeyRef: { name: formal-agent-lab-s3, key: secret-access-key } }
+            - name: FAL_LLM_BASE_URL
+              valueFrom: { secretKeyRef: { name: formal-agent-lab-llm, key: base-url } }
+            - name: FAL_LLM_API_KEY
+              valueFrom: { secretKeyRef: { name: formal-agent-lab-llm, key: api-key } }
+            - name: FAL_LLM_MODEL
+              valueFrom: { secretKeyRef: { name: formal-agent-lab-llm, key: model } }
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            readOnlyRootFilesystem: false
+
