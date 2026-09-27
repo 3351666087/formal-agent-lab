@@ -300,8 +300,9 @@ def _routes(app: FastAPI) -> None:
         await db(lambda s: runs.mark_queued(s, run["id"]).id)
         try:
             await orch().start(run["id"], f"run-{run['id']}")
-        except Exception:
-            await db(lambda s: runs.mark_start_failed(s, run["id"], f"workflow could not be started: {exc}").id)
+        except Exception as exc:
+            reason = f"workflow could not be started: {exc}"
+            await db(lambda s: runs.mark_start_failed(s, run["id"], reason).id)
             raise
         return await db(lambda s: runs.run_dict(get_or_404(s, Run, run["id"], "run"), s))
 
