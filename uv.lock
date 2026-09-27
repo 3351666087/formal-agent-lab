@@ -523,12 +523,19 @@ dependencies = [
     { name = "typer" },
 ]
 
+[package.optional-dependencies]
+offline = [
+    { name = "formal-lab-model-core" },
+]
+
 [package.metadata]
 requires-dist = [
     { name = "formal-lab-contracts", editable = "packages/contracts" },
+    { name = "formal-lab-model-core", marker = "extra == 'offline'", editable = "packages/model-core" },
     { name = "httpx", specifier = ">=0.28" },
     { name = "typer", specifier = ">=0.27" },
 ]
+provides-extras = ["offline"]
 
 [[package]]
 name = "formal-lab-solver-z3"

@@ -62,9 +62,12 @@
 | 评测 | 自有 Run/Metric 契约 + Inspect 适配器 | 通过适配层保持平台契约独立 |
 | 发布 | OCI、Compose、Helm、Python SDK、CLI | 开发与最终扩展部署共用构建基础 |
 
-- [ ] **P1-010** 建立 contracts、model-core、solver-adapters、orchestrator、platform-api、web、sdk、evaluation、neutral-environment 等模块边界。
-- [ ] **P1-011** API、Worker、Web 按运行职责部署；内部包保持模块化接口，并由实际部署职责决定服务边界。
-- [ ] **P1-012** 扩展模块通过注册表与能力声明接入。核心包保持插件无关，扩展差异集中在正式接口与元数据中。
+- [x] **P1-010** 建立 contracts、model-core、solver-adapters、orchestrator、platform-api、web、sdk、evaluation、neutral-environment 等模块边界。
+  - 证据：模块边界即 workspace 包：packages/{contracts,contracts-ts,model-core,solver-adapters/z3,neutral-environment,strategies,runtime,evaluation,platform-api,orchestrator,sdk}、web、examples/{neutral-scheduling,external-plugin}；依赖方向由 tests/architecture/test_boundaries.py 按真实 import 检查
+- [x] **P1-011** API、Worker、Web 按运行职责部署；内部包保持模块化接口，并由实际部署职责决定服务边界。
+  - 证据：部署职责：API（fal-api，python.Dockerfile target api）、Worker（fal-worker，target worker）、Web（web.Dockerfile/Caddy）分别部署（Compose 与 Helm 各为独立服务/Deployment）；内部包通过 runtime 引擎与服务层模块化接口复用（docs/execution/evidence/compose-smoke.json）
+- [x] **P1-012** 扩展模块通过注册表与能力声明接入。核心包保持插件无关，扩展差异集中在正式接口与元数据中。
+  - 证据：插件经 formal_lab.plugins entry point + PluginDescriptor 能力声明接入；核心包不 import 插件包、不含示例插件 id（test_core_is_plugin_agnostic）；评分器按 eval.applies_to 能力选择
 - [x] **P1-013** Environment 主线使用项目自带纯数据模拟器；所有已声明能力都对应真实实现与可验证结果。
   - 证据：主线环境为 formal-lab.env.ir-world（packages/neutral-environment，纯数据 IR 模拟器）；声明能力 env.snapshot_restore/observation_delay/truth_overrides/seeded_variation 均有测试（packages/neutral-environment/tests/test_ir_world.py，docs/execution/evidence/M2-core-tests.log）
 
@@ -140,14 +143,16 @@
 - [ ] **P1-040** 从单一契约来源生成其余语言类型；提交生成命令，并在 CI 检查漂移。
 - [x] **P1-041** 实现稳定接口：ModelFrontend.compile、Planner.propose、Verifier.check、Environment.reset/observe/step/snapshot/restore/close、Evaluator.score、ArtifactStore.put/get。
   - 证据：接口定义 packages/contracts/src/formal_lab_contracts/interfaces.py；实现：IRJsonFrontend.compile、Z3BoundedPlanner/EddDispatchPlanner/LLMPlanner.propose、Z3Verifier.check、IRWorldEnvironment.reset/observe/step/snapshot/restore/close、GenericEvaluator/SchedulingScorer.score、Local/S3ArtifactStore.put/get
-- [ ] **P1-042** 每个接口给出可运行示例；Environment 示例仅调用纯数据模拟器。
+- [x] **P1-042** 每个接口给出可运行示例；Environment 示例仅调用纯数据模拟器。
+  - 证据：examples/interfaces/{model_frontend,verifier,environment,planner,evaluator,artifact_store}.py，全部由 tests/examples/test_interface_examples.py 运行通过；Environment 示例只调用纯数据 IR 模拟器
 - [x] **P1-043** 定义统一错误：输入无效、版本不匹配、不支持、超时、结果未知、取消、可/不可重试失败。
   - 证据：formal_lab_contracts.errors：INVALID_INPUT/VERSION_MISMATCH/UNSUPPORTED/TIMEOUT/RESULT_UNKNOWN/CANCELLED/RETRYABLE_FAILURE/NON_RETRYABLE_FAILURE(+NOT_FOUND/CONFLICT)，异常↔ErrorInfo 往返测试 test_error_model_round_trip_and_retryability
 - [x] **P1-044** 扩展字段须有命名空间、版本与 schema；核心对象持续保持强类型结构。
   - 证据：ExtensibleModel.extensions：反向 DNS 命名空间 + version + schema_id，JSON Schema propertyNames 约束，保留 formal-lab.core.*；核心对象 extra=forbid（fixtures invalid/unknown-core-field, bad-extension-namespace）
 - [x] **P1-045** 实现 capabilities 协商；未支持语义返回显式 UNSUPPORTED 结果。
   - 证据：capabilities.negotiate + PluginRegistry.negotiate；test_capability_negotiation；Verifier 对未支持 profile/feature 返回 verdict=UNSUPPORTED（非异常）
-- [ ] **P1-046** 编辑模型产生新版本；运行固定引用版本；旧实验持续引用其原始版本与解释。
+- [x] **P1-046** 编辑模型产生新版本；运行固定引用版本；旧实验持续引用其原始版本与解释。
+  - 证据：编辑=新增不可变 ModelVersion（内容不变不建新版本）；场景与运行固定 (package_id, version, digest)，旧实验继续引用原版本（test_model_versions_are_immutable_and_runs_keep_their_version；UI test_model_workbench_edit_check_and_persist）
 - [ ] **P1-047** 导出 **contracts/v1/**、**docs/contracts/v1.md**，固定契约摘要并写入交接。
 
 ### 4.1 精确结果语义
@@ -194,7 +199,8 @@
   - 证据：无 FAL_LLM_API_KEY 时 LLM 策略显式报错，规则/符号策略完整运行；StubModelClient 结果标注 LLM_STUB（test_llm_stub_results_are_labelled, test_unconfigured_llm_is_explicit）
 - [x] **P1-074** 有可用配置时做一次真实模型集成检查；无配置留下入口及未测记录，继续其余工作。
   - 证据：用户提供的 OpenAI 兼容中转站 + gpt-5.6-sol：normal 场景 14 步 SUCCEEDED，14 次调用 / 104,039 tokens，全部来源 LLM（docs/execution/evidence/P1-074-llm-integration.json，tests/integration/test_llm_real.py）
-- [ ] **P1-075** 使用同一模拟器、预算与评分函数比较策略，保存实际结果。
+- [x] **P1-075** 使用同一模拟器、预算与评分函数比较策略，保存实际结果。
+  - 证据：同一模拟器/预算/评分函数：4 场景 × {EDD 规则, Z3, LLM 替身} × 种子 1–5 = 60 run，结果保存于 examples/neutral-scheduling/results/comparison.json（Z3 相对规则步数更少 p=0.00214，延期成本差异不显著 p=0.706；替身单独标注 LLM_STUB）
 
 ## 7. 平台后端与运行时
 
@@ -288,7 +294,8 @@
 - [x] **P1-126** 回放：离线查看原事件；重新运行产生新 ID，并保留原结果及来源关系。
   - 证据：离线查看导出包（无服务）；重新运行产生新 ID，原 run 保留并记录 lineage（test_cli_export_offline_replay_import_and_rerun, test_import_into_fresh_database_keeps_events_and_allows_rerun）
 - [ ] **P1-127** 部署：Compose 完整路径实测；Helm 渲染与安装验证状态分开记录。
-- [ ] **P1-128** 边界：主路径仅调用中性模拟器，没有扩展动作、外部目标执行器或伪装的自由命令工具。
+- [x] **P1-128** 边界：主路径仅调用中性模拟器，没有扩展动作、外部目标执行器或伪装的自由命令工具。
+  - 证据：主路径仅调用 IR 纯数据模拟器：环境/策略/引擎无 subprocess/shell/socket 执行器，网络只在模型客户端；环境拒绝非模型声明的动作（test_main_path_has_no_external_executors, test_actions_are_limited_to_model_declared_types）
 - [ ] **P1-129** 为关键行为写有意义的测试，避免大量镜像实现的单元测试掩盖端到端未接通。
 
 每个验收项保存命令、退出码、时间、日志和版本。勾选状态以真实执行证据为准。条件式检查（例如缺少外部模型配置时的真实调用、缺少集群时的 Helm 安装）单独记录 NOT_RUN 与原因，并让能力表只展示实际完成和实测的范围。
@@ -299,8 +306,10 @@
 - [ ] **P1-131** 生成 **docs/handoff/phase1.manifest.json**，使用下表固定字段。
 - [ ] **P1-132** 生成 **docs/handoff/phase1-checks.json**：任务 ID、命令、结果、退出码、日志/产物、实际执行时间。
 - [ ] **P1-133** 生成 **docs/architecture/plugin-integration.md**：如何新增前端、语义 profile、规划器、验证器、环境和评分器，并提供生产调度示例。
-- [ ] **P1-134** 在 **tests/contracts/** 保留后续扩展阶段可复用的合同测试与兼容样例。
-- [ ] **P1-135** **examples/neutral-scheduling/** 独立可运行，作为后续回归哨兵。
+- [x] **P1-134** 在 **tests/contracts/** 保留后续扩展阶段可复用的合同测试与兼容样例。
+  - 证据：tests/contracts/：build_fixtures.py + fixtures/{valid,invalid,semantic-invalid}（15/11/7 个兼容样例）+ test_contracts.py；TS 侧 packages/contracts-ts/test 复用同一组样例
+- [x] **P1-135** **examples/neutral-scheduling/** 独立可运行，作为后续回归哨兵。
+  - 证据：python -m formal_lab_example_scheduling run|compare|check|export-model 无需服务独立运行；回归哨兵 examples/neutral-scheduling/tests/test_sentinel.py
 - [ ] **P1-136** 输出真实变更与交接状态，并在 phase-handoff/v1 产物生成后结束本阶段执行。
 
 | manifest 字段 | 要求 |
