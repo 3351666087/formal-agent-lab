@@ -10,7 +10,13 @@ from __future__ import annotations
 import json
 
 from formal_lab_example_scheduling.model import build_model
-from formal_lab_example_scheduling.scenarios import BUDGET, SCENARIO_CONFIGS, STOP, STRATEGIES
+from formal_lab_example_scheduling.scenarios import (
+    BUDGET,
+    SCENARIO_CONFIGS,
+    STOP,
+    STRATEGIES,
+    TWO_DISPATCHER_CONFIGS,
+)
 from formal_lab_example_warehouse import NAMESPACE, SCHEMA_ID, demo_model
 from formal_lab_example_warehouse import scenarios as wh
 from sqlalchemy import select
@@ -107,6 +113,26 @@ def seed_scheduling(s) -> dict[str, object]:
             "turns": {"mode": "ROUND_ROBIN", "observation_timing": "ROUND_START", "conflict_policy": "REVALIDATE"},
             "termination": {"joint_goal": "all_done", "on_no_action": "SKIP_ACTOR", "no_progress_limit": 12},
             "extensions": _ext("two-dispatchers"),
+        })
+    for key, (label, pair) in {"two-rule-rule": ("两名调度员：规则+规则", TWO_DISPATCHER_CONFIGS["rule+rule"]),
+                               "two-model-symbolic": ("两名调度员：模型+符号（需模型配置）",
+                                                      TWO_DISPATCHER_CONFIGS["model+symbolic"])}.items():
+        if key in existing:
+            continue
+        scenarios.create_scenario(s, project.id, {
+            "name": label, "model_version_id": v2.id,
+            "description": "Two dispatchers share all machines and take turns (" + " + ".join(pair) + ")"
+                           + ("; the model participant needs FAL_LLM_* configured, otherwise the run fails at "
+                              "start with that reason" if "llm" in pair else ""),
+            "environment": {"plugin": {"plugin_id": "formal-lab.env.ir-world", "version": "1.1.0"},
+                            "config": SCENARIO_CONFIGS["normal"]["env"]},
+            "participants": [
+                {"actor_id": "dispatcher_a", "role": "dispatcher", "label": "调度员 A", "strategy": STRATEGIES[pair[0]]},
+                {"actor_id": "dispatcher_b", "role": "dispatcher", "label": "调度员 B", "strategy": STRATEGIES[pair[1]]}],
+            "budget": BUDGET, "seed": 0, "objective": objective,
+            "turns": {"mode": "ROUND_ROBIN", "observation_timing": "ROUND_START", "conflict_policy": "REVALIDATE"},
+            "termination": {"joint_goal": "all_done", "on_no_action": "SKIP_ACTOR", "no_progress_limit": 12},
+            "extensions": _ext(key),
         })
     return {"project_id": project.id, "model_id": model.id, "model_version": version.version, "strategies": ids}
 

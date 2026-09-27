@@ -163,25 +163,45 @@
 - [x] **P2-035** 将默认终止条件抽象为明确的运行配置，区分单参与者目标完成、联合完成、无可选动作和预算结束。
   - 证据：默认终止条件抽象为 TerminationPolicy：joint_goal（联合完成）、actor_goals IGNORE/ANY/ALL（单参与者目标完成 / 全部参与者目标）、invariants、on_no_action FAIL/SKIP_ACTOR/END（无可选动作）、no_progress_limit；预算结束（全局 BUDGET_EXHAUSTED / 全部参与者退役 ACTOR_BUDGETS_EXHAUSTED）；类型化 TerminationReason 写入 RunManifest 与终止事件；v1 stop_conditions 等价映射；测试 test_termination_reasons
   - 实现：`packages/contracts/src/formal_lab_contracts/kernel.py`、`packages/runtime/src/formal_lab_runtime/engine.py`
-- [ ] **P2-036** 全局与参与者预算分别计数；记录模型尝试、成功调用、已知 token 用量和未报告用量。
+- [x] **P2-036** 全局与参与者预算分别计数；记录模型尝试、成功调用、已知 token 用量和未报告用量。
+  - 证据：BudgetUsage/ModelUsage count model attempts, answered calls, known tokens, unreported and unconfirmed calls, globally and per actor (actor_usage); tests: packages/strategies/tests/test_llm_planner.py::test_unreported_usage_timeouts_and_cancellation, test_task_planner::test_model_generator_answers_are_checked_and_failures_fall_back; real relay: docs/execution/evidence/phase2/model/evidence.json (per_step usage_unreported_calls, mixed actor_usage)
+  - 实现：`packages/strategies/src/formal_lab_strategies/llm_planner.py`、`packages/strategies/src/formal_lab_strategies/model_clients.py`、`packages/runtime/src/formal_lab_runtime/engine.py`
 - [x] **P2-037** 多参与者暂停、继续、取消、Worker 重启后恢复到正确轮次，并保留各自计划进度。
   - 证据：多参与者暂停（在步边界、事件记录轮次游标）、继续、取消（CANCELLED + termination_reason）、Worker SIGKILL 后恢复到正确轮次：全局步逐一不重复、轮流顺序与各参与者 actor_step 连续、参与者用量之和等于全局步、Z3 调度员计划版本只增不减（检查点恢复而非重置）；tests/integration/test_multi_actor_platform.py 2 项通过
   - 实现：`tests/integration/test_multi_actor_platform.py`、`packages/platform-api/src/formal_lab_api/services/execution.py`
 - [ ] **P2-038** 更新 StepRecord、EpisodeRecord、矩阵维度、评分器输入和回放器对多参与者的支持；旧单参与者包继续可读。
-- [ ] **P2-039** 交付规则+规则、规则+符号、可配置模型+符号三个运行配置；实测模型配置可用时运行第三种，其余两种始终可验收。
+- [x] **P2-039** 交付规则+规则、规则+符号、可配置模型+符号三个运行配置；实测模型配置可用时运行第三种，其余两种始终可验收。
+  - 证据：TWO_DISPATCHER_CONFIGS rule+rule / rule+symbolic / model+symbolic; seeded platform scenarios; test_multi_actor::test_delivered_two_participant_configurations (model+symbolic marked llm, skipped NOT_RUN without key) — 3 passed incl. real relay gpt-5.6-sol; evidence docs/execution/evidence/phase2/model/evidence.json (mixed: llm+z3 SUCCEEDED)
+  - 实现：`examples/neutral-scheduling/src/formal_lab_example_scheduling/scenarios.py`、`packages/platform-api/src/formal_lab_api/seed.py`、`packages/runtime/tests/test_multi_actor.py`
 
 ## 5. 持久任务计划与通用策略能力
 
 保留当前 Planner.propose 的兼容入口。在其周围建设可恢复计划，而不是建立另一套编排系统。长任务直接复用 [temporalio/sdk-python](https://github.com/temporalio/sdk-python)；消息处理参考 [Temporal Signals / Queries / Updates](https://docs.temporal.io/encyclopedia/workflow-message-passing)。
 
-- [ ] **P2-040** 实现 TaskPlan、TaskNode、依赖、完成判据、计划版本与当前游标；用订单分解和工序依赖验证。
-- [ ] **P2-041** 为策略提供显式 checkpoint/restore 能力，保存结构化任务进度、必要摘要、随机状态和缓存引用。
-- [ ] **P2-042** 计划失效由新观测、资源变化、预算或效果差异触发；保存修订前后计划和原因。
-- [ ] **P2-043** 提供规则、符号、模型辅助三种计划生成方式，统一产出类型化对象并走相同运行通路。
-- [ ] **P2-044** 扩展现有模型客户端的结构化输出校验、超时、限流退避和取消；将传输失败、格式失败与模型返回的业务结果分别记录。
-- [ ] **P2-045** 模型配置与开发模型标签分离；调用记录保存实际返回的型号、请求配置和用量。使用现有配置，凭据缺失时报告对应检查未运行。
-- [ ] **P2-046** 用同种子的新进程对照不中断运行与中途恢复：比较动作轨迹、轮次、任务游标和规则/符号结果；真实模型重跑只声称请求与证据可复现。
-- [ ] **P2-047** 处理重复无进展、重复观测和无候选状态，交付有停止理由的结果；对现有 state-delay 案例给出策略行为差异报告。
+- [x] **P2-040** 实现 TaskPlan、TaskNode、依赖、完成判据、计划版本与当前游标；用订单分解和工序依赖验证。
+  - 证据：TaskPlan/TaskNode (depends_on from the model's pred table, done_when on the belief, version, cursor = dispatched node); examples/neutral-scheduling/tests/test_task_planner.py::test_orders_become_dependent_tasks_with_completion_criteria
+  - 实现：`examples/neutral-scheduling/src/formal_lab_example_scheduling/task_planner.py`、`packages/contracts/src/formal_lab_contracts/execution.py`
+- [x] **P2-041** 为策略提供显式 checkpoint/restore 能力，保存结构化任务进度、必要摘要、随机状态和缓存引用。
+  - 证据：PlannerCheckpoint = plan + progress (working state, pending prediction, rejection memory, budget mode, generator note) + RNG state; restored before every proposal; test_task_planner::test_resume_in_a_fresh_process_equals_the_uninterrupted_run (checkpoint contents asserted)
+  - 实现：`examples/neutral-scheduling/src/formal_lab_example_scheduling/task_planner.py`、`packages/runtime/src/formal_lab_runtime/engine.py`
+- [x] **P2-042** 计划失效由新观测、资源变化、预算或效果差异触发；保存修订前后计划和原因。
+  - 证据：Revisions on EFFECT_DIFFERENCE / ACTION_REJECTED / RESOURCE_CHANGE / NEW_OBSERVATION / BUDGET (once) / RULE, each PLAN_UPDATED with trigger, detail, parent_version and the previous plan on record; unchanged order = no new version; test_task_planner::test_revisions_record_trigger_parent_and_reason
+  - 实现：`examples/neutral-scheduling/src/formal_lab_example_scheduling/task_planner.py`
+- [x] **P2-043** 提供规则、符号、模型辅助三种计划生成方式，统一产出类型化对象并走相同运行通路。
+  - 证据：generators rule (EDD / budget mode), symbolic (Z3 plan order), model (JSON-schema order, dependency-respecting permutation check, fallback) → same TaskPlan, same engine path; test_task_planner::test_three_generators_share_one_path[RULE|SYMBOLIC|LLM_STUB], ::test_model_generator_answers_are_checked_and_failures_fall_back; real model: evidence/phase2/model (task-model runs)
+  - 实现：`examples/neutral-scheduling/src/formal_lab_example_scheduling/task_planner.py`
+- [x] **P2-044** 扩展现有模型客户端的结构化输出校验、超时、限流退避和取消；将传输失败、格式失败与模型返回的业务结果分别记录。
+  - 证据：ModelCall outcome OK / FORMAT_ERROR / TRANSPORT_ERROR kept apart from business validity; jsonschema validation, per-attempt timeout, 408/409/429/5xx backoff honouring Retry-After, cancel Event; packages/strategies/tests/test_llm_planner.py (http errors, rate limit, format vs transport, timeouts/cancellation)
+  - 实现：`packages/strategies/src/formal_lab_strategies/model_clients.py`、`packages/strategies/src/formal_lab_strategies/llm_planner.py`
+- [x] **P2-045** 模型配置与开发模型标签分离；调用记录保存实际返回的型号、请求配置和用量。使用现有配置，凭据缺失时报告对应检查未运行。
+  - 证据：strategy config 'model' vs FAL_LLM_MODEL label; each call records model_requested, model_returned, request (messages, schema, temperature, timeout, attempts), usage as reported; scripts/model_evidence.py uses the existing .env config and writes NOT_RUN when the key is missing; docs/execution/evidence/phase2/model/{evidence.json,summary.md} (4/4 PASS against gpt-5.6-sol)
+  - 实现：`scripts/model_evidence.py`、`packages/strategies/src/formal_lab_strategies/model_clients.py`
+- [x] **P2-046** 用同种子的新进程对照不中断运行与中途恢复：比较动作轨迹、轮次、任务游标和规则/符号结果；真实模型重跑只声称请求与证据可复现。
+  - 证据：fresh-process resume == uninterrupted (trajectory, turn, task cursor, checkpoint digests, check verdicts, metrics) for task-rule/task-symbolic/task-model-stub: test_task_planner::test_resume_in_a_fresh_process_equals_the_uninterrupted_run; real model claims only request + evidence reproducibility: evidence/phase2/model (requests: identical first request digest; resume: boundary checkpoint restored, events contiguous, calls complete)
+  - 实现：`examples/neutral-scheduling/tests/test_task_planner.py`、`scripts/model_evidence.py`
+- [x] **P2-047** 处理重复无进展、重复观测和无候选状态，交付有停止理由的结果；对现有 state-delay 案例给出策略行为差异报告。
+  - 证据：no progress → NO_PROGRESS with stall in the stop text (no_progress_limit); repeated observation request with unchanged revision declined and recorded (served:false); no candidate → NO_APPLICABLE_ACTION; tests: test_kernel::test_repeated_observation_request_is_declined_and_no_progress_ends_the_run, test_task_planner::test_a_stalled_strategy_ends_with_a_reason_instead_of_the_budget, ::test_delayed_observations_neither_double_dispatch_nor_retry_a_busy_machine; report docs/execution/evidence/phase2/state-delay/report.md (6 strategies × 5 seeds × with/without stop)
+  - 实现：`packages/runtime/src/formal_lab_runtime/engine.py`、`scripts/state_delay_report.py`、`examples/neutral-scheduling/src/formal_lab_example_scheduling/task_planner.py`
 
 ## 6. 操作协调与持久服务环境
 

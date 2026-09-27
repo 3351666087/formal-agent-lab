@@ -77,6 +77,29 @@ def test_two_dispatchers_take_turns_with_own_usage(reg):
     assert all(f":{e.actor_id}:" in (e.idempotency_key or "") for e in props)
 
 
+@pytest.mark.parametrize("config", ["rule+rule", "rule+symbolic",
+                                    pytest.param("model+symbolic", marks=pytest.mark.llm)])
+def test_delivered_two_participant_configurations(reg, config):
+    """P2-039: rule+rule and rule+symbolic always run; model+symbolic runs when a model endpoint is configured
+    (otherwise NOT_RUN with that reason — never a stub in its place)."""
+    from formal_lab_example_scheduling.scenarios import TWO_DISPATCHER_CONFIGS
+    from formal_lab_runtime.settings import llm_configured
+
+    pair = TWO_DISPATCHER_CONFIGS[config]
+    if "llm" in pair and not llm_configured():
+        pytest.skip("FAL_LLM_API_KEY not configured (NOT_RUN)")
+    pkg = model_package()
+    res = run(reg, two_dispatchers(pkg, seed=2, strategies=pair), pkg, f"run_cfg_{config.replace('+', '_')}")
+    assert res.status == "SUCCEEDED" and str(res.termination_reason) == "JOINT_GOAL_REACHED"
+    kinds = {e.actor_id: e.payload["proposal"]["source"]["kind"] for e in res.events
+             if str(e.event_type) == "ACTION_PROPOSED"}
+    expect = {"rule": "RULE", "z3": "SYMBOLIC", "llm": "LLM"}
+    assert kinds == {"dispatcher_a": expect[pair[0]], "dispatcher_b": expect[pair[1]]}
+    assert set(res.actor_usage) == {"dispatcher_a", "dispatcher_b"}
+    if "llm" in pair:
+        assert res.actor_usage["dispatcher_a"]["model_calls"] > 0 and res.actor_usage["dispatcher_b"]["model_calls"] == 0
+
+
 @pytest.mark.parametrize("policy", ["REVALIDATE", "REJECT_STALE"])
 def test_two_dispatchers_wanting_the_same_machine_is_arbitrated_deterministically(reg, policy):
     """Round-start observations: dispatcher B proposes on the state before A's action and asks for the machine and

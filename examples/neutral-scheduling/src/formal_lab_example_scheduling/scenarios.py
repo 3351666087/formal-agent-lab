@@ -95,6 +95,12 @@ def all_scenarios(package: ModelPackage) -> list[ScenarioManifest]:
     return [scenario(k, package) for k in SCENARIO_CONFIGS]
 
 
+# the three delivered two-participant configurations (P2-039); the model one needs a configured endpoint
+TWO_DISPATCHER_CONFIGS: dict[str, tuple[str, str]] = {"rule+rule": ("rule", "rule"),
+                                                      "rule+symbolic": ("rule", "z3"),
+                                                      "model+symbolic": ("llm", "z3")}
+
+
 def two_dispatchers(package: ModelPackage, *, seed: int = 0, strategies: tuple[str, str] = ("rule", "rule"),
                     timing: str = "TURN_START", conflict_policy: str = "REVALIDATE", key: str = "normal",
                     turns: dict | None = None, env: dict | None = None,
