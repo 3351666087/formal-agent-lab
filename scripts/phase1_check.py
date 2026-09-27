@@ -132,19 +132,26 @@ def versions() -> dict[str, str]:
 
 
 def run_remote_ci(check: Check, log: Path) -> tuple[str, int, str]:
+    """Result of the GitHub Actions run for exactly this HEAD; waits (up to 40 min) while it is still running."""
     rev = subprocess.run(["git", "rev-parse", "HEAD"], cwd=ROOT, capture_output=True, text=True).stdout.strip()
-    url = "https://api.github.com/repos/3351666087/formal-agent-lab/actions/runs?per_page=10&branch=main"
-    data = json.load(urllib.request.urlopen(urllib.request.Request(url, headers={"User-Agent": "fal-phase1-check"}),
-                                            timeout=30))
-    runs = data.get("workflow_runs", [])
-    done = [r for r in runs if r["status"] == "completed"]
-    lines = [f"{r['head_sha'][:10]} {r['status']} {r['conclusion']} {r['html_url']}" for r in runs]
-    log.write_text("\n".join(lines) + "\n")
-    if not done:
-        return "NOT_RUN", 0, "no completed CI run yet"
-    latest = done[0]
-    note = f"latest completed run {latest['html_url']} on {latest['head_sha'][:10]} (HEAD {rev[:10]}): {latest['conclusion']}"
-    return ("PASS" if latest["conclusion"] == "success" else "FAIL"), 0, note
+    url = "https://api.github.com/repos/3351666087/formal-agent-lab/actions/runs?per_page=20&branch=main"
+    deadline = time.time() + 40 * 60
+    while True:
+        data = json.load(urllib.request.urlopen(urllib.request.Request(url, headers={"User-Agent": "fal-phase1-check"}),
+                                                timeout=30))
+        runs = data.get("workflow_runs", [])
+        log.write_text("\n".join(f"{r['head_sha'][:10]} {r['status']} {r['conclusion']} {r['html_url']}"
+                                 for r in runs) + "\n")
+        mine = [r for r in runs if r["head_sha"] == rev]
+        if not mine:
+            return "NOT_RUN", 0, f"no CI run for HEAD {rev[:10]} (not pushed?)"
+        latest = mine[0]
+        if latest["status"] == "completed":
+            note = f"CI run {latest['html_url']} on HEAD {rev[:10]}: {latest['conclusion']}"
+            return ("PASS" if latest["conclusion"] == "success" else "FAIL"), 0, note
+        if time.time() > deadline:
+            return "NOT_RUN", 0, f"CI run {latest['html_url']} on HEAD {rev[:10]} still {latest['status']}"
+        time.sleep(30)
 
 
 def main() -> int:
