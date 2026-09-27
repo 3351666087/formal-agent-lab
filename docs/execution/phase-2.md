@@ -89,7 +89,9 @@
 - [x] **P2-011** 为现有 deterministic_finite_v1 提供驱动，原生产调度样例保持相同语义与可读历史结果。
   - 证据：IR 驱动 formal-lab.driver.ir-finite 保持 deterministic_finite_v1 语义：阶段一回放包 normal.replay.zip 的逐步动作/结果/指标由新内核逐一复现（test_single_participant_run_reproduces_the_phase1_trajectory）；哨兵 compare（4 场景 × rule/z3 × 种子 1-3）中规则策略全部指标与改动前基线逐格一致；Z3 格的差异经证实源于阶段一结果依赖进程内运行顺序（阶段一代码自身单独/批量 12 格中 8 格不同），新内核单独=批量（docs/execution/evidence/phase2/z3-reproducibility.json，D-017）；阶段一回放包仍可读（@1 → v2 升级）
   - 实现：`packages/model-core/src/formal_lab_model/driver.py`、`packages/runtime/tests/test_kernel.py`、`docs/execution/evidence/phase2/z3-reproducibility.json`
-- [ ] **P2-012** 用第二个独立实现的仓储资源分配插件验证候选、预测和性质计算来自驱动；通用 runtime 无须识别具体场景名称。
+- [x] **P2-012** 用第二个独立实现的仓储资源分配插件验证候选、预测和性质计算来自驱动；通用 runtime 无须识别具体场景名称。
+  - 证据：第二个独立实现的语义：examples/warehouse-allocation（profile warehouse_alloc_v1，命名空间载荷 + 自有 JSON schema；驱动以 Python 实现候选（按读取集枚举补全）、预测、性质、读取集与信念，完全不经 IR）；通用纯数据环境 formal-lab.env.driver-world 只经驱动模拟；运行内核与平台核心不含任何仓储名称（tests/architecture 检查 core 不得提及 warehouse）；本地（单人、收货员+拣货员）与平台（Temporal）运行均成功，Z3 验证器对该 profile 如实回答 UNSUPPORTED 并记入协商
+  - 实现：`examples/warehouse-allocation/src/formal_lab_example_warehouse/driver.py`、`packages/neutral-environment/src/formal_lab_env/driver_world.py`、`tests/integration/test_multi_actor_platform.py`、`tests/architecture/test_boundaries.py`
 - [x] **P2-013** 审查 ModelPackage.ir 的强制 ModelIR 类型及 PluginInterface 枚举。兼容扩展使用有 schema 的命名空间载荷；确需非 ModelIR 载荷时交付真实的并行 v2 契约与 v1 适配器。
   - 证据：审查结论：v1 ModelPackage.ir 为必填 ModelIR、PluginInterface 封闭枚举，第二语义（非 IR 载荷）与 SEMANTIC_DRIVER/PROBE 无法在 v1 兼容表达（v1 消费者会拒绝），故交付并行 formal-lab-contracts/v2（ModelPackage.payload = fal-ir | namespaced{namespace, schema_id, data}，ir 保留为访问器）与 v1 适配器 formal_lab_contracts.compat；兼容扩展仍走带 schema 的命名空间 extensions；决策 D-015
   - 实现：`packages/contracts/src/formal_lab_contracts/objects.py`、`packages/contracts/src/formal_lab_contracts/compat.py`、`packages/contracts/src/formal_lab_contracts/v1/__init__.py`
@@ -145,14 +147,26 @@
 
 先实现每个逻辑步一个参与者动作的显式交错语义。以两名生产调度员协调机器、仓储工位分配为验收场景。
 
-- [ ] **P2-030** 替换固定 participants[0] 的调度方式，实现 round-robin 与场景声明的固定轮次表。
-- [ ] **P2-031** 持久化当前 actor、全局 step、actor_step、round 与调度游标；默认单参与者配置保持兼容。
+- [x] **P2-030** 替换固定 participants[0] 的调度方式，实现 round-robin 与场景声明的固定轮次表。
+  - 证据：participants[0] 固定调度被替换为 TurnScheduler（CycleScheduler）：ROUND_ROBIN 与场景声明的 FIXED_TABLE 轮次表（可重复参与者）；退役参与者的槽位跳过且不占全局步；测试 test_round_robin_and_fixed_table_cursor、test_two_dispatchers_take_turns_with_own_usage
+  - 实现：`packages/runtime/src/formal_lab_runtime/turns.py`、`packages/runtime/src/formal_lab_runtime/engine.py`
+- [x] **P2-031** 持久化当前 actor、全局 step、actor_step、round 与调度游标；默认单参与者配置保持兼容。
+  - 证据：当前参与者、全局步、actor_step、round 与调度游标（TurnState.position，含跳过/退役/已达目标/无进展计数）持久化在 CarryState（平台 runs.carry，随每步原子提交）与事件 turn 字段；单参与者 ROUND_ROBIN 与阶段一编号一致（阶段一回放包逐步复现）；平台测试暂停/Worker SIGKILL 后轮次连续
+  - 实现：`packages/runtime/src/formal_lab_runtime/engine.py`、`packages/platform-api/src/formal_lab_api/services/execution.py`、`packages/contracts/src/formal_lab_contracts/execution.py`
 - [ ] **P2-032** 每个参与者获得自己的 Observation、目标、候选集合、策略实例与用量，展示层可切换参与者视角。
-- [ ] **P2-033** 明确轮次动作的观测时点、世界修订号与共享资源冲突裁决；为两位调度员同时希望分配同一机器的情形写确定性验收。
-- [ ] **P2-034** 事件键、operation_id、proposal_id 和因果关系包含必要的 actor/turn 信息；同轮次重放产生一致业务结果。
-- [ ] **P2-035** 将默认终止条件抽象为明确的运行配置，区分单参与者目标完成、联合完成、无可选动作和预算结束。
+- [x] **P2-033** 明确轮次动作的观测时点、世界修订号与共享资源冲突裁决；为两位调度员同时希望分配同一机器的情形写确定性验收。
+  - 证据：观测时点 TURN_START / ROUND_START，世界修订号随每个已应用动作递增；共享资源冲突裁决 REVALIDATE（前提仍成立则执行）/ REJECT_STALE（其依赖的位置在提案修订号之后被写过则拒绝），被拒结果携带 ConflictInfo（基于修订号、当前修订号、变更位置、写入者）；确定性验收：两名调度员 ROUND_START 下 B 提议 A 刚占用的同一工序/机器，两种策略下均被拒且两次运行完全一致；TURN_START 下无冲突（test_two_dispatchers_wanting_the_same_machine_is_arbitrated_deterministically）
+  - 实现：`packages/neutral-environment/src/formal_lab_env/ir_world.py`、`packages/neutral-environment/src/formal_lab_env/driver_world.py`、`examples/neutral-scheduling/src/formal_lab_example_scheduling/scenarios.py`
+- [x] **P2-034** 事件键、operation_id、proposal_id 和因果关系包含必要的 actor/turn 信息；同轮次重放产生一致业务结果。
+  - 证据：事件键 {run}:s{g}:{actor}:{kind}、proposal_id {run}:s{g}:{actor}:proposal、operation_id {run}:s{g}:{actor}:apply 与因果父事件均含参与者/轮次；同轮次重放产生相同键（幂等去重）与一致业务结果（新进程续跑与不中断运行逐步一致：test_multi_actor_resume_in_a_fresh_process、平台 SIGKILL 后无重复事件）
+  - 实现：`packages/runtime/src/formal_lab_runtime/engine.py`
+- [x] **P2-035** 将默认终止条件抽象为明确的运行配置，区分单参与者目标完成、联合完成、无可选动作和预算结束。
+  - 证据：默认终止条件抽象为 TerminationPolicy：joint_goal（联合完成）、actor_goals IGNORE/ANY/ALL（单参与者目标完成 / 全部参与者目标）、invariants、on_no_action FAIL/SKIP_ACTOR/END（无可选动作）、no_progress_limit；预算结束（全局 BUDGET_EXHAUSTED / 全部参与者退役 ACTOR_BUDGETS_EXHAUSTED）；类型化 TerminationReason 写入 RunManifest 与终止事件；v1 stop_conditions 等价映射；测试 test_termination_reasons
+  - 实现：`packages/contracts/src/formal_lab_contracts/kernel.py`、`packages/runtime/src/formal_lab_runtime/engine.py`
 - [ ] **P2-036** 全局与参与者预算分别计数；记录模型尝试、成功调用、已知 token 用量和未报告用量。
-- [ ] **P2-037** 多参与者暂停、继续、取消、Worker 重启后恢复到正确轮次，并保留各自计划进度。
+- [x] **P2-037** 多参与者暂停、继续、取消、Worker 重启后恢复到正确轮次，并保留各自计划进度。
+  - 证据：多参与者暂停（在步边界、事件记录轮次游标）、继续、取消（CANCELLED + termination_reason）、Worker SIGKILL 后恢复到正确轮次：全局步逐一不重复、轮流顺序与各参与者 actor_step 连续、参与者用量之和等于全局步、Z3 调度员计划版本只增不减（检查点恢复而非重置）；tests/integration/test_multi_actor_platform.py 2 项通过
+  - 实现：`tests/integration/test_multi_actor_platform.py`、`packages/platform-api/src/formal_lab_api/services/execution.py`
 - [ ] **P2-038** 更新 StepRecord、EpisodeRecord、矩阵维度、评分器输入和回放器对多参与者的支持；旧单参与者包继续可读。
 - [ ] **P2-039** 交付规则+规则、规则+符号、可配置模型+符号三个运行配置；实测模型配置可用时运行第三种，其余两种始终可验收。
 
