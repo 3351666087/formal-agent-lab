@@ -5,7 +5,6 @@ from __future__ import annotations
 import json
 
 import pytest
-
 from formal_lab_example_scheduling.__main__ import main
 
 

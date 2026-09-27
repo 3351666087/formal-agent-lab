@@ -114,7 +114,7 @@ def test_budget_dimensions():
 
     b = Budget(max_steps=10, max_wall_seconds=5, max_model_calls=3, max_tokens=100)
     rule_dims = ["steps", "wall_seconds"]
-    llm_dims = rule_dims + ["model_calls", "tokens"]
+    llm_dims = [*rule_dims, "model_calls", "tokens"]
     assert budget_exhausted(b, BudgetUsage(steps=9, wall_seconds=4.9), rule_dims) is None
     assert "step" in budget_exhausted(b, BudgetUsage(steps=10), rule_dims)
     assert "wall-clock" in budget_exhausted(b, BudgetUsage(wall_seconds=5.0), rule_dims)

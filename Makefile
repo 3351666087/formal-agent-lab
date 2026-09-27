@@ -32,9 +32,10 @@ lock: ## re-resolve dependency locks
 contracts: ## regenerate JSON Schemas, digest and TypeScript types from the Pydantic source
 	$(PY) -m formal_lab_contracts.schema_export --out contracts/v1
 	pnpm --filter @formal-lab/contracts run generate
+	$(PY) -m formal_lab_contracts.docs --out docs/contracts/v1.md
 
 contracts-check: contracts ## fail if generated contracts drift from the committed ones
-	git diff --exit-code -- contracts/v1 packages/contracts-ts/src
+	git diff --exit-code -- contracts/v1 packages/contracts-ts/src docs/contracts/v1.md
 
 # ----------------------------------------------------------------- quality
 .PHONY: lint test test-unit test-integration

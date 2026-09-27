@@ -211,7 +211,7 @@ for _name, _method in (("cancel", "cancel"), ("pause", "pause"), ("resume", "res
 def matrix_run(project: str = typer.Option(...), scenario: list[str] = typer.Option(...),
                strategy: list[str] = typer.Option(...), seeds: str = typer.Option("1,2,3"),
                max_steps: list[int] = typer.Option(None, help="budget variants (max_steps); default: scenario budget"),
-               name: str = typer.Option("cli-matrix"), wait: bool = typer.Option(True), report: Path = None,
+               name: str = typer.Option("cli-matrix"), wait: bool = typer.Option(True), report: Path | None = None,
                api: str = API) -> None:
     """Run every scenario × strategy × seed × budget combination and print the comparison report."""
     c = _client(api)
@@ -236,7 +236,7 @@ def matrix_run(project: str = typer.Option(...), scenario: list[str] = typer.Opt
 
 
 @matrix_app.command("report")
-def matrix_report(matrix_id: str, output: Path = None, api: str = API) -> None:
+def matrix_report(matrix_id: str, output: Path | None = None, api: str = API) -> None:
     try:
         rep = _client(api).matrix_report(matrix_id)
     except FormalLabError as exc:

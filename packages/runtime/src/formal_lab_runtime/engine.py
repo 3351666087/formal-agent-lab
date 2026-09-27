@@ -7,6 +7,7 @@ from (run_id, step), so a retried step produces the same ids and idempotency key
 
 from __future__ import annotations
 
+import contextlib
 import hashlib
 import time
 from dataclasses import dataclass, field
@@ -492,8 +493,6 @@ def finish_run(rc: RunComponents, *, status: RunStatus, reason: str | None, fina
                              {"status": status.value, "reason": reason, "usage": usage.model_dump(),
                               "final_properties": properties},
                              [event_key(m.run_id, None, "metrics")]))
-    try:
+    with contextlib.suppress(Exception):  # closing is best effort; the state is already persisted
         rc.env.close()
-    except Exception:  # closing is best effort; the state is already persisted
-        pass
     return FinishResult(metrics, final_state, properties, events)

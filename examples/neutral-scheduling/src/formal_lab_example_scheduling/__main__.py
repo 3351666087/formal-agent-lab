@@ -96,7 +96,7 @@ def cmd_check(args: argparse.Namespace) -> int:
                           ("INVARIANT_VIOLATION", "machine_capacity", 8), ("INVARIANT_VIOLATION", "on_time", 12)):
         r = v.check(package, CheckQuery(kind=kind, property_id=prop, bound={"max_steps": k, "timeout_ms": 60000}))
         replay = r.witness.replay if r.witness else "-"
-        print(f"{kind:20s} {prop:18s} k={k:2d} → {str(r.verdict):24s} replay={replay} ({r.stats.elapsed_ms:.0f} ms)")
+        print(f"{kind:20s} {prop:18s} k={k:2d} → {r.verdict!s:24s} replay={replay} ({r.stats.elapsed_ms:.0f} ms)")
         ok &= r.witness is None or r.witness.replay == "CONFIRMED"
     return 0 if ok else 1
 

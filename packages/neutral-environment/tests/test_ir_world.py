@@ -88,7 +88,7 @@ def test_truth_override_and_seeded_variation(pkg):
 
 
 def test_closed_environment_and_bad_config(pkg):
-    env, sc, _ = make_env(pkg, "normal")
+    env, _sc, _ = make_env(pkg, "normal")
     env.close()
     with pytest.raises(Conflict):
         env.observe("dispatcher")

@@ -43,8 +43,10 @@ ALLOWED: dict[str, set[str]] = {
     "formal_lab_api": {"formal_lab_contracts", "formal_lab_model", "formal_lab_runtime", "formal_lab_eval"},
     "formal_lab_orchestrator": {"formal_lab_contracts", "formal_lab_api"},
     "formal_lab_sdk": {"formal_lab_contracts", "formal_lab_model"},  # model-core only via the optional [offline] extra
+    # the example is a plugin package: it may use the engines it declares in its pyproject
     "formal_lab_example_scheduling": {"formal_lab_contracts", "formal_lab_model", "formal_lab_eval",
-                                      "formal_lab_runtime"},
+                                      "formal_lab_runtime", "formal_lab_solver_z3", "formal_lab_env",
+                                      "formal_lab_strategies"},
     "fal_example_external_plugin": {"formal_lab_sdk"},
 }
 # demo tooling inside the API package that seeds the example project (not on any request/run path)
@@ -124,9 +126,8 @@ def test_main_path_has_no_external_executors(pkg):
 def test_actions_are_limited_to_model_declared_types():
     """The environment rejects anything that is not a declared ground action (no free-form commands)."""
     from formal_lab_contracts import ActionProposal
-    from formal_lab_example_scheduling.scenarios import model_package, scenario
-
     from formal_lab_env.ir_world import create
+    from formal_lab_example_scheduling.scenarios import model_package, scenario
 
     pkg = model_package()
     sc = scenario("normal", pkg)

@@ -1,6 +1,12 @@
 """Planner.propose: the same PlanningContext drives the rule, Z3 and (stub) LLM strategies."""
 
-from formal_lab_contracts import BudgetUsage, CandidateAction, GroundAction, PlanningContext, PreconditionVerdict
+from formal_lab_contracts import (
+    BudgetUsage,
+    CandidateAction,
+    GroundAction,
+    PlanningContext,
+    PreconditionVerdict,
+)
 from formal_lab_env.ir_world import create as create_env
 from formal_lab_example_scheduling.rule_planner import create as create_rule
 from formal_lab_example_scheduling.scenarios import model_package, scenario

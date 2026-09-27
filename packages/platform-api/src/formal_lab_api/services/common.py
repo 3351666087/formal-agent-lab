@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 import uuid
 from functools import lru_cache
-from typing import Any, TypeVar
+from typing import Any
 
 from formal_lab_contracts import ArtifactRef, canonical_json
 from formal_lab_contracts.errors import NotFound
@@ -14,14 +14,12 @@ from sqlalchemy.orm import Session
 
 from ..db import Artifact
 
-T = TypeVar("T")
-
 
 def new_id(prefix: str) -> str:
     return f"{prefix}_{uuid.uuid4().hex[:20]}"
 
 
-def get_or_404(s: Session, model: type[T], key: Any, what: str | None = None) -> T:
+def get_or_404[T](s: Session, model: type[T], key: Any, what: str | None = None) -> T:
     obj = s.get(model, key)
     if obj is None:
         raise NotFound(f"{what or model.__name__} {key!r} not found")

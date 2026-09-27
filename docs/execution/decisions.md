@@ -55,3 +55,31 @@
 - **决策**：Z3 规划策略求信念状态到目标的最短动作序列（≤ horizon），执行首个动作，按信念状态摘要缓存计划后缀；无计划时按声明顺序回退并在 rationale 中说明。
 - **理由**：最短步数在调度中近似最小化完工时间，求解稳定（实测 ~1 s/新计划）。
 - **替代方案**：Optimize 最小化加权延误（需要“域上 max”聚合，IR 暂不提供）。实测该策略在部分场景延误成本高于规则策略，属于真实对比结果，保留。
+
+## D-009 Z3 线程安全：每个编译模型独占一个 z3.Context，按线程缓存
+
+- **决策**：`Z3Model` 持有私有 `z3.Context`，所有 Z3 对象显式绑定该上下文；`compile_package` 以 (模型摘要, 线程 id) 缓存。
+- **理由**：Z3 上下文非线程安全。Inspect 并发样本与 Worker 线程池（最多 8 个并发活动）曾触发 Z3 断言崩溃；有并发回归测试。
+- **替代方案**：全局锁（串行化所有求解，吞吐受限）；进程池（心跳与共享状态复杂）。
+
+## D-010 TypeScript 类型取自序列化视图
+
+- **决策**：`contracts/v1/bundle.schema.json`（校验视图）供 ajv/jsonschema 校验输入；`bundle.serialization.schema.json`（带默认值字段均为必填）生成 TS 类型，二者同源于 Pydantic。
+- **理由**：Web/SDK 读取的是平台输出，默认值字段总是存在；用校验视图生成会把它们变成可选，削弱类型检查。
+
+## D-011 S3 兼容对象存储选 SeaweedFS
+
+- **决策**：开发与 Compose 使用 `chrislusf/seaweedfs:4.47`（`weed mini`，Apache-2.0）；平台只依赖 S3 API（boto3），Helm 指向任意外部 S3 兼容服务。
+- **理由**：多架构镜像、许可宽松、单容器即可提供 S3。
+- **替代方案**：MinIO（社区版发行与许可变化）；仅本地文件（不满足 S3 适配要求）。
+
+## D-012 编排服务的部署边界
+
+- **决策**：开发与 Compose 使用 `temporal server start-dev`（SQLite 持久卷，单节点）；Helm Chart 不部署 PostgreSQL/Temporal/对象存储，而通过现有 Secret 与地址接入外部服务。
+- **理由**：本阶段交付单用户本地配置；生产级 Temporal/数据库有各自成熟的部署方式，平台不重复。
+- **扩展影响**：部署能力等级在 `/api/v1/meta` 的 `capability_level` 与 docs/deployment.md 中标注。
+
+## D-013 Web：Vite 构建的 SPA，由 Caddy 提供并反向代理 /api
+
+- **决策**：React + React Router + TanStack Query（无 Next.js，仓库为空起步）；生产镜像 `caddy:2.11-alpine`，`/api/*` 以 `flush_interval -1` 代理以支持 SSE。开发时 Vite 在虚拟机内以轮询方式监听 virtiofs 共享的源码。
+- **理由**：所有交互走同一 REST/SSE API，与 CLI/SDK 共享服务层；静态托管简单可缓存。

@@ -128,7 +128,7 @@ def wilcoxon_signed_rank(diffs: list[float]) -> dict[str, Any]:
     ranks = _ranks([abs(x) for x in d])
     w_plus = sum(r for r, x in zip(ranks, d, strict=True) if x > 0)
     if n <= 20:
-        twice = [int(round(2 * r)) for r in ranks]
+        twice = [round(2 * r) for r in ranks]
         dist: Counter[int] = Counter({0: 1})
         for r in twice:  # distribution of 2·W+ under H0 (each sign ±1 w.p. 1/2)
             nxt: Counter[int] = Counter()
@@ -137,7 +137,7 @@ def wilcoxon_signed_rank(diffs: list[float]) -> dict[str, Any]:
                 nxt[s + r] += c
             dist = nxt
         total = 2 ** n
-        w2 = int(round(2 * w_plus))
+        w2 = round(2 * w_plus)
         lower = sum(c for s, c in dist.items() if s <= w2) / total
         upper = sum(c for s, c in dist.items() if s >= w2) / total
         return {"n_nonzero": n, "w_plus": w_plus, "p_value": min(1.0, 2 * min(lower, upper)),

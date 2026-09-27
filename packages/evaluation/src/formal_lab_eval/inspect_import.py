@@ -23,7 +23,7 @@ def import_log(client: Client, project: str, log_path: Path) -> dict:
     bundles = bundle_paths_from_log(log)
     scores = metric_results_from_log(log)
     run_ids = []
-    for sample_id, path in sorted(bundles.items()):
+    for _sample_id, path in sorted(bundles.items()):
         run = client.import_bundle(project_id, Path(path).read_bytes())
         run_ids.append(run["id"])
     matrix = client.create_imported_matrix(

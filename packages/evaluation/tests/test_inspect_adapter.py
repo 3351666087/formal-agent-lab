@@ -20,7 +20,8 @@ def test_inspect_eval_round_trip(tmp_path):
     bundles = bundle_paths_from_log(log)
     assert set(per_sample) == set(bundles) == {s.id for s in log.samples}
     for sample_id, path in bundles.items():
-        bundle = read_bundle(open(path, "rb").read())
+        with open(path, "rb") as fh:
+            bundle = read_bundle(fh.read())
         assert [m.model_dump() for m in bundle.metrics] == [m.model_dump() for m in per_sample[sample_id]]
         assert bundle.manifest.status == "SUCCEEDED" and bundle.events[-1].event_type == "RUN_SUCCEEDED"
     mismatch = next(v for k, v in per_sample.items() if k.startswith("expectation-mismatch"))

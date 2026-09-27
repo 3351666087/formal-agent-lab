@@ -1,0 +1,63 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  UV_VERSION: "0.12.19"
+  PNPM_VERSION: "12.6.0"
+  NODE_VERSION: "24.21.0"
+  UV_PROJECT_ENVIRONMENT: ${{ github.workspace }}/.venv
+
+jobs:
+  contracts-and-unit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with: { version: "${{ env.UV_VERSION }}" }
+      - uses: pnpm/action-setup@v4
+        with: { version: "${{ env.PNPM_VERSION }}" }
+      - uses: actions/setup-node@v4
+        with: { node-version: "${{ env.NODE_VERSION }}", cache: pnpm }
+      - name: install locked dependencies
+        run: |
+          uv sync --frozen --all-packages
+          pnpm install --frozen-lockfile
+      - name: contracts drift check (regenerate from the Pydantic source, then git diff)
+        run: make contracts-check
+      - name: lint
+        run: make lint
+      - name: contract, architecture and unit tests
+        run: uv run --frozen pytest -m "not integration and not llm and not ui" -q
+      - name: TypeScript contract tests
+        run: pnpm --filter @formal-lab/contracts run test
+      - name: web typecheck and build
+        run: pnpm --dir web exec tsc --noEmit -p tsconfig.json && pnpm --dir web exec vite build
+
+  integration:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    needs: contracts-and-unit
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with: { version: "${{ env.UV_VERSION }}" }
+      - name: install locked dependencies
+        run: uv sync --frozen --all-packages
+      - name: start PostgreSQL, Temporal and the S3 store
+        run: docker compose -f deploy/compose/services.dev.yaml -p fal-dev up -d --wait
+      - name: platform integration tests (API, worker, Temporal, SDK/CLI, replay, Inspect)
+        run: uv run --frozen pytest tests/integration -m "integration and not ui and not llm" -q
+      - name: service logs on failure
+        if: failure()
+        run: |
+          docker compose -f deploy/compose/services.dev.yaml -p fal-dev logs --tail 200
+          tail -n 200 var/log/integration/*.log || true
