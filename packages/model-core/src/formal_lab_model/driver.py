@@ -3,7 +3,7 @@
 The run kernel never builds a CheckedModel or an Interpreter itself: it asks the registry for the driver of the
 pinned model's profile and talks to the returned `LoadedModel` (candidates, predictions, properties, belief with
 provenance, display structure). This module is that driver for IR payloads (P2-010 / P2-011); other profiles
-bring their own driver plugin (e.g. examples/warehouse-allocation).
+bring their own driver plugin.
 """
 
 from __future__ import annotations

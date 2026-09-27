@@ -410,4 +410,6 @@ def create(config: dict[str, Any] | None, services: Any = None) -> IRWorldEnviro
 def registrations():
     from formal_lab_contracts.interfaces import PluginRegistration
 
-    return [PluginRegistration(DESCRIPTOR, create)]
+    from . import driver_world
+
+    return [PluginRegistration(DESCRIPTOR, create), PluginRegistration(driver_world.DESCRIPTOR, driver_world.create)]

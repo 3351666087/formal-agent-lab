@@ -27,8 +27,9 @@ class Belief:
     stale_paths: list[str]  # locations whose value is the last known (older than this step)
 
 
-def belief_from_observation(observation: Observation, model: CheckedModel) -> Belief:
-    state = model.initial_state()
+def belief_from_state(observation: Observation, initial: dict[str, StateScalar]) -> Belief:
+    """Belief over any state space given its initial state (model-agnostic; drivers of other profiles reuse it)."""
+    state = dict(initial)
     seen: set[str] = set()
     stale: list[str] = []
     for fact in observation.facts:
@@ -47,7 +48,15 @@ def belief_from_observation(observation: Observation, model: CheckedModel) -> Be
     return Belief(state=state, unknown_paths=unknown, assumed_paths=assumed, stale_paths=sorted(set(stale)))
 
 
+def belief_from_observation(observation: Observation, model: CheckedModel) -> Belief:
+    return belief_from_state(observation, model.initial_state())
+
+
 def belief_state(observation: Observation, model: CheckedModel) -> BeliefState:
+    return belief_state_from(observation, model.initial_state())
+
+
+def belief_state_from(observation: Observation, initial: dict[str, StateScalar]) -> BeliefState:
     """v2 belief with explicit provenance per location (P2-025).
 
     KNOWN: observed fresh at this step. STALE: a last-known value (older fact, or the last-known value of an
@@ -56,7 +65,7 @@ def belief_state(observation: Observation, model: CheckedModel) -> BeliefState:
     observation — the model's initial value is assumed. Completion-based checks treat exactly the observation's
     unknown items as free (the phase-1 semantics); everything that is not KNOWN is listed in the assumption set.
     """
-    old = belief_from_observation(observation, model)
+    old = belief_from_state(observation, initial)
     fresh = {f.path for f in observation.facts if f.observed_at_step >= observation.step and f.path in old.state}
     provenance: dict[str, Provenance] = {}
     as_of: dict[str, int] = {}

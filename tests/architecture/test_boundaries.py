@@ -29,6 +29,7 @@ PACKAGES = {
     "formal_lab_sdk": "packages/sdk/src/formal_lab_sdk",
     "formal_lab_example_scheduling": "examples/neutral-scheduling/src/formal_lab_example_scheduling",
     "fal_example_external_plugin": "examples/external-plugin/src/fal_example_external_plugin",
+    "formal_lab_example_warehouse": "examples/warehouse-allocation/src/formal_lab_example_warehouse",
 }
 
 # allowed internal imports (dependency direction); anything not listed is a violation
@@ -50,11 +51,13 @@ ALLOWED: dict[str, set[str]] = {
                                       "formal_lab_runtime", "formal_lab_solver_z3", "formal_lab_env",
                                       "formal_lab_strategies"},
     "fal_example_external_plugin": {"formal_lab_sdk"},
+    # the second semantic profile: its own driver/strategies; only contracts + the model-agnostic belief helper
+    "formal_lab_example_warehouse": {"formal_lab_contracts", "formal_lab_model"},
 }
 # demo tooling inside the API package that seeds the example project (not on any request/run path)
 EXEMPT_FILES = {"packages/platform-api/src/formal_lab_api/seed.py"}
 PLUGIN_PACKAGES = {"formal_lab_solver_z3", "formal_lab_env", "formal_lab_strategies",
-                   "formal_lab_example_scheduling", "fal_example_external_plugin"}
+                   "formal_lab_example_scheduling", "fal_example_external_plugin", "formal_lab_example_warehouse"}
 CORE = {"formal_lab_contracts", "formal_lab_model", "formal_lab_runtime", "formal_lab_api",
         "formal_lab_orchestrator", "formal_lab_sdk"}
 
@@ -100,6 +103,8 @@ def test_core_is_plugin_agnostic():
                 offenders.append(f"{rel} imports plugin package {mod}")
             if "formal-lab.example." in text or "neutral-scheduling" in text:
                 offenders.append(f"{rel} mentions the scheduling example")
+            if "warehouse" in text.lower():  # P2-012: the kernel never needs to know a scenario / profile name
+                offenders.append(f"{rel} mentions the warehouse example")
     assert not offenders, "\n".join(offenders)
 
 
@@ -107,7 +112,8 @@ FORBIDDEN_CALLS = {"subprocess", "os.system", "os.popen", "pty", "shlex", "socke
 
 
 @pytest.mark.parametrize("pkg", ["formal_lab_env", "formal_lab_strategies", "formal_lab_runtime",
-                                 "formal_lab_solver_z3", "formal_lab_model", "formal_lab_example_scheduling"])
+                                 "formal_lab_solver_z3", "formal_lab_model", "formal_lab_example_scheduling",
+                                 "formal_lab_example_warehouse"])
 def test_main_path_has_no_external_executors(pkg):
     """P1-128: environment, strategies and the step engine cannot execute commands or reach external targets;
     the only network use on the main path is the LLM client (httpx) inside formal_lab_strategies."""

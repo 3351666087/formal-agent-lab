@@ -42,6 +42,7 @@ from formal_lab_contracts import (
     ModelUsage,
     NoActionPolicy,
     Observation,
+    ObservationTiming,
     OperationRecord,
     Participant,
     PlannerCheckpoint,
@@ -604,8 +605,8 @@ def plan_step(rc: RunComponents, snapshot: EnvironmentSnapshot, step: int, usage
     _restore(rc, snapshot)
     if m.turns.observation_timing.value == "ROUND_START":
         if rc.scheduler.round_starts(state, turn) or actor not in carry.round_observations:
-            plan.round_observations = {a: rc.env.observe(a).model_copy(update={"timing": "ROUND_START"})
-                                       .model_dump(mode="json") for a in rc.scheduler.active(state)}
+            plan.round_observations = {a: rc.env.observe(a).model_copy(update={
+                "timing": ObservationTiming.ROUND_START}).model_dump(mode="json") for a in rc.scheduler.active(state)}
         source = plan.round_observations or carry.round_observations
         obs = Observation.model_validate(source[actor]).model_copy(update={"turn": turn})
     else:
@@ -1021,10 +1022,10 @@ def _check_goals(rc: RunComponents, ex: StepExecution, carry: CarryState, actor:
             reached.append(p.actor_id)
     carry.turn = carry.turn.model_copy(update={"goals_reached": reached})
     with_goals = [p.actor_id for p in rc.manifest.participants if p.goal]
-    if term.actor_goals.value == "ANY" and reached:
+    if str(term.actor_goals) == "ANY" and reached:
         ex.terminal, ex.termination_reason = RunStatus.SUCCEEDED, TerminationReason.ACTOR_GOAL_REACHED
         ex.terminal_reason = f"participant {reached[0]} reached its goal"
-    elif term.actor_goals.value == "ALL" and with_goals and set(with_goals) <= set(reached):
+    elif str(term.actor_goals) == "ALL" and with_goals and set(with_goals) <= set(reached):
         ex.terminal, ex.termination_reason = RunStatus.SUCCEEDED, TerminationReason.ALL_ACTOR_GOALS_REACHED
         ex.terminal_reason = f"all participants reached their goals ({', '.join(with_goals)})"
 

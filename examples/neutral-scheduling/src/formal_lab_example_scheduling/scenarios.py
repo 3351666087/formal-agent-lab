@@ -75,3 +75,42 @@ def scenario(key: str, package: ModelPackage, *, seed: int = 0, strategy: dict |
 
 def all_scenarios(package: ModelPackage) -> list[ScenarioManifest]:
     return [scenario(k, package) for k in SCENARIO_CONFIGS]
+
+
+def two_dispatchers(package: ModelPackage, *, seed: int = 0, strategies: tuple[str, str] = ("rule", "rule"),
+                    timing: str = "TURN_START", conflict_policy: str = "REVALIDATE", key: str = "normal",
+                    turns: dict | None = None, env: dict | None = None,
+                    configs: tuple[dict | None, dict | None] = (None, None)) -> ScenarioManifest:
+    """Two production dispatchers share the line and take turns (one action per logical step).
+
+    Both may assign any operation to any machine, so with ROUND_START observations the second dispatcher acts on
+    the state of the round's start and can ask for a machine the first one just took — the environment arbitrates
+    by world revision (REVALIDATE: apply if still applicable; REJECT_STALE: reject when what the action depends on
+    changed since the proposal's revision). Joint goal: all orders done.
+    """
+    cfg = SCENARIO_CONFIGS[key]
+
+    def strat(name: str, extra: dict | None) -> dict:
+        spec = dict(STRATEGIES[name])
+        if extra:
+            spec = {"plugin": spec["plugin"], "config": {**spec["config"], **extra}}
+        return spec
+
+    return ScenarioManifest(
+        scenario_id=f"sched-two-{key}",
+        name=f"两名调度员：{cfg['name']}",
+        description="Two dispatchers coordinate the same machines, taking turns; " + cfg["description"],
+        model=package.ref(),
+        environment={"plugin": ENV_REF, "config": {**cfg["env"], **(env or {})}},
+        participants=[
+            {"actor_id": "dispatcher_a", "role": "dispatcher", "label": "调度员 A",
+             "strategy": strat(strategies[0], configs[0])},
+            {"actor_id": "dispatcher_b", "role": "dispatcher", "label": "调度员 B",
+             "strategy": strat(strategies[1], configs[1])},
+        ],
+        objectives=[{"property_id": "all_done", "description": "complete all orders"}],
+        budget=BUDGET,
+        seed=seed,
+        termination={"joint_goal": "all_done", "on_no_action": "SKIP_ACTOR", "no_progress_limit": 12},
+        turns=turns or {"mode": "ROUND_ROBIN", "observation_timing": timing, "conflict_policy": conflict_policy},
+    )

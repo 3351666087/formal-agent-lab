@@ -85,8 +85,11 @@ def negotiate_run(registry: PluginRegistry, *, scenario: ScenarioManifest, packa
                              CapabilityRequirement(id=caps.DRIVER_CANDIDATES),
                              CapabilityRequirement(id=caps.DRIVER_PREDICT)],
           {_profile_capability(profile): f"the model's profile {profile}"})
-    env_reqs = [CapabilityRequirement(id=_profile_capability(profile))]
-    env_why = {_profile_capability(profile): f"simulating/serving a {profile} model"}
+    generic = any(c.id == "env.driver_generic" for c in env.descriptor.capabilities)
+    # a driver-generic environment simulates any profile through the model's semantic driver
+    env_reqs = [CapabilityRequirement(id="env.driver_generic" if generic else _profile_capability(profile))]
+    env_why = {_profile_capability(profile): f"simulating/serving a {profile} model",
+               "env.driver_generic": f"simulating a {profile} model through its driver"}
     if len(participants) > 1:
         env_reqs.append(CapabilityRequirement(id=caps.ENV_MULTI_ACTOR))
         env_why[caps.ENV_MULTI_ACTOR] = f"{len(participants)} participants taking turns"
