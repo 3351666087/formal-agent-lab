@@ -1,0 +1,101 @@
+{
+  "resources": {
+    "cpus_online": 4,
+    "cgroup_cpu_quota": null,
+    "cpus_usable": 4,
+    "memory_total_mib": 5910,
+    "memory_available_mib": 4293,
+    "cgroup_memory_limit_mib": null,
+    "memory_usable_mib": 5910,
+    "loadavg": [
+      0.76,
+      0.9,
+      0.83
+    ]
+  },
+  "workload": {
+    "cells": [
+      [
+        "normal",
+        "rule",
+        1
+      ],
+      [
+        "normal",
+        "rule",
+        2
+      ],
+      [
+        "normal",
+        "z3",
+        1
+      ],
+      [
+        "normal",
+        "z3",
+        2
+      ],
+      [
+        "state-delay",
+        "rule",
+        1
+      ],
+      [
+        "state-delay",
+        "rule",
+        2
+      ],
+      [
+        "state-delay",
+        "z3",
+        1
+      ],
+      [
+        "state-delay",
+        "z3",
+        2
+      ]
+    ],
+    "runner": "local, one process per run"
+  },
+  "allowed_concurrency": 2,
+  "rule": "min(2, usable CPUs, (available memory − 1 GiB reserve) ÷ baseline peak per run)",
+  "local": [
+    {
+      "concurrency": 1,
+      "wall_seconds": 57.57,
+      "runs": 8,
+      "failures": [],
+      "peak_rss_mib_all_processes": 111.3,
+      "max_rss_mib_single_run": 111.0,
+      "run_seconds": [
+        0.203,
+        0.514,
+        1.454,
+        3.047,
+        12.835,
+        12.911,
+        13.188,
+        13.213
+      ]
+    },
+    {
+      "concurrency": 2,
+      "wall_seconds": 31.77,
+      "runs": 8,
+      "failures": [],
+      "peak_rss_mib_all_processes": 220.7,
+      "max_rss_mib_single_run": 110.6,
+      "run_seconds": [
+        0.389,
+        0.403,
+        1.538,
+        3.316,
+        12.138,
+        12.726,
+        15.16,
+        17.311
+      ]
+    }
+  ]
+}

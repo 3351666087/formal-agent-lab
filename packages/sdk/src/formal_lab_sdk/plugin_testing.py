@@ -9,9 +9,9 @@ the real engine without the platform:
 
 Planner stages: registered (descriptor + config schema) → initialised (created by the registry with its config) →
 negotiated (the run manifest's capability negotiation for the participant) → observe & propose (the first step's
-proposal names the plugin and one of the offered candidates) → state advanced (outcomes recorded) → recovered (a
-run stopped mid-way, serialised to JSON and continued equals the uninterrupted run) → finished (terminal status,
-termination reason, metrics).
+proposal names the plugin and one of the offered candidates) → state advanced (outcomes recorded; for a planner that
+checkpoints, task plan versions increase) → recovered (a run stopped mid-way, serialised to JSON and continued equals
+the uninterrupted run, including every planner checkpoint) → finished (terminal status, termination reason, metrics).
 
 Environment stages: registered → initialised → reset & observe → step (an applicable action is applied, the
 revision moves) → snapshot / restore (FULL_STATE: restored exactly; SESSION_MARKER: re-attached) → operation lookup
@@ -154,7 +154,15 @@ def check_planner(ref: tuple[str, str] | Any, config: dict[str, Any] | None = No
         traj = _trajectory(res.events)
         assert traj, "no outcome was recorded"
         applied = sum(1 for _, _, st in traj if st == "APPLIED")
-        return f"{len(traj)} step(s), {applied} applied"
+        plans = [e.payload["plan"] for e in res.events if str(e.event_type) == "PLAN_UPDATED"]
+        cps = [e for e in res.events if str(e.event_type) == "PLANNER_CHECKPOINT"]
+        if not cps:
+            return f"{len(traj)} step(s), {applied} applied"
+        versions = [p["version"] for p in plans]
+        assert versions == sorted(set(versions)), f"task plan versions are not increasing: {versions}"
+        triggers = [p["revision"]["trigger"] for p in plans if p.get("revision")]
+        return (f"{len(traj)} step(s), {applied} applied; {len(cps)} checkpoint(s), task plan versions {versions} "
+                f"({', '.join(triggers)})")
 
     def recovered() -> str:
         full = state["full"]
@@ -164,7 +172,14 @@ def check_planner(ref: tuple[str, str] | Any, config: dict[str, Any] | None = No
             return "run shorter than one step boundary: nothing to recover"
         again = resume_local(json.loads(json.dumps(part.to_json())), pkg, reg)
         assert _trajectory(again.events) == _trajectory(full.events), "resumed trajectory differs from the uninterrupted one"
-        return f"stopped after step {cut}, serialised, continued: identical trajectory"
+        cps = [(e.logical_step, e.payload["digest"]) for e in full.events if str(e.event_type) == "PLANNER_CHECKPOINT"]
+        if not cps:
+            return f"stopped after step {cut}, serialised, continued: identical trajectory"
+        resumed = [(e.logical_step, e.payload["digest"]) for e in again.events
+                   if str(e.event_type) == "PLANNER_CHECKPOINT"]
+        assert resumed == cps, "the planner's checkpoints after the resume differ from the uninterrupted run"
+        return (f"stopped after step {cut}, serialised, continued: identical trajectory and "
+                f"{len(cps)} identical planner checkpoint(s)")
 
     def finished() -> str:
         full = state["full"]

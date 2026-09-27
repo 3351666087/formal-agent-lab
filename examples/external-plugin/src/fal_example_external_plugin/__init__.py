@@ -1,7 +1,8 @@
 """Out-of-tree plugin example: registered only through the public SDK plugin API (formal_lab_sdk.plugins).
 
 `org.example.preference-planner` chooses the first candidate whose applicability on the actor's belief is
-APPLICABLE, by a configured action-type preference order. It depends on nothing but `formal-lab-sdk`.
+APPLICABLE, by a configured action-type preference order. `org.example.checklist-planner` (checklist.py) uses the
+phase-2 extension points: a versioned TaskPlan with checkpoint / restore. Both depend on nothing but `formal-lab-sdk`.
 """
 
 from __future__ import annotations
@@ -62,4 +63,6 @@ def create(config: dict[str, Any] | None, services: Any) -> PreferencePlanner:
 
 
 def registrations() -> list[PluginRegistration]:
-    return [PluginRegistration(DESCRIPTOR, create)]
+    from . import checklist
+
+    return [PluginRegistration(DESCRIPTOR, create), PluginRegistration(checklist.DESCRIPTOR, checklist.create)]

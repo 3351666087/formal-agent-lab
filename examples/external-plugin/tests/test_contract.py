@@ -24,3 +24,13 @@ def test_harness_checks_the_pure_environment_too():
     report = check_environment(("formal-lab.env.ir-world", "1.1.0"))
     assert report.ok, report.failures()
     assert "FULL_STATE" in next(s.detail for s in report.stages if s.name == "snapshot / restore")
+
+
+def test_external_checklist_planner_keeps_a_task_plan_across_a_resume():
+    """Phase-2 extension points from outside the repository: a versioned TaskPlan with checkpoint / restore."""
+    report = check_planner(("org.example.checklist-planner", "0.2.0"), {"preference": ["serve"], "batch": 2})
+    assert report.ok, report.failures()
+    stages = {s.name: s.detail for s in report.stages}
+    assert "task plan versions [1, 2] (INITIAL, NEW_OBSERVATION)" in stages["state advanced"]
+    assert "identical planner checkpoint(s)" in stages["recovered"]
+    assert "SUCCEEDED" in stages["finished"]

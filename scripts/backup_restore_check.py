@@ -4,7 +4,10 @@
 Uses its own database (fal_backup_check) next to the development one: migrate + seed, run one experiment through the
 platform's execution activities (the same functions the Temporal worker calls), export its replay bundle, then
 `scripts/local_data.py backup` → `reset` (database and artifacts emptied) → `restore`, and check that the run, its
-events, operations and artifacts are back and the re-exported bundle is byte-identical.
+events, operations and artifacts are back and the re-exported bundle has the same content: every file digest listed
+in its bundle.json (manifest, events, package, metrics, operations, artifacts, embedded contract) and the same
+provenance. The bundle.json `created_at` and the zip entry times record the moment of export, so the zip bytes
+themselves differ between two exports of the same run.
 
 Evidence: docs/execution/evidence/phase2/backup-restore.json. Needs the fal-dev PostgreSQL container
 (`make services-up`).
@@ -13,12 +16,14 @@ Evidence: docs/execution/evidence/phase2/backup-restore.json. Needs the fal-dev 
 from __future__ import annotations
 
 import hashlib
+import io
 import json
 import os
 import subprocess
 import sys
 import tempfile
 import time
+import zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -39,11 +44,17 @@ def sh(*args: str) -> dict:
             "seconds": round(time.perf_counter() - t0, 2), "result": json.loads(res.stdout)}
 
 
+def content(bundle: bytes) -> dict:
+    with zipfile.ZipFile(io.BytesIO(bundle)) as zf:
+        info = json.loads(zf.read("bundle.json"))
+    return {"files": info["files"], "provenance": info["provenance"], "event_count": info["event_count"]}
+
+
 def main() -> int:
     import psycopg
 
     with psycopg.connect("postgresql://fal:fal@127.0.0.1:5432/fal", autocommit=True) as conn:
-        conn.execute(f"drop database if exists {DB}")
+        conn.execute(f"drop database if exists {DB} with (force)")
         conn.execute(f"create database {DB}")
     subprocess.run([sys.executable, "-m", "formal_lab_api.migrate", "upgrade"], cwd=ROOT, check=True, env=os.environ)
     subprocess.run([sys.executable, "-m", "formal_lab_api.seed"], cwd=ROOT, check=True, env=os.environ,
@@ -69,7 +80,7 @@ def main() -> int:
     execution.finalize_run(run_id, res["status"], res.get("reason"))
     with session_scope() as s:
         before_bundle, _ = bundles.export_run(s, run_id)
-    before = hashlib.sha256(before_bundle).hexdigest()
+    before = hashlib.sha256(json.dumps(content(before_bundle), sort_keys=True).encode()).hexdigest()
     steps = [sh("status"), sh("backup", "--out", str(WORK / "backup"))]
     steps.append(sh("reset", "--yes"))
     emptied = steps[-1]["result"]["rows"]
@@ -78,16 +89,21 @@ def main() -> int:
     with session_scope() as s:
         after_bundle, _ = bundles.export_run(s, run_id)
         run_status = s.get(runs.Run, run_id).status
-    after = hashlib.sha256(after_bundle).hexdigest()
+    after = hashlib.sha256(json.dumps(content(after_bundle), sort_keys=True).encode()).hexdigest()
+    differing = sorted(k for k, v in content(after_bundle)["files"].items() if content(before_bundle)["files"].get(k) != v)
     ok = restored["matches_backup"] and before == after and emptied["runs"] == 0
     OUT.write_text(json.dumps({
         "database": DB, "run_id": run_id, "run_status": run_status, "steps": steps,
-        "after_reset_rows": emptied, "bundle_sha256_before": before, "bundle_sha256_after_restore": after,
-        "bundle_identical": before == after, "ok": ok,
+        "after_reset_rows": emptied, "bundle_content_sha256_before": before, "bundle_content_sha256_after_restore": after,
+        "bundle_content_identical": before == after, "files_differing": differing,
+        "bundle_files": len(content(before_bundle)["files"]), "ok": ok,
         "backup_files": steps[1]["result"]["files"]}, indent=2, ensure_ascii=False) + "\n")
+    from formal_lab_api.db import get_engine
+
+    get_engine().dispose()
     with psycopg.connect("postgresql://fal:fal@127.0.0.1:5432/fal", autocommit=True) as conn:
-        conn.execute(f"drop database if exists {DB}")
-    print(json.dumps({"ok": ok, "run": run_id, "status": run_status, "bundle_identical": before == after,
+        conn.execute(f"drop database if exists {DB} with (force)")
+    print(json.dumps({"ok": ok, "run": run_id, "status": run_status, "bundle_content_identical": before == after,
                       "rows_after_reset": emptied["runs"], "restored_rows": restored["now"]}))
     return 0 if ok else 1
 

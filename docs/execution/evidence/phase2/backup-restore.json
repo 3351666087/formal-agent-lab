@@ -1,0 +1,150 @@
+{
+  "database": "fal_backup_check",
+  "run_id": "run_13a2fc8d5861438fb48a",
+  "run_status": "SUCCEEDED",
+  "steps": [
+    {
+      "command": "scripts/local_data.py status --database fal_backup_check",
+      "exit": 0,
+      "seconds": 0.6,
+      "result": {
+        "database": "fal_backup_check",
+        "alembic_revision": "0002",
+        "rows": {
+          "projects": 3,
+          "model_versions": 4,
+          "scenarios": 17,
+          "runs": 1,
+          "run_events": 152,
+          "operation_records": 18,
+          "model_releases": 0,
+          "regression_cases": 0,
+          "matrices": 0,
+          "matrix_cells": 0,
+          "artifacts": 19
+        },
+        "artifact_root": "/tmp/fal-backup-zirxaeg5/artifacts",
+        "artifact_files": 19,
+        "artifact_bytes": 228514
+      }
+    },
+    {
+      "command": "scripts/local_data.py backup --out /tmp/fal-backup-zirxaeg5/backup --database fal_backup_check",
+      "exit": 0,
+      "seconds": 0.65,
+      "result": {
+        "database": "fal_backup_check",
+        "alembic_revision": "0002",
+        "rows": {
+          "projects": 3,
+          "model_versions": 4,
+          "scenarios": 17,
+          "runs": 1,
+          "run_events": 152,
+          "operation_records": 18,
+          "model_releases": 0,
+          "regression_cases": 0,
+          "matrices": 0,
+          "matrix_cells": 0,
+          "artifacts": 19
+        },
+        "artifact_root": "/tmp/fal-backup-zirxaeg5/artifacts",
+        "artifact_files": 19,
+        "artifact_bytes": 228514,
+        "created_at": "2026-09-27T16:11:48Z",
+        "source_revision": "bba1702c5f1e0e2dc012320b74991ae1f580d3e4",
+        "files": {
+          "database.sql": 1556631,
+          "artifacts.tar.gz": 9149
+        }
+      }
+    },
+    {
+      "command": "scripts/local_data.py reset --yes --database fal_backup_check",
+      "exit": 0,
+      "seconds": 1.0,
+      "result": {
+        "database": "fal_backup_check",
+        "alembic_revision": "0002",
+        "rows": {
+          "projects": 0,
+          "model_versions": 0,
+          "scenarios": 0,
+          "runs": 0,
+          "run_events": 0,
+          "operation_records": 0,
+          "model_releases": 0,
+          "regression_cases": 0,
+          "matrices": 0,
+          "matrix_cells": 0,
+          "artifacts": 0
+        },
+        "artifact_root": "/tmp/fal-backup-zirxaeg5/artifacts",
+        "artifact_files": 0,
+        "artifact_bytes": 0
+      }
+    },
+    {
+      "command": "scripts/local_data.py restore --from /tmp/fal-backup-zirxaeg5/backup --yes --database fal_backup_check",
+      "exit": 0,
+      "seconds": 0.77,
+      "result": {
+        "restored_from": "/tmp/fal-backup-zirxaeg5/backup",
+        "matches_backup": true,
+        "backup": {
+          "projects": 3,
+          "model_versions": 4,
+          "scenarios": 17,
+          "runs": 1,
+          "run_events": 152,
+          "operation_records": 18,
+          "model_releases": 0,
+          "regression_cases": 0,
+          "matrices": 0,
+          "matrix_cells": 0,
+          "artifacts": 19
+        },
+        "now": {
+          "projects": 3,
+          "model_versions": 4,
+          "scenarios": 17,
+          "runs": 1,
+          "run_events": 152,
+          "operation_records": 18,
+          "model_releases": 0,
+          "regression_cases": 0,
+          "matrices": 0,
+          "matrix_cells": 0,
+          "artifacts": 19
+        },
+        "artifacts": [
+          19,
+          19
+        ]
+      }
+    }
+  ],
+  "after_reset_rows": {
+    "projects": 0,
+    "model_versions": 0,
+    "scenarios": 0,
+    "runs": 0,
+    "run_events": 0,
+    "operation_records": 0,
+    "model_releases": 0,
+    "regression_cases": 0,
+    "matrices": 0,
+    "matrix_cells": 0,
+    "artifacts": 0
+  },
+  "bundle_content_sha256_before": "39b1dd035ab49254d379d5948ffdcca93538aceb28580746a3e5cc070f425bf2",
+  "bundle_content_sha256_after_restore": "39b1dd035ab49254d379d5948ffdcca93538aceb28580746a3e5cc070f425bf2",
+  "bundle_content_identical": true,
+  "files_differing": [],
+  "bundle_files": 79,
+  "ok": true,
+  "backup_files": {
+    "database.sql": 1556631,
+    "artifacts.tar.gz": 9149
+  }
+}

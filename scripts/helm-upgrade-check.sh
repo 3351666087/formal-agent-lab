@@ -17,8 +17,10 @@ OUT=docs/execution/evidence/helm/upgrade.json
 LOG=docs/execution/evidence/helm/upgrade.log
 exec > >(tee "$LOG") 2>&1
 WT=$(mktemp -d)/phase1
+stop_forward() { # never `kill 0`: with PF unset that would signal this whole process group
+  if [[ -n "${PF:-}" ]]; then kill "$PF" 2>/dev/null || true; PF=; fi; }
 cleanup() {
-  kill "${PF:-0}" 2>/dev/null || true
+  stop_forward
   [[ "${1:-}" == "--keep" ]] || kind delete cluster --name $CLUSTER >/dev/null 2>&1 || true
   git worktree remove --force "$WT" >/dev/null 2>&1 || true
 }
@@ -39,7 +41,7 @@ kubectl rollout status deploy/postgres deploy/temporal deploy/s3 --timeout=180s
 
 SET="--set image.pullPolicy=Never --set externalServices.temporal.address=temporal:7233 --set externalServices.artifacts.s3.endpoint=http://s3:8333"
 revision() { kubectl exec deploy/postgres -- psql -U fal -d fal -Atc "select version_num from alembic_version"; }
-forward() { kill "${PF:-0}" 2>/dev/null || true; sleep 1
+forward() { stop_forward; sleep 1
   kubectl port-forward svc/fal-formal-agent-lab-web 18091:80 >/dev/null 2>&1 & PF=$!; sleep 4; }
 probe() { # phase label → JSON line appended to $STATE
   uv run --frozen python scripts/helm_upgrade_probe.py "$1" http://127.0.0.1:18091/api/v1 "$STATE"; }

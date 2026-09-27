@@ -66,6 +66,19 @@ def test_external_plugin_registered_through_public_interfaces(stack, sdk, demo):
     done = sdk.wait(run["id"])
     assert done["status"] == "SUCCEEDED"
     assert {sdk.step(run["id"], n)["proposal"]["source"]["kind"] for n in (1, 2)} == {"EXTERNAL"}
+    # the phase-2 extension from the same package: a task plan with checkpoints, run by the durable worker
+    assert "org.example.checklist-planner" in plugin_ids
+    cl = sdk.create_strategy(demo["project"], f"checklist-{uuid.uuid4().hex[:6]}", "org.example.checklist-planner",
+                             {"preference": ["assign", "resume", "advance"], "batch": 3}, "0.2.0")
+    run = sdk.start_run(demo["project"], demo["scenarios"]["正常调度"]["id"], cl["id"], seed=1)
+    done = sdk.wait(run["id"])
+    assert done["status"] == "SUCCEEDED"
+    events = sdk.events(run["id"])
+    plans = [e.payload["plan"] for e in events if e.event_type == "PLAN_UPDATED"]
+    assert [p["version"] for p in plans] == list(range(1, len(plans) + 1)) and len(plans) >= 2
+    assert all(p["generator"]["strategy"]["plugin_id"] == "org.example.checklist-planner" for p in plans)
+    proposals = sum(1 for e in events if e.event_type == "ACTION_PROPOSED")
+    assert proposals and sum(1 for e in events if e.event_type == "PLANNER_CHECKPOINT") == proposals
 
 
 def test_cli_export_offline_replay_import_and_rerun(stack, sdk, demo, tmp_path):

@@ -38,7 +38,8 @@ def export_run(s: Session, run_id: str) -> tuple[bytes, str]:
                                                                     .order_by(RunEvent.seq))]
     operations = [OperationRecord.model_validate(r.record) for r in s.scalars(
         select(OperationRecordRow).where(OperationRecordRow.run_id == run_id).order_by(OperationRecordRow.step))]
-    metrics = [MetricResult.model_validate(m.result) for m in s.scalars(select(MetricRow).where(MetricRow.run_id == run_id))]
+    metrics = [MetricResult.model_validate(m.result) for m in s.scalars(
+        select(MetricRow).where(MetricRow.run_id == run_id).order_by(MetricRow.metric_id))]  # stable across restores
     artifacts: dict[str, bytes] = {}
     for row in s.scalars(select(Artifact).where(Artifact.run_id == run_id)):
         artifacts[row.digest] = artifact_store().get(ArtifactRef.model_validate(row.ref))
