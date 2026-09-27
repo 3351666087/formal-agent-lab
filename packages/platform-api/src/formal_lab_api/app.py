@@ -296,8 +296,14 @@ def _routes(app: FastAPI) -> None:
     async def _start(run: dict[str, Any]) -> dict[str, Any]:
         if run["status"] != RunStatus.CREATED.value:
             return run
-        await orch().start(run["id"], f"run-{run['id']}")
-        return await db(lambda s: runs.run_dict(runs.mark_queued(s, run["id"]), s))
+        # QUEUED is committed before the workflow exists, so RUN_QUEUED always precedes the worker's RUN_STARTED
+        await db(lambda s: runs.mark_queued(s, run["id"]).id)
+        try:
+            await orch().start(run["id"], f"run-{run['id']}")
+        except Exception:
+            await db(lambda s: runs.mark_start_failed(s, run["id"], f"workflow could not be started: {exc}").id)
+            raise
+        return await db(lambda s: runs.run_dict(get_or_404(s, Run, run["id"], "run"), s))
 
     @app.post(f"{API}/projects/{{project_id}}/runs", status_code=201)
     async def create_run(project_id: str, response: Response, body: dict[str, Any] = Body(...),

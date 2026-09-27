@@ -129,6 +129,7 @@ def test_import_into_fresh_database_keeps_events_and_allows_rerun(stack, sdk, tm
     assert done["metrics"]["delay_cost"]["value"] == imported["metrics"]["delay_cost"]["value"]
 
 
+@pytest.mark.timeout(600)  # 18 runs; CI runners have 2 CPUs
 def test_cli_matrix_compares_two_non_stub_strategies(stack, tmp_path):
     out = tmp_path / "report.json"
     fal(stack, "matrix", "run", "--project", "生产调度示例", "--scenario", "正常调度", "--scenario", "资源不足",

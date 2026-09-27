@@ -131,6 +131,17 @@ def mark_queued(s: Session, run_id: str) -> Run:
     return run
 
 
+def mark_start_failed(s: Session, run_id: str, reason: str) -> Run:
+    run = lock_run(s, run_id)
+    if run.status == RunStatus.QUEUED.value:
+        transition(run, RunStatus.FAILED, reason)
+        run.finished_at = utcnow()
+        run.termination_reason = "FAILED"
+        append_events(s, run, [draft(f"{run_id}:run:start-failed", "RUN_FAILED", None,
+                                     {"status": "FAILED", "reason": reason}, [f"{run_id}:run:queued"])])
+    return run
+
+
 def request_pause(s: Session, run_id: str) -> Run:
     run = lock_run(s, run_id)
     if run.status in (RunStatus.PAUSING.value, RunStatus.PAUSED.value):

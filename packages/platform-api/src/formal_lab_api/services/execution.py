@@ -37,6 +37,7 @@ from formal_lab_contracts import (
     utcnow,
 )
 from formal_lab_contracts.errors import Conflict, NonRetryableFailure
+from formal_lab_runtime.coordination import InMemoryLedger
 from formal_lab_runtime.engine import (
     CarryState,
     PlanPhase,
@@ -270,8 +271,17 @@ def run_step(run_id: str, step: int) -> dict[str, Any]:
             else:
                 existing.status, existing.result, existing.attempts = "COMPLETED", plan.to_json(), existing.attempts + 1
 
-    # ---- phase 2: apply through the coordinator (pure envs: deterministic w.r.t. snapshot) and commit atomically
-    ex = apply_step(rc, snapshot, plan, carry, DbLedger())
+    # ---- phase 2: apply through the coordinator and commit atomically. Live services get the durable ledger (intent
+    # committed before dispatch); a pure-data simulator is restored from the pre-step snapshot and replayed exactly,
+    # so its record is kept in memory and committed with the step.
+    if rc.pure:
+        ledger = InMemoryLedger()
+        prior = DbLedger().get(f"{run_id}:s{step}:{plan.turn.actor_id}:apply") if plan.turn else None
+        if prior is not None:
+            ledger.put(prior)
+    else:
+        ledger = DbLedger()
+    ex = apply_step(rc, snapshot, plan, carry, ledger)
     with session_scope() as s:
         run = lock_run(s, run_id)
         done = _op(s, apply_id)
@@ -281,6 +291,14 @@ def run_step(run_id: str, step: int) -> dict[str, Any]:
             return _stop_result(run) or {"terminal": True, "status": run.status, "finalized": True}
         if ex.snapshot is not None and ex.observation is not None:
             _store_snapshot(s, run_id, step, ex.snapshot)
+        if rc.pure and ex.operation is not None:
+            rec = ex.operation
+            row = s.get(OperationRecordRow, rec.operation_id)
+            if row is None:
+                s.add(OperationRecordRow(operation_id=rec.operation_id, run_id=run_id, step=rec.step,
+                                         actor_id=rec.actor_id, state=rec.state.value, record=rec.model_dump(mode="json")))
+            else:
+                row.state, row.record = rec.state.value, rec.model_dump(mode="json")
         events = list(ex.events)
         if recovered:
             events.insert(0, draft(f"{run_id}:s{step}:recovery", "RECOVERY", step,
