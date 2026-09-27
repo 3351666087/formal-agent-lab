@@ -1,0 +1,40 @@
+$ uv run --frozen python -m formal_lab_example_scheduling compare --strategies rule,z3,llm-stub --seeds 1,2,3 --out docs/execution/evidence/checks/strategy-comparison.json
+# started 2026-09-27T01:18:39Z at revision 00f1d3f8ceccdce7a5d44264c97583cefac24302
+
+normal                 rule      seed=1 SUCCEEDED         cost=0.0
+normal                 rule      seed=2 SUCCEEDED         cost=1.0
+normal                 rule      seed=3 SUCCEEDED         cost=2.0
+normal                 z3        seed=1 SUCCEEDED         cost=0.0
+normal                 z3        seed=2 SUCCEEDED         cost=0.0
+normal                 z3        seed=3 SUCCEEDED         cost=0.0
+normal                 llm-stub  seed=1 SUCCEEDED         cost=0.0
+normal                 llm-stub  seed=2 SUCCEEDED         cost=1.0
+normal                 llm-stub  seed=3 SUCCEEDED         cost=2.0
+resource-shortage      rule      seed=1 SUCCEEDED         cost=1.0
+resource-shortage      rule      seed=2 SUCCEEDED         cost=2.0
+resource-shortage      rule      seed=3 SUCCEEDED         cost=3.0
+resource-shortage      z3        seed=1 SUCCEEDED         cost=3.0
+resource-shortage      z3        seed=2 SUCCEEDED         cost=3.0
+resource-shortage      z3        seed=3 SUCCEEDED         cost=3.0
+resource-shortage      llm-stub  seed=1 SUCCEEDED         cost=1.0
+resource-shortage      llm-stub  seed=2 SUCCEEDED         cost=2.0
+resource-shortage      llm-stub  seed=3 SUCCEEDED         cost=3.0
+state-delay            rule      seed=1 SUCCEEDED         cost=4.0
+state-delay            rule      seed=2 SUCCEEDED         cost=6.0
+state-delay            rule      seed=3 SUCCEEDED         cost=14.0
+state-delay            z3        seed=1 SUCCEEDED         cost=0.0
+state-delay            z3        seed=2 SUCCEEDED         cost=4.0
+state-delay            z3        seed=3 SUCCEEDED         cost=4.0
+state-delay            llm-stub  seed=1 BUDGET_EXHAUSTED  cost=110.0
+state-delay            llm-stub  seed=2 BUDGET_EXHAUSTED  cost=110.0
+state-delay            llm-stub  seed=3 BUDGET_EXHAUSTED  cost=110.0
+expectation-mismatch   rule      seed=1 SUCCEEDED         cost=3.0
+expectation-mismatch   rule      seed=2 SUCCEEDED         cost=3.0
+expectation-mismatch   rule      seed=3 SUCCEEDED         cost=8.0
+expectation-mismatch   z3        seed=1 SUCCEEDED         cost=14.0
+expectation-mismatch   z3        seed=2 SUCCEEDED         cost=6.0
+expectation-mismatch   z3        seed=3 SUCCEEDED         cost=6.0
+expectation-mismatch   llm-stub  seed=1 SUCCEEDED         cost=3.0
+expectation-mismatch   llm-stub  seed=2 SUCCEEDED         cost=3.0
+expectation-mismatch   llm-stub  seed=3 SUCCEEDED         cost=8.0
+wrote docs/execution/evidence/checks/strategy-comparison.json

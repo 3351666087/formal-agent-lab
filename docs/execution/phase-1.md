@@ -316,7 +316,8 @@
 - [ ] **P1-130** 生成 **docs/handoff/phase1.md**：已完成能力、真实命令、目录地图、问题、未验证项、扩展入口及本地开发限制。
 - [ ] **P1-131** 生成 **docs/handoff/phase1.manifest.json**，使用下表固定字段。
 - [ ] **P1-132** 生成 **docs/handoff/phase1-checks.json**：任务 ID、命令、结果、退出码、日志/产物、实际执行时间。
-- [ ] **P1-133** 生成 **docs/architecture/plugin-integration.md**：如何新增前端、语义 profile、规划器、验证器、环境和评分器，并提供生产调度示例。
+- [x] **P1-133** 生成 **docs/architecture/plugin-integration.md**：如何新增前端、语义 profile、规划器、验证器、环境和评分器，并提供生产调度示例。
+  - 证据：docs/architecture/plugin-integration.md：注册机制（entry point、PluginDescriptor、PluginServices、能力协商、UI 元数据）与前端/语义 profile/规划器/验证器/环境/评分器/产物存储的接口约定，附生产调度示例走查与包外插件示例
 - [x] **P1-134** 在 **tests/contracts/** 保留后续扩展阶段可复用的合同测试与兼容样例。
   - 证据：tests/contracts/：build_fixtures.py + fixtures/{valid,invalid,semantic-invalid}（15/11/7 个兼容样例）+ test_contracts.py；TS 侧 packages/contracts-ts/test 复用同一组样例
 - [x] **P1-135** **examples/neutral-scheduling/** 独立可运行，作为后续回归哨兵。

@@ -1,0 +1,51 @@
+$ make contracts-check && uv run --frozen pytest -p no:cacheprovider tests/contracts -q && pnpm --filter @formal-lab/contracts run test
+# started 2026-09-27T01:09:14Z at revision 00f1d3f8ceccdce7a5d44264c97583cefac24302
+
+make[1]: Entering directory '/Users/null3351/Code/formal-agent-lab'
+uv run --frozen python -m formal_lab_contracts.schema_export --out contracts/v1
+formal-lab-contracts/v1 digest sha256:0cbd6256c21eead867cdd3bcf8ea7f1011207d4dacd6d09996b543575e21312b (28 files)
+pnpm --filter @formal-lab/contracts run generate
+$ node scripts/generate.mjs
+generated TypeScript for formal-lab-contracts/v1 (0cbd6256c21e)
+uv run --frozen python -m formal_lab_contracts.docs --out docs/contracts/v1.md
+wrote docs/contracts/v1.md
+git diff --exit-code -- contracts/v1 packages/contracts-ts/src docs/contracts/v1.md
+make[1]: Leaving directory '/Users/null3351/Code/formal-agent-lab'
+.......................................                                  [100%]
+39 passed in 0.53s
+$ tsc --noEmit -p tsconfig.json && node --test test/*.test.mjs
+✔ valid fixture ActionOutcome accepted (63.269878ms)
+✔ valid fixture ActionProposal accepted (1.82132ms)
+✔ valid fixture ActionSpec accepted (2.56908ms)
+✔ valid fixture ArtifactRef accepted (0.730421ms)
+✔ valid fixture BoundedCheckResult accepted (3.475489ms)
+✔ valid fixture BoundedCheckResult.unsupported accepted (0.25923ms)
+✔ valid fixture MetricDefinition accepted (0.853012ms)
+✔ valid fixture MetricResult accepted (2.854613ms)
+✔ valid fixture MetricResult.missing accepted (0.063942ms)
+✔ valid fixture ModelPackage accepted (4.182733ms)
+✔ valid fixture Observation accepted (1.329704ms)
+✔ valid fixture PluginDescriptor accepted (2.71293ms)
+✔ valid fixture RunManifest accepted (4.062101ms)
+✔ valid fixture ScenarioManifest accepted (2.788003ms)
+✔ valid fixture TraceEvent accepted (0.951051ms)
+✔ invalid fixture bad-contract-version rejected (contract_version is fixed) (0.736173ms)
+✔ invalid fixture bad-digest rejected (digest must be 64 lowercase hex chars) (0.034931ms)
+✔ invalid fixture bad-extension-namespace rejected (extension keys are reverse-DNS namespaces) (0.19933ms)
+✔ invalid fixture bad-plugin-id rejected (plugin ids are lowercase dotted) (0.030637ms)
+✔ invalid fixture bad-query-kind rejected (query kind is a closed enum) (0.050354ms)
+✔ invalid fixture empty-int-range-missing-max rejected (int type needs min and max) (0.129636ms)
+✔ invalid fixture metric-direction rejected (direction is a closed enum) (0.046811ms)
+✔ invalid fixture negative-seq rejected (seq is >= 1) (0.02426ms)
+✔ invalid fixture outcome-status-enum rejected (outcome status is a closed enum) (0.045143ms)
+✔ invalid fixture unknown-core-field rejected (core objects reject unknown fields) (0.065152ms)
+✔ invalid fixture unknown-expr-op rejected (expression ops are a closed set) (0.180156ms)
+✔ generated meta.ts matches DIGEST.json (2.127902ms)
+ℹ tests 27
+ℹ suites 0
+ℹ pass 27
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 202.825665

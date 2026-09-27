@@ -52,7 +52,7 @@ DESCRIPTOR = PluginDescriptor(
     ui={"label": "LLM 策略", "category": "llm",
         "description": "Chooses one candidate action with a language model (JSON-schema output). "
         "client=stub gives a labelled deterministic stand-in."},
-    license="Apache-2.0",
+    license="UNLICENSED",  # repository owner has not chosen a license yet
     source="formal-lab-strategies",
 )
 

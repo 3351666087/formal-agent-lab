@@ -29,7 +29,7 @@ WORKDIR /home/fal
 USER fal
 LABEL org.opencontainers.image.source="https://github.com/3351666087/formal-agent-lab" \
       org.opencontainers.image.revision="${FAL_SOURCE_REVISION}" \
-      org.opencontainers.image.licenses="Apache-2.0"
+      org.opencontainers.image.licenses="NOASSERTION"
 
 FROM runtime AS api
 EXPOSE 8000

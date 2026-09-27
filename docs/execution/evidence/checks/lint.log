@@ -1,0 +1,28 @@
+$ make lint
+# started 2026-09-27T01:24:52Z at revision 00f1d3f8ceccdce7a5d44264c97583cefac24302
+
+make[1]: Entering directory '/Users/null3351/Code/formal-agent-lab'
+uv run --frozen ruff check packages examples tests scripts
+I001 [*] Import block is un-sorted or un-formatted
+   --> scripts/release.py:115:5
+    |
+114 |   def verify_sdk(wheels: Path) -> dict:
+115 | /     from formal_lab_example_scheduling.scenarios import model_package, scenario
+116 | |
+117 | |     from formal_lab_runtime import default_registry, make_manifest, new_run_id, run_local
+118 | |     from formal_lab_runtime.bundles import bundle_from_local
+    | |____________________________________________________________^
+119 |
+120 |       with tempfile.TemporaryDirectory() as tmp:
+    |
+help: Organize imports
+    |
+115 |     from formal_lab_example_scheduling.scenarios import model_package, scenario
+    -
+116 |     from formal_lab_runtime import default_registry, make_manifest, new_run_id, run_local
+    |
+
+Found 1 error.
+[*] 1 fixable with the `--fix` option.
+make[1]: *** [Makefile:43: lint] Error 1
+make[1]: Leaving directory '/Users/null3351/Code/formal-agent-lab'

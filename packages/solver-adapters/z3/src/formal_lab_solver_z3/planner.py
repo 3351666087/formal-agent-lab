@@ -52,7 +52,7 @@ DESCRIPTOR = PluginDescriptor(
     entrypoint="formal_lab_solver_z3.planner:create",
     ui={"label": "Z3 bounded planner", "category": "symbolic",
         "description": "Shortest plan to the goal within a horizon (Z3 BMC), receding horizon"},
-    license="MIT (z3) / Apache-2.0 (adapter)",
+    license="z3: MIT; adapter: UNLICENSED (owner has not chosen a license yet)",
     source="formal-lab-solver-z3",
 )
 

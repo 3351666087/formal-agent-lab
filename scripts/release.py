@@ -113,7 +113,6 @@ def main() -> None:
 
 def verify_sdk(wheels: Path) -> dict:
     from formal_lab_example_scheduling.scenarios import model_package, scenario
-
     from formal_lab_runtime import default_registry, make_manifest, new_run_id, run_local
     from formal_lab_runtime.bundles import bundle_from_local
 

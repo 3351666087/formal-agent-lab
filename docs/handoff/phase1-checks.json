@@ -1,0 +1,423 @@
+{
+  "format": "phase1-checks@1",
+  "handoff_version": "phase-handoff/v1",
+  "generated_at": "2026-09-27T01:34:25Z",
+  "source_revision": {
+    "commit": "00f1d3f8ceccdce7a5d44264c97583cefac24302",
+    "dirty": true
+  },
+  "command": "make phase1-check",
+  "environment": {
+    "os": "Ubuntu 24.04.4 LTS",
+    "arch": "aarch64",
+    "kernel": "6.8.0-117-generic",
+    "python": "3.12.3",
+    "uv": "uv 0.12.19 (aarch64-unknown-linux-gnu)",
+    "node": "v24.21.0",
+    "pnpm": "12.6.0",
+    "docker": "29.5.2",
+    "z3": "5.1.0",
+    "temporalio": "1.33.0",
+    "inspect_ai": "0.3.269",
+    "helm": "v4.3.0+gbec5b06",
+    "temporal_cli": "temporal version 1.9.1 (Server 1.32.0, UI 2.54.1)"
+  },
+  "summary": {
+    "PASS": 18,
+    "FAIL": 2,
+    "NOT_RUN": 0
+  },
+  "duration_s": 1512.8,
+  "checks": [
+    {
+      "id": "contracts",
+      "tasks": [
+        "P1-040",
+        "P1-047",
+        "P1-120",
+        "P1-134"
+      ],
+      "title": "契约：Python/TS/schema 一致，漂移检查",
+      "command": "make contracts-check && uv run --frozen pytest -p no:cacheprovider tests/contracts -q && pnpm --filter @formal-lab/contracts run test",
+      "result": "PASS",
+      "exit_code": 0,
+      "started_at": "2026-09-27T01:09:14Z",
+      "finished_at": "2026-09-27T01:09:16Z",
+      "duration_s": 2.1,
+      "log": "docs/execution/evidence/checks/contracts.log",
+      "summary": "ℹ duration_ms 202.825665",
+      "evidence": [
+        "contracts/v1/DIGEST.json",
+        "docs/contracts/v1.md"
+      ]
+    },
+    {
+      "id": "contract-semantics",
+      "tasks": [
+        "P1-120",
+        "P1-043",
+        "P1-045",
+        "P1-049",
+        "P1-050"
+      ],
+      "title": "错误输入、未知与未支持语义",
+      "command": "uv run --frozen pytest -p no:cacheprovider -q packages/model-core/tests/test_model_core.py::test_frontend_errors packages/solver-adapters/z3/tests/test_z3_engine.py::test_unsupported_profile_feature packages/solver-adapters/z3/tests/test_z3_engine.py::test_precondition_with_unknowns_matches_interpreter packages/solver-adapters/z3/tests/test_z3_engine.py::test_timeout_yields_unknown_with_reason tests/contracts/test_contracts.py::test_error_model_round_trip_and_retryability tests/contracts/test_contracts.py::test_capability_negotiation",
+      "result": "PASS",
+      "exit_code": 0,
+      "started_at": "2026-09-27T01:09:16Z",
+      "finished_at": "2026-09-27T01:09:16Z",
+      "duration_s": 0.4,
+      "log": "docs/execution/evidence/checks/contract-semantics.log",
+      "summary": "6 passed in 0.28s",
+      "evidence": []
+    },
+    {
+      "id": "engine",
+      "tasks": [
+        "P1-121",
+        "P1-022",
+        "P1-023"
+      ],
+      "title": "引擎：可达、不可达、不变量反例、超时/未知",
+      "command": "uv run --frozen pytest -p no:cacheprovider -q packages/solver-adapters/z3/tests/test_z3_engine.py -k 'not differential' packages/model-core",
+      "result": "PASS",
+      "exit_code": 0,
+      "started_at": "2026-09-27T01:09:16Z",
+      "finished_at": "2026-09-27T01:09:18Z",
+      "duration_s": 2.4,
+      "log": "docs/execution/evidence/checks/engine.log",
+      "summary": "27 passed, 81 deselected in 2.23s",
+      "evidence": []
+    },
+    {
+      "id": "semantics-differential",
+      "tasks": [
+        "P1-122",
+        "P1-063"
+      ],
+      "title": "语义：解释器与 Z3 小模型对照，见证可重放",
+      "command": "uv run --frozen pytest -p no:cacheprovider -q packages/solver-adapters/z3/tests/test_z3_engine.py -k differential",
+      "result": "PASS",
+      "exit_code": 0,
+      "started_at": "2026-09-27T01:09:18Z",
+      "finished_at": "2026-09-27T01:09:24Z",
+      "duration_s": 5.6,
+      "log": "docs/execution/evidence/checks/semantics-differential.log",
+      "summary": "81 passed, 7 deselected in 5.34s",
+      "evidence": []
+    },
+    {
+      "id": "runtime-integration",
+      "tasks": [
+        "P1-123",
+        "P1-024",
+        "P1-025",
+        "P1-026",
+        "P1-027",
+        "P1-028",
+        "P1-080",
+        "P1-081",
+        "P1-082",
+        "P1-083",
+        "P1-084",
+        "P1-085",
+        "P1-086"
+      ],
+      "title": "运行：持久化、Worker 恢复、取消、重复提交、断线续传",
+      "command": "uv run --frozen pytest -p no:cacheprovider -q -m integration tests/integration/test_platform_runs.py",
+      "result": "PASS",
+      "exit_code": 0,
+      "started_at": "2026-09-27T01:09:24Z",
+      "finished_at": "2026-09-27T01:10:51Z",
+      "duration_s": 87.3,
+      "log": "docs/execution/evidence/checks/runtime-integration.log",
+      "summary": "12 passed in 85.93s (0:01:25)",
+      "evidence": []
+    },
+    {
+      "id": "product-ui",
+      "tasks": [
+        "P1-124",
+        "P1-090",
+        "P1-091",
+        "P1-092",
+        "P1-093",
+        "P1-094",
+        "P1-095",
+        "P1-096"
+      ],
+      "title": "产品：UI 创建运行并查看结果（Playwright，截图与溢出检查）",
+      "command": "uv run --frozen pytest -p no:cacheprovider -q -m 'integration and ui' tests/integration/test_web_ui.py",
+      "result": "PASS",
+      "exit_code": 0,
+      "started_at": "2026-09-27T01:10:51Z",
+      "finished_at": "2026-09-27T01:13:35Z",
+      "duration_s": 163.9,
+      "log": "docs/execution/evidence/checks/product-ui.log",
+      "summary": "12 passed in 163.37s (0:02:43)",
+      "evidence": [
+        "docs/execution/evidence/ui/"
+      ]
+    },
+    {
+      "id": "sdk-cli-replay-matrix",
+      "tasks": [
+        "P1-124",
+        "P1-125",
+        "P1-126",
+        "P1-100",
+        "P1-103",
+        "P1-104",
+        "P1-105",
+        "P1-106",
+        "P1-029",
+        "P1-032"
+      ],
+      "title": "CLI 导出、SDK 读取、回放、导入与重跑、矩阵、Inspect 导入、包外插件",
+      "command": "uv run --frozen pytest -p no:cacheprovider -q -m integration tests/integration/test_sdk_cli_replay.py",
+      "result": "PASS",
+      "exit_code": 0,
+      "started_at": "2026-09-27T01:13:35Z",
+      "finished_at": "2026-09-27T01:18:34Z",
+      "duration_s": 298.8,
+      "log": "docs/execution/evidence/checks/sdk-cli-replay-matrix.log",
+      "summary": "6 passed in 298.25s (0:04:58)",
+      "evidence": []
+    },
+    {
+      "id": "evaluation-stats",
+      "tasks": [
+        "P1-101",
+        "P1-102",
+        "P1-030",
+        "P1-031"
+      ],
+      "title": "统计、区间、配对比较与 Inspect 互转",
+      "command": "uv run --frozen pytest -p no:cacheprovider -q packages/evaluation",
+      "result": "PASS",
+      "exit_code": 0,
+      "started_at": "2026-09-27T01:18:34Z",
+      "finished_at": "2026-09-27T01:18:39Z",
+      "duration_s": 5.2,
+      "log": "docs/execution/evidence/checks/evaluation-stats.log",
+      "summary": "6 passed in 4.71s",
+      "evidence": []
+    },
+    {
+      "id": "strategy-comparison",
+      "tasks": [
+        "P1-125",
+        "P1-075",
+        "P1-135"
+      ],
+      "title": "两种非替身策略在多个固定种子/场景下可比（独立运行，无服务）",
+      "command": "uv run --frozen python -m formal_lab_example_scheduling compare --strategies rule,z3,llm-stub --seeds 1,2,3 --out docs/execution/evidence/checks/strategy-comparison.json",
+      "result": "PASS",
+      "exit_code": 0,
+      "started_at": "2026-09-27T01:18:39Z",
+      "finished_at": "2026-09-27T01:21:45Z",
+      "duration_s": 185.8,
+      "log": "docs/execution/evidence/checks/strategy-comparison.log",
+      "summary": "wrote docs/execution/evidence/checks/strategy-comparison.json",
+      "evidence": [
+        "docs/execution/evidence/checks/strategy-comparison.json",
+        "examples/neutral-scheduling/results/comparison.json"
+      ]
+    },
+    {
+      "id": "example-sentinel",
+      "tasks": [
+        "P1-135",
+        "P1-070",
+        "P1-071"
+      ],
+      "title": "生产调度示例独立运行（回归哨兵）",
+      "command": "uv run --frozen pytest -p no:cacheprovider -q examples/neutral-scheduling",
+      "result": "PASS",
+      "exit_code": 0,
+      "started_at": "2026-09-27T01:21:45Z",
+      "finished_at": "2026-09-27T01:22:38Z",
+      "duration_s": 53.1,
+      "log": "docs/execution/evidence/checks/example-sentinel.log",
+      "summary": "6 passed in 52.83s",
+      "evidence": []
+    },
+    {
+      "id": "interface-examples",
+      "tasks": [
+        "P1-042",
+        "P1-041"
+      ],
+      "title": "每个接口的可运行示例",
+      "command": "uv run --frozen pytest -p no:cacheprovider -q tests/examples",
+      "result": "PASS",
+      "exit_code": 0,
+      "started_at": "2026-09-27T01:22:38Z",
+      "finished_at": "2026-09-27T01:22:46Z",
+      "duration_s": 7.7,
+      "log": "docs/execution/evidence/checks/interface-examples.log",
+      "summary": "6 passed in 7.55s",
+      "evidence": []
+    },
+    {
+      "id": "boundaries",
+      "tasks": [
+        "P1-128",
+        "P1-010",
+        "P1-012"
+      ],
+      "title": "边界：主路径仅调用中性模拟器，核心不依赖插件",
+      "command": "uv run --frozen pytest -p no:cacheprovider -q tests/architecture",
+      "result": "PASS",
+      "exit_code": 0,
+      "started_at": "2026-09-27T01:22:46Z",
+      "finished_at": "2026-09-27T01:22:46Z",
+      "duration_s": 0.5,
+      "log": "docs/execution/evidence/checks/boundaries.log",
+      "summary": "20 passed in 0.35s",
+      "evidence": []
+    },
+    {
+      "id": "unit-suite",
+      "tasks": [
+        "P1-129"
+      ],
+      "title": "全部非集成测试（单元/契约/架构/示例）",
+      "command": "uv run --frozen pytest -p no:cacheprovider -q -m 'not integration and not llm and not ui'",
+      "result": "PASS",
+      "exit_code": 0,
+      "started_at": "2026-09-27T01:22:46Z",
+      "finished_at": "2026-09-27T01:24:52Z",
+      "duration_s": 125.8,
+      "log": "docs/execution/evidence/checks/unit-suite.log",
+      "summary": "211 passed, 31 deselected in 125.14s (0:02:05)",
+      "evidence": []
+    },
+    {
+      "id": "lint",
+      "tasks": [
+        "P1-129"
+      ],
+      "title": "ruff",
+      "command": "make lint",
+      "result": "FAIL",
+      "exit_code": 2,
+      "started_at": "2026-09-27T01:24:52Z",
+      "finished_at": "2026-09-27T01:24:52Z",
+      "duration_s": 0.1,
+      "log": "docs/execution/evidence/checks/lint.log",
+      "summary": "make[1]: Leaving directory '/Users/null3351/Code/formal-agent-lab'",
+      "evidence": []
+    },
+    {
+      "id": "web-build",
+      "tasks": [
+        "P1-090"
+      ],
+      "title": "Web 类型检查与构建",
+      "command": "make web-build",
+      "result": "PASS",
+      "exit_code": 0,
+      "started_at": "2026-09-27T01:24:52Z",
+      "finished_at": "2026-09-27T01:24:53Z",
+      "duration_s": 0.9,
+      "log": "docs/execution/evidence/checks/web-build.log",
+      "summary": "make[1]: Leaving directory '/Users/null3351/Code/formal-agent-lab'",
+      "evidence": []
+    },
+    {
+      "id": "compose-e2e",
+      "tasks": [
+        "P1-127",
+        "P1-111",
+        "P1-112"
+      ],
+      "title": "部署：Compose 完整路径实测",
+      "command": "scripts/compose-smoke.sh",
+      "result": "PASS",
+      "exit_code": 0,
+      "started_at": "2026-09-27T01:24:53Z",
+      "finished_at": "2026-09-27T01:27:12Z",
+      "duration_s": 138.9,
+      "log": "docs/execution/evidence/checks/compose-e2e.log",
+      "summary": "==> OK (docs/execution/evidence/compose-smoke.json)",
+      "evidence": [
+        "docs/execution/evidence/compose-smoke.json"
+      ]
+    },
+    {
+      "id": "helm-render",
+      "tasks": [
+        "P1-127",
+        "P1-113"
+      ],
+      "title": "Helm lint / template / kubeconform",
+      "command": "make helm-lint",
+      "result": "PASS",
+      "exit_code": 0,
+      "started_at": "2026-09-27T01:27:12Z",
+      "finished_at": "2026-09-27T01:27:14Z",
+      "duration_s": 2.1,
+      "log": "docs/execution/evidence/checks/helm-render.log",
+      "summary": "make[1]: Leaving directory '/Users/null3351/Code/formal-agent-lab'",
+      "evidence": [
+        "docs/execution/evidence/helm/"
+      ]
+    },
+    {
+      "id": "helm-install",
+      "tasks": [
+        "P1-127",
+        "P1-113"
+      ],
+      "title": "Helm 安装（kind 临时集群，状态单独记录）",
+      "command": "scripts/helm-install-check.sh",
+      "result": "PASS",
+      "exit_code": 0,
+      "started_at": "2026-09-27T01:27:14Z",
+      "finished_at": "2026-09-27T01:30:03Z",
+      "duration_s": 168.5,
+      "log": "docs/execution/evidence/checks/helm-install.log",
+      "summary": "==> OK (docs/execution/evidence/helm/install.json)",
+      "evidence": [
+        "docs/execution/evidence/helm/install.json"
+      ]
+    },
+    {
+      "id": "llm-real",
+      "tasks": [
+        "P1-074"
+      ],
+      "title": "真实模型集成检查（OpenAI 兼容端点）",
+      "command": "uv run --frozen pytest -p no:cacheprovider -q -m llm tests/integration/test_llm_real.py",
+      "result": "PASS",
+      "exit_code": 0,
+      "started_at": "2026-09-27T01:30:03Z",
+      "finished_at": "2026-09-27T01:34:24Z",
+      "duration_s": 261.3,
+      "log": "docs/execution/evidence/checks/llm-real.log",
+      "summary": "1 passed in 260.89s (0:04:20)",
+      "evidence": [
+        "docs/execution/evidence/P1-074-llm-integration.json"
+      ]
+    },
+    {
+      "id": "ci-remote",
+      "tasks": [
+        "P1-040"
+      ],
+      "title": "GitHub Actions 最近一次 CI 运行（远端）",
+      "command": "(GitHub API)",
+      "result": "FAIL",
+      "exit_code": 0,
+      "started_at": "2026-09-27T01:34:24Z",
+      "finished_at": "2026-09-27T01:34:25Z",
+      "duration_s": 1.0,
+      "log": "docs/execution/evidence/checks/ci-remote.log",
+      "summary": "latest completed run https://github.com/3351666087/formal-agent-lab/actions/runs/36284595533 on 00f1d3f8ce (HEAD 00f1d3f8ce): failure",
+      "evidence": [
+        "docs/execution/evidence/ci-run.json"
+      ]
+    }
+  ]
+}
