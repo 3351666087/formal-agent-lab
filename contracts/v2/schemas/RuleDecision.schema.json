@@ -1,0 +1,213 @@
+{
+  "$defs": {
+    "Digest": {
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": {
+          "const": "sha256",
+          "default": "sha256",
+          "title": "Algorithm",
+          "type": "string"
+        },
+        "value": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "Digest",
+      "type": "object"
+    },
+    "EventType": {
+      "enum": [
+        "RUN_CREATED",
+        "RUN_QUEUED",
+        "RUN_STARTED",
+        "OBSERVATION",
+        "CANDIDATES",
+        "ACTION_PROPOSED",
+        "CHECK_COMPLETED",
+        "ACTION_OUTCOME",
+        "EFFECT_COMPARED",
+        "STATE_SNAPSHOT",
+        "RUN_PAUSING",
+        "RUN_PAUSED",
+        "RUN_RESUMED",
+        "RUN_CANCELLING",
+        "RUN_CANCELLED",
+        "BUDGET_EXHAUSTED",
+        "RUN_SUCCEEDED",
+        "RUN_FAILED",
+        "METRICS_COMPUTED",
+        "LOG",
+        "TURN_STARTED",
+        "TURN_SKIPPED",
+        "OBSERVATION_REQUESTED",
+        "PLAN_UPDATED",
+        "PLANNER_CHECKPOINT",
+        "OPERATION_STATE",
+        "OPERATION_RECONCILED",
+        "OPERATION_REVIEW",
+        "PROBE_SAMPLED",
+        "RULE_EVALUATED",
+        "SESSION_STATE",
+        "RECOVERY",
+        "MODEL_REVISION_SUGGESTED",
+        "REGRESSION_CASE_CREATED"
+      ],
+      "title": "EventType",
+      "type": "string"
+    },
+    "RuleEvaluation": {
+      "additionalProperties": false,
+      "properties": {
+        "completions_checked": {
+          "default": 0,
+          "title": "Completions Checked",
+          "type": "integer"
+        },
+        "explanation": {
+          "title": "Explanation",
+          "type": "string"
+        },
+        "outcome": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RuleOutcome"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "outcome applied (null when the rule did not decide)"
+        },
+        "priority": {
+          "title": "Priority",
+          "type": "integer"
+        },
+        "result": {
+          "$ref": "#/$defs/RuleResult"
+        },
+        "rule_id": {
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*$",
+          "title": "Rule Id",
+          "type": "string"
+        },
+        "ruleset": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RuleSetRef"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "rule_id",
+        "result",
+        "outcome",
+        "priority",
+        "explanation"
+      ],
+      "title": "RuleEvaluation",
+      "type": "object"
+    },
+    "RuleOutcome": {
+      "enum": [
+        "CONTINUE",
+        "OBSERVE_MORE",
+        "REPLAN",
+        "PAUSE"
+      ],
+      "title": "RuleOutcome",
+      "type": "string"
+    },
+    "RuleResult": {
+      "enum": [
+        "TRUE",
+        "FALSE",
+        "UNKNOWN",
+        "TIMEOUT",
+        "CONFLICT",
+        "UNSUPPORTED"
+      ],
+      "title": "RuleResult",
+      "type": "string"
+    },
+    "RuleSetRef": {
+      "additionalProperties": false,
+      "properties": {
+        "digest": {
+          "$ref": "#/$defs/Digest"
+        },
+        "ruleset_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:@/-]{0,254}$",
+          "title": "Ruleset Id",
+          "type": "string"
+        },
+        "version": {
+          "minimum": 1,
+          "title": "Version",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "ruleset_id",
+        "version",
+        "digest"
+      ],
+      "title": "RuleSetRef",
+      "type": "object"
+    }
+  },
+  "$id": "https://formal-lab.dev/contracts/v2/RuleDecision.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Resolution of all rules that evaluated for one event: the winning outcome and why.",
+  "properties": {
+    "evaluations": {
+      "items": {
+        "$ref": "#/$defs/RuleEvaluation"
+      },
+      "title": "Evaluations",
+      "type": "array"
+    },
+    "event_type": {
+      "$ref": "#/$defs/EventType"
+    },
+    "outcome": {
+      "$ref": "#/$defs/RuleOutcome"
+    },
+    "priority_explanation": {
+      "title": "Priority Explanation",
+      "type": "string"
+    },
+    "winner": {
+      "anyOf": [
+        {
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Winner"
+    }
+  },
+  "required": [
+    "event_type",
+    "evaluations",
+    "outcome",
+    "winner",
+    "priority_explanation"
+  ],
+  "title": "RuleDecision",
+  "type": "object"
+}

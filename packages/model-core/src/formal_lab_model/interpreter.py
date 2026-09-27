@@ -92,6 +92,19 @@ class Interpreter:
                 return lambda s, e: any(body(s, i) for i in envs(s, e))
             if expr.op == "count":
                 return lambda s, e: sum(1 for i in envs(s, e) if body(s, i))
+            if expr.op in ("max_over", "min_over"):
+                pick = max if expr.op == "max_over" else min
+                default = self.compile_expr(expr.default) if expr.default is not None else None
+
+                def extremum(s: State, e: Env, pick=pick, default=default) -> Any:
+                    values = [body(s, i) for i in envs(s, e)]
+                    if values:
+                        return pick(values)
+                    if default is None:
+                        raise EvaluationError(f"{expr.op} over an empty set without a default")
+                    return default(s, e)
+
+                return extremum
             return lambda s, e: sum(body(s, i) for i in envs(s, e))
         if isinstance(expr, ApplyExpr):
             args = [self.compile_expr(a) for a in expr.args]

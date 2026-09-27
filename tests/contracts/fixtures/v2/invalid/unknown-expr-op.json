@@ -1,0 +1,190 @@
+{
+  "instance": {
+    "compiled": [],
+    "contract_version": "formal-lab-contracts/v2",
+    "created_at": "2026-09-27T12:00:00Z",
+    "digest": {
+      "algorithm": "sha256",
+      "value": "3bbefb596964eb6d5b9af55fa10a8534942c729ab774ca58c5259ca9f70d2ac2"
+    },
+    "extensions": {
+      "org.example.lab": {
+        "data": {
+          "tags": [
+            "demo"
+          ]
+        },
+        "schema_id": "org.example.lab/tags@1",
+        "version": "1.0.0"
+      }
+    },
+    "frontend": {
+      "plugin_id": "formal-lab.frontend.ir-json",
+      "version": "1.0.0"
+    },
+    "package_id": "lamp",
+    "payload": {
+      "ir": {
+        "actions": [
+          {
+            "cost": 2,
+            "description": null,
+            "effects": [
+              {
+                "kind": "assign",
+                "target": {
+                  "index": [],
+                  "var": "on"
+                },
+                "value": {
+                  "args": [
+                    {
+                      "index": [],
+                      "name": "on",
+                      "op": "var"
+                    }
+                  ],
+                  "op": "not"
+                }
+              },
+              {
+                "kind": "assign",
+                "target": {
+                  "index": [],
+                  "var": "toggles"
+                },
+                "value": {
+                  "args": [
+                    {
+                      "index": [],
+                      "name": "toggles",
+                      "op": "var"
+                    },
+                    {
+                      "domain": null,
+                      "op": "const",
+                      "value": 1
+                    }
+                  ],
+                  "op": "add"
+                }
+              }
+            ],
+            "label": null,
+            "name": "toggle",
+            "params": [],
+            "precondition": {
+              "domain": null,
+              "op": "const",
+              "value": true
+            },
+            "retry": "RECONCILE_THEN_RETRY",
+            "timeout_seconds": 30.0
+          }
+        ],
+        "constants": [],
+        "description": "a lamp that can be toggled; a counter records toggles (bounded)",
+        "entity_sets": [],
+        "enums": [],
+        "features": [],
+        "name": "lamp-counter",
+        "objectives": [
+          {
+            "description": null,
+            "direction": "minimize",
+            "id": "toggle_cost",
+            "label": "toggle cost",
+            "terms": [
+              {
+                "expr": null,
+                "kind": "action_cost",
+                "label": null,
+                "weight": 1
+              }
+            ],
+            "unit": "cost"
+          }
+        ],
+        "properties": [
+          {
+            "description": null,
+            "expr": {
+              "args": [],
+              "op": "xor"
+            },
+            "id": "lit",
+            "kind": "goal",
+            "label": null
+          },
+          {
+            "description": null,
+            "expr": {
+              "args": [
+                {
+                  "index": [],
+                  "name": "toggles",
+                  "op": "var"
+                },
+                {
+                  "domain": null,
+                  "op": "const",
+                  "value": 2
+                }
+              ],
+              "op": "le"
+            },
+            "id": "few_toggles",
+            "kind": "invariant",
+            "label": null
+          }
+        ],
+        "semantic_profile": "deterministic_finite_v1",
+        "state": [
+          {
+            "description": null,
+            "index": [],
+            "initial": {
+              "cells": [],
+              "default": false
+            },
+            "label": null,
+            "name": "on",
+            "observable": true,
+            "type": {
+              "kind": "bool"
+            }
+          },
+          {
+            "description": null,
+            "index": [],
+            "initial": {
+              "cells": [],
+              "default": 0
+            },
+            "label": null,
+            "name": "toggles",
+            "observable": true,
+            "type": {
+              "kind": "int",
+              "max": 3,
+              "min": 0
+            }
+          }
+        ]
+      },
+      "kind": "fal-ir"
+    },
+    "semantic_profile": "deterministic_finite_v1",
+    "source": {
+      "artifact": null,
+      "author": null,
+      "format": "fal-ir-json/v1",
+      "origin": "tests/contracts",
+      "parent_version": null,
+      "text": null
+    },
+    "version": 1
+  },
+  "object": "ModelPackage",
+  "reason": "expression ops are a closed set"
+}

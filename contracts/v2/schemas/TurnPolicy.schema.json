@@ -1,0 +1,57 @@
+{
+  "$defs": {
+    "ConflictPolicy": {
+      "enum": [
+        "REVALIDATE",
+        "REJECT_STALE"
+      ],
+      "title": "ConflictPolicy",
+      "type": "string"
+    },
+    "ObservationTiming": {
+      "enum": [
+        "TURN_START",
+        "ROUND_START"
+      ],
+      "title": "ObservationTiming",
+      "type": "string"
+    },
+    "TurnMode": {
+      "enum": [
+        "ROUND_ROBIN",
+        "FIXED_TABLE"
+      ],
+      "title": "TurnMode",
+      "type": "string"
+    }
+  },
+  "$id": "https://formal-lab.dev/contracts/v2/TurnPolicy.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Explicit interleaving semantics: exactly one participant acts per logical (global) step.",
+  "properties": {
+    "conflict_policy": {
+      "$ref": "#/$defs/ConflictPolicy",
+      "default": "REVALIDATE"
+    },
+    "mode": {
+      "$ref": "#/$defs/TurnMode",
+      "default": "ROUND_ROBIN"
+    },
+    "observation_timing": {
+      "$ref": "#/$defs/ObservationTiming",
+      "default": "TURN_START"
+    },
+    "table": {
+      "description": "FIXED_TABLE: actor ids in turn order",
+      "items": {
+        "pattern": "^[A-Za-z0-9][A-Za-z0-9._:@/-]{0,254}$",
+        "type": "string"
+      },
+      "title": "Table",
+      "type": "array"
+    }
+  },
+  "title": "TurnPolicy",
+  "type": "object"
+}

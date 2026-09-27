@@ -1,0 +1,133 @@
+{
+  "$defs": {
+    "ObjectiveBound": {
+      "additionalProperties": false,
+      "properties": {
+        "level": {
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*$",
+          "title": "Level",
+          "type": "string"
+        },
+        "optimal": {
+          "default": false,
+          "title": "Optimal",
+          "type": "boolean"
+        },
+        "proven_lower": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "no plan within the horizon is cheaper than this",
+          "title": "Proven Lower"
+        },
+        "proven_upper": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "a plan at most this expensive exists",
+          "title": "Proven Upper"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "objective value of the returned plan",
+          "title": "Value"
+        }
+      },
+      "required": [
+        "level",
+        "value"
+      ],
+      "title": "ObjectiveBound",
+      "type": "object"
+    },
+    "OptimizationStatus": {
+      "enum": [
+        "OPTIMAL",
+        "FEASIBLE",
+        "NO_PLAN_WITHIN_HORIZON",
+        "UNKNOWN",
+        "UNSUPPORTED"
+      ],
+      "title": "OptimizationStatus",
+      "type": "string"
+    }
+  },
+  "$id": "https://formal-lab.dev/contracts/v2/OptimizationResult.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "horizon": {
+      "title": "Horizon",
+      "type": "integer"
+    },
+    "levels": {
+      "items": {
+        "$ref": "#/$defs/ObjectiveBound"
+      },
+      "title": "Levels",
+      "type": "array"
+    },
+    "method": {
+      "default": "incremental bound tightening (binary search per lexicographic level)",
+      "title": "Method",
+      "type": "string"
+    },
+    "objective_id": {
+      "pattern": "^[A-Za-z_][A-Za-z0-9_]*$",
+      "title": "Objective Id",
+      "type": "string"
+    },
+    "plan_length": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Plan Length"
+    },
+    "scope": {
+      "const": "MODEL_INTERNAL_WITHIN_HORIZON",
+      "default": "MODEL_INTERNAL_WITHIN_HORIZON",
+      "title": "Scope",
+      "type": "string"
+    },
+    "solver_calls": {
+      "default": 0,
+      "title": "Solver Calls",
+      "type": "integer"
+    },
+    "status": {
+      "$ref": "#/$defs/OptimizationStatus"
+    }
+  },
+  "required": [
+    "objective_id",
+    "status",
+    "horizon"
+  ],
+  "title": "OptimizationResult",
+  "type": "object"
+}

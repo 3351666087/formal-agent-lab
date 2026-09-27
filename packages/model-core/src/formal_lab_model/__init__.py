@@ -1,8 +1,18 @@
 """Finite-state IR engine: static checking, canonical form, digests and the reference interpreter."""
 
-from .checker import CheckedModel, GroundAction, ModelCheckError, ModelIssue, check_model, check_or_raise
+from .belief import belief_state
+from .checker import (
+    CheckedModel,
+    GroundAction,
+    ModelCheckError,
+    ModelIssue,
+    check_expression,
+    check_model,
+    check_or_raise,
+)
 from .compare import compare_effects
 from .diff import ModelChange, diff_models
+from .driver import IRFiniteDriver, IRLoadedModel
 from .explore import SearchOutcome, bfs, reachable_states
 from .frontend import IRJsonFrontend, build_package, canonical_ir, canonical_text, ir_digest, parse_ir
 from .interpreter import Interpreter, State, StepResult
@@ -12,7 +22,9 @@ from .specs import action_specs
 __all__ = [
     "CheckedModel",
     "GroundAction",
+    "IRFiniteDriver",
     "IRJsonFrontend",
+    "IRLoadedModel",
     "Interpreter",
     "ModelChange",
     "ModelCheckError",
@@ -21,10 +33,12 @@ __all__ = [
     "State",
     "StepResult",
     "action_specs",
+    "belief_state",
     "bfs",
     "build_package",
     "canonical_ir",
     "canonical_text",
+    "check_expression",
     "check_model",
     "check_or_raise",
     "compare_effects",

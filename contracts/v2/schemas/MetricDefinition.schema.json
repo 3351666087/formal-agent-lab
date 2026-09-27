@@ -1,0 +1,85 @@
+{
+  "$defs": {
+    "Aggregation": {
+      "enum": [
+        "MEAN",
+        "SUM",
+        "MEDIAN",
+        "MIN",
+        "MAX",
+        "RATE"
+      ],
+      "title": "Aggregation",
+      "type": "string"
+    },
+    "MetricDirection": {
+      "enum": [
+        "HIGHER_IS_BETTER",
+        "LOWER_IS_BETTER",
+        "NONE"
+      ],
+      "title": "MetricDirection",
+      "type": "string"
+    }
+  },
+  "$id": "https://formal-lab.dev/contracts/v2/MetricDefinition.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "aggregation": {
+      "$ref": "#/$defs/Aggregation"
+    },
+    "description": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Description"
+    },
+    "direction": {
+      "$ref": "#/$defs/MetricDirection"
+    },
+    "label": {
+      "title": "Label",
+      "type": "string"
+    },
+    "metric_id": {
+      "pattern": "^[a-z0-9_.-]+$",
+      "title": "Metric Id",
+      "type": "string"
+    },
+    "unit": {
+      "title": "Unit",
+      "type": "string"
+    },
+    "value_type": {
+      "default": "float",
+      "enum": [
+        "float",
+        "int",
+        "bool"
+      ],
+      "title": "Value Type",
+      "type": "string"
+    },
+    "version": {
+      "default": "1",
+      "title": "Version",
+      "type": "string"
+    }
+  },
+  "required": [
+    "metric_id",
+    "label",
+    "unit",
+    "direction",
+    "aggregation"
+  ],
+  "title": "MetricDefinition",
+  "type": "object"
+}

@@ -1,0 +1,633 @@
+{
+  "$defs": {
+    "ArtifactRef": {
+      "additionalProperties": false,
+      "description": "Pointer to a large object held by an ArtifactStore (never inlined into events).",
+      "properties": {
+        "digest": {
+          "$ref": "#/$defs/Digest"
+        },
+        "format_version": {
+          "minLength": 1,
+          "title": "Format Version",
+          "type": "string"
+        },
+        "media_type": {
+          "minLength": 3,
+          "title": "Media Type",
+          "type": "string"
+        },
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Name"
+        },
+        "size_bytes": {
+          "minimum": 0,
+          "title": "Size Bytes",
+          "type": "integer"
+        },
+        "uri": {
+          "description": "object location, e.g. file://… or s3://bucket/key",
+          "minLength": 1,
+          "title": "Uri",
+          "type": "string"
+        }
+      },
+      "required": [
+        "uri",
+        "media_type",
+        "size_bytes",
+        "digest",
+        "format_version"
+      ],
+      "title": "ArtifactRef",
+      "type": "object"
+    },
+    "ComparisonVerdict": {
+      "enum": [
+        "MATCH",
+        "DIFFERENT",
+        "INSUFFICIENT_INFORMATION"
+      ],
+      "title": "ComparisonVerdict",
+      "type": "string"
+    },
+    "ConflictInfo": {
+      "additionalProperties": false,
+      "description": "Why a proposal based on an older world revision was rejected (shared-resource arbitration).",
+      "properties": {
+        "based_on_revision": {
+          "minimum": 0,
+          "title": "Based On Revision",
+          "type": "integer"
+        },
+        "changed_paths": {
+          "description": "locations written since based_on_revision",
+          "items": {
+            "type": "string"
+          },
+          "title": "Changed Paths",
+          "type": "array"
+        },
+        "current_revision": {
+          "minimum": 0,
+          "title": "Current Revision",
+          "type": "integer"
+        },
+        "policy": {
+          "$ref": "#/$defs/ConflictPolicy"
+        },
+        "reason": {
+          "title": "Reason",
+          "type": "string"
+        }
+      },
+      "required": [
+        "policy",
+        "based_on_revision",
+        "current_revision",
+        "reason"
+      ],
+      "title": "ConflictInfo",
+      "type": "object"
+    },
+    "ConflictPolicy": {
+      "enum": [
+        "REVALIDATE",
+        "REJECT_STALE"
+      ],
+      "title": "ConflictPolicy",
+      "type": "string"
+    },
+    "Digest": {
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": {
+          "const": "sha256",
+          "default": "sha256",
+          "title": "Algorithm",
+          "type": "string"
+        },
+        "value": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "Digest",
+      "type": "object"
+    },
+    "EffectComparison": {
+      "additionalProperties": false,
+      "properties": {
+        "diffs": {
+          "items": {
+            "$ref": "#/$defs/FieldDiff"
+          },
+          "title": "Diffs",
+          "type": "array"
+        },
+        "evidence": {
+          "items": {
+            "$ref": "#/$defs/EvidenceRef"
+          },
+          "title": "Evidence",
+          "type": "array"
+        },
+        "evidence_counts": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "description": "evidence status → fields (v2)",
+          "title": "Evidence Counts",
+          "type": "object"
+        },
+        "expected_by": {
+          "description": "what produced the expectation, e.g. model:<package>@<version>",
+          "title": "Expected By",
+          "type": "string"
+        },
+        "verdict": {
+          "$ref": "#/$defs/ComparisonVerdict"
+        }
+      },
+      "required": [
+        "verdict",
+        "expected_by"
+      ],
+      "title": "EffectComparison",
+      "type": "object"
+    },
+    "ErrorCode": {
+      "enum": [
+        "INVALID_INPUT",
+        "VERSION_MISMATCH",
+        "UNSUPPORTED",
+        "TIMEOUT",
+        "RESULT_UNKNOWN",
+        "CANCELLED",
+        "RETRYABLE_FAILURE",
+        "NON_RETRYABLE_FAILURE",
+        "NOT_FOUND",
+        "CONFLICT"
+      ],
+      "title": "ErrorCode",
+      "type": "string"
+    },
+    "ErrorInfo": {
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "$ref": "#/$defs/ErrorCode"
+        },
+        "details": {
+          "additionalProperties": true,
+          "title": "Details",
+          "type": "object"
+        },
+        "field_errors": {
+          "items": {
+            "$ref": "#/$defs/FieldError"
+          },
+          "title": "Field Errors",
+          "type": "array"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        },
+        "retryable": {
+          "title": "Retryable",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "code",
+        "message",
+        "retryable"
+      ],
+      "title": "ErrorInfo",
+      "type": "object"
+    },
+    "EvidenceRef": {
+      "additionalProperties": false,
+      "description": "Reference to something that supports a claim: an event, artifact, check or snapshot.",
+      "properties": {
+        "artifact": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ArtifactRef"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "id": {
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "event",
+            "artifact",
+            "check",
+            "snapshot",
+            "operation",
+            "model_call",
+            "probe",
+            "query_bundle",
+            "release",
+            "rule",
+            "plan",
+            "regression_case",
+            "session"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Note"
+        }
+      },
+      "required": [
+        "kind",
+        "id"
+      ],
+      "title": "EvidenceRef",
+      "type": "object"
+    },
+    "FieldDiff": {
+      "additionalProperties": false,
+      "properties": {
+        "evidence": {
+          "default": "observed",
+          "description": "basis of `observed`: fresh observation, verified within a stated scope (probe / operation query), or unknown (not comparable); `predicted` marks a value only the model supplies (v2)",
+          "enum": [
+            "observed",
+            "verified-within-scope",
+            "predicted",
+            "unknown"
+          ],
+          "title": "Evidence",
+          "type": "string"
+        },
+        "expected": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "predicted by the model",
+          "title": "Expected"
+        },
+        "freshness": {
+          "default": "FRESH",
+          "enum": [
+            "FRESH",
+            "STALE",
+            "MISSING"
+          ],
+          "title": "Freshness",
+          "type": "string"
+        },
+        "observed": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Observed"
+        },
+        "observed_at_step": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Observed At Step"
+        },
+        "path": {
+          "title": "Path",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "MATCH",
+            "DIFFERENT",
+            "UNKNOWN"
+          ],
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "path",
+        "expected",
+        "observed",
+        "status"
+      ],
+      "title": "FieldDiff",
+      "type": "object"
+    },
+    "FieldError": {
+      "additionalProperties": false,
+      "properties": {
+        "message": {
+          "title": "Message",
+          "type": "string"
+        },
+        "path": {
+          "title": "Path",
+          "type": "string"
+        }
+      },
+      "required": [
+        "path",
+        "message"
+      ],
+      "title": "FieldError",
+      "type": "object"
+    },
+    "GroundAction": {
+      "additionalProperties": false,
+      "properties": {
+        "action_type": {
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*$",
+          "title": "Action Type",
+          "type": "string"
+        },
+        "params": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "title": "Params",
+          "type": "object"
+        }
+      },
+      "required": [
+        "action_type"
+      ],
+      "title": "GroundAction",
+      "type": "object"
+    },
+    "OperationState": {
+      "enum": [
+        "PREPARED",
+        "DISPATCHED",
+        "COMPLETED",
+        "FAILED",
+        "OUTCOME_UNKNOWN",
+        "RECONCILED"
+      ],
+      "title": "OperationState",
+      "type": "string"
+    },
+    "OutcomeStatus": {
+      "enum": [
+        "APPLIED",
+        "REJECTED",
+        "FAILED_RETRYABLE",
+        "FAILED_NON_RETRYABLE",
+        "TIMED_OUT",
+        "UNKNOWN",
+        "CANCELLED"
+      ],
+      "title": "OutcomeStatus",
+      "type": "string"
+    },
+    "TurnRef": {
+      "additionalProperties": false,
+      "description": "Position of one action in the interleaving: global step g, round r, and the actor's own step count.",
+      "properties": {
+        "actor_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:@/-]{0,254}$",
+          "title": "Actor Id",
+          "type": "string"
+        },
+        "actor_step": {
+          "minimum": 0,
+          "title": "Actor Step",
+          "type": "integer"
+        },
+        "global_step": {
+          "minimum": 0,
+          "title": "Global Step",
+          "type": "integer"
+        },
+        "round": {
+          "minimum": 0,
+          "title": "Round",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "global_step",
+        "round",
+        "actor_id",
+        "actor_step"
+      ],
+      "title": "TurnRef",
+      "type": "object"
+    }
+  },
+  "$id": "https://formal-lab.dev/contracts/v2/ActionOutcome.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "action": {
+      "$ref": "#/$defs/GroundAction"
+    },
+    "conflict": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ConflictInfo"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "effect_applied": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "null when it is unknown whether the effect took place",
+      "title": "Effect Applied"
+    },
+    "effect_comparison": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/EffectComparison"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "error": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ErrorInfo"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "evidence": {
+      "items": {
+        "$ref": "#/$defs/EvidenceRef"
+      },
+      "title": "Evidence",
+      "type": "array"
+    },
+    "operation_id": {
+      "title": "Operation Id",
+      "type": "string"
+    },
+    "operation_state": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/OperationState"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "coordination state (v2)"
+    },
+    "proposal_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Proposal Id"
+    },
+    "result": {
+      "additionalProperties": true,
+      "title": "Result",
+      "type": "object"
+    },
+    "revision_after": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Revision After"
+    },
+    "revision_before": {
+      "minimum": 0,
+      "title": "Revision Before",
+      "type": "integer"
+    },
+    "run_id": {
+      "title": "Run Id",
+      "type": "string"
+    },
+    "status": {
+      "$ref": "#/$defs/OutcomeStatus"
+    },
+    "step_id": {
+      "title": "Step Id",
+      "type": "string"
+    },
+    "turn": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/TurnRef"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    }
+  },
+  "required": [
+    "operation_id",
+    "run_id",
+    "step_id",
+    "action",
+    "status",
+    "effect_applied",
+    "revision_before"
+  ],
+  "title": "ActionOutcome",
+  "type": "object"
+}

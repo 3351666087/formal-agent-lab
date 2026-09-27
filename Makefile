@@ -32,13 +32,14 @@ lock: ## re-resolve dependency locks
 
 # ----------------------------------------------------------------- contracts
 .PHONY: contracts contracts-check
-contracts: ## regenerate JSON Schemas, digest and TypeScript types from the Pydantic source
-	$(PY) -m formal_lab_contracts.schema_export --out contracts/v1
+contracts: ## regenerate JSON Schemas, digests, TypeScript types and docs (v2 live, v1 frozen) from the Pydantic source
+	$(PY) -m formal_lab_contracts.schema_export --out contracts/v2 --v1-out contracts/v1
 	pnpm --filter @formal-lab/contracts run generate
-	$(PY) -m formal_lab_contracts.docs --out docs/contracts/v1.md
+	$(PY) -m formal_lab_contracts.docs --out docs/contracts/v2.md --v1-out docs/contracts/v1.md
 
-contracts-check: contracts ## fail if generated contracts drift from the committed ones
-	git diff --exit-code -- contracts/v1 packages/contracts-ts/src docs/contracts/v1.md
+contracts-check: contracts ## fail if generated contracts drift from the committed ones (untracked output counts as drift)
+	git diff --exit-code -- contracts packages/contracts-ts/src docs/contracts
+	test -z "$$(git status --porcelain --untracked-files=all -- contracts packages/contracts-ts/src docs/contracts)"
 
 # ----------------------------------------------------------------- quality
 .PHONY: lint test test-unit test-integration

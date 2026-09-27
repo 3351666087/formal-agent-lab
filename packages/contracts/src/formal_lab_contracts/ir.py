@@ -11,6 +11,13 @@ Normative semantics (implemented independently by the reference interpreter and 
 - An action is applicable iff its precondition holds AND every written integer value lies in the
   declared range of its location (implicit domain guard).
 - Integer arithmetic is unbounded inside expressions; only stored values are range-checked.
+
+Additions in formal-lab-contracts/v2 (same profile, backward compatible — a v1 model is a valid v2 model with the
+same canonical form and digest, because fields introduced in v2 are left out of the canonical form while they hold
+their default):
+- quantifiers `max_over` / `min_over`: largest / smallest int `body` over the members that satisfy `where`;
+  `default` is the value when no member qualifies (required whenever `where` is given).
+- `ModelIR.objectives`: named cost objectives (see `ObjectiveDecl`) that scenarios and planners refer to by id.
 """
 
 from __future__ import annotations
@@ -68,7 +75,8 @@ ApplyOp = Literal[
     "add", "sub", "mul", "neg", "min", "max",
     "ite",
 ]  # fmt: skip
-QuantOp = Literal["forall", "exists", "count", "sum"]
+QuantOp = Literal["forall", "exists", "count", "sum", "max_over", "min_over"]
+V2_QUANT_OPS = ("max_over", "min_over")
 
 
 class ConstExpr(ContractModel):
@@ -100,13 +108,23 @@ class ApplyExpr(ContractModel):
 
 
 class QuantExpr(ContractModel):
-    """forall/exists → bool, count → number of satisfying members, sum → sum of an int body."""
+    """forall/exists → bool, count → number of satisfying members, sum → sum of an int body,
+    max_over/min_over → largest/smallest int body over the satisfying members (`default` when there is none)."""
 
     op: QuantOp
     var: Name
     domain: Name = Field(description="entity set or enum to range over")
     where: Expr | None = None
     body: Expr
+    default: Expr | None = Field(default=None, description="max_over/min_over only: value when no member qualifies")
+
+    @model_validator(mode="after")
+    def _default_only_for_extrema(self) -> QuantExpr:
+        if self.default is not None and self.op not in V2_QUANT_OPS:
+            raise ValueError(f"`default` is only meaningful for {V2_QUANT_OPS}, not {self.op!r}")
+        if self.op in V2_QUANT_OPS and self.where is not None and self.default is None:
+            raise ValueError(f"{self.op} with `where` needs a `default` for the empty case")
+        return self
 
 
 Expr = Annotated[ConstExpr | VarExpr | RefExpr | ApplyExpr | QuantExpr, Field(discriminator="op")]
@@ -213,6 +231,39 @@ class PropertyDecl(ContractModel):
     description: str | None = None
 
 
+class CostTerm(ContractModel):
+    """One additive cost term of an objective level.
+
+    - action_cost: `weight` × the declared `cost` of every action taken on the path.
+    - state_rate: `weight` × `expr` (int) evaluated on every post-state s_1..s_k of the path.
+    - terminal: `weight` × `expr` (int) evaluated on the final state s_k of the path.
+    """
+
+    kind: Literal["action_cost", "state_rate", "terminal"]
+    expr: Expr | None = None
+    weight: int = 1
+    label: str | None = None
+
+    @model_validator(mode="after")
+    def _expr_shape(self) -> CostTerm:
+        if self.kind == "action_cost" and self.expr is not None:
+            raise ValueError("action_cost terms take no expr (they use ActionDecl.cost)")
+        if self.kind != "action_cost" and self.expr is None:
+            raise ValueError(f"{self.kind} terms need an int expr")
+        return self
+
+
+class ObjectiveDecl(ContractModel):
+    """A named cost objective declared by the model: the sum of its terms over a path."""
+
+    id: Name
+    label: str | None = None
+    unit: str = "cost"
+    direction: Literal["minimize", "maximize"] = "minimize"
+    terms: list[CostTerm] = Field(min_length=1)
+    description: str | None = None
+
+
 class ModelIR(ContractModel):
     semantic_profile: str = Field(default=DETERMINISTIC_FINITE_V1)
     name: str = Field(min_length=1)
@@ -228,7 +279,41 @@ class ModelIR(ContractModel):
         description="semantic features the model relies on beyond the profile (e.g. 'probabilistic_effects');"
         " unsupported features make engines answer UNSUPPORTED",
     )
+    objectives: list[ObjectiveDecl] = Field(default_factory=list, description="named cost objectives (v2)")
 
 
-for _model in (VarExpr, ApplyExpr, QuantExpr, AssignTarget, AssignEffect, WhenEffect, ForallEffect):
+# fields introduced by formal-lab-contracts/v2 inside the IR: omitted from the canonical form at their default
+V2_IR_DEFAULTS = {"ModelIR.objectives": [], "QuantExpr.default": None}
+
+
+for _model in (VarExpr, ApplyExpr, QuantExpr, AssignTarget, AssignEffect, WhenEffect, ForallEffect, CostTerm,
+               ObjectiveDecl):
     _model.model_rebuild()
+
+
+_QUANT_OPS = ("forall", "exists", "count", "sum", "max_over", "min_over")
+
+
+def canonical_ir_dump(ir: ModelIR) -> dict:
+    """Canonical JSON form of a model (the input of its digest).
+
+    Every v1 field is explicit (defaults filled); list order is semantic and preserved; key order is irrelevant
+    because digests use sorted-key canonical JSON. Fields introduced in v2 (`V2_IR_DEFAULTS`) are left out while
+    they hold their default, so a phase-1 model keeps its phase-1 digest.
+    """
+    data = ir.model_dump(mode="json")
+    if data.get("objectives") == []:
+        data.pop("objectives")
+
+    def strip(node):
+        if isinstance(node, dict):
+            if node.get("op") in _QUANT_OPS and "body" in node and node.get("default", 0) is None:
+                node.pop("default")
+            for value in node.values():
+                strip(value)
+        elif isinstance(node, list):
+            for value in node:
+                strip(value)
+
+    strip(data)
+    return data

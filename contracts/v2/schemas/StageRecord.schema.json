@@ -1,0 +1,320 @@
+{
+  "$defs": {
+    "ArtifactRef": {
+      "additionalProperties": false,
+      "description": "Pointer to a large object held by an ArtifactStore (never inlined into events).",
+      "properties": {
+        "digest": {
+          "$ref": "#/$defs/Digest"
+        },
+        "format_version": {
+          "minLength": 1,
+          "title": "Format Version",
+          "type": "string"
+        },
+        "media_type": {
+          "minLength": 3,
+          "title": "Media Type",
+          "type": "string"
+        },
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Name"
+        },
+        "size_bytes": {
+          "minimum": 0,
+          "title": "Size Bytes",
+          "type": "integer"
+        },
+        "uri": {
+          "description": "object location, e.g. file://… or s3://bucket/key",
+          "minLength": 1,
+          "title": "Uri",
+          "type": "string"
+        }
+      },
+      "required": [
+        "uri",
+        "media_type",
+        "size_bytes",
+        "digest",
+        "format_version"
+      ],
+      "title": "ArtifactRef",
+      "type": "object"
+    },
+    "Digest": {
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": {
+          "const": "sha256",
+          "default": "sha256",
+          "title": "Algorithm",
+          "type": "string"
+        },
+        "value": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "Digest",
+      "type": "object"
+    },
+    "ErrorCode": {
+      "enum": [
+        "INVALID_INPUT",
+        "VERSION_MISMATCH",
+        "UNSUPPORTED",
+        "TIMEOUT",
+        "RESULT_UNKNOWN",
+        "CANCELLED",
+        "RETRYABLE_FAILURE",
+        "NON_RETRYABLE_FAILURE",
+        "NOT_FOUND",
+        "CONFLICT"
+      ],
+      "title": "ErrorCode",
+      "type": "string"
+    },
+    "ErrorInfo": {
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "$ref": "#/$defs/ErrorCode"
+        },
+        "details": {
+          "additionalProperties": true,
+          "title": "Details",
+          "type": "object"
+        },
+        "field_errors": {
+          "items": {
+            "$ref": "#/$defs/FieldError"
+          },
+          "title": "Field Errors",
+          "type": "array"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        },
+        "retryable": {
+          "title": "Retryable",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "code",
+        "message",
+        "retryable"
+      ],
+      "title": "ErrorInfo",
+      "type": "object"
+    },
+    "EvidenceRef": {
+      "additionalProperties": false,
+      "description": "Reference to something that supports a claim: an event, artifact, check or snapshot.",
+      "properties": {
+        "artifact": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ArtifactRef"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "id": {
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "event",
+            "artifact",
+            "check",
+            "snapshot",
+            "operation",
+            "model_call",
+            "probe",
+            "query_bundle",
+            "release",
+            "rule",
+            "plan",
+            "regression_case",
+            "session"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Note"
+        }
+      },
+      "required": [
+        "kind",
+        "id"
+      ],
+      "title": "EvidenceRef",
+      "type": "object"
+    },
+    "ExecutionStage": {
+      "enum": [
+        "TURN",
+        "OBSERVE",
+        "PROPOSE",
+        "CHECK",
+        "EXECUTE",
+        "RECONCILE",
+        "PROBE",
+        "COMPARE",
+        "TERMINATE"
+      ],
+      "title": "ExecutionStage",
+      "type": "string"
+    },
+    "FieldError": {
+      "additionalProperties": false,
+      "properties": {
+        "message": {
+          "title": "Message",
+          "type": "string"
+        },
+        "path": {
+          "title": "Path",
+          "type": "string"
+        }
+      },
+      "required": [
+        "path",
+        "message"
+      ],
+      "title": "FieldError",
+      "type": "object"
+    },
+    "RetrySemantics": {
+      "enum": [
+        "IDEMPOTENT",
+        "RECONCILE_THEN_RETRY",
+        "NOT_RETRYABLE"
+      ],
+      "title": "RetrySemantics",
+      "type": "string"
+    },
+    "StageStatus": {
+      "enum": [
+        "OK",
+        "SKIPPED",
+        "FAILED",
+        "UNKNOWN"
+      ],
+      "title": "StageStatus",
+      "type": "string"
+    }
+  },
+  "$id": "https://formal-lab.dev/contracts/v2/StageRecord.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Typed record of one execution stage (P2-016): inputs/outputs by digest, retry semantics, error, evidence.",
+  "properties": {
+    "elapsed_ms": {
+      "default": 0.0,
+      "title": "Elapsed Ms",
+      "type": "number"
+    },
+    "error": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ErrorInfo"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "evidence": {
+      "items": {
+        "$ref": "#/$defs/EvidenceRef"
+      },
+      "title": "Evidence",
+      "type": "array"
+    },
+    "input_digest": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Input Digest"
+    },
+    "note": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Note"
+    },
+    "output_digest": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Output Digest"
+    },
+    "retry": {
+      "$ref": "#/$defs/RetrySemantics"
+    },
+    "stage": {
+      "$ref": "#/$defs/ExecutionStage"
+    },
+    "status": {
+      "$ref": "#/$defs/StageStatus"
+    }
+  },
+  "required": [
+    "stage",
+    "status",
+    "retry"
+  ],
+  "title": "StageRecord",
+  "type": "object"
+}

@@ -1,0 +1,854 @@
+{
+  "$defs": {
+    "ApplyExpr": {
+      "additionalProperties": false,
+      "properties": {
+        "args": {
+          "items": {
+            "discriminator": {
+              "mapping": {
+                "add": "#/$defs/ApplyExpr",
+                "and": "#/$defs/ApplyExpr",
+                "const": "#/$defs/ConstExpr",
+                "count": "#/$defs/QuantExpr",
+                "eq": "#/$defs/ApplyExpr",
+                "exists": "#/$defs/QuantExpr",
+                "forall": "#/$defs/QuantExpr",
+                "ge": "#/$defs/ApplyExpr",
+                "gt": "#/$defs/ApplyExpr",
+                "implies": "#/$defs/ApplyExpr",
+                "ite": "#/$defs/ApplyExpr",
+                "le": "#/$defs/ApplyExpr",
+                "lt": "#/$defs/ApplyExpr",
+                "max": "#/$defs/ApplyExpr",
+                "max_over": "#/$defs/QuantExpr",
+                "min": "#/$defs/ApplyExpr",
+                "min_over": "#/$defs/QuantExpr",
+                "mul": "#/$defs/ApplyExpr",
+                "ne": "#/$defs/ApplyExpr",
+                "neg": "#/$defs/ApplyExpr",
+                "not": "#/$defs/ApplyExpr",
+                "or": "#/$defs/ApplyExpr",
+                "ref": "#/$defs/RefExpr",
+                "sub": "#/$defs/ApplyExpr",
+                "sum": "#/$defs/QuantExpr",
+                "var": "#/$defs/VarExpr"
+              },
+              "propertyName": "op"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/ConstExpr"
+              },
+              {
+                "$ref": "#/$defs/VarExpr"
+              },
+              {
+                "$ref": "#/$defs/RefExpr"
+              },
+              {
+                "$ref": "#/$defs/ApplyExpr"
+              },
+              {
+                "$ref": "#/$defs/QuantExpr"
+              }
+            ]
+          },
+          "minItems": 1,
+          "title": "Args",
+          "type": "array"
+        },
+        "op": {
+          "enum": [
+            "not",
+            "and",
+            "or",
+            "implies",
+            "eq",
+            "ne",
+            "lt",
+            "le",
+            "gt",
+            "ge",
+            "add",
+            "sub",
+            "mul",
+            "neg",
+            "min",
+            "max",
+            "ite"
+          ],
+          "title": "Op",
+          "type": "string"
+        }
+      },
+      "required": [
+        "op",
+        "args"
+      ],
+      "title": "ApplyExpr",
+      "type": "object"
+    },
+    "ConstExpr": {
+      "additionalProperties": false,
+      "properties": {
+        "domain": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z_][A-Za-z0-9_]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "enum or entity set of a symbolic value; required when ambiguous",
+          "title": "Domain"
+        },
+        "op": {
+          "const": "const",
+          "default": "const",
+          "title": "Op",
+          "type": "string"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "title": "Value"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "ConstExpr",
+      "type": "object"
+    },
+    "GroundAction": {
+      "additionalProperties": false,
+      "properties": {
+        "action_type": {
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*$",
+          "title": "Action Type",
+          "type": "string"
+        },
+        "params": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "title": "Params",
+          "type": "object"
+        }
+      },
+      "required": [
+        "action_type"
+      ],
+      "title": "GroundAction",
+      "type": "object"
+    },
+    "PlanGenerator": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "$ref": "#/$defs/ProposalSourceKind",
+          "description": "RULE / SYMBOLIC / LLM / LLM_STUB / EXTERNAL"
+        },
+        "method": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Method"
+        },
+        "model": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model"
+        },
+        "strategy": {
+          "$ref": "#/$defs/PluginRef"
+        }
+      },
+      "required": [
+        "kind",
+        "strategy"
+      ],
+      "title": "PlanGenerator",
+      "type": "object"
+    },
+    "PlanRevision": {
+      "additionalProperties": false,
+      "properties": {
+        "at_step": {
+          "minimum": 0,
+          "title": "At Step",
+          "type": "integer"
+        },
+        "detail": {
+          "title": "Detail",
+          "type": "string"
+        },
+        "trigger": {
+          "$ref": "#/$defs/PlanTrigger"
+        }
+      },
+      "required": [
+        "trigger",
+        "detail",
+        "at_step"
+      ],
+      "title": "PlanRevision",
+      "type": "object"
+    },
+    "PlanTrigger": {
+      "enum": [
+        "INITIAL",
+        "NEW_OBSERVATION",
+        "RESOURCE_CHANGE",
+        "BUDGET",
+        "EFFECT_DIFFERENCE",
+        "ACTION_REJECTED",
+        "RULE",
+        "RESTORED"
+      ],
+      "title": "PlanTrigger",
+      "type": "string"
+    },
+    "PluginRef": {
+      "additionalProperties": false,
+      "properties": {
+        "plugin_id": {
+          "pattern": "^[a-z0-9]+([.-][a-z0-9]+)*(/[a-z0-9]+([.-][a-z0-9]+)*)?$",
+          "title": "Plugin Id",
+          "type": "string"
+        },
+        "version": {
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+([-+][0-9A-Za-z.-]+)?$",
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "plugin_id",
+        "version"
+      ],
+      "title": "PluginRef",
+      "type": "object"
+    },
+    "ProposalSourceKind": {
+      "enum": [
+        "RULE",
+        "SYMBOLIC",
+        "LLM",
+        "LLM_STUB",
+        "HUMAN",
+        "EXTERNAL"
+      ],
+      "title": "ProposalSourceKind",
+      "type": "string"
+    },
+    "QuantExpr": {
+      "additionalProperties": false,
+      "description": "forall/exists → bool, count → number of satisfying members, sum → sum of an int body,\nmax_over/min_over → largest/smallest int body over the satisfying members (`default` when there is none).",
+      "properties": {
+        "body": {
+          "discriminator": {
+            "mapping": {
+              "add": "#/$defs/ApplyExpr",
+              "and": "#/$defs/ApplyExpr",
+              "const": "#/$defs/ConstExpr",
+              "count": "#/$defs/QuantExpr",
+              "eq": "#/$defs/ApplyExpr",
+              "exists": "#/$defs/QuantExpr",
+              "forall": "#/$defs/QuantExpr",
+              "ge": "#/$defs/ApplyExpr",
+              "gt": "#/$defs/ApplyExpr",
+              "implies": "#/$defs/ApplyExpr",
+              "ite": "#/$defs/ApplyExpr",
+              "le": "#/$defs/ApplyExpr",
+              "lt": "#/$defs/ApplyExpr",
+              "max": "#/$defs/ApplyExpr",
+              "max_over": "#/$defs/QuantExpr",
+              "min": "#/$defs/ApplyExpr",
+              "min_over": "#/$defs/QuantExpr",
+              "mul": "#/$defs/ApplyExpr",
+              "ne": "#/$defs/ApplyExpr",
+              "neg": "#/$defs/ApplyExpr",
+              "not": "#/$defs/ApplyExpr",
+              "or": "#/$defs/ApplyExpr",
+              "ref": "#/$defs/RefExpr",
+              "sub": "#/$defs/ApplyExpr",
+              "sum": "#/$defs/QuantExpr",
+              "var": "#/$defs/VarExpr"
+            },
+            "propertyName": "op"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/ConstExpr"
+            },
+            {
+              "$ref": "#/$defs/VarExpr"
+            },
+            {
+              "$ref": "#/$defs/RefExpr"
+            },
+            {
+              "$ref": "#/$defs/ApplyExpr"
+            },
+            {
+              "$ref": "#/$defs/QuantExpr"
+            }
+          ],
+          "title": "Body"
+        },
+        "default": {
+          "anyOf": [
+            {
+              "discriminator": {
+                "mapping": {
+                  "add": "#/$defs/ApplyExpr",
+                  "and": "#/$defs/ApplyExpr",
+                  "const": "#/$defs/ConstExpr",
+                  "count": "#/$defs/QuantExpr",
+                  "eq": "#/$defs/ApplyExpr",
+                  "exists": "#/$defs/QuantExpr",
+                  "forall": "#/$defs/QuantExpr",
+                  "ge": "#/$defs/ApplyExpr",
+                  "gt": "#/$defs/ApplyExpr",
+                  "implies": "#/$defs/ApplyExpr",
+                  "ite": "#/$defs/ApplyExpr",
+                  "le": "#/$defs/ApplyExpr",
+                  "lt": "#/$defs/ApplyExpr",
+                  "max": "#/$defs/ApplyExpr",
+                  "max_over": "#/$defs/QuantExpr",
+                  "min": "#/$defs/ApplyExpr",
+                  "min_over": "#/$defs/QuantExpr",
+                  "mul": "#/$defs/ApplyExpr",
+                  "ne": "#/$defs/ApplyExpr",
+                  "neg": "#/$defs/ApplyExpr",
+                  "not": "#/$defs/ApplyExpr",
+                  "or": "#/$defs/ApplyExpr",
+                  "ref": "#/$defs/RefExpr",
+                  "sub": "#/$defs/ApplyExpr",
+                  "sum": "#/$defs/QuantExpr",
+                  "var": "#/$defs/VarExpr"
+                },
+                "propertyName": "op"
+              },
+              "oneOf": [
+                {
+                  "$ref": "#/$defs/ConstExpr"
+                },
+                {
+                  "$ref": "#/$defs/VarExpr"
+                },
+                {
+                  "$ref": "#/$defs/RefExpr"
+                },
+                {
+                  "$ref": "#/$defs/ApplyExpr"
+                },
+                {
+                  "$ref": "#/$defs/QuantExpr"
+                }
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "max_over/min_over only: value when no member qualifies",
+          "title": "Default"
+        },
+        "domain": {
+          "description": "entity set or enum to range over",
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*$",
+          "title": "Domain",
+          "type": "string"
+        },
+        "op": {
+          "enum": [
+            "forall",
+            "exists",
+            "count",
+            "sum",
+            "max_over",
+            "min_over"
+          ],
+          "title": "Op",
+          "type": "string"
+        },
+        "var": {
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*$",
+          "title": "Var",
+          "type": "string"
+        },
+        "where": {
+          "anyOf": [
+            {
+              "discriminator": {
+                "mapping": {
+                  "add": "#/$defs/ApplyExpr",
+                  "and": "#/$defs/ApplyExpr",
+                  "const": "#/$defs/ConstExpr",
+                  "count": "#/$defs/QuantExpr",
+                  "eq": "#/$defs/ApplyExpr",
+                  "exists": "#/$defs/QuantExpr",
+                  "forall": "#/$defs/QuantExpr",
+                  "ge": "#/$defs/ApplyExpr",
+                  "gt": "#/$defs/ApplyExpr",
+                  "implies": "#/$defs/ApplyExpr",
+                  "ite": "#/$defs/ApplyExpr",
+                  "le": "#/$defs/ApplyExpr",
+                  "lt": "#/$defs/ApplyExpr",
+                  "max": "#/$defs/ApplyExpr",
+                  "max_over": "#/$defs/QuantExpr",
+                  "min": "#/$defs/ApplyExpr",
+                  "min_over": "#/$defs/QuantExpr",
+                  "mul": "#/$defs/ApplyExpr",
+                  "ne": "#/$defs/ApplyExpr",
+                  "neg": "#/$defs/ApplyExpr",
+                  "not": "#/$defs/ApplyExpr",
+                  "or": "#/$defs/ApplyExpr",
+                  "ref": "#/$defs/RefExpr",
+                  "sub": "#/$defs/ApplyExpr",
+                  "sum": "#/$defs/QuantExpr",
+                  "var": "#/$defs/VarExpr"
+                },
+                "propertyName": "op"
+              },
+              "oneOf": [
+                {
+                  "$ref": "#/$defs/ConstExpr"
+                },
+                {
+                  "$ref": "#/$defs/VarExpr"
+                },
+                {
+                  "$ref": "#/$defs/RefExpr"
+                },
+                {
+                  "$ref": "#/$defs/ApplyExpr"
+                },
+                {
+                  "$ref": "#/$defs/QuantExpr"
+                }
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Where"
+        }
+      },
+      "required": [
+        "op",
+        "var",
+        "domain",
+        "body"
+      ],
+      "title": "QuantExpr",
+      "type": "object"
+    },
+    "RefExpr": {
+      "additionalProperties": false,
+      "description": "Reads an action parameter or a quantifier-bound variable.",
+      "properties": {
+        "name": {
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*$",
+          "title": "Name",
+          "type": "string"
+        },
+        "op": {
+          "const": "ref",
+          "default": "ref",
+          "title": "Op",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "title": "RefExpr",
+      "type": "object"
+    },
+    "TaskNode": {
+      "additionalProperties": false,
+      "properties": {
+        "action": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/GroundAction"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "action that executes the task (if any)"
+        },
+        "attempts": {
+          "default": 0,
+          "title": "Attempts",
+          "type": "integer"
+        },
+        "completed_at_step": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Completed At Step"
+        },
+        "depends_on": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Depends On",
+          "type": "array"
+        },
+        "done_when": {
+          "anyOf": [
+            {
+              "discriminator": {
+                "mapping": {
+                  "add": "#/$defs/ApplyExpr",
+                  "and": "#/$defs/ApplyExpr",
+                  "const": "#/$defs/ConstExpr",
+                  "count": "#/$defs/QuantExpr",
+                  "eq": "#/$defs/ApplyExpr",
+                  "exists": "#/$defs/QuantExpr",
+                  "forall": "#/$defs/QuantExpr",
+                  "ge": "#/$defs/ApplyExpr",
+                  "gt": "#/$defs/ApplyExpr",
+                  "implies": "#/$defs/ApplyExpr",
+                  "ite": "#/$defs/ApplyExpr",
+                  "le": "#/$defs/ApplyExpr",
+                  "lt": "#/$defs/ApplyExpr",
+                  "max": "#/$defs/ApplyExpr",
+                  "max_over": "#/$defs/QuantExpr",
+                  "min": "#/$defs/ApplyExpr",
+                  "min_over": "#/$defs/QuantExpr",
+                  "mul": "#/$defs/ApplyExpr",
+                  "ne": "#/$defs/ApplyExpr",
+                  "neg": "#/$defs/ApplyExpr",
+                  "not": "#/$defs/ApplyExpr",
+                  "or": "#/$defs/ApplyExpr",
+                  "ref": "#/$defs/RefExpr",
+                  "sub": "#/$defs/ApplyExpr",
+                  "sum": "#/$defs/QuantExpr",
+                  "var": "#/$defs/VarExpr"
+                },
+                "propertyName": "op"
+              },
+              "oneOf": [
+                {
+                  "$ref": "#/$defs/ConstExpr"
+                },
+                {
+                  "$ref": "#/$defs/VarExpr"
+                },
+                {
+                  "$ref": "#/$defs/RefExpr"
+                },
+                {
+                  "$ref": "#/$defs/ApplyExpr"
+                },
+                {
+                  "$ref": "#/$defs/QuantExpr"
+                }
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "completion criterion over the belief state (IR)",
+          "title": "Done When"
+        },
+        "label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Label"
+        },
+        "node_id": {
+          "minLength": 1,
+          "title": "Node Id",
+          "type": "string"
+        },
+        "note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Note"
+        },
+        "status": {
+          "$ref": "#/$defs/TaskStatus",
+          "default": "PENDING"
+        }
+      },
+      "required": [
+        "node_id"
+      ],
+      "title": "TaskNode",
+      "type": "object"
+    },
+    "TaskStatus": {
+      "enum": [
+        "PENDING",
+        "READY",
+        "IN_PROGRESS",
+        "DONE",
+        "FAILED",
+        "SKIPPED"
+      ],
+      "title": "TaskStatus",
+      "type": "string"
+    },
+    "VarExpr": {
+      "additionalProperties": false,
+      "description": "Reads a state variable or a constant table at the given index.",
+      "properties": {
+        "index": {
+          "items": {
+            "discriminator": {
+              "mapping": {
+                "add": "#/$defs/ApplyExpr",
+                "and": "#/$defs/ApplyExpr",
+                "const": "#/$defs/ConstExpr",
+                "count": "#/$defs/QuantExpr",
+                "eq": "#/$defs/ApplyExpr",
+                "exists": "#/$defs/QuantExpr",
+                "forall": "#/$defs/QuantExpr",
+                "ge": "#/$defs/ApplyExpr",
+                "gt": "#/$defs/ApplyExpr",
+                "implies": "#/$defs/ApplyExpr",
+                "ite": "#/$defs/ApplyExpr",
+                "le": "#/$defs/ApplyExpr",
+                "lt": "#/$defs/ApplyExpr",
+                "max": "#/$defs/ApplyExpr",
+                "max_over": "#/$defs/QuantExpr",
+                "min": "#/$defs/ApplyExpr",
+                "min_over": "#/$defs/QuantExpr",
+                "mul": "#/$defs/ApplyExpr",
+                "ne": "#/$defs/ApplyExpr",
+                "neg": "#/$defs/ApplyExpr",
+                "not": "#/$defs/ApplyExpr",
+                "or": "#/$defs/ApplyExpr",
+                "ref": "#/$defs/RefExpr",
+                "sub": "#/$defs/ApplyExpr",
+                "sum": "#/$defs/QuantExpr",
+                "var": "#/$defs/VarExpr"
+              },
+              "propertyName": "op"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/ConstExpr"
+              },
+              {
+                "$ref": "#/$defs/VarExpr"
+              },
+              {
+                "$ref": "#/$defs/RefExpr"
+              },
+              {
+                "$ref": "#/$defs/ApplyExpr"
+              },
+              {
+                "$ref": "#/$defs/QuantExpr"
+              }
+            ]
+          },
+          "title": "Index",
+          "type": "array"
+        },
+        "name": {
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*$",
+          "title": "Name",
+          "type": "string"
+        },
+        "op": {
+          "const": "var",
+          "default": "var",
+          "title": "Op",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "title": "VarExpr",
+      "type": "object"
+    }
+  },
+  "$id": "https://formal-lab.dev/contracts/v2/TaskPlan.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "A structured, versioned plan with a cursor (P2-040). Every revision is a new version with its reason.",
+  "properties": {
+    "actor_id": {
+      "title": "Actor Id",
+      "type": "string"
+    },
+    "assumptions_digest": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Assumptions Digest"
+    },
+    "created_at_step": {
+      "minimum": 0,
+      "title": "Created At Step",
+      "type": "integer"
+    },
+    "cursor": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "node currently being executed",
+      "title": "Cursor"
+    },
+    "generator": {
+      "$ref": "#/$defs/PlanGenerator"
+    },
+    "nodes": {
+      "items": {
+        "$ref": "#/$defs/TaskNode"
+      },
+      "title": "Nodes",
+      "type": "array"
+    },
+    "objective_value": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Objective Value"
+    },
+    "parent_version": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Parent Version"
+    },
+    "plan_id": {
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:@/-]{0,254}$",
+      "title": "Plan Id",
+      "type": "string"
+    },
+    "revision": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/PlanRevision"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "why this version replaced the previous one"
+    },
+    "status": {
+      "default": "ACTIVE",
+      "enum": [
+        "ACTIVE",
+        "COMPLETED",
+        "INVALIDATED",
+        "ABANDONED"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "version": {
+      "minimum": 1,
+      "title": "Version",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "plan_id",
+    "actor_id",
+    "version",
+    "generator",
+    "created_at_step"
+  ],
+  "title": "TaskPlan",
+  "type": "object"
+}

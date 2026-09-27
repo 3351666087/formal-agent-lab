@@ -1,0 +1,36 @@
+{
+  "$id": "https://formal-lab.dev/contracts/v2/NamespacedPayload.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Model in a profile-specific format owned by a semantic-driver plugin. `schema_id` names the JSON Schema\n(published in the driver's descriptor `input_schema`) that validates `data`.",
+  "properties": {
+    "data": {
+      "additionalProperties": true,
+      "title": "Data",
+      "type": "object"
+    },
+    "kind": {
+      "const": "namespaced",
+      "default": "namespaced",
+      "title": "Kind",
+      "type": "string"
+    },
+    "namespace": {
+      "pattern": "^[a-z0-9][a-z0-9-]*(\\.[a-z0-9_-]+)+$",
+      "title": "Namespace",
+      "type": "string"
+    },
+    "schema_id": {
+      "minLength": 1,
+      "title": "Schema Id",
+      "type": "string"
+    }
+  },
+  "required": [
+    "namespace",
+    "schema_id",
+    "data"
+  ],
+  "title": "NamespacedPayload",
+  "type": "object"
+}

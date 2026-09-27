@@ -116,6 +116,7 @@ class CheckedModel:
     ground_actions: list[GroundAction]
     properties: dict[str, Any]
     issues: list[ModelIssue] = field(default_factory=list)
+    objectives: dict[str, Any] = field(default_factory=dict)  # id → ObjectiveDecl (v2)
 
     @property
     def state_families(self) -> list[LocationFamily]:
@@ -240,8 +241,19 @@ class _Checker:
             props[prop.id] = prop
             self.expect(prop.expr, TBool(), {}, f"{where}/expr")
 
+        objectives: dict[str, Any] = {}
+        for i, obj in enumerate(ir.objectives):
+            where = f"/objectives/{i}"
+            if obj.id in objectives:
+                self.err(where, "DUPLICATE_OBJECTIVE", f"objective {obj.id!r} repeated")
+            objectives[obj.id] = obj
+            for j, term in enumerate(obj.terms):
+                if term.expr is not None:
+                    self.expect(term.expr, TInt(), {}, f"{where}/terms/{j}/expr")
+
         return CheckedModel(ir=ir, domains=self.domains, domain_kind=self.domain_kind, families=self.families,
-                            actions=actions, ground_actions=ground, properties=props, issues=self.issues)
+                            actions=actions, ground_actions=ground, properties=props, issues=self.issues,
+                            objectives=objectives)
 
     def _domain(self, name: str, members: list[str], kind: str, where: str) -> None:
         if len(set(members)) != len(members):
@@ -358,9 +370,11 @@ class _Checker:
             inner = {**scope, expr.var: TSym(expr.domain)}
             if expr.where is not None:
                 self.expect(expr.where, TBool(), inner, f"{where}/where")
-            body_ty = TInt() if expr.op == "sum" else TBool()
-            self.expect(expr.body, body_ty, inner, f"{where}/body")
-            return TInt() if expr.op in ("count", "sum") else TBool()
+            numeric_body = expr.op in ("sum", "max_over", "min_over")
+            self.expect(expr.body, TInt() if numeric_body else TBool(), inner, f"{where}/body")
+            if expr.default is not None:
+                self.expect(expr.default, TInt(), scope, f"{where}/default")
+            return TInt() if expr.op in ("count", "sum", "max_over", "min_over") else TBool()
         if isinstance(expr, ApplyExpr):
             return self._apply(expr, scope, where)
         self.err(where, "BAD_EXPR", f"unrecognised expression {expr!r}")
@@ -465,3 +479,25 @@ def check_or_raise(ir: ModelIR) -> CheckedModel:
     if checked.issues:
         raise ModelCheckError(checked.issues)
     return checked
+
+
+def check_expression(model: CheckedModel, expr: Any, *, expected: str = "bool", params: dict[str, Any] | None = None,
+                     extra_domains: dict[str, list[str]] | None = None, where: str = "") -> list[ModelIssue]:
+    """Type-check an expression against a checked model (used for rule conditions and objective terms).
+
+    `params` maps a ref name to "bool" | "int" | a domain name (possibly one of `extra_domains`, symbolic values
+    that exist only in the evaluation context, e.g. comparison verdicts)."""
+    checker = _Checker(model.ir)
+    checker.domains = {**model.domains, **(extra_domains or {})}
+    checker.domain_kind = {**model.domain_kind, **{d: "enum" for d in (extra_domains or {})}}
+    checker.families = model.families
+    checker.symbol_domains = {}
+    for d, members in checker.domains.items():
+        for m in members:
+            checker.symbol_domains.setdefault(m, []).append(d)
+    scope: dict[str, Ty] = {}
+    for name, ty in (params or {}).items():
+        scope[name] = TBool() if ty == "bool" else TInt() if ty == "int" else TSym(ty)
+    want = TBool() if expected == "bool" else TInt()
+    checker.expect(expr, want, scope, where)
+    return checker.issues

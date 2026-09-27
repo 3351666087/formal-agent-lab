@@ -12,36 +12,40 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, "../../..");
 const readJson = async (p) => JSON.parse(await readFile(p, "utf8"));
 
-const bundle = await readJson(path.join(root, "contracts/v1/bundle.schema.json"));
 const ajv = new Ajv2020({ strict: false, allErrors: true });
 addFormats(ajv);
-ajv.addSchema(bundle, "bundle");
-const validatorFor = (type) => ajv.getSchema(`bundle#/$defs/${type}`);
+for (const version of ["v1", "v2"]) {
+  ajv.addSchema(await readJson(path.join(root, `contracts/${version}/bundle.schema.json`)), `bundle-${version}`);
+}
+const validatorFor = (version, type) => ajv.getSchema(`bundle-${version}#/$defs/${type}`);
 
-async function fixtures(sub) {
-  const dir = path.join(root, "tests/contracts/fixtures", sub);
+async function fixtures(version, sub) {
+  const dir = path.join(root, "tests/contracts/fixtures", version, sub);
   const names = (await readdir(dir)).filter((n) => n.endsWith(".json")).sort();
   return Promise.all(names.map(async (n) => [n.replace(/\.json$/, ""), await readJson(path.join(dir, n))]));
 }
 
-for (const [name, instance] of await fixtures("valid")) {
-  test(`valid fixture ${name} accepted`, () => {
-    const validate = validatorFor(name.split(".")[0]);
-    assert.ok(validate, `no schema for ${name}`);
-    assert.ok(validate(instance), JSON.stringify(validate.errors, null, 2));
-  });
+for (const version of ["v1", "v2"]) {
+  for (const [name, instance] of await fixtures(version, "valid")) {
+    test(`${version} valid fixture ${name} accepted`, () => {
+      const validate = validatorFor(version, name.split(".")[0]);
+      assert.ok(validate, `no ${version} schema for ${name}`);
+      assert.ok(validate(instance), JSON.stringify(validate.errors, null, 2));
+    });
+  }
+  for (const [name, fixture] of await fixtures(version, "invalid")) {
+    test(`${version} invalid fixture ${name} rejected (${fixture.reason})`, () => {
+      const validate = validatorFor(version, fixture.object);
+      assert.equal(validate(fixture.instance), false);
+    });
+  }
 }
 
-for (const [name, fixture] of await fixtures("invalid")) {
-  test(`invalid fixture ${name} rejected (${fixture.reason})`, () => {
-    const validate = validatorFor(fixture.object);
-    assert.equal(validate(fixture.instance), false);
-  });
-}
-
-test("generated meta.ts matches DIGEST.json", async () => {
-  const digest = await readJson(path.join(root, "contracts/v1/DIGEST.json"));
+test("generated meta.ts matches DIGEST.json of v2 and v1", async () => {
   const meta = await readFile(path.join(here, "../src/meta.ts"), "utf8");
+  const digest = await readJson(path.join(root, "contracts/v2/DIGEST.json"));
+  const digestV1 = await readJson(path.join(root, "contracts/v1/DIGEST.json"));
   assert.match(meta, new RegExp(`CONTRACT_DIGEST = "${digest.digest}"`));
-  assert.match(meta, /CONTRACT_VERSION = "formal-lab-contracts\/v1"/);
+  assert.match(meta, new RegExp(`CONTRACT_DIGEST_V1 = "${digestV1.digest}"`));
+  assert.match(meta, /CONTRACT_VERSION = "formal-lab-contracts\/v2"/);
 });

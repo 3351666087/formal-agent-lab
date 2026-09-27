@@ -1,10 +1,15 @@
-"""The frozen objects of formal-lab-contracts/v1 and their supporting types."""
+"""The core objects of formal-lab-contracts/v2 and their supporting types.
+
+v2 keeps every v1 object name, field name and meaning; it adds optional fields (multi-participant turns, cost
+objectives, assumptions, operation states, …), a typed model payload (`ModelPackage.payload`, replacing the
+mandatory `ir`) and extends a few enums. v1 JSON is upgraded by `formal_lab_contracts.compat`.
+"""
 
 from __future__ import annotations
 
 from datetime import datetime
 from enum import StrEnum
-from typing import Any, Literal
+from typing import Annotated, Any, Literal
 
 from pydantic import Field, model_validator
 
@@ -17,6 +22,7 @@ from .common import (
     ExtensibleModel,
     Identifier,
     Name,
+    Namespace,
     PluginId,
     PluginRef,
     SemVer,
@@ -24,6 +30,29 @@ from .common import (
 )
 from .errors import ErrorInfo
 from .ir import Effect, Expr, ModelIR
+from .kernel import (
+    ActionScope,
+    AssumptionSet,
+    AssumptionSetRef,
+    CapabilityNegotiation,
+    ConflictPolicy,
+    ExecutionStage,
+    ObjectiveSpec,
+    ObservationRequest,
+    ObservationTiming,
+    OperationState,
+    OptimizationResult,
+    OptimizationStatus,
+    PlanRef,
+    ReleaseRef,
+    RobustnessResult,
+    RobustnessVerdict,
+    RuleSetRef,
+    TerminationPolicy,
+    TerminationReason,
+    TurnPolicy,
+    TurnRef,
+)
 
 # =========================================================================== PluginDescriptor
 
@@ -35,9 +64,14 @@ class PluginInterface(StrEnum):
     ENVIRONMENT = "ENVIRONMENT"
     EVALUATOR = "EVALUATOR"
     ARTIFACT_STORE = "ARTIFACT_STORE"
+    SEMANTIC_DRIVER = "SEMANTIC_DRIVER"  # v2: validates/loads a model payload, candidates, predictions, properties
+    PROBE = "PROBE"  # v2: independent business observations of an environment session
 
 
-INTERFACE_VERSION = "1"
+INTERFACE_VERSION = "2"
+# interface versions the registry accepts: v1 plugins keep working for the interfaces that existed in v1
+SUPPORTED_INTERFACE_VERSIONS = ("1", "2")
+V2_ONLY_INTERFACES = frozenset({PluginInterface.SEMANTIC_DRIVER, PluginInterface.PROBE})
 
 
 class Capability(ContractModel):
@@ -63,12 +97,16 @@ class PluginUi(ContractModel):
 
 
 class PluginDescriptor(ExtensibleModel):
-    contract_version: ContractVersion = "formal-lab-contracts/v1"
+    contract_version: Literal["formal-lab-contracts/v1", "formal-lab-contracts/v2"] = "formal-lab-contracts/v2"
     plugin_id: PluginId
     version: SemVer
     interface: PluginInterface
     interface_version: str = INTERFACE_VERSION
     capabilities: list[Capability] = Field(default_factory=list)
+    requires: list[Capability] = Field(
+        default_factory=list,
+        description="capabilities this plugin needs from its collaborators; params.of names the role "
+        "(driver / environment / verifier), e.g. {id: env.persistent_session, params: {of: environment}}")
     semantic_profiles: list[str] = Field(default_factory=list)
     config_schema: dict[str, Any] = Field(default_factory=lambda: {"type": "object", "properties": {}})
     input_schema: dict[str, Any] | None = None
@@ -111,20 +149,54 @@ class CompiledArtifact(ContractModel):
     stats: dict[str, Any] = Field(default_factory=dict)
 
 
+class IRPayload(ContractModel):
+    """Model in the neutral finite-state IR (profile deterministic_finite_v1)."""
+
+    kind: Literal["fal-ir"] = "fal-ir"
+    ir: ModelIR
+
+
+class NamespacedPayload(ContractModel):
+    """Model in a profile-specific format owned by a semantic-driver plugin. `schema_id` names the JSON Schema
+    (published in the driver's descriptor `input_schema`) that validates `data`."""
+
+    kind: Literal["namespaced"] = "namespaced"
+    namespace: Namespace
+    schema_id: str = Field(min_length=1)
+    data: dict[str, Any]
+
+
+ModelPayload = Annotated[IRPayload | NamespacedPayload, Field(discriminator="kind")]
+
+
 class ModelPackage(ExtensibleModel):
-    contract_version: ContractVersion = "formal-lab-contracts/v1"
+    contract_version: ContractVersion = "formal-lab-contracts/v2"
     package_id: Identifier
     version: int = Field(ge=1)
-    frontend: PluginRef = Field(description="plugin category that produced the IR")
+    frontend: PluginRef = Field(description="plugin that produced the payload")
     semantic_profile: str
-    digest: Digest = Field(description="sha256 of the canonical IR")
-    ir: ModelIR
+    digest: Digest = Field(description="sha256 of the canonical payload (IR: of the canonical IR, as in v1)")
+    payload: ModelPayload
     source: ModelSource
     compiled: list[CompiledArtifact] = Field(default_factory=list)
     created_at: datetime
 
     def ref(self) -> ModelRef:
         return ModelRef(package_id=self.package_id, version=self.version, digest=self.digest)
+
+    @property
+    def is_ir(self) -> bool:
+        return self.payload.kind == "fal-ir"
+
+    @property
+    def ir(self) -> ModelIR:
+        """The IR of an IR-payload package (v1 compatibility accessor)."""
+        if isinstance(self.payload, IRPayload):
+            return self.payload.ir
+        from .errors import Unsupported
+
+        raise Unsupported(f"model {self.package_id}@{self.version} ({self.semantic_profile}) has a "
+                          f"{self.payload.kind} payload, not the neutral IR")
 
 
 # =========================================================================== ScenarioManifest
@@ -138,11 +210,19 @@ class Budget(ContractModel):
 
 
 class BudgetUsage(ContractModel):
+    """Usage counters. `model_calls` counts calls that returned a usable response; `model_attempts` every request
+    sent (incl. failures and lost responses); tokens are only what the provider reported — calls without usage data
+    are counted in `unreported_calls`, calls whose response was lost in `unconfirmed_calls`."""
+
     steps: int = 0
     wall_seconds: float = 0.0
     model_calls: int = 0
     input_tokens: int = 0
     output_tokens: int = 0
+    model_attempts: int = 0
+    unreported_calls: int = 0
+    unconfirmed_calls: int = 0
+    observation_requests: int = 0
 
     @property
     def tokens(self) -> int:
@@ -158,6 +238,10 @@ class Participant(ContractModel):
     actor_id: Identifier
     role: str = "operator"
     strategy: StrategySpec
+    label: str | None = None
+    goal: Name | None = Field(default=None, description="the participant's own goal property (v2)")
+    budget: Budget | None = Field(default=None, description="per-participant budget, counted separately (v2)")
+    scope: ActionScope | None = Field(default=None, description="ground actions this participant may choose (v2)")
 
 
 class EnvironmentSpec(ContractModel):
@@ -183,7 +267,7 @@ class StopCondition(ContractModel):
 
 
 class ScenarioManifest(ExtensibleModel):
-    contract_version: ContractVersion = "formal-lab-contracts/v1"
+    contract_version: ContractVersion = "formal-lab-contracts/v2"
     scenario_id: Identifier
     revision: int = Field(default=1, ge=1)
     name: str
@@ -194,7 +278,42 @@ class ScenarioManifest(ExtensibleModel):
     objectives: list[Objective] = Field(default_factory=list)
     budget: Budget
     seed: int = 0
-    stop_conditions: list[StopCondition] = Field(default_factory=list)
+    stop_conditions: list[StopCondition] = Field(
+        default_factory=list, description="v1 stop conditions; used only when `termination` is not given")
+    turns: TurnPolicy = Field(default_factory=TurnPolicy, description="interleaving of participants (v2)")
+    termination: TerminationPolicy | None = Field(default=None, description="v2 termination; overrides stop_conditions")
+    objective: ObjectiveSpec | None = Field(default=None, description="cost objective for planners and reports (v2)")
+    driver: PluginRef | None = Field(default=None, description="semantic driver; default: the one for the profile")
+    rules: RuleSetRef | None = Field(default=None, description="event–condition–handler rules to apply (v2)")
+    release: ReleaseRef | None = Field(default=None, description="checked model release the scenario runs on (v2)")
+
+    @model_validator(mode="after")
+    def _participants(self) -> ScenarioManifest:
+        ids = [p.actor_id for p in self.participants]
+        if len(set(ids)) != len(ids):
+            raise ValueError("participant actor ids must be unique")
+        unknown = [a for a in self.turns.table if a not in ids]
+        if unknown:
+            raise ValueError(f"turn table names unknown participants {unknown}")
+        if self.termination is not None and self.stop_conditions:
+            raise ValueError("give either v1 `stop_conditions` or v2 `termination`, not both")
+        return self
+
+    def effective_termination(self) -> TerminationPolicy:
+        """v2 termination policy; derived from v1 stop conditions when not given (same behaviour as phase 1)."""
+        if self.termination is not None:
+            return self.termination
+        from .kernel import NoActionPolicy
+
+        goal = next((sc.property_id for sc in self.stop_conditions if sc.kind == StopConditionKind.GOAL_REACHED
+                     and sc.property_id), None)
+        return TerminationPolicy(
+            joint_goal=goal,
+            invariants=[sc.property_id for sc in self.stop_conditions
+                        if sc.kind == StopConditionKind.INVARIANT_VIOLATED and sc.property_id],
+            on_no_action=NoActionPolicy.FAIL if any(sc.kind == StopConditionKind.NO_APPLICABLE_ACTION
+                                                    for sc in self.stop_conditions) else NoActionPolicy.END,
+        )
 
 
 # =========================================================================== Observation
@@ -217,10 +336,14 @@ class Observation(ContractModel):
     run_id: str
     actor_id: str
     step: int = Field(ge=0, description="logical step at which the observation is taken")
-    state_revision: int = Field(ge=0)
+    state_revision: int = Field(ge=0, description="world revision the observation reflects")
     facts: list[Fact]
     unknowns: list[UnknownItem] = Field(default_factory=list)
     evidence: list[EvidenceRef] = Field(default_factory=list)
+    turn: TurnRef | None = Field(default=None, description="turn the observation was taken for (v2)")
+    timing: ObservationTiming = ObservationTiming.TURN_START
+    requested_paths: list[str] = Field(default_factory=list,
+                                       description="locations observed fresh on request (OBSERVE_MORE, v2)")
     semantics: str = Field(
         default="Facts are what the actor observed (possibly stale, see observed_at_step); unknowns are "
         "locations whose current value the actor cannot know at this step. The environment truth state is a "
@@ -266,9 +389,14 @@ class ProposalSourceKind(StrEnum):
 
 
 class ModelUsage(ContractModel):
+    """Model usage of one proposal: `model_calls` usable responses, `attempts` requests sent; tokens as reported."""
+
     model_calls: int = 0
     input_tokens: int = 0
     output_tokens: int = 0
+    attempts: int = 0
+    unreported_calls: int = 0
+    unconfirmed_calls: int = 0
 
 
 class ProposalSource(ContractModel):
@@ -290,6 +418,11 @@ class ActionProposal(ContractModel):
     rationale: str | None = None
     candidates_considered: int | None = None
     usage: ModelUsage = Field(default_factory=ModelUsage)
+    turn: TurnRef | None = None
+    plan: PlanRef | None = Field(default=None, description="task-plan node this proposal executes (v2)")
+    assumptions: AssumptionSetRef | None = Field(default=None, description="what the proposal assumed (v2)")
+    observation_request: ObservationRequest | None = Field(
+        default=None, description="ask for fresh observations first; `action` is the fallback if none are possible")
 
 
 class OutcomeStatus(StrEnum):
@@ -308,11 +441,20 @@ class ComparisonVerdict(StrEnum):
     INSUFFICIENT_INFORMATION = "INSUFFICIENT_INFORMATION"
 
 
+EvidenceStatus = Literal["observed", "verified-within-scope", "predicted", "unknown"]
+
+
 class FieldDiff(ContractModel):
     path: str
-    expected: StateScalar | None
+    expected: StateScalar | None = Field(description="predicted by the model")
     observed: StateScalar | None
     status: Literal["MATCH", "DIFFERENT", "UNKNOWN"]
+    evidence: EvidenceStatus = Field(
+        default="observed",
+        description="basis of `observed`: fresh observation, verified within a stated scope (probe / operation "
+        "query), or unknown (not comparable); `predicted` marks a value only the model supplies (v2)")
+    observed_at_step: int | None = Field(default=None, ge=0)
+    freshness: Literal["FRESH", "STALE", "MISSING"] = "FRESH"
 
 
 class EffectComparison(ContractModel):
@@ -320,6 +462,17 @@ class EffectComparison(ContractModel):
     expected_by: str = Field(description="what produced the expectation, e.g. model:<package>@<version>")
     diffs: list[FieldDiff] = Field(default_factory=list)
     evidence: list[EvidenceRef] = Field(default_factory=list)
+    evidence_counts: dict[str, int] = Field(default_factory=dict, description="evidence status → fields (v2)")
+
+
+class ConflictInfo(ContractModel):
+    """Why a proposal based on an older world revision was rejected (shared-resource arbitration)."""
+
+    policy: ConflictPolicy
+    based_on_revision: int = Field(ge=0)
+    current_revision: int = Field(ge=0)
+    changed_paths: list[str] = Field(default_factory=list, description="locations written since based_on_revision")
+    reason: str
 
 
 class ActionOutcome(ContractModel):
@@ -336,6 +489,9 @@ class ActionOutcome(ContractModel):
     error: ErrorInfo | None = None
     effect_comparison: EffectComparison | None = None
     evidence: list[EvidenceRef] = Field(default_factory=list)
+    turn: TurnRef | None = None
+    operation_state: OperationState | None = Field(default=None, description="coordination state (v2)")
+    conflict: ConflictInfo | None = None
 
     @model_validator(mode="after")
     def _consistent(self) -> ActionOutcome:
@@ -353,18 +509,24 @@ class QueryKind(StrEnum):
     GOAL_REACHABILITY = "GOAL_REACHABILITY"
     INVARIANT_VIOLATION = "INVARIANT_VIOLATION"
     ACTION_PRECONDITION = "ACTION_PRECONDITION"
+    OPTIMIZE_OBJECTIVE = "OPTIMIZE_OBJECTIVE"  # v2: cheapest path to the goal within a horizon
+    ROBUST_SEQUENCE = "ROBUST_SEQUENCE"  # v2: does a fixed action sequence work for every completion?
 
 
 class QuerySemantics(StrEnum):
     EXISTS_PATH = "EXISTS_PATH"  # is there a path (≤ bound) reaching the goal?
     ALL_PATHS = "ALL_PATHS"  # do all paths (≤ bound) satisfy the invariant? (searched as a violating path)
     SINGLE_STEP = "SINGLE_STEP"  # is the action applicable in the given (possibly partial) state?
+    OPTIMAL_PATH = "OPTIMAL_PATH"  # which goal path (≤ horizon) minimises the objective lexicographically?
+    ALL_COMPLETIONS = "ALL_COMPLETIONS"  # does the sequence work for every completion of the unknown locations?
 
 
 QUERY_SEMANTICS = {
     QueryKind.GOAL_REACHABILITY: QuerySemantics.EXISTS_PATH,
     QueryKind.INVARIANT_VIOLATION: QuerySemantics.ALL_PATHS,
     QueryKind.ACTION_PRECONDITION: QuerySemantics.SINGLE_STEP,
+    QueryKind.OPTIMIZE_OBJECTIVE: QuerySemantics.OPTIMAL_PATH,
+    QueryKind.ROBUST_SEQUENCE: QuerySemantics.ALL_COMPLETIONS,
 }
 
 
@@ -393,12 +555,20 @@ class CheckQuery(ContractModel):
     action: GroundAction | None = Field(default=None, description="action for ACTION_PRECONDITION")
     bound: CheckBound
     initial_state: Literal["MODEL_INITIAL", "GIVEN_STATE"] = "MODEL_INITIAL"
+    objective: ObjectiveSpec | None = Field(default=None, description="OPTIMIZE_OBJECTIVE: what to minimise (v2)")
+    sequence: list[GroundAction] = Field(default_factory=list, description="ROBUST_SEQUENCE: actions in order (v2)")
 
     @model_validator(mode="after")
     def _shape(self) -> CheckQuery:
         if self.kind is QueryKind.ACTION_PRECONDITION:
             if self.action is None:
                 raise ValueError("ACTION_PRECONDITION requires `action`")
+        elif self.kind is QueryKind.OPTIMIZE_OBJECTIVE:
+            if self.objective is None:
+                raise ValueError("OPTIMIZE_OBJECTIVE requires `objective`")
+        elif self.kind is QueryKind.ROBUST_SEQUENCE:
+            if not self.sequence:
+                raise ValueError("ROBUST_SEQUENCE requires a non-empty `sequence`")
         elif self.property_id is None:
             raise ValueError(f"{self.kind} requires `property_id`")
         return self
@@ -436,11 +606,11 @@ class UnsupportedInfo(ContractModel):
 
 
 class BoundedCheckResult(ExtensibleModel):
-    contract_version: ContractVersion = "formal-lab-contracts/v1"
+    contract_version: ContractVersion = "formal-lab-contracts/v2"
     check_id: str
     query: CheckQuery
     semantics: QuerySemantics
-    verdict: SearchVerdict | PreconditionVerdict
+    verdict: SearchVerdict | PreconditionVerdict | OptimizationStatus | RobustnessVerdict
     bound: CheckBound
     scope: Literal["MODEL_INTERNAL"] = Field(
         default="MODEL_INTERNAL", description="conclusion holds for the model, not for the real system"
@@ -455,11 +625,16 @@ class BoundedCheckResult(ExtensibleModel):
     stats: SolverStats
     unsupported: UnsupportedInfo | None = None
     explanation: str | None = None
+    assumption_set: AssumptionSet | None = Field(default=None, description="assumptions behind the answer (v2)")
+    optimization: OptimizationResult | None = None
+    robustness: RobustnessResult | None = None
+    observation_request: ObservationRequest | None = Field(
+        default=None, description="UNKNOWN precondition: which observations would settle it (v2)")
+    query_bundle: ArtifactRef | None = Field(default=None, description="replayable query package (v2)")
 
     @model_validator(mode="after")
     def _verdict_matches_kind(self) -> BoundedCheckResult:
-        search = self.query.kind in (QueryKind.GOAL_REACHABILITY, QueryKind.INVARIANT_VIOLATION)
-        allowed = SearchVerdict if search else PreconditionVerdict
+        allowed = VERDICTS_BY_KIND[self.query.kind]
         try:
             self.verdict = allowed(str(self.verdict))
         except ValueError as exc:
@@ -468,9 +643,24 @@ class BoundedCheckResult(ExtensibleModel):
             raise ValueError(f"semantics {self.semantics} does not match {self.query.kind}")
         if self.verdict == SearchVerdict.WITNESS and self.witness is None:
             raise ValueError("WITNESS verdict requires a witness")
+        if self.verdict in (OptimizationStatus.OPTIMAL, OptimizationStatus.FEASIBLE) and (
+                self.witness is None or self.optimization is None):
+            raise ValueError(f"{self.verdict} requires a witness and optimization details")
+        if self.verdict == RobustnessVerdict.NOT_ROBUST and (self.robustness is None
+                                                             or self.robustness.counterexample is None):
+            raise ValueError("NOT_ROBUST requires a counterexample completion")
         if str(self.verdict) == "UNSUPPORTED" and self.unsupported is None:
             raise ValueError("UNSUPPORTED verdict requires `unsupported` details")
         return self
+
+
+VERDICTS_BY_KIND: dict[QueryKind, type[StrEnum]] = {
+    QueryKind.GOAL_REACHABILITY: SearchVerdict,
+    QueryKind.INVARIANT_VIOLATION: SearchVerdict,
+    QueryKind.ACTION_PRECONDITION: PreconditionVerdict,
+    QueryKind.OPTIMIZE_OBJECTIVE: OptimizationStatus,
+    QueryKind.ROBUST_SEQUENCE: RobustnessVerdict,
+}
 
 
 # =========================================================================== TraceEvent
@@ -497,6 +687,21 @@ class EventType(StrEnum):
     RUN_FAILED = "RUN_FAILED"
     METRICS_COMPUTED = "METRICS_COMPUTED"
     LOG = "LOG"
+    # v2
+    TURN_STARTED = "TURN_STARTED"
+    TURN_SKIPPED = "TURN_SKIPPED"
+    OBSERVATION_REQUESTED = "OBSERVATION_REQUESTED"
+    PLAN_UPDATED = "PLAN_UPDATED"
+    PLANNER_CHECKPOINT = "PLANNER_CHECKPOINT"
+    OPERATION_STATE = "OPERATION_STATE"
+    OPERATION_RECONCILED = "OPERATION_RECONCILED"
+    OPERATION_REVIEW = "OPERATION_REVIEW"
+    PROBE_SAMPLED = "PROBE_SAMPLED"
+    RULE_EVALUATED = "RULE_EVALUATED"
+    SESSION_STATE = "SESSION_STATE"
+    RECOVERY = "RECOVERY"
+    MODEL_REVISION_SUGGESTED = "MODEL_REVISION_SUGGESTED"
+    REGRESSION_CASE_CREATED = "REGRESSION_CASE_CREATED"
 
 
 class TraceEvent(ContractModel):
@@ -511,6 +716,8 @@ class TraceEvent(ContractModel):
     payload_schema: str = Field(description="schema id of payload, e.g. formal-lab/events/ACTION_PROPOSED@1")
     payload: dict[str, Any] = Field(default_factory=dict)
     idempotency_key: str | None = None
+    turn: TurnRef | None = Field(default=None, description="turn the event belongs to (v2)")
+    stage: ExecutionStage | None = Field(default=None, description="execution stage that emitted it (v2)")
 
 
 # =========================================================================== Metrics
@@ -616,7 +823,7 @@ class PlatformInfo(ContractModel):
 
 
 class RunManifest(ExtensibleModel):
-    contract_version: ContractVersion = "formal-lab-contracts/v1"
+    contract_version: ContractVersion = "formal-lab-contracts/v2"
     run_id: str
     project_id: str
     created_at: datetime
@@ -635,6 +842,21 @@ class RunManifest(ExtensibleModel):
     platform: PlatformInfo
     artifacts: list[ArtifactRef] = Field(default_factory=list)
     budget_usage: BudgetUsage = Field(default_factory=BudgetUsage)
+    turns: TurnPolicy = Field(default_factory=TurnPolicy, description="effective interleaving (v2)")
+    termination: TerminationPolicy | None = Field(default=None, description="effective termination policy (v2)")
+    objective: ObjectiveSpec | None = None
+    rules: RuleSetRef | None = None
+    release: ReleaseRef | None = None
+    negotiation: list[CapabilityNegotiation] = Field(
+        default_factory=list, description="capability negotiation performed before the run was created (v2)")
+    actor_usage: dict[str, BudgetUsage] = Field(default_factory=dict, description="per-participant usage (v2)")
+    termination_reason: TerminationReason | None = None
+
+    def participant(self, actor_id: str) -> Participant:
+        for p in self.participants:
+            if p.actor_id == actor_id:
+                return p
+        raise KeyError(actor_id)
 
 
 # =========================================================================== runtime exchange types
@@ -646,6 +868,9 @@ class CandidateAction(ContractModel):
     belief_applicability: PreconditionVerdict = Field(
         description="applicability judged on the actor's observation (unknown facts stay UNKNOWN)"
     )
+    reason: str | None = Field(default=None, description="why it is INAPPLICABLE / UNKNOWN (v2)")
+    observation_request: ObservationRequest | None = Field(default=None,
+                                                           description="UNKNOWN: what would settle it (v2)")
 
 
 class PlanningContext(ContractModel):
@@ -660,33 +885,30 @@ class PlanningContext(ContractModel):
     budget: Budget
     usage: BudgetUsage
     seed: int
+    turn: TurnRef | None = Field(default=None, description="global/actor step of this decision (v2)")
+    goal: Name | None = Field(default=None, description="the actor's goal (participant goal, else joint goal)")
+    objective: ObjectiveSpec | None = None
+    actor_budget: Budget | None = None
+    actor_usage: BudgetUsage | None = None
+    participants: list[str] = Field(default_factory=list, description="all actor ids in turn order (v2)")
+    observation_request_allowed: bool = Field(
+        default=False, description="the environment can answer an ObservationRequest this turn (v2)")
+    assumptions: AssumptionSet | None = Field(default=None, description="provenance of the belief (v2)")
+    last_outcome: ActionOutcome | None = Field(
+        default=None, description="the actor's previous outcome incl. its effect comparison (plan revision, v2)")
+    replan_requested: str | None = Field(default=None, description="reason a REPLAN rule fired for this actor (v2)")
 
 
 class EnvironmentSnapshot(ContractModel):
+    """Environment state at a step. FULL_STATE snapshots of pure-data environments can be restored; persistent
+    service sessions produce SESSION_MARKER snapshots (revision + session reference only), which are never restored
+    — recovery reconciles against the live session instead (v2)."""
+
     environment: PluginRef
     step: int = Field(ge=0)
     state_revision: int = Field(ge=0)
     digest: Digest
     data: dict[str, Any]
-
-
-class StepRecord(ContractModel):
-    step: int
-    observation: Observation
-    proposal: ActionProposal | None
-    outcome: ActionOutcome | None
-    checks: list[BoundedCheckResult] = Field(default_factory=list)
-
-
-class EpisodeRecord(ContractModel):
-    """Input to Evaluator.score: everything needed to compute metrics deterministically."""
-
-    run_id: str
-    scenario: ScenarioManifest
-    status: RunStatus
-    steps: list[StepRecord]
-    final_truth_state: dict[str, StateScalar]
-    final_step: int
-    usage: BudgetUsage
-    environment_summary: dict[str, Any] = Field(default_factory=dict)
+    kind: Literal["FULL_STATE", "SESSION_MARKER"] = "FULL_STATE"
+    session_id: str | None = None
 

@@ -1,0 +1,288 @@
+{
+  "$defs": {
+    "ArtifactRef": {
+      "additionalProperties": false,
+      "description": "Pointer to a large object held by an ArtifactStore (never inlined into events).",
+      "properties": {
+        "digest": {
+          "$ref": "#/$defs/Digest"
+        },
+        "format_version": {
+          "minLength": 1,
+          "title": "Format Version",
+          "type": "string"
+        },
+        "media_type": {
+          "minLength": 3,
+          "title": "Media Type",
+          "type": "string"
+        },
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Name"
+        },
+        "size_bytes": {
+          "minimum": 0,
+          "title": "Size Bytes",
+          "type": "integer"
+        },
+        "uri": {
+          "description": "object location, e.g. file://… or s3://bucket/key",
+          "minLength": 1,
+          "title": "Uri",
+          "type": "string"
+        }
+      },
+      "required": [
+        "uri",
+        "media_type",
+        "size_bytes",
+        "digest",
+        "format_version"
+      ],
+      "title": "ArtifactRef",
+      "type": "object"
+    },
+    "Digest": {
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": {
+          "const": "sha256",
+          "default": "sha256",
+          "title": "Algorithm",
+          "type": "string"
+        },
+        "value": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "Digest",
+      "type": "object"
+    },
+    "EvidenceRef": {
+      "additionalProperties": false,
+      "description": "Reference to something that supports a claim: an event, artifact, check or snapshot.",
+      "properties": {
+        "artifact": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ArtifactRef"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "id": {
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "event",
+            "artifact",
+            "check",
+            "snapshot",
+            "operation",
+            "model_call",
+            "probe",
+            "query_bundle",
+            "release",
+            "rule",
+            "plan",
+            "regression_case",
+            "session"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Note"
+        }
+      },
+      "required": [
+        "kind",
+        "id"
+      ],
+      "title": "EvidenceRef",
+      "type": "object"
+    },
+    "PluginRef": {
+      "additionalProperties": false,
+      "properties": {
+        "plugin_id": {
+          "pattern": "^[a-z0-9]+([.-][a-z0-9]+)*(/[a-z0-9]+([.-][a-z0-9]+)*)?$",
+          "title": "Plugin Id",
+          "type": "string"
+        },
+        "version": {
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+([-+][0-9A-Za-z.-]+)?$",
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "plugin_id",
+        "version"
+      ],
+      "title": "PluginRef",
+      "type": "object"
+    },
+    "ProbeWindow": {
+      "additionalProperties": false,
+      "properties": {
+        "end": {
+          "title": "End",
+          "type": "number"
+        },
+        "kind": {
+          "enum": [
+            "LOGICAL_STEPS",
+            "WALL_SECONDS"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "size": {
+          "exclusiveMinimum": 0,
+          "title": "Size",
+          "type": "number"
+        },
+        "start": {
+          "title": "Start",
+          "type": "number"
+        }
+      },
+      "required": [
+        "kind",
+        "size",
+        "start",
+        "end"
+      ],
+      "title": "ProbeWindow",
+      "type": "object"
+    }
+  },
+  "$id": "https://formal-lab.dev/contracts/v2/ProbeResult.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "An independent business observation (P2-064): taken from the service itself, not from the agent's view.",
+  "properties": {
+    "evidence": {
+      "items": {
+        "$ref": "#/$defs/EvidenceRef"
+      },
+      "title": "Evidence",
+      "type": "array"
+    },
+    "logical_step": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Logical Step"
+    },
+    "metric": {
+      "title": "Metric",
+      "type": "string"
+    },
+    "missing_reason": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Missing Reason"
+    },
+    "probe": {
+      "$ref": "#/$defs/PluginRef"
+    },
+    "probe_id": {
+      "title": "Probe Id",
+      "type": "string"
+    },
+    "source": {
+      "description": "where the value was read, e.g. GET /metrics of the order service",
+      "title": "Source",
+      "type": "string"
+    },
+    "status": {
+      "default": "OK",
+      "enum": [
+        "OK",
+        "MISSING",
+        "ERROR"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "unit": {
+      "title": "Unit",
+      "type": "string"
+    },
+    "value": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Value"
+    },
+    "wall_time": {
+      "format": "date-time",
+      "title": "Wall Time",
+      "type": "string"
+    },
+    "window": {
+      "$ref": "#/$defs/ProbeWindow"
+    }
+  },
+  "required": [
+    "probe_id",
+    "probe",
+    "source",
+    "metric",
+    "value",
+    "unit",
+    "window",
+    "wall_time"
+  ],
+  "title": "ProbeResult",
+  "type": "object"
+}

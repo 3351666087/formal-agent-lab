@@ -1,0 +1,81 @@
+{
+  "instance": {
+    "actor_id": "a",
+    "causal_parents": [
+      "evt_0001"
+    ],
+    "event_id": "evt_0002",
+    "event_type": "ACTION_PROPOSED",
+    "idempotency_key": "run_0002:s1:a:proposal",
+    "logical_step": 1,
+    "payload": {
+      "proposal": {
+        "action": {
+          "action_type": "toggle",
+          "params": {}
+        },
+        "actor_id": "a",
+        "assumptions": {
+          "basis": "ASSUMPTION_BASED",
+          "count": 1,
+          "counts": {
+            "STALE": 1
+          },
+          "digest": {
+            "algorithm": "sha256",
+            "value": "b9831560ce8070682a14d93f9f2192a7242cbfe036adccae61c67034ea55ce22"
+          }
+        },
+        "based_on_revision": 1,
+        "candidates_considered": 1,
+        "observation_request": null,
+        "plan": {
+          "node_id": "n1",
+          "plan_id": "plan_a",
+          "version": 2
+        },
+        "proposal_id": "run_0002:s1:a:proposal",
+        "rationale": "cost-optimal plan",
+        "run_id": "run_0002",
+        "source": {
+          "kind": "SYMBOLIC",
+          "model": null,
+          "model_call_ids": [],
+          "strategy": {
+            "plugin_id": "formal-lab.planner.z3-bounded",
+            "version": "2.0.0"
+          }
+        },
+        "step": 1,
+        "step_id": "run_0002:s1",
+        "turn": {
+          "actor_id": "a",
+          "actor_step": 1,
+          "global_step": 1,
+          "round": 1
+        },
+        "usage": {
+          "attempts": 0,
+          "input_tokens": 0,
+          "model_calls": 0,
+          "output_tokens": 0,
+          "unconfirmed_calls": 0,
+          "unreported_calls": 0
+        }
+      }
+    },
+    "payload_schema": "formal-lab/events/ACTION_PROPOSED@2",
+    "run_id": "run_0002",
+    "seq": 0,
+    "stage": "PROPOSE",
+    "turn": {
+      "actor_id": "a",
+      "actor_step": 1,
+      "global_step": 1,
+      "round": 1
+    },
+    "wall_time": "2026-09-27T12:00:00Z"
+  },
+  "object": "TraceEvent",
+  "reason": "seq is >= 1"
+}

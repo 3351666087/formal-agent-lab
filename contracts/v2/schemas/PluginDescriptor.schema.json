@@ -1,0 +1,300 @@
+{
+  "$defs": {
+    "Capability": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "e.g. query.goal_reachability, profile.deterministic_finite_v1",
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "params": {
+          "additionalProperties": true,
+          "title": "Params",
+          "type": "object"
+        },
+        "version": {
+          "default": "1",
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "title": "Capability",
+      "type": "object"
+    },
+    "Extension": {
+      "additionalProperties": false,
+      "description": "Namespaced, versioned extension payload. `schema_id` names the JSON Schema that validates `data`.",
+      "properties": {
+        "data": {
+          "additionalProperties": true,
+          "title": "Data",
+          "type": "object"
+        },
+        "schema_id": {
+          "minLength": 1,
+          "title": "Schema Id",
+          "type": "string"
+        },
+        "version": {
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+([-+][0-9A-Za-z.-]+)?$",
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "version",
+        "schema_id",
+        "data"
+      ],
+      "title": "Extension",
+      "type": "object"
+    },
+    "PluginInterface": {
+      "enum": [
+        "MODEL_FRONTEND",
+        "PLANNER",
+        "VERIFIER",
+        "ENVIRONMENT",
+        "EVALUATOR",
+        "ARTIFACT_STORE",
+        "SEMANTIC_DRIVER",
+        "PROBE"
+      ],
+      "title": "PluginInterface",
+      "type": "string"
+    },
+    "PluginUi": {
+      "additionalProperties": false,
+      "description": "Display metadata; the Web UI renders plugins exclusively from this and the schemas.",
+      "properties": {
+        "action_display": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "action type → template, e.g. '分配 {op} → {machine}'",
+          "title": "Action Display",
+          "type": "object"
+        },
+        "action_labels": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "action type → label",
+          "title": "Action Labels",
+          "type": "object"
+        },
+        "category": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Category"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Description"
+        },
+        "entity_labels": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Entity Labels",
+          "type": "object"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "metric_labels": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Metric Labels",
+          "type": "object"
+        },
+        "state_labels": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "state variable → label",
+          "title": "State Labels",
+          "type": "object"
+        },
+        "value_labels": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "enum symbol → label",
+          "title": "Value Labels",
+          "type": "object"
+        }
+      },
+      "required": [
+        "label"
+      ],
+      "title": "PluginUi",
+      "type": "object"
+    }
+  },
+  "$id": "https://formal-lab.dev/contracts/v2/PluginDescriptor.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "capabilities": {
+      "items": {
+        "$ref": "#/$defs/Capability"
+      },
+      "title": "Capabilities",
+      "type": "array"
+    },
+    "config_schema": {
+      "additionalProperties": true,
+      "title": "Config Schema",
+      "type": "object"
+    },
+    "contract_version": {
+      "default": "formal-lab-contracts/v2",
+      "enum": [
+        "formal-lab-contracts/v1",
+        "formal-lab-contracts/v2"
+      ],
+      "title": "Contract Version",
+      "type": "string"
+    },
+    "entrypoint": {
+      "description": "python import path 'module:attr' of the factory",
+      "title": "Entrypoint",
+      "type": "string"
+    },
+    "extensions": {
+      "description": "namespaced extension slots; keys are reverse-DNS namespaces, formal-lab.core.* is reserved",
+      "patternProperties": {
+        "^[a-z0-9][a-z0-9-]*(\\.[a-z0-9_-]+)+$": {
+          "$ref": "#/$defs/Extension"
+        }
+      },
+      "propertyNames": {
+        "not": {
+          "pattern": "^formal[-_]lab\\.core"
+        },
+        "pattern": "^[a-z0-9][a-z0-9-]*(\\.[a-z0-9_-]+)+$"
+      },
+      "title": "Extensions",
+      "type": "object"
+    },
+    "input_schema": {
+      "anyOf": [
+        {
+          "additionalProperties": true,
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Input Schema"
+    },
+    "interface": {
+      "$ref": "#/$defs/PluginInterface"
+    },
+    "interface_version": {
+      "default": "2",
+      "title": "Interface Version",
+      "type": "string"
+    },
+    "license": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "License"
+    },
+    "output_schema": {
+      "anyOf": [
+        {
+          "additionalProperties": true,
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Output Schema"
+    },
+    "plugin_id": {
+      "pattern": "^[a-z0-9]+([.-][a-z0-9]+)*(/[a-z0-9]+([.-][a-z0-9]+)*)?$",
+      "title": "Plugin Id",
+      "type": "string"
+    },
+    "requires": {
+      "description": "capabilities this plugin needs from its collaborators; params.of names the role (driver / environment / verifier), e.g. {id: env.persistent_session, params: {of: environment}}",
+      "items": {
+        "$ref": "#/$defs/Capability"
+      },
+      "title": "Requires",
+      "type": "array"
+    },
+    "semantic_profiles": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Semantic Profiles",
+      "type": "array"
+    },
+    "source": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "package name / URL providing the plugin",
+      "title": "Source"
+    },
+    "ui": {
+      "$ref": "#/$defs/PluginUi"
+    },
+    "version": {
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+([-+][0-9A-Za-z.-]+)?$",
+      "title": "Version",
+      "type": "string"
+    }
+  },
+  "required": [
+    "plugin_id",
+    "version",
+    "interface",
+    "entrypoint",
+    "ui"
+  ],
+  "title": "PluginDescriptor",
+  "type": "object"
+}

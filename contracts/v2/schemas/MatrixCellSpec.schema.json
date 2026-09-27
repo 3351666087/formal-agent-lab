@@ -1,0 +1,181 @@
+{
+  "$defs": {
+    "Digest": {
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": {
+          "const": "sha256",
+          "default": "sha256",
+          "title": "Algorithm",
+          "type": "string"
+        },
+        "value": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "Digest",
+      "type": "object"
+    },
+    "ModelRef": {
+      "additionalProperties": false,
+      "properties": {
+        "digest": {
+          "$ref": "#/$defs/Digest"
+        },
+        "package_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:@/-]{0,254}$",
+          "title": "Package Id",
+          "type": "string"
+        },
+        "version": {
+          "minimum": 1,
+          "title": "Version",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "package_id",
+        "version",
+        "digest"
+      ],
+      "title": "ModelRef",
+      "type": "object"
+    },
+    "RuleSetRef": {
+      "additionalProperties": false,
+      "properties": {
+        "digest": {
+          "$ref": "#/$defs/Digest"
+        },
+        "ruleset_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:@/-]{0,254}$",
+          "title": "Ruleset Id",
+          "type": "string"
+        },
+        "version": {
+          "minimum": 1,
+          "title": "Version",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "ruleset_id",
+        "version",
+        "digest"
+      ],
+      "title": "RuleSetRef",
+      "type": "object"
+    }
+  },
+  "$id": "https://formal-lab.dev/contracts/v2/MatrixCellSpec.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "One matrix cell: the complete configuration; `cell_id` is derived from its canonical digest.",
+  "properties": {
+    "ablations": {
+      "additionalProperties": true,
+      "description": "mechanism switches (e.g. observation delay)",
+      "title": "Ablations",
+      "type": "object"
+    },
+    "budget": {
+      "additionalProperties": true,
+      "title": "Budget",
+      "type": "object"
+    },
+    "cell_id": {
+      "title": "Cell Id",
+      "type": "string"
+    },
+    "config_digest": {
+      "title": "Config Digest",
+      "type": "string"
+    },
+    "environment": {
+      "additionalProperties": true,
+      "description": "{plugin, config} (backend)",
+      "title": "Environment",
+      "type": "object"
+    },
+    "model": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ModelRef"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "participants": {
+      "additionalProperties": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "description": "actor → {plugin, config}",
+      "title": "Participants",
+      "type": "object"
+    },
+    "rules": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/RuleSetRef"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "rules_enabled": {
+      "default": true,
+      "title": "Rules Enabled",
+      "type": "boolean"
+    },
+    "scenario_id": {
+      "title": "Scenario Id",
+      "type": "string"
+    },
+    "scenario_revision": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Scenario Revision"
+    },
+    "seed": {
+      "title": "Seed",
+      "type": "integer"
+    },
+    "split": {
+      "default": "acceptance",
+      "enum": [
+        "dev",
+        "acceptance"
+      ],
+      "title": "Split",
+      "type": "string"
+    }
+  },
+  "required": [
+    "cell_id",
+    "scenario_id",
+    "participants",
+    "environment",
+    "seed",
+    "config_digest"
+  ],
+  "title": "MatrixCellSpec",
+  "type": "object"
+}

@@ -1,0 +1,55 @@
+{
+  "$id": "https://formal-lab.dev/contracts/v2/BudgetUsage.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Usage counters. `model_calls` counts calls that returned a usable response; `model_attempts` every request\nsent (incl. failures and lost responses); tokens are only what the provider reported — calls without usage data\nare counted in `unreported_calls`, calls whose response was lost in `unconfirmed_calls`.",
+  "properties": {
+    "input_tokens": {
+      "default": 0,
+      "title": "Input Tokens",
+      "type": "integer"
+    },
+    "model_attempts": {
+      "default": 0,
+      "title": "Model Attempts",
+      "type": "integer"
+    },
+    "model_calls": {
+      "default": 0,
+      "title": "Model Calls",
+      "type": "integer"
+    },
+    "observation_requests": {
+      "default": 0,
+      "title": "Observation Requests",
+      "type": "integer"
+    },
+    "output_tokens": {
+      "default": 0,
+      "title": "Output Tokens",
+      "type": "integer"
+    },
+    "steps": {
+      "default": 0,
+      "title": "Steps",
+      "type": "integer"
+    },
+    "unconfirmed_calls": {
+      "default": 0,
+      "title": "Unconfirmed Calls",
+      "type": "integer"
+    },
+    "unreported_calls": {
+      "default": 0,
+      "title": "Unreported Calls",
+      "type": "integer"
+    },
+    "wall_seconds": {
+      "default": 0.0,
+      "title": "Wall Seconds",
+      "type": "number"
+    }
+  },
+  "title": "BudgetUsage",
+  "type": "object"
+}

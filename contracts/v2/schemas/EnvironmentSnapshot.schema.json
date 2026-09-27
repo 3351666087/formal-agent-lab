@@ -1,0 +1,103 @@
+{
+  "$defs": {
+    "Digest": {
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": {
+          "const": "sha256",
+          "default": "sha256",
+          "title": "Algorithm",
+          "type": "string"
+        },
+        "value": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "Digest",
+      "type": "object"
+    },
+    "PluginRef": {
+      "additionalProperties": false,
+      "properties": {
+        "plugin_id": {
+          "pattern": "^[a-z0-9]+([.-][a-z0-9]+)*(/[a-z0-9]+([.-][a-z0-9]+)*)?$",
+          "title": "Plugin Id",
+          "type": "string"
+        },
+        "version": {
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+([-+][0-9A-Za-z.-]+)?$",
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "plugin_id",
+        "version"
+      ],
+      "title": "PluginRef",
+      "type": "object"
+    }
+  },
+  "$id": "https://formal-lab.dev/contracts/v2/EnvironmentSnapshot.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Environment state at a step. FULL_STATE snapshots of pure-data environments can be restored; persistent\nservice sessions produce SESSION_MARKER snapshots (revision + session reference only), which are never restored\n— recovery reconciles against the live session instead (v2).",
+  "properties": {
+    "data": {
+      "additionalProperties": true,
+      "title": "Data",
+      "type": "object"
+    },
+    "digest": {
+      "$ref": "#/$defs/Digest"
+    },
+    "environment": {
+      "$ref": "#/$defs/PluginRef"
+    },
+    "kind": {
+      "default": "FULL_STATE",
+      "enum": [
+        "FULL_STATE",
+        "SESSION_MARKER"
+      ],
+      "title": "Kind",
+      "type": "string"
+    },
+    "session_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Session Id"
+    },
+    "state_revision": {
+      "minimum": 0,
+      "title": "State Revision",
+      "type": "integer"
+    },
+    "step": {
+      "minimum": 0,
+      "title": "Step",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "environment",
+    "step",
+    "state_revision",
+    "digest",
+    "data"
+  ],
+  "title": "EnvironmentSnapshot",
+  "type": "object"
+}

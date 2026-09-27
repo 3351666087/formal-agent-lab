@@ -1,0 +1,101 @@
+{
+  "$defs": {
+    "RobustnessVerdict": {
+      "enum": [
+        "ROBUST",
+        "NOT_ROBUST",
+        "UNKNOWN",
+        "UNSUPPORTED"
+      ],
+      "title": "RobustnessVerdict",
+      "type": "string"
+    }
+  },
+  "$id": "https://formal-lab.dev/contracts/v2/RobustnessResult.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Open-loop robustness of a fixed action sequence over all completions (P2-026). This is not policy\nsynthesis: the sequence cannot branch on later observations.",
+  "properties": {
+    "counterexample": {
+      "anyOf": [
+        {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "completion of the unknowns that breaks it",
+      "title": "Counterexample"
+    },
+    "failing_index": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "first action that is inapplicable (0-based)",
+      "title": "Failing Index"
+    },
+    "goal_fails": {
+      "default": false,
+      "title": "Goal Fails",
+      "type": "boolean"
+    },
+    "require_goal": {
+      "anyOf": [
+        {
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Require Goal"
+    },
+    "sequence": {
+      "description": "ground action keys, in order",
+      "items": {
+        "type": "string"
+      },
+      "title": "Sequence",
+      "type": "array"
+    },
+    "unknown_paths": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Unknown Paths",
+      "type": "array"
+    },
+    "verdict": {
+      "$ref": "#/$defs/RobustnessVerdict"
+    }
+  },
+  "required": [
+    "verdict",
+    "sequence"
+  ],
+  "title": "RobustnessResult",
+  "type": "object"
+}

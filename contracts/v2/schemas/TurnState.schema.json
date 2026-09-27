@@ -1,0 +1,70 @@
+{
+  "$id": "https://formal-lab.dev/contracts/v2/TurnState.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Persistent cursor of the TurnScheduler (P2-031): restored exactly after pause, crash or continue-as-new.",
+  "properties": {
+    "actor_steps": {
+      "additionalProperties": {
+        "type": "integer"
+      },
+      "title": "Actor Steps",
+      "type": "object"
+    },
+    "global_step": {
+      "description": "last completed global step (0 before the first turn)",
+      "minimum": 0,
+      "title": "Global Step",
+      "type": "integer"
+    },
+    "goals_reached": {
+      "description": "actors whose own goal holds",
+      "items": {
+        "type": "string"
+      },
+      "title": "Goals Reached",
+      "type": "array"
+    },
+    "no_progress": {
+      "default": 0,
+      "description": "consecutive turns without a state change",
+      "minimum": 0,
+      "title": "No Progress",
+      "type": "integer"
+    },
+    "position": {
+      "description": "index into the turn cycle of the next turn",
+      "minimum": 0,
+      "title": "Position",
+      "type": "integer"
+    },
+    "retired": {
+      "description": "actors out of budget / finished; never scheduled",
+      "items": {
+        "type": "string"
+      },
+      "title": "Retired",
+      "type": "array"
+    },
+    "round": {
+      "minimum": 0,
+      "title": "Round",
+      "type": "integer"
+    },
+    "skipped": {
+      "additionalProperties": {
+        "type": "integer"
+      },
+      "description": "turns passed per actor (no action)",
+      "title": "Skipped",
+      "type": "object"
+    }
+  },
+  "required": [
+    "global_step",
+    "round",
+    "position"
+  ],
+  "title": "TurnState",
+  "type": "object"
+}

@@ -1,0 +1,84 @@
+{
+  "instance": {
+    "created_at": "2026-09-27T12:00:00Z",
+    "digest": {
+      "algorithm": "sha256",
+      "value": "b244c53fcd627a24c82563c4a800c51a4246ec9efbb0e6b6d22dab146d7ff3d5"
+    },
+    "model": {
+      "digest": {
+        "algorithm": "sha256",
+        "value": "3bbefb596964eb6d5b9af55fa10a8534942c729ab774ca58c5259ca9f70d2ac2"
+      },
+      "package_id": "lamp",
+      "version": 1
+    },
+    "name": "lamp rules",
+    "note": null,
+    "parent_version": null,
+    "rules": [
+      {
+        "condition": {
+          "args": [
+            {
+              "name": "ev_verdict",
+              "op": "ref"
+            },
+            {
+              "domain": null,
+              "op": "const",
+              "value": "DIFFERENT"
+            }
+          ],
+          "op": "eq"
+        },
+        "enabled": true,
+        "label": null,
+        "message": "prediction differs: pause and review the model",
+        "observe_paths": [],
+        "outcome": "PAUSE",
+        "priority": 10,
+        "rule_id": "pause_on_difference",
+        "trigger": {
+          "events": [
+            "EFFECT_COMPARED"
+          ],
+          "stage": null
+        }
+      },
+      {
+        "condition": {
+          "args": [
+            {
+              "name": "ev_unknown_count",
+              "op": "ref"
+            },
+            {
+              "domain": null,
+              "op": "const",
+              "value": 0
+            }
+          ],
+          "op": "gt"
+        },
+        "enabled": true,
+        "label": null,
+        "message": "ask for the counter",
+        "observe_paths": [],
+        "outcome": "OBSERVE_MORE",
+        "priority": 0,
+        "rule_id": "observe_toggles",
+        "trigger": {
+          "events": [
+            "OBSERVATION"
+          ],
+          "stage": null
+        }
+      }
+    ],
+    "ruleset_id": "lamp-rules",
+    "version": 1
+  },
+  "object": "RuleSet",
+  "reason": "OBSERVE_MORE rules name observe_paths"
+}

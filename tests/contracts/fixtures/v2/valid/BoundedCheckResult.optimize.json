@@ -1,0 +1,108 @@
+{
+  "action_digest": null,
+  "assumption_set": null,
+  "assumptions": [],
+  "backend": {
+    "name": "z3",
+    "version": "5.1.0"
+  },
+  "bound": {
+    "max_steps": 4,
+    "timeout_ms": 5000
+  },
+  "check_id": "chk_0003",
+  "contract_version": "formal-lab-contracts/v2",
+  "explanation": null,
+  "extensions": {},
+  "model_digest": {
+    "algorithm": "sha256",
+    "value": "3bbefb596964eb6d5b9af55fa10a8534942c729ab774ca58c5259ca9f70d2ac2"
+  },
+  "observation_request": null,
+  "optimization": {
+    "horizon": 4,
+    "levels": [
+      {
+        "level": "cost",
+        "optimal": false,
+        "proven_lower": 1,
+        "proven_upper": 2,
+        "value": 2
+      }
+    ],
+    "method": "incremental bound tightening (binary search per lexicographic level)",
+    "objective_id": "cheapest",
+    "plan_length": 1,
+    "scope": "MODEL_INTERNAL_WITHIN_HORIZON",
+    "solver_calls": 3,
+    "status": "FEASIBLE"
+  },
+  "query": {
+    "action": null,
+    "bound": {
+      "max_steps": 4,
+      "timeout_ms": 5000
+    },
+    "initial_state": "MODEL_INITIAL",
+    "kind": "OPTIMIZE_OBJECTIVE",
+    "objective": {
+      "accumulation": "until_goal",
+      "description": null,
+      "goal_property": "lit",
+      "horizon": 4,
+      "levels": [
+        {
+          "direction": "minimize",
+          "id": "cost",
+          "label": null,
+          "model_objective": "toggle_cost",
+          "terms": [],
+          "unit": "cost"
+        }
+      ],
+      "objective_id": "cheapest"
+    },
+    "property_id": null,
+    "sequence": []
+  },
+  "query_bundle": null,
+  "robustness": null,
+  "scope": "MODEL_INTERNAL",
+  "semantics": "OPTIMAL_PATH",
+  "state_digest": null,
+  "stats": {
+    "elapsed_ms": 5000.0,
+    "reason_unknown": "timeout",
+    "solver_status": "unknown",
+    "steps_explored": 0,
+    "timeout_ms": null
+  },
+  "unsupported": null,
+  "variable_mapping": {},
+  "verdict": "FEASIBLE",
+  "witness": {
+    "replay": "CONFIRMED",
+    "replay_note": null,
+    "steps": [
+      {
+        "action": null,
+        "state": {
+          "on": false,
+          "toggles": 0
+        },
+        "step": 0
+      },
+      {
+        "action": {
+          "action_type": "toggle",
+          "params": {}
+        },
+        "state": {
+          "on": true,
+          "toggles": 1
+        },
+        "step": 1
+      }
+    ]
+  }
+}

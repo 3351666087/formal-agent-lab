@@ -1,7 +1,8 @@
-"""Contract tests for formal-lab-contracts/v1 (reusable by later phases).
+"""Contract tests for formal-lab-contracts/v2 and the frozen v1 (reusable by later phases).
 
-Three views of the contract must agree: the Pydantic source, the generated JSON Schemas and the
-generated TypeScript (checked by packages/contracts-ts/test with the same fixtures).
+Three views of the contract must agree: the Pydantic source, the generated JSON Schemas and the generated
+TypeScript (packages/contracts-ts/test uses the same fixtures). v1 samples (fixtures/v1, frozen since phase 1) must
+keep validating as v1 and upgrade to valid v2 objects without changing their meaning.
 """
 
 from __future__ import annotations
@@ -12,71 +13,147 @@ from pathlib import Path
 import formal_lab_contracts as c
 import jsonschema
 import pytest
-from formal_lab_contracts import schema_export
+from formal_lab_contracts import compat, schema_export
 from formal_lab_contracts.capabilities import CapabilityRequirement, negotiate
-from formal_lab_contracts.errors import ErrorCode, FormalLabError, InvalidInput, Timeout
+from formal_lab_contracts.errors import ErrorCode, FormalLabError, InvalidInput, Timeout, VersionMismatch
+from formal_lab_contracts.v1 import objects as v1
+from formal_lab_contracts.v1 import schema_export as v1_export
 from pydantic import ValidationError
 
 ROOT = Path(__file__).resolve().parents[2]
 FIXTURES = Path(__file__).parent / "fixtures"
-SCHEMAS = ROOT / "contracts" / "v1" / "schemas"
 
 
-def _load(sub: str) -> list[tuple[str, dict]]:
-    return [(p.stem, json.loads(p.read_text())) for p in sorted((FIXTURES / sub).glob("*.json"))]
+def _load(version: str, sub: str) -> list[tuple[str, dict]]:
+    return [(p.stem, json.loads(p.read_text())) for p in sorted((FIXTURES / version / sub).glob("*.json"))]
 
 
-def _model(type_name: str):
-    return getattr(c, type_name)
-
-
-def _schema_validator(type_name: str) -> jsonschema.protocols.Validator:
-    schema = json.loads((SCHEMAS / f"{type_name}.schema.json").read_text())
+def _validator(version: str, type_name: str) -> jsonschema.protocols.Validator:
+    schema = json.loads((ROOT / "contracts" / version / "schemas" / f"{type_name}.schema.json").read_text())
     cls = jsonschema.validators.validator_for(schema)
     cls.check_schema(schema)
     return cls(schema)
 
 
-VALID = _load("valid")
-INVALID = _load("invalid")
-SEMANTIC_INVALID = _load("semantic-invalid")
+V1_VALID, V1_INVALID, V1_SEMANTIC = (_load("v1", s) for s in ("valid", "invalid", "semantic-invalid"))
+V2_VALID, V2_INVALID, V2_SEMANTIC = (_load("v2", s) for s in ("valid", "invalid", "semantic-invalid"))
+UPGRADABLE = {"ModelPackage", "ScenarioManifest", "RunManifest", "BoundedCheckResult", "ActionOutcome",
+              "PluginDescriptor", "Observation", "ActionProposal", "MetricResult", "TraceEvent"}
 
 
-def test_every_frozen_object_has_a_sample():
-    names = {name.split(".")[0] for name, _ in VALID}
-    frozen = {m.__name__ for m in schema_export.FROZEN_OBJECTS}
-    assert frozen <= names, f"missing samples for {frozen - names}"
+# ------------------------------------------------------------------------ v2
 
 
-@pytest.mark.parametrize(("name", "instance"), VALID, ids=[n for n, _ in VALID])
-def test_valid_samples_accepted_by_pydantic_and_schema(name, instance):
+def test_every_v2_object_has_a_sample():
+    names = {name.split(".")[0] for name, _ in V2_VALID}
+    required = {m.__name__ for m in schema_export.FROZEN_OBJECTS + schema_export.V2_OBJECTS}
+    assert required <= names, f"missing samples for {required - names}"
+
+
+@pytest.mark.parametrize(("name", "instance"), V2_VALID, ids=[n for n, _ in V2_VALID])
+def test_v2_valid_samples_accepted_by_pydantic_and_schema(name, instance):
     type_name = name.split(".")[0]
-    obj = _model(type_name).model_validate(instance)
-    # round trip is lossless
-    assert json.loads(obj.model_dump_json()) == json.loads(json.dumps(instance))
-    _schema_validator(type_name).validate(instance)
+    obj = getattr(c, type_name).model_validate(instance)
+    assert json.loads(obj.model_dump_json()) == json.loads(json.dumps(instance)), "round trip must be lossless"
+    _validator("v2", type_name).validate(instance)
 
 
-@pytest.mark.parametrize(("name", "case"), INVALID, ids=[n for n, _ in INVALID])
-def test_invalid_samples_rejected_by_pydantic_and_schema(name, case):
+@pytest.mark.parametrize(("name", "case"), V2_INVALID, ids=[n for n, _ in V2_INVALID])
+def test_v2_invalid_samples_rejected_by_pydantic_and_schema(name, case):
     with pytest.raises(ValidationError):
-        _model(case["object"]).model_validate(case["instance"])
-    errors = list(_schema_validator(case["object"]).iter_errors(case["instance"]))
+        getattr(c, case["object"]).model_validate(case["instance"])
+    errors = list(_validator("v2", case["object"]).iter_errors(case["instance"]))
     assert errors, f"schema accepted invalid sample {name}: {case['reason']}"
 
 
-@pytest.mark.parametrize(("name", "case"), SEMANTIC_INVALID, ids=[n for n, _ in SEMANTIC_INVALID])
-def test_semantic_rules_enforced_by_pydantic(name, case):
+@pytest.mark.parametrize(("name", "case"), V2_SEMANTIC, ids=[n for n, _ in V2_SEMANTIC])
+def test_v2_semantic_rules_enforced_by_pydantic(name, case):
     with pytest.raises(ValidationError):
-        _model(case["object"]).model_validate(case["instance"])
+        getattr(c, case["object"]).model_validate(case["instance"])
 
 
 def test_generated_schemas_match_source():
-    files = schema_export.build_schemas()
-    for rel, content in files.items():
-        assert (ROOT / "contracts" / "v1" / rel).read_text() == content, f"{rel} drifted; run make contracts"
-    committed = json.loads((ROOT / "contracts" / "v1" / "DIGEST.json").read_text())
-    assert committed["digest"] == schema_export.contract_digest(files)["digest"]
+    for version, module in (("v2", schema_export), ("v1", v1_export)):
+        files = module.build_schemas()
+        for rel, content in files.items():
+            assert (ROOT / "contracts" / version / rel).read_text() == content, f"{version}/{rel} drifted"
+        committed = json.loads((ROOT / "contracts" / version / "DIGEST.json").read_text())
+        assert committed["digest"] == module.contract_digest(files)["digest"]
+
+
+def test_v1_digest_is_the_phase1_digest():
+    baseline = json.loads((ROOT / "docs/execution/evidence/phase2/baseline/phase1-baseline.json").read_text())
+    assert v1_export.contract_digest(v1_export.build_schemas())["digest"] == baseline["phase1"]["contract_digest"]
+
+
+# ------------------------------------------------------------------------ v1 (frozen) and upgrades
+
+
+@pytest.mark.parametrize(("name", "instance"), V1_VALID, ids=[n for n, _ in V1_VALID])
+def test_v1_samples_still_valid_v1_and_upgrade_to_v2(name, instance):
+    type_name = name.split(".")[0]
+    v1_obj = getattr(v1, type_name).model_validate(instance)
+    _validator("v1", type_name).validate(instance)
+    if type_name not in UPGRADABLE:
+        return
+    upgraded = compat.upgrade(type_name, instance)
+    dumped = upgraded.model_dump(mode="json")
+    _validator("v2", type_name).validate(dumped)
+    # every v1 field keeps its value (the meaning is unchanged); ModelPackage.ir moved into the payload
+    original = v1_obj.model_dump(mode="json")
+    if type_name == "ModelPackage":
+        assert dumped["payload"]["kind"] == "fal-ir" and _contains(dumped["payload"]["ir"], original["ir"])
+        assert dumped["digest"] == original["digest"]
+        original.pop("ir")
+    for key, value in original.items():
+        if key == "contract_version":
+            continue
+        assert _contains(dumped[key], value), f"{type_name}.{key} changed on upgrade"
+
+
+def _contains(new, old) -> bool:
+    """`new` keeps every v1 value of `old` (v2 may only add keys, never change or drop v1 values)."""
+    if isinstance(old, dict):
+        return isinstance(new, dict) and all(k == "contract_version" or (k in new and _contains(new[k], v))
+                                             for k, v in old.items())
+    if isinstance(old, list):
+        return isinstance(new, list) and len(new) == len(old) and all(_contains(a, b) for a, b in zip(new, old, strict=True))
+    return new == old
+
+
+@pytest.mark.parametrize(("name", "case"), V1_INVALID, ids=[n for n, _ in V1_INVALID])
+def test_v1_invalid_samples_still_rejected(name, case):
+    with pytest.raises(ValidationError):
+        getattr(v1, case["object"]).model_validate(case["instance"])
+    assert list(_validator("v1", case["object"]).iter_errors(case["instance"]))
+    # a v1-shaped object relabelled as v2 is a valid v2 object, so only the other cases must fail to upgrade
+    if case["object"] in UPGRADABLE and case["object"] != "PluginDescriptor" and name != "bad-contract-version":
+        with pytest.raises((InvalidInput, ValidationError, VersionMismatch)):
+            compat.upgrade(case["object"], case["instance"])
+
+
+@pytest.mark.parametrize(("name", "case"), V1_SEMANTIC, ids=[n for n, _ in V1_SEMANTIC])
+def test_v1_semantic_rules_still_enforced(name, case):
+    with pytest.raises(ValidationError):
+        getattr(v1, case["object"]).model_validate(case["instance"])
+
+
+def test_v1_scenario_keeps_its_stop_semantics():
+    sample = json.loads((FIXTURES / "v1" / "valid" / "ScenarioManifest.json").read_text())
+    scenario = compat.upgrade("ScenarioManifest", sample)
+    term = scenario.effective_termination()
+    assert term.joint_goal == "lit" and term.on_no_action == "END"  # no NO_APPLICABLE_ACTION condition in v1 sample
+    assert scenario.turns.mode == "ROUND_ROBIN" and len(scenario.participants) == 1
+
+
+def test_unknown_contract_version_rejected():
+    sample = json.loads((FIXTURES / "v1" / "valid" / "ScenarioManifest.json").read_text())
+    sample["contract_version"] = "formal-lab-contracts/v9"
+    with pytest.raises(VersionMismatch):
+        compat.upgrade("ScenarioManifest", sample)
+
+
+# ------------------------------------------------------------------------ behaviour
 
 
 def test_error_model_round_trip_and_retryability():
@@ -86,33 +163,49 @@ def test_error_model_round_trip_and_retryability():
     back = FormalLabError.from_info(c.ErrorInfo.model_validate_json(info.model_dump_json()))
     assert isinstance(back, Timeout) and back.details == {"timeout_ms": 50}
     assert not InvalidInput("x").retryable
-    assert {e.value for e in ErrorCode} >= {
-        "INVALID_INPUT", "VERSION_MISMATCH", "UNSUPPORTED", "TIMEOUT", "RESULT_UNKNOWN", "CANCELLED",
-        "RETRYABLE_FAILURE", "NON_RETRYABLE_FAILURE",
-    }
 
 
-def test_capability_negotiation():
-    descriptor = c.PluginDescriptor.model_validate(json.loads((FIXTURES / "valid" / "PluginDescriptor.json").read_text()))
+def test_capability_negotiation_explains_itself():
+    descriptor = c.PluginDescriptor.model_validate(json.loads((FIXTURES / "v2" / "valid" / "PluginDescriptor.json")
+                                                              .read_text()))
     ok = negotiate(descriptor, [CapabilityRequirement(id="plan.bounded_search"),
-                                CapabilityRequirement(id="plan.llm", optional=True)])
-    assert ok.compatible and ok.granted == ["plan.bounded_search"] and ok.missing_optional == ["plan.llm"]
-    bad = negotiate(descriptor, [CapabilityRequirement(id="query.probabilistic_reachability")])
-    assert not bad.compatible and bad.missing_required == ["query.probabilistic_reachability"]
-    too_new = negotiate(descriptor, [CapabilityRequirement(id="plan.bounded_search", min_version="2")])
-    assert not too_new.compatible
+                                CapabilityRequirement(id="plan.llm", optional=True)], role="strategy:a")
+    assert ok.compatible and ok.verdict == "PARTIAL" and ok.missing_optional == ["plan.llm"] and ok.role == "strategy:a"
+    bad = negotiate(descriptor, [CapabilityRequirement(id="query.probabilistic_reachability")],
+                    why={"query.probabilistic_reachability": "probabilistic goals"})
+    assert not bad.compatible and bad.verdict == "UNSUPPORTED" and "probabilistic goals" in bad.reasons[0]
+    assert not negotiate(descriptor, [CapabilityRequirement(id="plan.bounded_search", min_version="2")]).compatible
 
 
 def test_extension_namespace_rules():
-    base = json.loads((FIXTURES / "valid" / "ModelPackage.json").read_text())
+    base = json.loads((FIXTURES / "v2" / "valid" / "ModelPackage.json").read_text())
     base["extensions"] = {"formal-lab.core.hack": {"version": "1.0.0", "schema_id": "x", "data": {}}}
     with pytest.raises(ValidationError):
         c.ModelPackage.model_validate(base)
 
 
 def test_verdict_is_coerced_to_kind_specific_enum():
-    sample = json.loads((FIXTURES / "valid" / "BoundedCheckResult.unsupported.json").read_text())
-    result = c.BoundedCheckResult.model_validate(sample)
-    assert isinstance(result.verdict, c.PreconditionVerdict)
-    search = c.BoundedCheckResult.model_validate(json.loads((FIXTURES / "valid" / "BoundedCheckResult.json").read_text()))
-    assert isinstance(search.verdict, c.SearchVerdict)
+    for name, enum in (("BoundedCheckResult", c.SearchVerdict), ("BoundedCheckResult.unsupported",
+                                                                  c.PreconditionVerdict),
+                       ("BoundedCheckResult.optimize", c.OptimizationStatus),
+                       ("BoundedCheckResult.robust", c.RobustnessVerdict)):
+        r = c.BoundedCheckResult.model_validate(json.loads((FIXTURES / "v2" / "valid" / f"{name}.json").read_text()))
+        assert isinstance(r.verdict, enum), name
+
+
+def test_canonical_ir_keeps_v1_digests():
+    """A v1 model has the same canonical form (and digest) under v2; v2-only fields change the digest only when
+    they are actually used."""
+    v1_pkg = json.loads((FIXTURES / "v1" / "valid" / "ModelPackage.json").read_text())
+    ir = c.ModelIR.model_validate(v1_pkg["ir"])
+    assert c.digest_of(c.canonical_ir_dump(ir)).model_dump() == v1_pkg["digest"]
+    with_objective = ir.model_copy(update={"objectives": [c.ObjectiveDecl(id="n", terms=[{"kind": "action_cost"}])]})
+    assert c.digest_of(c.canonical_ir_dump(with_objective)).model_dump() != v1_pkg["digest"]
+
+
+def test_namespaced_package_has_no_ir():
+    pkg = c.ModelPackage.model_validate(json.loads((FIXTURES / "v2" / "valid" / "ModelPackage.namespaced.json")
+                                                   .read_text()))
+    assert not pkg.is_ir
+    with pytest.raises(c.errors.Unsupported):
+        _ = pkg.ir

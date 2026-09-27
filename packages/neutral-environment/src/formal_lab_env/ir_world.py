@@ -13,6 +13,14 @@ Scenario configuration (all optional, validated against CONFIG_SCHEMA):
   model the actors plan with (used for "expectation vs. simulation mismatch" scenarios).
 - observation.delay_steps: {var: k} the actor sees var's value from k steps ago (stale facts + unknowns).
 - observation.hidden: [var] never revealed (unknown, NOT_OBSERVABLE).
+- observation.per_actor: {actor: {delay_steps, hidden}} per-participant overrides (v1.1).
+- observation.on_request: false disables fresh observations on request (OBSERVE_MORE); default true (v1.1).
+
+Several participants (v1.1): every actor observes the same truth through its own view; the world revision counts
+applied actions. A proposal carries the revision its observation reflected; the scenario's conflict policy decides
+what happens when the world moved on since then — REVALIDATE applies it if its precondition still holds on the
+current state, REJECT_STALE rejects it when a location its precondition reads was written since that revision.
+Either way a rejection caused by a newer revision carries `ConflictInfo` (which locations changed, by whom).
 """
 
 from __future__ import annotations
@@ -24,6 +32,7 @@ from typing import Any
 from formal_lab_contracts import (
     ActionOutcome,
     ActionProposal,
+    ConflictInfo,
     EnvironmentSnapshot,
     EvidenceRef,
     Fact,
@@ -42,7 +51,7 @@ from formal_lab_model import Interpreter, check_model
 from formal_lab_model.checker import CheckedModel, TInt
 
 ENV_ID = "formal-lab.env.ir-world"
-ENV_VERSION = "1.0.0"
+ENV_VERSION = "1.1.0"
 MAX_OP_MEMORY = 64
 
 CONFIG_SCHEMA: dict[str, Any] = {
@@ -66,6 +75,19 @@ CONFIG_SCHEMA: dict[str, Any] = {
             "properties": {
                 "delay_steps": {"type": "object", "additionalProperties": {"type": "integer", "minimum": 0}},
                 "hidden": {"type": "array", "items": {"type": "string"}},
+                "per_actor": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "object",
+                        "properties": {
+                            "delay_steps": {"type": "object",
+                                            "additionalProperties": {"type": "integer", "minimum": 0}},
+                            "hidden": {"type": "array", "items": {"type": "string"}},
+                        },
+                        "additionalProperties": False,
+                    },
+                },
+                "on_request": {"type": "boolean", "default": True},
             },
             "additionalProperties": False,
         },
@@ -83,6 +105,12 @@ DESCRIPTOR = PluginDescriptor(
         {"id": caps.ENV_OBSERVATION_DELAY},
         {"id": caps.ENV_TRUTH_OVERRIDES},
         {"id": caps.ENV_SEEDED_VARIATION},
+        {"id": caps.ENV_PURE_REPLAYABLE},
+        {"id": caps.ENV_SNAPSHOT},
+        {"id": caps.ENV_RESTORE},
+        {"id": caps.ENV_IDEMPOTENT_STEP},
+        {"id": caps.ENV_MULTI_ACTOR},
+        {"id": caps.ENV_OBSERVE_ON_REQUEST},
     ],
     semantic_profiles=["deterministic_finite_v1"],
     config_schema=CONFIG_SCHEMA,
@@ -99,8 +127,9 @@ def _check_config(config: dict[str, Any]) -> None:
     if unknown:
         raise InvalidInput(f"unknown environment config keys: {sorted(unknown)}")
     obs = config.get("observation", {})
-    if set(obs) - {"delay_steps", "hidden"}:
-        raise InvalidInput(f"unknown observation config keys: {sorted(set(obs) - {'delay_steps', 'hidden'})}")
+    allowed = {"delay_steps", "hidden", "per_actor", "on_request"}
+    if set(obs) - allowed:
+        raise InvalidInput(f"unknown observation config keys: {sorted(set(obs) - allowed)}")
 
 
 def truth_model_ir(package: ModelPackage, overrides: dict[str, Any]) -> ModelIR:
@@ -166,6 +195,8 @@ class IRWorldEnvironment:
             "history": [state],  # truth states by step (bounded by the largest delay)
             "applied_ops": {},
             "closed": False,
+            "conflict_policy": scenario.turns.conflict_policy.value,
+            "writes": {},  # path → [revision, actor] of the last write (conflict arbitration)
         }
         return self.observe(scenario.participants[0].actor_id)
 
@@ -181,18 +212,27 @@ class IRWorldEnvironment:
             raise Conflict("environment is closed")
         return self._data
 
-    def observe(self, actor_id: str) -> Observation:
+    def _view(self, actor_id: str) -> tuple[dict[str, int], set[str]]:
+        obs_cfg = self.config.get("observation", {})
+        own = obs_cfg.get("per_actor", {}).get(actor_id, {})
+        delays = {**obs_cfg.get("delay_steps", {}), **own.get("delay_steps", {})}
+        hidden = set(obs_cfg.get("hidden", [])) | set(own.get("hidden", []))
+        return delays, hidden
+
+    def observe(self, actor_id: str, fresh_paths: list[str] | None = None) -> Observation:
         data = self._require()
         assert self._truth is not None
         step = data["step"]
-        obs_cfg = self.config.get("observation", {})
-        delays: dict[str, int] = obs_cfg.get("delay_steps", {})
-        hidden = set(obs_cfg.get("hidden", []))
+        delays, hidden = self._view(actor_id)
+        fresh = set(fresh_paths or [])
         history = data["history"]
         facts: list[Fact] = []
         unknowns: list[UnknownItem] = []
         for fam in self._truth.state_families:
             for path in fam.table:
+                if path in fresh:
+                    facts.append(Fact(path=path, value=data["state"][path], observed_at_step=step))
+                    continue
                 if fam.name in hidden or not fam.observable:
                     unknowns.append(UnknownItem(path=path, reason="NOT_OBSERVABLE"))
                     continue
@@ -217,7 +257,21 @@ class IRWorldEnvironment:
             unknowns=unknowns,
             evidence=[EvidenceRef(kind="snapshot", id=f"{data['run_id']}:env@{step}",
                                   note=f"truth revision {data['revision']}")],
+            requested_paths=sorted(fresh),
         )
+
+    def observe_paths(self, actor_id: str, paths: list[str]) -> Observation:
+        """Fresh values for the requested locations (OBSERVE_MORE); the rest of the view is unchanged."""
+        if not self.config.get("observation", {}).get("on_request", True):
+            from formal_lab_contracts.errors import Unsupported
+
+            raise Unsupported("observations on request are disabled for this scenario")
+        assert self._truth is not None
+        known = set(self._truth.state_paths())
+        unknown = [p for p in paths if p not in known]
+        if unknown:
+            raise InvalidInput(f"not state locations: {unknown}")
+        return self.observe(actor_id, fresh_paths=paths)
 
     # ------------------------------------------------------------------ transition
     def step(self, proposal: ActionProposal, *, operation_id: str) -> ActionOutcome:
@@ -236,10 +290,20 @@ class IRWorldEnvironment:
                 result={"reason": f"INVALID_ACTION: {exc}", "properties": self.truth_properties()},
             )
         else:
+            conflict = self._conflict(ga, proposal, before)
             res = self._interp.step(ga, data["state"])
-            if res.applicable and res.next_state is not None:
+            if conflict is not None and conflict.policy.value == "REJECT_STALE":
+                outcome = ActionOutcome(
+                    operation_id=operation_id, run_id=data["run_id"], step_id=proposal.step_id,
+                    proposal_id=proposal.proposal_id, action=proposal.action, status=OutcomeStatus.REJECTED,
+                    effect_applied=False, revision_before=before, revision_after=before, conflict=conflict,
+                    result={"reason": f"STALE_REVISION: {conflict.reason}", "properties": self.truth_properties()},
+                )
+            elif res.applicable and res.next_state is not None:
                 data["state"] = res.next_state
                 data["revision"] = before + 1
+                for path in {p for p, _ in res.writes}:
+                    data["writes"][path] = [before + 1, proposal.actor_id]
                 outcome = ActionOutcome(
                     operation_id=operation_id, run_id=data["run_id"], step_id=proposal.step_id,
                     proposal_id=proposal.proposal_id, action=proposal.action, status=OutcomeStatus.APPLIED,
@@ -252,6 +316,8 @@ class IRWorldEnvironment:
                     operation_id=operation_id, run_id=data["run_id"], step_id=proposal.step_id,
                     proposal_id=proposal.proposal_id, action=proposal.action, status=OutcomeStatus.REJECTED,
                     effect_applied=False, revision_before=before, revision_after=before,
+                    conflict=conflict.model_copy(update={"reason": f"precondition no longer holds: {res.reason}; "
+                                                                   + conflict.reason}) if conflict else None,
                     result={"reason": res.reason, "properties": self.truth_properties()},
                 )
         data["step"] += 1
@@ -262,6 +328,28 @@ class IRWorldEnvironment:
         if len(data["applied_ops"]) > MAX_OP_MEMORY:
             data["applied_ops"].pop(next(iter(data["applied_ops"])))
         return outcome
+
+    def _conflict(self, ga: Any, proposal: ActionProposal, current: int) -> ConflictInfo | None:
+        """Locations the action's precondition reads that were written after the proposal's revision."""
+        data = self._data
+        assert data is not None and self._truth is not None
+        if proposal.based_on_revision >= current:
+            return None
+        from formal_lab_model.rules import read_set
+
+        decl = self._truth.actions[ga.action]
+        reads = read_set(decl.precondition, self._truth)
+        changed = sorted(p for p, (rev, _) in data.get("writes", {}).items()
+                         if rev > proposal.based_on_revision and p in reads)
+        if not changed:
+            return None
+        writers = sorted({data["writes"][p][1] for p in changed if data["writes"][p][1]})
+        return ConflictInfo(policy=data.get("conflict_policy", "REVALIDATE"),
+                            based_on_revision=proposal.based_on_revision, current_revision=current,
+                            changed_paths=changed,
+                            reason=f"observed at revision {proposal.based_on_revision}, world at {current}; "
+                                   f"{len(changed)} location(s) it depends on changed since"
+                                   + (f" (written by {', '.join(writers)})" if writers else ""))
 
     # ------------------------------------------------------------------ persistence
     def snapshot(self) -> EnvironmentSnapshot:

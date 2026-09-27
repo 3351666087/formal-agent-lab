@@ -10,6 +10,7 @@ from formal_lab_contracts import (
     ModelPackage,
     ModelSource,
     PluginDescriptor,
+    canonical_ir_dump,
     digest_of,
     utcnow,
 )
@@ -29,8 +30,8 @@ DESCRIPTOR = PluginDescriptor(
     interface="MODEL_FRONTEND",
     capabilities=[{"id": caps.PROFILE_DETERMINISTIC_FINITE_V1}],
     semantic_profiles=["deterministic_finite_v1"],
-    input_schema={"$ref": "https://formal-lab.dev/contracts/v1/ModelIR.schema.json"},
-    output_schema={"$ref": "https://formal-lab.dev/contracts/v1/ModelPackage.schema.json"},
+    input_schema={"$ref": "https://formal-lab.dev/contracts/v2/ModelIR.schema.json"},
+    output_schema={"$ref": "https://formal-lab.dev/contracts/v2/ModelPackage.schema.json"},
     entrypoint="formal_lab_model.frontend:create",
     ui={"label": "IR JSON", "description": "Neutral finite-state IR (fal-ir-json/v1) with type checking",
         "category": "model_frontend"},
@@ -40,9 +41,10 @@ DESCRIPTOR = PluginDescriptor(
 
 
 def canonical_ir(ir: ModelIR) -> dict[str, Any]:
-    """Normal form: every field explicit (defaults filled), JSON types only. Key order is irrelevant
-    because digests use canonical JSON (sorted keys); list order is semantic and preserved."""
-    return ir.model_dump(mode="json")
+    """Normal form: every v1 field explicit (defaults filled), JSON types only; fields introduced in v2 are left out
+    while they hold their default, so phase-1 models keep their digests. Key order is irrelevant because digests
+    use canonical JSON (sorted keys); list order is semantic and preserved."""
+    return canonical_ir_dump(ir)
 
 
 def ir_digest(ir: ModelIR):
@@ -89,7 +91,7 @@ def build_package(ir: ModelIR, *, package_id: str, version: int, source: ModelSo
         frontend=DESCRIPTOR.ref(),
         semantic_profile=ir.semantic_profile,
         digest=ir_digest(ir),
-        ir=ir,
+        payload={"kind": "fal-ir", "ir": ir},
         source=source,
         created_at=utcnow(),
     )
@@ -114,4 +116,6 @@ def create(config: dict[str, Any] | None = None, services: Any = None) -> IRJson
 def registrations():
     from formal_lab_contracts.interfaces import PluginRegistration
 
-    return [PluginRegistration(DESCRIPTOR, create)]
+    from . import driver
+
+    return [PluginRegistration(DESCRIPTOR, create), PluginRegistration(driver.DESCRIPTOR, driver.create)]

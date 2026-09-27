@@ -194,7 +194,7 @@ def listening() -> dict[int, str]:
                    timeout=20)
     if code == 0:
         for line in out.splitlines():
-            name, ports, project = (line.split("|") + ["", ""])[:3]
+            name, ports, project = [*line.split("|"), "", ""][:3]
             for m in re.finditer(r":(\d+)->", ports):
                 tag = "project" if name.startswith("fal") or project.startswith("fal") else "container"
                 owners[int(m.group(1))] = f"{tag}:{name}"
@@ -360,7 +360,7 @@ def summary(r: dict) -> str:
         f"thread, matrix {r['concurrency']['matrix']} ({r['concurrency']['basis']})",
     ]
     for name, p in r["profiles"].items():
-        extra = "; ".join(p["missing_tools"] and [f"missing {p['missing_tools']}"] or [] + p["resource_problems"]
+        extra = "; ".join((p["missing_tools"] and [f"missing {p['missing_tools']}"]) or [] + p["resource_problems"]
                           + [f"port {c['port']} used by {c['owner']}" for c in p["port_conflicts"]])
         lines.append(f"profile   {name:15s} {p['status']:12s} ~{p['estimate']['memory_mib']} MiB "
                      f"{p['estimate']['cpus']} CPU {p['estimate']['disk_gib']} GiB" + (f"  ({extra})" if extra else ""))

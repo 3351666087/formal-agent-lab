@@ -1,0 +1,129 @@
+{
+  "$defs": {
+    "Digest": {
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": {
+          "const": "sha256",
+          "default": "sha256",
+          "title": "Algorithm",
+          "type": "string"
+        },
+        "value": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "Digest",
+      "type": "object"
+    },
+    "RuleOutcome": {
+      "enum": [
+        "CONTINUE",
+        "OBSERVE_MORE",
+        "REPLAN",
+        "PAUSE"
+      ],
+      "title": "RuleOutcome",
+      "type": "string"
+    },
+    "RuleResult": {
+      "enum": [
+        "TRUE",
+        "FALSE",
+        "UNKNOWN",
+        "TIMEOUT",
+        "CONFLICT",
+        "UNSUPPORTED"
+      ],
+      "title": "RuleResult",
+      "type": "string"
+    },
+    "RuleSetRef": {
+      "additionalProperties": false,
+      "properties": {
+        "digest": {
+          "$ref": "#/$defs/Digest"
+        },
+        "ruleset_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:@/-]{0,254}$",
+          "title": "Ruleset Id",
+          "type": "string"
+        },
+        "version": {
+          "minimum": 1,
+          "title": "Version",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "ruleset_id",
+        "version",
+        "digest"
+      ],
+      "title": "RuleSetRef",
+      "type": "object"
+    }
+  },
+  "$id": "https://formal-lab.dev/contracts/v2/RuleEvaluation.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "completions_checked": {
+      "default": 0,
+      "title": "Completions Checked",
+      "type": "integer"
+    },
+    "explanation": {
+      "title": "Explanation",
+      "type": "string"
+    },
+    "outcome": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/RuleOutcome"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "outcome applied (null when the rule did not decide)"
+    },
+    "priority": {
+      "title": "Priority",
+      "type": "integer"
+    },
+    "result": {
+      "$ref": "#/$defs/RuleResult"
+    },
+    "rule_id": {
+      "pattern": "^[A-Za-z_][A-Za-z0-9_]*$",
+      "title": "Rule Id",
+      "type": "string"
+    },
+    "ruleset": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/RuleSetRef"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    }
+  },
+  "required": [
+    "rule_id",
+    "result",
+    "outcome",
+    "priority",
+    "explanation"
+  ],
+  "title": "RuleEvaluation",
+  "type": "object"
+}

@@ -1,0 +1,1900 @@
+{
+  "$defs": {
+    "ApplyExpr": {
+      "additionalProperties": false,
+      "properties": {
+        "args": {
+          "items": {
+            "discriminator": {
+              "mapping": {
+                "add": "#/$defs/ApplyExpr",
+                "and": "#/$defs/ApplyExpr",
+                "const": "#/$defs/ConstExpr",
+                "count": "#/$defs/QuantExpr",
+                "eq": "#/$defs/ApplyExpr",
+                "exists": "#/$defs/QuantExpr",
+                "forall": "#/$defs/QuantExpr",
+                "ge": "#/$defs/ApplyExpr",
+                "gt": "#/$defs/ApplyExpr",
+                "implies": "#/$defs/ApplyExpr",
+                "ite": "#/$defs/ApplyExpr",
+                "le": "#/$defs/ApplyExpr",
+                "lt": "#/$defs/ApplyExpr",
+                "max": "#/$defs/ApplyExpr",
+                "max_over": "#/$defs/QuantExpr",
+                "min": "#/$defs/ApplyExpr",
+                "min_over": "#/$defs/QuantExpr",
+                "mul": "#/$defs/ApplyExpr",
+                "ne": "#/$defs/ApplyExpr",
+                "neg": "#/$defs/ApplyExpr",
+                "not": "#/$defs/ApplyExpr",
+                "or": "#/$defs/ApplyExpr",
+                "ref": "#/$defs/RefExpr",
+                "sub": "#/$defs/ApplyExpr",
+                "sum": "#/$defs/QuantExpr",
+                "var": "#/$defs/VarExpr"
+              },
+              "propertyName": "op"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/ConstExpr"
+              },
+              {
+                "$ref": "#/$defs/VarExpr"
+              },
+              {
+                "$ref": "#/$defs/RefExpr"
+              },
+              {
+                "$ref": "#/$defs/ApplyExpr"
+              },
+              {
+                "$ref": "#/$defs/QuantExpr"
+              }
+            ]
+          },
+          "minItems": 1,
+          "title": "Args",
+          "type": "array"
+        },
+        "op": {
+          "enum": [
+            "not",
+            "and",
+            "or",
+            "implies",
+            "eq",
+            "ne",
+            "lt",
+            "le",
+            "gt",
+            "ge",
+            "add",
+            "sub",
+            "mul",
+            "neg",
+            "min",
+            "max",
+            "ite"
+          ],
+          "title": "Op",
+          "type": "string"
+        }
+      },
+      "required": [
+        "op",
+        "args"
+      ],
+      "title": "ApplyExpr",
+      "type": "object"
+    },
+    "ArtifactRef": {
+      "additionalProperties": false,
+      "description": "Pointer to a large object held by an ArtifactStore (never inlined into events).",
+      "properties": {
+        "digest": {
+          "$ref": "#/$defs/Digest"
+        },
+        "format_version": {
+          "minLength": 1,
+          "title": "Format Version",
+          "type": "string"
+        },
+        "media_type": {
+          "minLength": 3,
+          "title": "Media Type",
+          "type": "string"
+        },
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Name"
+        },
+        "size_bytes": {
+          "minimum": 0,
+          "title": "Size Bytes",
+          "type": "integer"
+        },
+        "uri": {
+          "description": "object location, e.g. file://… or s3://bucket/key",
+          "minLength": 1,
+          "title": "Uri",
+          "type": "string"
+        }
+      },
+      "required": [
+        "uri",
+        "media_type",
+        "size_bytes",
+        "digest",
+        "format_version"
+      ],
+      "title": "ArtifactRef",
+      "type": "object"
+    },
+    "AssumptionItem": {
+      "additionalProperties": false,
+      "properties": {
+        "as_of_step": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "As Of Step"
+        },
+        "path": {
+          "title": "Path",
+          "type": "string"
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reason"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "value the plan assumed (null for free UNKNOWN locations)",
+          "title": "Value"
+        }
+      },
+      "required": [
+        "path",
+        "provenance",
+        "value"
+      ],
+      "title": "AssumptionItem",
+      "type": "object"
+    },
+    "AssumptionSet": {
+      "additionalProperties": false,
+      "description": "Everything a belief-based conclusion assumed beyond fresh observations (P2-025).",
+      "properties": {
+        "counts": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "description": "provenance → number of locations",
+          "title": "Counts",
+          "type": "object"
+        },
+        "digest": {
+          "$ref": "#/$defs/Digest"
+        },
+        "items": {
+          "items": {
+            "$ref": "#/$defs/AssumptionItem"
+          },
+          "title": "Items",
+          "type": "array"
+        }
+      },
+      "required": [
+        "digest"
+      ],
+      "title": "AssumptionSet",
+      "type": "object"
+    },
+    "BackendInfo": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "version": {
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "version"
+      ],
+      "title": "BackendInfo",
+      "type": "object"
+    },
+    "BoundedCheckResult": {
+      "additionalProperties": false,
+      "properties": {
+        "action_digest": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Digest"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "assumption_set": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AssumptionSet"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "assumptions behind the answer (v2)"
+        },
+        "assumptions": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Assumptions",
+          "type": "array"
+        },
+        "backend": {
+          "$ref": "#/$defs/BackendInfo"
+        },
+        "bound": {
+          "$ref": "#/$defs/CheckBound"
+        },
+        "check_id": {
+          "title": "Check Id",
+          "type": "string"
+        },
+        "contract_version": {
+          "const": "formal-lab-contracts/v2",
+          "default": "formal-lab-contracts/v2",
+          "title": "Contract Version",
+          "type": "string"
+        },
+        "explanation": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Explanation"
+        },
+        "extensions": {
+          "description": "namespaced extension slots; keys are reverse-DNS namespaces, formal-lab.core.* is reserved",
+          "patternProperties": {
+            "^[a-z0-9][a-z0-9-]*(\\.[a-z0-9_-]+)+$": {
+              "$ref": "#/$defs/Extension"
+            }
+          },
+          "propertyNames": {
+            "not": {
+              "pattern": "^formal[-_]lab\\.core"
+            },
+            "pattern": "^[a-z0-9][a-z0-9-]*(\\.[a-z0-9_-]+)+$"
+          },
+          "title": "Extensions",
+          "type": "object"
+        },
+        "model_digest": {
+          "$ref": "#/$defs/Digest"
+        },
+        "observation_request": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ObservationRequest"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "UNKNOWN precondition: which observations would settle it (v2)"
+        },
+        "optimization": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/OptimizationResult"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "query": {
+          "$ref": "#/$defs/CheckQuery"
+        },
+        "query_bundle": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ArtifactRef"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "replayable query package (v2)"
+        },
+        "robustness": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RobustnessResult"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "scope": {
+          "const": "MODEL_INTERNAL",
+          "default": "MODEL_INTERNAL",
+          "description": "conclusion holds for the model, not for the real system",
+          "title": "Scope",
+          "type": "string"
+        },
+        "semantics": {
+          "$ref": "#/$defs/QuerySemantics"
+        },
+        "state_digest": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Digest"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "stats": {
+          "$ref": "#/$defs/SolverStats"
+        },
+        "unsupported": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/UnsupportedInfo"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "variable_mapping": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "solver symbol → state path",
+          "title": "Variable Mapping",
+          "type": "object"
+        },
+        "verdict": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SearchVerdict"
+            },
+            {
+              "$ref": "#/$defs/PreconditionVerdict"
+            },
+            {
+              "$ref": "#/$defs/OptimizationStatus"
+            },
+            {
+              "$ref": "#/$defs/RobustnessVerdict"
+            }
+          ],
+          "title": "Verdict"
+        },
+        "witness": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Witness"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "check_id",
+        "query",
+        "semantics",
+        "verdict",
+        "bound",
+        "model_digest",
+        "backend",
+        "stats"
+      ],
+      "title": "BoundedCheckResult",
+      "type": "object"
+    },
+    "CheckBound": {
+      "additionalProperties": false,
+      "properties": {
+        "max_steps": {
+          "description": "maximum path length explored (0 for single-step queries)",
+          "minimum": 0,
+          "title": "Max Steps",
+          "type": "integer"
+        },
+        "timeout_ms": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Timeout Ms"
+        }
+      },
+      "required": [
+        "max_steps"
+      ],
+      "title": "CheckBound",
+      "type": "object"
+    },
+    "CheckQuery": {
+      "additionalProperties": false,
+      "properties": {
+        "action": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/GroundAction"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "action for ACTION_PRECONDITION"
+        },
+        "bound": {
+          "$ref": "#/$defs/CheckBound"
+        },
+        "initial_state": {
+          "default": "MODEL_INITIAL",
+          "enum": [
+            "MODEL_INITIAL",
+            "GIVEN_STATE"
+          ],
+          "title": "Initial State",
+          "type": "string"
+        },
+        "kind": {
+          "$ref": "#/$defs/QueryKind"
+        },
+        "objective": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ObjectiveSpec"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "OPTIMIZE_OBJECTIVE: what to minimise (v2)"
+        },
+        "property_id": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z_][A-Za-z0-9_]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "goal / invariant property to query",
+          "title": "Property Id"
+        },
+        "sequence": {
+          "description": "ROBUST_SEQUENCE: actions in order (v2)",
+          "items": {
+            "$ref": "#/$defs/GroundAction"
+          },
+          "title": "Sequence",
+          "type": "array"
+        }
+      },
+      "required": [
+        "kind",
+        "bound"
+      ],
+      "title": "CheckQuery",
+      "type": "object"
+    },
+    "ConstExpr": {
+      "additionalProperties": false,
+      "properties": {
+        "domain": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z_][A-Za-z0-9_]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "enum or entity set of a symbolic value; required when ambiguous",
+          "title": "Domain"
+        },
+        "op": {
+          "const": "const",
+          "default": "const",
+          "title": "Op",
+          "type": "string"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "title": "Value"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "ConstExpr",
+      "type": "object"
+    },
+    "CostTerm": {
+      "additionalProperties": false,
+      "description": "One additive cost term of an objective level.\n\n- action_cost: `weight` × the declared `cost` of every action taken on the path.\n- state_rate: `weight` × `expr` (int) evaluated on every post-state s_1..s_k of the path.\n- terminal: `weight` × `expr` (int) evaluated on the final state s_k of the path.",
+      "properties": {
+        "expr": {
+          "anyOf": [
+            {
+              "discriminator": {
+                "mapping": {
+                  "add": "#/$defs/ApplyExpr",
+                  "and": "#/$defs/ApplyExpr",
+                  "const": "#/$defs/ConstExpr",
+                  "count": "#/$defs/QuantExpr",
+                  "eq": "#/$defs/ApplyExpr",
+                  "exists": "#/$defs/QuantExpr",
+                  "forall": "#/$defs/QuantExpr",
+                  "ge": "#/$defs/ApplyExpr",
+                  "gt": "#/$defs/ApplyExpr",
+                  "implies": "#/$defs/ApplyExpr",
+                  "ite": "#/$defs/ApplyExpr",
+                  "le": "#/$defs/ApplyExpr",
+                  "lt": "#/$defs/ApplyExpr",
+                  "max": "#/$defs/ApplyExpr",
+                  "max_over": "#/$defs/QuantExpr",
+                  "min": "#/$defs/ApplyExpr",
+                  "min_over": "#/$defs/QuantExpr",
+                  "mul": "#/$defs/ApplyExpr",
+                  "ne": "#/$defs/ApplyExpr",
+                  "neg": "#/$defs/ApplyExpr",
+                  "not": "#/$defs/ApplyExpr",
+                  "or": "#/$defs/ApplyExpr",
+                  "ref": "#/$defs/RefExpr",
+                  "sub": "#/$defs/ApplyExpr",
+                  "sum": "#/$defs/QuantExpr",
+                  "var": "#/$defs/VarExpr"
+                },
+                "propertyName": "op"
+              },
+              "oneOf": [
+                {
+                  "$ref": "#/$defs/ConstExpr"
+                },
+                {
+                  "$ref": "#/$defs/VarExpr"
+                },
+                {
+                  "$ref": "#/$defs/RefExpr"
+                },
+                {
+                  "$ref": "#/$defs/ApplyExpr"
+                },
+                {
+                  "$ref": "#/$defs/QuantExpr"
+                }
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expr"
+        },
+        "kind": {
+          "enum": [
+            "action_cost",
+            "state_rate",
+            "terminal"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Label"
+        },
+        "weight": {
+          "default": 1,
+          "title": "Weight",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "title": "CostTerm",
+      "type": "object"
+    },
+    "Digest": {
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": {
+          "const": "sha256",
+          "default": "sha256",
+          "title": "Algorithm",
+          "type": "string"
+        },
+        "value": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "Digest",
+      "type": "object"
+    },
+    "Extension": {
+      "additionalProperties": false,
+      "description": "Namespaced, versioned extension payload. `schema_id` names the JSON Schema that validates `data`.",
+      "properties": {
+        "data": {
+          "additionalProperties": true,
+          "title": "Data",
+          "type": "object"
+        },
+        "schema_id": {
+          "minLength": 1,
+          "title": "Schema Id",
+          "type": "string"
+        },
+        "version": {
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+([-+][0-9A-Za-z.-]+)?$",
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "version",
+        "schema_id",
+        "data"
+      ],
+      "title": "Extension",
+      "type": "object"
+    },
+    "GroundAction": {
+      "additionalProperties": false,
+      "properties": {
+        "action_type": {
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*$",
+          "title": "Action Type",
+          "type": "string"
+        },
+        "params": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "title": "Params",
+          "type": "object"
+        }
+      },
+      "required": [
+        "action_type"
+      ],
+      "title": "GroundAction",
+      "type": "object"
+    },
+    "ModelRef": {
+      "additionalProperties": false,
+      "properties": {
+        "digest": {
+          "$ref": "#/$defs/Digest"
+        },
+        "package_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:@/-]{0,254}$",
+          "title": "Package Id",
+          "type": "string"
+        },
+        "version": {
+          "minimum": 1,
+          "title": "Version",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "package_id",
+        "version",
+        "digest"
+      ],
+      "title": "ModelRef",
+      "type": "object"
+    },
+    "ObjectiveBound": {
+      "additionalProperties": false,
+      "properties": {
+        "level": {
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*$",
+          "title": "Level",
+          "type": "string"
+        },
+        "optimal": {
+          "default": false,
+          "title": "Optimal",
+          "type": "boolean"
+        },
+        "proven_lower": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "no plan within the horizon is cheaper than this",
+          "title": "Proven Lower"
+        },
+        "proven_upper": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "a plan at most this expensive exists",
+          "title": "Proven Upper"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "objective value of the returned plan",
+          "title": "Value"
+        }
+      },
+      "required": [
+        "level",
+        "value"
+      ],
+      "title": "ObjectiveBound",
+      "type": "object"
+    },
+    "ObjectiveLevel": {
+      "additionalProperties": false,
+      "description": "One lexicographic level: minimise (or maximise) the sum of its terms over the path.",
+      "properties": {
+        "direction": {
+          "default": "minimize",
+          "enum": [
+            "minimize",
+            "maximize"
+          ],
+          "title": "Direction",
+          "type": "string"
+        },
+        "id": {
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Label"
+        },
+        "model_objective": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z_][A-Za-z0-9_]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "use the terms of ModelIR.objectives[id]",
+          "title": "Model Objective"
+        },
+        "terms": {
+          "items": {
+            "$ref": "#/$defs/CostTerm"
+          },
+          "title": "Terms",
+          "type": "array"
+        },
+        "unit": {
+          "default": "cost",
+          "title": "Unit",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "title": "ObjectiveLevel",
+      "type": "object"
+    },
+    "ObjectiveSpec": {
+      "additionalProperties": false,
+      "description": "What a cost-aware planner optimises (P2-020).\n\nA candidate plan is a path s_0 → … → s_k (k ≤ horizon) that ends in the first state where `goal_property`\nholds. Its value on each level is the sum of the level's terms over that path (see `CostTerm`); levels are\ncompared lexicographically in list order. Costs stop accumulating once the goal holds.",
+      "properties": {
+        "accumulation": {
+          "const": "until_goal",
+          "default": "until_goal",
+          "title": "Accumulation",
+          "type": "string"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Description"
+        },
+        "goal_property": {
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*$",
+          "title": "Goal Property",
+          "type": "string"
+        },
+        "horizon": {
+          "maximum": 200,
+          "minimum": 1,
+          "title": "Horizon",
+          "type": "integer"
+        },
+        "levels": {
+          "items": {
+            "$ref": "#/$defs/ObjectiveLevel"
+          },
+          "minItems": 1,
+          "title": "Levels",
+          "type": "array"
+        },
+        "objective_id": {
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*$",
+          "title": "Objective Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "objective_id",
+        "levels",
+        "goal_property",
+        "horizon"
+      ],
+      "title": "ObjectiveSpec",
+      "type": "object"
+    },
+    "ObservationRequest": {
+      "additionalProperties": false,
+      "description": "Extra observations that would settle an UNKNOWN verdict (P2-027).",
+      "properties": {
+        "applicable_completion": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "anyOf": [
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "string"
+                  }
+                ]
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Applicable Completion"
+        },
+        "for_action": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "ground action key the request is about",
+          "title": "For Action"
+        },
+        "inapplicable_completion": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "anyOf": [
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "string"
+                  }
+                ]
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Inapplicable Completion"
+        },
+        "paths": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Paths",
+          "type": "array"
+        },
+        "reason": {
+          "title": "Reason",
+          "type": "string"
+        }
+      },
+      "required": [
+        "paths",
+        "reason"
+      ],
+      "title": "ObservationRequest",
+      "type": "object"
+    },
+    "OptimizationResult": {
+      "additionalProperties": false,
+      "properties": {
+        "horizon": {
+          "title": "Horizon",
+          "type": "integer"
+        },
+        "levels": {
+          "items": {
+            "$ref": "#/$defs/ObjectiveBound"
+          },
+          "title": "Levels",
+          "type": "array"
+        },
+        "method": {
+          "default": "incremental bound tightening (binary search per lexicographic level)",
+          "title": "Method",
+          "type": "string"
+        },
+        "objective_id": {
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*$",
+          "title": "Objective Id",
+          "type": "string"
+        },
+        "plan_length": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Plan Length"
+        },
+        "scope": {
+          "const": "MODEL_INTERNAL_WITHIN_HORIZON",
+          "default": "MODEL_INTERNAL_WITHIN_HORIZON",
+          "title": "Scope",
+          "type": "string"
+        },
+        "solver_calls": {
+          "default": 0,
+          "title": "Solver Calls",
+          "type": "integer"
+        },
+        "status": {
+          "$ref": "#/$defs/OptimizationStatus"
+        }
+      },
+      "required": [
+        "objective_id",
+        "status",
+        "horizon"
+      ],
+      "title": "OptimizationResult",
+      "type": "object"
+    },
+    "OptimizationStatus": {
+      "enum": [
+        "OPTIMAL",
+        "FEASIBLE",
+        "NO_PLAN_WITHIN_HORIZON",
+        "UNKNOWN",
+        "UNSUPPORTED"
+      ],
+      "title": "OptimizationStatus",
+      "type": "string"
+    },
+    "PluginRef": {
+      "additionalProperties": false,
+      "properties": {
+        "plugin_id": {
+          "pattern": "^[a-z0-9]+([.-][a-z0-9]+)*(/[a-z0-9]+([.-][a-z0-9]+)*)?$",
+          "title": "Plugin Id",
+          "type": "string"
+        },
+        "version": {
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+([-+][0-9A-Za-z.-]+)?$",
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "plugin_id",
+        "version"
+      ],
+      "title": "PluginRef",
+      "type": "object"
+    },
+    "PreconditionVerdict": {
+      "enum": [
+        "APPLICABLE",
+        "INAPPLICABLE",
+        "UNKNOWN",
+        "UNSUPPORTED"
+      ],
+      "title": "PreconditionVerdict",
+      "type": "string"
+    },
+    "Provenance": {
+      "enum": [
+        "KNOWN",
+        "STALE",
+        "UNKNOWN",
+        "ASSUMED_INITIAL"
+      ],
+      "title": "Provenance",
+      "type": "string"
+    },
+    "QuantExpr": {
+      "additionalProperties": false,
+      "description": "forall/exists → bool, count → number of satisfying members, sum → sum of an int body,\nmax_over/min_over → largest/smallest int body over the satisfying members (`default` when there is none).",
+      "properties": {
+        "body": {
+          "discriminator": {
+            "mapping": {
+              "add": "#/$defs/ApplyExpr",
+              "and": "#/$defs/ApplyExpr",
+              "const": "#/$defs/ConstExpr",
+              "count": "#/$defs/QuantExpr",
+              "eq": "#/$defs/ApplyExpr",
+              "exists": "#/$defs/QuantExpr",
+              "forall": "#/$defs/QuantExpr",
+              "ge": "#/$defs/ApplyExpr",
+              "gt": "#/$defs/ApplyExpr",
+              "implies": "#/$defs/ApplyExpr",
+              "ite": "#/$defs/ApplyExpr",
+              "le": "#/$defs/ApplyExpr",
+              "lt": "#/$defs/ApplyExpr",
+              "max": "#/$defs/ApplyExpr",
+              "max_over": "#/$defs/QuantExpr",
+              "min": "#/$defs/ApplyExpr",
+              "min_over": "#/$defs/QuantExpr",
+              "mul": "#/$defs/ApplyExpr",
+              "ne": "#/$defs/ApplyExpr",
+              "neg": "#/$defs/ApplyExpr",
+              "not": "#/$defs/ApplyExpr",
+              "or": "#/$defs/ApplyExpr",
+              "ref": "#/$defs/RefExpr",
+              "sub": "#/$defs/ApplyExpr",
+              "sum": "#/$defs/QuantExpr",
+              "var": "#/$defs/VarExpr"
+            },
+            "propertyName": "op"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/ConstExpr"
+            },
+            {
+              "$ref": "#/$defs/VarExpr"
+            },
+            {
+              "$ref": "#/$defs/RefExpr"
+            },
+            {
+              "$ref": "#/$defs/ApplyExpr"
+            },
+            {
+              "$ref": "#/$defs/QuantExpr"
+            }
+          ],
+          "title": "Body"
+        },
+        "default": {
+          "anyOf": [
+            {
+              "discriminator": {
+                "mapping": {
+                  "add": "#/$defs/ApplyExpr",
+                  "and": "#/$defs/ApplyExpr",
+                  "const": "#/$defs/ConstExpr",
+                  "count": "#/$defs/QuantExpr",
+                  "eq": "#/$defs/ApplyExpr",
+                  "exists": "#/$defs/QuantExpr",
+                  "forall": "#/$defs/QuantExpr",
+                  "ge": "#/$defs/ApplyExpr",
+                  "gt": "#/$defs/ApplyExpr",
+                  "implies": "#/$defs/ApplyExpr",
+                  "ite": "#/$defs/ApplyExpr",
+                  "le": "#/$defs/ApplyExpr",
+                  "lt": "#/$defs/ApplyExpr",
+                  "max": "#/$defs/ApplyExpr",
+                  "max_over": "#/$defs/QuantExpr",
+                  "min": "#/$defs/ApplyExpr",
+                  "min_over": "#/$defs/QuantExpr",
+                  "mul": "#/$defs/ApplyExpr",
+                  "ne": "#/$defs/ApplyExpr",
+                  "neg": "#/$defs/ApplyExpr",
+                  "not": "#/$defs/ApplyExpr",
+                  "or": "#/$defs/ApplyExpr",
+                  "ref": "#/$defs/RefExpr",
+                  "sub": "#/$defs/ApplyExpr",
+                  "sum": "#/$defs/QuantExpr",
+                  "var": "#/$defs/VarExpr"
+                },
+                "propertyName": "op"
+              },
+              "oneOf": [
+                {
+                  "$ref": "#/$defs/ConstExpr"
+                },
+                {
+                  "$ref": "#/$defs/VarExpr"
+                },
+                {
+                  "$ref": "#/$defs/RefExpr"
+                },
+                {
+                  "$ref": "#/$defs/ApplyExpr"
+                },
+                {
+                  "$ref": "#/$defs/QuantExpr"
+                }
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "max_over/min_over only: value when no member qualifies",
+          "title": "Default"
+        },
+        "domain": {
+          "description": "entity set or enum to range over",
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*$",
+          "title": "Domain",
+          "type": "string"
+        },
+        "op": {
+          "enum": [
+            "forall",
+            "exists",
+            "count",
+            "sum",
+            "max_over",
+            "min_over"
+          ],
+          "title": "Op",
+          "type": "string"
+        },
+        "var": {
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*$",
+          "title": "Var",
+          "type": "string"
+        },
+        "where": {
+          "anyOf": [
+            {
+              "discriminator": {
+                "mapping": {
+                  "add": "#/$defs/ApplyExpr",
+                  "and": "#/$defs/ApplyExpr",
+                  "const": "#/$defs/ConstExpr",
+                  "count": "#/$defs/QuantExpr",
+                  "eq": "#/$defs/ApplyExpr",
+                  "exists": "#/$defs/QuantExpr",
+                  "forall": "#/$defs/QuantExpr",
+                  "ge": "#/$defs/ApplyExpr",
+                  "gt": "#/$defs/ApplyExpr",
+                  "implies": "#/$defs/ApplyExpr",
+                  "ite": "#/$defs/ApplyExpr",
+                  "le": "#/$defs/ApplyExpr",
+                  "lt": "#/$defs/ApplyExpr",
+                  "max": "#/$defs/ApplyExpr",
+                  "max_over": "#/$defs/QuantExpr",
+                  "min": "#/$defs/ApplyExpr",
+                  "min_over": "#/$defs/QuantExpr",
+                  "mul": "#/$defs/ApplyExpr",
+                  "ne": "#/$defs/ApplyExpr",
+                  "neg": "#/$defs/ApplyExpr",
+                  "not": "#/$defs/ApplyExpr",
+                  "or": "#/$defs/ApplyExpr",
+                  "ref": "#/$defs/RefExpr",
+                  "sub": "#/$defs/ApplyExpr",
+                  "sum": "#/$defs/QuantExpr",
+                  "var": "#/$defs/VarExpr"
+                },
+                "propertyName": "op"
+              },
+              "oneOf": [
+                {
+                  "$ref": "#/$defs/ConstExpr"
+                },
+                {
+                  "$ref": "#/$defs/VarExpr"
+                },
+                {
+                  "$ref": "#/$defs/RefExpr"
+                },
+                {
+                  "$ref": "#/$defs/ApplyExpr"
+                },
+                {
+                  "$ref": "#/$defs/QuantExpr"
+                }
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Where"
+        }
+      },
+      "required": [
+        "op",
+        "var",
+        "domain",
+        "body"
+      ],
+      "title": "QuantExpr",
+      "type": "object"
+    },
+    "QueryKind": {
+      "enum": [
+        "GOAL_REACHABILITY",
+        "INVARIANT_VIOLATION",
+        "ACTION_PRECONDITION",
+        "OPTIMIZE_OBJECTIVE",
+        "ROBUST_SEQUENCE"
+      ],
+      "title": "QueryKind",
+      "type": "string"
+    },
+    "QuerySemantics": {
+      "enum": [
+        "EXISTS_PATH",
+        "ALL_PATHS",
+        "SINGLE_STEP",
+        "OPTIMAL_PATH",
+        "ALL_COMPLETIONS"
+      ],
+      "title": "QuerySemantics",
+      "type": "string"
+    },
+    "RefExpr": {
+      "additionalProperties": false,
+      "description": "Reads an action parameter or a quantifier-bound variable.",
+      "properties": {
+        "name": {
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*$",
+          "title": "Name",
+          "type": "string"
+        },
+        "op": {
+          "const": "ref",
+          "default": "ref",
+          "title": "Op",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "title": "RefExpr",
+      "type": "object"
+    },
+    "RobustnessResult": {
+      "additionalProperties": false,
+      "description": "Open-loop robustness of a fixed action sequence over all completions (P2-026). This is not policy\nsynthesis: the sequence cannot branch on later observations.",
+      "properties": {
+        "counterexample": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "anyOf": [
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "string"
+                  }
+                ]
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "completion of the unknowns that breaks it",
+          "title": "Counterexample"
+        },
+        "failing_index": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "first action that is inapplicable (0-based)",
+          "title": "Failing Index"
+        },
+        "goal_fails": {
+          "default": false,
+          "title": "Goal Fails",
+          "type": "boolean"
+        },
+        "require_goal": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z_][A-Za-z0-9_]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Require Goal"
+        },
+        "sequence": {
+          "description": "ground action keys, in order",
+          "items": {
+            "type": "string"
+          },
+          "title": "Sequence",
+          "type": "array"
+        },
+        "unknown_paths": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Unknown Paths",
+          "type": "array"
+        },
+        "verdict": {
+          "$ref": "#/$defs/RobustnessVerdict"
+        }
+      },
+      "required": [
+        "verdict",
+        "sequence"
+      ],
+      "title": "RobustnessResult",
+      "type": "object"
+    },
+    "RobustnessVerdict": {
+      "enum": [
+        "ROBUST",
+        "NOT_ROBUST",
+        "UNKNOWN",
+        "UNSUPPORTED"
+      ],
+      "title": "RobustnessVerdict",
+      "type": "string"
+    },
+    "SearchVerdict": {
+      "enum": [
+        "WITNESS",
+        "NO_WITNESS_WITHIN_BOUND",
+        "UNKNOWN",
+        "UNSUPPORTED"
+      ],
+      "title": "SearchVerdict",
+      "type": "string"
+    },
+    "SolverStats": {
+      "additionalProperties": false,
+      "properties": {
+        "elapsed_ms": {
+          "default": 0.0,
+          "title": "Elapsed Ms",
+          "type": "number"
+        },
+        "reason_unknown": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reason Unknown"
+        },
+        "solver_status": {
+          "description": "raw backend status, e.g. sat / unsat / unknown / not-run",
+          "title": "Solver Status",
+          "type": "string"
+        },
+        "steps_explored": {
+          "default": 0,
+          "title": "Steps Explored",
+          "type": "integer"
+        },
+        "timeout_ms": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Timeout Ms"
+        }
+      },
+      "required": [
+        "solver_status"
+      ],
+      "title": "SolverStats",
+      "type": "object"
+    },
+    "UnsupportedInfo": {
+      "additionalProperties": false,
+      "properties": {
+        "extension_point": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "interface through which support can be added",
+          "title": "Extension Point"
+        },
+        "feature": {
+          "title": "Feature",
+          "type": "string"
+        },
+        "reason": {
+          "title": "Reason",
+          "type": "string"
+        }
+      },
+      "required": [
+        "feature",
+        "reason"
+      ],
+      "title": "UnsupportedInfo",
+      "type": "object"
+    },
+    "VarExpr": {
+      "additionalProperties": false,
+      "description": "Reads a state variable or a constant table at the given index.",
+      "properties": {
+        "index": {
+          "items": {
+            "discriminator": {
+              "mapping": {
+                "add": "#/$defs/ApplyExpr",
+                "and": "#/$defs/ApplyExpr",
+                "const": "#/$defs/ConstExpr",
+                "count": "#/$defs/QuantExpr",
+                "eq": "#/$defs/ApplyExpr",
+                "exists": "#/$defs/QuantExpr",
+                "forall": "#/$defs/QuantExpr",
+                "ge": "#/$defs/ApplyExpr",
+                "gt": "#/$defs/ApplyExpr",
+                "implies": "#/$defs/ApplyExpr",
+                "ite": "#/$defs/ApplyExpr",
+                "le": "#/$defs/ApplyExpr",
+                "lt": "#/$defs/ApplyExpr",
+                "max": "#/$defs/ApplyExpr",
+                "max_over": "#/$defs/QuantExpr",
+                "min": "#/$defs/ApplyExpr",
+                "min_over": "#/$defs/QuantExpr",
+                "mul": "#/$defs/ApplyExpr",
+                "ne": "#/$defs/ApplyExpr",
+                "neg": "#/$defs/ApplyExpr",
+                "not": "#/$defs/ApplyExpr",
+                "or": "#/$defs/ApplyExpr",
+                "ref": "#/$defs/RefExpr",
+                "sub": "#/$defs/ApplyExpr",
+                "sum": "#/$defs/QuantExpr",
+                "var": "#/$defs/VarExpr"
+              },
+              "propertyName": "op"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/ConstExpr"
+              },
+              {
+                "$ref": "#/$defs/VarExpr"
+              },
+              {
+                "$ref": "#/$defs/RefExpr"
+              },
+              {
+                "$ref": "#/$defs/ApplyExpr"
+              },
+              {
+                "$ref": "#/$defs/QuantExpr"
+              }
+            ]
+          },
+          "title": "Index",
+          "type": "array"
+        },
+        "name": {
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*$",
+          "title": "Name",
+          "type": "string"
+        },
+        "op": {
+          "const": "var",
+          "default": "var",
+          "title": "Op",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "title": "VarExpr",
+      "type": "object"
+    },
+    "Witness": {
+      "additionalProperties": false,
+      "properties": {
+        "replay": {
+          "default": "NOT_REPLAYED",
+          "enum": [
+            "CONFIRMED",
+            "REFUTED",
+            "NOT_REPLAYED"
+          ],
+          "title": "Replay",
+          "type": "string"
+        },
+        "replay_note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Replay Note"
+        },
+        "steps": {
+          "items": {
+            "$ref": "#/$defs/WitnessStep"
+          },
+          "title": "Steps",
+          "type": "array"
+        }
+      },
+      "required": [
+        "steps"
+      ],
+      "title": "Witness",
+      "type": "object"
+    },
+    "WitnessStep": {
+      "additionalProperties": false,
+      "properties": {
+        "action": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/GroundAction"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "action leading into this state (null for step 0)"
+        },
+        "state": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "title": "State",
+          "type": "object"
+        },
+        "step": {
+          "title": "Step",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "step",
+        "action",
+        "state"
+      ],
+      "title": "WitnessStep",
+      "type": "object"
+    }
+  },
+  "$id": "https://formal-lab.dev/contracts/v2/QueryBundle.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Replayable package of one check (P2-029): everything needed to re-ask and to explain the answer.",
+  "properties": {
+    "assumptions": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/AssumptionSet"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "bundle_id": {
+      "title": "Bundle Id",
+      "type": "string"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "driver": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/PluginRef"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "explanation": {
+      "description": "the shared, rendered explanation",
+      "items": {
+        "type": "string"
+      },
+      "title": "Explanation",
+      "type": "array"
+    },
+    "format": {
+      "const": "formal-lab/query-bundle@1",
+      "default": "formal-lab/query-bundle@1",
+      "title": "Format",
+      "type": "string"
+    },
+    "model": {
+      "$ref": "#/$defs/ModelRef"
+    },
+    "query": {
+      "$ref": "#/$defs/CheckQuery"
+    },
+    "replay": {
+      "additionalProperties": true,
+      "description": "independent re-check of the witness",
+      "title": "Replay",
+      "type": "object"
+    },
+    "result": {
+      "$ref": "#/$defs/BoundedCheckResult"
+    },
+    "state": {
+      "anyOf": [
+        {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "State"
+    },
+    "unknown_paths": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Unknown Paths",
+      "type": "array"
+    },
+    "verifier": {
+      "$ref": "#/$defs/PluginRef"
+    }
+  },
+  "required": [
+    "bundle_id",
+    "created_at",
+    "model",
+    "verifier",
+    "query",
+    "result"
+  ],
+  "title": "QueryBundle",
+  "type": "object"
+}

@@ -1,0 +1,97 @@
+{
+  "instance": {
+    "action_digest": null,
+    "assumption_set": {
+      "counts": {
+        "KNOWN": 1,
+        "STALE": 1
+      },
+      "digest": {
+        "algorithm": "sha256",
+        "value": "b9831560ce8070682a14d93f9f2192a7242cbfe036adccae61c67034ea55ce22"
+      },
+      "items": [
+        {
+          "as_of_step": 0,
+          "path": "toggles",
+          "provenance": "STALE",
+          "reason": "OBSERVATION_DELAY",
+          "value": 0
+        }
+      ]
+    },
+    "assumptions": [],
+    "backend": {
+      "name": "z3",
+      "version": "5.1.0"
+    },
+    "bound": {
+      "max_steps": 3,
+      "timeout_ms": 5000
+    },
+    "check_id": "chk_0001",
+    "contract_version": "formal-lab-contracts/v2",
+    "explanation": null,
+    "extensions": {},
+    "model_digest": {
+      "algorithm": "sha256",
+      "value": "3bbefb596964eb6d5b9af55fa10a8534942c729ab774ca58c5259ca9f70d2ac2"
+    },
+    "observation_request": null,
+    "optimization": null,
+    "query": {
+      "action": null,
+      "bound": {
+        "max_steps": 3,
+        "timeout_ms": 5000
+      },
+      "initial_state": "GIVEN_STATE",
+      "kind": "GOAL_REACHABILITY",
+      "objective": null,
+      "property_id": "lit",
+      "sequence": []
+    },
+    "query_bundle": null,
+    "robustness": null,
+    "scope": "MODEL_INTERNAL",
+    "semantics": "ALL_PATHS",
+    "state_digest": null,
+    "stats": {
+      "elapsed_ms": 1.5,
+      "reason_unknown": null,
+      "solver_status": "sat",
+      "steps_explored": 1,
+      "timeout_ms": 5000
+    },
+    "unsupported": null,
+    "variable_mapping": {},
+    "verdict": "WITNESS",
+    "witness": {
+      "replay": "CONFIRMED",
+      "replay_note": null,
+      "steps": [
+        {
+          "action": null,
+          "state": {
+            "on": false,
+            "toggles": 0
+          },
+          "step": 0
+        },
+        {
+          "action": {
+            "action_type": "toggle",
+            "params": {}
+          },
+          "state": {
+            "on": true,
+            "toggles": 1
+          },
+          "step": 1
+        }
+      ]
+    }
+  },
+  "object": "BoundedCheckResult",
+  "reason": "GOAL_REACHABILITY has EXISTS_PATH semantics"
+}

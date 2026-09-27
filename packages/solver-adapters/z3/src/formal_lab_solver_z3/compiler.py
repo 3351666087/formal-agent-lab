@@ -208,6 +208,18 @@ class Z3Model:
                 return _or([_and([c, b]) for c, b in parts])
             if e.op == "count":
                 return _sum([_ite_num(_and([c, b]), 1, 0) for c, b in parts])
+            if e.op in ("max_over", "min_over"):
+                # fold from the default (value when no member qualifies): best = ite(c_i ∧ (none yet ∨ b_i beats
+                # best), b_i, best), tracking "some member qualified" separately so the default never competes
+                default = self.expr(e.default, S, env) if e.default is not None else 0
+                best: Any = default
+                seen: Any = False
+                for c, b in parts:
+                    beats = _cmp(b, best, e.op)
+                    take = _and([c, _or([_not(seen), beats])])
+                    best = _ite_num(take, b, best)
+                    seen = _or([seen, c])
+                return best
             return _sum([_ite_num(c, b, 0) for c, b in parts])
         if isinstance(e, ApplyExpr):
             args = [self.expr(a, S, env) for a in e.args]
@@ -369,6 +381,13 @@ def _ite_num(c: Any, a: Any, b: Any) -> Any:
     if isinstance(c, bool):
         return a if c else b
     return z3.If(c, a, b)
+
+
+def _cmp(a: Any, b: Any, op: str) -> Any:
+    """a strictly better than b for max_over (>) / min_over (<), on mixed python/z3 ints."""
+    if isinstance(a, int) and isinstance(b, int) and not isinstance(a, bool) and not isinstance(b, bool):
+        return a > b if op == "max_over" else a < b
+    return (a > b) if op == "max_over" else (a < b)
 
 
 def _sum(xs: list[Any]) -> Any:

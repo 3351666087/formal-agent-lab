@@ -1,0 +1,331 @@
+{
+  "instance": {
+    "actor_usage": {
+      "a": {
+        "input_tokens": 0,
+        "model_attempts": 0,
+        "model_calls": 0,
+        "observation_requests": 0,
+        "output_tokens": 0,
+        "steps": 1,
+        "unconfirmed_calls": 0,
+        "unreported_calls": 0,
+        "wall_seconds": 0.0
+      },
+      "b": {
+        "input_tokens": 0,
+        "model_attempts": 0,
+        "model_calls": 0,
+        "observation_requests": 0,
+        "output_tokens": 0,
+        "steps": 1,
+        "unconfirmed_calls": 0,
+        "unreported_calls": 0,
+        "wall_seconds": 0.0
+      }
+    },
+    "artifacts": [
+      {
+        "digest": {
+          "algorithm": "sha256",
+          "value": "2d711642b726b04401627ca9fbac32f5c8530fb1903cc4db02258717921a4881"
+        },
+        "format_version": "formal-lab/snapshot@1",
+        "media_type": "application/json",
+        "name": "snapshot-step-1.json",
+        "size_bytes": 42,
+        "uri": "file://var/artifacts/ab/abcdef.json"
+      }
+    ],
+    "budget": {
+      "max_model_calls": null,
+      "max_steps": 6,
+      "max_tokens": null,
+      "max_wall_seconds": 30.0
+    },
+    "budget_usage": {
+      "input_tokens": 0,
+      "model_attempts": 1,
+      "model_calls": 0,
+      "observation_requests": 0,
+      "output_tokens": 0,
+      "steps": 2,
+      "unconfirmed_calls": 1,
+      "unreported_calls": 0,
+      "wall_seconds": 0.2
+    },
+    "config": {},
+    "contract_version": "formal-lab-contracts/v2",
+    "created_at": "2026-09-27T12:00:00Z",
+    "extensions": {},
+    "matrix_id": null,
+    "model": {
+      "digest": {
+        "algorithm": "sha256",
+        "value": "3bbefb596964eb6d5b9af55fa10a8534942c729ab774ca58c5259ca9f70d2ac2"
+      },
+      "package_id": "lamp",
+      "version": 1
+    },
+    "negotiation": [
+      {
+        "compatible": true,
+        "granted": [
+          "env.pure_replayable"
+        ],
+        "missing_optional": [],
+        "missing_required": [],
+        "plugin_id": "formal-lab.env.ir-world",
+        "plugin_version": "1.0.0",
+        "reasons": [],
+        "role": "environment",
+        "verdict": "SUPPORTED"
+      }
+    ],
+    "objective": {
+      "accumulation": "until_goal",
+      "description": null,
+      "goal_property": "lit",
+      "horizon": 4,
+      "levels": [
+        {
+          "direction": "minimize",
+          "id": "cost",
+          "label": null,
+          "model_objective": "toggle_cost",
+          "terms": [],
+          "unit": "cost"
+        }
+      ],
+      "objective_id": "cheapest"
+    },
+    "participants": [
+      {
+        "actor_id": "a",
+        "budget": {
+          "max_model_calls": null,
+          "max_steps": 3,
+          "max_tokens": null,
+          "max_wall_seconds": null
+        },
+        "goal": "lit",
+        "label": null,
+        "role": "operator",
+        "scope": null,
+        "strategy": {
+          "config": {
+            "horizon": 3
+          },
+          "plugin": {
+            "plugin_id": "formal-lab.planner.z3-bounded",
+            "version": "2.0.0"
+          }
+        }
+      },
+      {
+        "actor_id": "b",
+        "budget": null,
+        "goal": null,
+        "label": null,
+        "role": "operator",
+        "scope": {
+          "action_types": [
+            "toggle"
+          ],
+          "params": {}
+        },
+        "strategy": {
+          "config": {},
+          "plugin": {
+            "plugin_id": "formal-lab.example.scheduling.edd-dispatch",
+            "version": "2.0.0"
+          }
+        }
+      }
+    ],
+    "platform": {
+      "source_revision": "0000000",
+      "version": "0.2.0"
+    },
+    "plugins": [
+      {
+        "descriptor_digest": {
+          "algorithm": "sha256",
+          "value": "5041bf1f713df204784353e82f6a4a535931cb64f1f4b4a5aeaffcb720918b22"
+        },
+        "interface": "ENVIRONMENT",
+        "interface_version": "2",
+        "plugin_id": "formal-lab.env.ir-world",
+        "role": "environment",
+        "version": "1.0.0"
+      },
+      {
+        "descriptor_digest": {
+          "algorithm": "sha256",
+          "value": "9a51a7767c3d6fbab05a874b052aa49174a280702a278208810f9cd1a9ef3afa"
+        },
+        "interface": "SEMANTIC_DRIVER",
+        "interface_version": "2",
+        "plugin_id": "formal-lab.driver.ir-finite",
+        "role": "driver",
+        "version": "1.0.0"
+      }
+    ],
+    "project_id": "prj_0001",
+    "release": null,
+    "rules": null,
+    "run_id": "run_0002",
+    "scenario": {
+      "budget": {
+        "max_model_calls": null,
+        "max_steps": 6,
+        "max_tokens": null,
+        "max_wall_seconds": 30.0
+      },
+      "contract_version": "formal-lab-contracts/v2",
+      "description": null,
+      "driver": null,
+      "environment": {
+        "config": {},
+        "plugin": {
+          "plugin_id": "formal-lab.env.ir-world",
+          "version": "1.0.0"
+        }
+      },
+      "extensions": {},
+      "model": {
+        "digest": {
+          "algorithm": "sha256",
+          "value": "3bbefb596964eb6d5b9af55fa10a8534942c729ab774ca58c5259ca9f70d2ac2"
+        },
+        "package_id": "lamp",
+        "version": 1
+      },
+      "name": "lamp, two participants",
+      "objective": {
+        "accumulation": "until_goal",
+        "description": null,
+        "goal_property": "lit",
+        "horizon": 4,
+        "levels": [
+          {
+            "direction": "minimize",
+            "id": "cost",
+            "label": null,
+            "model_objective": "toggle_cost",
+            "terms": [],
+            "unit": "cost"
+          }
+        ],
+        "objective_id": "cheapest"
+      },
+      "objectives": [
+        {
+          "description": null,
+          "metric_id": null,
+          "property_id": "lit"
+        }
+      ],
+      "participants": [
+        {
+          "actor_id": "a",
+          "budget": {
+            "max_model_calls": null,
+            "max_steps": 3,
+            "max_tokens": null,
+            "max_wall_seconds": null
+          },
+          "goal": "lit",
+          "label": null,
+          "role": "operator",
+          "scope": null,
+          "strategy": {
+            "config": {
+              "horizon": 3
+            },
+            "plugin": {
+              "plugin_id": "formal-lab.planner.z3-bounded",
+              "version": "2.0.0"
+            }
+          }
+        },
+        {
+          "actor_id": "b",
+          "budget": null,
+          "goal": null,
+          "label": null,
+          "role": "operator",
+          "scope": {
+            "action_types": [
+              "toggle"
+            ],
+            "params": {}
+          },
+          "strategy": {
+            "config": {},
+            "plugin": {
+              "plugin_id": "formal-lab.example.scheduling.edd-dispatch",
+              "version": "2.0.0"
+            }
+          }
+        }
+      ],
+      "release": null,
+      "revision": 1,
+      "rules": null,
+      "scenario_id": "lamp-two-actors",
+      "seed": 7,
+      "stop_conditions": [],
+      "termination": {
+        "actor_goals": "ALL",
+        "invariants": [
+          "few_toggles"
+        ],
+        "joint_goal": "lit",
+        "no_progress_limit": 4,
+        "on_no_action": "SKIP_ACTOR"
+      },
+      "turns": {
+        "conflict_policy": "REJECT_STALE",
+        "mode": "FIXED_TABLE",
+        "observation_timing": "ROUND_START",
+        "table": [
+          "a",
+          "b",
+          "b"
+        ]
+      }
+    },
+    "scenario_digest": {
+      "algorithm": "sha256",
+      "value": "023ed48c45be689d3f3a0c2f4383eed518adbee488556d186fd668a6121db102"
+    },
+    "seed": 7,
+    "source_run_id": null,
+    "status": "SUCCEEDED",
+    "status_reason": null,
+    "surprise": 1,
+    "termination": {
+      "actor_goals": "ALL",
+      "invariants": [
+        "few_toggles"
+      ],
+      "joint_goal": "lit",
+      "no_progress_limit": 4,
+      "on_no_action": "SKIP_ACTOR"
+    },
+    "termination_reason": "JOINT_GOAL_REACHED",
+    "turns": {
+      "conflict_policy": "REJECT_STALE",
+      "mode": "FIXED_TABLE",
+      "observation_timing": "ROUND_START",
+      "table": [
+        "a",
+        "b",
+        "b"
+      ]
+    }
+  },
+  "object": "RunManifest",
+  "reason": "core objects reject unknown fields"
+}

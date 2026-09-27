@@ -1,4 +1,4 @@
-"""Shared building blocks of formal-lab-contracts/v1."""
+"""Shared building blocks of formal-lab-contracts/v2 (the live contract; v1 is frozen in `formal_lab_contracts.v1`)."""
 
 from __future__ import annotations
 
@@ -9,8 +9,11 @@ from typing import Annotated, Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, StringConstraints, field_validator
 
-CONTRACT_VERSION = "formal-lab-contracts/v1"
-ContractVersion = Literal["formal-lab-contracts/v1"]
+CONTRACT_VERSION = "formal-lab-contracts/v2"
+CONTRACT_VERSION_V1 = "formal-lab-contracts/v1"
+# versions this code can read: v1 through the adapters in `formal_lab_contracts.compat`, v2 natively
+SUPPORTED_CONTRACT_VERSIONS = (CONTRACT_VERSION_V1, CONTRACT_VERSION)
+ContractVersion = Literal["formal-lab-contracts/v2"]
 
 # Scalar value carried by a state location, fact or action parameter.
 # bool is listed first so JSON true/false never degrades to int.
@@ -108,7 +111,8 @@ class ArtifactRef(ContractModel):
 class EvidenceRef(ContractModel):
     """Reference to something that supports a claim: an event, artifact, check or snapshot."""
 
-    kind: Literal["event", "artifact", "check", "snapshot", "operation", "model_call"]
+    kind: Literal["event", "artifact", "check", "snapshot", "operation", "model_call", "probe", "query_bundle",
+                  "release", "rule", "plan", "regression_case", "session"]
     id: str = Field(min_length=1)
     artifact: ArtifactRef | None = None
     note: str | None = None

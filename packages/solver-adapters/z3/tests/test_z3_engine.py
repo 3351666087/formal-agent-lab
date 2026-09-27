@@ -65,7 +65,8 @@ def test_unsupported_profile_feature():
     from formal_lab_model import ir_digest
 
     package = ModelPackage(package_id="p", version=1, frontend={"plugin_id": "x", "version": "1.0.0"},
-                           semantic_profile=ir.semantic_profile, digest=ir_digest(ir), ir=ir,
+                           semantic_profile=ir.semantic_profile, digest=ir_digest(ir),
+                           payload={"kind": "fal-ir", "ir": ir},
                            source={"format": "fal-ir-json/v1"}, created_at=datetime.now(UTC))
     res = V.check(package, q("GOAL_REACHABILITY", "lit", 3))
     assert res.verdict == "UNSUPPORTED" and res.unsupported.extension_point

@@ -1,0 +1,75 @@
+{
+  "$defs": {
+    "ActorGoalMode": {
+      "enum": [
+        "IGNORE",
+        "ALL",
+        "ANY"
+      ],
+      "title": "ActorGoalMode",
+      "type": "string"
+    },
+    "NoActionPolicy": {
+      "enum": [
+        "FAIL",
+        "SKIP_ACTOR",
+        "END"
+      ],
+      "title": "NoActionPolicy",
+      "type": "string"
+    }
+  },
+  "$id": "https://formal-lab.dev/contracts/v2/TerminationPolicy.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "When a run ends. Budget exhaustion always ends it; the rest is configured here (v1 stop conditions map to\n`joint_goal`, `invariants` and `on_no_action=FAIL`).",
+  "properties": {
+    "actor_goals": {
+      "$ref": "#/$defs/ActorGoalMode",
+      "default": "IGNORE"
+    },
+    "invariants": {
+      "description": "a violation ends the run as FAILED",
+      "items": {
+        "pattern": "^[A-Za-z_][A-Za-z0-9_]*$",
+        "type": "string"
+      },
+      "title": "Invariants",
+      "type": "array"
+    },
+    "joint_goal": {
+      "anyOf": [
+        {
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "property whose truth ends the run successfully",
+      "title": "Joint Goal"
+    },
+    "no_progress_limit": {
+      "anyOf": [
+        {
+          "minimum": 1,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "end with NO_PROGRESS after this many consecutive turns without a state change",
+      "title": "No Progress Limit"
+    },
+    "on_no_action": {
+      "$ref": "#/$defs/NoActionPolicy",
+      "default": "FAIL"
+    }
+  },
+  "title": "TerminationPolicy",
+  "type": "object"
+}

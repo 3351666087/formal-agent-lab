@@ -1,0 +1,74 @@
+{
+  "$defs": {
+    "ErrorCode": {
+      "enum": [
+        "INVALID_INPUT",
+        "VERSION_MISMATCH",
+        "UNSUPPORTED",
+        "TIMEOUT",
+        "RESULT_UNKNOWN",
+        "CANCELLED",
+        "RETRYABLE_FAILURE",
+        "NON_RETRYABLE_FAILURE",
+        "NOT_FOUND",
+        "CONFLICT"
+      ],
+      "title": "ErrorCode",
+      "type": "string"
+    },
+    "FieldError": {
+      "additionalProperties": false,
+      "properties": {
+        "message": {
+          "title": "Message",
+          "type": "string"
+        },
+        "path": {
+          "title": "Path",
+          "type": "string"
+        }
+      },
+      "required": [
+        "path",
+        "message"
+      ],
+      "title": "FieldError",
+      "type": "object"
+    }
+  },
+  "$id": "https://formal-lab.dev/contracts/v2/ErrorInfo.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "code": {
+      "$ref": "#/$defs/ErrorCode"
+    },
+    "details": {
+      "additionalProperties": true,
+      "title": "Details",
+      "type": "object"
+    },
+    "field_errors": {
+      "items": {
+        "$ref": "#/$defs/FieldError"
+      },
+      "title": "Field Errors",
+      "type": "array"
+    },
+    "message": {
+      "title": "Message",
+      "type": "string"
+    },
+    "retryable": {
+      "title": "Retryable",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "code",
+    "message",
+    "retryable"
+  ],
+  "title": "ErrorInfo",
+  "type": "object"
+}

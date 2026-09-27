@@ -1,0 +1,36 @@
+{
+  "$id": "https://formal-lab.dev/contracts/v2/TurnRef.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Position of one action in the interleaving: global step g, round r, and the actor's own step count.",
+  "properties": {
+    "actor_id": {
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:@/-]{0,254}$",
+      "title": "Actor Id",
+      "type": "string"
+    },
+    "actor_step": {
+      "minimum": 0,
+      "title": "Actor Step",
+      "type": "integer"
+    },
+    "global_step": {
+      "minimum": 0,
+      "title": "Global Step",
+      "type": "integer"
+    },
+    "round": {
+      "minimum": 0,
+      "title": "Round",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "global_step",
+    "round",
+    "actor_id",
+    "actor_step"
+  ],
+  "title": "TurnRef",
+  "type": "object"
+}

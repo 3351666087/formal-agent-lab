@@ -1,0 +1,341 @@
+{
+  "$defs": {
+    "ArtifactRef": {
+      "additionalProperties": false,
+      "description": "Pointer to a large object held by an ArtifactStore (never inlined into events).",
+      "properties": {
+        "digest": {
+          "$ref": "#/$defs/Digest"
+        },
+        "format_version": {
+          "minLength": 1,
+          "title": "Format Version",
+          "type": "string"
+        },
+        "media_type": {
+          "minLength": 3,
+          "title": "Media Type",
+          "type": "string"
+        },
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Name"
+        },
+        "size_bytes": {
+          "minimum": 0,
+          "title": "Size Bytes",
+          "type": "integer"
+        },
+        "uri": {
+          "description": "object location, e.g. file://… or s3://bucket/key",
+          "minLength": 1,
+          "title": "Uri",
+          "type": "string"
+        }
+      },
+      "required": [
+        "uri",
+        "media_type",
+        "size_bytes",
+        "digest",
+        "format_version"
+      ],
+      "title": "ArtifactRef",
+      "type": "object"
+    },
+    "Digest": {
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": {
+          "const": "sha256",
+          "default": "sha256",
+          "title": "Algorithm",
+          "type": "string"
+        },
+        "value": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "Digest",
+      "type": "object"
+    },
+    "EvidenceRef": {
+      "additionalProperties": false,
+      "description": "Reference to something that supports a claim: an event, artifact, check or snapshot.",
+      "properties": {
+        "artifact": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ArtifactRef"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "id": {
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "event",
+            "artifact",
+            "check",
+            "snapshot",
+            "operation",
+            "model_call",
+            "probe",
+            "query_bundle",
+            "release",
+            "rule",
+            "plan",
+            "regression_case",
+            "session"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Note"
+        }
+      },
+      "required": [
+        "kind",
+        "id"
+      ],
+      "title": "EvidenceRef",
+      "type": "object"
+    },
+    "Fact": {
+      "additionalProperties": false,
+      "properties": {
+        "observed_at_step": {
+          "minimum": 0,
+          "title": "Observed At Step",
+          "type": "integer"
+        },
+        "path": {
+          "description": "state location path, e.g. op_status[o1_cut]",
+          "title": "Path",
+          "type": "string"
+        },
+        "source": {
+          "default": "DIRECT",
+          "enum": [
+            "DIRECT",
+            "DELAYED"
+          ],
+          "title": "Source",
+          "type": "string"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "title": "Value"
+        }
+      },
+      "required": [
+        "path",
+        "value",
+        "observed_at_step"
+      ],
+      "title": "Fact",
+      "type": "object"
+    },
+    "ObservationTiming": {
+      "enum": [
+        "TURN_START",
+        "ROUND_START"
+      ],
+      "title": "ObservationTiming",
+      "type": "string"
+    },
+    "TurnRef": {
+      "additionalProperties": false,
+      "description": "Position of one action in the interleaving: global step g, round r, and the actor's own step count.",
+      "properties": {
+        "actor_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:@/-]{0,254}$",
+          "title": "Actor Id",
+          "type": "string"
+        },
+        "actor_step": {
+          "minimum": 0,
+          "title": "Actor Step",
+          "type": "integer"
+        },
+        "global_step": {
+          "minimum": 0,
+          "title": "Global Step",
+          "type": "integer"
+        },
+        "round": {
+          "minimum": 0,
+          "title": "Round",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "global_step",
+        "round",
+        "actor_id",
+        "actor_step"
+      ],
+      "title": "TurnRef",
+      "type": "object"
+    },
+    "UnknownItem": {
+      "additionalProperties": false,
+      "properties": {
+        "last_known": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Fact"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "path": {
+          "title": "Path",
+          "type": "string"
+        },
+        "reason": {
+          "enum": [
+            "OBSERVATION_DELAY",
+            "NOT_OBSERVABLE",
+            "NOT_YET_OBSERVED"
+          ],
+          "title": "Reason",
+          "type": "string"
+        }
+      },
+      "required": [
+        "path",
+        "reason"
+      ],
+      "title": "UnknownItem",
+      "type": "object"
+    }
+  },
+  "$id": "https://formal-lab.dev/contracts/v2/Observation.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "actor_id": {
+      "title": "Actor Id",
+      "type": "string"
+    },
+    "evidence": {
+      "items": {
+        "$ref": "#/$defs/EvidenceRef"
+      },
+      "title": "Evidence",
+      "type": "array"
+    },
+    "facts": {
+      "items": {
+        "$ref": "#/$defs/Fact"
+      },
+      "title": "Facts",
+      "type": "array"
+    },
+    "requested_paths": {
+      "description": "locations observed fresh on request (OBSERVE_MORE, v2)",
+      "items": {
+        "type": "string"
+      },
+      "title": "Requested Paths",
+      "type": "array"
+    },
+    "run_id": {
+      "title": "Run Id",
+      "type": "string"
+    },
+    "semantics": {
+      "default": "Facts are what the actor observed (possibly stale, see observed_at_step); unknowns are locations whose current value the actor cannot know at this step. The environment truth state is a separate object that agents never receive.",
+      "title": "Semantics",
+      "type": "string"
+    },
+    "state_revision": {
+      "description": "world revision the observation reflects",
+      "minimum": 0,
+      "title": "State Revision",
+      "type": "integer"
+    },
+    "step": {
+      "description": "logical step at which the observation is taken",
+      "minimum": 0,
+      "title": "Step",
+      "type": "integer"
+    },
+    "timing": {
+      "$ref": "#/$defs/ObservationTiming",
+      "default": "TURN_START"
+    },
+    "turn": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/TurnRef"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "turn the observation was taken for (v2)"
+    },
+    "unknowns": {
+      "items": {
+        "$ref": "#/$defs/UnknownItem"
+      },
+      "title": "Unknowns",
+      "type": "array"
+    }
+  },
+  "required": [
+    "run_id",
+    "actor_id",
+    "step",
+    "state_revision",
+    "facts"
+  ],
+  "title": "Observation",
+  "type": "object"
+}

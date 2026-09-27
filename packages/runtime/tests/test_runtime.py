@@ -38,13 +38,36 @@ def test_registry_discovers_builtin_plugins_via_entry_points(reg):
         reg.get(("formal-lab.planner.nope", "1.0.0"))
 
 
-def test_registry_rejects_incompatible_interface_version(reg):
-    d = reg.get(("formal-lab.eval.generic", "1.0.0")).descriptor.model_copy(
-        update={"plugin_id": "x.y", "interface_version": "2"})
+def test_registry_interface_and_contract_versions(reg):
+    """v1 plugins (interface 1, contract v1) keep registering; unknown versions and v1-declared v2-only interfaces
+    are refused; the config schema itself must be a valid JSON Schema."""
     from formal_lab_runtime import PluginRegistry
 
+    base = reg.get(("formal-lab.eval.generic", "1.0.0")).descriptor
+    fresh = PluginRegistry()
+    v1_plugin = base.model_copy(update={"plugin_id": "x.v1", "interface_version": "1",
+                                        "contract_version": "formal-lab-contracts/v1"})
+    fresh.register(PluginRegistration(v1_plugin, lambda c, s: None))
     with pytest.raises(VersionMismatch):
-        PluginRegistry().register(PluginRegistration(d, lambda c, s: None))
+        fresh.register(PluginRegistration(base.model_copy(update={"plugin_id": "x.y", "interface_version": "3"}),
+                                          lambda c, s: None))
+    driver_v1 = base.model_copy(update={"plugin_id": "x.drv", "interface": "SEMANTIC_DRIVER", "interface_version": "1"})
+    with pytest.raises(VersionMismatch):
+        fresh.register(PluginRegistration(driver_v1, lambda c, s: None))
+    from formal_lab_contracts.errors import InvalidInput
+
+    with pytest.raises(InvalidInput):
+        fresh.register(PluginRegistration(base.model_copy(update={"plugin_id": "x.bad",
+                                                                  "config_schema": {"type": "no-such-type"}}),
+                                          lambda c, s: None))
+
+
+def test_registry_resolves_semver_compatible_versions(reg):
+    """A scenario that names ir-world 1.0.0 runs on the installed, backward-compatible 1.1.0."""
+    assert reg.resolve(("formal-lab.env.ir-world", "1.0.0")).descriptor.version == "1.1.0"
+    with pytest.raises(NotFound):
+        reg.resolve(("formal-lab.env.ir-world", "2.0.0"))
+    assert reg.driver_for("deterministic_finite_v1").descriptor.plugin_id == "formal-lab.driver.ir-finite"
 
 
 def test_manifest_pins_versions_and_budget_dimensions(pkg, reg):

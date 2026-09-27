@@ -1,0 +1,125 @@
+{
+  "instance": {
+    "budget": {
+      "max_model_calls": null,
+      "max_steps": 6,
+      "max_tokens": null,
+      "max_wall_seconds": 30.0
+    },
+    "contract_version": "formal-lab-contracts/v2",
+    "description": null,
+    "driver": null,
+    "environment": {
+      "config": {},
+      "plugin": {
+        "plugin_id": "formal-lab.env.ir-world",
+        "version": "1.0.0"
+      }
+    },
+    "extensions": {},
+    "model": {
+      "digest": {
+        "algorithm": "sha256",
+        "value": "3bbefb596964eb6d5b9af55fa10a8534942c729ab774ca58c5259ca9f70d2ac2"
+      },
+      "package_id": "lamp",
+      "version": 1
+    },
+    "name": "lamp, two participants",
+    "objective": {
+      "accumulation": "until_goal",
+      "description": null,
+      "goal_property": "lit",
+      "horizon": 4,
+      "levels": [
+        {
+          "direction": "minimize",
+          "id": "cost",
+          "label": null,
+          "model_objective": "toggle_cost",
+          "terms": [],
+          "unit": "cost"
+        }
+      ],
+      "objective_id": "cheapest"
+    },
+    "objectives": [
+      {
+        "description": null,
+        "metric_id": null,
+        "property_id": "lit"
+      }
+    ],
+    "participants": [
+      {
+        "actor_id": "a",
+        "budget": {
+          "max_model_calls": null,
+          "max_steps": 3,
+          "max_tokens": null,
+          "max_wall_seconds": null
+        },
+        "goal": "lit",
+        "label": null,
+        "role": "operator",
+        "scope": null,
+        "strategy": {
+          "config": {
+            "horizon": 3
+          },
+          "plugin": {
+            "plugin_id": "formal-lab.planner.z3-bounded",
+            "version": "2.0.0"
+          }
+        }
+      },
+      {
+        "actor_id": "a",
+        "budget": null,
+        "goal": null,
+        "label": null,
+        "role": "operator",
+        "scope": {
+          "action_types": [
+            "toggle"
+          ],
+          "params": {}
+        },
+        "strategy": {
+          "config": {},
+          "plugin": {
+            "plugin_id": "formal-lab.example.scheduling.edd-dispatch",
+            "version": "2.0.0"
+          }
+        }
+      }
+    ],
+    "release": null,
+    "revision": 1,
+    "rules": null,
+    "scenario_id": "lamp-two-actors",
+    "seed": 7,
+    "stop_conditions": [],
+    "termination": {
+      "actor_goals": "ALL",
+      "invariants": [
+        "few_toggles"
+      ],
+      "joint_goal": "lit",
+      "no_progress_limit": 4,
+      "on_no_action": "SKIP_ACTOR"
+    },
+    "turns": {
+      "conflict_policy": "REJECT_STALE",
+      "mode": "FIXED_TABLE",
+      "observation_timing": "ROUND_START",
+      "table": [
+        "a",
+        "b",
+        "b"
+      ]
+    }
+  },
+  "object": "ScenarioManifest",
+  "reason": "participant actor ids are unique"
+}

@@ -1,6 +1,8 @@
-"""Generate contracts/v1 JSON Schemas and the contract digest from the Pydantic source of truth.
+"""Generate contracts/v2 JSON Schemas and the contract digest from the Pydantic source of truth.
 
-    python -m formal_lab_contracts.schema_export --out contracts/v1
+    python -m formal_lab_contracts.schema_export --out contracts/v2 --v1-out contracts/v1
+
+contracts/v1 is regenerated from the frozen `formal_lab_contracts.v1` sub-package (it must never change).
 """
 
 from __future__ import annotations
@@ -13,10 +15,10 @@ from pathlib import Path
 from pydantic import BaseModel
 from pydantic.json_schema import models_json_schema
 
-from . import capabilities, errors, ir, objects
+from . import errors, execution, governance, ir, kernel, objects
 from .common import CONTRACT_VERSION, ArtifactRef, EvidenceRef, Extension
 
-# The frozen objects (section 4 of the phase-1 task book) followed by supporting types.
+# The objects named in the phase-1 task book (v2 content, same names and meaning) …
 FROZEN_OBJECTS: list[type[BaseModel]] = [
     objects.PluginDescriptor,
     objects.ModelPackage,
@@ -32,21 +34,52 @@ FROZEN_OBJECTS: list[type[BaseModel]] = [
     objects.MetricResult,
     objects.RunManifest,
 ]
+# … the objects introduced by phase 2 …
+V2_OBJECTS: list[type[BaseModel]] = [
+    kernel.ObjectiveSpec,
+    kernel.TurnPolicy,
+    kernel.TerminationPolicy,
+    kernel.AssumptionSet,
+    execution.BeliefState,
+    execution.TurnState,
+    execution.TaskPlan,
+    execution.PlannerCheckpoint,
+    execution.EnvironmentSession,
+    execution.OperationRecord,
+    execution.StageRecord,
+    execution.ProbeResult,
+    execution.QueryBundle,
+    governance.RuleSet,
+    governance.RuleEvaluation,
+    governance.RuleDecision,
+    governance.ModelReleaseRecord,
+    governance.RegressionCase,
+    governance.MatrixCellSpec,
+]
+# … and supporting types.
 SUPPORTING: list[type[BaseModel]] = [
     ir.ModelIR,
+    objects.IRPayload,
+    objects.NamespacedPayload,
     objects.CheckQuery,
     objects.PlanningContext,
     objects.CandidateAction,
     objects.EnvironmentSnapshot,
-    objects.EpisodeRecord,
+    execution.StepRecord,
+    execution.EpisodeRecord,
     objects.BudgetUsage,
     errors.ErrorInfo,
-    capabilities.CapabilityRequirement,
-    capabilities.CapabilityNegotiation,
+    kernel.CapabilityRequirement,
+    kernel.CapabilityNegotiation,
+    kernel.TurnRef,
+    kernel.OptimizationResult,
+    kernel.RobustnessResult,
+    kernel.ObservationRequest,
     EvidenceRef,
     Extension,
 ]
-ALL_MODELS = FROZEN_OBJECTS + SUPPORTING
+ALL_MODELS = FROZEN_OBJECTS + V2_OBJECTS + SUPPORTING
+BASE_URL = "https://formal-lab.dev/contracts/v2"
 
 
 def _dump(obj: object) -> str:
@@ -59,27 +92,26 @@ def build_schemas() -> dict[str, str]:
     for model in ALL_MODELS:
         schema = model.model_json_schema(mode="validation")
         schema["$schema"] = "https://json-schema.org/draft/2020-12/schema"
-        schema["$id"] = f"https://formal-lab.dev/contracts/v1/{model.__name__}.schema.json"
+        schema["$id"] = f"{BASE_URL}/{model.__name__}.schema.json"
         files[f"schemas/{model.__name__}.schema.json"] = _dump(schema)
 
     _, bundle = models_json_schema([(m, "validation") for m in ALL_MODELS], ref_template="#/$defs/{model}")
-    bundle = {
+    files["bundle.schema.json"] = _dump({
         "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "$id": "https://formal-lab.dev/contracts/v1/bundle.schema.json",
-        "title": "FormalLabContractsV1",
+        "$id": f"{BASE_URL}/bundle.schema.json",
+        "title": "FormalLabContractsV2",
         "description": f"{CONTRACT_VERSION}: all contract types (generated, do not edit)",
         "type": "object",
         "properties": {m.__name__: {"$ref": f"#/$defs/{m.__name__}"} for m in ALL_MODELS},
         "$defs": bundle["$defs"],
-    }
-    files["bundle.schema.json"] = _dump(bundle)
+    })
     # Serialization view: what the platform emits (fields with defaults are always present). TypeScript types
     # for consumers are generated from this view; validators use the validation bundle above.
     _, out_bundle = models_json_schema([(m, "serialization") for m in ALL_MODELS], ref_template="#/$defs/{model}")
     files["bundle.serialization.schema.json"] = _dump({
         "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "$id": "https://formal-lab.dev/contracts/v1/bundle.serialization.schema.json",
-        "title": "FormalLabContractsV1",
+        "$id": f"{BASE_URL}/bundle.serialization.schema.json",
+        "title": "FormalLabContractsV2",
         "description": f"{CONTRACT_VERSION}: all contract types as serialized by the platform (generated, do not edit)",
         "type": "object",
         "properties": {m.__name__: {"$ref": f"#/$defs/{m.__name__}"} for m in ALL_MODELS},
@@ -88,14 +120,27 @@ def build_schemas() -> dict[str, str]:
     files["objects.json"] = _dump(
         {
             "contract_version": CONTRACT_VERSION,
+            "compatible_with": ["formal-lab-contracts/v1 (read through formal_lab_contracts.compat)"],
             "frozen_objects": [m.__name__ for m in FROZEN_OBJECTS],
+            "v2_objects": [m.__name__ for m in V2_OBJECTS],
             "supporting_types": [m.__name__ for m in SUPPORTING],
             "error_codes": [c.value for c in errors.ErrorCode],
+            "plugin_interfaces": [i.value for i in objects.PluginInterface],
+            "interface_versions": list(objects.SUPPORTED_INTERFACE_VERSIONS),
             "query_kinds": [k.value for k in objects.QueryKind],
             "search_verdicts": [v.value for v in objects.SearchVerdict],
             "precondition_verdicts": [v.value for v in objects.PreconditionVerdict],
+            "optimization_statuses": [v.value for v in kernel.OptimizationStatus],
+            "robustness_verdicts": [v.value for v in kernel.RobustnessVerdict],
             "run_statuses": [s.value for s in objects.RunStatus],
+            "termination_reasons": [r.value for r in kernel.TerminationReason],
             "event_types": [e.value for e in objects.EventType],
+            "execution_stages": [s.value for s in kernel.ExecutionStage],
+            "operation_states": [s.value for s in kernel.OperationState],
+            "turn_modes": [m.value for m in kernel.TurnMode],
+            "provenance": [p.value for p in kernel.Provenance],
+            "rule_outcomes": [o.value for o in kernel.RuleOutcome],
+            "rule_results": [r.value for r in governance.RuleResult],
         }
     )
     return files
@@ -132,8 +177,14 @@ def write(out: Path) -> dict[str, object]:
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--out", type=Path, default=Path("contracts/v1"))
+    parser.add_argument("--out", type=Path, default=Path("contracts/v2"))
+    parser.add_argument("--v1-out", type=Path, default=None, help="also regenerate the frozen v1 contract here")
     args = parser.parse_args()
+    if args.v1_out is not None:
+        from .v1 import schema_export as v1export
+
+        d1 = v1export.write(args.v1_out)
+        print(f"{v1export.CONTRACT_VERSION} digest sha256:{d1['digest']} ({len(d1['files'])} files, frozen)")
     digest = write(args.out)
     print(f"{CONTRACT_VERSION} digest sha256:{digest['digest']} ({len(digest['files'])} files)")
 

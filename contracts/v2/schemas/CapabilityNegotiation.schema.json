@@ -1,0 +1,86 @@
+{
+  "$id": "https://formal-lab.dev/contracts/v2/CapabilityNegotiation.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "compatible": {
+      "title": "Compatible",
+      "type": "boolean"
+    },
+    "granted": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Granted",
+      "type": "array"
+    },
+    "missing_optional": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Missing Optional",
+      "type": "array"
+    },
+    "missing_required": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Missing Required",
+      "type": "array"
+    },
+    "plugin_id": {
+      "title": "Plugin Id",
+      "type": "string"
+    },
+    "plugin_version": {
+      "title": "Plugin Version",
+      "type": "string"
+    },
+    "reasons": {
+      "description": "human-readable explanation (v2)",
+      "items": {
+        "type": "string"
+      },
+      "title": "Reasons",
+      "type": "array"
+    },
+    "role": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "role of the plugin in the run (v2)",
+      "title": "Role"
+    },
+    "verdict": {
+      "anyOf": [
+        {
+          "enum": [
+            "SUPPORTED",
+            "PARTIAL",
+            "UNSUPPORTED"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "SUPPORTED: all granted; PARTIAL: optional ones missing; UNSUPPORTED (v2)",
+      "title": "Verdict"
+    }
+  },
+  "required": [
+    "plugin_id",
+    "plugin_version",
+    "compatible"
+  ],
+  "title": "CapabilityNegotiation",
+  "type": "object"
+}

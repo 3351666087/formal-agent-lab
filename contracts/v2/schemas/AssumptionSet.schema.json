@@ -1,0 +1,126 @@
+{
+  "$defs": {
+    "AssumptionItem": {
+      "additionalProperties": false,
+      "properties": {
+        "as_of_step": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "As Of Step"
+        },
+        "path": {
+          "title": "Path",
+          "type": "string"
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reason"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "value the plan assumed (null for free UNKNOWN locations)",
+          "title": "Value"
+        }
+      },
+      "required": [
+        "path",
+        "provenance",
+        "value"
+      ],
+      "title": "AssumptionItem",
+      "type": "object"
+    },
+    "Digest": {
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": {
+          "const": "sha256",
+          "default": "sha256",
+          "title": "Algorithm",
+          "type": "string"
+        },
+        "value": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "Digest",
+      "type": "object"
+    },
+    "Provenance": {
+      "enum": [
+        "KNOWN",
+        "STALE",
+        "UNKNOWN",
+        "ASSUMED_INITIAL"
+      ],
+      "title": "Provenance",
+      "type": "string"
+    }
+  },
+  "$id": "https://formal-lab.dev/contracts/v2/AssumptionSet.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Everything a belief-based conclusion assumed beyond fresh observations (P2-025).",
+  "properties": {
+    "counts": {
+      "additionalProperties": {
+        "type": "integer"
+      },
+      "description": "provenance → number of locations",
+      "title": "Counts",
+      "type": "object"
+    },
+    "digest": {
+      "$ref": "#/$defs/Digest"
+    },
+    "items": {
+      "items": {
+        "$ref": "#/$defs/AssumptionItem"
+      },
+      "title": "Items",
+      "type": "array"
+    }
+  },
+  "required": [
+    "digest"
+  ],
+  "title": "AssumptionSet",
+  "type": "object"
+}
