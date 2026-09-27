@@ -224,7 +224,7 @@ def test_extremum_quantifiers_agree_with_the_interpreter():
         ir = ModelIR.model_validate(data)
         it = Interpreter(check_model(ir))
         for prop in [p["id"] for p in data["properties"]]:
-            ref = bfs(it, it.initial_state(), lambda s, p=prop: it.holds(p, s), max_depth=3)
+            ref = bfs(it, it.initial_state(), lambda s, p=prop, it=it: it.holds(p, s), max_depth=3)
             res = V.check(pkg(ir), CheckQuery(kind="GOAL_REACHABILITY", property_id=prop,
                                               bound={"max_steps": 3, "timeout_ms": 10_000}))
             assert (res.verdict == "WITNESS") == ref.found, (op, prop)
