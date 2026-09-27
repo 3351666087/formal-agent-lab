@@ -1,0 +1,3246 @@
+[
+  {
+    "actor_id": null,
+    "causal_parents": [],
+    "event_id": "evt_ae33339a9335113679313b6b",
+    "event_type": "RUN_CREATED",
+    "idempotency_key": "run_phase1_normal:run:created",
+    "logical_step": null,
+    "payload": {
+      "manifest": {
+        "artifacts": [],
+        "budget": {
+          "max_model_calls": 80,
+          "max_steps": 60,
+          "max_tokens": 800000,
+          "max_wall_seconds": 600.0
+        },
+        "budget_usage": {
+          "input_tokens": 0,
+          "model_calls": 0,
+          "output_tokens": 0,
+          "steps": 0,
+          "wall_seconds": 0.0
+        },
+        "config": {
+          "budget_dimensions": [
+            "steps",
+            "wall_seconds"
+          ]
+        },
+        "contract_version": "formal-lab-contracts/v1",
+        "created_at": "2026-09-27T03:19:19.660405Z",
+        "extensions": {},
+        "matrix_id": null,
+        "model": {
+          "digest": {
+            "algorithm": "sha256",
+            "value": "27ef54c6843626d6358ef69ec6529c77a897ffac22914c16694e277ca760bb8a"
+          },
+          "package_id": "neutral-scheduling",
+          "version": 1
+        },
+        "participants": [
+          {
+            "actor_id": "dispatcher",
+            "role": "dispatcher",
+            "strategy": {
+              "config": {},
+              "plugin": {
+                "plugin_id": "formal-lab.example.scheduling.edd-dispatch",
+                "version": "1.0.0"
+              }
+            }
+          }
+        ],
+        "platform": {
+          "source_revision": "46400ad8d3c882bcf62dc9fffded3152fc5c35b0+dirty",
+          "version": "0.1.0"
+        },
+        "plugins": [
+          {
+            "descriptor_digest": {
+              "algorithm": "sha256",
+              "value": "e43a067c86ffda04615cc7b6a78bcba3457ea1f46e67bf3d7e929823181eb4e9"
+            },
+            "interface": "ENVIRONMENT",
+            "interface_version": "1",
+            "plugin_id": "formal-lab.env.ir-world",
+            "role": "environment",
+            "version": "1.0.0"
+          },
+          {
+            "descriptor_digest": {
+              "algorithm": "sha256",
+              "value": "3e5b55208a345600124b864c140b826939b382012b83fc9f43aad193c7dc139c"
+            },
+            "interface": "PLANNER",
+            "interface_version": "1",
+            "plugin_id": "formal-lab.example.scheduling.edd-dispatch",
+            "role": "strategy:dispatcher",
+            "version": "1.0.0"
+          },
+          {
+            "descriptor_digest": {
+              "algorithm": "sha256",
+              "value": "6d91e714b610390a2545499ec5ffcff48c7515dde9007b8ceebc5c1a60cb8860"
+            },
+            "interface": "VERIFIER",
+            "interface_version": "1",
+            "plugin_id": "formal-lab.verifier.z3-bmc",
+            "role": "verifier",
+            "version": "1.0.0"
+          },
+          {
+            "descriptor_digest": {
+              "algorithm": "sha256",
+              "value": "000c2a0a9a656df0dbcbe67785875824cc6ed555289c604a1371cd4b0626232b"
+            },
+            "interface": "EVALUATOR",
+            "interface_version": "1",
+            "plugin_id": "formal-lab.eval.generic",
+            "role": "evaluator:0",
+            "version": "1.0.0"
+          }
+        ],
+        "project_id": "prj_phase1",
+        "run_id": "run_phase1_normal",
+        "scenario": {
+          "budget": {
+            "max_model_calls": 80,
+            "max_steps": 60,
+            "max_tokens": 800000,
+            "max_wall_seconds": 600.0
+          },
+          "contract_version": "formal-lab-contracts/v1",
+          "description": "Adequate machines and resources; processing times vary ±1 per seed.",
+          "environment": {
+            "config": {
+              "seeded_variation": [
+                {
+                  "delta_max": 1,
+                  "delta_min": -1,
+                  "var": "proc_time"
+                }
+              ]
+            },
+            "plugin": {
+              "plugin_id": "formal-lab.env.ir-world",
+              "version": "1.0.0"
+            }
+          },
+          "extensions": {},
+          "model": {
+            "digest": {
+              "algorithm": "sha256",
+              "value": "27ef54c6843626d6358ef69ec6529c77a897ffac22914c16694e277ca760bb8a"
+            },
+            "package_id": "neutral-scheduling",
+            "version": 1
+          },
+          "name": "正常调度",
+          "objectives": [
+            {
+              "description": "complete all orders",
+              "metric_id": null,
+              "property_id": "all_done"
+            },
+            {
+              "description": "minimise simulated delay cost",
+              "metric_id": "delay_cost",
+              "property_id": null
+            }
+          ],
+          "participants": [
+            {
+              "actor_id": "dispatcher",
+              "role": "dispatcher",
+              "strategy": {
+                "config": {},
+                "plugin": {
+                  "plugin_id": "formal-lab.example.scheduling.edd-dispatch",
+                  "version": "1.0.0"
+                }
+              }
+            }
+          ],
+          "revision": 1,
+          "scenario_id": "sched-normal",
+          "seed": 1,
+          "stop_conditions": [
+            {
+              "kind": "GOAL_REACHED",
+              "property_id": "all_done"
+            },
+            {
+              "kind": "NO_APPLICABLE_ACTION",
+              "property_id": null
+            }
+          ]
+        },
+        "scenario_digest": {
+          "algorithm": "sha256",
+          "value": "19ec17a2200c92f2ccde20c2fe4c127937b3ed4790e01287dedce16a8f6e249f"
+        },
+        "seed": 1,
+        "source_run_id": null,
+        "status": "CREATED",
+        "status_reason": null
+      }
+    },
+    "payload_schema": "formal-lab/events/RUN_CREATED@1",
+    "run_id": "run_phase1_normal",
+    "seq": 1,
+    "wall_time": "2026-09-27T03:19:22.830873Z"
+  },
+  {
+    "actor_id": null,
+    "causal_parents": [
+      "evt_ae33339a9335113679313b6b"
+    ],
+    "event_id": "evt_aabe06443447ac25d4dff3ff",
+    "event_type": "RUN_QUEUED",
+    "idempotency_key": "run_phase1_normal:run:queued",
+    "logical_step": null,
+    "payload": {
+      "runner": "local"
+    },
+    "payload_schema": "formal-lab/events/RUN_QUEUED@1",
+    "run_id": "run_phase1_normal",
+    "seq": 2,
+    "wall_time": "2026-09-27T03:19:22.830884Z"
+  },
+  {
+    "actor_id": null,
+    "causal_parents": [
+      "evt_aabe06443447ac25d4dff3ff"
+    ],
+    "event_id": "evt_3c25d46abc9e5df5c020b097",
+    "event_type": "RUN_STARTED",
+    "idempotency_key": "run_phase1_normal:run:started",
+    "logical_step": 0,
+    "payload": {
+      "budget": {
+        "max_model_calls": 80,
+        "max_steps": 60,
+        "max_tokens": 800000,
+        "max_wall_seconds": 600.0
+      },
+      "budget_dimensions": [
+        "steps",
+        "wall_seconds"
+      ],
+      "manifest_digest": "a0b38aeb278832fd2f9b976f0e569c6d0f021e02913dc5aa856beaf97f326134",
+      "seed": 1
+    },
+    "payload_schema": "formal-lab/events/RUN_STARTED@1",
+    "run_id": "run_phase1_normal",
+    "seq": 3,
+    "wall_time": "2026-09-27T03:19:22.830888Z"
+  },
+  {
+    "actor_id": "dispatcher",
+    "causal_parents": [
+      "evt_3c25d46abc9e5df5c020b097"
+    ],
+    "event_id": "evt_67492d3c8c6ec9f9bae174c3",
+    "event_type": "OBSERVATION",
+    "idempotency_key": "run_phase1_normal:s0:observation",
+    "logical_step": 0,
+    "payload": {
+      "observation": {
+        "actor_id": "dispatcher",
+        "evidence": [
+          {
+            "artifact": null,
+            "id": "run_phase1_normal:env@0",
+            "kind": "snapshot",
+            "note": "truth revision 0"
+          }
+        ],
+        "facts": [
+          {
+            "observed_at_step": 0,
+            "path": "phase[o1_cut]",
+            "source": "DIRECT",
+            "value": "waiting"
+          },
+          {
+            "observed_at_step": 0,
+            "path": "phase[o1_weld]",
+            "source": "DIRECT",
+            "value": "waiting"
+          },
+          {
+            "observed_at_step": 0,
+            "path": "phase[o2_cut]",
+            "source": "DIRECT",
+            "value": "waiting"
+          },
+          {
+            "observed_at_step": 0,
+            "path": "phase[o2_paint]",
+            "source": "DIRECT",
+            "value": "waiting"
+          },
+          {
+            "observed_at_step": 0,
+            "path": "phase[o3_cut]",
+            "source": "DIRECT",
+            "value": "waiting"
+          },
+          {
+            "observed_at_step": 0,
+            "path": "phase[o3_weld]",
+            "source": "DIRECT",
+            "value": "waiting"
+          },
+          {
+            "observed_at_step": 0,
+            "path": "phase[o3_paint]",
+            "source": "DIRECT",
+            "value": "waiting"
+          },
+          {
+            "observed_at_step": 0,
+            "path": "on[o1_cut,m1]",
+            "source": "DIRECT",
+            "value": false
+          },
+          {
+            "observed_at_step": 0,
+            "path": "on[o1_cut,m2]",
+            "source": "DIRECT",
+            "value": false
+          },
+          {
+            "observed_at_step": 0,
+            "path": "on[o1_cut,m3]",
+            "source": "DIRECT",
+            "value": false
+          },
+          {
+            "observed_at_step": 0,
+            "path": "on[o1_weld,m1]",
+            "source": "DIRECT",
+            "value": false
+          },
+          {
+            "observed_at_step": 0,
+            "path": "on[o1_weld,m2]",
+            "source": "DIRECT",
+            "value": false
+          },
+          {
+            "observed_at_step": 0,
+            "path": "on[o1_weld,m3]",
+            "source": "DIRECT",
+            "value": false
+          },
+          {
+            "observed_at_step": 0,
+            "path": "on[o2_cut,m1]",
+            "source": "DIRECT",
+            "value": false
+          },
+          {
+            "observed_at_step": 0,
+            "path": "on[o2_cut,m2]",
+            "source": "DIRECT",
+            "value": false
+          },
+          {
+            "observed_at_step": 0,
+            "path": "on[o2_cut,m3]",
+            "source": "DIRECT",
+            "value": false
+          },
+          {
+            "observed_at_step": 0,
+            "path": "on[o2_paint,m1]",
+            "source": "DIRECT",
+            "value": false
+          },
+          {
+            "observed_at_step": 0,
+            "path": "on[o2_paint,m2]",
+            "source": "DIRECT",
+            "value": false
+          },
+          {
+            "observed_at_step": 0,
+            "path": "on[o2_paint,m3]",
+            "source": "DIRECT",
+            "value": false
+          },
+          {
+            "observed_at_step": 0,
+            "path": "on[o3_cut,m1]",
+            "source": "DIRECT",
+            "value": false
+          },
+          {
+            "observed_at_step": 0,
+            "path": "on[o3_cut,m2]",
+            "source": "DIRECT",
+            "value": false
+          },
+          {
+            "observed_at_step": 0,
+            "path": "on[o3_cut,m3]",
+            "source": "DIRECT",
+            "value": false
+          },
+          {
+            "observed_at_step": 0,
+            "path": "on[o3_weld,m1]",
+            "source": "DIRECT",
+            "value": false
+          },
+          {
+            "observed_at_step": 0,
+            "path": "on[o3_weld,m2]",
+            "source": "DIRECT",
+            "value": false
+          },
+          {
+            "observed_at_step": 0,
+            "path": "on[o3_weld,m3]",
+            "source": "DIRECT",
+            "value": false
+          },
+          {
+            "observed_at_step": 0,
+            "path": "on[o3_paint,m1]",
+            "source": "DIRECT",
+            "value": false
+          },
+          {
+            "observed_at_step": 0,
+            "path": "on[o3_paint,m2]",
+            "source": "DIRECT",
+            "value": false
+          },
+          {
+            "observed_at_step": 0,
+            "path": "on[o3_paint,m3]",
+            "source": "DIRECT",
+            "value": false
+          },
+          {
+            "observed_at_step": 0,
+            "path": "remaining[o1_cut]",
+            "source": "DIRECT",
+            "value": 0
+          },
+          {
+            "observed_at_step": 0,
+            "path": "remaining[o1_weld]",
+            "source": "DIRECT",
+            "value": 0
+          },
+          {
+            "observed_at_step": 0,
+            "path": "remaining[o2_cut]",
+            "source": "DIRECT",
+            "value": 0
+          },
+          {
+            "observed_at_step": 0,
+            "path": "remaining[o2_paint]",
+            "source": "DIRECT",
+            "value": 0
+          },
+          {
+            "observed_at_step": 0,
+            "path": "remaining[o3_cut]",
+            "source": "DIRECT",
+            "value": 0
+          },
+          {
+            "observed_at_step": 0,
+            "path": "remaining[o3_weld]",
+            "source": "DIRECT",
+            "value": 0
+          },
+          {
+            "observed_at_step": 0,
+            "path": "remaining[o3_paint]",
+            "source": "DIRECT",
+            "value": 0
+          },
+          {
+            "observed_at_step": 0,
+            "path": "proc_time[o1_cut]",
+            "source": "DIRECT",
+            "value": 1
+          },
+          {
+            "observed_at_step": 0,
+            "path": "proc_time[o1_weld]",
+            "source": "DIRECT",
+            "value": 4
+          },
+          {
+            "observed_at_step": 0,
+            "path": "proc_time[o2_cut]",
+            "source": "DIRECT",
+            "value": 2
+          },
+          {
+            "observed_at_step": 0,
+            "path": "proc_time[o2_paint]",
+            "source": "DIRECT",
+            "value": 2
+          },
+          {
+            "observed_at_step": 0,
+            "path": "proc_time[o3_cut]",
+            "source": "DIRECT",
+            "value": 1
+          },
+          {
+            "observed_at_step": 0,
+            "path": "proc_time[o3_weld]",
+            "source": "DIRECT",
+            "value": 2
+          },
+          {
+            "observed_at_step": 0,
+            "path": "proc_time[o3_paint]",
+            "source": "DIRECT",
+            "value": 2
+          },
+          {
+            "observed_at_step": 0,
+            "path": "res_cap[fixture]",
+            "source": "DIRECT",
+            "value": 2
+          },
+          {
+            "observed_at_step": 0,
+            "path": "res_cap[operator]",
+            "source": "DIRECT",
+            "value": 2
+          },
+          {
+            "observed_at_step": 0,
+            "path": "finish[o1_cut]",
+            "source": "DIRECT",
+            "value": 0
+          },
+          {
+            "observed_at_step": 0,
+            "path": "finish[o1_weld]",
+            "source": "DIRECT",
+            "value": 0
+          },
+          {
+            "observed_at_step": 0,
+            "path": "finish[o2_cut]",
+            "source": "DIRECT",
+            "value": 0
+          },
+          {
+            "observed_at_step": 0,
+            "path": "finish[o2_paint]",
+            "source": "DIRECT",
+            "value": 0
+          },
+          {
+            "observed_at_step": 0,
+            "path": "finish[o3_cut]",
+            "source": "DIRECT",
+            "value": 0
+          },
+          {
+            "observed_at_step": 0,
+            "path": "finish[o3_weld]",
+            "source": "DIRECT",
+            "value": 0
+          },
+          {
+            "observed_at_step": 0,
+            "path": "finish[o3_paint]",
+            "source": "DIRECT",
+            "value": 0
+          },
+          {
+            "observed_at_step": 0,
+            "path": "paused[m1]",
+            "source": "DIRECT",
+            "value": false
+          },
+          {
+            "observed_at_step": 0,
+            "path": "paused[m2]",
+            "source": "DIRECT",
+            "value": false
+          },
+          {
+            "observed_at_step": 0,
+            "path": "paused[m3]",
+            "source": "DIRECT",
+            "value": false
+          },
+          {
+            "observed_at_step": 0,
+            "path": "priority[o1]",
+            "source": "DIRECT",
+            "value": "normal"
+          },
+          {
+            "observed_at_step": 0,
+            "path": "priority[o2]",
+            "source": "DIRECT",
+            "value": "normal"
+          },
+          {
+            "observed_at_step": 0,
+            "path": "priority[o3]",
+            "source": "DIRECT",
+            "value": "normal"
+          },
+          {
+            "observed_at_step": 0,
+            "path": "clock",
+            "source": "DIRECT",
+            "value": 0
+          },
+          {
+            "observed_at_step": 0,
+            "path": "tick_parity",
+            "source": "DIRECT",
+            "value": false
+          }
+        ],
+        "run_id": "run_phase1_normal",
+        "semantics": "Facts are what the actor observed (possibly stale, see observed_at_step); unknowns are locations whose current value the actor cannot know at this step. The environment truth state is a separate object that agents never receive.",
+        "state_revision": 0,
+        "step": 0,
+        "unknowns": []
+      }
+    },
+    "payload_schema": "formal-lab/events/OBSERVATION@1",
+    "run_id": "run_phase1_normal",
+    "seq": 4,
+    "wall_time": "2026-09-27T03:19:22.830892Z"
+  },
+  {
+    "actor_id": null,
+    "causal_parents": [
+      "evt_67492d3c8c6ec9f9bae174c3"
+    ],
+    "event_id": "evt_c77b9890e9f301246132069c",
+    "event_type": "CHECK_COMPLETED",
+    "idempotency_key": "run_phase1_normal:s0:initial-check",
+    "logical_step": 0,
+    "payload": {
+      "purpose": "initial goal reachability from the actor's belief",
+      "result": {
+        "action_digest": null,
+        "assumptions": [
+          "paths start in the given state",
+          "one ground action per logical step; deterministic effects as specified by deterministic_finite_v1",
+          "only paths of at most 16 step(s) are considered"
+        ],
+        "backend": {
+          "name": "z3",
+          "version": "5.1.0"
+        },
+        "bound": {
+          "max_steps": 16,
+          "timeout_ms": 20000
+        },
+        "check_id": "chk_479ea6d42bdc48d6",
+        "contract_version": "formal-lab-contracts/v1",
+        "explanation": "shortest path to goal 'all_done' has 14 step(s)",
+        "extensions": {},
+        "model_digest": {
+          "algorithm": "sha256",
+          "value": "27ef54c6843626d6358ef69ec6529c77a897ffac22914c16694e277ca760bb8a"
+        },
+        "query": {
+          "action": null,
+          "bound": {
+            "max_steps": 16,
+            "timeout_ms": 20000
+          },
+          "initial_state": "GIVEN_STATE",
+          "kind": "GOAL_REACHABILITY",
+          "property_id": "all_done"
+        },
+        "scope": "MODEL_INTERNAL",
+        "semantics": "EXISTS_PATH",
+        "state_digest": {
+          "algorithm": "sha256",
+          "value": "50e6f77cb92b086926dead6ea33cce26d9b4ef83700eeb5766f26c8fc101f7d9"
+        },
+        "stats": {
+          "elapsed_ms": 2851.442227001826,
+          "reason_unknown": null,
+          "solver_status": "sat",
+          "steps_explored": 14,
+          "timeout_ms": 20000
+        },
+        "unsupported": null,
+        "variable_mapping": {
+          "act@t": "index into ground actions: assign(op=o1_cut,m=m1), assign(op=o1_cut,m=m2), assign(op=o1_cut,m=m3), assign(op=o1_weld,m=m1), assign(op=o1_weld,m=m2), assign(op=o1_weld,m=m3), assign(op=o2_cut,m=m1), assign(op=o2_cut,m=m2), assign(op=o2_cut,m=m3), assign(op=o2_paint,m=m1), assign(op=o2_paint,m=m2), assign(op=o2_paint,m=m3), assign(op=o3_cut,m=m1), assign(op=o3_cut,m=m2), assign(op=o3_cut,m=m3), assign(op=o3_weld,m=m1), assign(op=o3_weld,m=m2), assign(op=o3_weld,m=m3), assign(op=o3_paint,m=m1), assign(op=o3_paint,m=m2), assign(op=o3_paint,m=m3), advance(), pause(m=m1), pause(m=m2), pause(m=m3), resume(m=m1), resume(m=m2), resume(m=m3), reprioritize(ord=o1,lvl=high), reprioritize(ord=o1,lvl=normal), reprioritize(ord=o1,lvl=low), reprioritize(ord=o2,lvl=high), reprioritize(ord=o2,lvl=normal), reprioritize(ord=o2,lvl=low), reprioritize(ord=o3,lvl=high), reprioritize(ord=o3,lvl=normal), reprioritize(ord=o3,lvl=low)",
+          "clock@t": "clock",
+          "finish[o1_cut]@t": "finish[o1_cut]",
+          "finish[o1_weld]@t": "finish[o1_weld]",
+          "finish[o2_cut]@t": "finish[o2_cut]",
+          "finish[o2_paint]@t": "finish[o2_paint]",
+          "finish[o3_cut]@t": "finish[o3_cut]",
+          "finish[o3_paint]@t": "finish[o3_paint]",
+          "finish[o3_weld]@t": "finish[o3_weld]",
+          "on[o1_cut,m1]@t": "on[o1_cut,m1]",
+          "on[o1_cut,m2]@t": "on[o1_cut,m2]",
+          "on[o1_cut,m3]@t": "on[o1_cut,m3]",
+          "on[o1_weld,m1]@t": "on[o1_weld,m1]",
+          "on[o1_weld,m2]@t": "on[o1_weld,m2]",
+          "on[o1_weld,m3]@t": "on[o1_weld,m3]",
+          "on[o2_cut,m1]@t": "on[o2_cut,m1]",
+          "on[o2_cut,m2]@t": "on[o2_cut,m2]",
+          "on[o2_cut,m3]@t": "on[o2_cut,m3]",
+          "on[o2_paint,m1]@t": "on[o2_paint,m1]",
+          "on[o2_paint,m2]@t": "on[o2_paint,m2]",
+          "on[o2_paint,m3]@t": "on[o2_paint,m3]",
+          "on[o3_cut,m1]@t": "on[o3_cut,m1]",
+          "on[o3_cut,m2]@t": "on[o3_cut,m2]",
+          "on[o3_cut,m3]@t": "on[o3_cut,m3]",
+          "on[o3_paint,m1]@t": "on[o3_paint,m1]",
+          "on[o3_paint,m2]@t": "on[o3_paint,m2]",
+          "on[o3_paint,m3]@t": "on[o3_paint,m3]",
+          "on[o3_weld,m1]@t": "on[o3_weld,m1]",
+          "on[o3_weld,m2]@t": "on[o3_weld,m2]",
+          "on[o3_weld,m3]@t": "on[o3_weld,m3]",
+          "paused[m1]@t": "paused[m1]",
+          "paused[m2]@t": "paused[m2]",
+          "paused[m3]@t": "paused[m3]",
+          "phase[o1_cut]@t": "phase[o1_cut]",
+          "phase[o1_weld]@t": "phase[o1_weld]",
+          "phase[o2_cut]@t": "phase[o2_cut]",
+          "phase[o2_paint]@t": "phase[o2_paint]",
+          "phase[o3_cut]@t": "phase[o3_cut]",
+          "phase[o3_paint]@t": "phase[o3_paint]",
+          "phase[o3_weld]@t": "phase[o3_weld]",
+          "priority[o1]@t": "priority[o1]",
+          "priority[o2]@t": "priority[o2]",
+          "priority[o3]@t": "priority[o3]",
+          "proc_time[o1_cut]@t": "proc_time[o1_cut]",
+          "proc_time[o1_weld]@t": "proc_time[o1_weld]",
+          "proc_time[o2_cut]@t": "proc_time[o2_cut]",
+          "proc_time[o2_paint]@t": "proc_time[o2_paint]",
+          "proc_time[o3_cut]@t": "proc_time[o3_cut]",
+          "proc_time[o3_paint]@t": "proc_time[o3_paint]",
+          "proc_time[o3_weld]@t": "proc_time[o3_weld]",
+          "remaining[o1_cut]@t": "remaining[o1_cut]",
+          "remaining[o1_weld]@t": "remaining[o1_weld]",
+          "remaining[o2_cut]@t": "remaining[o2_cut]",
+          "remaining[o2_paint]@t": "remaining[o2_paint]",
+          "remaining[o3_cut]@t": "remaining[o3_cut]",
+          "remaining[o3_paint]@t": "remaining[o3_paint]",
+          "remaining[o3_weld]@t": "remaining[o3_weld]",
+          "res_cap[fixture]@t": "res_cap[fixture]",
+          "res_cap[operator]@t": "res_cap[operator]",
+          "tick_parity@t": "tick_parity"
+        },
+        "verdict": "WITNESS",
+        "witness": {
+          "replay": "CONFIRMED",
+          "replay_note": "replayed by the reference interpreter",
+          "steps": [
+            {
+              "action": null,
+              "state": {
+                "clock": 0,
+                "finish[o1_cut]": 0,
+                "finish[o1_weld]": 0,
+                "finish[o2_cut]": 0,
+                "finish[o2_paint]": 0,
+                "finish[o3_cut]": 0,
+                "finish[o3_paint]": 0,
+                "finish[o3_weld]": 0,
+                "on[o1_cut,m1]": false,
+                "on[o1_cut,m2]": false,
+                "on[o1_cut,m3]": false,
+                "on[o1_weld,m1]": false,
+                "on[o1_weld,m2]": false,
+                "on[o1_weld,m3]": false,
+                "on[o2_cut,m1]": false,
+                "on[o2_cut,m2]": false,
+                "on[o2_cut,m3]": false,
+                "on[o2_paint,m1]": false,
+                "on[o2_paint,m2]": false,
+                "on[o2_paint,m3]": false,
+                "on[o3_cut,m1]": false,
+                "on[o3_cut,m2]": false,
+                "on[o3_cut,m3]": false,
+                "on[o3_paint,m1]": false,
+                "on[o3_paint,m2]": false,
+                "on[o3_paint,m3]": false,
+                "on[o3_weld,m1]": false,
+                "on[o3_weld,m2]": false,
+                "on[o3_weld,m3]": false,
+                "paused[m1]": false,
+                "paused[m2]": false,
+                "paused[m3]": false,
+                "phase[o1_cut]": "waiting",
+                "phase[o1_weld]": "waiting",
+                "phase[o2_cut]": "waiting",
+                "phase[o2_paint]": "waiting",
+                "phase[o3_cut]": "waiting",
+                "phase[o3_paint]": "waiting",
+                "phase[o3_weld]": "waiting",
+                "priority[o1]": "normal",
+                "priority[o2]": "normal",
+                "priority[o3]": "normal",
+                "proc_time[o1_cut]": 1,
+                "proc_time[o1_weld]": 4,
+                "proc_time[o2_cut]": 2,
+                "proc_time[o2_paint]": 2,
+                "proc_time[o3_cut]": 1,
+                "proc_time[o3_paint]": 2,
+                "proc_time[o3_weld]": 2,
+                "remaining[o1_cut]": 0,
+                "remaining[o1_weld]": 0,
+                "remaining[o2_cut]": 0,
+                "remaining[o2_paint]": 0,
+                "remaining[o3_cut]": 0,
+                "remaining[o3_paint]": 0,
+                "remaining[o3_weld]": 0,
+                "res_cap[fixture]": 2,
+                "res_cap[operator]": 2,
+                "tick_parity": false
+              },
+              "step": 0
+            },
+            {
+              "action": {
+                "action_type": "assign",
+                "params": {
+                  "m": "m2",
+                  "op": "o1_cut"
+                }
+              },
+              "state": {
+                "clock": 0,
+                "finish[o1_cut]": 0,
+                "finish[o1_weld]": 0,
+                "finish[o2_cut]": 0,
+                "finish[o2_paint]": 0,
+                "finish[o3_cut]": 0,
+                "finish[o3_paint]": 0,
+                "finish[o3_weld]": 0,
+                "on[o1_cut,m1]": false,
+                "on[o1_cut,m2]": true,
+                "on[o1_cut,m3]": false,
+                "on[o1_weld,m1]": false,
+                "on[o1_weld,m2]": false,
+                "on[o1_weld,m3]": false,
+                "on[o2_cut,m1]": false,
+                "on[o2_cut,m2]": false,
+                "on[o2_cut,m3]": false,
+                "on[o2_paint,m1]": false,
+                "on[o2_paint,m2]": false,
+                "on[o2_paint,m3]": false,
+                "on[o3_cut,m1]": false,
+                "on[o3_cut,m2]": false,
+                "on[o3_cut,m3]": false,
+                "on[o3_paint,m1]": false,
+                "on[o3_paint,m2]": false,
+                "on[o3_paint,m3]": false,
+                "on[o3_weld,m1]": false,
+                "on[o3_weld,m2]": false,
+                "on[o3_weld,m3]": false,
+                "paused[m1]": false,
+                "paused[m2]": false,
+                "paused[m3]": false,
+                "phase[o1_cut]": "running",
+                "phase[o1_weld]": "waiting",
+                "phase[o2_cut]": "waiting",
+                "phase[o2_paint]": "waiting",
+                "phase[o3_cut]": "waiting",
+                "phase[o3_paint]": "waiting",
+                "phase[o3_weld]": "waiting",
+                "priority[o1]": "normal",
+                "priority[o2]": "normal",
+                "priority[o3]": "normal",
+                "proc_time[o1_cut]": 1,
+                "proc_time[o1_weld]": 4,
+                "proc_time[o2_cut]": 2,
+                "proc_time[o2_paint]": 2,
+                "proc_time[o3_cut]": 1,
+                "proc_time[o3_paint]": 2,
+                "proc_time[o3_weld]": 2,
+                "remaining[o1_cut]": 1,
+                "remaining[o1_weld]": 0,
+                "remaining[o2_cut]": 0,
+                "remaining[o2_paint]": 0,
+                "remaining[o3_cut]": 0,
+                "remaining[o3_paint]": 0,
+                "remaining[o3_weld]": 0,
+                "res_cap[fixture]": 2,
+                "res_cap[operator]": 2,
+                "tick_parity": false
+              },
+              "step": 1
+            },
+            {
+              "action": {
+                "action_type": "advance",
+                "params": {}
+              },
+              "state": {
+                "clock": 1,
+                "finish[o1_cut]": 1,
+                "finish[o1_weld]": 0,
+                "finish[o2_cut]": 0,
+                "finish[o2_paint]": 0,
+                "finish[o3_cut]": 0,
+                "finish[o3_paint]": 0,
+                "finish[o3_weld]": 0,
+                "on[o1_cut,m1]": false,
+                "on[o1_cut,m2]": false,
+                "on[o1_cut,m3]": false,
+                "on[o1_weld,m1]": false,
+                "on[o1_weld,m2]": false,
+                "on[o1_weld,m3]": false,
+                "on[o2_cut,m1]": false,
+                "on[o2_cut,m2]": false,
+                "on[o2_cut,m3]": false,
+                "on[o2_paint,m1]": false,
+                "on[o2_paint,m2]": false,
+                "on[o2_paint,m3]": false,
+                "on[o3_cut,m1]": false,
+                "on[o3_cut,m2]": false,
+                "on[o3_cut,m3]": false,
+                "on[o3_paint,m1]": false,
+                "on[o3_paint,m2]": false,
+                "on[o3_paint,m3]": false,
+                "on[o3_weld,m1]": false,
+                "on[o3_weld,m2]": false,
+                "on[o3_weld,m3]": false,
+                "paused[m1]": false,
+                "paused[m2]": false,
+                "paused[m3]": false,
+                "phase[o1_cut]": "done",
+                "phase[o1_weld]": "waiting",
+                "phase[o2_cut]": "waiting",
+                "phase[o2_paint]": "waiting",
+                "phase[o3_cut]": "waiting",
+                "phase[o3_paint]": "waiting",
+                "phase[o3_weld]": "waiting",
+                "priority[o1]": "normal",
+                "priority[o2]": "normal",
+                "priority[o3]": "normal",
+                "proc_time[o1_cut]": 1,
+                "proc_time[o1_weld]": 4,
+                "proc_time[o2_cut]": 2,
+                "proc_time[o2_paint]": 2,
+                "proc_time[o3_cut]": 1,
+                "proc_time[o3_paint]": 2,
+                "proc_time[o3_weld]": 2,
+                "remaining[o1_cut]": 0,
+                "remaining[o1_weld]": 0,
+                "remaining[o2_cut]": 0,
+                "remaining[o2_paint]": 0,
+                "remaining[o3_cut]": 0,
+                "remaining[o3_paint]": 0,
+                "remaining[o3_weld]": 0,
+                "res_cap[fixture]": 2,
+                "res_cap[operator]": 2,
+                "tick_parity": true
+              },
+              "step": 2
+            },
+            {
+              "action": {
+                "action_type": "assign",
+                "params": {
+                  "m": "m3",
+                  "op": "o1_weld"
+                }
+              },
+              "state": {
+                "clock": 1,
+                "finish[o1_cut]": 1,
+                "finish[o1_weld]": 0,
+                "finish[o2_cut]": 0,
+                "finish[o2_paint]": 0,
+                "finish[o3_cut]": 0,
+                "finish[o3_paint]": 0,
+                "finish[o3_weld]": 0,
+                "on[o1_cut,m1]": false,
+                "on[o1_cut,m2]": false,
+                "on[o1_cut,m3]": false,
+                "on[o1_weld,m1]": false,
+                "on[o1_weld,m2]": false,
+                "on[o1_weld,m3]": true,
+                "on[o2_cut,m1]": false,
+                "on[o2_cut,m2]": false,
+                "on[o2_cut,m3]": false,
+                "on[o2_paint,m1]": false,
+                "on[o2_paint,m2]": false,
+                "on[o2_paint,m3]": false,
+                "on[o3_cut,m1]": false,
+                "on[o3_cut,m2]": false,
+                "on[o3_cut,m3]": false,
+                "on[o3_paint,m1]": false,
+                "on[o3_paint,m2]": false,
+                "on[o3_paint,m3]": false,
+                "on[o3_weld,m1]": false,
+                "on[o3_weld,m2]": false,
+                "on[o3_weld,m3]": false,
+                "paused[m1]": false,
+                "paused[m2]": false,
+                "paused[m3]": false,
+                "phase[o1_cut]": "done",
+                "phase[o1_weld]": "running",
+                "phase[o2_cut]": "waiting",
+                "phase[o2_paint]": "waiting",
+                "phase[o3_cut]": "waiting",
+                "phase[o3_paint]": "waiting",
+                "phase[o3_weld]": "waiting",
+                "priority[o1]": "normal",
+                "priority[o2]": "normal",
+                "priority[o3]": "normal",
+                "proc_time[o1_cut]": 1,
+                "proc_time[o1_weld]": 4,
+                "proc_time[o2_cut]": 2,
+                "proc_time[o2_paint]": 2,
+                "proc_time[o3_cut]": 1,
+                "proc_time[o3_paint]": 2,
+                "proc_time[o3_weld]": 2,
+                "remaining[o1_cut]": 0,
+                "remaining[o1_weld]": 4,
+                "remaining[o2_cut]": 0,
+                "remaining[o2_paint]": 0,
+                "remaining[o3_cut]": 0,
+                "remaining[o3_paint]": 0,
+                "remaining[o3_weld]": 0,
+                "res_cap[fixture]": 2,
+                "res_cap[operator]": 2,
+                "tick_parity": true
+              },
+              "step": 3
+            },
+            {
+              "action": {
+                "action_type": "assign",
+                "params": {
+                  "m": "m1",
+                  "op": "o3_cut"
+                }
+              },
+              "state": {
+                "clock": 1,
+                "finish[o1_cut]": 1,
+                "finish[o1_weld]": 0,
+                "finish[o2_cut]": 0,
+                "finish[o2_paint]": 0,
+                "finish[o3_cut]": 0,
+                "finish[o3_paint]": 0,
+                "finish[o3_weld]": 0,
+                "on[o1_cut,m1]": false,
+                "on[o1_cut,m2]": false,
+                "on[o1_cut,m3]": false,
+                "on[o1_weld,m1]": false,
+                "on[o1_weld,m2]": false,
+                "on[o1_weld,m3]": true,
+                "on[o2_cut,m1]": false,
+                "on[o2_cut,m2]": false,
+                "on[o2_cut,m3]": false,
+                "on[o2_paint,m1]": false,
+                "on[o2_paint,m2]": false,
+                "on[o2_paint,m3]": false,
+                "on[o3_cut,m1]": true,
+                "on[o3_cut,m2]": false,
+                "on[o3_cut,m3]": false,
+                "on[o3_paint,m1]": false,
+                "on[o3_paint,m2]": false,
+                "on[o3_paint,m3]": false,
+                "on[o3_weld,m1]": false,
+                "on[o3_weld,m2]": false,
+                "on[o3_weld,m3]": false,
+                "paused[m1]": false,
+                "paused[m2]": false,
+                "paused[m3]": false,
+                "phase[o1_cut]": "done",
+                "phase[o1_weld]": "running",
+                "phase[o2_cut]": "waiting",
+                "phase[o2_paint]": "waiting",
+                "phase[o3_cut]": "running",
+                "phase[o3_paint]": "waiting",
+                "phase[o3_weld]": "waiting",
+                "priority[o1]": "normal",
+                "priority[o2]": "normal",
+                "priority[o3]": "normal",
+                "proc_time[o1_cut]": 1,
+                "proc_time[o1_weld]": 4,
+                "proc_time[o2_cut]": 2,
+                "proc_time[o2_paint]": 2,
+                "proc_time[o3_cut]": 1,
+                "proc_time[o3_paint]": 2,
+                "proc_time[o3_weld]": 2,
+                "remaining[o1_cut]": 0,
+                "remaining[o1_weld]": 4,
+                "remaining[o2_cut]": 0,
+                "remaining[o2_paint]": 0,
+                "remaining[o3_cut]": 1,
+                "remaining[o3_paint]": 0,
+                "remaining[o3_weld]": 0,
+                "res_cap[fixture]": 2,
+                "res_cap[operator]": 2,
+                "tick_parity": true
+              },
+              "step": 4
+            },
+            {
+              "action": {
+                "action_type": "advance",
+                "params": {}
+              },
+              "state": {
+                "clock": 2,
+                "finish[o1_cut]": 1,
+                "finish[o1_weld]": 0,
+                "finish[o2_cut]": 0,
+                "finish[o2_paint]": 0,
+                "finish[o3_cut]": 2,
+                "finish[o3_paint]": 0,
+                "finish[o3_weld]": 0,
+                "on[o1_cut,m1]": false,
+                "on[o1_cut,m2]": false,
+                "on[o1_cut,m3]": false,
+                "on[o1_weld,m1]": false,
+                "on[o1_weld,m2]": false,
+                "on[o1_weld,m3]": true,
+                "on[o2_cut,m1]": false,
+                "on[o2_cut,m2]": false,
+                "on[o2_cut,m3]": false,
+                "on[o2_paint,m1]": false,
+                "on[o2_paint,m2]": false,
+                "on[o2_paint,m3]": false,
+                "on[o3_cut,m1]": false,
+                "on[o3_cut,m2]": false,
+                "on[o3_cut,m3]": false,
+                "on[o3_paint,m1]": false,
+                "on[o3_paint,m2]": false,
+                "on[o3_paint,m3]": false,
+                "on[o3_weld,m1]": false,
+                "on[o3_weld,m2]": false,
+                "on[o3_weld,m3]": false,
+                "paused[m1]": false,
+                "paused[m2]": false,
+                "paused[m3]": false,
+                "phase[o1_cut]": "done",
+                "phase[o1_weld]": "running",
+                "phase[o2_cut]": "waiting",
+                "phase[o2_paint]": "waiting",
+                "phase[o3_cut]": "done",
+                "phase[o3_paint]": "waiting",
+                "phase[o3_weld]": "waiting",
+                "priority[o1]": "normal",
+                "priority[o2]": "normal",
+                "priority[o3]": "normal",
+                "proc_time[o1_cut]": 1,
+                "proc_time[o1_weld]": 4,
+                "proc_time[o2_cut]": 2,
+                "proc_time[o2_paint]": 2,
+                "proc_time[o3_cut]": 1,
+                "proc_time[o3_paint]": 2,
+                "proc_time[o3_weld]": 2,
+                "remaining[o1_cut]": 0,
+                "remaining[o1_weld]": 3,
+                "remaining[o2_cut]": 0,
+                "remaining[o2_paint]": 0,
+                "remaining[o3_cut]": 0,
+                "remaining[o3_paint]": 0,
+                "remaining[o3_weld]": 0,
+                "res_cap[fixture]": 2,
+                "res_cap[operator]": 2,
+                "tick_parity": false
+              },
+              "step": 5
+            },
+            {
+              "action": {
+                "action_type": "assign",
+                "params": {
+                  "m": "m2",
+                  "op": "o3_weld"
+                }
+              },
+              "state": {
+                "clock": 2,
+                "finish[o1_cut]": 1,
+                "finish[o1_weld]": 0,
+                "finish[o2_cut]": 0,
+                "finish[o2_paint]": 0,
+                "finish[o3_cut]": 2,
+                "finish[o3_paint]": 0,
+                "finish[o3_weld]": 0,
+                "on[o1_cut,m1]": false,
+                "on[o1_cut,m2]": false,
+                "on[o1_cut,m3]": false,
+                "on[o1_weld,m1]": false,
+                "on[o1_weld,m2]": false,
+                "on[o1_weld,m3]": true,
+                "on[o2_cut,m1]": false,
+                "on[o2_cut,m2]": false,
+                "on[o2_cut,m3]": false,
+                "on[o2_paint,m1]": false,
+                "on[o2_paint,m2]": false,
+                "on[o2_paint,m3]": false,
+                "on[o3_cut,m1]": false,
+                "on[o3_cut,m2]": false,
+                "on[o3_cut,m3]": false,
+                "on[o3_paint,m1]": false,
+                "on[o3_paint,m2]": false,
+                "on[o3_paint,m3]": false,
+                "on[o3_weld,m1]": false,
+                "on[o3_weld,m2]": true,
+                "on[o3_weld,m3]": false,
+                "paused[m1]": false,
+                "paused[m2]": false,
+                "paused[m3]": false,
+                "phase[o1_cut]": "done",
+                "phase[o1_weld]": "running",
+                "phase[o2_cut]": "waiting",
+                "phase[o2_paint]": "waiting",
+                "phase[o3_cut]": "done",
+                "phase[o3_paint]": "waiting",
+                "phase[o3_weld]": "running",
+                "priority[o1]": "normal",
+                "priority[o2]": "normal",
+                "priority[o3]": "normal",
+                "proc_time[o1_cut]": 1,
+                "proc_time[o1_weld]": 4,
+                "proc_time[o2_cut]": 2,
+                "proc_time[o2_paint]": 2,
+                "proc_time[o3_cut]": 1,
+                "proc_time[o3_paint]": 2,
+                "proc_time[o3_weld]": 2,
+                "remaining[o1_cut]": 0,
+                "remaining[o1_weld]": 3,
+                "remaining[o2_cut]": 0,
+                "remaining[o2_paint]": 0,
+                "remaining[o3_cut]": 0,
+                "remaining[o3_paint]": 0,
+                "remaining[o3_weld]": 2,
+                "res_cap[fixture]": 2,
+                "res_cap[operator]": 2,
+                "tick_parity": false
+              },
+              "step": 6
+            },
+            {
+              "action": {
+                "action_type": "assign",
+                "params": {
+                  "m": "m1",
+                  "op": "o2_cut"
+                }
+              },
+              "state": {
+                "clock": 2,
+                "finish[o1_cut]": 1,
+                "finish[o1_weld]": 0,
+                "finish[o2_cut]": 0,
+                "finish[o2_paint]": 0,
+                "finish[o3_cut]": 2,
+                "finish[o3_paint]": 0,
+                "finish[o3_weld]": 0,
+                "on[o1_cut,m1]": false,
+                "on[o1_cut,m2]": false,
+                "on[o1_cut,m3]": false,
+                "on[o1_weld,m1]": false,
+                "on[o1_weld,m2]": false,
+                "on[o1_weld,m3]": true,
+                "on[o2_cut,m1]": true,
+                "on[o2_cut,m2]": false,
+                "on[o2_cut,m3]": false,
+                "on[o2_paint,m1]": false,
+                "on[o2_paint,m2]": false,
+                "on[o2_paint,m3]": false,
+                "on[o3_cut,m1]": false,
+                "on[o3_cut,m2]": false,
+                "on[o3_cut,m3]": false,
+                "on[o3_paint,m1]": false,
+                "on[o3_paint,m2]": false,
+                "on[o3_paint,m3]": false,
+                "on[o3_weld,m1]": false,
+                "on[o3_weld,m2]": true,
+                "on[o3_weld,m3]": false,
+                "paused[m1]": false,
+                "paused[m2]": false,
+                "paused[m3]": false,
+                "phase[o1_cut]": "done",
+                "phase[o1_weld]": "running",
+                "phase[o2_cut]": "running",
+                "phase[o2_paint]": "waiting",
+                "phase[o3_cut]": "done",
+                "phase[o3_paint]": "waiting",
+                "phase[o3_weld]": "running",
+                "priority[o1]": "normal",
+                "priority[o2]": "normal",
+                "priority[o3]": "normal",
+                "proc_time[o1_cut]": 1,
+                "proc_time[o1_weld]": 4,
+                "proc_time[o2_cut]": 2,
+                "proc_time[o2_paint]": 2,
+                "proc_time[o3_cut]": 1,
+                "proc_time[o3_paint]": 2,
+                "proc_time[o3_weld]": 2,
+                "remaining[o1_cut]": 0,
+                "remaining[o1_weld]": 3,
+                "remaining[o2_cut]": 2,
+                "remaining[o2_paint]": 0,
+                "remaining[o3_cut]": 0,
+                "remaining[o3_paint]": 0,
+                "remaining[o3_weld]": 2,
+                "res_cap[fixture]": 2,
+                "res_cap[operator]": 2,
+                "tick_parity": false
+              },
+              "step": 7
+            },
+            {
+              "action": {
+                "action_type": "advance",
+                "params": {}
+              },
+              "state": {
+                "clock": 3,
+                "finish[o1_cut]": 1,
+                "finish[o1_weld]": 0,
+                "finish[o2_cut]": 0,
+                "finish[o2_paint]": 0,
+                "finish[o3_cut]": 2,
+                "finish[o3_paint]": 0,
+                "finish[o3_weld]": 0,
+                "on[o1_cut,m1]": false,
+                "on[o1_cut,m2]": false,
+                "on[o1_cut,m3]": false,
+                "on[o1_weld,m1]": false,
+                "on[o1_weld,m2]": false,
+                "on[o1_weld,m3]": true,
+                "on[o2_cut,m1]": true,
+                "on[o2_cut,m2]": false,
+                "on[o2_cut,m3]": false,
+                "on[o2_paint,m1]": false,
+                "on[o2_paint,m2]": false,
+                "on[o2_paint,m3]": false,
+                "on[o3_cut,m1]": false,
+                "on[o3_cut,m2]": false,
+                "on[o3_cut,m3]": false,
+                "on[o3_paint,m1]": false,
+                "on[o3_paint,m2]": false,
+                "on[o3_paint,m3]": false,
+                "on[o3_weld,m1]": false,
+                "on[o3_weld,m2]": true,
+                "on[o3_weld,m3]": false,
+                "paused[m1]": false,
+                "paused[m2]": false,
+                "paused[m3]": false,
+                "phase[o1_cut]": "done",
+                "phase[o1_weld]": "running",
+                "phase[o2_cut]": "running",
+                "phase[o2_paint]": "waiting",
+                "phase[o3_cut]": "done",
+                "phase[o3_paint]": "waiting",
+                "phase[o3_weld]": "running",
+                "priority[o1]": "normal",
+                "priority[o2]": "normal",
+                "priority[o3]": "normal",
+                "proc_time[o1_cut]": 1,
+                "proc_time[o1_weld]": 4,
+                "proc_time[o2_cut]": 2,
+                "proc_time[o2_paint]": 2,
+                "proc_time[o3_cut]": 1,
+                "proc_time[o3_paint]": 2,
+                "proc_time[o3_weld]": 2,
+                "remaining[o1_cut]": 0,
+                "remaining[o1_weld]": 2,
+                "remaining[o2_cut]": 1,
+                "remaining[o2_paint]": 0,
+                "remaining[o3_cut]": 0,
+                "remaining[o3_paint]": 0,
+                "remaining[o3_weld]": 1,
+                "res_cap[fixture]": 2,
+                "res_cap[operator]": 2,
+                "tick_parity": true
+              },
+              "step": 8
+            },
+            {
+              "action": {
+                "action_type": "advance",
+                "params": {}
+              },
+              "state": {
+                "clock": 4,
+                "finish[o1_cut]": 1,
+                "finish[o1_weld]": 0,
+                "finish[o2_cut]": 4,
+                "finish[o2_paint]": 0,
+                "finish[o3_cut]": 2,
+                "finish[o3_paint]": 0,
+                "finish[o3_weld]": 4,
+                "on[o1_cut,m1]": false,
+                "on[o1_cut,m2]": false,
+                "on[o1_cut,m3]": false,
+                "on[o1_weld,m1]": false,
+                "on[o1_weld,m2]": false,
+                "on[o1_weld,m3]": true,
+                "on[o2_cut,m1]": false,
+                "on[o2_cut,m2]": false,
+                "on[o2_cut,m3]": false,
+                "on[o2_paint,m1]": false,
+                "on[o2_paint,m2]": false,
+                "on[o2_paint,m3]": false,
+                "on[o3_cut,m1]": false,
+                "on[o3_cut,m2]": false,
+                "on[o3_cut,m3]": false,
+                "on[o3_paint,m1]": false,
+                "on[o3_paint,m2]": false,
+                "on[o3_paint,m3]": false,
+                "on[o3_weld,m1]": false,
+                "on[o3_weld,m2]": false,
+                "on[o3_weld,m3]": false,
+                "paused[m1]": false,
+                "paused[m2]": false,
+                "paused[m3]": false,
+                "phase[o1_cut]": "done",
+                "phase[o1_weld]": "running",
+                "phase[o2_cut]": "done",
+                "phase[o2_paint]": "waiting",
+                "phase[o3_cut]": "done",
+                "phase[o3_paint]": "waiting",
+                "phase[o3_weld]": "done",
+                "priority[o1]": "normal",
+                "priority[o2]": "normal",
+                "priority[o3]": "normal",
+                "proc_time[o1_cut]": 1,
+                "proc_time[o1_weld]": 4,
+                "proc_time[o2_cut]": 2,
+                "proc_time[o2_paint]": 2,
+                "proc_time[o3_cut]": 1,
+                "proc_time[o3_paint]": 2,
+                "proc_time[o3_weld]": 2,
+                "remaining[o1_cut]": 0,
+                "remaining[o1_weld]": 1,
+                "remaining[o2_cut]": 0,
+                "remaining[o2_paint]": 0,
+                "remaining[o3_cut]": 0,
+                "remaining[o3_paint]": 0,
+                "remaining[o3_weld]": 0,
+                "res_cap[fixture]": 2,
+                "res_cap[operator]": 2,
+                "tick_parity": false
+              },
+              "step": 9
+            },
+            {
+              "action": {
+                "action_type": "assign",
+                "params": {
+                  "m": "m2",
+                  "op": "o3_paint"
+                }
+              },
+              "state": {
+                "clock": 4,
+                "finish[o1_cut]": 1,
+                "finish[o1_weld]": 0,
+                "finish[o2_cut]": 4,
+                "finish[o2_paint]": 0,
+                "finish[o3_cut]": 2,
+                "finish[o3_paint]": 0,
+                "finish[o3_weld]": 4,
+                "on[o1_cut,m1]": false,
+                "on[o1_cut,m2]": false,
+                "on[o1_cut,m3]": false,
+                "on[o1_weld,m1]": false,
+                "on[o1_weld,m2]": false,
+                "on[o1_weld,m3]": true,
+                "on[o2_cut,m1]": false,
+                "on[o2_cut,m2]": false,
+                "on[o2_cut,m3]": false,
+                "on[o2_paint,m1]": false,
+                "on[o2_paint,m2]": false,
+                "on[o2_paint,m3]": false,
+                "on[o3_cut,m1]": false,
+                "on[o3_cut,m2]": false,
+                "on[o3_cut,m3]": false,
+                "on[o3_paint,m1]": false,
+                "on[o3_paint,m2]": true,
+                "on[o3_paint,m3]": false,
+                "on[o3_weld,m1]": false,
+                "on[o3_weld,m2]": false,
+                "on[o3_weld,m3]": false,
+                "paused[m1]": false,
+                "paused[m2]": false,
+                "paused[m3]": false,
+                "phase[o1_cut]": "done",
+                "phase[o1_weld]": "running",
+                "phase[o2_cut]": "done",
+                "phase[o2_paint]": "waiting",
+                "phase[o3_cut]": "done",
+                "phase[o3_paint]": "running",
+                "phase[o3_weld]": "done",
+                "priority[o1]": "normal",
+                "priority[o2]": "normal",
+                "priority[o3]": "normal",
+                "proc_time[o1_cut]": 1,
+                "proc_time[o1_weld]": 4,
+                "proc_time[o2_cut]": 2,
+                "proc_time[o2_paint]": 2,
+                "proc_time[o3_cut]": 1,
+                "proc_time[o3_paint]": 2,
+                "proc_time[o3_weld]": 2,
+                "remaining[o1_cut]": 0,
+                "remaining[o1_weld]": 1,
+                "remaining[o2_cut]": 0,
+                "remaining[o2_paint]": 0,
+                "remaining[o3_cut]": 0,
+                "remaining[o3_paint]": 2,
+                "remaining[o3_weld]": 0,
+                "res_cap[fixture]": 2,
+                "res_cap[operator]": 2,
+                "tick_parity": false
+              },
+              "step": 10
+            },
+            {
+              "action": {
+                "action_type": "advance",
+                "params": {}
+              },
+              "state": {
+                "clock": 5,
+                "finish[o1_cut]": 1,
+                "finish[o1_weld]": 5,
+                "finish[o2_cut]": 4,
+                "finish[o2_paint]": 0,
+                "finish[o3_cut]": 2,
+                "finish[o3_paint]": 0,
+                "finish[o3_weld]": 4,
+                "on[o1_cut,m1]": false,
+                "on[o1_cut,m2]": false,
+                "on[o1_cut,m3]": false,
+                "on[o1_weld,m1]": false,
+                "on[o1_weld,m2]": false,
+                "on[o1_weld,m3]": false,
+                "on[o2_cut,m1]": false,
+                "on[o2_cut,m2]": false,
+                "on[o2_cut,m3]": false,
+                "on[o2_paint,m1]": false,
+                "on[o2_paint,m2]": false,
+                "on[o2_paint,m3]": false,
+                "on[o3_cut,m1]": false,
+                "on[o3_cut,m2]": false,
+                "on[o3_cut,m3]": false,
+                "on[o3_paint,m1]": false,
+                "on[o3_paint,m2]": true,
+                "on[o3_paint,m3]": false,
+                "on[o3_weld,m1]": false,
+                "on[o3_weld,m2]": false,
+                "on[o3_weld,m3]": false,
+                "paused[m1]": false,
+                "paused[m2]": false,
+                "paused[m3]": false,
+                "phase[o1_cut]": "done",
+                "phase[o1_weld]": "done",
+                "phase[o2_cut]": "done",
+                "phase[o2_paint]": "waiting",
+                "phase[o3_cut]": "done",
+                "phase[o3_paint]": "running",
+                "phase[o3_weld]": "done",
+                "priority[o1]": "normal",
+                "priority[o2]": "normal",
+                "priority[o3]": "normal",
+                "proc_time[o1_cut]": 1,
+                "proc_time[o1_weld]": 4,
+                "proc_time[o2_cut]": 2,
+                "proc_time[o2_paint]": 2,
+                "proc_time[o3_cut]": 1,
+                "proc_time[o3_paint]": 2,
+                "proc_time[o3_weld]": 2,
+                "remaining[o1_cut]": 0,
+                "remaining[o1_weld]": 0,
+                "remaining[o2_cut]": 0,
+                "remaining[o2_paint]": 0,
+                "remaining[o3_cut]": 0,
+                "remaining[o3_paint]": 1,
+                "remaining[o3_weld]": 0,
+                "res_cap[fixture]": 2,
+                "res_cap[operator]": 2,
+                "tick_parity": true
+              },
+              "step": 11
+            },
+            {
+              "action": {
+                "action_type": "assign",
+                "params": {
+                  "m": "m3",
+                  "op": "o2_paint"
+                }
+              },
+              "state": {
+                "clock": 5,
+                "finish[o1_cut]": 1,
+                "finish[o1_weld]": 5,
+                "finish[o2_cut]": 4,
+                "finish[o2_paint]": 0,
+                "finish[o3_cut]": 2,
+                "finish[o3_paint]": 0,
+                "finish[o3_weld]": 4,
+                "on[o1_cut,m1]": false,
+                "on[o1_cut,m2]": false,
+                "on[o1_cut,m3]": false,
+                "on[o1_weld,m1]": false,
+                "on[o1_weld,m2]": false,
+                "on[o1_weld,m3]": false,
+                "on[o2_cut,m1]": false,
+                "on[o2_cut,m2]": false,
+                "on[o2_cut,m3]": false,
+                "on[o2_paint,m1]": false,
+                "on[o2_paint,m2]": false,
+                "on[o2_paint,m3]": true,
+                "on[o3_cut,m1]": false,
+                "on[o3_cut,m2]": false,
+                "on[o3_cut,m3]": false,
+                "on[o3_paint,m1]": false,
+                "on[o3_paint,m2]": true,
+                "on[o3_paint,m3]": false,
+                "on[o3_weld,m1]": false,
+                "on[o3_weld,m2]": false,
+                "on[o3_weld,m3]": false,
+                "paused[m1]": false,
+                "paused[m2]": false,
+                "paused[m3]": false,
+                "phase[o1_cut]": "done",
+                "phase[o1_weld]": "done",
+                "phase[o2_cut]": "done",
+                "phase[o2_paint]": "running",
+                "phase[o3_cut]": "done",
+                "phase[o3_paint]": "running",
+                "phase[o3_weld]": "done",
+                "priority[o1]": "normal",
+                "priority[o2]": "normal",
+                "priority[o3]": "normal",
+                "proc_time[o1_cut]": 1,
+                "proc_time[o1_weld]": 4,
+                "proc_time[o2_cut]": 2,
+                "proc_time[o2_paint]": 2,
+                "proc_time[o3_cut]": 1,
+                "proc_time[o3_paint]": 2,
+                "proc_time[o3_weld]": 2,
+                "remaining[o1_cut]": 0,
+                "remaining[o1_weld]": 0,
+                "remaining[o2_cut]": 0,
+                "remaining[o2_paint]": 2,
+                "remaining[o3_cut]": 0,
+                "remaining[o3_paint]": 1,
+                "remaining[o3_weld]": 0,
+                "res_cap[fixture]": 2,
+                "res_cap[operator]": 2,
+                "tick_parity": true
+              },
+              "step": 12
+            },
+            {
+              "action": {
+                "action_type": "advance",
+                "params": {}
+              },
+              "state": {
+                "clock": 6,
+                "finish[o1_cut]": 1,
+                "finish[o1_weld]": 5,
+                "finish[o2_cut]": 4,
+                "finish[o2_paint]": 0,
+                "finish[o3_cut]": 2,
+                "finish[o3_paint]": 6,
+                "finish[o3_weld]": 4,
+                "on[o1_cut,m1]": false,
+                "on[o1_cut,m2]": false,
+                "on[o1_cut,m3]": false,
+                "on[o1_weld,m1]": false,
+                "on[o1_weld,m2]": false,
+                "on[o1_weld,m3]": false,
+                "on[o2_cut,m1]": false,
+                "on[o2_cut,m2]": false,
+                "on[o2_cut,m3]": false,
+                "on[o2_paint,m1]": false,
+                "on[o2_paint,m2]": false,
+                "on[o2_paint,m3]": true,
+                "on[o3_cut,m1]": false,
+                "on[o3_cut,m2]": false,
+                "on[o3_cut,m3]": false,
+                "on[o3_paint,m1]": false,
+                "on[o3_paint,m2]": false,
+                "on[o3_paint,m3]": false,
+                "on[o3_weld,m1]": false,
+                "on[o3_weld,m2]": false,
+                "on[o3_weld,m3]": false,
+                "paused[m1]": false,
+                "paused[m2]": false,
+                "paused[m3]": false,
+                "phase[o1_cut]": "done",
+                "phase[o1_weld]": "done",
+                "phase[o2_cut]": "done",
+                "phase[o2_paint]": "running",
+                "phase[o3_cut]": "done",
+                "phase[o3_paint]": "done",
+                "phase[o3_weld]": "done",
+                "priority[o1]": "normal",
+                "priority[o2]": "normal",
+                "priority[o3]": "normal",
+                "proc_time[o1_cut]": 1,
+                "proc_time[o1_weld]": 4,
+                "proc_time[o2_cut]": 2,
+                "proc_time[o2_paint]": 2,
+                "proc_time[o3_cut]": 1,
+                "proc_time[o3_paint]": 2,
+                "proc_time[o3_weld]": 2,
+                "remaining[o1_cut]": 0,
+                "remaining[o1_weld]": 0,
+                "remaining[o2_cut]": 0,
+                "remaining[o2_paint]": 1,
+                "remaining[o3_cut]": 0,
+                "remaining[o3_paint]": 0,
+                "remaining[o3_weld]": 0,
+                "res_cap[fixture]": 2,
+                "res_cap[operator]": 2,
+                "tick_parity": false
+              },
+              "step": 13
+            },
+            {
+              "action": {
+                "action_type": "advance",
+                "params": {}
+              },
+              "state": {
+                "clock": 7,
+                "finish[o1_cut]": 1,
+                "finish[o1_weld]": 5,
+                "finish[o2_cut]": 4,
+                "finish[o2_paint]": 7,
+                "finish[o3_cut]": 2,
+                "finish[o3_paint]": 6,
+                "finish[o3_weld]": 4,
+                "on[o1_cut,m1]": false,
+                "on[o1_cut,m2]": false,
+                "on[o1_cut,m3]": false,
+                "on[o1_weld,m1]": false,
+                "on[o1_weld,m2]": false,
+                "on[o1_weld,m3]": false,
+                "on[o2_cut,m1]": false,
+                "on[o2_cut,m2]": false,
+                "on[o2_cut,m3]": false,
+                "on[o2_paint,m1]": false,
+                "on[o2_paint,m2]": false,
+                "on[o2_paint,m3]": false,
+                "on[o3_cut,m1]": false,
+                "on[o3_cut,m2]": false,
+                "on[o3_cut,m3]": false,
+                "on[o3_paint,m1]": false,
+                "on[o3_paint,m2]": false,
+                "on[o3_paint,m3]": false,
+                "on[o3_weld,m1]": false,
+                "on[o3_weld,m2]": false,
+                "on[o3_weld,m3]": false,
+                "paused[m1]": false,
+                "paused[m2]": false,
+                "paused[m3]": false,
+                "phase[o1_cut]": "done",
+                "phase[o1_weld]": "done",
+                "phase[o2_cut]": "done",
+                "phase[o2_paint]": "done",
+                "phase[o3_cut]": "done",
+                "phase[o3_paint]": "done",
+                "phase[o3_weld]": "done",
+                "priority[o1]": "normal",
+                "priority[o2]": "normal",
+                "priority[o3]": "normal",
+                "proc_time[o1_cut]": 1,
+                "proc_time[o1_weld]": 4,
+                "proc_time[o2_cut]": 2,
+                "proc_time[o2_paint]": 2,
+                "proc_time[o3_cut]": 1,
+                "proc_time[o3_paint]": 2,
+                "proc_time[o3_weld]": 2,
+                "remaining[o1_cut]": 0,
+                "remaining[o1_weld]": 0,
+                "remaining[o2_cut]": 0,
+                "remaining[o2_paint]": 0,
+                "remaining[o3_cut]": 0,
+                "remaining[o3_paint]": 0,
+                "remaining[o3_weld]": 0,
+                "res_cap[fixture]": 2,
+                "res_cap[operator]": 2,
+                "tick_parity": true
+              },
+              "step": 14
+            }
+          ]
+        }
+      }
+    },
+    "payload_schema": "formal-lab/events/CHECK_COMPLETED@1",
+    "run_id": "run_phase1_normal",
+    "seq": 5,
+    "wall_time": "2026-09-27T03:19:22.830895Z"
+  },
+  {
+    "actor_id": null,
+    "causal_parents": [
+      "evt_67492d3c8c6ec9f9bae174c3"
+    ],
+    "event_id": "evt_a0b09681c27cb6fa777eccc7",
+    "event_type": "STATE_SNAPSHOT",
+    "idempotency_key": "run_phase1_normal:s0:snapshot",
+    "logical_step": 0,
+    "payload": {
+      "snapshot_digest": "99c70804c9097ad2f62bc197f586512e0f3531a7cc736486ace3b09856601800",
+      "state_revision": 0
+    },
+    "payload_schema": "formal-lab/events/STATE_SNAPSHOT@1",
+    "run_id": "run_phase1_normal",
+    "seq": 6,
+    "wall_time": "2026-09-27T03:19:22.830898Z"
+  },
+  {
+    "actor_id": "dispatcher",
+    "causal_parents": [
+      "evt_67492d3c8c6ec9f9bae174c3"
+    ],
+    "event_id": "evt_ffb29a98608e00c2fa7d9869",
+    "event_type": "OBSERVATION",
+    "idempotency_key": "run_phase1_normal:s1:observation",
+    "logical_step": 1,
+    "payload": {
+      "belief": {
+        "stale_paths": [],
+        "unknown_paths": []
+      },
+      "observation": {
+        "actor_id": "dispatcher",
+        "evidence": [
+          {
+            "artifact": null,
+            "id": "run_phase1_normal:env@0",
+            "kind": "snapshot",
+            "note": "truth revision 0"
+          }
+        ],
+        "facts": [
+          {
+            "observed_at_step": 0,
+            "path": "phase[o1_cut]",
+            "source": "DIRECT",
+            "value": "waiting"
+          },
+          {
+            "observed_at_step": 0,
+            "path": "phase[o1_weld]",
+            "source": "DIRECT",
+            "value": "waiting"
+          },
+          {
+            "observed_at_step": 0,
+            "path": "phase[o2_cut]",
+            "source": "DIRECT",
+            "value": "waiting"
+          },
+          {
+            "observed_at_step": 0,
+            "path": "phase[o2_paint]",
+            "source": "DIRECT",
+            "value": "waiting"
+          },
+          {
+            "observed_at_step": 0,
+            "path": "phase[o3_cut]",
+            "source": "DIRECT",
+            "value": "waiting"
+          },
+          {
+            "observed_at_step": 0,
+            "path": "phase[o3_weld]",
+            "source": "DIRECT",
+            "value": "waiting"
+          },
+          {
+            "observed_at_step": 0,
+            "path": "phase[o3_paint]",
+            "source": "DIRECT",
+            "value": "waiting"
+          },
+          {
+            "observed_at_step": 0,
+            "path": "on[o1_cut,m1]",
+            "source": "DIRECT",
+            "value": false
+          },
+          {
+            "observed_at_step": 0,
+            "path": "on[o1_cut,m2]",
+            "source": "DIRECT",
+            "value": false
+          },
+          {
+            "observed_at_step": 0,
+            "path": "on[o1_cut,m3]",
+            "source": "DIRECT",
+            "value": false
+          },
+          {
+            "observed_at_step": 0,
+            "path": "on[o1_weld,m1]",
+            "source": "DIRECT",
+            "value": false
+          },
+          {
+            "observed_at_step": 0,
+            "path": "on[o1_weld,m2]",
+            "source": "DIRECT",
+            "value": false
+          },
+          {
+            "observed_at_step": 0,
+            "path": "on[o1_weld,m3]",
+            "source": "DIRECT",
+            "value": false
+          },
+          {
+            "observed_at_step": 0,
+            "path": "on[o2_cut,m1]",
+            "source": "DIRECT",
+            "value": false
+          },
+          {
+            "observed_at_step": 0,
+            "path": "on[o2_cut,m2]",
+            "source": "DIRECT",
+            "value": false
+          },
+          {
+            "observed_at_step": 0,
+            "path": "on[o2_cut,m3]",
+            "source": "DIRECT",
+            "value": false
+          },
+          {
+            "observed_at_step": 0,
+            "path": "on[o2_paint,m1]",
+            "source": "DIRECT",
+            "value": false
+          },
+          {
+            "observed_at_step": 0,
+            "path": "on[o2_paint,m2]",
+            "source": "DIRECT",
+            "value": false
+          },
+          {
+            "observed_at_step": 0,
+            "path": "on[o2_paint,m3]",
+            "source": "DIRECT",
+            "value": false
+          },
+          {
+            "observed_at_step": 0,
+            "path": "on[o3_cut,m1]",
+            "source": "DIRECT",
+            "value": false
+          },
+          {
+            "observed_at_step": 0,
+            "path": "on[o3_cut,m2]",
+            "source": "DIRECT",
+            "value": false
+          },
+          {
+            "observed_at_step": 0,
+            "path": "on[o3_cut,m3]",
+            "source": "DIRECT",
+            "value": false
+          },
+          {
+            "observed_at_step": 0,
+            "path": "on[o3_weld,m1]",
+            "source": "DIRECT",
+            "value": false
+          },
+          {
+            "observed_at_step": 0,
+            "path": "on[o3_weld,m2]",
+            "source": "DIRECT",
+            "value": false
+          },
+          {
+            "observed_at_step": 0,
+            "path": "on[o3_weld,m3]",
+            "source": "DIRECT",
+            "value": false
+          },
+          {
+            "observed_at_step": 0,
+            "path": "on[o3_paint,m1]",
+            "source": "DIRECT",
+            "value": false
+          },
+          {
+            "observed_at_step": 0,
+            "path": "on[o3_paint,m2]",
+            "source": "DIRECT",
+            "value": false
+          },
+          {
+            "observed_at_step": 0,
+            "path": "on[o3_paint,m3]",
+            "source": "DIRECT",
+            "value": false
+          },
+          {
+            "observed_at_step": 0,
+            "path": "remaining[o1_cut]",
+            "source": "DIRECT",
+            "value": 0
+          },
+          {
+            "observed_at_step": 0,
+            "path": "remaining[o1_weld]",
+            "source": "DIRECT",
+            "value": 0
+          },
+          {
+            "observed_at_step": 0,
+            "path": "remaining[o2_cut]",
+            "source": "DIRECT",
+            "value": 0
+          },
+          {
+            "observed_at_step": 0,
+            "path": "remaining[o2_paint]",
+            "source": "DIRECT",
+            "value": 0
+          },
+          {
+            "observed_at_step": 0,
+            "path": "remaining[o3_cut]",
+            "source": "DIRECT",
+            "value": 0
+          },
+          {
+            "observed_at_step": 0,
+            "path": "remaining[o3_weld]",
+            "source": "DIRECT",
+            "value": 0
+          },
+          {
+            "observed_at_step": 0,
+            "path": "remaining[o3_paint]",
+            "source": "DIRECT",
+            "value": 0
+          },
+          {
+            "observed_at_step": 0,
+            "path": "proc_time[o1_cut]",
+            "source": "DIRECT",
+            "value": 1
+          },
+          {
+            "observed_at_step": 0,
+            "path": "proc_time[o1_weld]",
+            "source": "DIRECT",
+            "value": 4
+          },
+          {
+            "observed_at_step": 0,
+            "path": "proc_time[o2_cut]",
+            "source": "DIRECT",
+            "value": 2
+          },
+          {
+            "observed_at_step": 0,
+            "path": "proc_time[o2_paint]",
+            "source": "DIRECT",
+            "value": 2
+          },
+          {
+            "observed_at_step": 0,
+            "path": "proc_time[o3_cut]",
+            "source": "DIRECT",
+            "value": 1
+          },
+          {
+            "observed_at_step": 0,
+            "path": "proc_time[o3_weld]",
+            "source": "DIRECT",
+            "value": 2
+          },
+          {
+            "observed_at_step": 0,
+            "path": "proc_time[o3_paint]",
+            "source": "DIRECT",
+            "value": 2
+          },
+          {
+            "observed_at_step": 0,
+            "path": "res_cap[fixture]",
+            "source": "DIRECT",
+            "value": 2
+          },
+          {
+            "observed_at_step": 0,
+            "path": "res_cap[operator]",
+            "source": "DIRECT",
+            "value": 2
+          },
+          {
+            "observed_at_step": 0,
+            "path": "finish[o1_cut]",
+            "source": "DIRECT",
+            "value": 0
+          },
+          {
+            "observed_at_step": 0,
+            "path": "finish[o1_weld]",
+            "source": "DIRECT",
+            "value": 0
+          },
+          {
+            "observed_at_step": 0,
+            "path": "finish[o2_cut]",
+            "source": "DIRECT",
+            "value": 0
+          },
+          {
+            "observed_at_step": 0,
+            "path": "finish[o2_paint]",
+            "source": "DIRECT",
+            "value": 0
+          },
+          {
+            "observed_at_step": 0,
+            "path": "finish[o3_cut]",
+            "source": "DIRECT",
+            "value": 0
+          },
+          {
+            "observed_at_step": 0,
+            "path": "finish[o3_weld]",
+            "source": "DIRECT",
+            "value": 0
+          },
+          {
+            "observed_at_step": 0,
+            "path": "finish[o3_paint]",
+            "source": "DIRECT",
+            "value": 0
+          },
+          {
+            "observed_at_step": 0,
+            "path": "paused[m1]",
+            "source": "DIRECT",
+            "value": false
+          },
+          {
+            "observed_at_step": 0,
+            "path": "paused[m2]",
+            "source": "DIRECT",
+            "value": false
+          },
+          {
+            "observed_at_step": 0,
+            "path": "paused[m3]",
+            "source": "DIRECT",
+            "value": false
+          },
+          {
+            "observed_at_step": 0,
+            "path": "priority[o1]",
+            "source": "DIRECT",
+            "value": "normal"
+          },
+          {
+            "observed_at_step": 0,
+            "path": "priority[o2]",
+            "source": "DIRECT",
+            "value": "normal"
+          },
+          {
+            "observed_at_step": 0,
+            "path": "priority[o3]",
+            "source": "DIRECT",
+            "value": "normal"
+          },
+          {
+            "observed_at_step": 0,
+            "path": "clock",
+            "source": "DIRECT",
+            "value": 0
+          },
+          {
+            "observed_at_step": 0,
+            "path": "tick_parity",
+            "source": "DIRECT",
+            "value": false
+          }
+        ],
+        "run_id": "run_phase1_normal",
+        "semantics": "Facts are what the actor observed (possibly stale, see observed_at_step); unknowns are locations whose current value the actor cannot know at this step. The environment truth state is a separate object that agents never receive.",
+        "state_revision": 0,
+        "step": 0,
+        "unknowns": []
+      }
+    },
+    "payload_schema": "formal-lab/events/OBSERVATION@1",
+    "run_id": "run_phase1_normal",
+    "seq": 7,
+    "wall_time": "2026-09-27T03:19:22.830902Z"
+  },
+  {
+    "actor_id": "dispatcher",
+    "causal_parents": [
+      "evt_ffb29a98608e00c2fa7d9869"
+    ],
+    "event_id": "evt_f9a4f82d87e6781a072d46e8",
+    "event_type": "CANDIDATES",
+    "idempotency_key": "run_phase1_normal:s1:candidates",
+    "logical_step": 1,
+    "payload": {
+      "candidates": [
+        {
+          "action": {
+            "action_type": "assign",
+            "params": {
+              "m": "m1",
+              "op": "o1_cut"
+            }
+          },
+          "belief_applicability": "APPLICABLE",
+          "label": "分配工序"
+        },
+        {
+          "action": {
+            "action_type": "assign",
+            "params": {
+              "m": "m2",
+              "op": "o1_cut"
+            }
+          },
+          "belief_applicability": "APPLICABLE",
+          "label": "分配工序"
+        },
+        {
+          "action": {
+            "action_type": "assign",
+            "params": {
+              "m": "m3",
+              "op": "o1_cut"
+            }
+          },
+          "belief_applicability": "INAPPLICABLE",
+          "label": "分配工序"
+        },
+        {
+          "action": {
+            "action_type": "assign",
+            "params": {
+              "m": "m1",
+              "op": "o1_weld"
+            }
+          },
+          "belief_applicability": "INAPPLICABLE",
+          "label": "分配工序"
+        },
+        {
+          "action": {
+            "action_type": "assign",
+            "params": {
+              "m": "m2",
+              "op": "o1_weld"
+            }
+          },
+          "belief_applicability": "INAPPLICABLE",
+          "label": "分配工序"
+        },
+        {
+          "action": {
+            "action_type": "assign",
+            "params": {
+              "m": "m3",
+              "op": "o1_weld"
+            }
+          },
+          "belief_applicability": "INAPPLICABLE",
+          "label": "分配工序"
+        },
+        {
+          "action": {
+            "action_type": "assign",
+            "params": {
+              "m": "m1",
+              "op": "o2_cut"
+            }
+          },
+          "belief_applicability": "APPLICABLE",
+          "label": "分配工序"
+        },
+        {
+          "action": {
+            "action_type": "assign",
+            "params": {
+              "m": "m2",
+              "op": "o2_cut"
+            }
+          },
+          "belief_applicability": "APPLICABLE",
+          "label": "分配工序"
+        },
+        {
+          "action": {
+            "action_type": "assign",
+            "params": {
+              "m": "m3",
+              "op": "o2_cut"
+            }
+          },
+          "belief_applicability": "INAPPLICABLE",
+          "label": "分配工序"
+        },
+        {
+          "action": {
+            "action_type": "assign",
+            "params": {
+              "m": "m1",
+              "op": "o2_paint"
+            }
+          },
+          "belief_applicability": "INAPPLICABLE",
+          "label": "分配工序"
+        },
+        {
+          "action": {
+            "action_type": "assign",
+            "params": {
+              "m": "m2",
+              "op": "o2_paint"
+            }
+          },
+          "belief_applicability": "INAPPLICABLE",
+          "label": "分配工序"
+        },
+        {
+          "action": {
+            "action_type": "assign",
+            "params": {
+              "m": "m3",
+              "op": "o2_paint"
+            }
+          },
+          "belief_applicability": "INAPPLICABLE",
+          "label": "分配工序"
+        },
+        {
+          "action": {
+            "action_type": "assign",
+            "params": {
+              "m": "m1",
+              "op": "o3_cut"
+            }
+          },
+          "belief_applicability": "APPLICABLE",
+          "label": "分配工序"
+        },
+        {
+          "action": {
+            "action_type": "assign",
+            "params": {
+              "m": "m2",
+              "op": "o3_cut"
+            }
+          },
+          "belief_applicability": "INAPPLICABLE",
+          "label": "分配工序"
+        },
+        {
+          "action": {
+            "action_type": "assign",
+            "params": {
+              "m": "m3",
+              "op": "o3_cut"
+            }
+          },
+          "belief_applicability": "INAPPLICABLE",
+          "label": "分配工序"
+        },
+        {
+          "action": {
+            "action_type": "assign",
+            "params": {
+              "m": "m1",
+              "op": "o3_weld"
+            }
+          },
+          "belief_applicability": "INAPPLICABLE",
+          "label": "分配工序"
+        },
+        {
+          "action": {
+            "action_type": "assign",
+            "params": {
+              "m": "m2",
+              "op": "o3_weld"
+            }
+          },
+          "belief_applicability": "INAPPLICABLE",
+          "label": "分配工序"
+        },
+        {
+          "action": {
+            "action_type": "assign",
+            "params": {
+              "m": "m3",
+              "op": "o3_weld"
+            }
+          },
+          "belief_applicability": "INAPPLICABLE",
+          "label": "分配工序"
+        },
+        {
+          "action": {
+            "action_type": "assign",
+            "params": {
+              "m": "m1",
+              "op": "o3_paint"
+            }
+          },
+          "belief_applicability": "INAPPLICABLE",
+          "label": "分配工序"
+        },
+        {
+          "action": {
+            "action_type": "assign",
+            "params": {
+              "m": "m2",
+              "op": "o3_paint"
+            }
+          },
+          "belief_applicability": "INAPPLICABLE",
+          "label": "分配工序"
+        },
+        {
+          "action": {
+            "action_type": "assign",
+            "params": {
+              "m": "m3",
+              "op": "o3_paint"
+            }
+          },
+          "belief_applicability": "INAPPLICABLE",
+          "label": "分配工序"
+        },
+        {
+          "action": {
+            "action_type": "advance",
+            "params": {}
+          },
+          "belief_applicability": "INAPPLICABLE",
+          "label": "推进逻辑时间"
+        },
+        {
+          "action": {
+            "action_type": "pause",
+            "params": {
+              "m": "m1"
+            }
+          },
+          "belief_applicability": "APPLICABLE",
+          "label": "暂停机器"
+        },
+        {
+          "action": {
+            "action_type": "pause",
+            "params": {
+              "m": "m2"
+            }
+          },
+          "belief_applicability": "APPLICABLE",
+          "label": "暂停机器"
+        },
+        {
+          "action": {
+            "action_type": "pause",
+            "params": {
+              "m": "m3"
+            }
+          },
+          "belief_applicability": "APPLICABLE",
+          "label": "暂停机器"
+        },
+        {
+          "action": {
+            "action_type": "resume",
+            "params": {
+              "m": "m1"
+            }
+          },
+          "belief_applicability": "INAPPLICABLE",
+          "label": "恢复机器"
+        },
+        {
+          "action": {
+            "action_type": "resume",
+            "params": {
+              "m": "m2"
+            }
+          },
+          "belief_applicability": "INAPPLICABLE",
+          "label": "恢复机器"
+        },
+        {
+          "action": {
+            "action_type": "resume",
+            "params": {
+              "m": "m3"
+            }
+          },
+          "belief_applicability": "INAPPLICABLE",
+          "label": "恢复机器"
+        },
+        {
+          "action": {
+            "action_type": "reprioritize",
+            "params": {
+              "lvl": "high",
+              "ord": "o1"
+            }
+          },
+          "belief_applicability": "APPLICABLE",
+          "label": "重排队列"
+        },
+        {
+          "action": {
+            "action_type": "reprioritize",
+            "params": {
+              "lvl": "normal",
+              "ord": "o1"
+            }
+          },
+          "belief_applicability": "INAPPLICABLE",
+          "label": "重排队列"
+        },
+        {
+          "action": {
+            "action_type": "reprioritize",
+            "params": {
+              "lvl": "low",
+              "ord": "o1"
+            }
+          },
+          "belief_applicability": "APPLICABLE",
+          "label": "重排队列"
+        },
+        {
+          "action": {
+            "action_type": "reprioritize",
+            "params": {
+              "lvl": "high",
+              "ord": "o2"
+            }
+          },
+          "belief_applicability": "APPLICABLE",
+          "label": "重排队列"
+        },
+        {
+          "action": {
+            "action_type": "reprioritize",
+            "params": {
+              "lvl": "normal",
+              "ord": "o2"
+            }
+          },
+          "belief_applicability": "INAPPLICABLE",
+          "label": "重排队列"
+        },
+        {
+          "action": {
+            "action_type": "reprioritize",
+            "params": {
+              "lvl": "low",
+              "ord": "o2"
+            }
+          },
+          "belief_applicability": "APPLICABLE",
+          "label": "重排队列"
+        },
+        {
+          "action": {
+            "action_type": "reprioritize",
+            "params": {
+              "lvl": "high",
+              "ord": "o3"
+            }
+          },
+          "belief_applicability": "APPLICABLE",
+          "label": "重排队列"
+        },
+        {
+          "action": {
+            "action_type": "reprioritize",
+            "params": {
+              "lvl": "normal",
+              "ord": "o3"
+            }
+          },
+          "belief_applicability": "INAPPLICABLE",
+          "label": "重排队列"
+        },
+        {
+          "action": {
+            "action_type": "reprioritize",
+            "params": {
+              "lvl": "low",
+              "ord": "o3"
+            }
+          },
+          "belief_applicability": "APPLICABLE",
+          "label": "重排队列"
+        }
+      ],
+      "counts": {
+        "APPLICABLE": 14,
+        "INAPPLICABLE": 23,
+        "UNKNOWN": 0,
+        "UNSUPPORTED": 0
+      }
+    },
+    "payload_schema": "formal-lab/events/CANDIDATES@1",
+    "run_id": "run_phase1_normal",
+    "seq": 8,
+    "wall_time": "2026-09-27T03:19:22.830906Z"
+  },
+  {
+    "actor_id": "dispatcher",
+    "causal_parents": [
+      "evt_f9a4f82d87e6781a072d46e8"
+    ],
+    "event_id": "evt_a30657359b5edb9a0e5714b3",
+    "event_type": "ACTION_PROPOSED",
+    "idempotency_key": "run_phase1_normal:s1:proposal",
+    "logical_step": 1,
+    "payload": {
+      "model_call_ids": [],
+      "proposal": {
+        "action": {
+          "action_type": "assign",
+          "params": {
+            "m": "m1",
+            "op": "o1_cut"
+          }
+        },
+        "actor_id": "dispatcher",
+        "based_on_revision": 0,
+        "candidates_considered": 37,
+        "proposal_id": "run_phase1_normal:s1:proposal",
+        "rationale": "EDD: earliest-due applicable operation (priority, due, processing time)",
+        "run_id": "run_phase1_normal",
+        "source": {
+          "kind": "RULE",
+          "model": null,
+          "model_call_ids": [],
+          "strategy": {
+            "plugin_id": "formal-lab.example.scheduling.edd-dispatch",
+            "version": "1.0.0"
+          }
+        },
+        "step": 1,
+        "step_id": "run_phase1_normal:s1",
+        "usage": {
+          "input_tokens": 0,
+          "model_calls": 0,
+          "output_tokens": 0
+        }
+      }
+    },
+    "payload_schema": "formal-lab/events/ACTION_PROPOSED@1",
+    "run_id": "run_phase1_normal",
+    "seq": 9,
+    "wall_time": "2026-09-27T03:19:22.830909Z"
+  },
+  {
+    "actor_id": null,
+    "causal_parents": [
+      "evt_a30657359b5edb9a0e5714b3"
+    ],
+    "event_id": "evt_9b48e899b946f3376ae17add",
+    "event_type": "CHECK_COMPLETED",
+    "idempotency_key": "run_phase1_normal:s1:check",
+    "logical_step": 1,
+    "payload": {
+      "purpose": "precondition of the proposed action on the actor's belief",
+      "result": {
+        "action_digest": {
+          "algorithm": "sha256",
+          "value": "d16e9cb8c88743ba49ae841b5e44cfbce4c3efd58af0cb9e36f5a6476ac8fe51"
+        },
+        "assumptions": [
+          "state fully known"
+        ],
+        "backend": {
+          "name": "z3",
+          "version": "5.1.0"
+        },
+        "bound": {
+          "max_steps": 0,
+          "timeout_ms": 5000
+        },
+        "check_id": "chk_c8e09cf0ab494605",
+        "contract_version": "formal-lab-contracts/v1",
+        "explanation": "precondition and domain guards evaluated on a fully known state",
+        "extensions": {},
+        "model_digest": {
+          "algorithm": "sha256",
+          "value": "27ef54c6843626d6358ef69ec6529c77a897ffac22914c16694e277ca760bb8a"
+        },
+        "query": {
+          "action": {
+            "action_type": "assign",
+            "params": {
+              "m": "m1",
+              "op": "o1_cut"
+            }
+          },
+          "bound": {
+            "max_steps": 0,
+            "timeout_ms": 5000
+          },
+          "initial_state": "GIVEN_STATE",
+          "kind": "ACTION_PRECONDITION",
+          "property_id": null
+        },
+        "scope": "MODEL_INTERNAL",
+        "semantics": "SINGLE_STEP",
+        "state_digest": {
+          "algorithm": "sha256",
+          "value": "50e6f77cb92b086926dead6ea33cce26d9b4ef83700eeb5766f26c8fc101f7d9"
+        },
+        "stats": {
+          "elapsed_ms": 6.857492997369263,
+          "reason_unknown": null,
+          "solver_status": "can=sat,cannot=unsat",
+          "steps_explored": 0,
+          "timeout_ms": 5000
+        },
+        "unsupported": null,
+        "variable_mapping": {},
+        "verdict": "APPLICABLE",
+        "witness": null
+      }
+    },
+    "payload_schema": "formal-lab/events/CHECK_COMPLETED@1",
+    "run_id": "run_phase1_normal",
+    "seq": 10,
+    "wall_time": "2026-09-27T03:19:22.830913Z"
+  },
+  {
+    "actor_id": "dispatcher",
+    "causal_parents": [
+      "evt_a30657359b5edb9a0e5714b3",
+      "evt_9b48e899b946f3376ae17add"
+    ],
+    "event_id": "evt_abe0e24389b638c1c59a0d55",
+    "event_type": "ACTION_OUTCOME",
+    "idempotency_key": "run_phase1_normal:s1:outcome",
+    "logical_step": 1,
+    "payload": {
+      "outcome": {
+        "action": {
+          "action_type": "assign",
+          "params": {
+            "m": "m1",
+            "op": "o1_cut"
+          }
+        },
+        "effect_applied": true,
+        "effect_comparison": {
+          "diffs": [
+            {
+              "expected": true,
+              "observed": true,
+              "path": "on[o1_cut,m1]",
+              "status": "MATCH"
+            },
+            {
+              "expected": "running",
+              "observed": "running",
+              "path": "phase[o1_cut]",
+              "status": "MATCH"
+            },
+            {
+              "expected": 1,
+              "observed": 1,
+              "path": "remaining[o1_cut]",
+              "status": "MATCH"
+            }
+          ],
+          "evidence": [],
+          "expected_by": "model:neutral-scheduling@1 on belief",
+          "verdict": "MATCH"
+        },
+        "error": null,
+        "evidence": [],
+        "operation_id": "run_phase1_normal:s1:apply",
+        "proposal_id": "run_phase1_normal:s1:proposal",
+        "result": {
+          "properties": {
+            "all_done": false,
+            "machine_capacity": true,
+            "on_time": true,
+            "precedence": true,
+            "resource_capacity": true
+          },
+          "written_paths": [
+            "on[o1_cut,m1]",
+            "phase[o1_cut]",
+            "remaining[o1_cut]"
+          ]
+        },
+        "revision_after": 1,
+        "revision_before": 0,
+        "run_id": "run_phase1_normal",
+        "status": "APPLIED",
+        "step_id": "run_phase1_normal:s1"
+      },
+      "snapshot_digest": "56cf42cf16d25d708b67403df6a4d4abdc58ffbe7d9de29bd9554c01a1eac0db",
+      "state_revision": 1
+    },
+    "payload_schema": "formal-lab/events/ACTION_OUTCOME@1",
+    "run_id": "run_phase1_normal",
+    "seq": 11,
+    "wall_time": "2026-09-27T03:19:22.830917Z"
+  },
+  {
+    "actor_id": "dispatcher",
+    "causal_parents": [
+      "evt_abe0e24389b638c1c59a0d55"
+    ],
+    "event_id": "evt_eec6ef56a4d8bb7f11ec5ea0",
+    "event_type": "EFFECT_COMPARED",
+    "idempotency_key": "run_phase1_normal:s1:comparison",
+    "logical_step": 1,
+    "payload": {
+      "comparison": {
+        "diffs": [
+          {
+            "expected": true,
+            "observed": true,
+            "path": "on[o1_cut,m1]",
+            "status": "MATCH"
+          },
+          {
+            "expected": "running",
+            "observed": "running",
+            "path": "phase[o1_cut]",
+            "status": "MATCH"
+          },
+          {
+            "expected": 1,
+            "observed": 1,
+            "path": "remaining[o1_cut]",
+            "status": "MATCH"
+          }
+        ],
+        "evidence": [],
+        "expected_by": "model:neutral-scheduling@1 on belief",
+        "verdict": "MATCH"
+      },
+      "observation_after": {
+        "actor_id": "dispatcher",
+        "evidence": [
+          {
+            "artifact": null,
+            "id": "run_phase1_normal:env@1",
+            "kind": "snapshot",
+            "note": "truth revision 1"
+          }
+        ],
+        "facts": [
+          {
+            "observed_at_step": 1,
+            "path": "phase[o1_cut]",
+            "source": "DIRECT",
+            "value": "running"
+          },
+          {
+            "observed_at_step": 1,
+            "path": "phase[o1_weld]",
+            "source": "DIRECT",
+            "value": "waiting"
+          },
+          {
+            "observed_at_step": 1,
+            "path": "phase[o2_cut]",
+            "source": "DIRECT",
+            "value": "waiting"
+          },
+          {
+            "observed_at_step": 1,
+            "path": "phase[o2_paint]",
+            "source": "DIRECT",
+            "value": "waiting"
+          },
+          {
+            "observed_at_step": 1,
+            "path": "phase[o3_cut]",
+            "source": "DIRECT",
+            "value": "waiting"
+          },
+          {
+            "observed_at_step": 1,
+            "path": "phase[o3_weld]",
+            "source": "DIRECT",
+            "value": "waiting"
+          },
+          {
+            "observed_at_step": 1,
+            "path": "phase[o3_paint]",
+            "source": "DIRECT",
+            "value": "waiting"
+          },
+          {
+            "observed_at_step": 1,
+            "path": "on[o1_cut,m1]",
+            "source": "DIRECT",
+            "value": true
+          },
+          {
+            "observed_at_step": 1,
+            "path": "on[o1_cut,m2]",
+            "source": "DIRECT",
+            "value": false
+          },
+          {
+            "observed_at_step": 1,
+            "path": "on[o1_cut,m3]",
+            "source": "DIRECT",
+            "value": false
+          },
+          {
+            "observed_at_step": 1,
+            "path": "on[o1_weld,m1]",
+            "source": "DIRECT",
+            "value": false
+          },
+          {
+            "observed_at_step": 1,
+            "path": "on[o1_weld,m2]",
+            "source": "DIRECT",
+            "value": false
+          },
+          {
+            "observed_at_step": 1,
+            "path": "on[o1_weld,m3]",
+            "source": "DIRECT",
+            "value": false
+          },
+          {
+            "observed_at_step": 1,
+            "path": "on[o2_cut,m1]",
+            "source": "DIRECT",
+            "value": false
+          },
+          {
+            "observed_at_step": 1,
+            "path": "on[o2_cut,m2]",
+            "source": "DIRECT",
+            "value": false
+          },
+          {
+            "observed_at_step": 1,
+            "path": "on[o2_cut,m3]",
+            "source": "DIRECT",
+            "value": false
+          },
+          {
+            "observed_at_step": 1,
+            "path": "on[o2_paint,m1]",
+            "source": "DIRECT",
+            "value": false
+          },
+          {
+            "observed_at_step": 1,
+            "path": "on[o2_paint,m2]",
+            "source": "DIRECT",
+            "value": false
+          },
+          {
+            "observed_at_step": 1,
+            "path": "on[o2_paint,m3]",
+            "source": "DIRECT",
+            "value": false
+          },
+          {
+            "observed_at_step": 1,
+            "path": "on[o3_cut,m1]",
+            "source": "DIRECT",
+            "value": false
+          },
+          {
+            "observed_at_step": 1,
+            "path": "on[o3_cut,m2]",
+            "source": "DIRECT",
+            "value": false
+          },
+          {
+            "observed_at_step": 1,
+            "path": "on[o3_cut,m3]",
+            "source": "DIRECT",
+            "value": false
+          },
+          {
+            "observed_at_step": 1,
+            "path": "on[o3_weld,m1]",
+            "source": "DIRECT",
+            "value": false
+          },
+          {
+            "observed_at_step": 1,
+            "path": "on[o3_weld,m2]",
+            "source": "DIRECT",
+            "value": false
+          },
+          {
+            "observed_at_step": 1,
+            "path": "on[o3_weld,m3]",
+            "source": "DIRECT",
+            "value": false
+          },
+          {
+            "observed_at_step": 1,
+            "path": "on[o3_paint,m1]",
+            "source": "DIRECT",
+            "value": false
+          },
+          {
+            "observed_at_step": 1,
+            "path": "on[o3_paint,m2]",
+            "source": "DIRECT",
+            "value": false
+          },
+          {
+            "observed_at_step": 1,
+            "path": "on[o3_paint,m3]",
+            "source": "DIRECT",
+            "value": false
+          },
+          {
+            "observed_at_step": 1,
+            "path": "remaining[o1_cut]",
+            "source": "DIRECT",
+            "value": 1
+          },
+          {
+            "observed_at_step": 1,
+            "path": "remaining[o1_weld]",
+            "source": "DIRECT",
+            "value": 0
+          },
+          {
+            "observed_at_step": 1,
+            "path": "remaining[o2_cut]",
+            "source": "DIRECT",
+            "value": 0
+          },
+          {
+            "observed_at_step": 1,
+            "path": "remaining[o2_paint]",
+            "source": "DIRECT",
+            "value": 0
+          },
+          {
+            "observed_at_step": 1,
+            "path": "remaining[o3_cut]",
+            "source": "DIRECT",
+            "value": 0
+          },
+          {
+            "observed_at_step": 1,
+            "path": "remaining[o3_weld]",
+            "source": "DIRECT",
+            "value": 0
+          },
+          {
+            "observed_at_step": 1,
+            "path": "remaining[o3_paint]",
+            "source": "DIRECT",
+            "value": 0
+          },
+          {
+            "observed_at_step": 1,
+            "path": "proc_time[o1_cut]",
+            "source": "DIRECT",
+            "value": 1
+          },
+          {
+            "observed_at_step": 1,
+            "path": "proc_time[o1_weld]",
+            "source": "DIRECT",
+            "value": 4
+          },
+          {
+            "observed_at_step": 1,
+            "path": "proc_time[o2_cut]",
+            "source": "DIRECT",
+            "value": 2
+          },
+          {
+            "observed_at_step": 1,
+            "path": "proc_time[o2_paint]",
+            "source": "DIRECT",
+            "value": 2
+          },
+          {
+            "observed_at_step": 1,
+            "path": "proc_time[o3_cut]",
+            "source": "DIRECT",
+            "value": 1
+          },
+          {
+            "observed_at_step": 1,
+            "path": "proc_time[o3_weld]",
+            "source": "DIRECT",
+            "value": 2
+          },
+          {
+            "observed_at_step": 1,
+            "path": "proc_time[o3_paint]",
+            "source": "DIRECT",
+            "value": 2
+          },
+          {
+            "observed_at_step": 1,
+            "path": "res_cap[fixture]",
+            "source": "DIRECT",
+            "value": 2
+          },
+          {
+            "observed_at_step": 1,
+            "path": "res_cap[operator]",
+            "source": "DIRECT",
+            "value": 2
+          },
+          {
+            "observed_at_step": 1,
+            "path": "finish[o1_cut]",
+            "source": "DIRECT",
+            "value": 0
+          },
+          {
+            "observed_at_step": 1,
+            "path": "finish[o1_weld]",
+            "source": "DIRECT",
+            "value": 0
+          },
+          {
+            "observed_at_step": 1,
+            "path": "finish[o2_cut]",
+            "source": "DIRECT",
+            "value": 0
+          },
+          {
+            "observed_at_step": 1,
+            "path": "finish[o2_paint]",
+            "source": "DIRECT",
+            "value": 0
+          },
+          {
+            "observed_at_step": 1,
+            "path": "finish[o3_cut]",
+            "source": "DIRECT",
+            "value": 0
+          },
+          {
+            "observed_at_step": 1,
+            "path": "finish[o3_weld]",
+            "source": "DIRECT",
+            "value": 0
+          },
+          {
+            "observed_at_step": 1,
+            "path": "finish[o3_paint]",
+            "source": "DIRECT",
+            "value": 0
+          },
+          {
+            "observed_at_step": 1,
+            "path": "paused[m1]",
+            "source": "DIRECT",
+            "value": false
+          },
+          {
+            "observed_at_step": 1,
+            "path": "paused[m2]",
+            "source": "DIRECT",
+            "value": false
+          },
+          {
+            "observed_at_step": 1,
+            "path": "paused[m3]",
+            "source": "DIRECT",
+            "value": false
+          },
+          {
+            "observed_at_step": 1,
+            "path": "priority[o1]",
+            "source": "DIRECT",
+            "value": "normal"
+          },
+          {
+            "observed_at_step": 1,
+            "path": "priority[o2]",
+            "source": "DIRECT",
+            "value": "normal"
+          },
+          {
+            "observed_at_step": 1,
+            "path": "priority[o3]",
+            "source": "DIRECT",
+            "value": "normal"
+          },
+          {
+            "observed_at_step": 1,
+            "path": "clock",
+            "source": "DIRECT",
+            "value": 0
+          },
+          {
+            "observed_at_step": 1,
+            "path": "tick_parity",
+            "source": "DIRECT",
+            "value": false
+          }
+        ],
+        "run_id": "run_phase1_normal",
+        "semantics": "Facts are what the actor observed (possibly stale, see observed_at_step); unknowns are locations whose current value the actor cannot know at this step. The environment truth state is a separate object that agents never receive.",
+        "state_revision": 1,
+        "step": 1,
+        "unknowns": []
+      }
+    },
+    "payload_schema": "formal-lab/events/EFFECT_COMPARED@1",
+    "run_id": "run_phase1_normal",
+    "seq": 12,
+    "wall_time": "2026-09-27T03:19:22.830920Z"
+  }
+]

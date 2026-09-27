@@ -1,0 +1,88 @@
+{
+  "budget": {
+    "max_model_calls": 80,
+    "max_steps": 60,
+    "max_tokens": 800000,
+    "max_wall_seconds": 600.0
+  },
+  "contract_version": "formal-lab-contracts/v1",
+  "description": "Line state (phase / machine occupancy / remaining time) reaches the dispatcher 2 steps late; current values are unknown and preconditions may be UNKNOWN.",
+  "environment": {
+    "config": {
+      "observation": {
+        "delay_steps": {
+          "finish": 2,
+          "on": 2,
+          "phase": 2,
+          "remaining": 2
+        }
+      },
+      "seeded_variation": [
+        {
+          "delta_max": 1,
+          "delta_min": -1,
+          "var": "proc_time"
+        }
+      ]
+    },
+    "plugin": {
+      "plugin_id": "formal-lab.env.ir-world",
+      "version": "1.0.0"
+    }
+  },
+  "extensions": {},
+  "model": {
+    "digest": {
+      "algorithm": "sha256",
+      "value": "27ef54c6843626d6358ef69ec6529c77a897ffac22914c16694e277ca760bb8a"
+    },
+    "package_id": "neutral-scheduling",
+    "version": 1
+  },
+  "name": "状态延迟",
+  "objectives": [
+    {
+      "description": "complete all orders",
+      "metric_id": null,
+      "property_id": "all_done"
+    },
+    {
+      "description": "minimise simulated delay cost",
+      "metric_id": "delay_cost",
+      "property_id": null
+    }
+  ],
+  "participants": [
+    {
+      "actor_id": "dispatcher",
+      "role": "dispatcher",
+      "strategy": {
+        "config": {
+          "fallback_order": [
+            "assign",
+            "resume",
+            "advance"
+          ],
+          "horizon": 18
+        },
+        "plugin": {
+          "plugin_id": "formal-lab.planner.z3-bounded",
+          "version": "1.0.0"
+        }
+      }
+    }
+  ],
+  "revision": 1,
+  "scenario_id": "sched-state-delay",
+  "seed": 1,
+  "stop_conditions": [
+    {
+      "kind": "GOAL_REACHED",
+      "property_id": "all_done"
+    },
+    {
+      "kind": "NO_APPLICABLE_ACTION",
+      "property_id": null
+    }
+  ]
+}

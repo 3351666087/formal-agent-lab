@@ -1,0 +1,561 @@
+[
+  {
+    "capabilities": [
+      {
+        "id": "profile.deterministic_finite_v1",
+        "params": {},
+        "version": "1"
+      },
+      {
+        "id": "env.snapshot_restore",
+        "params": {},
+        "version": "1"
+      },
+      {
+        "id": "env.observation_delay",
+        "params": {},
+        "version": "1"
+      },
+      {
+        "id": "env.truth_overrides",
+        "params": {},
+        "version": "1"
+      },
+      {
+        "id": "env.seeded_variation",
+        "params": {},
+        "version": "1"
+      }
+    ],
+    "config_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "initial_overrides": {
+          "additionalProperties": {
+            "type": [
+              "boolean",
+              "integer",
+              "string"
+            ]
+          },
+          "type": "object"
+        },
+        "observation": {
+          "additionalProperties": false,
+          "properties": {
+            "delay_steps": {
+              "additionalProperties": {
+                "minimum": 0,
+                "type": "integer"
+              },
+              "type": "object"
+            },
+            "hidden": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          "type": "object"
+        },
+        "seeded_variation": {
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "delta_max": {
+                "type": "integer"
+              },
+              "delta_min": {
+                "type": "integer"
+              },
+              "var": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "var",
+              "delta_min",
+              "delta_max"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "truth_constant_overrides": {
+          "additionalProperties": {
+            "type": [
+              "boolean",
+              "integer",
+              "string"
+            ]
+          },
+          "type": "object"
+        }
+      },
+      "type": "object"
+    },
+    "contract_version": "formal-lab-contracts/v1",
+    "entrypoint": "formal_lab_env.ir_world:create",
+    "extensions": {},
+    "input_schema": null,
+    "interface": "ENVIRONMENT",
+    "interface_version": "1",
+    "license": "Apache-2.0",
+    "output_schema": null,
+    "plugin_id": "formal-lab.env.ir-world",
+    "semantic_profiles": [
+      "deterministic_finite_v1"
+    ],
+    "source": "formal-lab-neutral-env",
+    "ui": {
+      "action_display": {},
+      "action_labels": {},
+      "category": "environment",
+      "description": "Pure-data simulator: runs the pinned model (optionally with truth overrides) as the world",
+      "entity_labels": {},
+      "label": "IR world simulator",
+      "metric_labels": {},
+      "state_labels": {},
+      "value_labels": {}
+    },
+    "version": "1.0.0"
+  },
+  {
+    "capabilities": [
+      {
+        "id": "eval.deterministic",
+        "params": {},
+        "version": "1"
+      },
+      {
+        "id": "eval.applies_to",
+        "params": {
+          "all": true
+        },
+        "version": "1"
+      }
+    ],
+    "config_schema": {
+      "additionalProperties": false,
+      "properties": {},
+      "type": "object"
+    },
+    "contract_version": "formal-lab-contracts/v1",
+    "entrypoint": "formal_lab_eval.generic:create",
+    "extensions": {},
+    "input_schema": null,
+    "interface": "EVALUATOR",
+    "interface_version": "1",
+    "license": "Apache-2.0",
+    "output_schema": null,
+    "plugin_id": "formal-lab.eval.generic",
+    "semantic_profiles": [
+      "deterministic_finite_v1"
+    ],
+    "source": "formal-lab-evaluation",
+    "ui": {
+      "action_display": {},
+      "action_labels": {},
+      "category": "evaluator",
+      "description": null,
+      "entity_labels": {},
+      "label": "通用评分",
+      "metric_labels": {
+        "effect_mismatches": "效果差异",
+        "goal_reached": "目标达成",
+        "model_calls": "模型调用",
+        "rejected_actions": "被拒动作",
+        "steps_used": "使用步数",
+        "tokens": "Tokens",
+        "wall_seconds": "墙钟时间"
+      },
+      "state_labels": {},
+      "value_labels": {}
+    },
+    "version": "1.0.0"
+  },
+  {
+    "capabilities": [
+      {
+        "id": "eval.deterministic",
+        "params": {},
+        "version": "1"
+      },
+      {
+        "id": "eval.applies_to",
+        "params": {
+          "package_ids": [
+            "neutral-scheduling"
+          ]
+        },
+        "version": "1"
+      }
+    ],
+    "config_schema": {
+      "additionalProperties": false,
+      "properties": {},
+      "type": "object"
+    },
+    "contract_version": "formal-lab-contracts/v1",
+    "entrypoint": "formal_lab_example_scheduling.scorer:create",
+    "extensions": {},
+    "input_schema": null,
+    "interface": "EVALUATOR",
+    "interface_version": "1",
+    "license": "Apache-2.0",
+    "output_schema": {
+      "items": {
+        "$ref": "https://formal-lab.dev/contracts/v1/MetricResult.schema.json"
+      },
+      "type": "array"
+    },
+    "plugin_id": "formal-lab.example.scheduling.scorer",
+    "semantic_profiles": [
+      "deterministic_finite_v1"
+    ],
+    "source": "formal-lab-example-scheduling",
+    "ui": {
+      "action_display": {},
+      "action_labels": {},
+      "category": "evaluator",
+      "description": null,
+      "entity_labels": {},
+      "label": "调度评分",
+      "metric_labels": {
+        "delay_cost": "模拟延期成本",
+        "makespan": "完工时间",
+        "mean_tardiness": "平均延误",
+        "orders_completed": "完工订单数"
+      },
+      "state_labels": {},
+      "value_labels": {}
+    },
+    "version": "1.0.0"
+  },
+  {
+    "capabilities": [
+      {
+        "id": "profile.deterministic_finite_v1",
+        "params": {},
+        "version": "1"
+      }
+    ],
+    "config_schema": {
+      "properties": {},
+      "type": "object"
+    },
+    "contract_version": "formal-lab-contracts/v1",
+    "entrypoint": "formal_lab_model.frontend:create",
+    "extensions": {},
+    "input_schema": {
+      "$ref": "https://formal-lab.dev/contracts/v1/ModelIR.schema.json"
+    },
+    "interface": "MODEL_FRONTEND",
+    "interface_version": "1",
+    "license": "Apache-2.0",
+    "output_schema": {
+      "$ref": "https://formal-lab.dev/contracts/v1/ModelPackage.schema.json"
+    },
+    "plugin_id": "formal-lab.frontend.ir-json",
+    "semantic_profiles": [
+      "deterministic_finite_v1"
+    ],
+    "source": "formal-lab-model-core",
+    "ui": {
+      "action_display": {},
+      "action_labels": {},
+      "category": "model_frontend",
+      "description": "Neutral finite-state IR (fal-ir-json/v1) with type checking",
+      "entity_labels": {},
+      "label": "IR JSON",
+      "metric_labels": {},
+      "state_labels": {},
+      "value_labels": {}
+    },
+    "version": "1.0.0"
+  },
+  {
+    "capabilities": [
+      {
+        "id": "plan.rule",
+        "params": {},
+        "version": "1"
+      }
+    ],
+    "config_schema": {
+      "additionalProperties": false,
+      "properties": {},
+      "type": "object"
+    },
+    "contract_version": "formal-lab-contracts/v1",
+    "entrypoint": "formal_lab_example_scheduling.rule_planner:create",
+    "extensions": {},
+    "input_schema": null,
+    "interface": "PLANNER",
+    "interface_version": "1",
+    "license": "Apache-2.0",
+    "output_schema": null,
+    "plugin_id": "formal-lab.example.scheduling.edd-dispatch",
+    "semantic_profiles": [
+      "deterministic_finite_v1"
+    ],
+    "source": "formal-lab-example-scheduling",
+    "ui": {
+      "action_display": {},
+      "action_labels": {},
+      "category": "rule",
+      "description": "Earliest-due-date dispatch with priority and SPT tie-breaks (deterministic)",
+      "entity_labels": {},
+      "label": "EDD 规则调度",
+      "metric_labels": {},
+      "state_labels": {},
+      "value_labels": {}
+    },
+    "version": "1.0.0"
+  },
+  {
+    "capabilities": [
+      {
+        "id": "plan.llm",
+        "params": {},
+        "version": "1"
+      }
+    ],
+    "config_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "client": {
+          "default": "openai_compatible",
+          "enum": [
+            "openai_compatible",
+            "stub"
+          ],
+          "type": "string"
+        },
+        "goal_property": {
+          "type": "string"
+        },
+        "max_candidates": {
+          "default": 60,
+          "maximum": 200,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "model": {
+          "description": "override FAL_LLM_MODEL",
+          "type": "string"
+        },
+        "stub_preference": {
+          "description": "client=stub only: action types in preference order",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
+    "contract_version": "formal-lab-contracts/v1",
+    "entrypoint": "formal_lab_strategies.llm_planner:create",
+    "extensions": {},
+    "input_schema": null,
+    "interface": "PLANNER",
+    "interface_version": "1",
+    "license": "Apache-2.0",
+    "output_schema": null,
+    "plugin_id": "formal-lab.planner.llm",
+    "semantic_profiles": [
+      "deterministic_finite_v1"
+    ],
+    "source": "formal-lab-strategies",
+    "ui": {
+      "action_display": {},
+      "action_labels": {},
+      "category": "llm",
+      "description": "Chooses one candidate action with a language model (JSON-schema output). client=stub gives a labelled deterministic stand-in.",
+      "entity_labels": {},
+      "label": "LLM 策略",
+      "metric_labels": {},
+      "state_labels": {},
+      "value_labels": {}
+    },
+    "version": "1.0.0"
+  },
+  {
+    "capabilities": [
+      {
+        "id": "plan.bounded_search",
+        "params": {},
+        "version": "1"
+      },
+      {
+        "id": "profile.deterministic_finite_v1",
+        "params": {},
+        "version": "1"
+      }
+    ],
+    "config_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "fallback_order": {
+          "description": "action types preferred when no plan exists (in order)",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "goal_property": {
+          "description": "goal property id (default: first goal in the model)",
+          "type": "string"
+        },
+        "horizon": {
+          "default": 16,
+          "maximum": 60,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "timeout_ms": {
+          "default": 8000,
+          "minimum": 10,
+          "type": "integer"
+        }
+      },
+      "type": "object"
+    },
+    "contract_version": "formal-lab-contracts/v1",
+    "entrypoint": "formal_lab_solver_z3.planner:create",
+    "extensions": {},
+    "input_schema": null,
+    "interface": "PLANNER",
+    "interface_version": "1",
+    "license": "Apache-2.0 (adapter); z3-solver: MIT",
+    "output_schema": null,
+    "plugin_id": "formal-lab.planner.z3-bounded",
+    "semantic_profiles": [
+      "deterministic_finite_v1"
+    ],
+    "source": "formal-lab-solver-z3",
+    "ui": {
+      "action_display": {},
+      "action_labels": {},
+      "category": "symbolic",
+      "description": "Shortest plan to the goal within a horizon (Z3 BMC), receding horizon",
+      "entity_labels": {},
+      "label": "Z3 bounded planner",
+      "metric_labels": {},
+      "state_labels": {},
+      "value_labels": {}
+    },
+    "version": "1.0.0"
+  },
+  {
+    "capabilities": [
+      {
+        "id": "plan.rule",
+        "params": {},
+        "version": "1"
+      }
+    ],
+    "config_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "preference": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
+    "contract_version": "formal-lab-contracts/v1",
+    "entrypoint": "fal_example_external_plugin:create",
+    "extensions": {},
+    "input_schema": null,
+    "interface": "PLANNER",
+    "interface_version": "1",
+    "license": "Apache-2.0",
+    "output_schema": null,
+    "plugin_id": "org.example.preference-planner",
+    "semantic_profiles": [
+      "deterministic_finite_v1"
+    ],
+    "source": "fal-example-external-plugin",
+    "ui": {
+      "action_display": {},
+      "action_labels": {},
+      "category": "rule",
+      "description": "Packaged outside the core; registered via the formal_lab.plugins entry point",
+      "entity_labels": {},
+      "label": "Example: preference planner (external)",
+      "metric_labels": {},
+      "state_labels": {},
+      "value_labels": {}
+    },
+    "version": "0.1.0"
+  },
+  {
+    "capabilities": [
+      {
+        "id": "profile.deterministic_finite_v1",
+        "params": {},
+        "version": "1"
+      },
+      {
+        "id": "query.goal_reachability",
+        "params": {},
+        "version": "1"
+      },
+      {
+        "id": "query.invariant_violation",
+        "params": {},
+        "version": "1"
+      },
+      {
+        "id": "query.action_precondition",
+        "params": {},
+        "version": "1"
+      },
+      {
+        "id": "query.partial_state",
+        "params": {},
+        "version": "1"
+      }
+    ],
+    "config_schema": {
+      "properties": {
+        "default_timeout_ms": {
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "type": "object"
+    },
+    "contract_version": "formal-lab-contracts/v1",
+    "entrypoint": "formal_lab_solver_z3.verifier:create",
+    "extensions": {},
+    "input_schema": null,
+    "interface": "VERIFIER",
+    "interface_version": "1",
+    "license": "Apache-2.0 (adapter); z3-solver: MIT",
+    "output_schema": null,
+    "plugin_id": "formal-lab.verifier.z3-bmc",
+    "semantic_profiles": [
+      "deterministic_finite_v1"
+    ],
+    "source": "formal-lab-solver-z3",
+    "ui": {
+      "action_display": {},
+      "action_labels": {},
+      "category": "verifier",
+      "description": "Bounded model checking (incremental unrolling) with interpreter-replayed witnesses",
+      "entity_labels": {},
+      "label": "Z3 bounded checker",
+      "metric_labels": {},
+      "state_labels": {},
+      "value_labels": {}
+    },
+    "version": "1.0.0"
+  }
+]

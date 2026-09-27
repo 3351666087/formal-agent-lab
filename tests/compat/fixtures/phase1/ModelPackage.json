@@ -1,0 +1,1857 @@
+{
+  "compiled": [],
+  "contract_version": "formal-lab-contracts/v1",
+  "created_at": "2026-09-27T03:19:19.657568Z",
+  "digest": {
+    "algorithm": "sha256",
+    "value": "27ef54c6843626d6358ef69ec6529c77a897ffac22914c16694e277ca760bb8a"
+  },
+  "extensions": {},
+  "frontend": {
+    "plugin_id": "formal-lab.frontend.ir-json",
+    "version": "1.0.0"
+  },
+  "ir": {
+    "actions": [
+      {
+        "cost": 1,
+        "description": null,
+        "effects": [
+          {
+            "kind": "assign",
+            "target": {
+              "index": [
+                {
+                  "name": "op",
+                  "op": "ref"
+                }
+              ],
+              "var": "phase"
+            },
+            "value": {
+              "domain": null,
+              "op": "const",
+              "value": "running"
+            }
+          },
+          {
+            "kind": "assign",
+            "target": {
+              "index": [
+                {
+                  "name": "op",
+                  "op": "ref"
+                },
+                {
+                  "name": "m",
+                  "op": "ref"
+                }
+              ],
+              "var": "on"
+            },
+            "value": {
+              "domain": null,
+              "op": "const",
+              "value": true
+            }
+          },
+          {
+            "kind": "assign",
+            "target": {
+              "index": [
+                {
+                  "name": "op",
+                  "op": "ref"
+                }
+              ],
+              "var": "remaining"
+            },
+            "value": {
+              "index": [
+                {
+                  "name": "op",
+                  "op": "ref"
+                }
+              ],
+              "name": "proc_time",
+              "op": "var"
+            }
+          }
+        ],
+        "label": "分配工序",
+        "name": "assign",
+        "params": [
+          {
+            "name": "op",
+            "type": {
+              "kind": "entity",
+              "set": "ops"
+            }
+          },
+          {
+            "name": "m",
+            "type": {
+              "kind": "entity",
+              "set": "machines"
+            }
+          }
+        ],
+        "precondition": {
+          "args": [
+            {
+              "args": [
+                {
+                  "index": [
+                    {
+                      "name": "op",
+                      "op": "ref"
+                    }
+                  ],
+                  "name": "phase",
+                  "op": "var"
+                },
+                {
+                  "domain": null,
+                  "op": "const",
+                  "value": "waiting"
+                }
+              ],
+              "op": "eq"
+            },
+            {
+              "body": {
+                "args": [
+                  {
+                    "index": [
+                      {
+                        "name": "p",
+                        "op": "ref"
+                      }
+                    ],
+                    "name": "phase",
+                    "op": "var"
+                  },
+                  {
+                    "domain": null,
+                    "op": "const",
+                    "value": "done"
+                  }
+                ],
+                "op": "eq"
+              },
+              "domain": "ops",
+              "op": "forall",
+              "var": "p",
+              "where": {
+                "index": [
+                  {
+                    "name": "op",
+                    "op": "ref"
+                  },
+                  {
+                    "name": "p",
+                    "op": "ref"
+                  }
+                ],
+                "name": "pred",
+                "op": "var"
+              }
+            },
+            {
+              "index": [
+                {
+                  "name": "op",
+                  "op": "ref"
+                },
+                {
+                  "name": "m",
+                  "op": "ref"
+                }
+              ],
+              "name": "eligible",
+              "op": "var"
+            },
+            {
+              "args": [
+                {
+                  "index": [
+                    {
+                      "name": "m",
+                      "op": "ref"
+                    }
+                  ],
+                  "name": "paused",
+                  "op": "var"
+                }
+              ],
+              "op": "not"
+            },
+            {
+              "args": [
+                {
+                  "body": {
+                    "index": [
+                      {
+                        "name": "o",
+                        "op": "ref"
+                      },
+                      {
+                        "name": "m",
+                        "op": "ref"
+                      }
+                    ],
+                    "name": "on",
+                    "op": "var"
+                  },
+                  "domain": "ops",
+                  "op": "count",
+                  "var": "o",
+                  "where": null
+                },
+                {
+                  "domain": null,
+                  "op": "const",
+                  "value": 0
+                }
+              ],
+              "op": "eq"
+            },
+            {
+              "args": [
+                {
+                  "body": {
+                    "body": {
+                      "args": [
+                        {
+                          "index": [
+                            {
+                              "name": "o",
+                              "op": "ref"
+                            },
+                            {
+                              "name": "mm",
+                              "op": "ref"
+                            }
+                          ],
+                          "name": "on",
+                          "op": "var"
+                        },
+                        {
+                          "args": [
+                            {
+                              "index": [
+                                {
+                                  "name": "mm",
+                                  "op": "ref"
+                                }
+                              ],
+                              "name": "station_of",
+                              "op": "var"
+                            },
+                            {
+                              "index": [
+                                {
+                                  "name": "m",
+                                  "op": "ref"
+                                }
+                              ],
+                              "name": "station_of",
+                              "op": "var"
+                            }
+                          ],
+                          "op": "eq"
+                        }
+                      ],
+                      "op": "and"
+                    },
+                    "domain": "machines",
+                    "op": "exists",
+                    "var": "mm",
+                    "where": null
+                  },
+                  "domain": "ops",
+                  "op": "count",
+                  "var": "o",
+                  "where": null
+                },
+                {
+                  "index": [
+                    {
+                      "index": [
+                        {
+                          "name": "m",
+                          "op": "ref"
+                        }
+                      ],
+                      "name": "station_of",
+                      "op": "var"
+                    }
+                  ],
+                  "name": "station_cap",
+                  "op": "var"
+                }
+              ],
+              "op": "lt"
+            },
+            {
+              "body": {
+                "args": [
+                  {
+                    "body": {
+                      "args": [
+                        {
+                          "args": [
+                            {
+                              "index": [
+                                {
+                                  "name": "o",
+                                  "op": "ref"
+                                }
+                              ],
+                              "name": "phase",
+                              "op": "var"
+                            },
+                            {
+                              "domain": null,
+                              "op": "const",
+                              "value": "running"
+                            }
+                          ],
+                          "op": "eq"
+                        },
+                        {
+                          "index": [
+                            {
+                              "name": "o",
+                              "op": "ref"
+                            },
+                            {
+                              "name": "res",
+                              "op": "ref"
+                            }
+                          ],
+                          "name": "needs",
+                          "op": "var"
+                        }
+                      ],
+                      "op": "and"
+                    },
+                    "domain": "ops",
+                    "op": "count",
+                    "var": "o",
+                    "where": null
+                  },
+                  {
+                    "index": [
+                      {
+                        "name": "res",
+                        "op": "ref"
+                      }
+                    ],
+                    "name": "res_cap",
+                    "op": "var"
+                  }
+                ],
+                "op": "lt"
+              },
+              "domain": "resources",
+              "op": "forall",
+              "var": "res",
+              "where": {
+                "index": [
+                  {
+                    "name": "op",
+                    "op": "ref"
+                  },
+                  {
+                    "name": "res",
+                    "op": "ref"
+                  }
+                ],
+                "name": "needs",
+                "op": "var"
+              }
+            }
+          ],
+          "op": "and"
+        },
+        "retry": "RECONCILE_THEN_RETRY",
+        "timeout_seconds": 30.0
+      },
+      {
+        "cost": 1,
+        "description": null,
+        "effects": [
+          {
+            "kind": "assign",
+            "target": {
+              "index": [],
+              "var": "clock"
+            },
+            "value": {
+              "args": [
+                {
+                  "index": [],
+                  "name": "clock",
+                  "op": "var"
+                },
+                {
+                  "domain": null,
+                  "op": "const",
+                  "value": 1
+                }
+              ],
+              "op": "add"
+            }
+          },
+          {
+            "kind": "assign",
+            "target": {
+              "index": [],
+              "var": "tick_parity"
+            },
+            "value": {
+              "args": [
+                {
+                  "index": [],
+                  "name": "tick_parity",
+                  "op": "var"
+                }
+              ],
+              "op": "not"
+            }
+          },
+          {
+            "domain": "ops",
+            "effects": [
+              {
+                "kind": "assign",
+                "target": {
+                  "index": [
+                    {
+                      "name": "o",
+                      "op": "ref"
+                    }
+                  ],
+                  "var": "remaining"
+                },
+                "value": {
+                  "args": [
+                    {
+                      "index": [
+                        {
+                          "name": "o",
+                          "op": "ref"
+                        }
+                      ],
+                      "name": "remaining",
+                      "op": "var"
+                    },
+                    {
+                      "domain": null,
+                      "op": "const",
+                      "value": 1
+                    }
+                  ],
+                  "op": "sub"
+                }
+              },
+              {
+                "condition": {
+                  "args": [
+                    {
+                      "index": [
+                        {
+                          "name": "o",
+                          "op": "ref"
+                        }
+                      ],
+                      "name": "remaining",
+                      "op": "var"
+                    },
+                    {
+                      "domain": null,
+                      "op": "const",
+                      "value": 1
+                    }
+                  ],
+                  "op": "le"
+                },
+                "kind": "when",
+                "otherwise": [],
+                "then": [
+                  {
+                    "kind": "assign",
+                    "target": {
+                      "index": [
+                        {
+                          "name": "o",
+                          "op": "ref"
+                        }
+                      ],
+                      "var": "phase"
+                    },
+                    "value": {
+                      "domain": null,
+                      "op": "const",
+                      "value": "done"
+                    }
+                  },
+                  {
+                    "kind": "assign",
+                    "target": {
+                      "index": [
+                        {
+                          "name": "o",
+                          "op": "ref"
+                        }
+                      ],
+                      "var": "finish"
+                    },
+                    "value": {
+                      "args": [
+                        {
+                          "index": [],
+                          "name": "clock",
+                          "op": "var"
+                        },
+                        {
+                          "domain": null,
+                          "op": "const",
+                          "value": 1
+                        }
+                      ],
+                      "op": "add"
+                    }
+                  },
+                  {
+                    "domain": "machines",
+                    "effects": [
+                      {
+                        "kind": "assign",
+                        "target": {
+                          "index": [
+                            {
+                              "name": "o",
+                              "op": "ref"
+                            },
+                            {
+                              "name": "m",
+                              "op": "ref"
+                            }
+                          ],
+                          "var": "on"
+                        },
+                        "value": {
+                          "domain": null,
+                          "op": "const",
+                          "value": false
+                        }
+                      }
+                    ],
+                    "kind": "forall",
+                    "var": "m",
+                    "where": null
+                  }
+                ]
+              }
+            ],
+            "kind": "forall",
+            "var": "o",
+            "where": {
+              "args": [
+                {
+                  "args": [
+                    {
+                      "index": [
+                        {
+                          "name": "o",
+                          "op": "ref"
+                        }
+                      ],
+                      "name": "phase",
+                      "op": "var"
+                    },
+                    {
+                      "domain": null,
+                      "op": "const",
+                      "value": "running"
+                    }
+                  ],
+                  "op": "eq"
+                },
+                {
+                  "body": {
+                    "args": [
+                      {
+                        "index": [
+                          {
+                            "name": "o",
+                            "op": "ref"
+                          },
+                          {
+                            "name": "m",
+                            "op": "ref"
+                          }
+                        ],
+                        "name": "on",
+                        "op": "var"
+                      },
+                      {
+                        "args": [
+                          {
+                            "index": [
+                              {
+                                "name": "m",
+                                "op": "ref"
+                              }
+                            ],
+                            "name": "paused",
+                            "op": "var"
+                          }
+                        ],
+                        "op": "not"
+                      },
+                      {
+                        "args": [
+                          {
+                            "args": [
+                              {
+                                "index": [
+                                  {
+                                    "name": "m",
+                                    "op": "ref"
+                                  }
+                                ],
+                                "name": "degraded",
+                                "op": "var"
+                              }
+                            ],
+                            "op": "not"
+                          },
+                          {
+                            "index": [],
+                            "name": "tick_parity",
+                            "op": "var"
+                          }
+                        ],
+                        "op": "or"
+                      }
+                    ],
+                    "op": "and"
+                  },
+                  "domain": "machines",
+                  "op": "exists",
+                  "var": "m",
+                  "where": null
+                }
+              ],
+              "op": "and"
+            }
+          }
+        ],
+        "label": "推进逻辑时间",
+        "name": "advance",
+        "params": [],
+        "precondition": {
+          "body": {
+            "args": [
+              {
+                "index": [
+                  {
+                    "name": "o",
+                    "op": "ref"
+                  }
+                ],
+                "name": "phase",
+                "op": "var"
+              },
+              {
+                "domain": null,
+                "op": "const",
+                "value": "running"
+              }
+            ],
+            "op": "eq"
+          },
+          "domain": "ops",
+          "op": "exists",
+          "var": "o",
+          "where": null
+        },
+        "retry": "RECONCILE_THEN_RETRY",
+        "timeout_seconds": 30.0
+      },
+      {
+        "cost": 1,
+        "description": null,
+        "effects": [
+          {
+            "kind": "assign",
+            "target": {
+              "index": [
+                {
+                  "name": "m",
+                  "op": "ref"
+                }
+              ],
+              "var": "paused"
+            },
+            "value": {
+              "domain": null,
+              "op": "const",
+              "value": true
+            }
+          }
+        ],
+        "label": "暂停机器",
+        "name": "pause",
+        "params": [
+          {
+            "name": "m",
+            "type": {
+              "kind": "entity",
+              "set": "machines"
+            }
+          }
+        ],
+        "precondition": {
+          "args": [
+            {
+              "index": [
+                {
+                  "name": "m",
+                  "op": "ref"
+                }
+              ],
+              "name": "paused",
+              "op": "var"
+            }
+          ],
+          "op": "not"
+        },
+        "retry": "IDEMPOTENT",
+        "timeout_seconds": 30.0
+      },
+      {
+        "cost": 1,
+        "description": null,
+        "effects": [
+          {
+            "kind": "assign",
+            "target": {
+              "index": [
+                {
+                  "name": "m",
+                  "op": "ref"
+                }
+              ],
+              "var": "paused"
+            },
+            "value": {
+              "domain": null,
+              "op": "const",
+              "value": false
+            }
+          }
+        ],
+        "label": "恢复机器",
+        "name": "resume",
+        "params": [
+          {
+            "name": "m",
+            "type": {
+              "kind": "entity",
+              "set": "machines"
+            }
+          }
+        ],
+        "precondition": {
+          "index": [
+            {
+              "name": "m",
+              "op": "ref"
+            }
+          ],
+          "name": "paused",
+          "op": "var"
+        },
+        "retry": "IDEMPOTENT",
+        "timeout_seconds": 30.0
+      },
+      {
+        "cost": 1,
+        "description": null,
+        "effects": [
+          {
+            "kind": "assign",
+            "target": {
+              "index": [
+                {
+                  "name": "ord",
+                  "op": "ref"
+                }
+              ],
+              "var": "priority"
+            },
+            "value": {
+              "name": "lvl",
+              "op": "ref"
+            }
+          }
+        ],
+        "label": "重排队列",
+        "name": "reprioritize",
+        "params": [
+          {
+            "name": "ord",
+            "type": {
+              "kind": "entity",
+              "set": "orders"
+            }
+          },
+          {
+            "name": "lvl",
+            "type": {
+              "kind": "enum",
+              "name": "level"
+            }
+          }
+        ],
+        "precondition": {
+          "args": [
+            {
+              "index": [
+                {
+                  "name": "ord",
+                  "op": "ref"
+                }
+              ],
+              "name": "priority",
+              "op": "var"
+            },
+            {
+              "name": "lvl",
+              "op": "ref"
+            }
+          ],
+          "op": "ne"
+        },
+        "retry": "IDEMPOTENT",
+        "timeout_seconds": 30.0
+      }
+    ],
+    "constants": [
+      {
+        "description": null,
+        "index": [
+          "ops"
+        ],
+        "name": "order_of",
+        "type": {
+          "kind": "entity",
+          "set": "orders"
+        },
+        "value": {
+          "cells": [
+            {
+              "index": [
+                "o1_cut"
+              ],
+              "value": "o1"
+            },
+            {
+              "index": [
+                "o1_weld"
+              ],
+              "value": "o1"
+            },
+            {
+              "index": [
+                "o2_cut"
+              ],
+              "value": "o2"
+            },
+            {
+              "index": [
+                "o2_paint"
+              ],
+              "value": "o2"
+            },
+            {
+              "index": [
+                "o3_cut"
+              ],
+              "value": "o3"
+            },
+            {
+              "index": [
+                "o3_weld"
+              ],
+              "value": "o3"
+            },
+            {
+              "index": [
+                "o3_paint"
+              ],
+              "value": "o3"
+            }
+          ],
+          "default": null
+        }
+      },
+      {
+        "description": "pred[a, b]: operation a requires b to be done",
+        "index": [
+          "ops",
+          "ops"
+        ],
+        "name": "pred",
+        "type": {
+          "kind": "bool"
+        },
+        "value": {
+          "cells": [
+            {
+              "index": [
+                "o1_weld",
+                "o1_cut"
+              ],
+              "value": true
+            },
+            {
+              "index": [
+                "o2_paint",
+                "o2_cut"
+              ],
+              "value": true
+            },
+            {
+              "index": [
+                "o3_weld",
+                "o3_cut"
+              ],
+              "value": true
+            },
+            {
+              "index": [
+                "o3_paint",
+                "o3_weld"
+              ],
+              "value": true
+            }
+          ],
+          "default": false
+        }
+      },
+      {
+        "description": null,
+        "index": [
+          "ops",
+          "machines"
+        ],
+        "name": "eligible",
+        "type": {
+          "kind": "bool"
+        },
+        "value": {
+          "cells": [
+            {
+              "index": [
+                "o1_cut",
+                "m1"
+              ],
+              "value": true
+            },
+            {
+              "index": [
+                "o1_cut",
+                "m2"
+              ],
+              "value": true
+            },
+            {
+              "index": [
+                "o1_weld",
+                "m3"
+              ],
+              "value": true
+            },
+            {
+              "index": [
+                "o1_weld",
+                "m2"
+              ],
+              "value": true
+            },
+            {
+              "index": [
+                "o2_cut",
+                "m1"
+              ],
+              "value": true
+            },
+            {
+              "index": [
+                "o2_cut",
+                "m2"
+              ],
+              "value": true
+            },
+            {
+              "index": [
+                "o2_paint",
+                "m2"
+              ],
+              "value": true
+            },
+            {
+              "index": [
+                "o2_paint",
+                "m3"
+              ],
+              "value": true
+            },
+            {
+              "index": [
+                "o3_cut",
+                "m1"
+              ],
+              "value": true
+            },
+            {
+              "index": [
+                "o3_weld",
+                "m3"
+              ],
+              "value": true
+            },
+            {
+              "index": [
+                "o3_weld",
+                "m2"
+              ],
+              "value": true
+            },
+            {
+              "index": [
+                "o3_paint",
+                "m2"
+              ],
+              "value": true
+            },
+            {
+              "index": [
+                "o3_paint",
+                "m3"
+              ],
+              "value": true
+            }
+          ],
+          "default": false
+        }
+      },
+      {
+        "description": null,
+        "index": [
+          "ops",
+          "resources"
+        ],
+        "name": "needs",
+        "type": {
+          "kind": "bool"
+        },
+        "value": {
+          "cells": [
+            {
+              "index": [
+                "o1_cut",
+                "fixture"
+              ],
+              "value": true
+            },
+            {
+              "index": [
+                "o1_weld",
+                "operator"
+              ],
+              "value": true
+            },
+            {
+              "index": [
+                "o2_cut",
+                "fixture"
+              ],
+              "value": true
+            },
+            {
+              "index": [
+                "o3_cut",
+                "fixture"
+              ],
+              "value": true
+            },
+            {
+              "index": [
+                "o3_weld",
+                "operator"
+              ],
+              "value": true
+            }
+          ],
+          "default": false
+        }
+      },
+      {
+        "description": null,
+        "index": [
+          "machines"
+        ],
+        "name": "station_of",
+        "type": {
+          "kind": "entity",
+          "set": "stations"
+        },
+        "value": {
+          "cells": [
+            {
+              "index": [
+                "m1"
+              ],
+              "value": "s1"
+            },
+            {
+              "index": [
+                "m2"
+              ],
+              "value": "s1"
+            },
+            {
+              "index": [
+                "m3"
+              ],
+              "value": "s2"
+            }
+          ],
+          "default": null
+        }
+      },
+      {
+        "description": null,
+        "index": [
+          "stations"
+        ],
+        "name": "station_cap",
+        "type": {
+          "kind": "int",
+          "max": 3,
+          "min": 0
+        },
+        "value": {
+          "cells": [
+            {
+              "index": [
+                "s1"
+              ],
+              "value": 2
+            },
+            {
+              "index": [
+                "s2"
+              ],
+              "value": 1
+            }
+          ],
+          "default": null
+        }
+      },
+      {
+        "description": null,
+        "index": [
+          "orders"
+        ],
+        "name": "due",
+        "type": {
+          "kind": "int",
+          "max": 24,
+          "min": 0
+        },
+        "value": {
+          "cells": [
+            {
+              "index": [
+                "o1"
+              ],
+              "value": 6
+            },
+            {
+              "index": [
+                "o2"
+              ],
+              "value": 7
+            },
+            {
+              "index": [
+                "o3"
+              ],
+              "value": 8
+            }
+          ],
+          "default": null
+        }
+      },
+      {
+        "description": null,
+        "index": [
+          "orders"
+        ],
+        "name": "late_cost",
+        "type": {
+          "kind": "int",
+          "max": 9,
+          "min": 0
+        },
+        "value": {
+          "cells": [
+            {
+              "index": [
+                "o1"
+              ],
+              "value": 3
+            },
+            {
+              "index": [
+                "o2"
+              ],
+              "value": 2
+            },
+            {
+              "index": [
+                "o3"
+              ],
+              "value": 1
+            }
+          ],
+          "default": null
+        }
+      },
+      {
+        "description": "a degraded machine progresses only on every other tick (hidden-reality hook)",
+        "index": [
+          "machines"
+        ],
+        "name": "degraded",
+        "type": {
+          "kind": "bool"
+        },
+        "value": {
+          "cells": [],
+          "default": false
+        }
+      }
+    ],
+    "description": "Neutral production scheduling: assign operations to machines under station, resource and precedence constraints; finish all orders and keep simulated delay cost low.",
+    "entity_sets": [
+      {
+        "description": null,
+        "label": "订单",
+        "members": [
+          "o1",
+          "o2",
+          "o3"
+        ],
+        "name": "orders"
+      },
+      {
+        "description": null,
+        "label": "工序",
+        "members": [
+          "o1_cut",
+          "o1_weld",
+          "o2_cut",
+          "o2_paint",
+          "o3_cut",
+          "o3_weld",
+          "o3_paint"
+        ],
+        "name": "ops"
+      },
+      {
+        "description": null,
+        "label": "机器",
+        "members": [
+          "m1",
+          "m2",
+          "m3"
+        ],
+        "name": "machines"
+      },
+      {
+        "description": null,
+        "label": "工位",
+        "members": [
+          "s1",
+          "s2"
+        ],
+        "name": "stations"
+      },
+      {
+        "description": null,
+        "label": "有限资源",
+        "members": [
+          "fixture",
+          "operator"
+        ],
+        "name": "resources"
+      }
+    ],
+    "enums": [
+      {
+        "description": null,
+        "name": "op_phase",
+        "values": [
+          "waiting",
+          "running",
+          "done"
+        ]
+      },
+      {
+        "description": null,
+        "name": "level",
+        "values": [
+          "high",
+          "normal",
+          "low"
+        ]
+      }
+    ],
+    "features": [],
+    "name": "neutral-scheduling",
+    "properties": [
+      {
+        "description": null,
+        "expr": {
+          "body": {
+            "args": [
+              {
+                "index": [
+                  {
+                    "name": "o",
+                    "op": "ref"
+                  }
+                ],
+                "name": "phase",
+                "op": "var"
+              },
+              {
+                "domain": null,
+                "op": "const",
+                "value": "done"
+              }
+            ],
+            "op": "eq"
+          },
+          "domain": "ops",
+          "op": "forall",
+          "var": "o",
+          "where": null
+        },
+        "id": "all_done",
+        "kind": "goal",
+        "label": "全部订单完工"
+      },
+      {
+        "description": null,
+        "expr": {
+          "body": {
+            "args": [
+              {
+                "body": {
+                  "index": [
+                    {
+                      "name": "o",
+                      "op": "ref"
+                    },
+                    {
+                      "name": "m",
+                      "op": "ref"
+                    }
+                  ],
+                  "name": "on",
+                  "op": "var"
+                },
+                "domain": "ops",
+                "op": "count",
+                "var": "o",
+                "where": null
+              },
+              {
+                "domain": null,
+                "op": "const",
+                "value": 1
+              }
+            ],
+            "op": "le"
+          },
+          "domain": "machines",
+          "op": "forall",
+          "var": "m",
+          "where": null
+        },
+        "id": "machine_capacity",
+        "kind": "invariant",
+        "label": "机器容量"
+      },
+      {
+        "description": null,
+        "expr": {
+          "body": {
+            "args": [
+              {
+                "body": {
+                  "args": [
+                    {
+                      "args": [
+                        {
+                          "index": [
+                            {
+                              "name": "o",
+                              "op": "ref"
+                            }
+                          ],
+                          "name": "phase",
+                          "op": "var"
+                        },
+                        {
+                          "domain": null,
+                          "op": "const",
+                          "value": "running"
+                        }
+                      ],
+                      "op": "eq"
+                    },
+                    {
+                      "index": [
+                        {
+                          "name": "o",
+                          "op": "ref"
+                        },
+                        {
+                          "name": "res",
+                          "op": "ref"
+                        }
+                      ],
+                      "name": "needs",
+                      "op": "var"
+                    }
+                  ],
+                  "op": "and"
+                },
+                "domain": "ops",
+                "op": "count",
+                "var": "o",
+                "where": null
+              },
+              {
+                "index": [
+                  {
+                    "name": "res",
+                    "op": "ref"
+                  }
+                ],
+                "name": "res_cap",
+                "op": "var"
+              }
+            ],
+            "op": "le"
+          },
+          "domain": "resources",
+          "op": "forall",
+          "var": "res",
+          "where": null
+        },
+        "id": "resource_capacity",
+        "kind": "invariant",
+        "label": "资源容量"
+      },
+      {
+        "description": null,
+        "expr": {
+          "body": {
+            "body": {
+              "args": [
+                {
+                  "args": [
+                    {
+                      "index": [
+                        {
+                          "name": "o",
+                          "op": "ref"
+                        }
+                      ],
+                      "name": "phase",
+                      "op": "var"
+                    },
+                    {
+                      "domain": null,
+                      "op": "const",
+                      "value": "waiting"
+                    }
+                  ],
+                  "op": "ne"
+                },
+                {
+                  "args": [
+                    {
+                      "index": [
+                        {
+                          "name": "p",
+                          "op": "ref"
+                        }
+                      ],
+                      "name": "phase",
+                      "op": "var"
+                    },
+                    {
+                      "domain": null,
+                      "op": "const",
+                      "value": "done"
+                    }
+                  ],
+                  "op": "eq"
+                }
+              ],
+              "op": "implies"
+            },
+            "domain": "ops",
+            "op": "forall",
+            "var": "p",
+            "where": {
+              "index": [
+                {
+                  "name": "o",
+                  "op": "ref"
+                },
+                {
+                  "name": "p",
+                  "op": "ref"
+                }
+              ],
+              "name": "pred",
+              "op": "var"
+            }
+          },
+          "domain": "ops",
+          "op": "forall",
+          "var": "o",
+          "where": null
+        },
+        "id": "precedence",
+        "kind": "invariant",
+        "label": "工序依赖"
+      },
+      {
+        "description": null,
+        "expr": {
+          "body": {
+            "args": [
+              {
+                "args": [
+                  {
+                    "index": [],
+                    "name": "clock",
+                    "op": "var"
+                  },
+                  {
+                    "index": [
+                      {
+                        "index": [
+                          {
+                            "name": "o",
+                            "op": "ref"
+                          }
+                        ],
+                        "name": "order_of",
+                        "op": "var"
+                      }
+                    ],
+                    "name": "due",
+                    "op": "var"
+                  }
+                ],
+                "op": "gt"
+              },
+              {
+                "args": [
+                  {
+                    "index": [
+                      {
+                        "name": "o",
+                        "op": "ref"
+                      }
+                    ],
+                    "name": "phase",
+                    "op": "var"
+                  },
+                  {
+                    "domain": null,
+                    "op": "const",
+                    "value": "done"
+                  }
+                ],
+                "op": "eq"
+              }
+            ],
+            "op": "implies"
+          },
+          "domain": "ops",
+          "op": "forall",
+          "var": "o",
+          "where": null
+        },
+        "id": "on_time",
+        "kind": "invariant",
+        "label": "无延期"
+      }
+    ],
+    "semantic_profile": "deterministic_finite_v1",
+    "state": [
+      {
+        "description": null,
+        "index": [
+          "ops"
+        ],
+        "initial": {
+          "cells": [],
+          "default": "waiting"
+        },
+        "label": "工序状态",
+        "name": "phase",
+        "observable": true,
+        "type": {
+          "kind": "enum",
+          "name": "op_phase"
+        }
+      },
+      {
+        "description": null,
+        "index": [
+          "ops",
+          "machines"
+        ],
+        "initial": {
+          "cells": [],
+          "default": false
+        },
+        "label": "工序所在机器",
+        "name": "on",
+        "observable": true,
+        "type": {
+          "kind": "bool"
+        }
+      },
+      {
+        "description": null,
+        "index": [
+          "ops"
+        ],
+        "initial": {
+          "cells": [],
+          "default": 0
+        },
+        "label": "剩余加工时间",
+        "name": "remaining",
+        "observable": true,
+        "type": {
+          "kind": "int",
+          "max": 9,
+          "min": 0
+        }
+      },
+      {
+        "description": "instance data (varied per seed by the environment); never changed by actions",
+        "index": [
+          "ops"
+        ],
+        "initial": {
+          "cells": [
+            {
+              "index": [
+                "o1_cut"
+              ],
+              "value": 2
+            },
+            {
+              "index": [
+                "o1_weld"
+              ],
+              "value": 3
+            },
+            {
+              "index": [
+                "o2_cut"
+              ],
+              "value": 3
+            },
+            {
+              "index": [
+                "o2_paint"
+              ],
+              "value": 2
+            },
+            {
+              "index": [
+                "o3_cut"
+              ],
+              "value": 1
+            },
+            {
+              "index": [
+                "o3_weld"
+              ],
+              "value": 2
+            },
+            {
+              "index": [
+                "o3_paint"
+              ],
+              "value": 2
+            }
+          ],
+          "default": null
+        },
+        "label": "加工时间",
+        "name": "proc_time",
+        "observable": true,
+        "type": {
+          "kind": "int",
+          "max": 9,
+          "min": 1
+        }
+      },
+      {
+        "description": "instance data (set per scenario by the environment); never changed by actions",
+        "index": [
+          "resources"
+        ],
+        "initial": {
+          "cells": [
+            {
+              "index": [
+                "fixture"
+              ],
+              "value": 2
+            },
+            {
+              "index": [
+                "operator"
+              ],
+              "value": 2
+            }
+          ],
+          "default": null
+        },
+        "label": "资源容量",
+        "name": "res_cap",
+        "observable": true,
+        "type": {
+          "kind": "int",
+          "max": 3,
+          "min": 0
+        }
+      },
+      {
+        "description": null,
+        "index": [
+          "ops"
+        ],
+        "initial": {
+          "cells": [],
+          "default": 0
+        },
+        "label": "完工时刻",
+        "name": "finish",
+        "observable": true,
+        "type": {
+          "kind": "int",
+          "max": 24,
+          "min": 0
+        }
+      },
+      {
+        "description": null,
+        "index": [
+          "machines"
+        ],
+        "initial": {
+          "cells": [],
+          "default": false
+        },
+        "label": "机器暂停",
+        "name": "paused",
+        "observable": true,
+        "type": {
+          "kind": "bool"
+        }
+      },
+      {
+        "description": null,
+        "index": [
+          "orders"
+        ],
+        "initial": {
+          "cells": [],
+          "default": "normal"
+        },
+        "label": "队列优先级",
+        "name": "priority",
+        "observable": true,
+        "type": {
+          "kind": "enum",
+          "name": "level"
+        }
+      },
+      {
+        "description": null,
+        "index": [],
+        "initial": {
+          "cells": [],
+          "default": 0
+        },
+        "label": "逻辑时间",
+        "name": "clock",
+        "observable": true,
+        "type": {
+          "kind": "int",
+          "max": 24,
+          "min": 0
+        }
+      },
+      {
+        "description": null,
+        "index": [],
+        "initial": {
+          "cells": [],
+          "default": false
+        },
+        "label": null,
+        "name": "tick_parity",
+        "observable": true,
+        "type": {
+          "kind": "bool"
+        }
+      }
+    ]
+  },
+  "package_id": "neutral-scheduling",
+  "semantic_profile": "deterministic_finite_v1",
+  "source": {
+    "artifact": null,
+    "author": null,
+    "format": "fal-ir-json/v1",
+    "origin": "examples/neutral-scheduling",
+    "parent_version": null,
+    "text": "{\n  \"semantic_profile\": \"deterministic_finite_v1\",\n  \"name\": \"neutral-scheduling\",\n  \"description\": \"Neutral production scheduling: assign operations to machines under station, resource and precedence constraints; finish all orders and keep simulated delay cost low.\",\n  \"enums\": [\n    {\n      \"name\": \"op_phase\",\n      \"values\": [\n        \"waiting\",\n        \"running\",\n        \"done\"\n      ],\n      \"description\": null\n    },\n    {\n      \"name\": \"level\",\n      \"values\": [\n        \"high\",\n        \"normal\",\n        \"low\"\n      ],\n      \"description\": null\n    }\n  ],\n  \"entity_sets\": [\n    {\n      \"name\": \"orders\",\n      \"members\": [\n        \"o1\",\n        \"o2\",\n        \"o3\"\n      ],\n      \"label\": \"订单\",\n      \"description\": null\n    },\n    {\n      \"name\": \"ops\",\n      \"members\": [\n        \"o1_cut\",\n        \"o1_weld\",\n        \"o2_cut\",\n        \"o2_paint\",\n        \"o3_cut\",\n        \"o3_weld\",\n        \"o3_paint\"\n      ],\n      \"label\": \"工序\",\n      \"description\": null\n    },\n    {\n      \"name\": \"machines\",\n      \"members\": [\n        \"m1\",\n        \"m2\",\n        \"m3\"\n      ],\n      \"label\": \"机器\",\n      \"description\": null\n    },\n    {\n      \"name\": \"stations\",\n      \"members\": [\n        \"s1\",\n        \"s2\"\n      ],\n      \"label\": \"工位\",\n      \"description\": null\n    },\n    {\n      \"name\": \"resources\",\n      \"members\": [\n        \"fixture\",\n        \"operator\"\n      ],\n      \"label\": \"有限资源\",\n      \"description\": null\n    }\n  ],\n  \"constants\": [\n    {\n      \"name\": \"order_of\",\n      \"type\": {\n        \"kind\": \"entity\",\n        \"set\": \"orders\"\n      },\n      \"index\": [\n        \"ops\"\n      ],\n      \"value\": {\n        \"default\": null,\n        \"cells\": [\n          {\n            \"index\": [\n              \"o1_cut\"\n            ],\n            \"value\": \"o1\"\n          },\n          {\n            \"index\": [\n              \"o1_weld\"\n            ],\n            \"value\": \"o1\"\n          },\n          {\n            \"index\": [\n              \"o2_cut\"\n            ],\n            \"value\": \"o2\"\n          },\n          {\n            \"index\": [\n              \"o2_paint\"\n            ],\n            \"value\": \"o2\"\n          },\n          {\n            \"index\": [\n              \"o3_cut\"\n            ],\n            \"value\": \"o3\"\n          },\n          {\n            \"index\": [\n              \"o3_weld\"\n            ],\n            \"value\": \"o3\"\n          },\n          {\n            \"index\": [\n              \"o3_paint\"\n            ],\n            \"value\": \"o3\"\n          }\n        ]\n      },\n      \"description\": null\n    },\n    {\n      \"name\": \"pred\",\n      \"type\": {\n        \"kind\": \"bool\"\n      },\n      \"index\": [\n        \"ops\",\n        \"ops\"\n      ],\n      \"value\": {\n        \"default\": false,\n        \"cells\": [\n          {\n            \"index\": [\n              \"o1_weld\",\n              \"o1_cut\"\n            ],\n            \"value\": true\n          },\n          {\n            \"index\": [\n              \"o2_paint\",\n              \"o2_cut\"\n            ],\n            \"value\": true\n          },\n          {\n            \"index\": [\n              \"o3_weld\",\n              \"o3_cut\"\n            ],\n            \"value\": true\n          },\n          {\n            \"index\": [\n              \"o3_paint\",\n              \"o3_weld\"\n            ],\n            \"value\": true\n          }\n        ]\n      },\n      \"description\": \"pred[a, b]: operation a requires b to be done\"\n    },\n    {\n      \"name\": \"eligible\",\n      \"type\": {\n        \"kind\": \"bool\"\n      },\n      \"index\": [\n        \"ops\",\n        \"machines\"\n      ],\n      \"value\": {\n        \"default\": false,\n        \"cells\": [\n          {\n            \"index\": [\n              \"o1_cut\",\n              \"m1\"\n            ],\n            \"value\": true\n          },\n          {\n            \"index\": [\n              \"o1_cut\",\n              \"m2\"\n            ],\n            \"value\": true\n          },\n          {\n            \"index\": [\n              \"o1_weld\",\n              \"m3\"\n            ],\n            \"value\": true\n          },\n          {\n            \"index\": [\n              \"o1_weld\",\n              \"m2\"\n            ],\n            \"value\": true\n          },\n          {\n            \"index\": [\n              \"o2_cut\",\n              \"m1\"\n            ],\n            \"value\": true\n          },\n          {\n            \"index\": [\n              \"o2_cut\",\n              \"m2\"\n            ],\n            \"value\": true\n          },\n          {\n            \"index\": [\n              \"o2_paint\",\n              \"m2\"\n            ],\n            \"value\": true\n          },\n          {\n            \"index\": [\n              \"o2_paint\",\n              \"m3\"\n            ],\n            \"value\": true\n          },\n          {\n            \"index\": [\n              \"o3_cut\",\n              \"m1\"\n            ],\n            \"value\": true\n          },\n          {\n            \"index\": [\n              \"o3_weld\",\n              \"m3\"\n            ],\n            \"value\": true\n          },\n          {\n            \"index\": [\n              \"o3_weld\",\n              \"m2\"\n            ],\n            \"value\": true\n          },\n          {\n            \"index\": [\n              \"o3_paint\",\n              \"m2\"\n            ],\n            \"value\": true\n          },\n          {\n            \"index\": [\n              \"o3_paint\",\n              \"m3\"\n            ],\n            \"value\": true\n          }\n        ]\n      },\n      \"description\": null\n    },\n    {\n      \"name\": \"needs\",\n      \"type\": {\n        \"kind\": \"bool\"\n      },\n      \"index\": [\n        \"ops\",\n        \"resources\"\n      ],\n      \"value\": {\n        \"default\": false,\n        \"cells\": [\n          {\n            \"index\": [\n              \"o1_cut\",\n              \"fixture\"\n            ],\n            \"value\": true\n          },\n          {\n            \"index\": [\n              \"o1_weld\",\n              \"operator\"\n            ],\n            \"value\": true\n          },\n          {\n            \"index\": [\n              \"o2_cut\",\n              \"fixture\"\n            ],\n            \"value\": true\n          },\n          {\n            \"index\": [\n              \"o3_cut\",\n              \"fixture\"\n            ],\n            \"value\": true\n          },\n          {\n            \"index\": [\n              \"o3_weld\",\n              \"operator\"\n            ],\n            \"value\": true\n          }\n        ]\n      },\n      \"description\": null\n    },\n    {\n      \"name\": \"station_of\",\n      \"type\": {\n        \"kind\": \"entity\",\n        \"set\": \"stations\"\n      },\n      \"index\": [\n        \"machines\"\n      ],\n      \"value\": {\n        \"default\": null,\n        \"cells\": [\n          {\n            \"index\": [\n              \"m1\"\n            ],\n            \"value\": \"s1\"\n          },\n          {\n            \"index\": [\n              \"m2\"\n            ],\n            \"value\": \"s1\"\n          },\n          {\n            \"index\": [\n              \"m3\"\n            ],\n            \"value\": \"s2\"\n          }\n        ]\n      },\n      \"description\": null\n    },\n    {\n      \"name\": \"station_cap\",\n      \"type\": {\n        \"kind\": \"int\",\n        \"min\": 0,\n        \"max\": 3\n      },\n      \"index\": [\n        \"stations\"\n      ],\n      \"value\": {\n        \"default\": null,\n        \"cells\": [\n          {\n            \"index\": [\n              \"s1\"\n            ],\n            \"value\": 2\n          },\n          {\n            \"index\": [\n              \"s2\"\n            ],\n            \"value\": 1\n          }\n        ]\n      },\n      \"description\": null\n    },\n    {\n      \"name\": \"due\",\n      \"type\": {\n        \"kind\": \"int\",\n        \"min\": 0,\n        \"max\": 24\n      },\n      \"index\": [\n        \"orders\"\n      ],\n      \"value\": {\n        \"default\": null,\n        \"cells\": [\n          {\n            \"index\": [\n              \"o1\"\n            ],\n            \"value\": 6\n          },\n          {\n            \"index\": [\n              \"o2\"\n            ],\n            \"value\": 7\n          },\n          {\n            \"index\": [\n              \"o3\"\n            ],\n            \"value\": 8\n          }\n        ]\n      },\n      \"description\": null\n    },\n    {\n      \"name\": \"late_cost\",\n      \"type\": {\n        \"kind\": \"int\",\n        \"min\": 0,\n        \"max\": 9\n      },\n      \"index\": [\n        \"orders\"\n      ],\n      \"value\": {\n        \"default\": null,\n        \"cells\": [\n          {\n            \"index\": [\n              \"o1\"\n            ],\n            \"value\": 3\n          },\n          {\n            \"index\": [\n              \"o2\"\n            ],\n            \"value\": 2\n          },\n          {\n            \"index\": [\n              \"o3\"\n            ],\n            \"value\": 1\n          }\n        ]\n      },\n      \"description\": null\n    },\n    {\n      \"name\": \"degraded\",\n      \"type\": {\n        \"kind\": \"bool\"\n      },\n      \"index\": [\n        \"machines\"\n      ],\n      \"value\": {\n        \"default\": false,\n        \"cells\": []\n      },\n      \"description\": \"a degraded machine progresses only on every other tick (hidden-reality hook)\"\n    }\n  ],\n  \"state\": [\n    {\n      \"name\": \"phase\",\n      \"type\": {\n        \"kind\": \"enum\",\n        \"name\": \"op_phase\"\n      },\n      \"index\": [\n        \"ops\"\n      ],\n      \"initial\": {\n        \"default\": \"waiting\",\n        \"cells\": []\n      },\n      \"label\": \"工序状态\",\n      \"description\": null,\n      \"observable\": true\n    },\n    {\n      \"name\": \"on\",\n      \"type\": {\n        \"kind\": \"bool\"\n      },\n      \"index\": [\n        \"ops\",\n        \"machines\"\n      ],\n      \"initial\": {\n        \"default\": false,\n        \"cells\": []\n      },\n      \"label\": \"工序所在机器\",\n      \"description\": null,\n      \"observable\": true\n    },\n    {\n      \"name\": \"remaining\",\n      \"type\": {\n        \"kind\": \"int\",\n        \"min\": 0,\n        \"max\": 9\n      },\n      \"index\": [\n        \"ops\"\n      ],\n      \"initial\": {\n        \"default\": 0,\n        \"cells\": []\n      },\n      \"label\": \"剩余加工时间\",\n      \"description\": null,\n      \"observable\": true\n    },\n    {\n      \"name\": \"proc_time\",\n      \"type\": {\n        \"kind\": \"int\",\n        \"min\": 1,\n        \"max\": 9\n      },\n      \"index\": [\n        \"ops\"\n      ],\n      \"initial\": {\n        \"default\": null,\n        \"cells\": [\n          {\n            \"index\": [\n              \"o1_cut\"\n            ],\n            \"value\": 2\n          },\n          {\n            \"index\": [\n              \"o1_weld\"\n            ],\n            \"value\": 3\n          },\n          {\n            \"index\": [\n              \"o2_cut\"\n            ],\n            \"value\": 3\n          },\n          {\n            \"index\": [\n              \"o2_paint\"\n            ],\n            \"value\": 2\n          },\n          {\n            \"index\": [\n              \"o3_cut\"\n            ],\n            \"value\": 1\n          },\n          {\n            \"index\": [\n              \"o3_weld\"\n            ],\n            \"value\": 2\n          },\n          {\n            \"index\": [\n              \"o3_paint\"\n            ],\n            \"value\": 2\n          }\n        ]\n      },\n      \"label\": \"加工时间\",\n      \"description\": \"instance data (varied per seed by the environment); never changed by actions\",\n      \"observable\": true\n    },\n    {\n      \"name\": \"res_cap\",\n      \"type\": {\n        \"kind\": \"int\",\n        \"min\": 0,\n        \"max\": 3\n      },\n      \"index\": [\n        \"resources\"\n      ],\n      \"initial\": {\n        \"default\": null,\n        \"cells\": [\n          {\n            \"index\": [\n              \"fixture\"\n            ],\n            \"value\": 2\n          },\n          {\n            \"index\": [\n              \"operator\"\n            ],\n            \"value\": 2\n          }\n        ]\n      },\n      \"label\": \"资源容量\",\n      \"description\": \"instance data (set per scenario by the environment); never changed by actions\",\n      \"observable\": true\n    },\n    {\n      \"name\": \"finish\",\n      \"type\": {\n        \"kind\": \"int\",\n        \"min\": 0,\n        \"max\": 24\n      },\n      \"index\": [\n        \"ops\"\n      ],\n      \"initial\": {\n        \"default\": 0,\n        \"cells\": []\n      },\n      \"label\": \"完工时刻\",\n      \"description\": null,\n      \"observable\": true\n    },\n    {\n      \"name\": \"paused\",\n      \"type\": {\n        \"kind\": \"bool\"\n      },\n      \"index\": [\n        \"machines\"\n      ],\n      \"initial\": {\n        \"default\": false,\n        \"cells\": []\n      },\n      \"label\": \"机器暂停\",\n      \"description\": null,\n      \"observable\": true\n    },\n    {\n      \"name\": \"priority\",\n      \"type\": {\n        \"kind\": \"enum\",\n        \"name\": \"level\"\n      },\n      \"index\": [\n        \"orders\"\n      ],\n      \"initial\": {\n        \"default\": \"normal\",\n        \"cells\": []\n      },\n      \"label\": \"队列优先级\",\n      \"description\": null,\n      \"observable\": true\n    },\n    {\n      \"name\": \"clock\",\n      \"type\": {\n        \"kind\": \"int\",\n        \"min\": 0,\n        \"max\": 24\n      },\n      \"index\": [],\n      \"initial\": {\n        \"default\": 0,\n        \"cells\": []\n      },\n      \"label\": \"逻辑时间\",\n      \"description\": null,\n      \"observable\": true\n    },\n    {\n      \"name\": \"tick_parity\",\n      \"type\": {\n        \"kind\": \"bool\"\n      },\n      \"index\": [],\n      \"initial\": {\n        \"default\": false,\n        \"cells\": []\n      },\n      \"label\": null,\n      \"description\": null,\n      \"observable\": true\n    }\n  ],\n  \"actions\": [\n    {\n      \"name\": \"assign\",\n      \"params\": [\n        {\n          \"name\": \"op\",\n          \"type\": {\n            \"kind\": \"entity\",\n            \"set\": \"ops\"\n          }\n        },\n        {\n          \"name\": \"m\",\n          \"type\": {\n            \"kind\": \"entity\",\n            \"set\": \"machines\"\n          }\n        }\n      ],\n      \"precondition\": {\n        \"op\": \"and\",\n        \"args\": [\n          {\n            \"op\": \"eq\",\n            \"args\": [\n              {\n                \"op\": \"var\",\n                \"name\": \"phase\",\n                \"index\": [\n                  {\n                    \"op\": \"ref\",\n                    \"name\": \"op\"\n                  }\n                ]\n              },\n              {\n                \"op\": \"const\",\n                \"value\": \"waiting\",\n                \"domain\": null\n              }\n            ]\n          },\n          {\n            \"op\": \"forall\",\n            \"var\": \"p\",\n            \"domain\": \"ops\",\n            \"where\": {\n              \"op\": \"var\",\n              \"name\": \"pred\",\n              \"index\": [\n                {\n                  \"op\": \"ref\",\n                  \"name\": \"op\"\n                },\n                {\n                  \"op\": \"ref\",\n                  \"name\": \"p\"\n                }\n              ]\n            },\n            \"body\": {\n              \"op\": \"eq\",\n              \"args\": [\n                {\n                  \"op\": \"var\",\n                  \"name\": \"phase\",\n                  \"index\": [\n                    {\n                      \"op\": \"ref\",\n                      \"name\": \"p\"\n                    }\n                  ]\n                },\n                {\n                  \"op\": \"const\",\n                  \"value\": \"done\",\n                  \"domain\": null\n                }\n              ]\n            }\n          },\n          {\n            \"op\": \"var\",\n            \"name\": \"eligible\",\n            \"index\": [\n              {\n                \"op\": \"ref\",\n                \"name\": \"op\"\n              },\n              {\n                \"op\": \"ref\",\n                \"name\": \"m\"\n              }\n            ]\n          },\n          {\n            \"op\": \"not\",\n            \"args\": [\n              {\n                \"op\": \"var\",\n                \"name\": \"paused\",\n                \"index\": [\n                  {\n                    \"op\": \"ref\",\n                    \"name\": \"m\"\n                  }\n                ]\n              }\n            ]\n          },\n          {\n            \"op\": \"eq\",\n            \"args\": [\n              {\n                \"op\": \"count\",\n                \"var\": \"o\",\n                \"domain\": \"ops\",\n                \"where\": null,\n                \"body\": {\n                  \"op\": \"var\",\n                  \"name\": \"on\",\n                  \"index\": [\n                    {\n                      \"op\": \"ref\",\n                      \"name\": \"o\"\n                    },\n                    {\n                      \"op\": \"ref\",\n                      \"name\": \"m\"\n                    }\n                  ]\n                }\n              },\n              {\n                \"op\": \"const\",\n                \"value\": 0,\n                \"domain\": null\n              }\n            ]\n          },\n          {\n            \"op\": \"lt\",\n            \"args\": [\n              {\n                \"op\": \"count\",\n                \"var\": \"o\",\n                \"domain\": \"ops\",\n                \"where\": null,\n                \"body\": {\n                  \"op\": \"exists\",\n                  \"var\": \"mm\",\n                  \"domain\": \"machines\",\n                  \"where\": null,\n                  \"body\": {\n                    \"op\": \"and\",\n                    \"args\": [\n                      {\n                        \"op\": \"var\",\n                        \"name\": \"on\",\n                        \"index\": [\n                          {\n                            \"op\": \"ref\",\n                            \"name\": \"o\"\n                          },\n                          {\n                            \"op\": \"ref\",\n                            \"name\": \"mm\"\n                          }\n                        ]\n                      },\n                      {\n                        \"op\": \"eq\",\n                        \"args\": [\n                          {\n                            \"op\": \"var\",\n                            \"name\": \"station_of\",\n                            \"index\": [\n                              {\n                                \"op\": \"ref\",\n                                \"name\": \"mm\"\n                              }\n                            ]\n                          },\n                          {\n                            \"op\": \"var\",\n                            \"name\": \"station_of\",\n                            \"index\": [\n                              {\n                                \"op\": \"ref\",\n                                \"name\": \"m\"\n                              }\n                            ]\n                          }\n                        ]\n                      }\n                    ]\n                  }\n                }\n              },\n              {\n                \"op\": \"var\",\n                \"name\": \"station_cap\",\n                \"index\": [\n                  {\n                    \"op\": \"var\",\n                    \"name\": \"station_of\",\n                    \"index\": [\n                      {\n                        \"op\": \"ref\",\n                        \"name\": \"m\"\n                      }\n                    ]\n                  }\n                ]\n              }\n            ]\n          },\n          {\n            \"op\": \"forall\",\n            \"var\": \"res\",\n            \"domain\": \"resources\",\n            \"where\": {\n              \"op\": \"var\",\n              \"name\": \"needs\",\n              \"index\": [\n                {\n                  \"op\": \"ref\",\n                  \"name\": \"op\"\n                },\n                {\n                  \"op\": \"ref\",\n                  \"name\": \"res\"\n                }\n              ]\n            },\n            \"body\": {\n              \"op\": \"lt\",\n              \"args\": [\n                {\n                  \"op\": \"count\",\n                  \"var\": \"o\",\n                  \"domain\": \"ops\",\n                  \"where\": null,\n                  \"body\": {\n                    \"op\": \"and\",\n                    \"args\": [\n                      {\n                        \"op\": \"eq\",\n                        \"args\": [\n                          {\n                            \"op\": \"var\",\n                            \"name\": \"phase\",\n                            \"index\": [\n                              {\n                                \"op\": \"ref\",\n                                \"name\": \"o\"\n                              }\n                            ]\n                          },\n                          {\n                            \"op\": \"const\",\n                            \"value\": \"running\",\n                            \"domain\": null\n                          }\n                        ]\n                      },\n                      {\n                        \"op\": \"var\",\n                        \"name\": \"needs\",\n                        \"index\": [\n                          {\n                            \"op\": \"ref\",\n                            \"name\": \"o\"\n                          },\n                          {\n                            \"op\": \"ref\",\n                            \"name\": \"res\"\n                          }\n                        ]\n                      }\n                    ]\n                  }\n                },\n                {\n                  \"op\": \"var\",\n                  \"name\": \"res_cap\",\n                  \"index\": [\n                    {\n                      \"op\": \"ref\",\n                      \"name\": \"res\"\n                    }\n                  ]\n                }\n              ]\n            }\n          }\n        ]\n      },\n      \"effects\": [\n        {\n          \"kind\": \"assign\",\n          \"target\": {\n            \"var\": \"phase\",\n            \"index\": [\n              {\n                \"op\": \"ref\",\n                \"name\": \"op\"\n              }\n            ]\n          },\n          \"value\": {\n            \"op\": \"const\",\n            \"value\": \"running\",\n            \"domain\": null\n          }\n        },\n        {\n          \"kind\": \"assign\",\n          \"target\": {\n            \"var\": \"on\",\n            \"index\": [\n              {\n                \"op\": \"ref\",\n                \"name\": \"op\"\n              },\n              {\n                \"op\": \"ref\",\n                \"name\": \"m\"\n              }\n            ]\n          },\n          \"value\": {\n            \"op\": \"const\",\n            \"value\": true,\n            \"domain\": null\n          }\n        },\n        {\n          \"kind\": \"assign\",\n          \"target\": {\n            \"var\": \"remaining\",\n            \"index\": [\n              {\n                \"op\": \"ref\",\n                \"name\": \"op\"\n              }\n            ]\n          },\n          \"value\": {\n            \"op\": \"var\",\n            \"name\": \"proc_time\",\n            \"index\": [\n              {\n                \"op\": \"ref\",\n                \"name\": \"op\"\n              }\n            ]\n          }\n        }\n      ],\n      \"cost\": 1,\n      \"label\": \"分配工序\",\n      \"description\": null,\n      \"timeout_seconds\": 30.0,\n      \"retry\": \"RECONCILE_THEN_RETRY\"\n    },\n    {\n      \"name\": \"advance\",\n      \"params\": [],\n      \"precondition\": {\n        \"op\": \"exists\",\n        \"var\": \"o\",\n        \"domain\": \"ops\",\n        \"where\": null,\n        \"body\": {\n          \"op\": \"eq\",\n          \"args\": [\n            {\n              \"op\": \"var\",\n              \"name\": \"phase\",\n              \"index\": [\n                {\n                  \"op\": \"ref\",\n                  \"name\": \"o\"\n                }\n              ]\n            },\n            {\n              \"op\": \"const\",\n              \"value\": \"running\",\n              \"domain\": null\n            }\n          ]\n        }\n      },\n      \"effects\": [\n        {\n          \"kind\": \"assign\",\n          \"target\": {\n            \"var\": \"clock\",\n            \"index\": []\n          },\n          \"value\": {\n            \"op\": \"add\",\n            \"args\": [\n              {\n                \"op\": \"var\",\n                \"name\": \"clock\",\n                \"index\": []\n              },\n              {\n                \"op\": \"const\",\n                \"value\": 1,\n                \"domain\": null\n              }\n            ]\n          }\n        },\n        {\n          \"kind\": \"assign\",\n          \"target\": {\n            \"var\": \"tick_parity\",\n            \"index\": []\n          },\n          \"value\": {\n            \"op\": \"not\",\n            \"args\": [\n              {\n                \"op\": \"var\",\n                \"name\": \"tick_parity\",\n                \"index\": []\n              }\n            ]\n          }\n        },\n        {\n          \"kind\": \"forall\",\n          \"var\": \"o\",\n          \"domain\": \"ops\",\n          \"where\": {\n            \"op\": \"and\",\n            \"args\": [\n              {\n                \"op\": \"eq\",\n                \"args\": [\n                  {\n                    \"op\": \"var\",\n                    \"name\": \"phase\",\n                    \"index\": [\n                      {\n                        \"op\": \"ref\",\n                        \"name\": \"o\"\n                      }\n                    ]\n                  },\n                  {\n                    \"op\": \"const\",\n                    \"value\": \"running\",\n                    \"domain\": null\n                  }\n                ]\n              },\n              {\n                \"op\": \"exists\",\n                \"var\": \"m\",\n                \"domain\": \"machines\",\n                \"where\": null,\n                \"body\": {\n                  \"op\": \"and\",\n                  \"args\": [\n                    {\n                      \"op\": \"var\",\n                      \"name\": \"on\",\n                      \"index\": [\n                        {\n                          \"op\": \"ref\",\n                          \"name\": \"o\"\n                        },\n                        {\n                          \"op\": \"ref\",\n                          \"name\": \"m\"\n                        }\n                      ]\n                    },\n                    {\n                      \"op\": \"not\",\n                      \"args\": [\n                        {\n                          \"op\": \"var\",\n                          \"name\": \"paused\",\n                          \"index\": [\n                            {\n                              \"op\": \"ref\",\n                              \"name\": \"m\"\n                            }\n                          ]\n                        }\n                      ]\n                    },\n                    {\n                      \"op\": \"or\",\n                      \"args\": [\n                        {\n                          \"op\": \"not\",\n                          \"args\": [\n                            {\n                              \"op\": \"var\",\n                              \"name\": \"degraded\",\n                              \"index\": [\n                                {\n                                  \"op\": \"ref\",\n                                  \"name\": \"m\"\n                                }\n                              ]\n                            }\n                          ]\n                        },\n                        {\n                          \"op\": \"var\",\n                          \"name\": \"tick_parity\",\n                          \"index\": []\n                        }\n                      ]\n                    }\n                  ]\n                }\n              }\n            ]\n          },\n          \"effects\": [\n            {\n              \"kind\": \"assign\",\n              \"target\": {\n                \"var\": \"remaining\",\n                \"index\": [\n                  {\n                    \"op\": \"ref\",\n                    \"name\": \"o\"\n                  }\n                ]\n              },\n              \"value\": {\n                \"op\": \"sub\",\n                \"args\": [\n                  {\n                    \"op\": \"var\",\n                    \"name\": \"remaining\",\n                    \"index\": [\n                      {\n                        \"op\": \"ref\",\n                        \"name\": \"o\"\n                      }\n                    ]\n                  },\n                  {\n                    \"op\": \"const\",\n                    \"value\": 1,\n                    \"domain\": null\n                  }\n                ]\n              }\n            },\n            {\n              \"kind\": \"when\",\n              \"condition\": {\n                \"op\": \"le\",\n                \"args\": [\n                  {\n                    \"op\": \"var\",\n                    \"name\": \"remaining\",\n                    \"index\": [\n                      {\n                        \"op\": \"ref\",\n                        \"name\": \"o\"\n                      }\n                    ]\n                  },\n                  {\n                    \"op\": \"const\",\n                    \"value\": 1,\n                    \"domain\": null\n                  }\n                ]\n              },\n              \"then\": [\n                {\n                  \"kind\": \"assign\",\n                  \"target\": {\n                    \"var\": \"phase\",\n                    \"index\": [\n                      {\n                        \"op\": \"ref\",\n                        \"name\": \"o\"\n                      }\n                    ]\n                  },\n                  \"value\": {\n                    \"op\": \"const\",\n                    \"value\": \"done\",\n                    \"domain\": null\n                  }\n                },\n                {\n                  \"kind\": \"assign\",\n                  \"target\": {\n                    \"var\": \"finish\",\n                    \"index\": [\n                      {\n                        \"op\": \"ref\",\n                        \"name\": \"o\"\n                      }\n                    ]\n                  },\n                  \"value\": {\n                    \"op\": \"add\",\n                    \"args\": [\n                      {\n                        \"op\": \"var\",\n                        \"name\": \"clock\",\n                        \"index\": []\n                      },\n                      {\n                        \"op\": \"const\",\n                        \"value\": 1,\n                        \"domain\": null\n                      }\n                    ]\n                  }\n                },\n                {\n                  \"kind\": \"forall\",\n                  \"var\": \"m\",\n                  \"domain\": \"machines\",\n                  \"where\": null,\n                  \"effects\": [\n                    {\n                      \"kind\": \"assign\",\n                      \"target\": {\n                        \"var\": \"on\",\n                        \"index\": [\n                          {\n                            \"op\": \"ref\",\n                            \"name\": \"o\"\n                          },\n                          {\n                            \"op\": \"ref\",\n                            \"name\": \"m\"\n                          }\n                        ]\n                      },\n                      \"value\": {\n                        \"op\": \"const\",\n                        \"value\": false,\n                        \"domain\": null\n                      }\n                    }\n                  ]\n                }\n              ],\n              \"otherwise\": []\n            }\n          ]\n        }\n      ],\n      \"cost\": 1,\n      \"label\": \"推进逻辑时间\",\n      \"description\": null,\n      \"timeout_seconds\": 30.0,\n      \"retry\": \"RECONCILE_THEN_RETRY\"\n    },\n    {\n      \"name\": \"pause\",\n      \"params\": [\n        {\n          \"name\": \"m\",\n          \"type\": {\n            \"kind\": \"entity\",\n            \"set\": \"machines\"\n          }\n        }\n      ],\n      \"precondition\": {\n        \"op\": \"not\",\n        \"args\": [\n          {\n            \"op\": \"var\",\n            \"name\": \"paused\",\n            \"index\": [\n              {\n                \"op\": \"ref\",\n                \"name\": \"m\"\n              }\n            ]\n          }\n        ]\n      },\n      \"effects\": [\n        {\n          \"kind\": \"assign\",\n          \"target\": {\n            \"var\": \"paused\",\n            \"index\": [\n              {\n                \"op\": \"ref\",\n                \"name\": \"m\"\n              }\n            ]\n          },\n          \"value\": {\n            \"op\": \"const\",\n            \"value\": true,\n            \"domain\": null\n          }\n        }\n      ],\n      \"cost\": 1,\n      \"label\": \"暂停机器\",\n      \"description\": null,\n      \"timeout_seconds\": 30.0,\n      \"retry\": \"IDEMPOTENT\"\n    },\n    {\n      \"name\": \"resume\",\n      \"params\": [\n        {\n          \"name\": \"m\",\n          \"type\": {\n            \"kind\": \"entity\",\n            \"set\": \"machines\"\n          }\n        }\n      ],\n      \"precondition\": {\n        \"op\": \"var\",\n        \"name\": \"paused\",\n        \"index\": [\n          {\n            \"op\": \"ref\",\n            \"name\": \"m\"\n          }\n        ]\n      },\n      \"effects\": [\n        {\n          \"kind\": \"assign\",\n          \"target\": {\n            \"var\": \"paused\",\n            \"index\": [\n              {\n                \"op\": \"ref\",\n                \"name\": \"m\"\n              }\n            ]\n          },\n          \"value\": {\n            \"op\": \"const\",\n            \"value\": false,\n            \"domain\": null\n          }\n        }\n      ],\n      \"cost\": 1,\n      \"label\": \"恢复机器\",\n      \"description\": null,\n      \"timeout_seconds\": 30.0,\n      \"retry\": \"IDEMPOTENT\"\n    },\n    {\n      \"name\": \"reprioritize\",\n      \"params\": [\n        {\n          \"name\": \"ord\",\n          \"type\": {\n            \"kind\": \"entity\",\n            \"set\": \"orders\"\n          }\n        },\n        {\n          \"name\": \"lvl\",\n          \"type\": {\n            \"kind\": \"enum\",\n            \"name\": \"level\"\n          }\n        }\n      ],\n      \"precondition\": {\n        \"op\": \"ne\",\n        \"args\": [\n          {\n            \"op\": \"var\",\n            \"name\": \"priority\",\n            \"index\": [\n              {\n                \"op\": \"ref\",\n                \"name\": \"ord\"\n              }\n            ]\n          },\n          {\n            \"op\": \"ref\",\n            \"name\": \"lvl\"\n          }\n        ]\n      },\n      \"effects\": [\n        {\n          \"kind\": \"assign\",\n          \"target\": {\n            \"var\": \"priority\",\n            \"index\": [\n              {\n                \"op\": \"ref\",\n                \"name\": \"ord\"\n              }\n            ]\n          },\n          \"value\": {\n            \"op\": \"ref\",\n            \"name\": \"lvl\"\n          }\n        }\n      ],\n      \"cost\": 1,\n      \"label\": \"重排队列\",\n      \"description\": null,\n      \"timeout_seconds\": 30.0,\n      \"retry\": \"IDEMPOTENT\"\n    }\n  ],\n  \"properties\": [\n    {\n      \"id\": \"all_done\",\n      \"kind\": \"goal\",\n      \"expr\": {\n        \"op\": \"forall\",\n        \"var\": \"o\",\n        \"domain\": \"ops\",\n        \"where\": null,\n        \"body\": {\n          \"op\": \"eq\",\n          \"args\": [\n            {\n              \"op\": \"var\",\n              \"name\": \"phase\",\n              \"index\": [\n                {\n                  \"op\": \"ref\",\n                  \"name\": \"o\"\n                }\n              ]\n            },\n            {\n              \"op\": \"const\",\n              \"value\": \"done\",\n              \"domain\": null\n            }\n          ]\n        }\n      },\n      \"label\": \"全部订单完工\",\n      \"description\": null\n    },\n    {\n      \"id\": \"machine_capacity\",\n      \"kind\": \"invariant\",\n      \"expr\": {\n        \"op\": \"forall\",\n        \"var\": \"m\",\n        \"domain\": \"machines\",\n        \"where\": null,\n        \"body\": {\n          \"op\": \"le\",\n          \"args\": [\n            {\n              \"op\": \"count\",\n              \"var\": \"o\",\n              \"domain\": \"ops\",\n              \"where\": null,\n              \"body\": {\n                \"op\": \"var\",\n                \"name\": \"on\",\n                \"index\": [\n                  {\n                    \"op\": \"ref\",\n                    \"name\": \"o\"\n                  },\n                  {\n                    \"op\": \"ref\",\n                    \"name\": \"m\"\n                  }\n                ]\n              }\n            },\n            {\n              \"op\": \"const\",\n              \"value\": 1,\n              \"domain\": null\n            }\n          ]\n        }\n      },\n      \"label\": \"机器容量\",\n      \"description\": null\n    },\n    {\n      \"id\": \"resource_capacity\",\n      \"kind\": \"invariant\",\n      \"expr\": {\n        \"op\": \"forall\",\n        \"var\": \"res\",\n        \"domain\": \"resources\",\n        \"where\": null,\n        \"body\": {\n          \"op\": \"le\",\n          \"args\": [\n            {\n              \"op\": \"count\",\n              \"var\": \"o\",\n              \"domain\": \"ops\",\n              \"where\": null,\n              \"body\": {\n                \"op\": \"and\",\n                \"args\": [\n                  {\n                    \"op\": \"eq\",\n                    \"args\": [\n                      {\n                        \"op\": \"var\",\n                        \"name\": \"phase\",\n                        \"index\": [\n                          {\n                            \"op\": \"ref\",\n                            \"name\": \"o\"\n                          }\n                        ]\n                      },\n                      {\n                        \"op\": \"const\",\n                        \"value\": \"running\",\n                        \"domain\": null\n                      }\n                    ]\n                  },\n                  {\n                    \"op\": \"var\",\n                    \"name\": \"needs\",\n                    \"index\": [\n                      {\n                        \"op\": \"ref\",\n                        \"name\": \"o\"\n                      },\n                      {\n                        \"op\": \"ref\",\n                        \"name\": \"res\"\n                      }\n                    ]\n                  }\n                ]\n              }\n            },\n            {\n              \"op\": \"var\",\n              \"name\": \"res_cap\",\n              \"index\": [\n                {\n                  \"op\": \"ref\",\n                  \"name\": \"res\"\n                }\n              ]\n            }\n          ]\n        }\n      },\n      \"label\": \"资源容量\",\n      \"description\": null\n    },\n    {\n      \"id\": \"precedence\",\n      \"kind\": \"invariant\",\n      \"expr\": {\n        \"op\": \"forall\",\n        \"var\": \"o\",\n        \"domain\": \"ops\",\n        \"where\": null,\n        \"body\": {\n          \"op\": \"forall\",\n          \"var\": \"p\",\n          \"domain\": \"ops\",\n          \"where\": {\n            \"op\": \"var\",\n            \"name\": \"pred\",\n            \"index\": [\n              {\n                \"op\": \"ref\",\n                \"name\": \"o\"\n              },\n              {\n                \"op\": \"ref\",\n                \"name\": \"p\"\n              }\n            ]\n          },\n          \"body\": {\n            \"op\": \"implies\",\n            \"args\": [\n              {\n                \"op\": \"ne\",\n                \"args\": [\n                  {\n                    \"op\": \"var\",\n                    \"name\": \"phase\",\n                    \"index\": [\n                      {\n                        \"op\": \"ref\",\n                        \"name\": \"o\"\n                      }\n                    ]\n                  },\n                  {\n                    \"op\": \"const\",\n                    \"value\": \"waiting\",\n                    \"domain\": null\n                  }\n                ]\n              },\n              {\n                \"op\": \"eq\",\n                \"args\": [\n                  {\n                    \"op\": \"var\",\n                    \"name\": \"phase\",\n                    \"index\": [\n                      {\n                        \"op\": \"ref\",\n                        \"name\": \"p\"\n                      }\n                    ]\n                  },\n                  {\n                    \"op\": \"const\",\n                    \"value\": \"done\",\n                    \"domain\": null\n                  }\n                ]\n              }\n            ]\n          }\n        }\n      },\n      \"label\": \"工序依赖\",\n      \"description\": null\n    },\n    {\n      \"id\": \"on_time\",\n      \"kind\": \"invariant\",\n      \"expr\": {\n        \"op\": \"forall\",\n        \"var\": \"o\",\n        \"domain\": \"ops\",\n        \"where\": null,\n        \"body\": {\n          \"op\": \"implies\",\n          \"args\": [\n            {\n              \"op\": \"gt\",\n              \"args\": [\n                {\n                  \"op\": \"var\",\n                  \"name\": \"clock\",\n                  \"index\": []\n                },\n                {\n                  \"op\": \"var\",\n                  \"name\": \"due\",\n                  \"index\": [\n                    {\n                      \"op\": \"var\",\n                      \"name\": \"order_of\",\n                      \"index\": [\n                        {\n                          \"op\": \"ref\",\n                          \"name\": \"o\"\n                        }\n                      ]\n                    }\n                  ]\n                }\n              ]\n            },\n            {\n              \"op\": \"eq\",\n              \"args\": [\n                {\n                  \"op\": \"var\",\n                  \"name\": \"phase\",\n                  \"index\": [\n                    {\n                      \"op\": \"ref\",\n                      \"name\": \"o\"\n                    }\n                  ]\n                },\n                {\n                  \"op\": \"const\",\n                  \"value\": \"done\",\n                  \"domain\": null\n                }\n              ]\n            }\n          ]\n        }\n      },\n      \"label\": \"无延期\",\n      \"description\": null\n    }\n  ],\n  \"features\": []\n}"
+  },
+  "version": 1
+}

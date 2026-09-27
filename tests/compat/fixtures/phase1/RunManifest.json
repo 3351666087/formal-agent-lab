@@ -1,0 +1,180 @@
+{
+  "artifacts": [],
+  "budget": {
+    "max_model_calls": 80,
+    "max_steps": 60,
+    "max_tokens": 800000,
+    "max_wall_seconds": 600.0
+  },
+  "budget_usage": {
+    "input_tokens": 0,
+    "model_calls": 0,
+    "output_tokens": 0,
+    "steps": 15,
+    "wall_seconds": 3.010904672999459
+  },
+  "config": {
+    "budget_dimensions": [
+      "steps",
+      "wall_seconds"
+    ]
+  },
+  "contract_version": "formal-lab-contracts/v1",
+  "created_at": "2026-09-27T03:19:19.660405Z",
+  "extensions": {},
+  "matrix_id": null,
+  "model": {
+    "digest": {
+      "algorithm": "sha256",
+      "value": "27ef54c6843626d6358ef69ec6529c77a897ffac22914c16694e277ca760bb8a"
+    },
+    "package_id": "neutral-scheduling",
+    "version": 1
+  },
+  "participants": [
+    {
+      "actor_id": "dispatcher",
+      "role": "dispatcher",
+      "strategy": {
+        "config": {},
+        "plugin": {
+          "plugin_id": "formal-lab.example.scheduling.edd-dispatch",
+          "version": "1.0.0"
+        }
+      }
+    }
+  ],
+  "platform": {
+    "source_revision": "46400ad8d3c882bcf62dc9fffded3152fc5c35b0+dirty",
+    "version": "0.1.0"
+  },
+  "plugins": [
+    {
+      "descriptor_digest": {
+        "algorithm": "sha256",
+        "value": "e43a067c86ffda04615cc7b6a78bcba3457ea1f46e67bf3d7e929823181eb4e9"
+      },
+      "interface": "ENVIRONMENT",
+      "interface_version": "1",
+      "plugin_id": "formal-lab.env.ir-world",
+      "role": "environment",
+      "version": "1.0.0"
+    },
+    {
+      "descriptor_digest": {
+        "algorithm": "sha256",
+        "value": "3e5b55208a345600124b864c140b826939b382012b83fc9f43aad193c7dc139c"
+      },
+      "interface": "PLANNER",
+      "interface_version": "1",
+      "plugin_id": "formal-lab.example.scheduling.edd-dispatch",
+      "role": "strategy:dispatcher",
+      "version": "1.0.0"
+    },
+    {
+      "descriptor_digest": {
+        "algorithm": "sha256",
+        "value": "6d91e714b610390a2545499ec5ffcff48c7515dde9007b8ceebc5c1a60cb8860"
+      },
+      "interface": "VERIFIER",
+      "interface_version": "1",
+      "plugin_id": "formal-lab.verifier.z3-bmc",
+      "role": "verifier",
+      "version": "1.0.0"
+    },
+    {
+      "descriptor_digest": {
+        "algorithm": "sha256",
+        "value": "000c2a0a9a656df0dbcbe67785875824cc6ed555289c604a1371cd4b0626232b"
+      },
+      "interface": "EVALUATOR",
+      "interface_version": "1",
+      "plugin_id": "formal-lab.eval.generic",
+      "role": "evaluator:0",
+      "version": "1.0.0"
+    }
+  ],
+  "project_id": "prj_phase1",
+  "run_id": "run_phase1_normal",
+  "scenario": {
+    "budget": {
+      "max_model_calls": 80,
+      "max_steps": 60,
+      "max_tokens": 800000,
+      "max_wall_seconds": 600.0
+    },
+    "contract_version": "formal-lab-contracts/v1",
+    "description": "Adequate machines and resources; processing times vary ±1 per seed.",
+    "environment": {
+      "config": {
+        "seeded_variation": [
+          {
+            "delta_max": 1,
+            "delta_min": -1,
+            "var": "proc_time"
+          }
+        ]
+      },
+      "plugin": {
+        "plugin_id": "formal-lab.env.ir-world",
+        "version": "1.0.0"
+      }
+    },
+    "extensions": {},
+    "model": {
+      "digest": {
+        "algorithm": "sha256",
+        "value": "27ef54c6843626d6358ef69ec6529c77a897ffac22914c16694e277ca760bb8a"
+      },
+      "package_id": "neutral-scheduling",
+      "version": 1
+    },
+    "name": "正常调度",
+    "objectives": [
+      {
+        "description": "complete all orders",
+        "metric_id": null,
+        "property_id": "all_done"
+      },
+      {
+        "description": "minimise simulated delay cost",
+        "metric_id": "delay_cost",
+        "property_id": null
+      }
+    ],
+    "participants": [
+      {
+        "actor_id": "dispatcher",
+        "role": "dispatcher",
+        "strategy": {
+          "config": {},
+          "plugin": {
+            "plugin_id": "formal-lab.example.scheduling.edd-dispatch",
+            "version": "1.0.0"
+          }
+        }
+      }
+    ],
+    "revision": 1,
+    "scenario_id": "sched-normal",
+    "seed": 1,
+    "stop_conditions": [
+      {
+        "kind": "GOAL_REACHED",
+        "property_id": "all_done"
+      },
+      {
+        "kind": "NO_APPLICABLE_ACTION",
+        "property_id": null
+      }
+    ]
+  },
+  "scenario_digest": {
+    "algorithm": "sha256",
+    "value": "19ec17a2200c92f2ccde20c2fe4c127937b3ed4790e01287dedce16a8f6e249f"
+  },
+  "seed": 1,
+  "source_run_id": null,
+  "status": "SUCCEEDED",
+  "status_reason": "goal 'all_done' reached"
+}

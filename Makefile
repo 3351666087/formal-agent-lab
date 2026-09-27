@@ -16,6 +16,9 @@ help: ## list targets
 
 # ----------------------------------------------------------------- setup
 .PHONY: toolchain bootstrap lock
+doctor: ## report OS/arch, usable CPU/memory, disk, Docker, ports, toolchain and local profile availability
+	python3 scripts/doctor.py
+
 toolchain: ## install pinned toolchain (uv, node, pnpm, helm, temporal cli)
 	bash scripts/bootstrap-dev-vm.sh
 

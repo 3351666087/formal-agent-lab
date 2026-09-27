@@ -1,0 +1,73 @@
+{
+  "budget": {
+    "max_model_calls": 80,
+    "max_steps": 60,
+    "max_tokens": 800000,
+    "max_wall_seconds": 600.0
+  },
+  "contract_version": "formal-lab-contracts/v1",
+  "description": "Adequate machines and resources; processing times vary ±1 per seed.",
+  "environment": {
+    "config": {
+      "seeded_variation": [
+        {
+          "delta_max": 1,
+          "delta_min": -1,
+          "var": "proc_time"
+        }
+      ]
+    },
+    "plugin": {
+      "plugin_id": "formal-lab.env.ir-world",
+      "version": "1.0.0"
+    }
+  },
+  "extensions": {},
+  "model": {
+    "digest": {
+      "algorithm": "sha256",
+      "value": "27ef54c6843626d6358ef69ec6529c77a897ffac22914c16694e277ca760bb8a"
+    },
+    "package_id": "neutral-scheduling",
+    "version": 1
+  },
+  "name": "正常调度",
+  "objectives": [
+    {
+      "description": "complete all orders",
+      "metric_id": null,
+      "property_id": "all_done"
+    },
+    {
+      "description": "minimise simulated delay cost",
+      "metric_id": "delay_cost",
+      "property_id": null
+    }
+  ],
+  "participants": [
+    {
+      "actor_id": "dispatcher",
+      "role": "dispatcher",
+      "strategy": {
+        "config": {},
+        "plugin": {
+          "plugin_id": "formal-lab.example.scheduling.edd-dispatch",
+          "version": "1.0.0"
+        }
+      }
+    }
+  ],
+  "revision": 1,
+  "scenario_id": "sched-normal",
+  "seed": 1,
+  "stop_conditions": [
+    {
+      "kind": "GOAL_REACHED",
+      "property_id": "all_done"
+    },
+    {
+      "kind": "NO_APPLICABLE_ACTION",
+      "property_id": null
+    }
+  ]
+}
