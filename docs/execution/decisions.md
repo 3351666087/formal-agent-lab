@@ -83,3 +83,9 @@
 
 - **决策**：React + React Router + TanStack Query（无 Next.js，仓库为空起步）；生产镜像 `caddy:2.11-alpine`，`/api/*` 以 `flush_interval -1` 代理以支持 SSE。开发时 Vite 在虚拟机内以轮询方式监听 virtiofs 共享的源码。
 - **理由**：所有交互走同一 REST/SSE API，与 CLI/SDK 共享服务层；静态托管简单可缓存。
+
+## D-014 本仓库许可证：Apache-2.0
+
+- **决策**：仓库代码以 Apache License 2.0 发布（仓库所有者将选择权交给执行者）。根目录 `LICENSE`（Apache 官方全文）与 `NOTICE`；每个 Python 发行包、Helm Chart 目录各带一份相同的 `LICENSE`（PEP 639 `license = "Apache-2.0"`，文本随 wheel/sdist 分发；`tests/architecture/test_license.py` 保证副本一致）；插件描述、npm 元数据、镜像标签 `org.opencontainers.image.licenses` 与发行/离线包清单统一为 `Apache-2.0`，镜像内附 `/usr/share/doc/formal-agent-lab/{LICENSE,NOTICE}`。
+- **理由**：平台以插件扩展为核心，宽松许可便于第三方插件与后续领域阶段以任意许可接入，不受 copyleft 传染；相比 MIT 多了明确的专利授权与贡献条款，适合规划/验证类技术；与全部依赖兼容（MIT、BSD-3、Apache-2.0、PostgreSQL License；psycopg 为 LGPL-3.0-only，仅以未修改的库动态使用，不影响本仓库代码的许可）。
+- **扩展影响**：新包复制根 `LICENSE` 并在 pyproject 声明 `license = "Apache-2.0"`、`license-files = ["LICENSE"]`（架构测试会检查）；包外插件可自选许可，在 `PluginDescriptor.license` 中声明。

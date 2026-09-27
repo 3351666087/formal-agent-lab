@@ -167,6 +167,8 @@ def build(verify: bool) -> Path:
     (out / "compose.yaml").write_text(COMPOSE.format(tag=tag))
     (out / "install.sh").write_text(INSTALL)
     (out / "install.sh").chmod(0o755)
+    for name in ("LICENSE", "NOTICE"):
+        shutil.copyfile(ROOT / name, out / name)
 
     files = sorted(p for p in out.rglob("*") if p.is_file())
     contracts = json.loads((ROOT / "contracts" / "v1" / "DIGEST.json").read_text())
@@ -183,6 +185,7 @@ def build(verify: bool) -> Path:
             "web": {"dir": "web", "files": len(list((out / "web").rglob("*")))},
             "compose": "compose.yaml (pull_policy: never)",
             "install": "install.sh",
+            "license": {"spdx": "Apache-2.0", "files": ["LICENSE", "NOTICE"]},
             "model_weights": [],
         },
         "not_included": {

@@ -68,7 +68,7 @@ DESCRIPTOR = PluginDescriptor(
     entrypoint="formal_lab_solver_z3.verifier:create",
     ui={"label": "Z3 bounded checker", "category": "verifier",
         "description": "Bounded model checking (incremental unrolling) with interpreter-replayed witnesses"},
-    license="z3: MIT; adapter: UNLICENSED (owner has not chosen a license yet)",
+    license="Apache-2.0 (adapter); z3-solver: MIT",
     source="formal-lab-solver-z3",
 )
 

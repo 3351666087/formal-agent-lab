@@ -54,6 +54,9 @@ def main() -> None:
     sh("uv", "build", "--all-packages", "--wheel", "--out-dir", str(wheels))
     wheel_info = [{"file": p.name, "sha256": sha256(p), "bytes": p.stat().st_size} for p in sorted(wheels.glob("*.whl"))]
 
+    for name in ("LICENSE", "NOTICE"):
+        shutil.copyfile(ROOT / name, OUT / name)
+
     print("==> web bundle")
     sh("pnpm", "--dir", "web", "exec", "tsc", "--noEmit", "-p", "tsconfig.json")
     sh("pnpm", "--dir", "web", "exec", "vite", "build")
@@ -73,7 +76,8 @@ def main() -> None:
         images.append({"name": name, "refs": [f"formal-agent-lab/{name}:{VERSION}", f"formal-agent-lab/{name}:{rev[:12]}"],
                        "image_id": info["Id"], "architecture": info["Architecture"], "os": info["Os"],
                        "size_bytes": info["Size"], "created": info["Created"],
-                       "revision_label": info["Config"]["Labels"].get("org.opencontainers.image.revision")})
+                       "revision_label": info["Config"]["Labels"].get("org.opencontainers.image.revision"),
+                       "licenses_label": info["Config"]["Labels"].get("org.opencontainers.image.licenses")})
 
     print("==> SDK/CLI wheel check in a clean venv (no server)")
     sdk_check = verify_sdk(wheels)
@@ -88,6 +92,8 @@ def main() -> None:
         "generated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         "source": {"repository": "https://github.com/3351666087/formal-agent-lab", "revision": rev, "dirty": dirty},
         "contract": {"version": contracts["contract_version"], "digest": contracts["digest"]},
+        "license": {"spdx": "Apache-2.0", "files": ["LICENSE", "NOTICE"],
+                    "third_party": "docs/reuse-ledger.md"},
         "dependencies": {
             "python": {"lock": "uv.lock", "sha256": sha256(ROOT / "uv.lock"), "python": sys.version.split()[0]},
             "node": {"lock": "pnpm-lock.yaml", "sha256": sha256(ROOT / "pnpm-lock.yaml")},

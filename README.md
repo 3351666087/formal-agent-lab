@@ -32,4 +32,4 @@ Python SDK ──┘            │                   └► 产物存储（本�
 契约 formal-lab-contracts/v1（Pydantic → JSON Schema → TypeScript）贯穿所有层；插件经 entry point 注册。
 ```
 
-许可：仓库所有者尚未为本仓库代码选择许可证（插件元数据标为 `UNLICENSED`）；第三方组件的许可见复用记录。
+许可：[Apache License 2.0](LICENSE)（另见 [NOTICE](NOTICE)；选择理由见决策 D-014）。第三方组件以未修改的官方发行物使用，各自的许可见[复用记录](docs/reuse-ledger.md)。

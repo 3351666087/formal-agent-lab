@@ -67,3 +67,7 @@
 | Caddy 镜像 | caddy:2.11-alpine | Apache-2.0 | Web 静态服务 + /api 反向代理 | deploy/docker/web.Dockerfile |
 | Helm / kubeconform | 4.3.0 / 0.8.0 | Apache-2.0 | Chart lint/渲染/清单校验 | scripts/bootstrap-dev-vm.sh |
 | uv / pnpm / Node | 0.12.19 / 12.6.0 / 24.21.0 | MIT/Apache-2.0 / MIT / MIT | 构建工具链 | scripts/bootstrap-dev-vm.sh |
+
+## 3. 本仓库许可与兼容性
+
+本仓库代码以 [Apache-2.0](../LICENSE) 发布（决策 D-014）。上表依赖的许可均与之兼容：MIT、BSD-3、Apache-2.0、PostgreSQL License 为宽松许可；psycopg（LGPL-3.0-only）以未修改的官方 wheel 作为库动态导入，镜像中随包保留其许可文件，本仓库不分发其修改版。发行的 wheel、sdist、镜像（`/usr/share/doc/formal-agent-lab/`）、发行目录与离线包均附带 `LICENSE` 与 `NOTICE`。

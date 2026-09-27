@@ -50,7 +50,7 @@ DESCRIPTOR = PluginDescriptor(
     entrypoint="formal_lab_example_scheduling.scorer:create",
     ui={"label": "调度评分", "category": "evaluator",
         "metric_labels": {d.metric_id: d.label for d in DEFINITIONS}},
-    license="UNLICENSED",  # repository owner has not chosen a license yet
+    license="Apache-2.0",
     source="formal-lab-example-scheduling",
 )
 

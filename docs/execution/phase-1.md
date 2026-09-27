@@ -45,7 +45,7 @@
 - [x] **P1-005** 实际实现并取得证据后才能勾选。阻塞项保留未勾选，追加 **BLOCKED：原因 / 已完成部分 / 解除条件**。
   - 证据：每个已勾选项均附证据行（scripts/tick.py 要求证据文本）；阻塞项规则由 tick.py --block 支持，本阶段结束时无残留阻塞项：条件式检查的前提（用户提供的 OpenAI 兼容中转站、本地 kind 集群）均具备，llm-real / helm-install 实测 PASS
 - [x] **P1-006** 常规可逆实现选择自行决策。缺少外部服务配置、基础设施或出现真实语义冲突时，精确说明，同时继续完成其余独立任务。
-  - 证据：常规可逆选择自行决策并记录于 docs/execution/decisions.md（D-001..D-013）；外部依赖如实说明：模型名 gpt 6 sol 不存在，改用中转站上的 gpt-5.6-sol 并告知用户；不上云，Helm 安装在本地 kind 临时集群验证；许可证未由所有者选择，未擅自指定，列入 manifest deferred_work
+  - 证据：常规可逆选择自行决策并记录于 docs/execution/decisions.md（D-001..D-013）；外部依赖如实说明：模型名 gpt 6 sol 不存在，改用中转站上的 gpt-5.6-sol 并告知用户；不上云，Helm 安装在本地 kind 临时集群验证；许可证起初未擅自指定（元数据标 UNLICENSED），所有者随后将选择交给执行者，选定 Apache-2.0 并记录理由与兼容性（D-014，tests/architecture/test_license.py）
 - [x] **P1-007** 截图、指标、测试、镜像构建与部署状态均以真实执行证据记录；测试代码与测试通过状态分别记录。
   - 证据：截图为 Playwright 真实运行产物（docs/execution/evidence/ui/，20 张）；指标来自真实运行（examples/neutral-scheduling/results/comparison.json、compose-smoke.json、helm/install.json）；测试代码（tests/、各包 tests/）与通过状态（docs/handoff/phase1-checks.json + evidence/checks/*.log）分开记录；镜像构建与部署状态见 release-manifest.json、offline-manifest.json、compose-smoke.json、helm/install.json
 

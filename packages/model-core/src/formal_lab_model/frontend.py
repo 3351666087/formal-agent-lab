@@ -34,7 +34,7 @@ DESCRIPTOR = PluginDescriptor(
     entrypoint="formal_lab_model.frontend:create",
     ui={"label": "IR JSON", "description": "Neutral finite-state IR (fal-ir-json/v1) with type checking",
         "category": "model_frontend"},
-    license="UNLICENSED",  # repository owner has not chosen a license yet
+    license="Apache-2.0",
     source="formal-lab-model-core",
 )
 

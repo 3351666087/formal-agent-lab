@@ -13,5 +13,8 @@ FROM caddy:2.11-alpine
 ARG FAL_SOURCE_REVISION=unknown
 COPY deploy/docker/Caddyfile /etc/caddy/Caddyfile
 COPY --from=build /src/web/dist /srv
-LABEL org.opencontainers.image.revision="${FAL_SOURCE_REVISION}"
+COPY LICENSE NOTICE /usr/share/doc/formal-agent-lab/
+LABEL org.opencontainers.image.source="https://github.com/3351666087/formal-agent-lab" \
+      org.opencontainers.image.revision="${FAL_SOURCE_REVISION}" \
+      org.opencontainers.image.licenses="Apache-2.0"
 EXPOSE 8080

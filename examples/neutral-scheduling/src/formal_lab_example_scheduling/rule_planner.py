@@ -40,7 +40,7 @@ DESCRIPTOR = PluginDescriptor(
     entrypoint="formal_lab_example_scheduling.rule_planner:create",
     ui={"label": "EDD 规则调度", "category": "rule",
         "description": "Earliest-due-date dispatch with priority and SPT tie-breaks (deterministic)"},
-    license="UNLICENSED",  # repository owner has not chosen a license yet
+    license="Apache-2.0",
     source="formal-lab-example-scheduling",
 )
 

@@ -86,6 +86,7 @@ def main() -> None:
         "contract_version": digest["contract_version"],
         "contract_digest": {"algorithm": digest["algorithm"], "value": digest["digest"], "method": digest["method"],
                             "files": len(digest["files"]), "source": "contracts/v1/DIGEST.json"},
+        "license": {"spdx": "Apache-2.0", "files": ["LICENSE", "NOTICE"], "decision": "docs/execution/decisions.md#D-014"},
         "paths": {
             "contracts": "contracts/v1/", "contract_source": "packages/contracts/src/formal_lab_contracts/",
             "contract_types_ts": "packages/contracts-ts/src/generated.ts", "contract_docs": "docs/contracts/v1.md",
@@ -146,8 +147,6 @@ def main() -> None:
             "optimisation objectives in the Z3 planner (it minimises plan length, not weighted delay cost)",
         ],
         "deferred_work": [
-            {"item": "choose a license for the repository (plugin metadata currently says UNLICENSED)",
-             "depends_on": "repository owner decision"},
             {"item": "domain extension phases (new semantic profiles, domain environments/planners)",
              "depends_on": "formal-lab-contracts/v1 + plugin interfaces (docs/architecture/plugin-integration.md)"},
             {"item": "authentication / multi-user projects and audit", "depends_on": "API gateway or identity provider choice"},

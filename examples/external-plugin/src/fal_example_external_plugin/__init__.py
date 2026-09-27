@@ -28,7 +28,7 @@ DESCRIPTOR = PluginDescriptor(
     entrypoint="fal_example_external_plugin:create",
     ui={"label": "Example: preference planner (external)", "category": "rule",
         "description": "Packaged outside the core; registered via the formal_lab.plugins entry point"},
-    license="UNLICENSED",  # repository owner has not chosen a license yet
+    license="Apache-2.0",
     source="fal-example-external-plugin",
 )
 

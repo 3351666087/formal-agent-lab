@@ -25,11 +25,12 @@ ENV PATH=/opt/venv/bin:$PATH PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 \
     FAL_SOURCE_REVISION=${FAL_SOURCE_REVISION} FAL_API_HOST=0.0.0.0 FAL_API_PORT=8000
 RUN groupadd --system fal && useradd --system --gid fal --home /home/fal --create-home fal
 COPY --from=build /opt/venv /opt/venv
+COPY LICENSE NOTICE /usr/share/doc/formal-agent-lab/
 WORKDIR /home/fal
 USER fal
 LABEL org.opencontainers.image.source="https://github.com/3351666087/formal-agent-lab" \
       org.opencontainers.image.revision="${FAL_SOURCE_REVISION}" \
-      org.opencontainers.image.licenses="NOASSERTION"
+      org.opencontainers.image.licenses="Apache-2.0"
 
 FROM runtime AS api
 EXPOSE 8000

@@ -43,7 +43,7 @@ DESCRIPTOR = PluginDescriptor(
     config_schema={"type": "object", "properties": {}, "additionalProperties": False},
     entrypoint="formal_lab_eval.generic:create",
     ui={"label": "通用评分", "category": "evaluator", "metric_labels": {d.metric_id: d.label for d in DEFINITIONS}},
-    license="UNLICENSED",  # repository owner has not chosen a license yet
+    license="Apache-2.0",
     source="formal-lab-evaluation",
 )
 

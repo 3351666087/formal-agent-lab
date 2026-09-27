@@ -89,7 +89,7 @@ DESCRIPTOR = PluginDescriptor(
     entrypoint="formal_lab_env.ir_world:create",
     ui={"label": "IR world simulator", "category": "environment",
         "description": "Pure-data simulator: runs the pinned model (optionally with truth overrides) as the world"},
-    license="UNLICENSED",  # repository owner has not chosen a license yet
+    license="Apache-2.0",
     source="formal-lab-neutral-env",
 )
 
