@@ -72,3 +72,70 @@ dev-down: ## stop API, worker and web
 
 dev-status: ## show process status
 	scripts/dev.sh status
+
+# ----------------------------------------------------------------- build / demo
+.PHONY: build web-build demo test-ui test-llm
+build: ## build all Python wheels + the web bundle (locked dependencies)
+	uv build --all-packages --out-dir out/release/wheels
+	pnpm --dir web exec tsc --noEmit -p tsconfig.json
+	pnpm --dir web exec vite build
+
+web-build: ## typecheck and build the web app
+	pnpm --dir web exec tsc --noEmit -p tsconfig.json
+	pnpm --dir web exec vite build
+
+demo: ## run the standalone scheduling example (no server) and print the strategy comparison
+	$(PY) -m formal_lab_example_scheduling check
+	$(PY) -m formal_lab_example_scheduling compare --seeds 1,2 --out out/demo/comparison.json
+
+test-ui: ## Playwright browser tests of the six web areas (needs services + `playwright install chromium`)
+	$(UV_RUN) pytest tests/integration/test_web_ui.py -m "integration and ui" -q
+
+test-llm: ## real-model integration check (needs FAL_LLM_API_KEY)
+	$(UV_RUN) pytest tests/integration/test_llm_real.py -m llm -q
+
+# ----------------------------------------------------------------- containers / deployment
+COMPOSE := docker compose -f deploy/compose/docker-compose.yaml
+.PHONY: images compose-up compose-down compose-smoke helm-lint helm-install-check
+images: ## build the api / worker / web OCI images
+	FAL_SOURCE_REVISION=$$(git rev-parse HEAD) $(COMPOSE) build
+
+compose-up: ## run the full containerised stack on http://127.0.0.1:8080
+	FAL_SOURCE_REVISION=$$(git rev-parse HEAD) $(COMPOSE) up -d --build --wait
+	$(COMPOSE) run --rm api python -m formal_lab_api.seed
+
+compose-down: ## stop the containerised stack (keeps volumes)
+	$(COMPOSE) down
+
+compose-smoke: ## build, start, run an experiment + matrix through :8080, record evidence, tear down
+	scripts/compose-smoke.sh
+
+helm-lint: ## helm lint + template + kubeconform for the chart
+	helm lint deploy/helm/formal-agent-lab --strict
+	helm template fal deploy/helm/formal-agent-lab | kubeconform -strict -summary -kubernetes-version 1.31.0
+
+helm-install-check: ## install the chart into a throw-away kind cluster and run an experiment through it
+	scripts/helm-install-check.sh
+
+# ----------------------------------------------------------------- release / acceptance
+.PHONY: release offline-bundle phase1-check handoff
+release: ## wheels + web bundle + images → out/release with manifest.json
+	uv run --frozen python scripts/release.py
+
+offline-bundle: ## offline package (images, wheels, web, manifest) → out/offline
+	uv run --frozen python scripts/offline_bundle.py --verify
+
+phase1-check: ## run every phase-1 acceptance check and write docs/handoff/phase1-checks.json
+	uv run --frozen python scripts/phase1_check.py
+
+handoff: ## regenerate docs/handoff/phase1.manifest.json from the repository and check results
+	uv run --frozen python scripts/handoff.py
+
+.PHONY: reclaim-disk
+reclaim-disk: ## drop Docker build cache / dangling images and return freed blocks to the host (VM disks are sparse)
+	# only our own artefacts: the Docker daemon may hold other projects' images — never prune -a / system prune
+	docker builder prune -af
+	docker image prune -f
+	-docker rmi $$(docker images --format '{{.Repository}}:{{.Tag}}' | grep -E '^formal-agent-lab/.+:[0-9a-f]{12}$$') 2>/dev/null
+	-docker rmi $$(docker images --format '{{.Repository}}@{{.Digest}}' | grep '^kindest/node') 2>/dev/null
+	sudo fstrim -av

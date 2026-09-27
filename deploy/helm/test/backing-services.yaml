@@ -1,0 +1,77 @@
+# TEST FIXTURE ONLY (scripts/helm-install-check.sh): minimal single-replica PostgreSQL, Temporal dev server and
+# SeaweedFS S3 inside a throw-away kind cluster, plus the Secrets the chart expects. Not a production setup.
+apiVersion: v1
+kind: Secret
+metadata: { name: formal-agent-lab-db }
+stringData: { database-url: "postgresql+psycopg://fal:fal@postgres:5432/fal" }
+---
+apiVersion: v1
+kind: Secret
+metadata: { name: formal-agent-lab-s3 }
+stringData: { access-key-id: fal-kind-access, secret-access-key: fal-kind-secret-key }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata: { name: postgres }
+spec:
+  selector: { matchLabels: { app: postgres } }
+  template:
+    metadata: { labels: { app: postgres } }
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:16-alpine
+          env: [{ name: POSTGRES_USER, value: fal }, { name: POSTGRES_PASSWORD, value: fal }, { name: POSTGRES_DB, value: fal }]
+          ports: [{ containerPort: 5432 }]
+          readinessProbe: { exec: { command: ["pg_isready", "-U", "fal", "-d", "fal"] }, periodSeconds: 2 }
+---
+apiVersion: v1
+kind: Service
+metadata: { name: postgres }
+spec: { selector: { app: postgres }, ports: [{ port: 5432 }] }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata: { name: temporal }
+spec:
+  selector: { matchLabels: { app: temporal } }
+  template:
+    metadata: { labels: { app: temporal } }
+    spec:
+      containers:
+        - name: temporal
+          image: temporalio/temporal:1.9.1
+          args: ["server", "start-dev", "--ip", "0.0.0.0", "--headless"]
+          ports: [{ containerPort: 7233 }]
+          readinessProbe: { tcpSocket: { port: 7233 }, periodSeconds: 2 }
+---
+apiVersion: v1
+kind: Service
+metadata: { name: temporal }
+spec: { selector: { app: temporal }, ports: [{ port: 7233 }] }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata: { name: s3 }
+spec:
+  selector: { matchLabels: { app: s3 } }
+  template:
+    metadata: { labels: { app: s3 } }
+    spec:
+      containers:
+        - name: s3
+          image: chrislusf/seaweedfs:4.47
+          args: ["mini", "-dir=/data", "-s3.port=8333"]
+          env:
+            - { name: AWS_ACCESS_KEY_ID, value: fal-kind-access }
+            - { name: AWS_SECRET_ACCESS_KEY, value: fal-kind-secret-key }
+            - { name: S3_BUCKET, value: formal-lab-artifacts }
+          ports: [{ containerPort: 8333 }]
+          readinessProbe: { tcpSocket: { port: 8333 }, periodSeconds: 2 }
+          volumeMounts: [{ name: data, mountPath: /data }]
+      volumes: [{ name: data, emptyDir: {} }]
+---
+apiVersion: v1
+kind: Service
+metadata: { name: s3 }
+spec: { selector: { app: s3 }, ports: [{ port: 8333 }] }

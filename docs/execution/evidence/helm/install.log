@@ -1,0 +1,117 @@
+==> images
+ Image formal-agent-lab/api:local Building 
+ Image formal-agent-lab/api:local Building 
+ Image formal-agent-lab/worker:local Building 
+ Image formal-agent-lab/web:local Building 
+ Image formal-agent-lab/api:local Built 
+ Image formal-agent-lab/web:local Built 
+ Image formal-agent-lab/worker:local Built 
+ Image formal-agent-lab/api:local Built 
+==> kind cluster fal-helm (kindest/node:v1.37.0@sha256:a1ed56cfb0e7b93589bdf97c8cd566405a265939e3620fc4f5de89adff580ae5)
+Creating cluster "fal-helm" ...
+ • Ensuring node image (kindest/node:v1.37.0) 🖼️  ...
+ ✓ Ensuring node image (kindest/node:v1.37.0) 🖼️
+ • Preparing nodes 📦   ...
+ ✓ Preparing nodes 📦 
+ • Writing configuration 📜  ...
+ ✓ Writing configuration 📜
+ • Starting control-plane 🕹️  ...
+ ✓ Starting control-plane 🕹️
+ • Installing CNI 🔌  ...
+ ✓ Installing CNI 🔌
+ • Installing StorageClass 💾  ...
+ ✓ Installing StorageClass 💾
+ • Waiting ≤ 3m0s for control-plane = Ready ⏳  ...
+ ✓ Waiting ≤ 3m0s for control-plane = Ready ⏳
+ • Ready after 17s 💚
+Set kubectl context to "kind-fal-helm"
+You can now use your cluster with:
+
+kubectl cluster-info --context kind-fal-helm
+
+Have a question, bug, or feature request? Let us know! https://kind.sigs.k8s.io/#community 🙂
+Image: "formal-agent-lab/api:c01df0d4396d" with ID "sha256:cab035c3c599c24f2116ccaab23e5df89e8c28865c9b35dd38b33a2b68e2511c" not yet present on node "fal-helm-control-plane", loading...
+Image: "formal-agent-lab/worker:c01df0d4396d" with ID "sha256:09b11631e708c4be3e4a0df81c2d40d46dfc53863001e97432522270b2d7f178" not yet present on node "fal-helm-control-plane", loading...
+Image: "formal-agent-lab/web:c01df0d4396d" with ID "sha256:2ba7c9a6c6cfd0be20e60114bad1d72e6faecc32f3966f25aa388fb66a478183" not yet present on node "fal-helm-control-plane", loading...
+==> test backing services
+secret/formal-agent-lab-db created
+secret/formal-agent-lab-s3 created
+deployment.apps/postgres created
+service/postgres created
+deployment.apps/temporal created
+service/temporal created
+deployment.apps/s3 created
+service/s3 created
+Waiting for deployment "postgres" rollout to finish: 0 of 1 updated replicas are available...
+deployment "postgres" successfully rolled out
+Waiting for deployment "temporal" rollout to finish: 0 of 1 updated replicas are available...
+deployment "temporal" successfully rolled out
+Waiting for deployment "s3" rollout to finish: 0 of 1 updated replicas are available...
+deployment "s3" successfully rolled out
+==> helm install (images pinned by tag loaded into the node; pullPolicy Never)
+NAME: fal
+LAST DEPLOYED: Sun Sep 27 08:59:56 2026
+NAMESPACE: default
+STATUS: deployed
+REVISION: 1
+DESCRIPTION: Install complete
+TEST SUITE: None
+NOTES:
+formal-agent-lab 0.1.0 installed as fal.
+
+External services this release expects (not deployed by the chart):
+  PostgreSQL  secret formal-agent-lab-db/database-url
+  Temporal    temporal:7233 (namespace default)
+  Artifacts   s3 http://s3:8333/formal-lab-artifacts
+
+Web UI:  kubectl port-forward svc/fal-formal-agent-lab-web 8080:80   → http://127.0.0.1:8080
+Readiness: kubectl port-forward svc/fal-formal-agent-lab-api 8000:8000 ; curl 127.0.0.1:8000/api/v1/health/ready
+Seed the demo project: kubectl exec deploy/fal-formal-agent-lab-api -- python -m formal_lab_api.seed
+NAME: fal
+LAST DEPLOYED: Sun Sep 27 08:59:56 2026
+NAMESPACE: default
+STATUS: deployed
+REVISION: 1
+DESCRIPTION: Install complete
+RESOURCES:
+==> v1/Service
+NAME                       TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)    AGE
+fal-formal-agent-lab-api   ClusterIP   10.96.101.124   <none>        8000/TCP   11s
+fal-formal-agent-lab-web   ClusterIP   10.96.28.147   <none>   80/TCP   11s
+
+==> v1/Deployment
+NAME                       READY   UP-TO-DATE   AVAILABLE   AGE
+fal-formal-agent-lab-api   1/1     1            1           11s
+fal-formal-agent-lab-web   1/1   1     1     11s
+fal-formal-agent-lab-worker   1/1   1     1     11s
+
+==> v1/Pod(related)
+NAME                                       READY   STATUS    RESTARTS   AGE
+fal-formal-agent-lab-api-b5d97f7c7-dvwj9   1/1     Running   0          11s
+fal-formal-agent-lab-web-648b66b767-mwzf7   1/1   Running   0     11s
+fal-formal-agent-lab-worker-66b8f79ff7-wxd8w   1/1   Running   0     11s
+
+
+TEST SUITE: None
+NOTES:
+formal-agent-lab 0.1.0 installed as fal.
+
+External services this release expects (not deployed by the chart):
+  PostgreSQL  secret formal-agent-lab-db/database-url
+  Temporal    temporal:7233 (namespace default)
+  Artifacts   s3 http://s3:8333/formal-lab-artifacts
+
+Web UI:  kubectl port-forward svc/fal-formal-agent-lab-web 8080:80   → http://127.0.0.1:8080
+Readiness: kubectl port-forward svc/fal-formal-agent-lab-api 8000:8000 ; curl 127.0.0.1:8000/api/v1/health/ready
+Seed the demo project: kubectl exec deploy/fal-formal-agent-lab-api -- python -m formal_lab_api.seed
+NAME                                           READY   STATUS    RESTARTS   AGE   IP            NODE                     NOMINATED NODE   READINESS GATES
+fal-formal-agent-lab-api-b5d97f7c7-dvwj9       1/1     Running   0          11s   10.244.0.9    fal-helm-control-plane   <none>           <none>
+fal-formal-agent-lab-web-648b66b767-mwzf7      1/1     Running   0          11s   10.244.0.11   fal-helm-control-plane   <none>           <none>
+fal-formal-agent-lab-worker-66b8f79ff7-wxd8w   1/1     Running   0          11s   10.244.0.10   fal-helm-control-plane   <none>           <none>
+postgres-6fc6fcb99c-zch9l                      1/1     Running   0          63s   10.244.0.5    fal-helm-control-plane   <none>           <none>
+s3-599dcc45f6-nqkv6                            1/1     Running   0          63s   10.244.0.7    fal-helm-control-plane   <none>           <none>
+temporal-d476cb89b-fs5qm                       1/1     Running   0          63s   10.244.0.6    fal-helm-control-plane   <none>           <none>
+==> seed + experiment through the web service
+{"project_id": "prj_91817b54ea794ba8945b", "model_id": "mdl_56862ece6c594367b392", "model_version": 1}
+{"passed": true, "run": "SUCCEEDED", "kubernetes": "v1.37.0"}
+==> OK (docs/execution/evidence/helm/install.json)

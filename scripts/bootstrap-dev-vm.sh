@@ -22,10 +22,11 @@ esac
 
 log() { printf '==> %s\n' "$*"; }
 
-if ! command -v make >/dev/null || ! command -v jq >/dev/null || ! command -v unzip >/dev/null; then
+if ! command -v make >/dev/null || ! command -v jq >/dev/null || ! command -v unzip >/dev/null \
+   || ! python3 -c "import ensurepip" 2>/dev/null; then
   log "apt packages"
   sudo apt-get update -qq
-  sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq build-essential git curl jq unzip ca-certificates >/dev/null
+  sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq build-essential git curl jq unzip ca-certificates python3-venv >/dev/null
 fi
 
 if [[ "$(uv --version 2>/dev/null | awk '{print $2}')" != "$UV_VERSION" ]]; then

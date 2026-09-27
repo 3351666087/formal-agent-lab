@@ -1,0 +1,82 @@
+{
+  "check": "P1-113 Helm install on a kind cluster",
+  "date": "2026-09-27T01:00:30Z",
+  "cluster": {
+    "tool": "kind v0.33.0",
+    "node_image": "kindest/node:v1.37.0@sha256:a1ed56cfb0e7b93589bdf97c8cd566405a265939e3620fc4f5de89adff580ae5",
+    "kubernetes": "v1.37.0"
+  },
+  "chart": "deploy/helm/formal-agent-lab",
+  "release": "fal",
+  "image_tag": "c01df0d4396d",
+  "backing_services": "test fixture deploy/helm/test/backing-services.yaml (not part of the chart)",
+  "pods": [
+    {
+      "name": "fal-formal-agent-lab-api-b5d97f7c7-dvwj9",
+      "phase": "Running",
+      "ready": true
+    },
+    {
+      "name": "fal-formal-agent-lab-web-648b66b767-mwzf7",
+      "phase": "Running",
+      "ready": true
+    },
+    {
+      "name": "fal-formal-agent-lab-worker-66b8f79ff7-wxd8w",
+      "phase": "Running",
+      "ready": true
+    },
+    {
+      "name": "postgres-6fc6fcb99c-zch9l",
+      "phase": "Running",
+      "ready": true
+    },
+    {
+      "name": "s3-599dcc45f6-nqkv6",
+      "phase": "Running",
+      "ready": true
+    },
+    {
+      "name": "temporal-d476cb89b-fs5qm",
+      "phase": "Running",
+      "ready": true
+    }
+  ],
+  "ready": {
+    "ready": true,
+    "database": {
+      "ok": true
+    },
+    "temporal": {
+      "ok": true,
+      "address": "temporal:7233"
+    },
+    "artifact_store": {
+      "ok": true,
+      "backend": "s3",
+      "bucket": "formal-lab-artifacts",
+      "endpoint": "http://s3:8333"
+    }
+  },
+  "run": {
+    "id": "run_86787c3f1c324725b408",
+    "status": "SUCCEEDED",
+    "events": 194,
+    "sse_events": 194,
+    "metrics": {
+      "delay_cost": 0.0,
+      "effect_mismatches": 3.0,
+      "goal_reached": 1.0,
+      "makespan": 7.0,
+      "mean_tardiness": 0.0,
+      "model_calls": null,
+      "orders_completed": 3.0,
+      "rejected_actions": 17.0,
+      "steps_used": 31.0,
+      "tokens": null,
+      "wall_seconds": 11.059
+    }
+  },
+  "passed": true,
+  "install_to_result_s": 34
+}

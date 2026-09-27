@@ -118,8 +118,10 @@
 
 ### 3.4 复用记录
 
-- [ ] **P1-033** 建立 **docs/reuse-ledger.md**：URL、版本/commit、许可、采用模块、复用方式、修改文件、验证证据、升级边界。
-- [ ] **P1-034** 记录 Z3、Temporal SDK、Inspect 的实际导入或调用路径；复用记录同时包含真实导入或调用路径、版本与验证证据。
+- [x] **P1-033** 建立 **docs/reuse-ledger.md**：URL、版本/commit、许可、采用模块、复用方式、修改文件、验证证据、升级边界。
+  - 证据：docs/reuse-ledger.md：Z3/Temporal/Inspect 的 URL、版本与上游 commit、许可、采用模块、复用方式（均未修改的官方发行物）、修改文件、验证证据、升级边界；其余依赖许可表
+- [x] **P1-034** 记录 Z3、Temporal SDK、Inspect 的实际导入或调用路径；复用记录同时包含真实导入或调用路径、版本与验证证据。
+  - 证据：reuse-ledger 逐项列出真实导入/调用路径（import z3 / temporalio.workflow|activity|client|worker / inspect_ai.Task|solver|scorer|log），并附版本（uv.lock）与测试证据
 
 ## 4. 冻结阶段间契约：formal-lab-contracts/v1
 
@@ -140,7 +142,8 @@
 | MetricDefinition / MetricResult | 指标 ID/版本、单位、方向、聚合方式、数值与证据 |
 | RunManifest | 实际固定的模型/插件/环境版本、配置、预算、种子、状态与产物 |
 
-- [ ] **P1-040** 从单一契约来源生成其余语言类型；提交生成命令，并在 CI 检查漂移。
+- [x] **P1-040** 从单一契约来源生成其余语言类型；提交生成命令，并在 CI 检查漂移。
+  - 证据：Pydantic 为唯一来源，make contracts 生成 schemas/TS/文档；CI 在 GitHub ubuntu-24.04 x86_64 上执行 make contracts-check（重新生成后 git diff --exit-code）并通过（docs/execution/evidence/ci-run.json，run 36283566183）
 - [x] **P1-041** 实现稳定接口：ModelFrontend.compile、Planner.propose、Verifier.check、Environment.reset/observe/step/snapshot/restore/close、Evaluator.score、ArtifactStore.put/get。
   - 证据：接口定义 packages/contracts/src/formal_lab_contracts/interfaces.py；实现：IRJsonFrontend.compile、Z3BoundedPlanner/EddDispatchPlanner/LLMPlanner.propose、Z3Verifier.check、IRWorldEnvironment.reset/observe/step/snapshot/restore/close、GenericEvaluator/SchedulingScorer.score、Local/S3ArtifactStore.put/get
 - [x] **P1-042** 每个接口给出可运行示例；Environment 示例仅调用纯数据模拟器。
@@ -270,14 +273,22 @@
 
 ## 10. 构建、部署与发行基础
 
-- [ ] **P1-110** 提供锁依赖的构建、启动、迁移、测试命令和仅含示例配置项的 .env.example。
-- [ ] **P1-111** 提供 Web/API/Worker OCI 构建定义，记录实际镜像引用与摘要。
-- [ ] **P1-112** Compose 启动 Web/API/Worker/PostgreSQL/Temporal 及选定对象存储配置，实际跑通中性实验。
-- [ ] **P1-113** Helm 覆盖配置、服务、Worker 和外部存储连接；完成 lint/模板检查。有集群再验证安装，分开记录状态。
-- [ ] **P1-114** Helm 交付通用开发部署模板，并在文档中准确标注已验证的部署范围。
-- [ ] **P1-115** 构建 SDK wheel、CLI 和平台基础发行包；manifest 记录源码、依赖、镜像、场景及文档。
-- [ ] **P1-116** 基础离线打包脚本区分已装入内容与外部前提；manifest 准确列出实际包含的权重、镜像与依赖。
-- [ ] **P1-117** 文档给出空环境开始的路径，记录实际验证的 OS、架构和资源，资源要求以实际验证记录为准。
+- [x] **P1-110** 提供锁依赖的构建、启动、迁移、测试命令和仅含示例配置项的 .env.example。
+  - 证据：uv.lock + pnpm-lock.yaml 锁定；make bootstrap/build/dev-up/migrate/seed/test-unit/test-integration/test-ui/images/compose-up/release/phase1-check 等（make help）；.env.example 仅含示例值
+- [x] **P1-111** 提供 Web/API/Worker OCI 构建定义，记录实际镜像引用与摘要。
+  - 证据：deploy/docker/python.Dockerfile（api/worker）与 web.Dockerfile；实际镜像 ID、架构、大小与 revision 标签记录于 docs/execution/evidence/compose-smoke.json 与 release-manifest.json
+- [x] **P1-112** Compose 启动 Web/API/Worker/PostgreSQL/Temporal 及选定对象存储配置，实际跑通中性实验。
+  - 证据：deploy/compose/docker-compose.yaml 启动 web/api/worker/postgres/temporal/s3(SeaweedFS)+迁移；scripts/compose-smoke.sh 实测经 :8080 运行实验（SSE 经代理完整）、8 格矩阵全部成功、18 个产物位于 S3、导出回放包（docs/execution/evidence/compose-smoke.json）
+- [x] **P1-113** Helm 覆盖配置、服务、Worker 和外部存储连接；完成 lint/模板检查。有集群再验证安装，分开记录状态。
+  - 证据：Chart 覆盖配置/Service/API/Worker/Web/迁移 Hook/外部 PostgreSQL、Temporal、S3 与 LLM Secret；helm lint --strict、helm template、kubeconform 通过（evidence/helm/{lint,kubeconform}.log）；安装状态单独记录：kind v0.33.0 / Kubernetes v1.37.0 安装并跑通实验（evidence/helm/install.json）
+- [x] **P1-114** Helm 交付通用开发部署模板，并在文档中准确标注已验证的部署范围。
+  - 证据：docs/deployment.md 按方式列出已验证范围与未验证项（多节点、Ingress 控制器、外部 HA 数据库/Temporal、升级回滚未验证），能力等级为单用户本地开发配置
+- [x] **P1-115** 构建 SDK wheel、CLI 和平台基础发行包；manifest 记录源码、依赖、镜像、场景及文档。
+  - 证据：make release：12 个 wheel（含 formal-lab-sdk 与 fal CLI）、Web 包、3 个镜像标签；manifest 记录源码 revision、uv.lock/pnpm-lock 摘要、契约摘要、wheel sha256、镜像 ID、场景与文档；SDK/CLI 在全新 venv 中无服务运行（docs/execution/evidence/release-manifest.json）
+- [x] **P1-116** 基础离线打包脚本区分已装入内容与外部前提；manifest 准确列出实际包含的权重、镜像与依赖。
+  - 证据：scripts/offline_bundle.py：区分 included（6 个镜像、30 个 wheel、Web、compose(pull_policy never)、install.sh、model_weights=[]）与 not_included/external_prerequisites；--verify 解包到空目录、pip --no-index 安装 CLI、启动并跑通实验（docs/execution/evidence/offline-manifest.json）
+- [x] **P1-117** 文档给出空环境开始的路径，记录实际验证的 OS、架构和资源，资源要求以实际验证记录为准。
+  - 证据：docs/getting-started.md：从空 Ubuntu 24.04 到运行与验收的完整路径；实测环境 Ubuntu 24.04.4 aarch64 / 4 vCPU / 5.9 GiB，另有 CI x86_64；资源表来自实测（内存、磁盘、镜像、耗时）
 
 ## 11. 阶段一必做验收
 
