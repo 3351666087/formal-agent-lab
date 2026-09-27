@@ -207,42 +207,94 @@
 
 当前“恢复快照后重新 apply”只适用于声明了这一能力的环境。订单服务是独立进程，数据库中的订单不会因为 Worker 恢复旧快照而自动回滚。
 
-- [ ] **P2-050** 为环境定义显式能力：pure_replayable、persistent_session、snapshot、restore、query_operation、idempotent_step，并在运行启动时协商。
-- [ ] **P2-051** 设计并持久化操作状态：prepared、dispatched、completed、failed、outcome_unknown、reconciled；保存阶段转换和原因。
-- [ ] **P2-052** 本地业务服务接收稳定 operation_id 并返回已有结果；协调器在调用前登记意图，在响应后记录结果。
-- [ ] **P2-053** 模拟“服务已完成业务操作但响应丢失”：先查询 operation_id 与业务状态，再决定后续处理，验证一次订单只产生一次业务效果。
-- [ ] **P2-054** 处理重复 Activity、Worker 退出、进程缓存丢失及取消与执行交错；使用服务侧幂等和数据库事务表达已实现的保证范围。
-- [ ] **P2-055** 把 planner checkpoint、轮次状态与已持久化提案一起恢复；计费响应丢失时保留未确认用量，分别统计逻辑提案与实际调用尝试。
-- [ ] **P2-056** 将共享资源的修订号检查与业务服务条件更新对应起来，给出旧观测提交和更新冲突的真实案例。
-- [ ] **P2-057** 本地运行器和 Temporal 路径共享执行阶段与协调逻辑，通过同一套合同样例比较结果。
-- [ ] **P2-058** 为异常操作提供查询、人工标记复核和可解释终止入口；所有恢复动作在事件中可追踪。
+- [x] **P2-050** 为环境定义显式能力：pure_replayable、persistent_session、snapshot、restore、query_operation、idempotent_step，并在运行启动时协商。
+  - 证据：env capabilities pure_replayable / persistent_session / snapshot / restore / query_operation / idempotent_step declared per environment and negotiated at run start (manifest.negotiation with the implied recovery path); examples/local-order-service/tests/test_order_service.py::test_capabilities_are_negotiated_at_run_start; docs/execution/evidence/phase2/orders/comparison.md (declarations)
+  - 实现：`packages/runtime/src/formal_lab_runtime/manifest.py`、`packages/contracts/src/formal_lab_contracts/capabilities.py`、`examples/local-order-service/src/formal_lab_example_orders/env.py`
+- [x] **P2-051** 设计并持久化操作状态：prepared、dispatched、completed、failed、outcome_unknown、reconciled；保存阶段转换和原因。
+  - 证据：operation_records (PREPARED/DISPATCHED/COMPLETED/FAILED/OUTCOME_UNKNOWN/RECONCILED) with every transition and reason, committed before the next action (DbLedger); tests/integration/test_order_service_platform.py::test_lost_answers_and_a_killed_worker (GET /runs/{id}/operations transitions)
+  - 实现：`packages/runtime/src/formal_lab_runtime/coordination.py`、`packages/platform-api/src/formal_lab_api/services/execution.py`
+- [x] **P2-052** 本地业务服务接收稳定 operation_id 并返回已有结果；协调器在调用前登记意图，在响应后记录结果。
+  - 证据：service takes a stable operation_id (PK inside BEGIN IMMEDIATE) and returns the stored answer (replayed: true, also for 8 concurrent duplicates); intent recorded (DISPATCHED) before the call; examples/local-order-service/tests/test_order_service.py::test_a_stable_operation_id_takes_effect_once
+  - 实现：`examples/local-order-service/src/formal_lab_example_orders/service.py`、`packages/runtime/src/formal_lab_runtime/coordination.py`
+- [x] **P2-053** 模拟“服务已完成业务操作但响应丢失”：先查询 operation_id 与业务状态，再决定后续处理，验证一次订单只产生一次业务效果。
+  - 证据：response held past the client timeout after commit → OUTCOME_UNKNOWN → lookup by id → RECONCILED, one business effect; examples/local-order-service/tests/test_order_service.py::test_a_lost_response_is_settled_by_looking_the_operation_up, case 'delayed' (6 reconciled per run), tests/integration/test_order_service_platform.py::test_lost_answers_and_a_killed_worker
+  - 实现：`examples/local-order-service/src/formal_lab_example_orders/env.py`、`packages/runtime/src/formal_lab_runtime/coordination.py`
+- [x] **P2-054** 处理重复 Activity、Worker 退出、进程缓存丢失及取消与执行交错；使用服务侧幂等和数据库事务表达已实现的保证范围。
+  - 证据：duplicate activity returns the recorded outcome; lost process cache (fresh adapter attached from the session marker) reconciles DISPATCHED records (found → not re-sent; not found → re-sent with the same id); SIGKILLed worker on the durable path; cancel while answers are held ends at a boundary with every service operation in the ledger; examples/local-order-service/tests/test_order_service.py::test_duplicate_activity_and_a_lost_process_cache, tests/integration/test_order_service_platform.py (3 tests); guarantees documented in service.py / README / D-021
+  - 实现：`examples/local-order-service/src/formal_lab_example_orders/service.py`、`examples/local-order-service/README.md`、`docs/execution/decisions.md`
+- [x] **P2-055** 把 planner checkpoint、轮次状态与已持久化提案一起恢复；计费响应丢失时保留未确认用量，分别统计逻辑提案与实际调用尝试。
+  - 证据：persisted proposal reused after a worker crash (one ACTION_PROPOSED per step, RECOVERY event), planner checkpoint + turn state restored together (test_multi_actor_platform); lost model answers keep attempts / unconfirmed usage apart from answered calls and logical proposals across a resume: packages/runtime/tests/test_kernel.py::test_lost_model_answers_keep_unconfirmed_usage_across_a_resume
+  - 实现：`packages/platform-api/src/formal_lab_api/services/execution.py`、`packages/runtime/src/formal_lab_runtime/engine.py`
+- [x] **P2-056** 将共享资源的修订号检查与业务服务条件更新对应起来，给出旧观测提交和更新冲突的真实案例。
+  - 证据：REJECT_STALE ↔ service conditional update on row revisions (per-field change log): two handlers with round-start observations — refused stale commits name the same changed locations as the pure model's revision check; examples/local-order-service/tests/test_order_service.py::test_stale_observations_meet_the_service_conditional_update; docs/execution/evidence/phase2/orders/comparison.md (stale contrast)
+  - 实现：`examples/local-order-service/src/formal_lab_example_orders/service.py`
+- [x] **P2-057** 本地运行器和 Temporal 路径共享执行阶段与协调逻辑，通过同一套合同样例比较结果。
+  - 证据：local runner and Temporal share stages and coordination: same actions, outcomes, per-step (event, stage) sequence, operation states and metrics against the same service; tests/integration/test_order_service_platform.py::test_durable_path_and_local_runner_share_the_kernel
+  - 实现：`packages/runtime/src/formal_lab_runtime/engine.py`、`packages/runtime/src/formal_lab_runtime/local_runner.py`
+- [x] **P2-058** 为异常操作提供查询、人工标记复核和可解释终止入口；所有恢复动作在事件中可追踪。
+  - 证据：GET /runs/{id}/operations?abnormal, GET /operations/{id}, POST /operations/{id}/review (OPERATION_REVIEW event, supersede rule), explained cancel {reason, operations}; lookup failure → NEEDS_REVIEW + OPERATION_UNRESOLVED; fal ops list/show/review, fal run cancel --reason; tests/integration/test_order_service_platform.py, examples/local-order-service/tests/test_order_service.py::test_an_operation_that_cannot_be_looked_up_needs_review
+  - 实现：`packages/platform-api/src/formal_lab_api/services/operations.py`、`packages/platform-api/src/formal_lab_api/app.py`、`packages/sdk/src/formal_lab_sdk/cli.py`
 
 ## 7. 完整本地业务样例与环境管理
 
 建立 **examples/local-order-service/**：订单提交、资源预约、处理队列、库存与完成状态。提供纯数据模型和独立业务服务两种后端，以同一动作合同进行比较。业务操作只包含这些真实的订单处理功能。
 
-- [ ] **P2-060** 实现本地订单服务及其持久化，提供固定的业务 API 和健康状态；使用合成订单数据。
-- [ ] **P2-061** 实现独立环境适配包，使用正式 EnvironmentSession 与操作协调接口，不在通用引擎写入业务客户端。
-- [ ] **P2-062** 实现 create/start/ready/reset/close 状态和项目归属标记；开发脚本根据项目自带 Compose 定义管理生命周期。
-- [ ] **P2-063** 以本机端口或 Compose 内部服务名连接环境；沿用单用户回环地址配置，并在能力页注明部署 profile。
-- [ ] **P2-064** 实现后台正常订单流与独立 Probe：吞吐、完成率、队列长度、延迟和恢复时间，固定采样窗口与逻辑/墙钟含义。
-- [ ] **P2-065** 提供正常处理、资源短缺、延迟响应、进程重启和预测效果偏差五种可重复案例。
-- [ ] **P2-066** 对照纯数据环境与业务服务的动作前提、结果和证据；差异保存为可定位到具体字段与操作的报告。
-- [ ] **P2-067** 声明每个环境实际支持的恢复方式：重新播种、服务侧重置、状态导入或快照；恢复结果用探针验证。
-- [ ] **P2-068** 加入 CPU/内存/磁盘预检、运行时超时、资源统计和失败后项目资源清理；保留用户其他项目的资源。
-- [ ] **P2-069** 从空的项目工作目录完成创建环境、运行实验、导出、重置、重跑与清理，保存真实验收日志。
+- [x] **P2-060** 实现本地订单服务及其持久化，提供固定的业务 API 和健康状态；使用合成订单数据。
+  - 证据：examples/local-order-service: FastAPI + SQLite service (tenant files, WAL), fixed business API + health, synthetic orders; examples/local-order-service/tests/test_order_service.py::test_service_api_state_survives_a_process_kill
+  - 实现：`examples/local-order-service/src/formal_lab_example_orders/service.py`、`examples/local-order-service/src/formal_lab_example_orders/instance.py`
+- [x] **P2-061** 实现独立环境适配包，使用正式 EnvironmentSession 与操作协调接口，不在通用引擎写入业务客户端。
+  - 证据：environment adapter plugin formal-lab.example.orders.service-env (Environment + SessionEnvironment, coordination interface), no business client in the engine: tests/architecture/test_boundaries.py::test_business_service_and_its_adapter_stay_apart
+  - 实现：`examples/local-order-service/src/formal_lab_example_orders/env.py`、`tests/architecture/test_boundaries.py`
+- [x] **P2-062** 实现 create/start/ready/reset/close 状态和项目归属标记；开发脚本根据项目自带 Compose 定义管理生命周期。
+  - 证据：lifecycle create/start/ready/reset/close with project labels (manifest + Docker labels); process and Compose modes from the example's own compose.yaml; make orders-up/down/status, python -m formal_lab_example_orders.lifecycle; examples/local-order-service/tests/test_order_service.py::test_lifecycle_labels_precheck_and_scoped_cleanup; evidence/phase2/orders/e2e-compose.log
+  - 实现：`examples/local-order-service/src/formal_lab_example_orders/lifecycle.py`、`examples/local-order-service/compose.yaml`、`Makefile`
+- [x] **P2-063** 以本机端口或 Compose 内部服务名连接环境；沿用单用户回环地址配置，并在能力页注明部署 profile。
+  - 证据：loopback port (local-lite) or Compose service name http://orders:8765 (FAL_ORDERS_ENDPOINT in the stack); deployment profiles declared in the env capability params and shown on the plugin card (web/src/pages/Strategies.tsx DeploymentNotes)
+  - 实现：`deploy/compose/docker-compose.yaml`、`examples/local-order-service/src/formal_lab_example_orders/env.py`、`web/src/pages/Strategies.tsx`
+- [x] **P2-064** 实现后台正常订单流与独立 Probe：吞吐、完成率、队列长度、延迟和恢复时间，固定采样窗口与逻辑/墙钟含义。
+  - 证据：arrivals of new orders on every tick (background order flow); independent probe from GET /metrics: throughput, completion rate, queue length, backlog, latency (logical window W ticks), operation latency and recovery time (wall clock, meaning stated per metric); examples/local-order-service/tests/test_order_service.py::test_five_repeatable_cases_on_the_service (probes, recovery after restart)
+  - 实现：`examples/local-order-service/src/formal_lab_example_orders/plugins.py`、`examples/local-order-service/src/formal_lab_example_orders/service.py`
+- [x] **P2-065** 提供正常处理、资源短缺、延迟响应、进程重启和预测效果偏差五种可重复案例。
+  - 证据：cases normal / shortage / delayed / restart / deviation, repeatable per seed: examples/local-order-service/tests/test_order_service.py::test_five_repeatable_cases_on_the_service[5 cases]
+  - 实现：`examples/local-order-service/src/formal_lab_example_orders/instance.py`、`examples/local-order-service/src/formal_lab_example_orders/scenarios.py`
+- [x] **P2-066** 对照纯数据环境与业务服务的动作前提、结果和证据；差异保存为可定位到具体字段与操作的报告。
+  - 证据：pure model vs service compared per step on preconditions, outcomes, every field, evidence; differences located by step, operation id and field: scripts/orders_report.py → docs/execution/evidence/phase2/orders/comparison.{md,json} (5 cases: 0 differences; slow-station contrast: 32 located); examples/local-order-service/tests/test_order_service.py::test_pure_model_and_service_compared_field_by_field
+  - 实现：`examples/local-order-service/src/formal_lab_example_orders/compare.py`、`scripts/orders_report.py`
+- [x] **P2-067** 声明每个环境实际支持的恢复方式：重新播种、服务侧重置、状态导入或快照；恢复结果用探针验证。
+  - 证据：recovery modes declared (pure: RESEED, SNAPSHOT; service: SERVICE_RESET, STATE_IMPORT) and verified by probes / truth state: examples/local-order-service/tests/test_order_service.py::test_recovery_modes_are_declared_and_verified_by_probes
+  - 实现：`examples/local-order-service/src/formal_lab_example_orders/env.py`、`examples/local-order-service/src/formal_lab_example_orders/service.py`
+- [x] **P2-068** 加入 CPU/内存/磁盘预检、运行时超时、资源统计和失败后项目资源清理；保留用户其他项目的资源。
+  - 证据：precheck (CPU / memory / disk floor), run_with_timeout, stats (RSS, CPU, data size / docker stats), cleanup by project label leaving other projects running; examples/local-order-service/tests/test_order_service.py::test_lifecycle_labels_precheck_and_scoped_cleanup; no leftover containers/volumes after the compose e2e (verified)
+  - 实现：`examples/local-order-service/src/formal_lab_example_orders/lifecycle.py`
+- [x] **P2-069** 从空的项目工作目录完成创建环境、运行实验、导出、重置、重跑与清理，保存真实验收日志。
+  - 证据：empty work dir → environment → experiment (12 cells) → export (bundles + service state) → service reset → rerun (12/12 identical) → cleanup: docs/execution/evidence/phase2/orders/e2e-process.{log,json}, e2e-compose.{log,json}; make orders-e2e
+  - 实现：`examples/local-order-service/src/formal_lab_example_orders/e2e.py`
 
 ## 8. 规则、版本发布与效果证据
 
 本节实现通用业务规则与模型发布流程。样例为机器容量、订单依赖、库存约束和计划一致性。
 
-- [ ] **P2-070** 实现带类型的事件—条件—处理规则：触发事件、表达式、版本、优先级以及继续、补充观测、重规划、暂停等结果。
-- [ ] **P2-071** 规则条件复用纯表达式 AST；未知、超时、冲突与不支持都有显式结果和优先级解释。
-- [ ] **P2-072** 规则编辑产生新版本；编译、类型检查、小模型查询和回归在发布前完成，运行固定引用已发布产物。
-- [ ] **P2-073** ModelReleaseRecord 保存检查对象、版本摘要、边界、假设和日志；它表达编译与检查事实。
-- [ ] **P2-074** 效果证据区分 observed、verified-within-scope、predicted、unknown，明确可比较字段的新鲜度和缺失状态。
-- [ ] **P2-075** 效果差异触发受影响计划暂停与模型修订建议；修订版本经检查后用于新运行，旧运行继续解释原版本。
-- [ ] **P2-076** 将反例或效果差异转成最小可回归案例，保留模型、场景、种子、输入、预期与实测输出。
+- [x] **P2-070** 实现带类型的事件—条件—处理规则：触发事件、表达式、版本、优先级以及继续、补充观测、重规划、暂停等结果。
+  - 证据：typed event–condition–handler rules (trigger events + stage, condition expression, version, priority, outcomes CONTINUE / OBSERVE_MORE / REPLAN / PAUSE); saved as versions via POST /projects/{id}/rulesets; a PAUSE rule pauses the run on an effect difference with the rule named: tests/integration/test_governance_platform.py::test_a_rule_pauses_the_affected_plan_on_an_effect_difference
+  - 实现：`packages/contracts/src/formal_lab_contracts/governance.py`、`packages/model-core/src/formal_lab_model/rules.py`、`packages/platform-api/src/formal_lab_api/services/governance.py`
+- [x] **P2-071** 规则条件复用纯表达式 AST；未知、超时、冲突与不支持都有显式结果和优先级解释。
+  - 证据：conditions reuse the pure expression AST (check_expression with the rule context types); UNKNOWN / TIMEOUT / CONFLICT / UNSUPPORTED results with priority explanation (RuleEvaluator.decide); type errors rejected with field paths (tests/integration/test_governance_platform.py, packages/runtime/tests/test_release.py::test_rules_are_type_checked_with_the_model)
+  - 实现：`packages/model-core/src/formal_lab_model/rules.py`
+- [x] **P2-072** 规则编辑产生新版本；编译、类型检查、小模型查询和回归在发布前完成，运行固定引用已发布产物。
+  - 证据：rule edits create versions (parent kept); releases run compilation, type checks, rules, bounded queries and regression before use; runs pin a RELEASED release of exactly their model and rules (mismatch refused): packages/runtime/tests/test_release.py, tests/integration/test_governance_platform.py::test_difference_to_released_revision_to_new_experiment; fal rules / fal release check
+  - 实现：`packages/runtime/src/formal_lab_runtime/release.py`、`packages/platform-api/src/formal_lab_api/services/governance.py`、`packages/platform-api/src/formal_lab_api/services/runs.py`
+- [x] **P2-073** ModelReleaseRecord 保存检查对象、版本摘要、边界、假设和日志；它表达编译与检查事实。
+  - 证据：ModelReleaseRecord: checks with bounds, compiled artifact (driver), regression results, bounds, assumptions (scope MODEL_INTERNAL), stages, log artifact; content-addressed (same inputs → same release id): packages/runtime/tests/test_release.py::test_old_version_is_rejected_the_revised_one_released
+  - 实现：`packages/runtime/src/formal_lab_runtime/release.py`
+- [x] **P2-074** 效果证据区分 observed、verified-within-scope、predicted、unknown，明确可比较字段的新鲜度和缺失状态。
+  - 证据：FieldDiff evidence observed / verified-within-scope / unknown with freshness FRESH / STALE / MISSING; expected is always the prediction; stale fields never match: packages/model-core/tests/test_model_core.py::test_effect_evidence_levels_and_freshness
+  - 实现：`packages/model-core/src/formal_lab_model/compare.py`
+- [x] **P2-075** 效果差异触发受影响计划暂停与模型修订建议；修订版本经检查后用于新运行，旧运行继续解释原版本。
+  - 证据：effect difference → MODEL_REVISION_SUGGESTED (action, differing fields, constants its effects read) and, with a rule, the affected run pauses; the revised version is checked and used by new runs while the old run keeps its pinned version: tests/integration/test_governance_platform.py (both tests), packages/runtime/tests/test_release.py::test_an_effect_difference_becomes_a_minimal_regression_case
+  - 实现：`packages/runtime/src/formal_lab_runtime/engine.py`、`packages/platform-api/src/formal_lab_api/services/governance.py`
+- [x] **P2-076** 将反例或效果差异转成最小可回归案例，保留模型、场景、种子、输入、预期与实测输出。
+  - 证据：minimal RegressionCase (model, scenario, seed, input state, action, expected, observed, compared paths, origin); replayed on any version (PASS when it predicts the observation): POST /regression-cases/{id}/replay, fal regression replay; packages/runtime/tests/test_release.py, tests/integration/test_governance_platform.py
+  - 实现：`packages/runtime/src/formal_lab_runtime/release.py`、`packages/platform-api/src/formal_lab_api/services/governance.py`
 - [ ] **P2-077** 交付一条“发现差异—定位模型—编辑新版本—重新检查—新实验比较”的完整 UI/CLI 路径。
 
 ## 9. 评测、回放与研究数据

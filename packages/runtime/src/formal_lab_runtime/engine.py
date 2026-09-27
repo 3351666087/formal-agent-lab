@@ -1170,17 +1170,23 @@ def finish_run(rc: RunComponents, *, status: RunStatus, reason: str | None, fina
     m = rc.manifest
     final_state: dict[str, Any] = {}
     properties: dict[str, bool] = {}
+    unavailable = None
     if final_snapshot is not None:
-        _restore(rc, final_snapshot)
-        final_state = rc.env.truth_state() if hasattr(rc.env, "truth_state") else {}
-        properties = rc.env.truth_properties() if hasattr(rc.env, "truth_properties") else {}
+        try:
+            _restore(rc, final_snapshot)
+            final_state = rc.env.truth_state() if hasattr(rc.env, "truth_state") else {}
+            properties = rc.env.truth_properties() if hasattr(rc.env, "truth_properties") else {}
+        except FormalLabError as exc:  # a live service that is down: score what can be scored, say why
+            final_state, properties = {}, {}
+            unavailable = f"final environment state unavailable: {exc.message}"
     reason_enum = termination_reason or {RunStatus.CANCELLED: TerminationReason.CANCELLED,
                                          RunStatus.BUDGET_EXHAUSTED: TerminationReason.BUDGET_EXHAUSTED,
                                          RunStatus.FAILED: TerminationReason.FAILED}.get(status)
     episode = EpisodeRecord(run_id=m.run_id, scenario=m.scenario, status=status, steps=steps,
                             final_truth_state=final_state, final_step=last_step, usage=usage,
                             environment_summary={"properties": properties, "goal": goal_of(rc),
-                                                 "capabilities": sorted(rc.env_caps)},
+                                                 "capabilities": sorted(rc.env_caps),
+                                                 **({"unavailable": unavailable} if unavailable else {})},
                             actor_usage={k: BudgetUsage.model_validate(v) for k, v in (actor_usage or {}).items()},
                             termination_reason=reason_enum, probes=probes or [],
                             backend="SERVICE" if caps.ENV_PERSISTENT_SESSION in rc.env_caps else "PURE_DATA")

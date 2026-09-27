@@ -92,11 +92,30 @@ function PluginCard({ entry }: { entry: CatalogEntry }) {
       <div className="small"><code>{d.plugin_id}@{d.version}</code> · 接口 {d.interface} v{d.interface_version}</div>
       {d.ui.description && <div className="small muted">{d.ui.description}</div>}
       <div className="chip-list">{d.capabilities.map((c) => <span key={c.id} className="badge accent" title={JSON.stringify(c.params)}>{c.id}</span>)}</div>
+      <DeploymentNotes capabilities={d.capabilities} />
       <div className="small muted">profile：{d.semantic_profiles.join(", ") || "—"} · 许可：{d.license ?? "—"} · 来源：{entry.source}</div>
       {entry.availability_note && <div className="small">{entry.availability_note}</div>}
       <details><summary className="small muted">配置 schema 与描述符摘要</summary>
         <Json value={{ config_schema: d.config_schema, descriptor_digest: entry.descriptor_digest }} maxHeight={220} /></details>
     </article>
+  );
+}
+
+/** Deployment profiles and recovery modes an environment declares in its capability params (P2-063 / P2-067). */
+function DeploymentNotes({ capabilities }: { capabilities: CatalogEntry["descriptor"]["capabilities"] }) {
+  const notes = capabilities.flatMap((c) => {
+    const params = (c.params ?? {}) as { deployment_profiles?: Record<string, string>; recovery_modes?: string[] };
+    return params.deployment_profiles || params.recovery_modes ? [params] : [];
+  });
+  if (!notes.length) return null;
+  return (
+    <div className="small stack" data-testid="deployment-notes">
+      {notes.map((n, i) => <div key={i}>
+        {n.deployment_profiles && <div><strong>部署 profile</strong>：
+          {Object.entries(n.deployment_profiles).map(([k, v]) => <div key={k}><code>{k}</code> — {v}</div>)}</div>}
+        {n.recovery_modes && <div><strong>恢复方式</strong>：{n.recovery_modes.join("、")}</div>}
+      </div>)}
+    </div>
   );
 }
 

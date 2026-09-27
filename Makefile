@@ -101,6 +101,20 @@ test-llm: ## real-model integration check (needs FAL_LLM_API_KEY)
 # ----------------------------------------------------------------- containers / deployment
 COMPOSE := docker compose -f deploy/compose/docker-compose.yaml
 .PHONY: images compose-up compose-down compose-smoke helm-lint helm-install-check
+orders-up: ## start the local order service example on 127.0.0.1:8765 (project "dev", data in var/.fal-orders)
+	$(PY) -m formal_lab_example_orders.lifecycle up --project dev
+
+orders-down: ## stop it (data kept; `ARGS=--purge` removes it)
+	$(PY) -m formal_lab_example_orders.lifecycle down --project dev $(ARGS)
+
+orders-status: ## show the order service manifest and health
+	$(PY) -m formal_lab_example_orders.lifecycle status --project dev
+
+orders-e2e: ## order service end to end from an empty work dir (process + compose), real logs in docs/execution/evidence/phase2/orders
+	rm -rf var/orders-e2e-process var/orders-e2e-compose
+	$(PY) -m formal_lab_example_orders.e2e --workdir var/orders-e2e-process --mode process --log docs/execution/evidence/phase2/orders/e2e-process.log --summary docs/execution/evidence/phase2/orders/e2e-process.json
+	$(PY) -m formal_lab_example_orders.e2e --workdir var/orders-e2e-compose --mode compose --project e2ecompose --log docs/execution/evidence/phase2/orders/e2e-compose.log --summary docs/execution/evidence/phase2/orders/e2e-compose.json
+
 images: ## build the api / worker / web OCI images
 	FAL_SOURCE_REVISION=$$(git rev-parse HEAD) $(COMPOSE) build
 

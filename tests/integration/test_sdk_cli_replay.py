@@ -163,3 +163,38 @@ def test_inspect_evaluation_is_imported_and_reported(stack, sdk, tmp_path):
     report = sdk.matrix_report(info["matrix_id"])
     assert report["matrix"]["spec"]["source"] == "inspect" and len(report["cells"]) == 4
     assert report["matrix"]["spec"]["artifacts"][0]["format_version"] == "inspect_ai/eval-log"
+
+
+def test_offline_replay_navigation_and_reexecution(tmp_path):
+    """P2-086: a recorded replay navigates turns, task plans, operations and the model version without executing
+    anything; re-execution is a separate command that runs the pinned manifest again and compares trajectories."""
+    from formal_lab_example_scheduling.scenarios import model_package, two_dispatchers
+    from formal_lab_runtime import default_registry, make_manifest, run_local
+    from formal_lab_runtime.bundles import bundle_from_local
+
+    reg = default_registry()
+    pkg = model_package()
+    sc = two_dispatchers(pkg, seed=1, strategies=("task-rule", "task-symbolic"))
+    m = make_manifest(run_id="run_nav", project_id="p", scenario=sc, package=pkg, registry=reg, seed=1,
+                      config={"initial_check_horizon": 0})
+    path = tmp_path / "nav.replay.zip"
+    path.write_bytes(bundle_from_local(run_local(m, pkg, reg), pkg))
+    env = {**os.environ}
+
+    def cli(*args: str, check: bool = True) -> subprocess.CompletedProcess:
+        res = subprocess.run([sys.executable, "-m", "formal_lab_sdk.cli", *args], cwd=tmp_path, text=True,
+                             capture_output=True, env=env, timeout=600)
+        if check:
+            assert res.returncode == 0, res.stdout + res.stderr
+        return res
+
+    turns = cli("replay", "turns", str(path), "--actor", "dispatcher_b").stdout.splitlines()
+    assert turns and all("dispatcher_b" in t for t in turns) and "round" in turns[0]
+    plans = cli("replay", "plans", str(path), "--nodes").stdout
+    assert "dispatcher_a v1" in plans and "INITIAL" in plans and "[SYMBOLIC]" in plans and "o1_cut" in plans
+    ops = cli("replay", "operations", str(path)).stdout
+    assert "PREPARED → DISPATCHED → COMPLETED" in ops
+    model = cli("replay", "model", str(path)).stdout
+    assert model.startswith("model neutral-scheduling@1") and "release — (not pinned)" in model
+    again = cli("replay", "reexecute", str(path))
+    assert "trajectory identical" in again.stdout

@@ -16,6 +16,7 @@ x-platform-env: &platform-env
   FAL_S3_SECRET_ACCESS_KEY: fal-compose-secret-key
   FAL_DEPLOYMENT_PROFILE: compose-local
   FAL_CORS_ORIGINS: http://127.0.0.1:8080
+  FAL_ORDERS_ENDPOINT: http://orders:8765  # the order-service example, reached by its Compose service name
 
 x-python-build: &python-build
   context: ../..
@@ -79,6 +80,15 @@ services:
       migrate: { condition: service_completed_successfully }
       temporal: { condition: service_healthy }
 
+  orders:  # local order service example: an independent business service (not published outside the stack)
+    image: formal-agent-lab/orders:${FAL_IMAGE_TAG:-local}
+    build: { <<: *python-build, target: orders }
+    command: ["python", "-m", "formal_lab_example_orders.service", "--data", "/data", "--host", "0.0.0.0",
+              "--port", "8765", "--project", "formal-agent-lab"]
+    volumes: ["ordersdata:/data"]
+    restart: unless-stopped
+    labels: { dev.formal-lab.project: formal-agent-lab, dev.formal-lab.component: local-order-service }
+
   web:
     image: formal-agent-lab/web:${FAL_IMAGE_TAG:-local}
     build:
@@ -96,4 +106,5 @@ services:
 volumes:
   pgdata: {}
   temporaldata: {}
+  ordersdata: {}
   s3data: {}

@@ -65,6 +65,20 @@ def _profile_capability(profile: str) -> str:
     return f"{caps.PROFILE_PREFIX}{profile}"
 
 
+def recovery_path(descriptor: Any) -> str:
+    """How an interrupted step is recovered with this environment (P2-050), decided by its declared capabilities."""
+    have = {c.id for c in descriptor.capabilities}
+    if have & {caps.ENV_PURE_REPLAYABLE, caps.ENV_SNAPSHOT_RESTORE}:
+        return "recovery: restore the pre-step snapshot and re-execute (pure-data replay)"
+    if {caps.ENV_QUERY_OPERATION, caps.ENV_IDEMPOTENT_STEP} <= have:
+        return ("recovery: re-attach to the live session; interrupted operations are looked up by id and re-sent "
+                "with the same id only if never received")
+    if caps.ENV_QUERY_OPERATION in have:
+        return ("recovery: re-attach; interrupted operations are looked up by id — re-sending is not idempotent, so "
+                "an operation not found is re-sent at most once more")
+    return "recovery: an interrupted operation cannot be settled automatically and will need a manual review"
+
+
 def negotiate_run(registry: PluginRegistry, *, scenario: ScenarioManifest, package: ModelPackage,
                   participants: list[Participant], driver: CatalogEntry, verifier: CatalogEntry,
                   probes: list[CatalogEntry]) -> list[CapabilityNegotiation]:
@@ -97,6 +111,7 @@ def negotiate_run(registry: PluginRegistry, *, scenario: ScenarioManifest, packa
                  (caps.ENV_PURE_REPLAYABLE, caps.ENV_PERSISTENT_SESSION, caps.ENV_QUERY_OPERATION,
                   caps.ENV_OBSERVE_ON_REQUEST)]
     needs(env, "environment", env_reqs, env_why)
+    results[-1] = results[-1].model_copy(update={"reasons": [*results[-1].reasons, recovery_path(env.descriptor)]})
     if not ({c.id for c in env.descriptor.capabilities} & {caps.ENV_PURE_REPLAYABLE, caps.ENV_SNAPSHOT_RESTORE,
                                                           caps.ENV_PERSISTENT_SESSION}):
         fatal.append(f"{env.descriptor.plugin_id} declares neither env.pure_replayable nor env.persistent_session: "

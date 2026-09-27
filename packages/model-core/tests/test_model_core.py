@@ -199,3 +199,31 @@ def test_effect_comparison():
                               expected_by="model:t@1")
     assert unknown.verdict == "INSUFFICIENT_INFORMATION"
     assert {d.path: d.status for d in unknown.diffs} == {"x": "MATCH", "y": "UNKNOWN"}
+
+
+def test_effect_evidence_levels_and_freshness():
+    """P2-074: every compared field says what backs it — observed fresh, verified within a stated scope, or
+    unknown (stale / missing); `expected` is always the model's prediction; stale fields never count as a match."""
+    from formal_lab_contracts import Fact, Observation, UnknownItem
+    from formal_lab_model.compare import compare_effects
+
+    obs = Observation(run_id="r", actor_id="a", step=5, state_revision=3,
+                      facts=[Fact(path="x", value=2, observed_at_step=5), Fact(path="y", value=1, observed_at_step=3,
+                                                                                source="DELAYED")],
+                      unknowns=[UnknownItem(path="z", reason="NOT_OBSERVABLE")])
+    cmp = compare_effects(expected_post={"x": 2, "y": 2, "z": 7, "w": 4}, pre_state={"x": 1, "y": 1, "z": 0, "w": 0},
+                          observation=obs, written_paths=["x", "y", "z", "w"], expected_by="model:m@1",
+                          verified={"w": 5})
+    by = {d.path: d for d in cmp.diffs}
+    assert (by["x"].status, by["x"].evidence, by["x"].freshness) == ("MATCH", "observed", "FRESH")
+    assert (by["y"].status, by["y"].evidence, by["y"].freshness, by["y"].observed) == ("UNKNOWN", "unknown", "STALE",
+                                                                                        None)
+    assert (by["z"].status, by["z"].freshness) == ("UNKNOWN", "MISSING")
+    assert (by["w"].status, by["w"].evidence) == ("DIFFERENT", "verified-within-scope")
+    assert cmp.verdict == "DIFFERENT" and cmp.evidence_counts == {"observed": 1, "unknown": 2,
+                                                                  "verified-within-scope": 1}
+    fresh_only = compare_effects(expected_post={"x": 2, "y": 2}, pre_state={"x": 1, "y": 1}, observation=obs,
+                                 written_paths=["x", "y"], expected_by="model:m@1")
+    assert fresh_only.verdict == "INSUFFICIENT_INFORMATION"  # a stale field is never a match
+    assert compare_effects(expected_post=None, pre_state={}, observation=obs, written_paths=[],
+                           expected_by="m").verdict == "INSUFFICIENT_INFORMATION"

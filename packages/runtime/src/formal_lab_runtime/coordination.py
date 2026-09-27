@@ -13,7 +13,8 @@ The intent is recorded (PREPARED, DISPATCHED) *before* the environment is called
   Found → RECONCILED with the service's outcome (never applied twice). Not found → dispatched again with the same
   id (the service deduplicates by id, so even a lost "not found" race cannot double-apply).
 - neither: an operation left DISPATCHED / OUTCOME_UNKNOWN cannot be settled automatically; it is marked
-  NEEDS_REVIEW and the run ends with OPERATION_UNRESOLVED (explainable termination, P2-058).
+  NEEDS_REVIEW and the run ends with OPERATION_UNRESOLVED (explainable termination, P2-058). The same happens when
+  the lookup itself fails (the service stays unreachable past the adapter's readiness wait).
 """
 
 from __future__ import annotations
@@ -64,7 +65,7 @@ class InMemoryLedger:
 def transition(record: OperationRecord, state: OperationState, reason: str, **update: Any) -> OperationRecord:
     if state != record.state and state not in OPERATION_TRANSITIONS[record.state]:
         raise NonRetryableFailure(f"operation {record.operation_id}: illegal transition {record.state} → {state}")
-    attempt = record.attempts + (1 if state is OperationState.DISPATCHED else 0)
+    attempt = record.attempts + (1 if state == OperationState.DISPATCHED else 0)
     return record.model_copy(update={
         "state": state,
         "attempts": attempt,
@@ -178,9 +179,15 @@ class Coordinator:
         if not self.queryable:
             return self._unresolved(record, log, f"{why}; the environment cannot be queried for operation "
                                                  f"{record.operation_id}")
-        found = self.env.query_operation(record.operation_id)
+        try:
+            found = self.env.query_operation(record.operation_id)
+        except (ResultUnknown, Timeout) as exc:  # the service cannot even be asked: never guess, ask a person
+            if record.state == OperationState.DISPATCHED:
+                record = self._save(record, log, OperationState.OUTCOME_UNKNOWN, f"{why}; outcome not recorded")
+            return self._unresolved(record, log, f"{why}; looking up operation {record.operation_id} failed: "
+                                                 f"{exc.message}")
         if found is None:
-            if record.state is OperationState.DISPATCHED:  # interrupted before any answer: mark it explicitly
+            if record.state == OperationState.DISPATCHED:  # interrupted before any answer: mark it explicitly
                 record = self._save(record, log, OperationState.OUTCOME_UNKNOWN, f"{why}; state after dispatch "
                                     "not recorded")
             note = "the environment has no record of the operation: it never took effect; re-sending the same id"
@@ -188,7 +195,7 @@ class Coordinator:
                 method="QUERY_OPERATION", found=False, note=note)}))
             log.append((record.state, note))
             return None
-        if record.state is OperationState.DISPATCHED:
+        if record.state == OperationState.DISPATCHED:
             record = self._save(record, log, OperationState.OUTCOME_UNKNOWN, f"{why}; outcome not recorded")
         outcome = found.model_copy(update={"operation_state": OperationState.RECONCILED})
         record = self._save(record, log, OperationState.RECONCILED,
@@ -202,7 +209,7 @@ class Coordinator:
     def _unresolved(self, record: OperationRecord, log: list, why: str) -> CoordinationResult:
         from formal_lab_contracts import ReviewMark
 
-        if record.state is OperationState.DISPATCHED:
+        if record.state == OperationState.DISPATCHED:
             record = self._save(record, log, OperationState.OUTCOME_UNKNOWN, why)
         record = record.model_copy(update={"review": ReviewMark(status="NEEDS_REVIEW", by="coordinator",
                                                                 at=utcnow(), note=why)})

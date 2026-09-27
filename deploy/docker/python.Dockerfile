@@ -40,3 +40,14 @@ CMD ["fal-api"]
 
 FROM runtime AS worker
 CMD ["fal-worker"]
+
+FROM runtime AS orders
+# the local order service example (independent business service; synthetic data)
+USER root
+RUN mkdir -p /data && chown fal:fal /data
+USER fal
+EXPOSE 8765
+VOLUME /data
+HEALTHCHECK --interval=5s --timeout=3s --retries=20 \
+  CMD python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8765/health', timeout=2)" || exit 1
+CMD ["python", "-m", "formal_lab_example_orders.service", "--data", "/data", "--host", "0.0.0.0", "--port", "8765"]

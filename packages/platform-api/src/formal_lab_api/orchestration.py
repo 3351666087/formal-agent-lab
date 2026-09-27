@@ -44,6 +44,22 @@ class TemporalOrchestrator:
             raise RetryableFailure(f"could not start workflow {workflow_id}: {exc}") from exc
         return handle.id
 
+    async def start_matrix(self, matrix_id: str, max_parallel: int) -> str:
+        """(Re)start the durable queue of a matrix; a running one is kept (it is woken instead), a finished one may
+        be started again after merges or reruns (its state is in the database)."""
+        client = await self.client()
+        wid = f"matrix-{matrix_id}"
+        try:
+            handle = await client.start_workflow(
+                "MatrixWorkflow", {"matrix_id": matrix_id, "max_parallel": max_parallel}, id=wid,
+                task_queue=self.settings.temporal_task_queue,
+                id_reuse_policy=WorkflowIDReusePolicy.ALLOW_DUPLICATE,
+                id_conflict_policy=WorkflowIDConflictPolicy.USE_EXISTING)
+            await handle.signal("wake")
+        except RPCError as exc:
+            raise RetryableFailure(f"could not start the queue of matrix {matrix_id}: {exc}") from exc
+        return handle.id
+
     async def signal(self, workflow_id: str, name: str) -> None:
         client = await self.client()
         await client.get_workflow_handle(workflow_id).signal(name)

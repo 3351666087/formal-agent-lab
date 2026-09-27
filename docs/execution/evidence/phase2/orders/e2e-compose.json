@@ -1,0 +1,285 @@
+{
+  "mode": "compose",
+  "project": "e2ecompose",
+  "workdir": "/tmp/tmp.cLSbRq2iDG/orders-e2e",
+  "steps": {
+    "precheck": {
+      "cpus": 4,
+      "mem_available_mb": 4284,
+      "disk_free_mb": 14749,
+      "floor": {
+        "cpus": 1,
+        "mem_mb": 256,
+        "disk_mb": 200
+      },
+      "ok": true,
+      "problems": []
+    },
+    "create": {
+      "endpoint": "http://127.0.0.1:37547",
+      "health": {
+        "status": "ok",
+        "service": "local-order-service",
+        "version": "1.0.0",
+        "project": "e2ecompose",
+        "pid": 1,
+        "started_at": 1790506679.0538933,
+        "tenants": 0
+      },
+      "seconds": 6.18,
+      "transitions": [
+        {
+          "status": "CREATED",
+          "at": "2026-09-27T10:57:58.013798+00:00",
+          "note": "work directory /tmp/tmp.cLSbRq2iDG/orders-e2e/.fal-orders/e2ecompose"
+        },
+        {
+          "status": "STARTING",
+          "at": "2026-09-27T10:57:58.013871+00:00",
+          "note": ""
+        },
+        {
+          "status": "READY",
+          "at": "2026-09-27T10:58:04.189654+00:00",
+          "note": "health ok at http://127.0.0.1:37547"
+        }
+      ]
+    },
+    "experiment": {
+      "normal-rule-1": {
+        "status": "SUCCEEDED",
+        "steps": 24,
+        "metrics": {
+          "orders_completed": 6.0,
+          "late_orders": 0.0,
+          "mean_latency": 2.3333333333333335
+        },
+        "operations": {
+          "COMPLETED": 24
+        },
+        "bundle": "bundles/normal-rule-1.replay.zip",
+        "seconds": 0.95
+      },
+      "normal-rule-2": {
+        "status": "SUCCEEDED",
+        "steps": 25,
+        "metrics": {
+          "orders_completed": 6.0,
+          "late_orders": 0.0,
+          "mean_latency": 2.0
+        },
+        "operations": {
+          "COMPLETED": 25
+        },
+        "bundle": "bundles/normal-rule-2.replay.zip",
+        "seconds": 0.91
+      },
+      "normal-z3-1": {
+        "status": "SUCCEEDED",
+        "steps": 26,
+        "metrics": {
+          "orders_completed": 6.0,
+          "late_orders": 0.0,
+          "mean_latency": 2.3333333333333335
+        },
+        "operations": {
+          "COMPLETED": 26
+        },
+        "bundle": "bundles/normal-z3-1.replay.zip",
+        "seconds": 20.69
+      },
+      "normal-z3-2": {
+        "status": "SUCCEEDED",
+        "steps": 27,
+        "metrics": {
+          "orders_completed": 6.0,
+          "late_orders": 0.0,
+          "mean_latency": 2.1666666666666665
+        },
+        "operations": {
+          "COMPLETED": 27
+        },
+        "bundle": "bundles/normal-z3-2.replay.zip",
+        "seconds": 14.63
+      },
+      "delayed-rule-1": {
+        "status": "SUCCEEDED",
+        "steps": 24,
+        "metrics": {
+          "orders_completed": 6.0,
+          "late_orders": 0.0,
+          "mean_latency": 2.3333333333333335
+        },
+        "operations": {
+          "COMPLETED": 18,
+          "RECONCILED": 6
+        },
+        "bundle": "bundles/delayed-rule-1.replay.zip",
+        "seconds": 7.18
+      },
+      "delayed-rule-2": {
+        "status": "SUCCEEDED",
+        "steps": 25,
+        "metrics": {
+          "orders_completed": 6.0,
+          "late_orders": 0.0,
+          "mean_latency": 2.0
+        },
+        "operations": {
+          "COMPLETED": 19,
+          "RECONCILED": 6
+        },
+        "bundle": "bundles/delayed-rule-2.replay.zip",
+        "seconds": 7.19
+      },
+      "delayed-z3-1": {
+        "status": "SUCCEEDED",
+        "steps": 26,
+        "metrics": {
+          "orders_completed": 6.0,
+          "late_orders": 0.0,
+          "mean_latency": 2.3333333333333335
+        },
+        "operations": {
+          "COMPLETED": 20,
+          "RECONCILED": 6
+        },
+        "bundle": "bundles/delayed-z3-1.replay.zip",
+        "seconds": 7.24
+      },
+      "delayed-z3-2": {
+        "status": "SUCCEEDED",
+        "steps": 27,
+        "metrics": {
+          "orders_completed": 6.0,
+          "late_orders": 0.0,
+          "mean_latency": 2.1666666666666665
+        },
+        "operations": {
+          "COMPLETED": 21,
+          "RECONCILED": 6
+        },
+        "bundle": "bundles/delayed-z3-2.replay.zip",
+        "seconds": 7.3
+      },
+      "deviation-rule-1": {
+        "status": "SUCCEEDED",
+        "steps": 26,
+        "metrics": {
+          "orders_completed": 6.0,
+          "late_orders": 1.0,
+          "mean_latency": 3.3333333333333335
+        },
+        "operations": {
+          "COMPLETED": 26
+        },
+        "bundle": "bundles/deviation-rule-1.replay.zip",
+        "seconds": 1.05
+      },
+      "deviation-rule-2": {
+        "status": "SUCCEEDED",
+        "steps": 28,
+        "metrics": {
+          "orders_completed": 6.0,
+          "late_orders": 0.0,
+          "mean_latency": 3.0
+        },
+        "operations": {
+          "COMPLETED": 28
+        },
+        "bundle": "bundles/deviation-rule-2.replay.zip",
+        "seconds": 1.04
+      },
+      "deviation-z3-1": {
+        "status": "SUCCEEDED",
+        "steps": 30,
+        "metrics": {
+          "orders_completed": 6.0,
+          "late_orders": 1.0,
+          "mean_latency": 4.0
+        },
+        "operations": {
+          "COMPLETED": 30
+        },
+        "bundle": "bundles/deviation-z3-1.replay.zip",
+        "seconds": 13.3
+      },
+      "deviation-z3-2": {
+        "status": "SUCCEEDED",
+        "steps": 28,
+        "metrics": {
+          "orders_completed": 6.0,
+          "late_orders": 0.0,
+          "mean_latency": 2.8333333333333335
+        },
+        "operations": {
+          "COMPLETED": 28
+        },
+        "bundle": "bundles/deviation-z3-2.replay.zip",
+        "seconds": 8.41
+      }
+    },
+    "export": {
+      "bundles": 12,
+      "service_states": 12,
+      "bytes": 4012925
+    },
+    "reset": {
+      "tenants": 12,
+      "probe_after_reset": {
+        "clock": 0,
+        "backlog": 3,
+        "queue": 0
+      },
+      "probe_metrics": [
+        "throughput",
+        "completion_rate",
+        "queue_length",
+        "backlog",
+        "latency_ticks",
+        "op_latency_ms",
+        "recovery_seconds"
+      ]
+    },
+    "rerun": {
+      "identical_trajectories": 12,
+      "cells": 12,
+      "differing": []
+    },
+    "resources": {
+      "mode": "compose",
+      "containers": [
+        {
+          "BlockIO": "9.46MB / 49.7MB",
+          "CPUPerc": "0.22%",
+          "Container": "887d7c54771e69a8701bec4bf469d35c62bebaf0b922be5b488d09eee593c253",
+          "ID": "887d7c54771e",
+          "MemPerc": "0.71%",
+          "MemUsage": "41.72MiB / 5.772GiB",
+          "Name": "fal-orders-e2ecompose-orders-1",
+          "NetIO": "2.1MB / 6.05MB",
+          "PIDs": "7"
+        }
+      ]
+    },
+    "cleanup": {
+      "removed": {
+        "processes": [],
+        "containers": [
+          "887d7c54771e69a8701bec4bf469d35c62bebaf0b922be5b488d09eee593c253"
+        ],
+        "paths": [
+          "/tmp/tmp.cLSbRq2iDG/orders-e2e/.fal-orders/e2ecompose"
+        ]
+      },
+      "leftover_after_close": {
+        "processes": [],
+        "containers": [],
+        "volumes": [],
+        "paths": []
+      },
+      "state_dir_gone": true
+    }
+  },
+  "ok": true
+}

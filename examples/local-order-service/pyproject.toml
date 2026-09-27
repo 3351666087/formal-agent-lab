@@ -1,0 +1,18 @@
+[project]
+name = "formal-lab-example-orders"
+version = "0.1.0"
+description = "Local order service: an independent FastAPI + SQLite business service, its environment adapter, lifecycle manager, probe, rule strategy and scorer, and a pure-data model of the same order handling"
+requires-python = ">=3.12"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+dependencies = ["formal-lab-contracts", "formal-lab-model-core", "fastapi>=0.141", "uvicorn>=0.54", "httpx>=0.28"]
+
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/formal_lab_example_orders"]
+
+[project.entry-points."formal_lab.plugins"]
+local-order-service = "formal_lab_example_orders:registrations"

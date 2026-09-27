@@ -298,3 +298,51 @@ def test_repeated_observation_request_is_declined_and_no_progress_ends_the_run(p
     assert [e.payload.get("served", True) for e in requests] == [True, False, False, False]
     assert all("repeated request" in e.payload["declined"] for e in requests[1:])
     assert any(p.plugin_id == desc.plugin_id for p in m.plugins)
+
+
+def test_lost_model_answers_keep_unconfirmed_usage_across_a_resume(pkg):
+    """P2-055: a proposal whose model answers were all lost (rule fallback) keeps its 4 attempts and 1 unconfirmed
+    call in the run and participant usage; logical proposals (one per step) and model attempts are counted apart,
+    and both survive serialising the run state and continuing it."""
+    from formal_lab_contracts import ActionProposal, ModelUsage, PluginDescriptor, ProposalSource
+    from formal_lab_contracts import capabilities as caps
+    from formal_lab_contracts.interfaces import PluginRegistration
+    from formal_lab_runtime.registry import PluginRegistry
+
+    desc = PluginDescriptor(plugin_id="test.planner.lossy", version="1.0.0", interface="PLANNER",
+                            capabilities=[{"id": caps.PLAN_RULE}], semantic_profiles=["deterministic_finite_v1"],
+                            entrypoint="tests:lossy", license="Apache-2.0", source="tests",
+                            ui={"label": "lossy", "category": "rule"})
+
+    class Lossy:
+        descriptor = desc
+
+        def propose(self, context):
+            pick = next(c for c in context.candidates if str(c.belief_applicability) == "APPLICABLE"
+                        and c.action.action_type in ("assign", "advance"))
+            lost = context.step == 1
+            usage = (ModelUsage(model_calls=0, attempts=4, unconfirmed_calls=1) if lost else
+                     ModelUsage(model_calls=1, attempts=1, input_tokens=100, output_tokens=10))
+            return ActionProposal(
+                proposal_id=f"{context.step_id}:p", run_id=context.run_id, step_id=context.step_id,
+                step=context.step, actor_id=context.actor_id, action=pick.action,
+                based_on_revision=context.observation.state_revision,
+                source=ProposalSource(kind="RULE" if lost else "LLM", strategy=desc.ref()), usage=usage,
+                rationale="model answers lost: rule fallback" if lost else "model choice")
+
+    reg = PluginRegistry().discover()
+    reg.register(PluginRegistration(descriptor=desc, factory=lambda config, services: Lossy()))
+    sc = scenario("normal", pkg, seed=1, strategy={"plugin": {"plugin_id": desc.plugin_id, "version": "1.0.0"},
+                                                  "config": {}})
+    sc = sc.model_copy(update={"budget": sc.budget.model_copy(update={"max_steps": 6})})
+    m = make_manifest(run_id="run_lossy", project_id="p", scenario=sc, package=pkg, registry=reg, seed=1)
+    part = run_local(m, pkg, reg, stop_after=2)
+    state = LocalRunState.from_json(json.loads(json.dumps(part.to_json())))
+    assert state.usage.model_attempts == 5 and state.usage.unconfirmed_calls == 1 and state.usage.model_calls == 1
+    res = resume_local(state, pkg, reg)
+    proposals = [e for e in res.events if str(e.event_type) == "ACTION_PROPOSED"]
+    assert len(proposals) == res.usage.steps == 6
+    assert (res.usage.model_calls, res.usage.model_attempts, res.usage.unconfirmed_calls) == (5, 9, 1)
+    assert res.usage.input_tokens == 500
+    actor = res.actor_usage["dispatcher"]
+    assert (actor["model_calls"], actor["model_attempts"], actor["unconfirmed_calls"]) == (5, 9, 1)

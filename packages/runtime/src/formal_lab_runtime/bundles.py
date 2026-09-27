@@ -17,5 +17,5 @@ def bundle_from_local(result: LocalRunResult, package: ModelPackage, provenance:
         data = canonical_json(call)
         artifacts[hashlib.sha256(data).hexdigest()] = data
     bundle = ReplayBundle(manifest=result.manifest, events=result.events, package=package, metrics=result.metrics,
-                          artifacts=artifacts)
+                          artifacts=artifacts, operations=list(result.operations))
     return write_bundle(bundle, provenance={"runner": "local", **(provenance or {})})

@@ -147,8 +147,57 @@ class Client:
     def resume(self, run_id: str) -> dict[str, Any]:
         return self.post(f"/runs/{run_id}/resume")
 
-    def cancel(self, run_id: str) -> dict[str, Any]:
-        return self.post(f"/runs/{run_id}/cancel")
+    def cancel(self, run_id: str, reason: str | None = None, operations: list[str] | None = None) -> dict[str, Any]:
+        """Cancel at the next step boundary; with a reason it is an explained termination by an operator."""
+        body = {"reason": reason, "operations": list(operations or [])} if reason else None
+        return self.post(f"/runs/{run_id}/cancel", body)
+
+    # ------------------------------------------------------------------ rules / releases / regression (P2-070 …)
+    def rulesets(self, project_id: str, ruleset_id: str | None = None) -> list[dict[str, Any]]:
+        return self.get(f"/projects/{project_id}/rulesets", params={"ruleset_id": ruleset_id} if ruleset_id else None)
+
+    def save_ruleset(self, project_id: str, model_version_id: str, ruleset_id: str, rules: list[dict[str, Any]],
+                     name: str | None = None, note: str | None = None) -> dict[str, Any]:
+        return self.post(f"/projects/{project_id}/rulesets", {"model_version_id": model_version_id,
+                                                               "ruleset_id": ruleset_id, "rules": rules,
+                                                               "name": name, "note": note})
+
+    def release(self, model_version_id: str, *, ruleset: tuple[str, int] | None = None,
+                regression: str | list[str] = "model", horizon: int = 6) -> dict[str, Any]:
+        body: dict[str, Any] = {"regression": regression, "horizon": horizon}
+        if ruleset:
+            body["ruleset"] = {"ruleset_id": ruleset[0], "version": ruleset[1]}
+        return self.post(f"/model-versions/{model_version_id}/releases", body)
+
+    def releases(self, project_id: str) -> list[dict[str, Any]]:
+        return self.get(f"/projects/{project_id}/releases")
+
+    def regression_cases(self, project_id: str, package_id: str | None = None) -> list[dict[str, Any]]:
+        return self.get(f"/projects/{project_id}/regression-cases",
+                        params={"package_id": package_id} if package_id else None)
+
+    def replay_case(self, case_id: str, model_version_id: str) -> dict[str, Any]:
+        return self.post(f"/regression-cases/{case_id}/replay", {"model_version_id": model_version_id})
+
+    def revision_suggestions(self, run_id: str) -> list[dict[str, Any]]:
+        return self.get(f"/runs/{run_id}/revision-suggestions")
+
+    def operations(self, run_id: str, *, state: str | None = None, needs_review: bool | None = None,
+                   abnormal: bool = False) -> list[dict[str, Any]]:
+        params: dict[str, Any] = {"abnormal": str(abnormal).lower()}
+        if state:
+            params["state"] = state
+        if needs_review is not None:
+            params["needs_review"] = str(needs_review).lower()
+        return self.get(f"/runs/{run_id}/operations", params=params)
+
+    def operation(self, operation_id: str) -> dict[str, Any]:
+        return self.get(f"/operations/{operation_id}")
+
+    def review_operation(self, operation_id: str, status: str, note: str, by: str = "operator",
+                         supersede: bool = False) -> dict[str, Any]:
+        return self.post(f"/operations/{operation_id}/review",
+                         {"status": status, "note": note, "by": by, "supersede": supersede})
 
     def rerun(self, run_id: str) -> dict[str, Any]:
         return self.post(f"/runs/{run_id}/rerun")
@@ -205,8 +254,42 @@ class Client:
     def matrix(self, matrix_id: str) -> dict[str, Any]:
         return self.get(f"/matrices/{matrix_id}")
 
-    def matrix_report(self, matrix_id: str) -> dict[str, Any]:
-        return self.get(f"/matrices/{matrix_id}/report")
+    def matrix_report(self, matrix_id: str, fmt: str = "json") -> Any:
+        """JSON report (dict); for v2 matrices also `fmt="csv"` or `"md"` (text)."""
+        res = self.get(f"/matrices/{matrix_id}/report", params={"format": fmt})
+        return res.decode() if isinstance(res, bytes) else res
+
+    # ---- matrix v2: full cell configurations in a durable queue (P2-080 / P2-081)
+    def create_matrix_v2(self, project_id: str, spec: dict[str, Any]) -> dict[str, Any]:
+        return self.post(f"/projects/{project_id}/matrices", {**spec, "version": 2})
+
+    def matrix_cells(self, matrix_id: str) -> list[dict[str, Any]]:
+        return self.get(f"/matrices/{matrix_id}/cells")
+
+    def matrix_resume(self, matrix_id: str) -> dict[str, Any]:
+        return self.post(f"/matrices/{matrix_id}/resume")
+
+    def matrix_rerun_failed(self, matrix_id: str) -> dict[str, Any]:
+        return self.post(f"/matrices/{matrix_id}/rerun-failed")
+
+    def matrix_merge(self, matrix_id: str, spec: dict[str, Any]) -> dict[str, Any]:
+        return self.post(f"/matrices/{matrix_id}/cells", spec)
+
+    def matrix_cancel(self, matrix_id: str) -> dict[str, Any]:
+        return self.post(f"/matrices/{matrix_id}/cancel")
+
+    def wait_matrix(self, matrix_id: str, timeout: float = 3600, poll: float = 2.0) -> list[dict[str, Any]]:
+        """Until no cell is queued or running; returns the cells."""
+        import time
+
+        deadline = time.monotonic() + timeout
+        while True:
+            cells = self.matrix_cells(matrix_id)
+            if all(c["status"] in ("DONE", "FAILED", "CANCELLED") for c in cells):
+                return cells
+            if time.monotonic() > deadline:
+                raise RetryableFailure(f"matrix {matrix_id} not finished after {timeout}s")
+            time.sleep(poll)
 
     def create_imported_matrix(self, project_id: str, name: str, run_ids: list[str], source: str,
                                spec: dict | None = None) -> dict[str, Any]:

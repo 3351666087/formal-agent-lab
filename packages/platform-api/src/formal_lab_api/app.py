@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import json
 import logging
 from contextlib import asynccontextmanager
@@ -21,13 +22,14 @@ from formal_lab_contracts.errors import (
     ErrorInfo,
     FieldError,
     FormalLabError,
+    InvalidInput,
     NotFound,
 )
 from sqlalchemy import select, text
 
 from .db import CheckRow, Matrix, Model, ModelVersion, Project, Run, Scenario, StrategyConfig, session_scope
 from .orchestration import TemporalOrchestrator
-from .services import catalog, modeling, runs, scenarios
+from .services import catalog, governance, modeling, operations, runs, scenarios
 from .services.common import artifact_store, get_or_404
 from .services.events import list_events, to_trace_event
 from .settings import get_settings
@@ -242,6 +244,43 @@ def _routes(app: FastAPI) -> None:
         return await db(lambda s: modeling.replay_bundle(s, body))
 
     # ------------------------------------------------------------------ scenarios / strategies
+    # ---- rule sets, releases, regression cases, revision suggestions (P2-070 … P2-077)
+    @app.get(f"{API}/projects/{{project_id}}/rulesets")
+    async def rulesets_list(project_id: str, ruleset_id: str | None = None):
+        return jsonable_encoder(await db(lambda s: governance.list_rulesets(s, project_id, ruleset_id)))
+
+    @app.post(f"{API}/projects/{{project_id}}/rulesets", status_code=201)
+    async def rulesets_save(project_id: str, body: dict[str, Any] = Body(...)):
+        return jsonable_encoder(await db(lambda s: governance.save_ruleset(s, project_id, body)))
+
+    @app.post(f"{API}/model-versions/{{version_id}}/releases", status_code=201)
+    async def release_create(version_id: str, body: dict[str, Any] | None = Body(default=None)):
+        return jsonable_encoder(await db(lambda s: governance.create_release(s, version_id, body or {})))
+
+    @app.get(f"{API}/projects/{{project_id}}/releases")
+    async def releases_list(project_id: str):
+        return jsonable_encoder(await db(lambda s: governance.list_releases(s, project_id)))
+
+    @app.get(f"{API}/releases/{{release_id}}")
+    async def release_get(release_id: str):
+        return jsonable_encoder(await db(lambda s: governance.get_release(s, release_id)))
+
+    @app.get(f"{API}/projects/{{project_id}}/regression-cases")
+    async def regression_list(project_id: str, package_id: str | None = None):
+        return jsonable_encoder(await db(lambda s: governance.list_cases(s, project_id, package_id)))
+
+    @app.post(f"{API}/regression-cases/{{case_id}}/replay")
+    async def regression_replay(case_id: str, body: dict[str, Any] = Body(...)):
+        return jsonable_encoder(await db(lambda s: governance.replay_case(s, case_id, body["model_version_id"])))
+
+    @app.get(f"{API}/runs/{{run_id}}/revision-suggestions")
+    async def run_suggestions(run_id: str):
+        def go(s):
+            get_or_404(s, Run, run_id, "run")
+            return governance.revision_suggestions(s, run_id)
+
+        return jsonable_encoder(await db(go))
+
     @app.get(f"{API}/projects/{{project_id}}/scenarios")
     async def list_scenarios(project_id: str):
         return await db(lambda s: [scenarios.scenario_dict(x, s) for x in scenarios.list_scenarios(s, project_id)])
@@ -401,15 +440,35 @@ def _routes(app: FastAPI) -> None:
         return res
 
     @app.post(f"{API}/runs/{{run_id}}/cancel")
-    async def cancel_run(run_id: str):
+    async def cancel_run(run_id: str, body: dict[str, Any] | None = Body(default=None)):
+        """Cancel at the next step boundary; with {"reason", "operations"} it is an explained termination."""
+        body = body or {}
+
         def go(s):
-            run, needs = runs.request_cancel(s, run_id)
+            run, needs = runs.request_cancel(s, run_id, body.get("reason"), body.get("operations"))
             return {"run": runs.run_dict(run, s), "needs": needs}
 
         res = await db(go)
         if res["needs"]:
             await orch().cancel(f"run-{run_id}")
         return res["run"]
+
+    @app.get(f"{API}/runs/{{run_id}}/operations")
+    async def run_operations(run_id: str, state: str | None = None, needs_review: bool | None = None,
+                             abnormal: bool = False):
+        def go(s):
+            get_or_404(s, Run, run_id, "run")
+            return operations.list_operations(s, run_id, state=state, needs_review=needs_review, abnormal=abnormal)
+
+        return jsonable_encoder(await db(go))
+
+    @app.post(f"{API}/operations/{{operation_id:path}}/review")
+    async def operation_review(operation_id: str, body: dict[str, Any] = Body(...)):
+        return jsonable_encoder(await db(lambda s: operations.review_operation(s, operation_id, body)))
+
+    @app.get(f"{API}/operations/{{operation_id:path}}")
+    async def operation_get(operation_id: str):
+        return jsonable_encoder(await db(lambda s: operations.get_operation(s, operation_id)))
 
     @app.post(f"{API}/runs/{{run_id}}/rerun", status_code=201)
     async def rerun(run_id: str):
@@ -495,6 +554,16 @@ def _routes(app: FastAPI) -> None:
     async def create_matrix(project_id: str, body: dict[str, Any] = Body(...)):
         from .services import matrices
 
+        if matrices.is_v2(body):  # full cell configurations, queued and driven by a durable MatrixWorkflow
+            def go2(s):
+                mx, counts = matrices.create_matrix_v2(s, project_id, body)
+                return {"matrix": matrices.matrix_dict(mx, s), "cells": counts,
+                        "max_parallel": mx.spec["max_parallel"]}
+
+            res = await db(go2)
+            await orch().start_matrix(res["matrix"]["id"], res["max_parallel"])
+            return res
+
         def go(s):
             mx, created = matrices.create_matrix(s, project_id, body)
             return {"matrix": matrices.matrix_dict(mx, s), "runs": [runs.run_dict(r, s) for r in created]}
@@ -504,6 +573,50 @@ def _routes(app: FastAPI) -> None:
             await _start(r)
         return await db(lambda s: {"matrix": matrices.matrix_dict(s.get(Matrix, res["matrix"]["id"]), s),
                                    "run_ids": [r["id"] for r in res["runs"]]})
+
+    async def _matrix_queue(matrix_id: str) -> None:
+        mx = await db(lambda s: get_or_404(s, Matrix, matrix_id, "matrix").spec)
+        await orch().start_matrix(matrix_id, int(mx.get("max_parallel", 2)))
+
+    @app.get(f"{API}/matrices/{{matrix_id}}/cells")
+    async def matrix_cells(matrix_id: str):
+        from .services import matrices
+
+        return jsonable_encoder(await db(lambda s: matrices.cells_dict(s, matrix_id)))
+
+    @app.post(f"{API}/matrices/{{matrix_id}}/resume")
+    async def matrix_resume(matrix_id: str):
+        """Continue an interrupted queue (the queue state is in the database)."""
+        await _matrix_queue(matrix_id)
+        return {"matrix_id": matrix_id, "queue": "started"}
+
+    @app.post(f"{API}/matrices/{{matrix_id}}/rerun-failed")
+    async def matrix_rerun_failed(matrix_id: str):
+        from .services import matrices
+
+        n = await db(lambda s: matrices.rerun_failed(s, matrix_id))
+        await _matrix_queue(matrix_id)
+        return {"matrix_id": matrix_id, "requeued": n}
+
+    @app.post(f"{API}/matrices/{{matrix_id}}/cells", status_code=201)
+    async def matrix_merge(matrix_id: str, body: dict[str, Any] = Body(...)):
+        """Incremental merge: new cells are queued; cells already done with the same configuration are reused."""
+        from .services import matrices
+
+        counts = await db(lambda s: matrices.merge_cells(s, matrix_id, body))
+        await _matrix_queue(matrix_id)
+        return {"matrix_id": matrix_id, "cells": counts}
+
+    @app.post(f"{API}/matrices/{{matrix_id}}/cancel")
+    async def matrix_cancel(matrix_id: str):
+        from .services import matrices
+
+        with contextlib.suppress(Exception):  # the queue may already be finished; the cells are what matter
+            await orch().cancel(f"matrix-{matrix_id}")
+        run_ids = await db(lambda s: matrices.cancel_cells(s, matrix_id))
+        for rid in run_ids:
+            await orch().cancel(f"run-{rid}")
+        return {"matrix_id": matrix_id, "cancelled_runs": run_ids}
 
     @app.post(f"{API}/projects/{{project_id}}/matrices/imported", status_code=201)
     async def create_imported_matrix(project_id: str, body: dict[str, Any] = Body(...)):
@@ -538,10 +651,29 @@ def _routes(app: FastAPI) -> None:
                                        select(Run).where(Run.matrix_id == matrix_id).order_by(Run.created_at))]})
 
     @app.get(f"{API}/matrices/{{matrix_id}}/report")
-    async def matrix_report(matrix_id: str):
+    async def matrix_report(matrix_id: str, format: str = "json"):
+        """v1 matrices: the phase-1 report; v2: splits, per-scenario / pooled (scenario clusters), paired comparisons
+        per dimension, probes with sources; also as CSV or Markdown (`?format=csv|md`)."""
+        from fastapi.responses import PlainTextResponse
+        from formal_lab_contracts import MetricDefinition
+        from formal_lab_eval.experiments import to_csv, to_markdown
+
         from .services import matrices
 
-        return await db(lambda s: matrices.report(s, matrix_id))
+        def go(s):
+            mx = get_or_404(s, Matrix, matrix_id, "matrix")
+            return matrices.report_v2(s, matrix_id) if mx.spec.get("version") == 2 else matrices.report(s, matrix_id)
+
+        rep = await db(go)
+        if format == "json":
+            return jsonable_encoder(rep)
+        if "splits" not in rep:
+            raise InvalidInput("CSV / Markdown reports are produced for v2 matrices")
+        if format == "csv":
+            return PlainTextResponse(to_csv(rep), media_type="text/csv")
+        defs = [MetricDefinition.model_validate(d) for d in rep["definitions"]]
+        return PlainTextResponse(to_markdown(rep, f"Matrix {rep['matrix']['name']}", defs),
+                                 media_type="text/markdown")
 
     # ------------------------------------------------------------------ uploads (e.g. Inspect .eval logs)
     @app.post(f"{API}/projects/{{project_id}}/artifacts", status_code=201)

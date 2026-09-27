@@ -21,10 +21,18 @@ model_app = typer.Typer(no_args_is_help=True, help="model validation and version
 run_app = typer.Typer(no_args_is_help=True, help="start, inspect and control experiment runs")
 matrix_app = typer.Typer(no_args_is_help=True, help="scenario × strategy × seed × budget matrices")
 replay_app = typer.Typer(no_args_is_help=True, help="offline replay of exported bundles (no server needed)")
+ops_app = typer.Typer(no_args_is_help=True, help="environment operations of a run: abnormal ones, reviews")
+rules_app = typer.Typer(no_args_is_help=True, help="rule sets (event–condition–handler), versioned")
+release_app = typer.Typer(no_args_is_help=True, help="pre-release checks of a model version (and rules)")
+regression_app = typer.Typer(no_args_is_help=True, help="regression cases from effect differences / counterexamples")
 app.add_typer(model_app, name="model")
 app.add_typer(run_app, name="run")
 app.add_typer(matrix_app, name="matrix")
 app.add_typer(replay_app, name="replay")
+app.add_typer(ops_app, name="ops")
+app.add_typer(rules_app, name="rules")
+app.add_typer(release_app, name="release")
+app.add_typer(regression_app, name="regression")
 
 API = typer.Option(DEFAULT_URL, "--api", envvar="FAL_API_URL", help="platform API base URL")
 
@@ -262,7 +270,19 @@ def run_step(run_id: str, step: int, api: str = API) -> None:
         _fail(exc)
 
 
-for _name, _method in (("cancel", "cancel"), ("pause", "pause"), ("resume", "resume"), ("rerun", "rerun")):
+@run_app.command("cancel")
+def run_cancel(run_id: str, reason: str = typer.Option(None, help="explained termination: why the operator ends it"),
+               operation: list[str] = typer.Option(None, help="operation ids the reason concerns"),
+               api: str = API) -> None:
+    """cancel a run at the next step boundary (with --reason: an explained termination)"""
+    try:
+        res = _client(api).cancel(run_id, reason, operation)
+    except FormalLabError as exc:
+        _fail(exc)
+    typer.echo(f"{res['id']} {res['status']}" + (f" ({res['status_reason']})" if res.get("status_reason") else ""))
+
+
+for _name, _method in (("pause", "pause"), ("resume", "resume"), ("rerun", "rerun")):
     def _make(method: str):
         def cmd(run_id: str, api: str = API) -> None:
             try:
@@ -276,6 +296,129 @@ for _name, _method in (("cancel", "cancel"), ("pause", "pause"), ("resume", "res
         return cmd
 
     run_app.command(_name)(_make(_method))
+
+
+# ---------------------------------------------------------------------------- operations
+@ops_app.command("list")
+def ops_list(run_id: str, abnormal: bool = typer.Option(False, "--abnormal", help="only operations whose outcome "
+                                                                                   "was unknown, failed or reviewed"),
+             state: str = typer.Option(None), needs_review: bool = typer.Option(None, "--needs-review/--reviewed"),
+             api: str = API) -> None:
+    """environment operations of a run with their coordination state"""
+    try:
+        rows = _client(api).operations(run_id, state=state, needs_review=needs_review, abnormal=abnormal)
+    except FormalLabError as exc:
+        _fail(exc)
+    for o in rows:
+        path = " → ".join(t["state"] for t in o["transitions"])
+        review = f"  [{o['review']['status']}]" if o.get("review") else ""
+        typer.echo(f"{o['operation_id']}  step {o['step']}  {o['state']}  {path}{review}")
+
+
+@ops_app.command("show")
+def ops_show(operation_id: str, api: str = API) -> None:
+    """one operation: transitions with reasons, reconciliation, review"""
+    try:
+        _out(_client(api).operation(operation_id))
+    except FormalLabError as exc:
+        _fail(exc)
+
+
+@ops_app.command("review")
+def ops_review(operation_id: str,
+               status: str = typer.Option(..., help="CONFIRMED_APPLIED | CONFIRMED_NOT_APPLIED | TERMINATED"),
+               note: str = typer.Option(..., help="what was checked"), by: str = typer.Option("operator"),
+               supersede: bool = typer.Option(False), api: str = API) -> None:
+    """record a manual review of an operation (appended to the run's events)"""
+    try:
+        res = _client(api).review_operation(operation_id, status, note, by, supersede)
+    except FormalLabError as exc:
+        _fail(exc)
+    typer.echo(f"{res['operation_id']} {res['state']} reviewed: {res['review']['status']} by {res['review']['by']}")
+
+
+# ---------------------------------------------------------------------------- rules / releases / regression
+@rules_app.command("push")
+def rules_push(path: Path, project: str = typer.Option(...), model_version: str = typer.Option(...),
+               ruleset_id: str = typer.Option(None, help="default: the file's ruleset_id"), api: str = API) -> None:
+    """save a rule-set file (JSON: {ruleset_id, name, rules}) as a new version, type-checked with the model"""
+    data = json.loads(path.read_text())
+    c = _client(api)
+    try:
+        row = c.save_ruleset(_project(c, project), model_version, ruleset_id or data["ruleset_id"], data["rules"],
+                             name=data.get("name"), note=data.get("note"))
+    except FormalLabError as exc:
+        _fail(exc)
+    typer.echo(f"{row['ruleset_id']}@{row['version']}  digest {row['digest'][:12]}")
+
+
+@rules_app.command("list")
+def rules_list(project: str = typer.Option(...), api: str = API) -> None:
+    c = _client(api)
+    for r in c.rulesets(_project(c, project)):
+        typer.echo(f"{r['ruleset_id']}@{r['version']}  {len(r['ruleset']['rules'])} rule(s)  model version "
+                   f"{r['model_version_id']}  digest {r['digest'][:12]}")
+
+
+@release_app.command("check")
+def release_check(model_version: str, ruleset: str = typer.Option(None, help="id@version"),
+                  regression: str = typer.Option("model", help="model | none | comma-separated case ids"),
+                  horizon: int = 6, api: str = API) -> None:
+    """compile, type-check, query and replay regression cases; prints the release record"""
+    rs = None
+    if ruleset:
+        rid, _, ver = ruleset.partition("@")
+        rs = (rid, int(ver))
+    sel: str | list[str] = regression if regression in ("model", "none") else regression.split(",")
+    try:
+        rel = _client(api).release(model_version, ruleset=rs, regression=sel, horizon=horizon)
+    except FormalLabError as exc:
+        _fail(exc)
+    rec = rel["record"]
+    typer.echo(f"{rel['release_id']}  {rel['status']}  model {rec['model']['package_id']}@{rec['model']['version']}")
+    for chk in rec["checks"]:
+        typer.echo(f"  {'✓' if chk['passed'] else '✗'} {chk['kind']:<20} {chk['subject']:<28} {chk['verdict']}")
+    for r in rec["regression"]:
+        typer.echo(f"  {'✓' if r['status'] == 'PASS' else '✗'} regression {r['case_id']}  {r['status']}: {r['detail']}")
+    for reason in rec["reasons"]:
+        typer.secho(f"  reason: {reason}", fg="red")
+    if rel["status"] != "RELEASED":
+        raise typer.Exit(1)
+
+
+@regression_app.command("list")
+def regression_list(project: str = typer.Option(...), package_id: str = typer.Option(None), api: str = API) -> None:
+    c = _client(api)
+    for r in c.regression_cases(_project(c, project), package_id):
+        case = r["case"]
+        typer.echo(f"{r['case_id']}  {r['source']}  {case['model']['package_id']}@{case['model']['version']}  "
+                   f"run {r['origin_run_id']}  {', '.join(case['compared_paths'][:3])}")
+
+
+@regression_app.command("replay")
+def regression_replay(case_id: str, model_version: str = typer.Option(...), api: str = API) -> None:
+    """replay one case on a model version: PASS when it predicts what was observed"""
+    try:
+        res = _client(api).replay_case(case_id, model_version)
+    except FormalLabError as exc:
+        _fail(exc)
+    typer.echo(f"{case_id} on {res['model']['package_id']}@{res['model']['version']}: {res['status']} — "
+               f"{res['detail']}")
+    if res["status"] != "PASS":
+        raise typer.Exit(1)
+
+
+@run_app.command("suggestions")
+def run_suggestions(run_id: str, api: str = API) -> None:
+    """model revision suggestions of a run (effect differences) and the regression case each produced"""
+    try:
+        rows = _client(api).revision_suggestions(run_id)
+    except FormalLabError as exc:
+        _fail(exc)
+    for r in rows:
+        fields = ", ".join(f"{d['path']}: {d['expected']}→{d['observed']}" for d in r["different_fields"][:3])
+        typer.echo(f"step {r['step']} {r['actor_id']}  {r['action']['action_type']}  {fields}  "
+                   f"constants read: {', '.join(r.get('constants_read', []))}  case {r['regression_case_id']}")
 
 
 # ---------------------------------------------------------------------------- matrices
@@ -308,14 +451,99 @@ def matrix_run(project: str = typer.Option(...), scenario: list[str] = typer.Opt
 
 
 @matrix_app.command("report")
-def matrix_report(matrix_id: str, output: Path | None = None, api: str = API) -> None:
+def matrix_report(matrix_id: str, output: Path | None = None,
+                  fmt: str = typer.Option("json", "--format", help="json | csv | md (csv/md: v2 matrices)"),
+                  api: str = API) -> None:
     try:
-        rep = _client(api).matrix_report(matrix_id)
+        rep = _client(api).matrix_report(matrix_id, fmt)
     except FormalLabError as exc:
         _fail(exc)
-    _print_report(rep)
+    if fmt != "json":
+        if output:
+            output.write_text(rep)
+        else:
+            typer.echo(rep)
+        return
+    if "splits" in rep:
+        _print_report_v2(rep)
+    else:
+        _print_report(rep)
     if output:
         output.write_text(json.dumps(rep, indent=2, ensure_ascii=False, default=str))
+
+
+def _print_report_v2(rep: dict[str, Any]) -> None:
+    for line in rep.get("conclusions", []):  # computed by the platform from the v2 report
+        typer.echo(line)
+
+
+@matrix_app.command("create")
+def matrix_create(spec: Path, project: str = typer.Option(...), wait: bool = typer.Option(False),
+                  api: str = API) -> None:
+    """v2 matrix from a JSON spec (participants / backends / rules / model_versions / seeds {dev, acceptance} /
+    budgets / ablations / max_parallel); names or ids of scenarios and strategies are accepted."""
+    c = _client(api)
+    try:
+        pid = _project(c, project)
+        body = json.loads(spec.read_text())
+        scs, sts = c.scenarios(pid), c.strategies(pid)
+        body["scenarios"] = [_resolve(scs, x, "scenario") for x in body.get("scenarios", [])]
+        body["participants"] = [{a: _resolve(sts, v, "strategy") for a, v in combo.items()}
+                                for combo in body.get("participants", [])]
+        if body.get("strategies"):
+            body["strategies"] = [_resolve(sts, x, "strategy") for x in body["strategies"]]
+        res = c.create_matrix_v2(pid, body)
+        mid = res["matrix"]["id"]
+        typer.echo(f"matrix {mid}: cells {res['cells']} (max_parallel {res['max_parallel']})")
+        if wait:
+            cells = c.wait_matrix(mid)
+            done = sum(1 for x in cells if x["status"] == "DONE")
+            typer.echo(f"matrix {mid}: {done}/{len(cells)} cells done")
+            _print_report_v2(c.matrix_report(mid))
+    except FormalLabError as exc:
+        _fail(exc)
+
+
+@matrix_app.command("cells")
+def matrix_cells_cmd(matrix_id: str, api: str = API) -> None:
+    """cells of a v2 matrix with their queue state"""
+    for x in _client(api).matrix_cells(matrix_id):
+        lab = x["labels"]
+        typer.echo(f"{x['cell_id']}  {x['status']:<9} {x['split']:<10} seed {x['seed']:<3} {lab['scenario']} × "
+                   f"{lab['participants']} [{lab['backend']}, {lab['rules']}, {lab['model']}, {lab['ablation']}]"
+                   f"  run {x['run_id'] or '—'} {x['run_status'] or ''}")
+
+
+for _name, _method, _doc in (("resume", "matrix_resume", "continue an interrupted matrix queue"),
+                             ("rerun-failed", "matrix_rerun_failed", "queue the failed cells again"),
+                             ("cancel", "matrix_cancel", "stop the queue and cancel running cells")):
+    def _mk(method: str, doc: str):
+        def cmd(matrix_id: str, api: str = API) -> None:
+            try:
+                _out(getattr(_client(api), method)(matrix_id))
+            except FormalLabError as exc:
+                _fail(exc)
+
+        cmd.__doc__ = doc
+        return cmd
+
+    matrix_app.command(_name)(_mk(_method, _doc))
+
+
+@matrix_app.command("merge")
+def matrix_merge(matrix_id: str, spec: Path, project: str = typer.Option(...), api: str = API) -> None:
+    """add cells from a JSON spec fragment (e.g. more seeds or strategies); completed identical cells are reused"""
+    c = _client(api)
+    try:
+        pid = _project(c, project)
+        body = json.loads(spec.read_text())
+        sts = c.strategies(pid)
+        if "participants" in body:
+            body["participants"] = [{a: _resolve(sts, v, "strategy") for a, v in combo.items()}
+                                    for combo in body["participants"]]
+        _out(c.matrix_merge(matrix_id, body))
+    except FormalLabError as exc:
+        _fail(exc)
 
 
 def _print_report(rep: dict[str, Any]) -> None:
@@ -411,6 +639,103 @@ def replay_view(path: Path, events: bool = typer.Option(False, "--events")) -> N
 def replay_step(path: Path, step: int) -> None:
     """Full observation / candidates / proposal / check / outcome / comparison of one step (offline)."""
     _out(read_bundle(path.read_bytes()).step(step))
+
+
+def _bundle(path: Path):
+    try:
+        return read_bundle(path.read_bytes())
+    except FormalLabError as exc:
+        _fail(exc)
+
+
+@replay_app.command("turns")
+def replay_turns(path: Path, actor: str = typer.Option(None), round_: int = typer.Option(None, "--round"),
+                 step_from: int = typer.Option(None, "--from"), step_to: int = typer.Option(None, "--to")) -> None:
+    """Navigate by turn: global step, round, actor, the actor's own step, action and outcome (offline)."""
+    for row in _bundle(path).turns():
+        if (actor and row.get("actor_id") != actor) or (round_ is not None and row.get("round") != round_):
+            continue
+        if (step_from is not None and row["step"] < step_from) or (step_to is not None and row["step"] > step_to):
+            continue
+        typer.echo(f"step {row['step']:3d}  round {row.get('round', '-')!s:>3}  {row.get('actor_id', '-'):<14} "
+                   f"#{row.get('actor_step', '-')!s:<3} {row.get('action', ''):<40} {row.get('outcome', '')}")
+
+
+@replay_app.command("plans")
+def replay_plans(path: Path, actor: str = typer.Option(None), nodes: bool = typer.Option(False, "--nodes")) -> None:
+    """Navigate task plans: every version with its trigger, parent, generator and progress (offline)."""
+    for p in _bundle(path).plans(actor):
+        plan = p["plan"]
+        rev = plan.get("revision") or {}
+        counts: dict[str, int] = {}
+        for n in plan.get("nodes", []):
+            counts[n["status"]] = counts.get(n["status"], 0) + 1
+        typer.echo(f"{plan['actor_id']} v{plan['version']} (parent {plan.get('parent_version')}) at step "
+                   f"{rev.get('at_step', plan.get('created_at_step'))}: {rev.get('trigger')} — "
+                   f"{(rev.get('detail') or '')[:90]}  [{plan['generator']['kind']}] {counts}")
+        if nodes:
+            for n in plan.get("nodes", []):
+                typer.echo(f"    {n['node_id']:<12} {n['status']:<12} after {', '.join(n['depends_on']) or '—'}")
+
+
+@replay_app.command("operations")
+def replay_operations(path: Path, abnormal: bool = typer.Option(False, "--abnormal")) -> None:
+    """Navigate operation coordination: each operation's states with reasons, reconciliation and review (offline)."""
+    for op in _bundle(path).operations:
+        states = [t.state.value for t in op.transitions]
+        if abnormal and "OUTCOME_UNKNOWN" not in states and op.review is None and op.state.value != "FAILED":
+            continue
+        typer.echo(f"{op.operation_id}  step {op.step}  {op.action.action_type}  {' → '.join(states)}"
+                   + (f"  [review {op.review.status}]" if op.review else ""))
+        for t in op.transitions:
+            typer.echo(f"    {t.state.value:<16} {t.reason}")
+
+
+@replay_app.command("model")
+def replay_model(path: Path) -> None:
+    """Which model version, rules and release the run used, and the revision suggestions it produced (offline)."""
+    b = _bundle(path)
+    m = b.manifest
+    typer.echo(f"model {m.model.package_id}@{m.model.version} digest {m.model.digest.value[:16]} "
+               f"(bundled package digest {b.package.digest.value[:16]})")
+    typer.echo(f"rules {m.rules.ruleset_id}@{m.rules.version}" if m.rules else "rules —")
+    typer.echo(f"release {m.release.release_id}" if m.release else "release — (not pinned)")
+    for e in b.events:
+        if str(e.event_type) == "MODEL_REVISION_SUGGESTED":
+            fields = ", ".join(f"{d['path']}: {d['expected']}→{d['observed']}" for d in e.payload["different_fields"][:3])
+            typer.echo(f"  step {e.logical_step}: {e.payload['action']['action_type']} differs — {fields}; constants "
+                       f"read: {', '.join(e.payload.get('constants_read', []))}")
+
+
+@replay_app.command("reexecute")
+def replay_reexecute(path: Path, allow_live: bool = typer.Option(False, "--allow-live",
+                                                                  help="also re-execute against a live service")) -> None:
+    """RE-EXECUTE the bundled run locally with the installed plugins (not a recorded replay): the pinned manifest and
+    model run again and the new trajectory is compared with the recorded one. Needs the engine and plugins."""
+    b = _bundle(path)
+    from formal_lab_runtime import default_registry, run_local
+
+    reg = default_registry()
+    env = reg.resolve(b.manifest.scenario.environment.plugin).descriptor
+    live = "env.persistent_session" in {c.id for c in env.capabilities}
+    if live and not allow_live:
+        typer.secho(f"{env.plugin_id} is a live service: re-executing would act on it again; pass --allow-live",
+                    fg="red", err=True)
+        raise typer.Exit(2)
+    res = run_local(b.manifest, b.package, reg)
+
+    def traj(events):
+        return [(e.logical_step, json.dumps(e.payload["outcome"]["action"], sort_keys=True),
+                 e.payload["outcome"]["status"]) for e in events if str(e.event_type) == "ACTION_OUTCOME"]
+
+    old, new = traj(b.events), traj(res.events)
+    first = next((i for i, (x, y) in enumerate(zip(old, new, strict=False)) if x != y), None)
+    same = first is None and len(old) == len(new)
+    typer.echo(f"re-executed {b.manifest.run_id}: status {res.status.value} (recorded {b.manifest.status.value}); "
+               f"{len(new)} steps (recorded {len(old)}); trajectory "
+               + ("identical" if same else f"diverges at step {old[first][0] if first is not None else len(old)}"))
+    if not same:
+        raise typer.Exit(1)
 
 
 def main() -> None:

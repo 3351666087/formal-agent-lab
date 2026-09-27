@@ -8,6 +8,7 @@ is delivered as workflow cancellation and finalises the run with status CANCELLE
 from __future__ import annotations
 
 import asyncio
+import contextlib
 from datetime import timedelta
 from typing import Any
 
@@ -110,3 +111,54 @@ class ExperimentWorkflow:
             return res
         return await workflow.execute_activity(
             "finalize_run", args=[run_id, res["status"], res.get("reason"), None], **_opts(timedelta(minutes=2)))
+
+
+@workflow.defn(name="MatrixWorkflow")
+class MatrixWorkflow:
+    """Durable queue of one matrix (P2-081): keeps at most `max_parallel` cell runs going, each as a child
+    ExperimentWorkflow (abandoned on close, so a cancelled matrix never kills a run mid-step). All queue state lives
+    in the database (matrix_cells), so after any interruption a new MatrixWorkflow simply continues from it; a
+    `wake` signal picks up reruns or merged cells without waiting for the next poll."""
+
+    def __init__(self) -> None:
+        self.woken = False
+        self.counts: dict[str, int] = {}
+
+    @workflow.signal
+    def wake(self) -> None:
+        self.woken = True
+
+    @workflow.query
+    def state(self) -> dict[str, Any]:
+        return {"counts": self.counts}
+
+    @workflow.run
+    async def run(self, inp: dict[str, Any]) -> dict[str, Any]:
+        matrix_id: str = inp["matrix_id"]
+        max_parallel = max(1, int(inp.get("max_parallel", 2)))
+        idle_rounds = 0
+        while True:
+            self.counts = await workflow.execute_activity("matrix_settle", matrix_id, **_opts(timedelta(minutes=2)))
+            free = max_parallel - self.counts.get("running", 0)
+            if free > 0 and self.counts.get("queued", 0) > 0:
+                started = await workflow.execute_activity("matrix_claim", args=[matrix_id, free],
+                                                          **_opts(timedelta(minutes=5)))
+                for run_id in started:
+                    try:
+                        await workflow.start_child_workflow(
+                            "ExperimentWorkflow", {"run_id": run_id}, id=f"run-{run_id}",
+                            parent_close_policy=workflow.ParentClosePolicy.ABANDON)
+                    except Exception as exc:  # already started (e.g. by an earlier execution): keep going
+                        workflow.logger.info("child run-%s not started: %s", run_id, exc)
+                continue
+            if self.counts.get("queued", 0) == 0 and self.counts.get("running", 0) == 0:
+                idle_rounds += 1
+                if idle_rounds >= 2:  # nothing left (checked twice, so a just-merged cell is not missed)
+                    return {"matrix_id": matrix_id, **self.counts}
+            else:
+                idle_rounds = 0
+            self.woken = False
+            with contextlib.suppress(TimeoutError):
+                await workflow.wait_condition(lambda: self.woken, timeout=timedelta(seconds=2))
+            if workflow.info().is_continue_as_new_suggested():
+                workflow.continue_as_new(inp)

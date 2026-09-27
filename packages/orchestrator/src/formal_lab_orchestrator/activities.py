@@ -80,4 +80,25 @@ def finalize_run(run_id: str, status: str, reason: str | None, error: dict[str, 
     return execution.finalize_run(run_id, status, reason, error)
 
 
-ALL = [prepare_run, run_step, mark_paused, mark_resumed, finalize_run]
+@activity.defn(name="matrix_settle")
+@_mapped
+def matrix_settle(matrix_id: str) -> dict[str, int]:
+    from formal_lab_api.db import session_scope
+    from formal_lab_api.services import matrices
+
+    with session_scope() as s:
+        return matrices.settle(s, matrix_id)
+
+
+@activity.defn(name="matrix_claim")
+@_mapped
+def matrix_claim(matrix_id: str, slots: int) -> list[str]:
+    """Create (and mark QUEUED) the runs of up to `slots` queued cells; idempotent per cell attempt."""
+    from formal_lab_api.db import session_scope
+    from formal_lab_api.services import matrices
+
+    with session_scope() as s:
+        return matrices.claim(s, matrix_id, slots)
+
+
+ALL = [prepare_run, run_step, mark_paused, mark_resumed, finalize_run, matrix_settle, matrix_claim]

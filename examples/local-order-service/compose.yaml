@@ -1,0 +1,23 @@
+# Local order service on its own (local-services profile), managed by the example's lifecycle manager:
+#   FAL_ORDERS_PROJECT=demo FAL_ORDERS_PORT=18765 docker compose -p fal-orders-demo -f examples/local-order-service/compose.yaml up -d --wait
+# Every resource carries dev.formal-lab.project=<project>; cleanup removes exactly those (the VM is shared).
+services:
+  orders:
+    image: formal-agent-lab/orders:${FAL_IMAGE_TAG:-local}
+    build:
+      context: ../..
+      dockerfile: deploy/docker/python.Dockerfile
+      target: orders
+    command: ["python", "-m", "formal_lab_example_orders.service", "--data", "/data", "--host", "0.0.0.0",
+              "--port", "8765", "--project", "${FAL_ORDERS_PROJECT:-local}"]
+    ports: ["127.0.0.1:${FAL_ORDERS_PORT:-18765}:8765"]
+    volumes: ["orders-data:/data"]
+    restart: unless-stopped
+    labels:
+      dev.formal-lab.project: ${FAL_ORDERS_PROJECT:-local}
+      dev.formal-lab.component: local-order-service
+volumes:
+  orders-data:
+    labels:
+      dev.formal-lab.project: ${FAL_ORDERS_PROJECT:-local}
+      dev.formal-lab.component: local-order-service

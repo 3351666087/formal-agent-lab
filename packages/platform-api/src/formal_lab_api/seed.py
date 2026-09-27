@@ -26,6 +26,7 @@ from .services import catalog, modeling, scenarios
 
 DEMO_PROJECT = "生产调度示例"
 WAREHOUSE_PROJECT = "仓储分配示例"
+ORDERS_PROJECT = "订单服务示例"
 EXT = "formal-lab.examples"
 
 
@@ -70,11 +71,11 @@ def seed_scheduling(s) -> dict[str, object]:
                            {"metric_id": "delay_cost", "description": "minimise simulated delay cost"}],
             "budget": BUDGET, "seed": 0, "stop_conditions": STOP, "extensions": _ext(key),
         })
-    labels = {"rule": "EDD 规则", "z3": "Z3 有界规划", "llm": "LLM（真实模型）", "llm-stub": "LLM 替身（stub）"}
+    labels = {"rule": "EDD 规则", "z3": "Z3 有界规划", "llm": "LLM（真实模型）", "llm-stub": "LLM 替身（stub）",
+              "task-rule": "任务计划（规则生成）", "task-symbolic": "任务计划（符号生成）",
+              "task-model": "任务计划（模型生成，真实模型）", "task-model-stub": "任务计划（模型生成，替身）",
+              "z3-cost": "Z3 成本最优"}
     specs = {labels[k]: (v["plugin"]["plugin_id"], v["plugin"]["version"], v["config"]) for k, v in STRATEGIES.items()}
-    specs["Z3 成本最优"] = ("formal-lab.planner.z3-bounded", "1.1.0",
-                         {"mode": "cost", "horizon": 18, "timeout_ms": 30000,
-                          "fallback_order": ["assign", "resume", "advance"]})
     ids = _strategies(s, project.id, specs)
     # model v2: the same scheduling semantics plus the declared cost objectives (delay_cost, effort)
     from formal_lab_model import ir_digest
@@ -166,11 +167,51 @@ def seed_warehouse(s) -> dict[str, object]:
     return {"project_id": project.id, "model_id": model.id, "strategies": ids}
 
 
+def seed_orders(s) -> dict[str, object]:
+    """The local order service example: the five cases on the business service (endpoint FAL_ORDERS_ENDPOINT,
+    default the loopback port of `make orders-up`; `http://orders:8765` inside the Compose stack) and the same
+    cases on the pure-data model for comparison."""
+    from formal_lab_example_orders.instance import CASES
+    from formal_lab_example_orders.model import PACKAGE_ID, build_model
+    from formal_lab_example_orders.scenarios import STRATEGIES as ORDER_STRATEGIES
+    from formal_lab_example_orders.scenarios import scenario as order_scenario
+    from formal_lab_runtime.settings import get_setting
+
+    endpoint = get_setting("FAL_ORDERS_ENDPOINT", "http://127.0.0.1:8765") or "http://127.0.0.1:8765"
+    project = s.scalar(select(Project).where(Project.name == ORDERS_PROJECT))
+    if project is None:
+        project = modeling.create_project(s, ORDERS_PROJECT, "Independent business service (FastAPI + SQLite) as a "
+                                          "persistent environment, next to a pure-data model of it", group="examples")
+    model = s.scalar(select(Model).where(Model.project_id == project.id, Model.package_id == PACKAGE_ID))
+    if model is None:
+        model, version = modeling.create_model(s, project.id, package_id=PACKAGE_ID, name="订单处理模型",
+                                               ir=build_model().model_dump(mode="json"), origin="seed")
+    else:
+        version = modeling.get_version(s, model.id, 1)
+    ids = _strategies(s, project.id, {name: (spec["plugin"]["plugin_id"], spec["plugin"]["version"], spec["config"])
+                                      for name, spec in {"订单处理规则": ORDER_STRATEGIES["rule"],
+                                                         "Z3 有界规划（订单）": ORDER_STRATEGIES["z3"]}.items()})
+    existing = _existing_keys(s, project.id)
+    run_defaults = {"version": "1.0.0", "schema_id": "formal-lab.run-defaults/config@1",
+                    "data": {"config": {"initial_check_horizon": 0}}}
+    specs = [(f"orders-{case}", case, "service") for case in CASES] + \
+            [(f"orders-{case}-pure", case, "pure") for case in ("normal", "deviation")]
+    for key, case, backend in specs:
+        if key in existing:
+            continue
+        manifest = order_scenario(case, backend=backend, endpoint=endpoint)
+        body = manifest.model_dump(mode="json", exclude={"scenario_id", "revision", "model", "contract_version"})
+        body["extensions"] = {**_ext(key), "formal-lab.run-defaults": run_defaults}
+        scenarios.create_scenario(s, project.id, {**body, "model_version_id": version.id})
+    return {"project_id": project.id, "model_id": model.id, "strategies": ids, "endpoint": endpoint}
+
+
 def seed() -> dict[str, object]:
     with session_scope() as s:
         catalog.sync_catalog(s)
         out = {"scheduling": seed_scheduling(s)}
         out["warehouse"] = seed_warehouse(s)
+        out["orders"] = seed_orders(s)
         return out
 
 

@@ -12,7 +12,7 @@ from temporalio.client import Client
 from temporalio.worker import Worker
 
 from .activities import ALL
-from .workflow import ExperimentWorkflow
+from .workflow import ExperimentWorkflow, MatrixWorkflow
 
 log = logging.getLogger("formal_lab.worker")
 
@@ -31,7 +31,7 @@ async def run_worker(max_concurrent_activities: int = 8) -> None:
     for sig in (signal.SIGINT, signal.SIGTERM):
         loop.add_signal_handler(sig, stop.set)
     with ThreadPoolExecutor(max_workers=max_concurrent_activities) as pool:
-        worker = Worker(client, task_queue=settings.temporal_task_queue, workflows=[ExperimentWorkflow],
+        worker = Worker(client, task_queue=settings.temporal_task_queue, workflows=[ExperimentWorkflow, MatrixWorkflow],
                         activities=ALL, activity_executor=pool,
                         max_concurrent_activities=max_concurrent_activities)
         log.info("worker started: queue=%s temporal=%s plugins=%d", settings.temporal_task_queue,

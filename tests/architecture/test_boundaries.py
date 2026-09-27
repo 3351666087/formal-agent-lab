@@ -30,6 +30,7 @@ PACKAGES = {
     "formal_lab_example_scheduling": "examples/neutral-scheduling/src/formal_lab_example_scheduling",
     "fal_example_external_plugin": "examples/external-plugin/src/fal_example_external_plugin",
     "formal_lab_example_warehouse": "examples/warehouse-allocation/src/formal_lab_example_warehouse",
+    "formal_lab_example_orders": "examples/local-order-service/src/formal_lab_example_orders",
 }
 
 # allowed internal imports (dependency direction); anything not listed is a violation
@@ -53,11 +54,15 @@ ALLOWED: dict[str, set[str]] = {
     "fal_example_external_plugin": {"formal_lab_sdk"},
     # the second semantic profile: its own driver/strategies; only contracts + the model-agnostic belief helper
     "formal_lab_example_warehouse": {"formal_lab_contracts", "formal_lab_model"},
+    # the business-service example: the service itself imports nothing of the platform (see below); the adapter,
+    # probe and strategy use contracts + model; runtime only for its local run helper
+    "formal_lab_example_orders": {"formal_lab_contracts", "formal_lab_model", "formal_lab_runtime"},
 }
 # demo tooling inside the API package that seeds the example project (not on any request/run path)
 EXEMPT_FILES = {"packages/platform-api/src/formal_lab_api/seed.py"}
 PLUGIN_PACKAGES = {"formal_lab_solver_z3", "formal_lab_env", "formal_lab_strategies",
-                   "formal_lab_example_scheduling", "fal_example_external_plugin", "formal_lab_example_warehouse"}
+                   "formal_lab_example_scheduling", "fal_example_external_plugin", "formal_lab_example_warehouse",
+                   "formal_lab_example_orders"}
 CORE = {"formal_lab_contracts", "formal_lab_model", "formal_lab_runtime", "formal_lab_api",
         "formal_lab_orchestrator", "formal_lab_sdk"}
 
@@ -151,3 +156,26 @@ def test_actions_are_limited_to_model_declared_types():
                            source={"kind": "EXTERNAL", "strategy": {"plugin_id": "x", "version": "1.0.0"}})
     out = env.step(bogus, operation_id="r:s1:apply")
     assert out.status == "REJECTED" and out.effect_applied is False and "INVALID_ACTION" in out.result["reason"]
+
+
+def test_business_service_and_its_adapter_stay_apart():
+    """P2-019 / P2-061: the order service is an independent process that imports nothing of the platform; the
+    environment adapter reaches it only over HTTP (no process control); starting and stopping processes or
+    containers is the lifecycle manager's job alone."""
+    base = ROOT / PACKAGES["formal_lab_example_orders"]
+
+    def toplevel(path: Path) -> set[str]:  # what importing the module pulls in (lazy imports inside functions aside)
+        out: set[str] = set()
+        for node in ast.parse(path.read_text()).body:
+            if isinstance(node, ast.Import):
+                out.update(a.name.split(".")[0] for a in node.names)
+            elif isinstance(node, ast.ImportFrom) and node.module and node.level == 0:
+                out.add(node.module.split(".")[0])
+        return out
+
+    service = _imports(base / "service.py") | _imports(base / "instance.py") | toplevel(base / "__init__.py")
+    assert not service & set(PACKAGES), f"service imports platform packages: {service & set(PACKAGES)}"
+    for name in ("env.py", "plugins.py", "model.py", "scenarios.py", "compare.py"):
+        mods = _imports(base / name)
+        assert not mods & {"subprocess", "socket", "signal"}, f"{name} controls processes: {mods}"
+    assert {"subprocess", "signal"} <= _imports(base / "lifecycle.py")

@@ -178,8 +178,8 @@ def _stop_result(run: Run) -> dict[str, Any] | None:
     if status in TERMINAL_RUN_STATUSES:
         return {"terminal": True, "status": status.value, "reason": run.status_reason, "finalized": True}
     if status == RunStatus.CANCELLING:
-        return {"terminal": True, "status": RunStatus.CANCELLED.value, "reason": "cancellation requested",
-                "finalized": False}
+        return {"terminal": True, "status": RunStatus.CANCELLED.value,
+                "reason": run.status_reason or "cancellation requested", "finalized": False}
     return None
 
 
@@ -347,7 +347,9 @@ def mark_paused(run_id: str) -> dict[str, Any]:
         if run.status != RunStatus.PAUSING.value:
             return {"status": run.status}
         n = int(run.usage.get("pause_requests", 0))
-        transition(run, RunStatus.PAUSED, f"paused at logical-step boundary after step {run.last_step}")
+        cause = run.status_reason if (run.status_reason or "").startswith("paused by rule") else None
+        where = f"paused at logical-step boundary after step {run.last_step}"
+        transition(run, RunStatus.PAUSED, f"{cause}; {where}" if cause else where)  # a rule's reason stays visible
         run.paused_at = utcnow()
         append_events(s, run, [draft(f"{run_id}:run:paused:{n}", "RUN_PAUSED", run.last_step,
                                      {"after_step": run.last_step,

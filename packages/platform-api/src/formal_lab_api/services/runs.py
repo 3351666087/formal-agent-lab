@@ -10,7 +10,6 @@ from formal_lab_contracts import (
     Budget,
     Participant,
     PluginRef,
-    ReleaseRef,
     RunStatus,
     ScenarioManifest,
     compat,
@@ -25,6 +24,8 @@ from ..db import MetricRow, ModelVersion, Project, Run, RunEvent, Scenario, Stra
 from .common import get_or_404, new_id, registry
 from .events import append_events, draft, list_events, lock_run, transition
 from .modeling import package_of
+
+RUN_DEFAULTS = "formal-lab.run-defaults"  # scenario extension: {"config": {...}} run defaults
 
 
 def evaluators_for(package_id: str, extra: list[dict[str, Any]] | None = None) -> list[PluginRef]:
@@ -53,6 +54,48 @@ def _package_for(s: Session, scenario: ScenarioManifest):
     return package_of(row)
 
 
+def _with_overrides(s: Session, scenario: ScenarioManifest, overrides: dict[str, Any]) -> ScenarioManifest:
+    """A matrix cell's variations of the stored scenario (P2-080): environment backend, rules (a version, or "off"),
+    model version and an environment configuration patch (ablation). Validated like a scenario. (A strategy
+    configuration patch is applied once the participants' strategies are resolved.)"""
+    if not overrides:
+        return scenario
+    data = scenario.model_dump(mode="json")
+    if overrides.get("environment"):
+        data["environment"] = overrides["environment"]
+    if overrides.get("rules") == "off":
+        data["rules"] = None
+    elif overrides.get("rules"):
+        from ..db import RuleSetRow
+
+        r = overrides["rules"]
+        row = s.scalar(select(RuleSetRow).where(RuleSetRow.ruleset_id == r["ruleset_id"],
+                                                RuleSetRow.version == int(r["version"])))
+        if row is None:
+            raise InvalidInput(f"rule set {r['ruleset_id']}@{r['version']} not found")
+        data["rules"] = {"ruleset_id": row.ruleset_id, "version": row.version, "digest": {"value": row.digest}}
+    if overrides.get("model_version_id"):
+        row = get_or_404(s, ModelVersion, overrides["model_version_id"], "model version")
+        data["model"] = package_of(row).ref().model_dump(mode="json")
+    patch = overrides.get("env_config_patch")
+    if patch:
+        data["environment"]["config"] = _merge(data["environment"].get("config", {}), patch)
+    return ScenarioManifest.model_validate(data)
+
+
+def _merge(base: dict[str, Any], patch: dict[str, Any]) -> dict[str, Any]:
+    """Deep merge; a `None` in the patch removes the key (e.g. an ablation switching a mechanism off)."""
+    out = dict(base)
+    for k, v in patch.items():
+        if v is None:
+            out.pop(k, None)
+        elif isinstance(v, dict) and isinstance(out.get(k), dict):
+            out[k] = _merge(out[k], v)
+        else:
+            out[k] = v
+    return out
+
+
 def create_run(s: Session, project_id: str, body: dict[str, Any], *, client_request_id: str | None = None,
                source_run: Run | None = None, matrix_id: str | None = None) -> tuple[Run, bool]:
     """Create a run with a fully pinned RunManifest. Returns (run, created); a repeated client_request_id
@@ -76,7 +119,7 @@ def create_run(s: Session, project_id: str, body: dict[str, Any], *, client_requ
         sc_row = get_or_404(s, Scenario, body.get("scenario_id"), "scenario")
         if sc_row.project_id != project_id:
             raise InvalidInput("scenario belongs to another project")
-        scenario = compat.upgrade_scenario(sc_row.manifest)
+        scenario = _with_overrides(s, compat.upgrade_scenario(sc_row.manifest), body.get("overrides") or {})
         participants = list(scenario.participants)
         strategy_id = body.get("strategy_config_id")
         per_actor = dict(body.get("participant_strategies") or {})
@@ -93,18 +136,30 @@ def create_run(s: Session, project_id: str, body: dict[str, Any], *, client_requ
         participants = [with_strategy(p, per_actor.get(p.actor_id) or strategy_id)
                         if (per_actor.get(p.actor_id) or strategy_id) else p for p in participants]
         participants = [Participant.model_validate(p.model_dump(mode="json")) for p in participants]
+        spatch = (body.get("overrides") or {}).get("strategy_config_patch")
+        if spatch:  # ablation of a strategy mechanism: applied to the participants whose strategy has that setting
+            def patched(p: Participant) -> Participant:
+                props = registry().resolve(p.strategy.plugin).descriptor.config_schema.get("properties", {})
+                mine = {k: v for k, v in spatch.items() if k in props}
+                if not mine:
+                    return p
+                return Participant.model_validate({**p.model_dump(mode="json"), "strategy": {
+                    "plugin": p.strategy.plugin.model_dump(mode="json"),
+                    "config": _merge(dict(p.strategy.config), mine)}})
+
+            participants = [patched(p) for p in participants]
         seed = int(body["seed"]) if body.get("seed") is not None else scenario.seed
         budget = Budget.model_validate({**scenario.budget.model_dump(exclude_none=True), **(body.get("budget") or {})})
         evaluators = evaluators_for(scenario.model.package_id, body.get("evaluators"))
-        scenario_id, config = sc_row.id, dict(body.get("config") or {})
+        # a scenario may carry default run settings (extension formal-lab.run-defaults); the request overrides them
+        defaults = scenario.extensions.get(RUN_DEFAULTS)
+        base = dict(defaults.data.get("config", {})) if defaults is not None else {}
+        scenario_id, config = sc_row.id, {**base, **dict(body.get("config") or {})}
     package = _package_for(s, scenario)
-    if body.get("release_id"):
-        from ..db import ReleaseRow
+    if body.get("release_id"):  # the run pins the released model (and rules): they must be the ones it uses
+        from .governance import pinned_release
 
-        rel = get_or_404(s, ReleaseRow, body["release_id"], "release")
-        if rel.status != "RELEASED":
-            raise InvalidInput(f"release {rel.release_id} was rejected; it cannot be run")
-        release = ReleaseRef(release_id=rel.release_id, digest={"value": rel.digest})
+        release = pinned_release(s, body["release_id"], package.ref(), scenario.rules)
     manifest = make_manifest(run_id=run_id, project_id=project_id, scenario=scenario, package=package,
                              registry=registry(), participants=participants, evaluators=evaluators, config=config,
                              source_run_id=source_run.id if source_run else None, matrix_id=matrix_id, seed=seed,
@@ -170,21 +225,26 @@ def request_resume(s: Session, run_id: str) -> Run:
     return run
 
 
-def request_cancel(s: Session, run_id: str) -> tuple[Run, bool]:
-    """Returns (run, needs_orchestrator_cancel)."""
+def request_cancel(s: Session, run_id: str, reason: str | None = None,
+                   operations: list[str] | None = None) -> tuple[Run, bool]:
+    """Returns (run, needs_orchestrator_cancel). `reason` (and the operations it concerns) make it an explained
+    termination by an operator (P2-058); it is kept on the run and in the RUN_CANCELLING event."""
     run = lock_run(s, run_id)
     status = RunStatus(run.status)
     if status in TERMINAL_RUN_STATUSES or status == RunStatus.CANCELLING:
         return run, False
+    why = f"terminated by operator: {reason}" if reason else None
     if status == RunStatus.CREATED:
-        transition(run, RunStatus.CANCELLED, "cancelled before start")
+        transition(run, RunStatus.CANCELLED, why or "cancelled before start")
         run.finished_at = utcnow()
         append_events(s, run, [draft(f"{run_id}:run:cancelled", "RUN_CANCELLED", None,
-                                     {"status": "CANCELLED", "reason": "cancelled before start"})])
+                                     {"status": "CANCELLED", "reason": why or "cancelled before start"})])
         return run, False
-    transition(run, RunStatus.CANCELLING, "cancellation requested")
-    append_events(s, run, [draft(f"{run_id}:run:cancelling", "RUN_CANCELLING", run.last_step,
-                                 {"requested_at": utcnow().isoformat()})])
+    transition(run, RunStatus.CANCELLING, why or "cancellation requested")
+    payload: dict[str, Any] = {"requested_at": utcnow().isoformat()}
+    if reason:
+        payload.update({"reason": why, "operations": list(operations or [])})
+    append_events(s, run, [draft(f"{run_id}:run:cancelling", "RUN_CANCELLING", run.last_step, payload)])
     return run, True
 
 

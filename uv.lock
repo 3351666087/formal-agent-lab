@@ -8,6 +8,7 @@ members = [
     "formal-agent-lab",
     "formal-lab-contracts",
     "formal-lab-evaluation",
+    "formal-lab-example-orders",
     "formal-lab-example-scheduling",
     "formal-lab-example-warehouse",
     "formal-lab-model-core",
@@ -336,6 +337,7 @@ source = { virtual = "." }
 dependencies = [
     { name = "formal-lab-contracts" },
     { name = "formal-lab-evaluation" },
+    { name = "formal-lab-example-orders" },
     { name = "formal-lab-example-scheduling" },
     { name = "formal-lab-example-warehouse" },
     { name = "formal-lab-model-core" },
@@ -363,6 +365,7 @@ dev = [
 requires-dist = [
     { name = "formal-lab-contracts", editable = "packages/contracts" },
     { name = "formal-lab-evaluation", editable = "packages/evaluation" },
+    { name = "formal-lab-example-orders", editable = "examples/local-order-service" },
     { name = "formal-lab-example-scheduling", editable = "examples/neutral-scheduling" },
     { name = "formal-lab-example-warehouse", editable = "examples/warehouse-allocation" },
     { name = "formal-lab-model-core", editable = "packages/model-core" },
@@ -414,6 +417,27 @@ requires-dist = [
     { name = "formal-lab-sdk", editable = "packages/sdk" },
     { name = "formal-lab-strategies", editable = "packages/strategies" },
     { name = "inspect-ai", specifier = "==0.3.269" },
+]
+
+[[package]]
+name = "formal-lab-example-orders"
+version = "0.1.0"
+source = { editable = "examples/local-order-service" }
+dependencies = [
+    { name = "fastapi" },
+    { name = "formal-lab-contracts" },
+    { name = "formal-lab-model-core" },
+    { name = "httpx" },
+    { name = "uvicorn" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "fastapi", specifier = ">=0.141" },
+    { name = "formal-lab-contracts", editable = "packages/contracts" },
+    { name = "formal-lab-model-core", editable = "packages/model-core" },
+    { name = "httpx", specifier = ">=0.28" },
+    { name = "uvicorn", specifier = ">=0.54" },
 ]
 
 [[package]]
