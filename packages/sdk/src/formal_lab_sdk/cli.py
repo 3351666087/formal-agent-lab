@@ -118,6 +118,78 @@ def model_push(path: Path, project: str = typer.Option(...), package_id: str = t
     _out(res if "version" not in res or isinstance(res.get("version"), int) else res["version"])
 
 
+@model_app.command("check")
+def model_check(version_id: str, kind: str = typer.Option("GOAL_REACHABILITY", help="query kind"),
+                prop: str = typer.Option(None, "--property", help="goal / invariant property"),
+                steps: int = typer.Option(16, help="bound (max steps / horizon)"),
+                timeout_ms: int = typer.Option(20000),
+                action: str = typer.Option(None, help="ACTION_PRECONDITION: action as JSON {action_type, params}"),
+                objective: Path = typer.Option(None, help="OPTIMIZE_OBJECTIVE: ObjectiveSpec JSON file"),
+                state: Path = typer.Option(None, help="start state JSON file (GIVEN_STATE)"),
+                unknown: list[str] = typer.Option(None, help="unknown location (repeatable)"),
+                export: Path = typer.Option(None, help="write the replayable query bundle here"),
+                api: str = API) -> None:
+    """Run a bounded check on a stored model version; print the shared explanation (P2-029)."""
+    c = _client(api)
+    query: dict[str, Any] = {"kind": kind, "bound": {"max_steps": steps, "timeout_ms": timeout_ms}}
+    if prop:
+        query["property_id"] = prop
+    if action:
+        query["action"] = json.loads(action)
+    if objective:
+        query["objective"] = json.loads(objective.read_text())
+    if state:
+        query["initial_state"] = "GIVEN_STATE"
+    try:
+        rec = c.check_record(version_id, query, json.loads(state.read_text()) if state else None, unknown or None)
+        for line in rec.get("explanation", []):
+            typer.echo(line)
+        if export and rec.get("query_bundle_id"):
+            bundle = c.query_bundle(rec["query_bundle_id"], export=True)
+            export.write_text(json.dumps(bundle.model_dump(mode="json"), indent=2, ensure_ascii=False))
+            typer.echo(f"query bundle → {export}")
+    except FormalLabError as exc:
+        _fail(exc)
+
+
+query_app = typer.Typer(no_args_is_help=True, help="replayable query bundles")
+app.add_typer(query_app, name="query")
+
+
+@query_app.command("replay")
+def query_replay(path: Path, offline: bool = typer.Option(False, "--offline",
+                                                         help="replay locally with the installed verifier"),
+                 api: str = API) -> None:
+    """Re-ask a query bundle and compare the answer (offline needs formal-lab-runtime + verifier plugins)."""
+    from formal_lab_contracts import QueryBundle
+
+    bundle = QueryBundle.model_validate_json(path.read_text())
+    try:
+        if offline:
+            if bundle.package is None:
+                raise typer.BadParameter("the bundle does not embed its model package (export it with --export)")
+            from formal_lab_runtime import default_registry
+            from formal_lab_runtime.query import replay_query
+
+            res = replay_query(default_registry(), bundle.package, bundle)
+        else:
+            res = _client(api).replay_query(bundle)
+    except FormalLabError as exc:
+        _fail(exc)
+    _out(res)
+    if not res.get("same"):
+        raise typer.Exit(1)
+
+
+@query_app.command("explain")
+def query_explain(path: Path) -> None:
+    """Print the explanation stored in a query bundle (offline)."""
+    from formal_lab_contracts import QueryBundle
+
+    for line in QueryBundle.model_validate_json(path.read_text()).explanation:
+        typer.echo(line)
+
+
 # ---------------------------------------------------------------------------- runs
 @run_app.command("start")
 def run_start(project: str = typer.Option(...), scenario: str = typer.Option(...),

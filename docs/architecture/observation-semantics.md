@@ -43,3 +43,31 @@
 | 预测 | 信念模型对动作效果的预期 |
 | 有界结论 | 只在给定步数边界内成立的检查结论 |
 | 模型内结论 | 结论关于模型，不关于真实系统 |
+
+## 阶段二：来源、假设与稳健性（formal-lab-contracts/v2）
+
+### 每个位置的来源（`BeliefState.provenance`）
+
+| 来源 | 含义 | 用于规划的值 | 补全检查中 |
+|---|---|---|---|
+| `KNOWN` | 本步新鲜观测 | 观测值 | 固定 |
+| `STALE` | 过期事实，或未知项附带的上次已知值 | 上次已知值 | 未知项的位置为自由变量；过期事实固定 |
+| `UNKNOWN` | 报告为未知且无任何值 | 模型初值（占位） | 自由变量 |
+| `ASSUMED_INITIAL` | 观测从未提及 | 模型初值（假设） | 固定 |
+
+`BeliefState.free_paths` 就是补全检查取遍的位置（观测的未知项，与阶段一语义一致）。除 `KNOWN` 外的每个位置都列入 `AssumptionSet`（值、时点与原因），并以其摘要标识。
+
+### 基于假设的计划与稳健结论
+
+- 用过期值或初值做出的规划标为 `ASSUMPTION_BASED`，提案携带 `AssumptionSetRef`（摘要、计数、依据）。全部位置新鲜观测时为 `FULLY_OBSERVED`，对全部补全检查过的为 `ROBUST`。
+- **单步**：`ACTION_PRECONDITION` 判断“所有允许补全均满足前提”。结论为 `UNKNOWN` 时，同时给出一个适用补全与一个不适用补全，以及 `ObservationRequest`：前提读取的、且在两者间取值不同的未知位置。
+- **多步**：`ROBUST_SEQUENCE` 检查给定的**固定动作序列**是否对每个补全都能逐步执行（可选：最终到达目标）。不成立时返回反例补全与首个失败动作，反例由参考解释器独立重放确认。
+- **与策略综合的区别**：稳健序列是开环的，序列事先固定，不随后续观测分支。“能根据观测结果选择下一步”的条件策略综合不在本平台能力内，未实现的能力回答 `UNSUPPORTED`。
+
+### 额外观测
+
+策略可在提案中附上 `observation_request`（例如 Z3 规划器的 `request_observations`：下一动作在信念上为 `UNKNOWN` 时）。规则也可以产生 `OBSERVE_MORE`。环境声明 `env.observe_on_request` 时，平台在同一回合内取回这些位置的新鲜值（事件 `OBSERVATION_REQUESTED`），并让策略基于新信念再提案一次。每回合最多一次，否则按原提案执行。
+
+### 效果证据等级（`FieldDiff.evidence`）
+
+`observed`（本步新鲜观测）、`verified-within-scope`（未在参与者视图中，但由独立来源在声明范围内确认，例如业务服务的操作查询结果）、`predicted`（只有模型预测）、`unknown`（不可比较）。另附 `freshness`（FRESH / STALE / MISSING）与观测时点。

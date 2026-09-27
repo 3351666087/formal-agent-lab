@@ -52,6 +52,60 @@ def lamp() -> ModelIR:
     )
 
 
+def shortcut() -> ModelIR:
+    """"Shorter but more expensive" (P2-024): an express ride reaches the goal in one step for 10, walking takes three
+    steps at 1 each. The shortest plan and the cheapest plan differ; a second level counts express rides."""
+    return ModelIR.model_validate(
+        {
+            "name": "shortcut",
+            "state": [
+                {"name": "pos", "type": {"kind": "int", "min": 0, "max": 3}, "initial": {"default": 0}},
+                {"name": "rides", "type": {"kind": "int", "min": 0, "max": 3}, "initial": {"default": 0}},
+            ],
+            "actions": [
+                {"name": "express", "cost": 10, "precondition": ap("eq", v("pos"), c(0)),
+                 "effects": [assign("pos", c(3)), assign("rides", ap("add", v("rides"), c(1)))]},
+                {"name": "walk", "cost": 1, "precondition": ap("lt", v("pos"), c(3)),
+                 "effects": [assign("pos", ap("add", v("pos"), c(1)))]},
+            ],
+            "properties": [{"id": "arrived", "kind": "goal", "expr": ap("eq", v("pos"), c(3))}],
+            "objectives": [
+                {"id": "fare", "label": "fare", "unit": "coins", "terms": [{"kind": "action_cost"}]},
+                {"id": "rides_taken", "unit": "rides", "terms": [{"kind": "terminal", "expr": v("rides")}]},
+            ],
+        }
+    )
+
+
+def queue_costs() -> ModelIR:
+    """Three waiting jobs with different lateness weights; one server; each tick of waiting costs weight(j).
+    State-rate costs make the order matter: serve the heaviest first."""
+    jobs = {"kind": "entity", "set": "jobs"}
+    return ModelIR.model_validate(
+        {
+            "name": "queue-costs",
+            "entity_sets": [{"name": "jobs", "members": ["a", "b", "c"]}],
+            "constants": [{"name": "weight", "type": {"kind": "int", "min": 0, "max": 9}, "index": ["jobs"],
+                           "value": {"cells": [{"index": ["a"], "value": 1}, {"index": ["b"], "value": 5},
+                                               {"index": ["c"], "value": 3}]}}],
+            "state": [{"name": "served", "type": {"kind": "bool"}, "index": ["jobs"], "initial": {"default": False}}],
+            "actions": [{"name": "serve", "params": [{"name": "j", "type": jobs}],
+                         "precondition": ap("not", v("served", r("j"))),
+                         "effects": [assign("served", c(True), r("j"))]}],
+            "properties": [{"id": "all_served", "kind": "goal",
+                            "expr": {"op": "forall", "var": "x", "domain": "jobs", "body": v("served", r("x"))}}],
+            "objectives": [{"id": "waiting", "unit": "weighted ticks", "terms": [
+                {"kind": "state_rate", "expr": {"op": "sum", "var": "x", "domain": "jobs",
+                                                "body": {"op": "ite", "args": [v("served", r("x")), c(0),
+                                                                               v("weight", r("x"))]}}}]},
+                {"id": "latest_weight", "unit": "weight", "terms": [
+                    {"kind": "terminal", "expr": {"op": "max_over", "var": "x", "domain": "jobs",
+                                                  "where": v("served", r("x")), "body": v("weight", r("x")),
+                                                  "default": c(0)}}]}],
+        }
+    )
+
+
 def two_jobs() -> ModelIR:
     """Two jobs, two machines, a single shared tool; job b depends on job a."""
     jobs = {"kind": "entity", "set": "jobs"}

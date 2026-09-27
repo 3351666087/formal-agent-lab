@@ -6388,6 +6388,18 @@
         "model": {
           "$ref": "#/$defs/ModelRef"
         },
+        "package": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ModelPackage"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "embedded model package (exports), so the bundle can be replayed offline"
+        },
         "query": {
           "$ref": "#/$defs/CheckQuery"
         },
@@ -6449,7 +6461,8 @@
         "assumptions",
         "result",
         "explanation",
-        "replay"
+        "replay",
+        "package"
       ],
       "title": "QueryBundle",
       "type": "object"

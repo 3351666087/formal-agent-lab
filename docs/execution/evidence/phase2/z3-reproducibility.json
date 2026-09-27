@@ -1,0 +1,191 @@
+{
+  "format": "formal-agent-lab/evidence@1",
+  "subject": "Z3 planner reproducibility (P2-011 / P2-028 / P2-046, decision D-017)",
+  "captured_at": "2026-09-27T06:30:00Z",
+  "method": "each cell = python -m formal_lab_example_scheduling (z3 strategy, seeded scenario) run (a) alone in a fresh process and (b) inside the `compare` batch; phase-1 code = git archive 46400ad on PYTHONPATH, phase-2 code = working tree after the fresh-context change",
+  "finding": "phase-1 Z3 results depended on what ran earlier in the same process (a process-global suffix cache and a reused Z3 context): 8 of 12 cells differ between 'alone' and 'in batch' with the phase-1 code itself. Phase 2 creates a fresh Z3 context per query and keeps the plan in the planner checkpoint: all 12 cells give the same result alone and in the batch. Rule-strategy cells are identical to phase 1 in every metric.",
+  "phase1_order_dependent_cells": 8,
+  "phase2_order_dependent_cells": 0,
+  "cells": [
+    {
+      "cell": "normal/1",
+      "phase1_in_batch_cost": 0.0,
+      "phase1_alone": {
+        "steps": 14,
+        "cost": 3.0
+      },
+      "phase2_alone": {
+        "steps": 14,
+        "cost": 0.0
+      },
+      "phase2_in_batch_cost": 0.0,
+      "phase1_order_dependent": true,
+      "phase2_order_dependent": false
+    },
+    {
+      "cell": "normal/2",
+      "phase1_in_batch_cost": 0.0,
+      "phase1_alone": {
+        "steps": 14,
+        "cost": 3.0
+      },
+      "phase2_alone": {
+        "steps": 14,
+        "cost": 0.0
+      },
+      "phase2_in_batch_cost": 0.0,
+      "phase1_order_dependent": true,
+      "phase2_order_dependent": false
+    },
+    {
+      "cell": "normal/3",
+      "phase1_in_batch_cost": 0.0,
+      "phase1_alone": {
+        "steps": 13,
+        "cost": 0.0
+      },
+      "phase2_alone": {
+        "steps": 13,
+        "cost": 0.0
+      },
+      "phase2_in_batch_cost": 0.0,
+      "phase1_order_dependent": false,
+      "phase2_order_dependent": false
+    },
+    {
+      "cell": "resource-shortage/1",
+      "phase1_in_batch_cost": 3.0,
+      "phase1_alone": {
+        "steps": 14,
+        "cost": 3.0
+      },
+      "phase2_alone": {
+        "steps": 14,
+        "cost": 3.0
+      },
+      "phase2_in_batch_cost": 3.0,
+      "phase1_order_dependent": false,
+      "phase2_order_dependent": false
+    },
+    {
+      "cell": "resource-shortage/2",
+      "phase1_in_batch_cost": 3.0,
+      "phase1_alone": {
+        "steps": 14,
+        "cost": 3.0
+      },
+      "phase2_alone": {
+        "steps": 14,
+        "cost": 3.0
+      },
+      "phase2_in_batch_cost": 3.0,
+      "phase1_order_dependent": false,
+      "phase2_order_dependent": false
+    },
+    {
+      "cell": "resource-shortage/3",
+      "phase1_in_batch_cost": 3.0,
+      "phase1_alone": {
+        "steps": 14,
+        "cost": 3.0
+      },
+      "phase2_alone": {
+        "steps": 14,
+        "cost": 3.0
+      },
+      "phase2_in_batch_cost": 3.0,
+      "phase1_order_dependent": false,
+      "phase2_order_dependent": false
+    },
+    {
+      "cell": "state-delay/1",
+      "phase1_in_batch_cost": 0.0,
+      "phase1_alone": {
+        "steps": 30,
+        "cost": 7.0
+      },
+      "phase2_alone": {
+        "steps": 33,
+        "cost": 2.0
+      },
+      "phase2_in_batch_cost": 2.0,
+      "phase1_order_dependent": true,
+      "phase2_order_dependent": false
+    },
+    {
+      "cell": "state-delay/2",
+      "phase1_in_batch_cost": 6.0,
+      "phase1_alone": {
+        "steps": 30,
+        "cost": 2.0
+      },
+      "phase2_alone": {
+        "steps": 32,
+        "cost": 6.0
+      },
+      "phase2_in_batch_cost": 6.0,
+      "phase1_order_dependent": true,
+      "phase2_order_dependent": false
+    },
+    {
+      "cell": "state-delay/3",
+      "phase1_in_batch_cost": 4.0,
+      "phase1_alone": {
+        "steps": 30,
+        "cost": 0.0
+      },
+      "phase2_alone": {
+        "steps": 32,
+        "cost": 4.0
+      },
+      "phase2_in_batch_cost": 4.0,
+      "phase1_order_dependent": true,
+      "phase2_order_dependent": false
+    },
+    {
+      "cell": "expectation-mismatch/1",
+      "phase1_in_batch_cost": 9.0,
+      "phase1_alone": {
+        "steps": 19,
+        "cost": 20.0
+      },
+      "phase2_alone": {
+        "steps": 17,
+        "cost": 8.0
+      },
+      "phase2_in_batch_cost": 8.0,
+      "phase1_order_dependent": true,
+      "phase2_order_dependent": false
+    },
+    {
+      "cell": "expectation-mismatch/2",
+      "phase1_in_batch_cost": 6.0,
+      "phase1_alone": {
+        "steps": 17,
+        "cost": 12.0
+      },
+      "phase2_alone": {
+        "steps": 17,
+        "cost": 6.0
+      },
+      "phase2_in_batch_cost": 6.0,
+      "phase1_order_dependent": true,
+      "phase2_order_dependent": false
+    },
+    {
+      "cell": "expectation-mismatch/3",
+      "phase1_in_batch_cost": 12.0,
+      "phase1_alone": {
+        "steps": 19,
+        "cost": 4.0
+      },
+      "phase2_alone": {
+        "steps": 17,
+        "cost": 12.0
+      },
+      "phase2_in_batch_cost": 12.0,
+      "phase1_order_dependent": true,
+      "phase2_order_dependent": false
+    }
+  ]
+}

@@ -89,3 +89,31 @@
 - **决策**：仓库代码以 Apache License 2.0 发布（仓库所有者将选择权交给执行者）。根目录 `LICENSE`（Apache 官方全文）与 `NOTICE`；每个 Python 发行包、Helm Chart 目录各带一份相同的 `LICENSE`（PEP 639 `license = "Apache-2.0"`，文本随 wheel/sdist 分发；`tests/architecture/test_license.py` 保证副本一致）；插件描述、npm 元数据、镜像标签 `org.opencontainers.image.licenses` 与发行/离线包清单统一为 `Apache-2.0`，镜像内附 `/usr/share/doc/formal-agent-lab/{LICENSE,NOTICE}`。
 - **理由**：平台以插件扩展为核心，宽松许可便于第三方插件与后续领域阶段以任意许可接入，不受 copyleft 传染；相比 MIT 多了明确的专利授权与贡献条款，适合规划/验证类技术；与全部依赖兼容（MIT、BSD-3、Apache-2.0、PostgreSQL License；psycopg 为 LGPL-3.0-only，仅以未修改的库动态使用，不影响本仓库代码的许可）。
 - **扩展影响**：新包复制根 `LICENSE` 并在 pyproject 声明 `license = "Apache-2.0"`、`license-files = ["LICENSE"]`（架构测试会检查）；包外插件可自选许可，在 `PluginDescriptor.license` 中声明。
+
+## D-015 并行发布契约 v2，冻结 v1 并提供适配器（阶段二）
+
+- **决策**：`formal-lab-contracts/v2` 成为平台现行契约；v1 源码原样冻结在 `formal_lab_contracts.v1`，`contracts/v1/` 与 `docs/contracts/v1.md` 逐字节不变（摘要 `0cbd6256…`）。`formal_lab_contracts.compat.upgrade(kind, json)` 先按 v1 校验再映射到 v2；数据库行记录写入时的 `contract_version`，读取时升级；回放包写 `@2`、读 `@1`。
+- **理由**：第二个语义驱动需要非 IR 模型载荷，新插件接口需要扩展 `PluginInterface`。v1 的 `ModelPackage.ir` 为必填、枚举封闭，v1 消费者会拒绝这些数据，无法在 v1 内兼容扩展（P2-013）。v2 保留所有 v1 对象名、字段名与语义，只新增可选字段并把 `ir` 移入类型化 `payload`（`ir` 保留为只读访问器）。v2 新增的 IR 字段在默认值时不进入规范形式，阶段一模型摘要不变。
+- **替代方案**：在 v1 的 `extensions` 中塞入非 IR 载荷（语义不透明、无法校验，驱动选择无法在契约层表达）；原地修改 v1（破坏阶段一回放包与既有消费者）。
+- **扩展影响**：v1 插件（interface_version 1）继续注册并收到 v2 对象；`SEMANTIC_DRIVER`、`PROBE` 仅限 v2；注册表按 semver 兼容版本解析插件，manifest 固定实际解析到的版本。
+
+## D-016 运行内核只经语义驱动读取模型语义
+
+- **决策**：步骤引擎不再构造 `CheckedModel`/`Interpreter`，而是按模型 profile 从注册表选择 `SEMANTIC_DRIVER`，只通过 `LoadedModel` 获取候选、预测、性质、带来源的信念与展示结构。IR 驱动在 model-core；部分状态的前提由运行的验证器在全部补全上判定（与阶段一语义一致）。
+- **理由**：去掉 runtime 与 IR 的硬耦合（P2-010），第二种语义以插件接入，runtime 无需识别场景或 profile 名称（P2-012）。改造后阶段一生产调度哨兵逐格复现（规则策略所有指标一致）。
+
+## D-017 Z3 规划可复现：每次查询新建上下文，计划记忆放入检查点
+
+- **决策**：每次 Z3 查询使用新的 `z3.Context`；Z3 规划器的“当前计划”以 `TaskPlan` 保存在 `PlannerCheckpoint` 中，每步先从检查点恢复；进程级求解缓存只存完整查询键（模型、驱动、模式、目标/目标函数摘要、受预算约束的 horizon、信念摘要、假设集合）的确定性答案，有容量上限（LRU）。
+- **理由**：实测阶段一 Z3 结果依赖同一进程内之前的运行（全局后缀缓存与复用的上下文），同一格单独运行与批量运行在 12 格中有 8 格不同（`docs/execution/evidence/phase2/z3-reproducibility.json`）。新做法下 12 格单独与批量结果完全一致，保证“同种子新进程中途恢复 = 不中断运行”（P2-046）。
+- **影响**：阶段一哨兵中 Z3 策略的批量数字不可复现；阶段二以单独/批量一致的新结果为基线，规则策略全部指标与阶段一逐格相同。每次查询多出上下文创建开销（毫秒级）。
+
+## D-018 操作协调状态机与账本
+
+- **决策**：环境操作经 `Coordinator` 执行，状态为 `PREPARED → DISPATCHED → COMPLETED | FAILED | OUTCOME_UNKNOWN → RECONCILED`。每次状态转换先写账本，再调用环境：本地运行用内存账本，平台用 `operation_records` 表，每次提交独立事务。恢复方式由环境能力决定：`env.pure_replayable` 从步前快照精确重放；`env.query_operation` 按操作 id 向服务查询后对账，不重发；两者都没有时标记 NEEDS_REVIEW，以 `OPERATION_UNRESOLVED` 可解释地结束运行。
+- **理由**：阶段一“恢复快照再 apply”只适用于纯数据模拟器；外部服务的业务状态不会随快照回滚（P2-050 … P2-054）。本地运行器与 Temporal 路径共享同一协调逻辑（P2-057）。
+
+## D-019 数据库存原始 JSON 与写入版本，读取时升级
+
+- **决策**：迁移 0002 为模型版本、场景、运行增加 `contract_version` 列（既有行标为 v1），不批量改写历史 JSON；所有读取经 `compat` 升级。运行新增 `carry`（轮次游标、规划器检查点、按参与者用量、规则标志），事件新增 `turn`/`stage`。同一迁移建好规则集、发布记录、查询包、回归案例、环境会话、矩阵单元与操作记录表。
+- **理由**：历史运行按写入时的契约解释（P2-093 “历史运行按当时 schema 展示”）；升级在读路径集中实现、可测（`tests/compat/`），迁移可回滚。

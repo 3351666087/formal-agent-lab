@@ -3006,6 +3006,10 @@ export interface QueryBundle {
   explanation: Explanation1;
   format: Format1;
   model: ModelRef;
+  /**
+   * embedded model package (exports), so the bundle can be replayed offline
+   */
+  package: ModelPackage | null;
   query: CheckQuery;
   replay: Replay1;
   result: BoundedCheckResult;

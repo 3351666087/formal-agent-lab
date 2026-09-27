@@ -9,7 +9,7 @@ from collections.abc import Iterator
 from typing import Any
 
 import httpx
-from formal_lab_contracts import BoundedCheckResult, RunManifest, TraceEvent
+from formal_lab_contracts import BoundedCheckResult, QueryBundle, RunManifest, TraceEvent
 from formal_lab_contracts.errors import ErrorInfo, FormalLabError, RetryableFailure
 
 DEFAULT_URL = os.environ.get("FAL_API_URL", "http://127.0.0.1:8000/api/v1")
@@ -83,9 +83,23 @@ class Client:
 
     def check(self, model_version_id: str, query: dict[str, Any], state: dict | None = None,
               unknown_paths: list[str] | None = None) -> BoundedCheckResult:
-        res = self.post(f"/model-versions/{model_version_id}/checks",
-                        {"query": query, "state": state, "unknown_paths": unknown_paths})
-        return BoundedCheckResult.model_validate(res["result"])
+        return BoundedCheckResult.model_validate(self.check_record(model_version_id, query, state,
+                                                                   unknown_paths)["result"])
+
+    def check_record(self, model_version_id: str, query: dict[str, Any], state: dict | None = None,
+                     unknown_paths: list[str] | None = None) -> dict[str, Any]:
+        """Stored check with its query bundle id, explanation and witness replay."""
+        return self.post(f"/model-versions/{model_version_id}/checks",
+                         {"query": query, "state": state, "unknown_paths": unknown_paths})
+
+    def query_bundle(self, bundle_id: str, *, export: bool = False) -> QueryBundle:
+        """A replayable query bundle; `export=True` embeds the model package for offline replay."""
+        data = self.get(f"/query-bundles/{bundle_id}/export" if export else f"/query-bundles/{bundle_id}")
+        return QueryBundle.model_validate(data)
+
+    def replay_query(self, bundle: QueryBundle | dict[str, Any]) -> dict[str, Any]:
+        body = bundle.model_dump(mode="json") if isinstance(bundle, QueryBundle) else bundle
+        return self.post("/query-bundles/replay", body)
 
     # ------------------------------------------------------------------ scenarios / strategies
     def scenarios(self, project_id: str) -> list[dict[str, Any]]:

@@ -42,7 +42,9 @@ ALLOWED: dict[str, set[str]] = {
     "formal_lab_eval": {"formal_lab_contracts", "formal_lab_runtime", "formal_lab_strategies", "formal_lab_sdk"},
     "formal_lab_api": {"formal_lab_contracts", "formal_lab_model", "formal_lab_runtime", "formal_lab_eval"},
     "formal_lab_orchestrator": {"formal_lab_contracts", "formal_lab_api"},
-    "formal_lab_sdk": {"formal_lab_contracts", "formal_lab_model"},  # model-core only via the optional [offline] extra
+    # model-core via the optional [offline] extra; runtime only lazily, for `fal query replay --offline` (needs the
+    # engine and a verifier plugin installed)
+    "formal_lab_sdk": {"formal_lab_contracts", "formal_lab_model", "formal_lab_runtime"},
     # the example is a plugin package: it may use the engines it declares in its pyproject
     "formal_lab_example_scheduling": {"formal_lab_contracts", "formal_lab_model", "formal_lab_eval",
                                       "formal_lab_runtime", "formal_lab_solver_z3", "formal_lab_env",

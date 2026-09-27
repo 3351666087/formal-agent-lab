@@ -67,7 +67,10 @@ def build_model(
     due: dict[str, int] | None = None,
     horizon: int = HORIZON,
     name: str = "neutral-scheduling",
+    with_objectives: bool = False,
 ) -> ModelIR:
+    """The scheduling model. `with_objectives` adds the declared cost objectives (model version 2 of the example);
+    without them the model is byte-identical to phase 1 (same digest)."""
     ops = ops or OPS
     resources = resources or RESOURCES
     stations = stations or STATIONS
@@ -220,4 +223,19 @@ def build_model(
                                             ap("eq", v("phase", r("o")), c("done"))))},
         ],
     }
+    if with_objectives:
+        completion = {"op": "max_over", "var": "p", "domain": "ops",
+                      "where": ap("eq", v("order_of", r("p")), r("o")), "body": v("finish", r("p")), "default": c(0)}
+        ir["objectives"] = [
+            {"id": "delay_cost", "label": "模拟延期成本", "unit": "cost",
+             "description": "Σ_orders late_cost × max(0, completion − due); completion = latest finish of the "
+                            "order's operations (the scorer's delay_cost on the goal state)",
+             "terms": [{"kind": "terminal", "expr": {
+                 "op": "sum", "var": "o", "domain": "orders",
+                 "body": ap("mul", v("late_cost", r("o")),
+                            ap("max", c(0), ap("sub", completion, v("due", r("o")))))}}]},
+            {"id": "effort", "label": "调度动作数", "unit": "actions",
+             "description": "one unit per dispatching action (assign / advance / pause / resume / reprioritize)",
+             "terms": [{"kind": "action_cost"}]},
+        ]
     return ModelIR.model_validate(ir)

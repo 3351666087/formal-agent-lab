@@ -29,6 +29,7 @@ from .objects import (
     BudgetUsage,
     CheckQuery,
     GroundAction,
+    ModelPackage,
     ModelRef,
     Observation,
     ProposalSourceKind,
@@ -163,7 +164,8 @@ class TaskPlan(ContractModel):
     def progress(self) -> dict[str, int]:
         out: dict[str, int] = {}
         for n in self.nodes:
-            out[n.status.value] = out.get(n.status.value, 0) + 1
+            key = str(getattr(n.status, "value", n.status))
+            out[key] = out.get(key, 0) + 1
         return out
 
 
@@ -370,3 +372,5 @@ class QueryBundle(ContractModel):
     result: BoundedCheckResult
     explanation: list[str] = Field(default_factory=list, description="the shared, rendered explanation")
     replay: dict[str, Any] = Field(default_factory=dict, description="independent re-check of the witness")
+    package: ModelPackage | None = Field(default=None, description="embedded model package (exports), so the bundle "
+                                                                   "can be replayed offline")

@@ -219,12 +219,27 @@ def _routes(app: FastAPI) -> None:
     @app.post(f"{API}/model-versions/{{version_id}}/checks", status_code=201)
     async def run_check(version_id: str, body: dict[str, Any] = Body(...)):
         return await db(lambda s: modeling.check_dict(modeling.run_check(
-            s, version_id, body["query"], body.get("state"), body.get("unknown_paths"))))
+            s, version_id, body["query"], body.get("state"), body.get("unknown_paths")), s))
 
     @app.get(f"{API}/model-versions/{{version_id}}/checks")
     async def list_checks(version_id: str):
-        return await db(lambda s: [modeling.check_dict(c) for c in s.scalars(
+        return await db(lambda s: [modeling.check_dict(c, s) for c in s.scalars(
             select(CheckRow).where(CheckRow.model_version_id == version_id).order_by(CheckRow.created_at.desc()))])
+
+    @app.get(f"{API}/query-bundles/{{bundle_id}}")
+    async def get_query_bundle(bundle_id: str):
+        return await db(lambda s: modeling.query_bundle(s, bundle_id))
+
+    @app.get(f"{API}/query-bundles/{{bundle_id}}/export")
+    async def export_query_bundle(bundle_id: str):
+        data = await db(lambda s: modeling.query_bundle(s, bundle_id, embed_package=True))
+        return Response(content=json.dumps(data, indent=2, ensure_ascii=False).encode(), media_type="application/json",
+                        headers={"Content-Disposition": f'attachment; filename="{bundle_id}.query.json"'})
+
+    @app.post(f"{API}/query-bundles/replay")
+    async def replay_query_bundle(body: dict[str, Any] = Body(...)):
+        """Re-ask a (stored or uploaded) query bundle and compare the answer (P2-029)."""
+        return await db(lambda s: modeling.replay_bundle(s, body))
 
     # ------------------------------------------------------------------ scenarios / strategies
     @app.get(f"{API}/projects/{{project_id}}/scenarios")

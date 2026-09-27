@@ -25,7 +25,7 @@ from sqlalchemy.orm import Session
 from ..db import CheckRow, Model, ModelVersion, Project, Run, Scenario
 from .common import get_or_404, new_id, registry
 
-DEFAULT_VERIFIER = PluginRef(plugin_id="formal-lab.verifier.z3-bmc", version="1.0.0")
+DEFAULT_VERIFIER = PluginRef(plugin_id="formal-lab.verifier.z3-bmc", version="1.1.0")
 
 
 # ------------------------------------------------------------------------ projects
@@ -248,24 +248,72 @@ def version_details(v: ModelVersion) -> dict[str, Any]:
 def run_check(s: Session, model_version_id: str, query: dict[str, Any],
               state: dict[str, Any] | None = None, unknown_paths: list[str] | None = None,
               verifier: PluginRef | None = None) -> CheckRow:
+    """Run a bounded check and store it with its replayable query bundle (P2-029)."""
+    from formal_lab_runtime.query import run_query
+
+    from ..db import QueryBundleRow
+
     v = get_or_404(s, ModelVersion, model_version_id, "model version")
     model = get_or_404(s, Model, v.model_id, "model")
     package = package_of(v)
     q = CheckQuery.model_validate(query)
-    ref = verifier or DEFAULT_VERIFIER
-    services = _Services(package)
-    plugin = registry().create(ref, {}, services)
-    result = plugin.check(package, q, state=state, unknown_paths=unknown_paths)
+    bundle = run_query(registry(), package, q, verifier=verifier or DEFAULT_VERIFIER, state=state,
+                       unknown_paths=unknown_paths, services=_Services(package))
+    result = bundle.result
     row = CheckRow(id=result.check_id, project_id=model.project_id, model_version_id=v.id,
                    query=q.model_dump(mode="json"), result=result.model_dump(mode="json"), verdict=str(result.verdict))
     s.add(row)
+    s.add(QueryBundleRow(id=bundle.bundle_id, project_id=model.project_id, model_version_id=v.id,
+                         check_id=result.check_id, bundle=bundle.model_dump(mode="json")))
     s.flush()
     return row
 
 
-def check_dict(c: CheckRow) -> dict[str, Any]:
-    return {"id": c.id, "model_version_id": c.model_version_id, "query": c.query, "verdict": c.verdict,
-            "result": c.result, "created_at": c.created_at}
+def check_dict(c: CheckRow, s: Session | None = None) -> dict[str, Any]:
+    out = {"id": c.id, "model_version_id": c.model_version_id, "query": c.query, "verdict": c.verdict,
+           "result": c.result, "created_at": c.created_at}
+    if s is not None:
+        from ..db import QueryBundleRow
+
+        qb = s.scalar(select(QueryBundleRow).where(QueryBundleRow.check_id == c.id))
+        if qb is not None:
+            out["query_bundle_id"] = qb.id
+            out["explanation"] = qb.bundle.get("explanation", [])
+            out["replay"] = qb.bundle.get("replay", {})
+    if "explanation" not in out:
+        from formal_lab_contracts import compat
+        from formal_lab_model.explain import explain_check
+
+        out["explanation"] = explain_check(compat.upgrade_check_result(c.result))
+    return out
+
+
+def query_bundle(s: Session, bundle_id: str, *, embed_package: bool = False) -> dict[str, Any]:
+    from ..db import QueryBundleRow
+
+    row = get_or_404(s, QueryBundleRow, bundle_id, "query bundle")
+    data = dict(row.bundle)
+    if embed_package:
+        data["package"] = package_of(get_or_404(s, ModelVersion, row.model_version_id, "model version")).model_dump(
+            mode="json")
+    return data
+
+
+def replay_bundle(s: Session, bundle: dict[str, Any]) -> dict[str, Any]:
+    """Replay an uploaded / stored query bundle against the stored model version with the same digest."""
+    from formal_lab_contracts import QueryBundle
+    from formal_lab_runtime.query import replay_query
+
+    qb = QueryBundle.model_validate(bundle)
+    row = s.scalar(select(ModelVersion).where(ModelVersion.digest == qb.model.digest.value))
+    if row is not None:
+        package = package_of(row)
+    elif qb.package is not None:
+        package = qb.package
+    else:
+        raise InvalidInput(f"model {qb.model.package_id}@{qb.model.version} ({qb.model.digest.value[:12]}) is not "
+                           "stored on this server and the bundle does not embed it")
+    return replay_query(registry(), package, qb, services=_Services(package))
 
 
 class _Services:
