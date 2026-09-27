@@ -5,15 +5,15 @@
   "models_reported": [
     "gpt-5.6-sol"
   ],
-  "run_id": "run_264e99eb587d4f4b8b11",
+  "run_id": "run_7d99dd654c9342419013",
   "status": "SUCCEEDED",
   "reason": "goal 'all_done' reached",
   "usage": {
     "steps": 14,
-    "wall_seconds": 96.25048628300283,
+    "wall_seconds": 71.65294547800295,
     "model_calls": 14,
-    "input_tokens": 102205,
-    "output_tokens": 2210
+    "input_tokens": 102200,
+    "output_tokens": 1699
   },
   "proposal_sources": [
     "LLM"
@@ -23,24 +23,24 @@
     "steps_used": 14.0,
     "rejected_actions": 0.0,
     "effect_mismatches": 0.0,
-    "wall_seconds": 96.25,
+    "wall_seconds": 71.653,
     "model_calls": 14.0,
-    "tokens": 104415.0,
+    "tokens": 103899.0,
     "orders_completed": 3.0,
     "delay_cost": 0.0,
     "mean_tardiness": 0.0,
     "makespan": 7.0
   },
   "first_rationales": [
-    "将只能由 m1 加工的 o3_cut 先分配给 m1，保留 m2 并行处理 o1_cut；这有助于尽早启动总工期较长的 o3 工艺链。",
-    "将 o1_cut 分配到当前可用的 m2，启动关键工序并为后续 o1_weld 释放前置条件。",
-    "两道正在加工的切割工序都只剩 1 个时间单位，推进逻辑时间可同时完成它们并释放机器与资源，直接推动后续工序解锁。"
+    "将只能由 m1 执行的 o3_cut 先分配给 m1，可立即启动其后续关键工序链，同时保留 m2 并行处理 o1_cut 或 o2_cut。",
+    "将可执行的 o1_cut 分配给 m2，推进首个待处理工序并为后续工序链创造进展。",
+    "两道切割工序正在并行运行且均只剩 1 个时间单位；推进逻辑时间可同时完成它们并解锁后续工序。"
   ],
   "model_call_ids": [
-    "resp_025acab8c18776f7016ab8784c39f887d28316adc8c69e5b41",
-    "resp_0d245e6ecc644f21016ab878527acc87d2b328980c6ef898d0",
-    "resp_0c20a6ae8f28c9a0016ab878583e0c87d282dd6e69c54caada",
-    "resp_0f5bcc09c155813e016ab8785b81d087d188eea76c2e5d7922",
-    "resp_054af218a00e6279016ab8786fc4f087d2ab856340c8dc4bc2"
+    "resp_0271b8e62ac70708016ab882b1f73087d28108f40fa4e4666d",
+    "resp_06d63b2c263838bd016ab882b8702c87d1b3b9c7d4230abb2a",
+    "resp_04b83380e6f1e2a6016ab882bdb80c87d1adc42432c05c56ee",
+    "resp_0ac8120ef52c28ab016ab882c0d0f487d1af3d0c7c8d62e70a",
+    "resp_0edef84fcce839bc016ab882c5ecd487d1bb17e5282ca0b3fb"
   ]
 }

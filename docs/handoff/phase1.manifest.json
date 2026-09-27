@@ -3,17 +3,17 @@
   "phase": 1,
   "status": "complete",
   "status_blockers": [],
-  "generated_at": "2026-09-27T02:02:04Z",
+  "generated_at": "2026-09-27T02:44:21Z",
   "source_revision": {
-    "checked_commit": "5f0af4a5b2a61862340142d3b369c7ca23ad194e",
+    "checked_commit": "f3afa5cb20804e764bab545f6ba67eed139af7f0",
     "checked_worktree_dirty": false,
-    "manifest_generated_on": "5f0af4a5b2a61862340142d3b369c7ca23ad194e",
+    "manifest_generated_on": "f3afa5cb20804e764bab545f6ba67eed139af7f0",
     "worktree_dirty_at_generation": true,
     "note": "the acceptance outputs and handoff artefacts (this file, phase1.md, phase1-checks.json, check logs, task-book ticks) are committed on top of the checked commit; no product code changes after the acceptance run",
     "agent_changes": {
-      "commits": 14,
+      "commits": 16,
       "first": "09f3cd668b7adceff7c12b69b3289e6c37c38f72",
-      "last": "5f0af4a5b2a61862340142d3b369c7ca23ad194e",
+      "last": "f3afa5cb20804e764bab545f6ba67eed139af7f0",
       "author": [
         "3351666087"
       ],
@@ -68,12 +68,7 @@
         "docs/execution/evidence/ui/20-phone-runs.jpg",
         "docs/execution/evidence/ui/20-phone-scenarios.jpg",
         "docs/execution/evidence/ui/20-phone-strategies.jpg",
-        "docs/execution/phase-1.md",
-        "docs/handoff/phase1-checks.json",
-        "docs/handoff/phase1.md",
-        "scripts/handoff.py",
-        "docs/api/",
-        "docs/handoff/phase1.manifest.json"
+        "docs/handoff/phase1-checks.json"
       ]
     }
   },
@@ -84,6 +79,14 @@
     "method": "sha256 over lines 'relative_path NUL sha256(file)' + LF, files sorted by relative path (DIGEST.json itself excluded)",
     "files": 28,
     "source": "contracts/v1/DIGEST.json"
+  },
+  "license": {
+    "spdx": "Apache-2.0",
+    "files": [
+      "LICENSE",
+      "NOTICE"
+    ],
+    "decision": "docs/execution/decisions.md#D-014"
   },
   "paths": {
     "contracts": "contracts/v1/",
@@ -175,10 +178,6 @@
   ],
   "deferred_work": [
     {
-      "item": "choose a license for the repository (plugin metadata currently says UNLICENSED)",
-      "depends_on": "repository owner decision"
-    },
-    {
       "item": "domain extension phases (new semantic profiles, domain environments/planners)",
       "depends_on": "formal-lab-contracts/v1 + plugin interfaces (docs/architecture/plugin-integration.md)"
     },
@@ -219,7 +218,7 @@
         "contracts/v1/DIGEST.json",
         "docs/contracts/v1.md"
       ],
-      "summary": "ℹ duration_ms 197.747724"
+      "summary": "ℹ duration_ms 206.462957"
     },
     {
       "id": "contract-semantics",
@@ -234,7 +233,7 @@
       "exit_code": 0,
       "log": "docs/execution/evidence/checks/contract-semantics.log",
       "evidence": [],
-      "summary": "6 passed in 0.25s"
+      "summary": "6 passed in 0.15s"
     },
     {
       "id": "engine",
@@ -247,7 +246,7 @@
       "exit_code": 0,
       "log": "docs/execution/evidence/checks/engine.log",
       "evidence": [],
-      "summary": "27 passed, 81 deselected in 2.19s"
+      "summary": "27 passed, 81 deselected in 2.25s"
     },
     {
       "id": "semantics-differential",
@@ -259,7 +258,7 @@
       "exit_code": 0,
       "log": "docs/execution/evidence/checks/semantics-differential.log",
       "evidence": [],
-      "summary": "81 passed, 7 deselected in 5.37s"
+      "summary": "81 passed, 7 deselected in 5.20s"
     },
     {
       "id": "runtime-integration",
@@ -282,7 +281,7 @@
       "exit_code": 0,
       "log": "docs/execution/evidence/checks/runtime-integration.log",
       "evidence": [],
-      "summary": "12 passed in 94.97s (0:01:34)"
+      "summary": "12 passed in 93.49s (0:01:33)"
     },
     {
       "id": "product-ui",
@@ -302,7 +301,7 @@
       "evidence": [
         "docs/execution/evidence/ui/"
       ],
-      "summary": "12 passed in 149.83s (0:02:29)"
+      "summary": "12 passed in 148.72s (0:02:28)"
     },
     {
       "id": "sdk-cli-replay-matrix",
@@ -322,7 +321,7 @@
       "exit_code": 0,
       "log": "docs/execution/evidence/checks/sdk-cli-replay-matrix.log",
       "evidence": [],
-      "summary": "6 passed in 288.31s (0:04:48)"
+      "summary": "6 passed in 281.91s (0:04:41)"
     },
     {
       "id": "evaluation-stats",
@@ -336,7 +335,7 @@
       "exit_code": 0,
       "log": "docs/execution/evidence/checks/evaluation-stats.log",
       "evidence": [],
-      "summary": "6 passed in 4.39s"
+      "summary": "6 passed in 4.37s"
     },
     {
       "id": "strategy-comparison",
@@ -365,7 +364,7 @@
       "exit_code": 0,
       "log": "docs/execution/evidence/checks/example-sentinel.log",
       "evidence": [],
-      "summary": "6 passed in 53.90s"
+      "summary": "6 passed in 49.58s"
     },
     {
       "id": "interface-examples",
@@ -377,7 +376,7 @@
       "exit_code": 0,
       "log": "docs/execution/evidence/checks/interface-examples.log",
       "evidence": [],
-      "summary": "6 passed in 6.95s"
+      "summary": "6 passed in 6.72s"
     },
     {
       "id": "boundaries",
@@ -390,7 +389,7 @@
       "exit_code": 0,
       "log": "docs/execution/evidence/checks/boundaries.log",
       "evidence": [],
-      "summary": "20 passed in 0.32s"
+      "summary": "37 passed in 0.89s"
     },
     {
       "id": "unit-suite",
@@ -401,7 +400,7 @@
       "exit_code": 0,
       "log": "docs/execution/evidence/checks/unit-suite.log",
       "evidence": [],
-      "summary": "211 passed, 31 deselected in 116.85s (0:01:56)"
+      "summary": "228 passed, 31 deselected in 121.70s (0:02:01)"
     },
     {
       "id": "lint",
@@ -423,7 +422,7 @@
       "exit_code": 0,
       "log": "docs/execution/evidence/checks/web-build.log",
       "evidence": [],
-      "summary": "✓ built in 281ms"
+      "summary": "✓ built in 318ms"
     },
     {
       "id": "compose-e2e",
@@ -479,7 +478,7 @@
       "evidence": [
         "docs/execution/evidence/P1-074-llm-integration.json"
       ],
-      "summary": "1 passed in 96.56s (0:01:36)"
+      "summary": "1 passed in 71.89s (0:01:11)"
     },
     {
       "id": "ci-remote",
@@ -492,7 +491,7 @@
       "evidence": [
         "docs/execution/evidence/ci-run.json"
       ],
-      "summary": "CI run https://github.com/3351666087/formal-agent-lab/actions/runs/36286170803 on HEAD 5f0af4a5b2: success"
+      "summary": "CI run https://github.com/3351666087/formal-agent-lab/actions/runs/36288368064 on HEAD f3afa5cb20: success"
     }
   ],
   "checks_summary": {

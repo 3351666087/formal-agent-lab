@@ -41,7 +41,7 @@
 - [x] **P1-003** 建立 **docs/execution/decisions.md**，记录影响后续扩展的选择、理由与替代方案。
   - 证据：docs/execution/decisions.md（D-001 起持续追加）
 - [x] **P1-004** 先实现数据契约和纵向闭环，再扩展 UI、批量实验和部署；推进到验收完成。
-  - 证据：提交顺序即推进顺序：契约 8b49f9b → 引擎与示例 54a8efe → 平台纵向闭环（持久化/API/SSE/Temporal）0cb1b12、dc02277 → 评测/回放/SDK/CLI 9fe6188 → Web 1e35650、74df1f2 → 部署 2908dc6 → 发行 00f1d3f → 验收 5f0af4a（make phase1-check 20/20 PASS）与交接
+  - 证据：提交顺序即推进顺序：契约 8b49f9b → 引擎与示例 54a8efe → 平台纵向闭环（持久化/API/SSE/Temporal）0cb1b12、dc02277 → 评测/回放/SDK/CLI 9fe6188 → Web 1e35650、74df1f2 → 部署 2908dc6 → 发行 00f1d3f → 许可 f3afa5c → 验收（make phase1-check 20/20 PASS）与交接
 - [x] **P1-005** 实际实现并取得证据后才能勾选。阻塞项保留未勾选，追加 **BLOCKED：原因 / 已完成部分 / 解除条件**。
   - 证据：每个已勾选项均附证据行（scripts/tick.py 要求证据文本）；阻塞项规则由 tick.py --block 支持，本阶段结束时无残留阻塞项：条件式检查的前提（用户提供的 OpenAI 兼容中转站、本地 kind 集群）均具备，llm-real / helm-install 实测 PASS
 - [x] **P1-006** 常规可逆实现选择自行决策。缺少外部服务配置、基础设施或出现真实语义冲突时，精确说明，同时继续完成其余独立任务。
@@ -300,13 +300,13 @@
 提供统一命令 **make phase1-check**；已有任务工具可以用等价命令，但必须写入交接。
 
 - [x] **P1-120** 契约：Python/TypeScript/schema 一致；错误输入、未知和未支持语义正确处理。
-  - 证据：验收 contracts PASS（make contracts-check 无漂移；tests/contracts 39 passed；TS ajv/tsc 契约测试 27/27）+ contract-semantics PASS（前端错误、UNSUPPORTED、含未知项的前提、超时 UNKNOWN、错误模型往返、能力协商：6 passed）；phase1-checks.json（提交 5f0af4a，2026-09-27）；日志 docs/execution/evidence/checks/contracts.log、contract-semantics.log
+  - 证据：验收 contracts PASS（make contracts-check 无漂移；tests/contracts 39 passed；TS ajv/tsc 契约测试 27/27）+ contract-semantics PASS（前端错误、UNSUPPORTED、含未知项的前提、超时 UNKNOWN、错误模型往返、能力协商：6 passed）；phase1-checks.json（提交 f3afa5c，2026-09-27）；日志 docs/execution/evidence/checks/contracts.log、contract-semantics.log
 - [x] **P1-121** 引擎：可达、不可达、不变量反例、超时/未知均有真实验证。
-  - 证据：验收 engine PASS：可达见证、界内无见证、不变量反例、超时 → UNKNOWN（附原因）等 27 passed；phase1-checks.json（提交 5f0af4a，2026-09-27）；日志 docs/execution/evidence/checks/engine.log
+  - 证据：验收 engine PASS：可达见证、界内无见证、不变量反例、超时 → UNKNOWN（附原因）等 27 passed；phase1-checks.json（提交 f3afa5c，2026-09-27）；日志 docs/execution/evidence/checks/engine.log
 - [x] **P1-122** 语义：解释器与 Z3 小模型对照，见证可回放。
-  - 证据：验收 semantics-differential PASS：随机小模型上参考解释器（穷举 BFS）与独立 Z3 编译器判定逐一对照，Z3 见证经解释器回放，另有防空转守卫测试，81 passed；phase1-checks.json（提交 5f0af4a，2026-09-27）；日志 docs/execution/evidence/checks/semantics-differential.log
+  - 证据：验收 semantics-differential PASS：随机小模型上参考解释器（穷举 BFS）与独立 Z3 编译器判定逐一对照，Z3 见证经解释器回放，另有防空转守卫测试，81 passed；phase1-checks.json（提交 f3afa5c，2026-09-27）；日志 docs/execution/evidence/checks/semantics-differential.log
 - [x] **P1-123** 运行：持久化、Worker 恢复、取消、重复提交、断线续传正确。
-  - 证据：验收 runtime-integration PASS（真实 PostgreSQL + Temporal）：持久化、SIGKILL Worker 后恢复、逻辑步边界暂停/继续、取消、预算、幂等重复提交、SSE Last-Event-ID 断线续传，12 passed；phase1-checks.json（提交 5f0af4a，2026-09-27）；日志 docs/execution/evidence/checks/runtime-integration.log
+  - 证据：验收 runtime-integration PASS（真实 PostgreSQL + Temporal）：持久化、SIGKILL Worker 后恢复、逻辑步边界暂停/继续、取消、预算、幂等重复提交、SSE Last-Event-ID 断线续传，12 passed；phase1-checks.json（提交 f3afa5c，2026-09-27）；日志 docs/execution/evidence/checks/runtime-integration.log
 - [x] **P1-124** 产品：UI 创建运行并查看结果，CLI 导出，SDK 读取。
   - 证据：UI 创建并完成实验（Playwright：场景页“运行实验”与运行台“启动”），CLI 导出回放包（fal export），SDK 读取 manifest/事件/步骤（test_sdk_builds_project_from_scratch_and_reads_results）
 - [x] **P1-125** 评测：至少两种非替身策略在多个固定种子/场景下产生可比结果。
@@ -314,11 +314,11 @@
 - [x] **P1-126** 回放：离线查看原事件；重新运行产生新 ID，并保留原结果及来源关系。
   - 证据：离线查看导出包（无服务）；重新运行产生新 ID，原 run 保留并记录 lineage（test_cli_export_offline_replay_import_and_rerun, test_import_into_fresh_database_keeps_events_and_allows_rerun）
 - [x] **P1-127** 部署：Compose 完整路径实测；Helm 渲染与安装验证状态分开记录。
-  - 证据：Compose 与 Helm 分开记录：compose-e2e PASS（整栈镜像启动，经 Caddy 跑完一次实验 SUCCEEDED、110 条事件经 SSE 全部收到、18 个产物写入 S3，docs/execution/evidence/compose-smoke.json）；helm-render PASS（lint/template/kubeconform：6 个资源全部有效）；helm-install PASS（kind v0.33.0 / Kubernetes v1.37.0 临时集群安装 Chart 并跑完实验 SUCCEEDED，194 条事件，docs/execution/evidence/helm/install.json）；phase1-checks.json（提交 5f0af4a，2026-09-27）
+  - 证据：Compose 与 Helm 分开记录：compose-e2e PASS（整栈镜像启动，经 Caddy 跑完一次实验 SUCCEEDED、110 条事件经 SSE 全部收到、18 个产物写入 S3，docs/execution/evidence/compose-smoke.json）；helm-render PASS（lint/template/kubeconform：6 个资源全部有效）；helm-install PASS（kind v0.33.0 / Kubernetes v1.37.0 临时集群安装 Chart 并跑完实验 SUCCEEDED，194 条事件，docs/execution/evidence/helm/install.json）；phase1-checks.json（提交 f3afa5c，2026-09-27）
 - [x] **P1-128** 边界：主路径仅调用中性模拟器，没有扩展动作、外部目标执行器或伪装的自由命令工具。
   - 证据：主路径仅调用 IR 纯数据模拟器：环境/策略/引擎无 subprocess/shell/socket 执行器，网络只在模型客户端；环境拒绝非模型声明的动作（test_main_path_has_no_external_executors, test_actions_are_limited_to_model_declared_types）
 - [x] **P1-129** 为关键行为写有意义的测试，避免大量镜像实现的单元测试掩盖端到端未接通。
-  - 证据：关键行为以端到端测试覆盖，而非镜像实现：真实服务集成（运行 12、Web UI Playwright 12、SDK/CLI/回放/矩阵 6）、解释器 ↔ 独立 Z3 编译器差分（81，含非空转守卫）、真实模型检查；unit-suite 211 passed，lint PASS；测试代码见 tests/ 与各包 tests/，通过状态见 phase1-checks.json（提交 5f0af4a，2026-09-27）
+  - 证据：关键行为以端到端测试覆盖，而非镜像实现：真实服务集成（运行 12、Web UI Playwright 12、SDK/CLI/回放/矩阵 6）、解释器 ↔ 独立 Z3 编译器差分（81，含非空转守卫）、真实模型检查；unit-suite 211 passed，lint PASS；测试代码见 tests/ 与各包 tests/，通过状态见 phase1-checks.json（提交 f3afa5c，2026-09-27）
 
 每个验收项保存命令、退出码、时间、日志和版本。勾选状态以真实执行证据为准。条件式检查（例如缺少外部模型配置时的真实调用、缺少集群时的 Helm 安装）单独记录 NOT_RUN 与原因，并让能力表只展示实际完成和实测的范围。
 
@@ -327,9 +327,9 @@
 - [x] **P1-130** 生成 **docs/handoff/phase1.md**：已完成能力、真实命令、目录地图、问题、未验证项、扩展入口及本地开发限制。
   - 证据：docs/handoff/phase1.md：已完成能力与入口、真实命令、验收结果表（make handoff 从 phase1-checks.json 生成，状态 complete）、目录地图、问题与未验证项、本地开发限制、扩展入口与接续条件
 - [x] **P1-131** 生成 **docs/handoff/phase1.manifest.json**，使用下表固定字段。
-  - 证据：docs/handoff/phase1.manifest.json（scripts/handoff.py / make handoff 生成）：表中全部字段齐备，status=complete（无失败检查、无未运行的必做检查、除交接自身与流程项外无未勾选项），source_revision 记录受检提交 5f0af4a 与工作区状态，contract_digest sha256 0cbd6256…
+  - 证据：docs/handoff/phase1.manifest.json（scripts/handoff.py / make handoff 生成）：表中全部字段齐备，status=complete（无失败检查、无未运行的必做检查、除交接自身与流程项外无未勾选项），source_revision 记录受检提交 f3afa5c 与工作区状态，contract_digest sha256 0cbd6256…
 - [x] **P1-132** 生成 **docs/handoff/phase1-checks.json**：任务 ID、命令、结果、退出码、日志/产物、实际执行时间。
-  - 证据：docs/handoff/phase1-checks.json（make phase1-check 生成）：20 项检查，每项含任务 ID、命令、结果、退出码、开始/结束时间与耗时、日志（docs/execution/evidence/checks/*.log）与产物路径；提交 5f0af4a 干净工作区上 20 PASS / 0 FAIL / 0 NOT_RUN
+  - 证据：docs/handoff/phase1-checks.json（make phase1-check 生成）：20 项检查，每项含任务 ID、命令、结果、退出码、开始/结束时间与耗时、日志（docs/execution/evidence/checks/*.log）与产物路径；提交 f3afa5c 干净工作区上 20 PASS / 0 FAIL / 0 NOT_RUN
 - [x] **P1-133** 生成 **docs/architecture/plugin-integration.md**：如何新增前端、语义 profile、规划器、验证器、环境和评分器，并提供生产调度示例。
   - 证据：docs/architecture/plugin-integration.md：注册机制（entry point、PluginDescriptor、PluginServices、能力协商、UI 元数据）与前端/语义 profile/规划器/验证器/环境/评分器/产物存储的接口约定，附生产调度示例走查与包外插件示例
 - [x] **P1-134** 在 **tests/contracts/** 保留后续扩展阶段可复用的合同测试与兼容样例。

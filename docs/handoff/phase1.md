@@ -32,30 +32,30 @@ make build && make images && make release             # wheel、Web、镜像、�
 <!-- checks:begin -->
 状态：**complete**
 
-`make phase1-check` 于 2026-09-27T02:00:08Z 在提交 `5f0af4a5b2a6` 上运行（Ubuntu 24.04.4 LTS，aarch64，Python 3.12.3，Docker 29.5.2，z3 5.1.0，temporalio 1.33.0，inspect_ai 0.3.269）：{'PASS': 20, 'FAIL': 0, 'NOT_RUN': 0}。
+`make phase1-check` 于 2026-09-27T02:44:06Z 在提交 `f3afa5cb2080` 上运行（Ubuntu 24.04.4 LTS，aarch64，Python 3.12.3，Docker 29.5.2，z3 5.1.0，temporalio 1.33.0，inspect_ai 0.3.269）：{'PASS': 20, 'FAIL': 0, 'NOT_RUN': 0}。
 
 | 检查 | 任务 | 结果 | 退出码 | 耗时 s | 日志 |
 |---|---|---|---|---|---|
-| 契约：Python/TS/schema 一致，漂移检查 (`contracts`) | P1-040, P1-047, P1-120, P1-134 | **PASS** | 0 | 1.9 | [log](../../docs/execution/evidence/checks/contracts.log) |
-| 错误输入、未知与未支持语义 (`contract-semantics`) | P1-120, P1-043, P1-045, P1-049 … | **PASS** | 0 | 0.5 | [log](../../docs/execution/evidence/checks/contract-semantics.log) |
+| 契约：Python/TS/schema 一致，漂移检查 (`contracts`) | P1-040, P1-047, P1-120, P1-134 | **PASS** | 0 | 1.7 | [log](../../docs/execution/evidence/checks/contracts.log) |
+| 错误输入、未知与未支持语义 (`contract-semantics`) | P1-120, P1-043, P1-045, P1-049 … | **PASS** | 0 | 0.3 | [log](../../docs/execution/evidence/checks/contract-semantics.log) |
 | 引擎：可达、不可达、不变量反例、超时/未知 (`engine`) | P1-121, P1-022, P1-023 | **PASS** | 0 | 2.4 | [log](../../docs/execution/evidence/checks/engine.log) |
-| 语义：解释器与 Z3 小模型对照，见证可重放 (`semantics-differential`) | P1-122, P1-063 | **PASS** | 0 | 5.6 | [log](../../docs/execution/evidence/checks/semantics-differential.log) |
-| 运行：持久化、Worker 恢复、取消、重复提交、断线续传 (`runtime-integration`) | P1-123, P1-024, P1-025, P1-026 … | **PASS** | 0 | 96.4 | [log](../../docs/execution/evidence/checks/runtime-integration.log) |
-| 产品：UI 创建运行并查看结果（Playwright，截图与溢出检查） (`product-ui`) | P1-124, P1-090, P1-091, P1-092 … | **PASS** | 0 | 150.0 | [log](../../docs/execution/evidence/checks/product-ui.log) |
-| CLI 导出、SDK 读取、回放、导入与重跑、矩阵、Inspect 导入、包外插件 (`sdk-cli-replay-matrix`) | P1-124, P1-125, P1-126, P1-100 … | **PASS** | 0 | 288.7 | [log](../../docs/execution/evidence/checks/sdk-cli-replay-matrix.log) |
-| 统计、区间、配对比较与 Inspect 互转 (`evaluation-stats`) | P1-101, P1-102, P1-030, P1-031 | **PASS** | 0 | 4.8 | [log](../../docs/execution/evidence/checks/evaluation-stats.log) |
-| 两种非替身策略在多个固定种子/场景下可比（独立运行，无服务） (`strategy-comparison`) | P1-125, P1-075, P1-135 | **PASS** | 0 | 183.7 | [log](../../docs/execution/evidence/checks/strategy-comparison.log) |
-| 生产调度示例独立运行（回归哨兵） (`example-sentinel`) | P1-135, P1-070, P1-071 | **PASS** | 0 | 54.1 | [log](../../docs/execution/evidence/checks/example-sentinel.log) |
-| 每个接口的可运行示例 (`interface-examples`) | P1-042, P1-041 | **PASS** | 0 | 7.1 | [log](../../docs/execution/evidence/checks/interface-examples.log) |
-| 边界：主路径仅调用中性模拟器，核心不依赖插件 (`boundaries`) | P1-128, P1-010, P1-012 | **PASS** | 0 | 0.5 | [log](../../docs/execution/evidence/checks/boundaries.log) |
-| 全部非集成测试（单元/契约/架构/示例） (`unit-suite`) | P1-129 | **PASS** | 0 | 117.3 | [log](../../docs/execution/evidence/checks/unit-suite.log) |
+| 语义：解释器与 Z3 小模型对照，见证可重放 (`semantics-differential`) | P1-122, P1-063 | **PASS** | 0 | 5.4 | [log](../../docs/execution/evidence/checks/semantics-differential.log) |
+| 运行：持久化、Worker 恢复、取消、重复提交、断线续传 (`runtime-integration`) | P1-123, P1-024, P1-025, P1-026 … | **PASS** | 0 | 94.9 | [log](../../docs/execution/evidence/checks/runtime-integration.log) |
+| 产品：UI 创建运行并查看结果（Playwright，截图与溢出检查） (`product-ui`) | P1-124, P1-090, P1-091, P1-092 … | **PASS** | 0 | 149.1 | [log](../../docs/execution/evidence/checks/product-ui.log) |
+| CLI 导出、SDK 读取、回放、导入与重跑、矩阵、Inspect 导入、包外插件 (`sdk-cli-replay-matrix`) | P1-124, P1-125, P1-126, P1-100 … | **PASS** | 0 | 282.3 | [log](../../docs/execution/evidence/checks/sdk-cli-replay-matrix.log) |
+| 统计、区间、配对比较与 Inspect 互转 (`evaluation-stats`) | P1-101, P1-102, P1-030, P1-031 | **PASS** | 0 | 4.7 | [log](../../docs/execution/evidence/checks/evaluation-stats.log) |
+| 两种非替身策略在多个固定种子/场景下可比（独立运行，无服务） (`strategy-comparison`) | P1-125, P1-075, P1-135 | **PASS** | 0 | 179.5 | [log](../../docs/execution/evidence/checks/strategy-comparison.log) |
+| 生产调度示例独立运行（回归哨兵） (`example-sentinel`) | P1-135, P1-070, P1-071 | **PASS** | 0 | 49.8 | [log](../../docs/execution/evidence/checks/example-sentinel.log) |
+| 每个接口的可运行示例 (`interface-examples`) | P1-042, P1-041 | **PASS** | 0 | 6.9 | [log](../../docs/execution/evidence/checks/interface-examples.log) |
+| 边界：主路径仅调用中性模拟器，核心不依赖插件 (`boundaries`) | P1-128, P1-010, P1-012 | **PASS** | 0 | 1.0 | [log](../../docs/execution/evidence/checks/boundaries.log) |
+| 全部非集成测试（单元/契约/架构/示例） (`unit-suite`) | P1-129 | **PASS** | 0 | 122.3 | [log](../../docs/execution/evidence/checks/unit-suite.log) |
 | ruff (`lint`) | P1-129 | **PASS** | 0 | 0.1 | [log](../../docs/execution/evidence/checks/lint.log) |
 | Web 类型检查与构建 (`web-build`) | P1-090 | **PASS** | 0 | 0.8 | [log](../../docs/execution/evidence/checks/web-build.log) |
-| 部署：Compose 完整路径实测 (`compose-e2e`) | P1-127, P1-111, P1-112 | **PASS** | 0 | 114.7 | [log](../../docs/execution/evidence/checks/compose-e2e.log) |
-| Helm lint / template / kubeconform (`helm-render`) | P1-127, P1-113 | **PASS** | 0 | 2.0 | [log](../../docs/execution/evidence/checks/helm-render.log) |
-| Helm 安装（kind 临时集群，状态单独记录） (`helm-install`) | P1-127, P1-113 | **PASS** | 0 | 142.9 | [log](../../docs/execution/evidence/checks/helm-install.log) |
-| 真实模型集成检查（OpenAI 兼容端点） (`llm-real`) | P1-074 | **PASS** | 0 | 97.1 | [log](../../docs/execution/evidence/checks/llm-real.log) |
-| GitHub Actions 最近一次 CI 运行（远端） (`ci-remote`) | P1-040 | **PASS** | 0 | 1.1 | [log](../../docs/execution/evidence/checks/ci-remote.log) |
+| 部署：Compose 完整路径实测 (`compose-e2e`) | P1-127, P1-111, P1-112 | **PASS** | 0 | 126.6 | [log](../../docs/execution/evidence/checks/compose-e2e.log) |
+| Helm lint / template / kubeconform (`helm-render`) | P1-127, P1-113 | **PASS** | 0 | 1.7 | [log](../../docs/execution/evidence/checks/helm-render.log) |
+| Helm 安装（kind 临时集群，状态单独记录） (`helm-install`) | P1-127, P1-113 | **PASS** | 0 | 136.9 | [log](../../docs/execution/evidence/checks/helm-install.log) |
+| 真实模型集成检查（OpenAI 兼容端点） (`llm-real`) | P1-074 | **PASS** | 0 | 72.5 | [log](../../docs/execution/evidence/checks/llm-real.log) |
+| GitHub Actions 最近一次 CI 运行（远端） (`ci-remote`) | P1-040 | **PASS** | 0 | 1.7 | [log](../../docs/execution/evidence/checks/ci-remote.log) |
 <!-- checks:end -->
 
 ## 4. 目录地图

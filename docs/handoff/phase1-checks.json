@@ -1,9 +1,9 @@
 {
   "format": "phase1-checks@1",
   "handoff_version": "phase-handoff/v1",
-  "generated_at": "2026-09-27T02:00:08Z",
+  "generated_at": "2026-09-27T02:44:06Z",
   "source_revision": {
-    "commit": "5f0af4a5b2a61862340142d3b369c7ca23ad194e",
+    "commit": "f3afa5cb20804e764bab545f6ba67eed139af7f0",
     "dirty": false
   },
   "command": "make phase1-check",
@@ -27,7 +27,7 @@
     "FAIL": 0,
     "NOT_RUN": 0
   },
-  "duration_s": 1272.5,
+  "duration_s": 1241.9,
   "checks": [
     {
       "id": "contracts",
@@ -41,11 +41,11 @@
       "command": "make contracts-check && uv run --frozen pytest -p no:cacheprovider tests/contracts -q && pnpm --filter @formal-lab/contracts run test",
       "result": "PASS",
       "exit_code": 0,
-      "started_at": "2026-09-27T01:38:57Z",
-      "finished_at": "2026-09-27T01:38:59Z",
-      "duration_s": 1.9,
+      "started_at": "2026-09-27T02:23:25Z",
+      "finished_at": "2026-09-27T02:23:27Z",
+      "duration_s": 1.7,
       "log": "docs/execution/evidence/checks/contracts.log",
-      "summary": "ℹ duration_ms 197.747724",
+      "summary": "ℹ duration_ms 206.462957",
       "evidence": [
         "contracts/v1/DIGEST.json",
         "docs/contracts/v1.md"
@@ -64,11 +64,11 @@
       "command": "uv run --frozen pytest -p no:cacheprovider -q packages/model-core/tests/test_model_core.py::test_frontend_errors packages/solver-adapters/z3/tests/test_z3_engine.py::test_unsupported_profile_feature packages/solver-adapters/z3/tests/test_z3_engine.py::test_precondition_with_unknowns_matches_interpreter packages/solver-adapters/z3/tests/test_z3_engine.py::test_timeout_yields_unknown_with_reason tests/contracts/test_contracts.py::test_error_model_round_trip_and_retryability tests/contracts/test_contracts.py::test_capability_negotiation",
       "result": "PASS",
       "exit_code": 0,
-      "started_at": "2026-09-27T01:38:59Z",
-      "finished_at": "2026-09-27T01:38:59Z",
-      "duration_s": 0.5,
+      "started_at": "2026-09-27T02:23:27Z",
+      "finished_at": "2026-09-27T02:23:27Z",
+      "duration_s": 0.3,
       "log": "docs/execution/evidence/checks/contract-semantics.log",
-      "summary": "6 passed in 0.25s",
+      "summary": "6 passed in 0.15s",
       "evidence": []
     },
     {
@@ -82,11 +82,11 @@
       "command": "uv run --frozen pytest -p no:cacheprovider -q packages/solver-adapters/z3/tests/test_z3_engine.py -k 'not differential' packages/model-core",
       "result": "PASS",
       "exit_code": 0,
-      "started_at": "2026-09-27T01:38:59Z",
-      "finished_at": "2026-09-27T01:39:01Z",
+      "started_at": "2026-09-27T02:23:27Z",
+      "finished_at": "2026-09-27T02:23:30Z",
       "duration_s": 2.4,
       "log": "docs/execution/evidence/checks/engine.log",
-      "summary": "27 passed, 81 deselected in 2.19s",
+      "summary": "27 passed, 81 deselected in 2.25s",
       "evidence": []
     },
     {
@@ -99,11 +99,11 @@
       "command": "uv run --frozen pytest -p no:cacheprovider -q packages/solver-adapters/z3/tests/test_z3_engine.py -k differential",
       "result": "PASS",
       "exit_code": 0,
-      "started_at": "2026-09-27T01:39:01Z",
-      "finished_at": "2026-09-27T01:39:07Z",
-      "duration_s": 5.6,
+      "started_at": "2026-09-27T02:23:30Z",
+      "finished_at": "2026-09-27T02:23:35Z",
+      "duration_s": 5.4,
       "log": "docs/execution/evidence/checks/semantics-differential.log",
-      "summary": "81 passed, 7 deselected in 5.37s",
+      "summary": "81 passed, 7 deselected in 5.20s",
       "evidence": []
     },
     {
@@ -127,11 +127,11 @@
       "command": "uv run --frozen pytest -p no:cacheprovider -q -m integration tests/integration/test_platform_runs.py",
       "result": "PASS",
       "exit_code": 0,
-      "started_at": "2026-09-27T01:39:07Z",
-      "finished_at": "2026-09-27T01:40:43Z",
-      "duration_s": 96.4,
+      "started_at": "2026-09-27T02:23:35Z",
+      "finished_at": "2026-09-27T02:25:10Z",
+      "duration_s": 94.9,
       "log": "docs/execution/evidence/checks/runtime-integration.log",
-      "summary": "12 passed in 94.97s (0:01:34)",
+      "summary": "12 passed in 93.49s (0:01:33)",
       "evidence": []
     },
     {
@@ -150,11 +150,11 @@
       "command": "uv run --frozen pytest -p no:cacheprovider -q -m 'integration and ui' tests/integration/test_web_ui.py",
       "result": "PASS",
       "exit_code": 0,
-      "started_at": "2026-09-27T01:40:43Z",
-      "finished_at": "2026-09-27T01:43:13Z",
-      "duration_s": 150.0,
+      "started_at": "2026-09-27T02:25:10Z",
+      "finished_at": "2026-09-27T02:27:39Z",
+      "duration_s": 149.1,
       "log": "docs/execution/evidence/checks/product-ui.log",
-      "summary": "12 passed in 149.83s (0:02:29)",
+      "summary": "12 passed in 148.72s (0:02:28)",
       "evidence": [
         "docs/execution/evidence/ui/"
       ]
@@ -177,11 +177,11 @@
       "command": "uv run --frozen pytest -p no:cacheprovider -q -m integration tests/integration/test_sdk_cli_replay.py",
       "result": "PASS",
       "exit_code": 0,
-      "started_at": "2026-09-27T01:43:13Z",
-      "finished_at": "2026-09-27T01:48:02Z",
-      "duration_s": 288.7,
+      "started_at": "2026-09-27T02:27:39Z",
+      "finished_at": "2026-09-27T02:32:21Z",
+      "duration_s": 282.3,
       "log": "docs/execution/evidence/checks/sdk-cli-replay-matrix.log",
-      "summary": "6 passed in 288.31s (0:04:48)",
+      "summary": "6 passed in 281.91s (0:04:41)",
       "evidence": []
     },
     {
@@ -196,11 +196,11 @@
       "command": "uv run --frozen pytest -p no:cacheprovider -q packages/evaluation",
       "result": "PASS",
       "exit_code": 0,
-      "started_at": "2026-09-27T01:48:02Z",
-      "finished_at": "2026-09-27T01:48:07Z",
-      "duration_s": 4.8,
+      "started_at": "2026-09-27T02:32:21Z",
+      "finished_at": "2026-09-27T02:32:26Z",
+      "duration_s": 4.7,
       "log": "docs/execution/evidence/checks/evaluation-stats.log",
-      "summary": "6 passed in 4.39s",
+      "summary": "6 passed in 4.37s",
       "evidence": []
     },
     {
@@ -214,9 +214,9 @@
       "command": "uv run --frozen python -m formal_lab_example_scheduling compare --strategies rule,z3,llm-stub --seeds 1,2,3 --out docs/execution/evidence/checks/strategy-comparison.json",
       "result": "PASS",
       "exit_code": 0,
-      "started_at": "2026-09-27T01:48:07Z",
-      "finished_at": "2026-09-27T01:51:11Z",
-      "duration_s": 183.7,
+      "started_at": "2026-09-27T02:32:26Z",
+      "finished_at": "2026-09-27T02:35:26Z",
+      "duration_s": 179.5,
       "log": "docs/execution/evidence/checks/strategy-comparison.log",
       "summary": "wrote docs/execution/evidence/checks/strategy-comparison.json",
       "evidence": [
@@ -235,11 +235,11 @@
       "command": "uv run --frozen pytest -p no:cacheprovider -q examples/neutral-scheduling",
       "result": "PASS",
       "exit_code": 0,
-      "started_at": "2026-09-27T01:51:11Z",
-      "finished_at": "2026-09-27T01:52:05Z",
-      "duration_s": 54.1,
+      "started_at": "2026-09-27T02:35:26Z",
+      "finished_at": "2026-09-27T02:36:16Z",
+      "duration_s": 49.8,
       "log": "docs/execution/evidence/checks/example-sentinel.log",
-      "summary": "6 passed in 53.90s",
+      "summary": "6 passed in 49.58s",
       "evidence": []
     },
     {
@@ -252,11 +252,11 @@
       "command": "uv run --frozen pytest -p no:cacheprovider -q tests/examples",
       "result": "PASS",
       "exit_code": 0,
-      "started_at": "2026-09-27T01:52:05Z",
-      "finished_at": "2026-09-27T01:52:12Z",
-      "duration_s": 7.1,
+      "started_at": "2026-09-27T02:36:16Z",
+      "finished_at": "2026-09-27T02:36:22Z",
+      "duration_s": 6.9,
       "log": "docs/execution/evidence/checks/interface-examples.log",
-      "summary": "6 passed in 6.95s",
+      "summary": "6 passed in 6.72s",
       "evidence": []
     },
     {
@@ -270,11 +270,11 @@
       "command": "uv run --frozen pytest -p no:cacheprovider -q tests/architecture",
       "result": "PASS",
       "exit_code": 0,
-      "started_at": "2026-09-27T01:52:12Z",
-      "finished_at": "2026-09-27T01:52:12Z",
-      "duration_s": 0.5,
+      "started_at": "2026-09-27T02:36:22Z",
+      "finished_at": "2026-09-27T02:36:23Z",
+      "duration_s": 1.0,
       "log": "docs/execution/evidence/checks/boundaries.log",
-      "summary": "20 passed in 0.32s",
+      "summary": "37 passed in 0.89s",
       "evidence": []
     },
     {
@@ -286,11 +286,11 @@
       "command": "uv run --frozen pytest -p no:cacheprovider -q -m 'not integration and not llm and not ui'",
       "result": "PASS",
       "exit_code": 0,
-      "started_at": "2026-09-27T01:52:12Z",
-      "finished_at": "2026-09-27T01:54:10Z",
-      "duration_s": 117.3,
+      "started_at": "2026-09-27T02:36:23Z",
+      "finished_at": "2026-09-27T02:38:26Z",
+      "duration_s": 122.3,
       "log": "docs/execution/evidence/checks/unit-suite.log",
-      "summary": "211 passed, 31 deselected in 116.85s (0:01:56)",
+      "summary": "228 passed, 31 deselected in 121.70s (0:02:01)",
       "evidence": []
     },
     {
@@ -302,8 +302,8 @@
       "command": "make lint",
       "result": "PASS",
       "exit_code": 0,
-      "started_at": "2026-09-27T01:54:10Z",
-      "finished_at": "2026-09-27T01:54:10Z",
+      "started_at": "2026-09-27T02:38:26Z",
+      "finished_at": "2026-09-27T02:38:26Z",
       "duration_s": 0.1,
       "log": "docs/execution/evidence/checks/lint.log",
       "summary": "All checks passed!",
@@ -318,11 +318,11 @@
       "command": "make web-build",
       "result": "PASS",
       "exit_code": 0,
-      "started_at": "2026-09-27T01:54:10Z",
-      "finished_at": "2026-09-27T01:54:10Z",
+      "started_at": "2026-09-27T02:38:26Z",
+      "finished_at": "2026-09-27T02:38:27Z",
       "duration_s": 0.8,
       "log": "docs/execution/evidence/checks/web-build.log",
-      "summary": "✓ built in 281ms",
+      "summary": "✓ built in 318ms",
       "evidence": []
     },
     {
@@ -336,9 +336,9 @@
       "command": "scripts/compose-smoke.sh",
       "result": "PASS",
       "exit_code": 0,
-      "started_at": "2026-09-27T01:54:10Z",
-      "finished_at": "2026-09-27T01:56:05Z",
-      "duration_s": 114.7,
+      "started_at": "2026-09-27T02:38:27Z",
+      "finished_at": "2026-09-27T02:40:33Z",
+      "duration_s": 126.6,
       "log": "docs/execution/evidence/checks/compose-e2e.log",
       "summary": "==> OK (docs/execution/evidence/compose-smoke.json)",
       "evidence": [
@@ -355,9 +355,9 @@
       "command": "make helm-lint",
       "result": "PASS",
       "exit_code": 0,
-      "started_at": "2026-09-27T01:56:05Z",
-      "finished_at": "2026-09-27T01:56:07Z",
-      "duration_s": 2.0,
+      "started_at": "2026-09-27T02:40:33Z",
+      "finished_at": "2026-09-27T02:40:35Z",
+      "duration_s": 1.7,
       "log": "docs/execution/evidence/checks/helm-render.log",
       "summary": "Summary: 6 resources found parsing stdin - Valid: 6, Invalid: 0, Errors: 0, Skipped: 0",
       "evidence": [
@@ -374,9 +374,9 @@
       "command": "scripts/helm-install-check.sh",
       "result": "PASS",
       "exit_code": 0,
-      "started_at": "2026-09-27T01:56:07Z",
-      "finished_at": "2026-09-27T01:58:30Z",
-      "duration_s": 142.9,
+      "started_at": "2026-09-27T02:40:35Z",
+      "finished_at": "2026-09-27T02:42:52Z",
+      "duration_s": 136.9,
       "log": "docs/execution/evidence/checks/helm-install.log",
       "summary": "==> OK (docs/execution/evidence/helm/install.json)",
       "evidence": [
@@ -392,11 +392,11 @@
       "command": "uv run --frozen pytest -p no:cacheprovider -q -m llm tests/integration/test_llm_real.py",
       "result": "PASS",
       "exit_code": 0,
-      "started_at": "2026-09-27T01:58:30Z",
-      "finished_at": "2026-09-27T02:00:07Z",
-      "duration_s": 97.1,
+      "started_at": "2026-09-27T02:42:52Z",
+      "finished_at": "2026-09-27T02:44:04Z",
+      "duration_s": 72.5,
       "log": "docs/execution/evidence/checks/llm-real.log",
-      "summary": "1 passed in 96.56s (0:01:36)",
+      "summary": "1 passed in 71.89s (0:01:11)",
       "evidence": [
         "docs/execution/evidence/P1-074-llm-integration.json"
       ]
@@ -410,11 +410,11 @@
       "command": "(GitHub API)",
       "result": "PASS",
       "exit_code": 0,
-      "started_at": "2026-09-27T02:00:07Z",
-      "finished_at": "2026-09-27T02:00:08Z",
-      "duration_s": 1.1,
+      "started_at": "2026-09-27T02:44:04Z",
+      "finished_at": "2026-09-27T02:44:06Z",
+      "duration_s": 1.7,
       "log": "docs/execution/evidence/checks/ci-remote.log",
-      "summary": "CI run https://github.com/3351666087/formal-agent-lab/actions/runs/36286170803 on HEAD 5f0af4a5b2: success",
+      "summary": "CI run https://github.com/3351666087/formal-agent-lab/actions/runs/36288368064 on HEAD f3afa5cb20: success",
       "evidence": [
         "docs/execution/evidence/ci-run.json"
       ]
