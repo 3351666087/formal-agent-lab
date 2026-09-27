@@ -948,9 +948,15 @@ def apply_step(rc: RunComponents, snapshot: EnvironmentSnapshot, plan: PlanPhase
     t0 = time.perf_counter()
     unknown_note = f" ({len(belief.free_paths)} unknown)" if belief.free_paths else ""
     # an action predicted inapplicable is predicted to change nothing (phase-1 semantics): compare against that
+    # the prediction is from the actor's belief at `based_on_revision`; when another participant moved the world
+    # before this action executed, a difference reflects that stale basis, not an error of the model
+    stale_basis = outcome.revision_before is not None and proposal.based_on_revision < outcome.revision_before
+    basis_note = (f"; basis stale: planned at revision {proposal.based_on_revision}, executed at revision "
+                  f"{outcome.revision_before}" if stale_basis else "")
     ex.comparison = rc_compare(rc, expected_post=expected_post,
                                pre_state=belief.state, observation=next_obs, written=written,
-                               expected_by=f"model:{rc.package.package_id}@{rc.package.version} on belief{unknown_note}",
+                               expected_by=f"model:{rc.package.package_id}@{rc.package.version} on belief"
+                                           f"{unknown_note}{basis_note}",
                                verified=outcome.result.get("verified") or {})
     outcome = outcome.model_copy(update={"effect_comparison": ex.comparison})
     ex.outcome = outcome
@@ -969,14 +975,15 @@ def apply_step(rc: RunComponents, snapshot: EnvironmentSnapshot, plan: PlanPhase
     ex.stages.append(_stage(ExecutionStage.COMPARE, StageStatus.OK, RetrySemantics.IDEMPOTENT, t0,
                             out=ex.comparison.model_dump(mode="json"), note=ex.comparison.verdict.value))
     last_key = tkey("comparison")
-    if ex.comparison.verdict.value == "DIFFERENT":
+    model_difference = ex.comparison.verdict.value == "DIFFERENT" and not stale_basis
+    if model_difference:  # only a difference on the revision the action was planned from points at the model
         last_key = _on_difference(rc, ex, belief, proposal, step, turn, last_key)
 
     # ---- rules on the outcome
     flags = dict(new.flags.get(actor, {}))
     rejected = flags.get("rejected", 0) + 1 if outcome.status.value == "REJECTED" else 0
     flags["rejected"] = rejected
-    different = sum(1 for d in ex.comparison.diffs if d.status == "DIFFERENT")
+    different = sum(1 for d in ex.comparison.diffs if d.status == "DIFFERENT") if model_difference else 0
     after_belief = rc.loaded.belief(next_obs)
     for trigger in ("ACTION_OUTCOME", "EFFECT_COMPARED"):
         decision = _apply_rules(rc, trigger, after_belief, _rule_context(

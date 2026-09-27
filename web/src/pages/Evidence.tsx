@@ -2,12 +2,12 @@ import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useNavigate, useParams } from "react-router";
 import type { TraceEvent } from "@formal-lab/contracts";
-import { get, type RunDetail, type RunSummary } from "../api";
+import { fetchAllEvents, get, type RunDetail, type RunSummary } from "../api";
 import { groupSteps, StepDetail } from "../components/Steps";
 import { Empty, fmtTime, fmtValue, Json, KV, Loading, QueryState, shortId, StatusBadge, Tabs } from "../ui";
 import { useRunLabels } from "./RunConsole";
 
-type Tab = "replay" | "causal" | "diff" | "artifacts" | "lineage";
+type Tab = "replay" | "navigate" | "causal" | "diff" | "artifacts" | "lineage";
 
 export function EvidencePage() {
   const { pid, runId } = useParams();
@@ -45,11 +45,14 @@ export function EvidencePage() {
 
 function RunEvidence({ pid, runId }: { pid: string; runId: string }) {
   const run = useQuery({ queryKey: ["run", runId], queryFn: () => get<RunDetail>(`/runs/${runId}`) });
-  const events = useQuery({ queryKey: ["events-all", runId], queryFn: () => get<TraceEvent[]>(`/runs/${runId}/events?limit=5000`) });
+  const events = useQuery({ queryKey: ["events-all", runId], queryFn: () => fetchAllEvents(runId!) });
   const labels = useRunLabels(run.data);
   const [tab, setTab] = useState<Tab>("replay");
+  const [focus, setFocus] = useState<number | null>(null);
+  const goto = (step: number | null | undefined) => { if (step === null || step === undefined) return; setFocus(step); setTab("replay"); };
   if (run.isPending || events.isPending) return <div className="card"><Loading /></div>;
   if (!run.data || !events.data) return <div className="card"><Empty title="无法加载实验" /></div>;
+  const stored = (run.data as RunDetail & { stored_contract_version?: string }).stored_contract_version;
   return (
     <div className="stack">
       <div className="card">
@@ -59,12 +62,15 @@ function RunEvidence({ pid, runId }: { pid: string; runId: string }) {
           <a className="btn sm" href={`/api/v1/runs/${runId}/export`} download>⤓ 导出回放包</a>
           <Link className="btn sm" to={`/p/${pid}/runs/${runId}`}>运行台</Link>
         </div>
+        {stored && stored !== "formal-lab-contracts/v2" && <div className="callout small" data-testid="schema-note">
+          该运行按 <code>{stored}</code> 记录：展示时逐字段升级，原始记录保持写入时的内容与含义。</div>}
         <Tabs label="证据视图" value={tab} onChange={setTab} tabs={[
-          { id: "replay", label: "按步回放" }, { id: "causal", label: "因果时间线" }, { id: "diff", label: "差异报告" },
-          { id: "artifacts", label: "产物" }, { id: "lineage", label: "来源与清单" }]} />
+          { id: "replay", label: "按步回放" }, { id: "navigate", label: "关联定位" }, { id: "causal", label: "因果时间线" },
+          { id: "diff", label: "差异报告" }, { id: "artifacts", label: "产物" }, { id: "lineage", label: "来源与清单" }]} />
         <div className="card-body">
-          {tab === "replay" && <Replay events={events.data} runId={runId} labels={labels} />}
-          {tab === "causal" && <Causal events={events.data} />}
+          {tab === "replay" && <Replay events={events.data} runId={runId} labels={labels} focus={focus} />}
+          {tab === "navigate" && <Navigator pid={pid} run={run.data} events={events.data} goto={goto} />}
+          {tab === "causal" && <Causal events={events.data} goto={goto} />}
           {tab === "diff" && <DiffReport events={events.data} labels={labels} />}
           {tab === "artifacts" && <Artifacts runId={runId} />}
           {tab === "lineage" && <Lineage run={run.data} pid={pid} />}
@@ -74,9 +80,10 @@ function RunEvidence({ pid, runId }: { pid: string; runId: string }) {
   );
 }
 
-function Replay({ events, runId, labels }: { events: TraceEvent[]; runId: string; labels: ReturnType<typeof useRunLabels> }) {
+function Replay({ events, runId, labels, focus }: { events: TraceEvent[]; runId: string; labels: ReturnType<typeof useRunLabels>; focus?: number | null }) {
   const steps = useMemo(() => groupSteps(events), [events]);
   const [i, setI] = useState(0);
+  useEffect(() => { if (focus !== null && focus !== undefined) { const k = steps.findIndex((x) => x.step === focus); if (k >= 0) setI(k); } }, [focus, steps]);
   const [playing, setPlaying] = useState(false);
   useEffect(() => {
     if (!playing) return;
@@ -141,7 +148,7 @@ const LANE_OF: Record<string, number> = {
 };
 const LANE_NAMES = ["运行", "观测", "候选", "提案", "检查", "结果", "效果"];
 
-function Causal({ events }: { events: TraceEvent[] }) {
+function Causal({ events, goto }: { events: TraceEvent[]; goto: (step: number | null | undefined) => void }) {
   const [sel, setSel] = useState<TraceEvent | null>(null);
   const [page, setPage] = useState(0);
   const PER = 120;
@@ -178,7 +185,9 @@ function Causal({ events }: { events: TraceEvent[] }) {
         </div>
         <div className="card pad stack">
           {sel ? <>
-            <div className="row"><code>{sel.event_type}</code><span className="muted small">seq {sel.seq} · {fmtTime(sel.wall_time)}</span></div>
+            <div className="row"><code>{sel.event_type}</code><span className="muted small">seq {sel.seq} · {fmtTime(sel.wall_time)}</span>
+              <span className="grow" />{sel.logical_step !== null && sel.logical_step !== undefined &&
+                <button className="btn sm" onClick={() => goto(sel.logical_step)}>回放第 {sel.logical_step} 步</button>}</div>
             <KV items={[["event_id", <code className="small">{sel.event_id}</code>], ["schema", sel.payload_schema],
               ["父事件", sel.causal_parents.join(", ") || "—"], ["幂等键", <code className="small">{sel.idempotency_key}</code>]]} />
             <Json value={sel.payload} maxHeight={420} />
@@ -258,6 +267,73 @@ function Lineage({ run, pid }: { run: RunDetail; pid: string }) {
       ]} />
       <h3>RunManifest</h3>
       <Json value={run.manifest} maxHeight={520} />
+    </div>
+  );
+}
+
+type P = Record<string, any>;
+
+/** Cross-references (P2-093): task plans, the model version / release / revision suggestions, business metrics and
+ *  independent probe samples — each row jumps to the replay step it belongs to. */
+function Navigator({ pid, run, events, goto }: { pid: string; run: RunDetail; events: TraceEvent[]; goto: (s: number | null | undefined) => void }) {
+  const m = run.manifest;
+  const plans = events.filter((e) => e.event_type === "PLAN_UPDATED");
+  const suggestions = events.filter((e) => e.event_type === "MODEL_REVISION_SUGGESTED");
+  const cases = events.filter((e) => e.event_type === "REGRESSION_CASE_CREATED");
+  const probes = events.filter((e) => e.event_type === "PROBE_SAMPLED");
+  const models = useQuery({ queryKey: ["models", pid], queryFn: () => get<{ id: string; package_id: string }[]>(`/projects/${pid}/models`) });
+  const modelId = models.data?.find((x) => x.package_id === m.model.package_id)?.id;
+  const [probeMetric, setProbeMetric] = useState("throughput");
+  const probeMetrics = [...new Set(probes.flatMap((e) => ((e.payload as P).results ?? []).map((r: P) => r.metric)))];
+  return (
+    <div className="stack" data-testid="navigator">
+      <div className="grid cols-2" style={{ alignItems: "start" }}>
+        <div className="card pad stack">
+          <h3>模型版本</h3>
+          <KV items={[
+            ["模型", modelId ? <Link to={`/p/${pid}/models/${modelId}`}>{m.model.package_id}@v{m.model.version}</Link> : `${m.model.package_id}@v${m.model.version}`],
+            ["摘要", <code className="small">{m.model.digest.value.slice(0, 16)}</code>],
+            ["发布", (m as P).release ? <code className="small">{(m as P).release.release_id}</code> : "未固定发布"],
+            ["规则集", (m as P).rules ? `${(m as P).rules.ruleset_id}@${(m as P).rules.version}` : "—"],
+          ]} />
+          <h4>模型修订建议</h4>
+          {suggestions.length === 0 ? <div className="small muted">没有效果差异</div> :
+            <table className="table" aria-label="修订建议"><thead><tr><th className="num">步</th><th>动作</th><th>不符字段</th><th>读取的常量</th><th /></tr></thead>
+              <tbody>{suggestions.map((e) => { const p = e.payload as P; return <tr key={e.seq}><td className="num">{e.logical_step}</td>
+                <td className="small">{p.action?.action_type}</td>
+                <td className="small">{(p.different_fields ?? []).slice(0, 3).map((d: P) => `${d.path}: ${fmtValue(d.expected)}→${fmtValue(d.observed)}`).join("；")}</td>
+                <td className="small">{(p.constants_read ?? []).join(", ") || "—"}</td>
+                <td><button className="btn sm" onClick={() => goto(e.logical_step)}>定位</button></td></tr>; })}</tbody></table>}
+          {cases.length > 0 && <div className="small">回归案例：{cases.map((e) => <code key={e.seq} className="small">{(e.payload as P).case?.case_id} </code>)}</div>}
+        </div>
+        <div className="card pad stack">
+          <h3>任务计划</h3>
+          {plans.length === 0 ? <div className="small muted">该运行的策略没有任务计划</div> :
+            <table className="table" aria-label="计划版本"><thead><tr><th>参与者</th><th className="num">版本</th><th>触发</th><th>生成</th><th className="num">步</th><th /></tr></thead>
+              <tbody>{plans.map((e) => { const p = (e.payload as P).plan; return <tr key={e.seq}><td className="small">{e.actor_id}</td>
+                <td className="num">v{p.version}</td><td className="small" title={p.revision?.detail}>{p.revision?.trigger}</td>
+                <td className="small">{p.generator?.kind}</td><td className="num">{e.logical_step}</td>
+                <td><button className="btn sm" onClick={() => goto(e.logical_step)}>定位</button></td></tr>; })}</tbody></table>}
+        </div>
+      </div>
+      <div className="grid cols-2" style={{ alignItems: "start" }}>
+        <div className="card pad stack">
+          <h3>业务指标（评分器）</h3>
+          <KV items={Object.entries(run.metrics).map(([k, v]) => [k, v.value !== null ? `${fmtValue(v.value)} ${v.unit ?? ""}` : v.status])} />
+        </div>
+        <div className="card pad stack">
+          <div className="row"><h3 className="grow">独立探针（按步）</h3>
+            {probeMetrics.length > 0 && <select value={probeMetric} onChange={(e) => setProbeMetric(e.target.value)} aria-label="探针指标">
+              {probeMetrics.map((x) => <option key={x}>{x}</option>)}</select>}</div>
+          {probes.length === 0 ? <div className="small muted">该环境没有探针</div> :
+            <div className="table-wrap" style={{ maxHeight: 260 }}><table className="table" aria-label="探针样本">
+              <thead><tr><th className="num">步</th><th className="num">值</th><th>来源</th><th /></tr></thead>
+              <tbody>{probes.map((e) => { const r = ((e.payload as P).results ?? []).find((x: P) => x.metric === probeMetric);
+                return r ? <tr key={e.seq}><td className="num">{e.logical_step}</td>
+                  <td className="num">{r.status === "OK" ? `${fmtValue(r.value)} ${r.unit}` : r.status}</td><td className="small muted">{r.source}</td>
+                  <td><button className="btn sm" onClick={() => goto(e.logical_step)}>定位</button></td></tr> : null; })}</tbody></table></div>}
+        </div>
+      </div>
     </div>
   );
 }

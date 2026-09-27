@@ -1,19 +1,21 @@
-import { StrictMode, useEffect, useState } from "react";
+import { lazy, StrictMode, Suspense, useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
 import { createBrowserRouter, Navigate, NavLink, Outlet, useLocation, useNavigate, useParams } from "react-router";
 import { RouterProvider } from "react-router/dom";
 import { get, type Meta, type Project } from "./api";
 import { ToastProvider } from "./ui";
-import { ProjectsPage } from "./pages/Projects";
-import { ModelWorkbench } from "./pages/ModelWorkbench";
-import { ScenariosPage } from "./pages/Scenarios";
-import { StrategiesPage } from "./pages/Strategies";
-import { RunsPage } from "./pages/Runs";
-import { RunConsole } from "./pages/RunConsole";
-import { EvidencePage } from "./pages/Evidence";
-import { BenchmarksPage } from "./pages/Benchmarks";
 import "./styles.css";
+
+// one chunk per area: the first screen loads only the shell and the page it shows (P2-095)
+const ProjectsPage = lazy(() => import("./pages/Projects").then((m) => ({ default: m.ProjectsPage })));
+const ModelWorkbench = lazy(() => import("./pages/ModelWorkbench").then((m) => ({ default: m.ModelWorkbench })));
+const ScenariosPage = lazy(() => import("./pages/Scenarios").then((m) => ({ default: m.ScenariosPage })));
+const StrategiesPage = lazy(() => import("./pages/Strategies").then((m) => ({ default: m.StrategiesPage })));
+const RunsPage = lazy(() => import("./pages/Runs").then((m) => ({ default: m.RunsPage })));
+const RunConsole = lazy(() => import("./pages/RunConsole").then((m) => ({ default: m.RunConsole })));
+const EvidencePage = lazy(() => import("./pages/Evidence").then((m) => ({ default: m.EvidencePage })));
+const BenchmarksPage = lazy(() => import("./pages/Benchmarks").then((m) => ({ default: m.BenchmarksPage })));
 
 const queryClient = new QueryClient({ defaultOptions: { queries: { retry: 1, staleTime: 5_000 } } });
 
@@ -77,7 +79,9 @@ function Shell() {
         </div>
       </aside>
       <main className="main" id="main">
-        <Outlet />
+        <Suspense fallback={<div className="muted pad" role="status" aria-live="polite">加载页面…</div>}>
+          <Outlet />
+        </Suspense>
       </main>
     </div>
   );

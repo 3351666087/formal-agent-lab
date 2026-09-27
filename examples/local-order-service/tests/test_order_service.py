@@ -336,3 +336,16 @@ def test_capabilities_are_negotiated_at_run_start(svc, reg):
                             capabilities=[{"id": "env.persistent_session"}], entrypoint="x:y",
                             ui={"label": "x"}, license="Apache-2.0", source="x")
     assert "manual review" in recovery_path(bare)
+
+
+def test_the_service_environment_passes_the_public_contract_harness(svc):
+    """P2-018: the public harness (formal_lab_sdk.plugin_testing) drives the service adapter through reset, step,
+    session-marker re-attach, operation lookup and close."""
+    from formal_lab_example_orders.env import ENV_ID, ENV_VERSION
+    from formal_lab_sdk.plugin_testing import check_environment
+
+    report = check_environment((ENV_ID, ENV_VERSION), {"endpoint": svc.endpoint, "tenant": "contract"},
+                               package=model_package())
+    assert report.ok, report.failures()
+    details = {s.name: s.detail for s in report.stages}
+    assert "SESSION_MARKER" in details["snapshot / restore"] and "found by id" in details["operation lookup"]

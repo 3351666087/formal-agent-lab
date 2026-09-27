@@ -155,3 +155,15 @@ export const TERMINAL = new Set(["SUCCEEDED", "FAILED", "CANCELLED", "BUDGET_EXH
 export function irOf(pkg: VersionDetail["package"] | undefined | null): ModelIR | null {
   return pkg && pkg.payload.kind === "fal-ir" ? pkg.payload.ir : null;
 }
+
+/** Every event of a run, fetched page by page (no silent truncation of long runs). */
+export async function fetchAllEvents(runId: string, pageSize = 2000): Promise<import("@formal-lab/contracts").TraceEvent[]> {
+  const all: import("@formal-lab/contracts").TraceEvent[] = [];
+  let after = 0;
+  for (;;) {
+    const page = await get<import("@formal-lab/contracts").TraceEvent[]>(`/runs/${runId}/events?after_seq=${after}&limit=${pageSize}`);
+    all.push(...page);
+    if (page.length < pageSize) return all;
+    after = page[page.length - 1].seq;
+  }
+}

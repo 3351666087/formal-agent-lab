@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate, useParams } from "react-router";
 import type { PluginDescriptor } from "@formal-lab/contracts";
@@ -6,7 +6,8 @@ import { irOf, get, post, TERMINAL, type CatalogEntry, type RunDetail, type Vers
 import { groupSteps, StateChart, StepDetail, Timeline } from "../components/Steps";
 import { makeLabels } from "../labels";
 import { useRunEvents } from "../sse";
-import { Empty, ErrorState, fmtNum, fmtTime, KV, Loading, StatusBadge, Tabs, useToast } from "../ui";
+import { ControlBanner, EnvironmentPanel, OperationsPanel, ParticipantsPanel, RecoveryLog } from "../components/RunKernel";
+import { Empty, ErrorState, fmtNum, fmtTime, KV, Loading, StatusBadge, Tabs, useToast, VirtualTable } from "../ui";
 import { CheckResult } from "./ModelWorkbench";
 
 export function RunConsole() {
@@ -20,10 +21,16 @@ export function RunConsole() {
   const lastSeq = events.at(-1)?.seq ?? 0;
   useEffect(() => { if (lastSeq) qc.invalidateQueries({ queryKey: ["run", runId] }); }, [lastSeq, qc, runId]);
   const labels = useRunLabels(run.data);
-  const steps = useMemo(() => groupSteps(events).filter((s) => s.step > 0 || s.observation), [events]);
+  // participant perspective (P2-032): every step is one participant's turn — its own observation, candidates,
+  // strategy output and usage; "全部" shows the interleaving
+  const [perspective, setPerspective] = useState<string>("");
+  const actorOf = (st: ReturnType<typeof groupSteps>[number]) => st.events.find((e) => e.actor_id)?.actor_id ?? null;
+  const steps = useMemo(() => groupSteps(events).filter((s) => (s.step > 0 || s.observation)
+    && (!perspective || s.step === 0 || actorOf(s) === perspective)), [events, perspective]);
   const [selected, setSelected] = useState<number | null>(null);
   const [follow, setFollow] = useState(true);
   const [tab, setTab] = useState<"timeline" | "state" | "events">("timeline");
+  const cancelReason = useRef<string | null>(null);
   const actionSteps = steps.filter((s) => s.step > 0);
   const lastStep = actionSteps.at(-1)?.step ?? 0;
   useEffect(() => { if (follow && lastStep) setSelected(lastStep); }, [follow, lastStep]);
@@ -40,7 +47,8 @@ export function RunConsole() {
   }, [steps, selected]);
 
   const control = useMutation({
-    mutationFn: (action: "pause" | "resume" | "cancel" | "rerun") => post<{ id: string; status: string }>(`/runs/${runId}/${action}`),
+    mutationFn: (action: "pause" | "resume" | "cancel" | "rerun") => post<{ id: string; status: string }>(`/runs/${runId}/${action}`,
+      action === "cancel" && cancelReason.current ? { reason: cancelReason.current, operations: [] } : undefined),
     onSuccess: (r, action) => {
       qc.invalidateQueries({ queryKey: ["run", runId] });
       if (action === "rerun") { toast("已创建重新运行"); navigate(`/p/${pid}/runs/${r.id}`); }
@@ -73,19 +81,32 @@ export function RunConsole() {
           <button className="btn" disabled={r.status !== "RUNNING" || control.isPending} onClick={() => control.mutate("pause")}>⏸ 暂停</button>
           <button className="btn" disabled={!["PAUSED", "PAUSING"].includes(r.status) || control.isPending} onClick={() => control.mutate("resume")}>▶ 继续</button>
           <button className="btn danger" disabled={terminal || r.status === "CANCELLING" || control.isPending}
-            onClick={() => { if (confirm("取消该实验？将保留已产生的证据。")) control.mutate("cancel"); }}>■ 取消</button>
+            onClick={() => {
+              const reason = prompt("取消该实验？将在当前步完成后结束并保留已产生的证据。\n可选：填写终止原因（记录为可解释终止）", "");
+              if (reason === null) return;
+              cancelReason.current = reason.trim() || null;
+              control.mutate("cancel");
+            }}>■ 取消</button>
           <button className="btn" disabled={!terminal || control.isPending} onClick={() => control.mutate("rerun")}>↻ 重新运行</button>
           <a className="btn" href={`/api/v1/runs/${r.id}/export`} download>⤓ 导出</a>
           <Link className="btn" to={`/p/${pid}/evidence/${r.id}`}>证据与回放</Link>
         </div>
       </div>
       {r.error && <div className="callout err small" role="alert"><strong>{r.error.code}</strong> {r.error.message}</div>}
+      <ControlBanner run={r} />
+      <div className="grid cols-2">
+        <ParticipantsPanel run={r} events={events} />
+        <EnvironmentPanel run={r} events={events} />
+        <OperationsPanel runId={r.id} />
+        <RecoveryLog events={events} />
+      </div>
 
       <div className="grid cols-3">
         <div className="card pad stack">
           <h3>配置（运行时固定）</h3>
           <KV items={[
-            ["策略", <code className="small">{m.participants[0].strategy.plugin.plugin_id}@{m.participants[0].strategy.plugin.version}</code>],
+            ["策略", <span className="stack" style={{ gap: 2 }}>{m.participants.map((p) => <code key={p.actor_id} className="small">
+              {m.participants.length > 1 ? `${p.actor_id}: ` : ""}{p.strategy.plugin.plugin_id}@{p.strategy.plugin.version}</code>)}</span>],
             ["模型", <code className="small">{m.model.package_id}@v{m.model.version} · {m.model.digest.value.slice(0, 8)}</code>],
             ["场景", `r${m.scenario.revision} · ${m.scenario_digest.value.slice(0, 8)}`],
             ["种子", String(m.seed)],
@@ -116,6 +137,10 @@ export function RunConsole() {
         <div className="card-head">
           <Tabs label="轨迹视图" value={tab} onChange={setTab} tabs={[{ id: "timeline", label: "时间线" }, { id: "state", label: "状态图表" }, { id: "events", label: "事件" }]} />
           <span className="grow" />
+          {m.participants.length > 1 && <label className="row small">视角
+            <select value={perspective} onChange={(e) => setPerspective(e.target.value)} aria-label="参与者视角">
+              <option value="">全部参与者（交错）</option>
+              {m.participants.map((p) => <option key={p.actor_id} value={p.actor_id}>{p.label ?? p.actor_id}</option>)}</select></label>}
           <label className="row small"><input type="checkbox" checked={follow} onChange={(e) => setFollow(e.target.checked)} />跟随最新步</label>
           <span className="small muted">键盘 <span className="kbd">←</span> <span className="kbd">→</span> 切换步骤</span>
         </div>
@@ -176,17 +201,16 @@ function Budget({ label, used, max, applies }: { label: string; used: number; ma
 
 function EventTable({ events, selected, onSelect }: { events: import("@formal-lab/contracts").TraceEvent[]; selected: number | null; onSelect: (n: number) => void }) {
   return (
-    <div className="table-wrap tall">
-      <table className="table wide" aria-label="事件">
-        <thead><tr><th className="num">seq</th><th>类型</th><th className="num">步</th><th>时间</th><th>因果父事件</th></tr></thead>
-        <tbody>{events.map((e) => (
-          <tr key={e.seq} className={`selectable ${e.logical_step === selected ? "selected" : ""}`} tabIndex={0}
-            onClick={() => e.logical_step !== null && e.logical_step !== undefined && onSelect(e.logical_step)}>
-            <td className="num">{e.seq}</td><td><code className="small">{e.event_type}</code></td><td className="num">{e.logical_step ?? "—"}</td>
-            <td className="small nowrap">{new Date(e.wall_time).toLocaleTimeString()}</td>
-            <td className="small mono">{e.causal_parents.map((p) => p.slice(4, 12)).join(", ") || "—"}</td></tr>))}</tbody>
-      </table>
-    </div>
+    <VirtualTable label="事件" rows={events}
+      header={<tr><th className="num">seq</th><th>类型</th><th>参与者</th><th className="num">步</th><th>阶段</th><th>时间</th><th>因果父事件</th></tr>}
+      render={(e, i) => (
+        <tr key={e.seq} aria-rowindex={i + 2} className={`vrow selectable ${e.logical_step === selected ? "selected" : ""}`} tabIndex={0}
+          onClick={() => e.logical_step !== null && e.logical_step !== undefined && onSelect(e.logical_step)}>
+          <td className="num">{e.seq}</td><td><code className="small">{e.event_type}</code></td>
+          <td className="small">{e.actor_id ?? "—"}</td><td className="num">{e.logical_step ?? "—"}</td>
+          <td className="small">{e.stage ?? "—"}</td>
+          <td className="small nowrap">{new Date(e.wall_time).toLocaleTimeString()}</td>
+          <td className="small mono">{e.causal_parents.map((p) => p.slice(4, 12)).join(", ") || "—"}</td></tr>)} />
   );
 }
 

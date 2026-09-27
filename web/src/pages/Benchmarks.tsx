@@ -3,6 +3,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { Link, useNavigate, useParams } from "react-router";
 import { get, post, type MatrixReport, type MatrixSummary, type Scenario, type Strategy } from "../api";
 import { Empty, fmtNum, fmtTime, InlineError, KV, Loading, Modal, QueryState, StatusBadge } from "../ui";
+import { ReportV2, V2Fields } from "../components/MatrixV2";
 
 export function BenchmarksPage() {
   const { pid, mid } = useParams();
@@ -32,7 +33,9 @@ export function BenchmarksPage() {
             )}
           </QueryState>
         </div>
-        {mid ? <Report key={mid} mid={mid} pid={pid!} /> : <div className="card"><Empty title="选择一个矩阵查看对比报告" /></div>}
+        {mid ? (matrices.data?.find((m) => m.id === mid)?.spec.version === 2
+          ? <ReportV2 key={mid} mid={mid} pid={pid!} /> : <Report key={mid} mid={mid} pid={pid!} />)
+          : <div className="card"><Empty title="选择一个矩阵查看对比报告" /></div>}
       </div>
       {creating && <CreateMatrix pid={pid!} onClose={() => setCreating(false)} onCreated={(id) => { setCreating(false); navigate(`/p/${pid}/benchmarks/${id}`); }} />}
     </>
@@ -47,20 +50,30 @@ function CreateMatrix({ pid, onClose, onCreated }: { pid: string; onClose: () =>
   const [seeds, setSeeds] = useState("1,2,3");
   const [budgets, setBudgets] = useState("");
   const [name, setName] = useState("矩阵");
+  const [queued, setQueued] = useState(true);
+  const [v2, setV2] = useState<Record<string, any>>({ dev: "1", acceptance: "2,3,4", max_parallel: 2, ablations: "" });
+  const csv = (x: string) => String(x).split(",").map((s) => s.trim()).filter(Boolean).map(Number);
   const toggle = (xs: string[], x: string) => (xs.includes(x) ? xs.filter((y) => y !== x) : [...xs, x]);
   const seedList = seeds.split(",").map((s) => s.trim()).filter(Boolean).map(Number);
   const budgetList = budgets.split(",").map((s) => s.trim()).filter(Boolean).map((b) => ({ max_steps: Number(b) }));
-  const total = sc.length * st.length * seedList.length * Math.max(1, budgetList.length);
+  let ablations: unknown[] = [{}];
+  try { if (v2.ablations.trim()) ablations = [{}, ...JSON.parse(v2.ablations)]; } catch { ablations = [{}]; }
+  const v2Seeds = csv(v2.dev).length + csv(v2.acceptance).length;
+  const total = queued ? sc.length * st.length * v2Seeds * Math.max(1, budgetList.length) * ablations.length
+    : sc.length * st.length * seedList.length * Math.max(1, budgetList.length);
   const create = useMutation({
-    mutationFn: () => post<{ matrix: MatrixSummary }>(`/projects/${pid}/matrices`, { name, scenarios: sc, strategies: st, seeds: seedList,
-      budgets: budgetList.length ? budgetList : null }),
+    mutationFn: () => post<{ matrix: MatrixSummary }>(`/projects/${pid}/matrices`, queued
+      ? { version: 2, name, scenarios: sc, participants: st.map((id) => ({ "*": id })),
+          seeds: { dev: csv(v2.dev), acceptance: csv(v2.acceptance) }, budgets: budgetList.length ? budgetList : null,
+          ablations, max_parallel: v2.max_parallel }
+      : { name, scenarios: sc, strategies: st, seeds: seedList, budgets: budgetList.length ? budgetList : null }),
     onSuccess: (r) => onCreated(r.matrix.id),
   });
   return (
     <Modal title="新建实验矩阵" onClose={onClose} footer={<>
       <span className="muted small" style={{ marginRight: "auto" }}>将创建 {total} 个实验</span>
       <button className="btn" onClick={onClose}>取消</button>
-      <button className="btn primary" disabled={!total || total > 400 || create.isPending} onClick={() => create.mutate()}>▶ 创建并运行</button></>}>
+      <button className="btn primary" disabled={!total || total > 600 || create.isPending} onClick={() => create.mutate()}>▶ 创建并运行</button></>}>
       <label className="field"><span>名称</span><input value={name} onChange={(e) => setName(e.target.value)} /></label>
       <fieldset className="stack" style={{ border: 0, padding: 0, margin: 0 }}><legend className="small muted">场景</legend>
         <div className="chip-list">{scenarios.data?.map((s) => (
@@ -69,8 +82,11 @@ function CreateMatrix({ pid, onClose, onCreated }: { pid: string; onClose: () =>
         <div className="chip-list">{strategies.data?.map((s) => (
           <label key={s.id} className={`badge ${s.config.client === "stub" ? "warn" : ""}`} style={{ cursor: "pointer" }}>
             <input type="checkbox" checked={st.includes(s.id)} onChange={() => setSt(toggle(st, s.id))} />{s.name}</label>))}</div></fieldset>
+      <label className="row small"><input type="checkbox" checked={queued} onChange={(e) => setQueued(e.target.checked)} />
+        单元队列（v2）：固定开发 / 验收种子划分、并发上限、可中断续跑、失败重跑与增量合并</label>
+      {queued && <V2Fields value={v2} onChange={setV2} />}
       <div className="form-grid">
-        <label className="field"><span>种子（逗号分隔）</span><input value={seeds} onChange={(e) => setSeeds(e.target.value)} /></label>
+        {!queued && <label className="field"><span>种子（逗号分隔）</span><input value={seeds} onChange={(e) => setSeeds(e.target.value)} /></label>}
         <label className="field"><span>步数预算变体（可选，逗号分隔）</span><input value={budgets} placeholder="场景默认" onChange={(e) => setBudgets(e.target.value)} /></label>
       </div>
       <InlineError error={create.error} />
@@ -84,6 +100,8 @@ function Report({ mid, pid }: { mid: string; pid: string }) {
   const [metric, setMetric] = useState<string>("");
   if (report.isPending) return <div className="card"><Loading label="生成报告…" /></div>;
   if (report.isError) return <div className="card"><Empty title="报告不可用" hint={String(report.error)} /></div>;
+  // a v2 matrix report (the matrix list may not know the new matrix yet): the report's own shape decides
+  if ("splits" in (report.data as object)) return <ReportV2 mid={mid} pid={pid} />;
   const r = report.data;
   const defs = r.definitions;
   const chosen = metric || (defs.find((d) => d.metric_id === "delay_cost") ?? defs[0])?.metric_id;

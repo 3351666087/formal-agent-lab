@@ -131,25 +131,48 @@ def _direction(b: Any, metric_id: str) -> str:
     return known.get(metric_id, "NONE")
 
 
+def _package_of(path: Path) -> str:
+    try:
+        return read_bundle(path.read_bytes()).manifest.model.package_id
+    except Exception:  # an unreadable bundle is reported by `build` of any group
+        return "_unreadable"
+
+
 def main(argv: list[str] | None = None) -> int:
+    """One report per model package (metrics of different domains are never mixed), plus an index."""
     ap = argparse.ArgumentParser(description="offline comparison report from replay bundles")
     ap.add_argument("bundles", nargs="+", type=Path)
     ap.add_argument("--out", type=Path, default=Path("report"))
     ap.add_argument("--title", default="Offline comparison report")
     args = ap.parse_args(argv)
-    report, defs = build(args.bundles)
+    groups: dict[str, list[Path]] = {}
+    for p in args.bundles:
+        groups.setdefault(_package_of(p), []).append(p)
+    unreadable = groups.pop("_unreadable", [])
     args.out.mkdir(parents=True, exist_ok=True)
-    (args.out / "report.json").write_text(json.dumps(report, indent=2, ensure_ascii=False, default=str) + "\n")
-    (args.out / "report.csv").write_text(to_csv(report))
-    md = to_markdown(report, args.title, defs)
-    md = md.replace("## Conclusions\n\n", "## Conclusions\n\n" + f"- {report['conclusions'][0]}\n", 1)
-    if report["verification"]["rejected"]:
-        md += "\n## Rejected bundles\n\n" + "\n".join(f"- `{r['bundle']}`: {'; '.join(r['problems'])}"
-                                                    for r in report["verification"]["rejected"]) + "\n"
-    (args.out / "report.md").write_text(md)
-    for line in report["conclusions"]:
-        print(line)
-    return 0 if not report["verification"]["rejected"] else 1
+    index = [f"# {args.title}", "", "Bundles are verified first (format, contract version, digests, event causality, "
+             "required parts, pinned model); one report per model package.", ""]
+    rejected_total = 0
+    for pkg, paths in sorted(groups.items()):
+        report, defs = build(paths + (unreadable if pkg == sorted(groups)[0] else []))
+        out = args.out / pkg
+        out.mkdir(parents=True, exist_ok=True)
+        (out / "report.json").write_text(json.dumps(report, indent=2, ensure_ascii=False, default=str) + "\n")
+        (out / "report.csv").write_text(to_csv(report))
+        md = to_markdown(report, f"{args.title} — {pkg}", defs)
+        md = md.replace("## Conclusions\n\n", "## Conclusions\n\n" + f"- {report['conclusions'][0]}\n", 1)
+        if report["verification"]["rejected"]:
+            md += "\n## Rejected bundles\n\n" + "\n".join(f"- `{r['bundle']}`: {'; '.join(r['problems'])}"
+                                                        for r in report["verification"]["rejected"]) + "\n"
+        (out / "report.md").write_text(md)
+        rejected_total += len(report["verification"]["rejected"])
+        index += [f"## {pkg}", "", f"[report.md]({pkg}/report.md) · [report.csv]({pkg}/report.csv) · "
+                  f"[report.json]({pkg}/report.json)", "", *[f"- {c}" for c in report["conclusions"]], ""]
+        print(f"== {pkg}")
+        for line in report["conclusions"]:
+            print(line)
+    (args.out / "index.md").write_text("\n".join(index) + "\n")
+    return 0 if not rejected_total else 1
 
 
 if __name__ == "__main__":

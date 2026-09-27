@@ -196,12 +196,38 @@ function FragmentKV({ k, v }: { k: ReactNode; v: ReactNode }) {
 type Schema = { type?: string | string[]; properties?: Record<string, Schema>; items?: Schema; enum?: unknown[];
   minimum?: number; maximum?: number; description?: string; default?: unknown; additionalProperties?: unknown };
 
-export function SchemaForm({ schema, value, onChange }: {
+/** Field errors of an API error under `basePath` (e.g. "/participants/0/strategy/config"), keyed by property. */
+export function fieldErrorsAt(error: unknown, basePath: string): Record<string, string> {
+  const info = error instanceof ApiError ? error.info : null;
+  const out: Record<string, string> = {};
+  for (const f of info?.field_errors ?? []) {
+    if (f.path === basePath) out[""] = f.message;
+    else if (f.path.startsWith(`${basePath}/`)) out[f.path.slice(basePath.length + 1).split("/")[0]] = f.message;
+  }
+  return out;
+}
+
+/** Example configuration from a schema: `examples[0]`, else every property's example / default. */
+export function exampleOf(schema: Schema): Record<string, unknown> {
+  const s = schema as Schema & { examples?: Record<string, unknown>[] };
+  if (s.examples?.length) return { ...s.examples[0] };
+  const out: Record<string, unknown> = {};
+  for (const [k, p] of Object.entries(schema.properties ?? {})) {
+    const q = p as { examples?: unknown[]; default?: unknown };
+    if (q.examples?.length) out[k] = q.examples[0];
+    else if (q.default !== undefined) out[k] = q.default;
+  }
+  return out;
+}
+
+export function SchemaForm({ schema, value, onChange, error, basePath }: {
   schema: Schema; value: Record<string, unknown>; onChange: (v: Record<string, unknown>) => void;
+  error?: unknown; basePath?: string;
 }) {
   const props = schema.properties ?? {};
   const keys = Object.keys(props);
   const [raw, setRaw] = useState<string | null>(null);
+  const errs = basePath ? fieldErrorsAt(error, basePath) : {};
   if (!keys.length && schema.additionalProperties !== false) {
     return <JsonField value={value} onChange={onChange} />;
   }
@@ -212,6 +238,10 @@ export function SchemaForm({ schema, value, onChange }: {
     onChange(next);
   };
   return (
+    <div className="stack" style={{ gap: 6 }}>
+    <div className="row small"><span className="muted grow">配置项由插件的 JSON Schema 生成</span>
+      <button type="button" className="btn sm ghost" onClick={() => onChange({ ...exampleOf(schema), ...value })}>填入示例</button></div>
+    {errs[""] && <span className="small" role="alert" style={{ color: "var(--err)" }}>{errs[""]}</span>}
     <div className="form-grid">
       {keys.map((k) => {
         const p = props[k];
@@ -239,13 +269,15 @@ export function SchemaForm({ schema, value, onChange }: {
             onChange={(e) => { setRaw(e.target.value); try { set(k, JSON.parse(e.target.value)); setRaw(null); } catch { /* keep typing */ } }} />;
         }
         return (
-          <label className="field" key={k}>
+          <label className={`field ${errs[k] ? "invalid" : ""}`} key={k} aria-invalid={Boolean(errs[k])}>
             <span>{k}</span>
             {input}
-            {p.description && <span className="hint">{p.description}</span>}
+            {errs[k] ? <span className="hint" role="alert" style={{ color: "var(--err)" }}>{errs[k]}</span>
+              : p.description && <span className="hint">{p.description}</span>}
           </label>
         );
       })}
+    </div>
     </div>
   );
 }
@@ -274,4 +306,30 @@ export function fmtValue(v: unknown): string {
   if (typeof v === "boolean") return v ? "true" : "false";
   if (v === null || v === undefined) return "—";
   return String(v);
+}
+
+
+/** Windowed table for large logs (P2-095): only the rows in view (plus a margin) are in the DOM; row height is
+ *  fixed so the scroll position maps directly to a row index. */
+export function VirtualTable<T>({ rows, header, render, label, rowHeight = 30, height = 520 }: {
+  rows: T[]; header: ReactNode; render: (row: T, index: number) => ReactNode; label: string;
+  rowHeight?: number; height?: number;
+}) {
+  const [top, setTop] = useState(0);
+  const overscan = 12;
+  const start = Math.max(0, Math.floor(top / rowHeight) - overscan);
+  const end = Math.min(rows.length, Math.ceil((top + height) / rowHeight) + overscan);
+  return (
+    <div className="table-wrap virtual" style={{ maxHeight: height, overflowY: "auto" }} data-testid="virtual-table"
+      data-rows={rows.length} data-rendered={end - start} onScroll={(e) => setTop(e.currentTarget.scrollTop)}>
+      <table className="table wide" aria-label={label} aria-rowcount={rows.length + 1}>
+        <thead>{header}</thead>
+        <tbody>
+          {start > 0 && <tr aria-hidden style={{ height: start * rowHeight }}><td colSpan={99} /></tr>}
+          {rows.slice(start, end).map((r, i) => render(r, start + i))}
+          {end < rows.length && <tr aria-hidden style={{ height: (rows.length - end) * rowHeight }}><td colSpan={99} /></tr>}
+        </tbody>
+      </table>
+    </div>
+  );
 }

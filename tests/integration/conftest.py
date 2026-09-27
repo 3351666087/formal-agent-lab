@@ -172,3 +172,56 @@ def demo(stack: Stack) -> dict:
     strategies = {seeded[s["name"]]: s for s in stack.get(f"/projects/{project['id']}/strategies")
                   if s["name"] in seeded}
     return {"project": project["id"], "scenarios": scenarios, "strategies": strategies}
+
+
+# ---------------------------------------------------------------------------------------------------- browser (UI)
+DESKTOP = {"width": 1440, "height": 900}
+PHONE = {"width": 375, "height": 812}
+
+
+def _ui_port() -> int:
+    with socket.socket() as s:
+        s.bind(("127.0.0.1", 0))
+        return s.getsockname()[1]
+
+
+@pytest.fixture(scope="module")
+def web(stack):
+    if not (ROOT / "web" / "dist" / "index.html").exists() or os.environ.get("FAL_UI_REBUILD", "1") == "1":
+        subprocess.run(["pnpm", "--dir", "web", "exec", "vite", "build"], cwd=ROOT, check=True, capture_output=True)
+    port = _ui_port()
+    proc = subprocess.Popen(["pnpm", "--dir", "web", "exec", "vite", "preview", "--port", str(port), "--strictPort"],
+                            cwd=ROOT, env={**os.environ, "FAL_API_ORIGIN": f"http://127.0.0.1:{stack.port}"},
+                            stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT, start_new_session=True)
+    base = f"http://127.0.0.1:{port}"
+    for _ in range(100):
+        try:
+            if httpx.get(base, timeout=1).status_code == 200:
+                break
+        except httpx.HTTPError:
+            time.sleep(0.2)
+    yield base
+    os.killpg(proc.pid, signal.SIGTERM)
+
+
+@pytest.fixture(scope="module")
+def browser():
+    from playwright.sync_api import sync_playwright
+
+    with sync_playwright() as p:
+        b = p.chromium.launch()
+        yield b
+        b.close()
+
+
+@pytest.fixture()
+def page(browser):
+    ctx = browser.new_context(viewport=DESKTOP, locale="zh-CN")
+    pg = ctx.new_page()
+    errors: list[str] = []
+    pg.on("pageerror", lambda e: errors.append(str(e)))
+    yield pg
+    ctx.close()
+    assert not errors, f"uncaught page errors: {errors}"
+
+

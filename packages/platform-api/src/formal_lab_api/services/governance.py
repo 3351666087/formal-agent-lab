@@ -133,6 +133,11 @@ def create_release(s: Session, model_version_id: str, body: dict[str, Any]) -> d
             raise NotFound(f"regression case(s) not found: {sorted(missing)}")
     record, log = check_release(package, registry(), ruleset=ruleset, cases=cases,
                                 horizon=int(body.get("horizon", 6)), timeout_ms=int(body.get("timeout_ms", 10000)))
+    # content-addressed per model version: the same IR in another project (or version row) is a different release
+    import hashlib
+
+    rid = "rel_" + hashlib.sha256(f"{record.release_id}:{version_row.id}".encode()).hexdigest()[:16]
+    record = record.model_copy(update={"release_id": rid})
     existing = s.get(ReleaseRow, record.release_id)
     if existing is not None:
         return release_dict(existing)

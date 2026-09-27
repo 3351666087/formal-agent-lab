@@ -6,15 +6,10 @@ docs/execution/evidence/phase2/ui/ (phase-1 shots in evidence/ui/ are history an
 
 from __future__ import annotations
 
-import os
 import re
-import signal
-import socket
-import subprocess
 import time
 from pathlib import Path
 
-import httpx
 import pytest
 
 pytestmark = [pytest.mark.integration, pytest.mark.ui]
@@ -22,52 +17,6 @@ ROOT = Path(__file__).resolve().parents[2]
 SHOTS = ROOT / "docs" / "execution" / "evidence" / "phase2" / "ui"
 DESKTOP = {"width": 1440, "height": 900}
 PHONE = {"width": 375, "height": 812}
-
-
-def _port() -> int:
-    with socket.socket() as s:
-        s.bind(("127.0.0.1", 0))
-        return s.getsockname()[1]
-
-
-@pytest.fixture(scope="module")
-def web(stack):
-    if not (ROOT / "web" / "dist" / "index.html").exists() or os.environ.get("FAL_UI_REBUILD", "1") == "1":
-        subprocess.run(["pnpm", "--dir", "web", "exec", "vite", "build"], cwd=ROOT, check=True, capture_output=True)
-    port = _port()
-    proc = subprocess.Popen(["pnpm", "--dir", "web", "exec", "vite", "preview", "--port", str(port), "--strictPort"],
-                            cwd=ROOT, env={**os.environ, "FAL_API_ORIGIN": f"http://127.0.0.1:{stack.port}"},
-                            stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT, start_new_session=True)
-    base = f"http://127.0.0.1:{port}"
-    for _ in range(100):
-        try:
-            if httpx.get(base, timeout=1).status_code == 200:
-                break
-        except httpx.HTTPError:
-            time.sleep(0.2)
-    yield base
-    os.killpg(proc.pid, signal.SIGTERM)
-
-
-@pytest.fixture(scope="module")
-def browser():
-    from playwright.sync_api import sync_playwright
-
-    with sync_playwright() as p:
-        b = p.chromium.launch()
-        yield b
-        b.close()
-
-
-@pytest.fixture()
-def page(browser):
-    ctx = browser.new_context(viewport=DESKTOP, locale="zh-CN")
-    pg = ctx.new_page()
-    errors: list[str] = []
-    pg.on("pageerror", lambda e: errors.append(str(e)))
-    yield pg
-    ctx.close()
-    assert not errors, f"uncaught page errors: {errors}"
 
 
 def shot(page, name: str) -> None:
@@ -86,7 +35,7 @@ def project_id(stack) -> str:
 
 def test_projects_and_empty_error_states(page, web, stack):
     page.goto(web)
-    page.get_by_role("heading", name="项目").wait_for()
+    page.get_by_role("heading", name="项目", exact=True).wait_for()
     page.get_by_role("heading", name="生产调度示例").wait_for()
     shot(page, "01-projects")
     # empty state: a fresh project has no models
@@ -208,8 +157,9 @@ def test_strategies_evidence_and_benchmarks(page, web, stack):
     page.goto(f"{web}/p/{pid}/benchmarks")
     page.get_by_role("button", name="新建矩阵").click()
     dialog = page.get_by_role("dialog")
+    dialog.get_by_label(re.compile("单元队列（v2）")).uncheck()  # the phase-1 matrix (one run per cell, no queue)
     dialog.get_by_label("正常调度").check()
-    dialog.get_by_label("资源不足").check()
+    dialog.get_by_label("资源不足", exact=True).check()
     dialog.get_by_label("EDD 规则").check()
     dialog.get_by_label("Z3 有界规划").check()
     dialog.locator("label.field:has(> span:text-is('种子（逗号分隔）')) input").fill("1,2")

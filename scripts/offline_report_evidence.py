@@ -64,7 +64,18 @@ def order_service_bundles(work: Path) -> int:
 def main() -> int:
     reg = default_registry()
     pkg = model_package()
-    work = Path(tempfile.mkdtemp(prefix="fal-bundles-"))
+    work = ROOT / "var" / "offline-evidence-bundles"  # kept between runs; --fresh regenerates the study
+    if "--fresh" in sys.argv and work.exists():
+        shutil.rmtree(work)
+    cached = work.exists() and any(work.glob("*.replay.zip"))
+    work.mkdir(parents=True, exist_ok=True)
+    n = len([p for p in work.glob("*.replay.zip") if "corrupted" not in p.name]) if cached else 0
+    if not cached:
+        n = study(work, reg, pkg)
+    return report(work, n)
+
+
+def study(work: Path, reg, pkg) -> int:
     n = 0
     for key in ("normal", "state-delay"):
         for strat in LABELS:
@@ -96,7 +107,11 @@ def main() -> int:
                         (work / f"{run_id}.replay.zip").write_bytes(bundle_from_local(res, pkg))
                         n += 1
     n += order_service_bundles(work)
-    good = sorted(work.glob("*.replay.zip"))
+    return n
+
+
+def report(work: Path, n: int) -> int:
+    good = sorted(p for p in work.glob("*.replay.zip") if "corrupted" not in p.name)
     bad = work / "run_off_corrupted.replay.zip"
     data = bytearray(good[0].read_bytes())
     data[len(data) // 2] ^= 0xFF
@@ -113,14 +128,15 @@ def main() -> int:
     OUT.mkdir(parents=True, exist_ok=True)
     (OUT / "run.log").write_text(f"$ cd <empty dir> && python -m formal_lab_eval.offline <{n + 1} bundles> --out report"
                                  f"\n(exit {proc.returncode}; FAL_API_* unset)\n\n{proc.stdout}{proc.stderr}")
-    for name in ("report.json", "report.csv", "report.md"):
-        shutil.copy(empty / "report" / name, OUT / name)
-    rep = json.loads((OUT / "report.json").read_text())
-    print(json.dumps({"bundles": n + 1, "verified": len(rep["verification"]["verified"]),
-                      "rejected": [r["bundle"] for r in rep["verification"]["rejected"]], "exit": proc.returncode}))
-    shutil.rmtree(work)
+    for old in OUT.glob("report.*"):
+        old.unlink()
+    shutil.copytree(empty / "report", OUT, dirs_exist_ok=True)
+    reps = [json.loads(p.read_text()) for p in OUT.glob("*/report.json")]
+    verified = sum(len(r["verification"]["verified"]) for r in reps)
+    rejected = [x["bundle"] for r in reps for x in r["verification"]["rejected"]]
+    print(json.dumps({"bundles": n + 1, "verified": verified, "rejected": rejected, "exit": proc.returncode}))
     shutil.rmtree(empty)
-    return 0 if len(rep["verification"]["rejected"]) == 1 else 1
+    return 0 if len(rejected) == 1 and verified == n else 1
 
 
 if __name__ == "__main__":

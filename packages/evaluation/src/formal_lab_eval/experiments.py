@@ -183,8 +183,11 @@ def _outcomes(cells: list[CellResult], defs: dict[str, MetricDefinition]) -> dic
         "goal_reached": sum(1 for c in finished if c.goal_reached),
         "goal_not_reached": [{"cell_id": c.cell_id, "run_id": c.run_id, "status": c.status,
                               "termination_reason": c.termination_reason} for c in finished if not c.goal_reached],
-        "metric_missing": {mid: sum(1 for c in finished if not _ok(c.metrics.get(mid))
-                                    and not _not_applicable(c.metrics.get(mid))) for mid in defs},
+        # missing = the evaluator produced the metric without a value (MISSING / ERROR) or the run failed before
+        # scoring; a metric a run's evaluators never produce is not applicable to it, not missing
+        "metric_missing": {mid: sum(1 for c in finished if (mid in c.metrics or not c.metrics)
+                                    and not _ok(c.metrics.get(mid)) and not _not_applicable(c.metrics.get(mid)))
+                           for mid in defs},
         "metric_not_applicable": {mid: n for mid in defs
                                   if (n := sum(1 for c in finished if _not_applicable(c.metrics.get(mid))))},
         "failures": [{"cell_id": c.cell_id, "run_id": c.run_id, "status": c.status,
@@ -201,8 +204,10 @@ def _comparisons(cells: list[CellResult], defs: dict[str, MetricDefinition]) -> 
         values = sorted({getattr(c.key, dim) for c in cells})
         if len(values) < 2:
             continue
-        base = values[0]
-        for other in values[1:]:
+        # the reference is the unmodified configuration when there is one (no ablation, the scenario's own
+        # backend / rules), so every variant is compared against it rather than against another variant
+        base = next((v for v in ("none", "scenario", "scenario-default") if v in values), values[0])
+        for other in [v for v in values if v != base]:
             for mid, d in defs.items():
                 if mid not in applicable:  # the metric does not apply to these runs: nothing to compare
                     continue
@@ -216,7 +221,7 @@ def _comparisons(cells: list[CellResult], defs: dict[str, MetricDefinition]) -> 
                 row = cmp.as_dict()
                 row.update({"dimension": dim, "kind": kind, "a_key": base, "b_key": other,
                             "paired_on": "all other dimensions equal (scenario, seed, budget, …)"})
-                row["pairs"] = row["pairs"][:50]
+                row["pairs"] = row["pairs"][:20]
                 out.append(row)
     return out
 
@@ -263,11 +268,13 @@ def conclusions(report: dict[str, Any], defs: list[MetricDefinition]) -> list[st
                    f"cancelled, {o['not_run']} not run; goal reached in {o['goal_reached']} of {o['finished']}; "
                    f"missing metrics: " + (", ".join(f"{k} {v}" for k, v in o["metric_missing"].items() if v)
                                             or "none"))
+        empty = [c for c in sec["comparisons"] if c["n_pairs"] == 0]
+        if empty:
+            out.append(f"[{split}] {len(empty)} comparison(s) have no complete pairs (the metric is missing on one side "
+                       "or the dimension varies only where the other does not) — no conclusion from them")
         for c in sec["comparisons"]:
             ci = c.get("ci")
             if c["n_pairs"] == 0:
-                out.append(f"[{split}] {c['kind']} {c['a']} vs {c['b']} on {c['metric_id']}: no complete pairs "
-                           f"({c['unpaired']} unpaired) — no conclusion")
                 continue
             if ci and (ci["low"] > 0 or ci["high"] < 0) and c.get("better"):
                 out.append(f"[{split}] {c['kind']}: {c['better']} is better on {c['metric_id']} (mean paired "

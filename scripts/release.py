@@ -1,4 +1,4 @@
-"""Build the phase-1 release: wheels (SDK, CLI, platform packages), web bundle, OCI images, manifest.
+"""Build the release: wheels (SDK, CLI, platform packages), web bundle, OCI images, manifest (phase 2: 0.2.0).
 
     uv run --frozen python scripts/release.py            → out/release/{wheels/, web-dist.tar.gz, manifest.json}
 
@@ -22,8 +22,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "out" / "release"
-VERSION = "0.1.0"
-IMAGES = ("api", "worker", "web")
+VERSION = "0.2.0"
+IMAGES = ("api", "worker", "web", "orders")
 
 
 def sh(*cmd: str, cwd: Path = ROOT, env: dict | None = None) -> str:
@@ -82,7 +82,17 @@ def main() -> None:
     print("==> SDK/CLI wheel check in a clean venv (no server)")
     sdk_check = verify_sdk(wheels)
 
-    contracts = json.loads((ROOT / "contracts" / "v1" / "DIGEST.json").read_text())
+    print("==> amd64 (other architecture): build with the available builder, run under emulation if possible")
+    other_arch = cross_arch(rev)
+    print("==> license inventory")
+    sh(sys.executable, "scripts/license_inventory.py")
+    licenses = json.loads((ROOT / "docs/execution/evidence/phase2/licenses.json").read_text())
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location("doctor", ROOT / "scripts" / "doctor.py")
+    doctor = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(doctor)  # type: ignore[union-attr]
+    contracts = {v: json.loads((ROOT / "contracts" / v / "DIGEST.json").read_text()) for v in ("v1", "v2")}
     from formal_lab_example_scheduling.scenarios import SCENARIO_CONFIGS, model_package
 
     pkg = model_package()
@@ -91,9 +101,14 @@ def main() -> None:
         "version": VERSION,
         "generated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         "source": {"repository": "https://github.com/3351666087/formal-agent-lab", "revision": rev, "dirty": dirty},
-        "contract": {"version": contracts["contract_version"], "digest": contracts["digest"]},
-        "license": {"spdx": "Apache-2.0", "files": ["LICENSE", "NOTICE"],
-                    "third_party": "docs/reuse-ledger.md"},
+        "contract": {"version": contracts["v2"]["contract_version"], "digest": contracts["v2"]["digest"]},
+        "contracts": {c["contract_version"]: c["digest"] for c in contracts.values()},
+        "license": {"spdx": "Apache-2.0", "files": ["LICENSE", "NOTICE"], "third_party": "docs/reuse-ledger.md",
+                    "inventory": "docs/licenses.md", "counts": licenses["counts"],
+                    "attention": [{k: e[k] for k in ("name", "version", "license", "note")} for e in licenses["attention"]]},
+        "architectures": {"native": {"arch": os.uname().machine, "build": "PASS", "run": "PASS (this host)"},
+                          "other": other_arch},
+        "resources": {"host": doctor.cpu_memory(), "disk": doctor.disk(ROOT)},
         "dependencies": {
             "python": {"lock": "uv.lock", "sha256": sha256(ROOT / "uv.lock"), "python": sys.version.split()[0]},
             "node": {"lock": "pnpm-lock.yaml", "sha256": sha256(ROOT / "pnpm-lock.yaml")},
@@ -105,16 +120,62 @@ def main() -> None:
         "images": images,
         "scenarios": {"model": {"package_id": pkg.package_id, "version": pkg.version, "digest": pkg.digest.value},
                       "scenario_ids": [f"sched-{k}" for k in SCENARIO_CONFIGS]},
-        "docs": ["README.md", "docs/getting-started.md", "docs/deployment.md", "docs/contracts/v1.md",
+        "docs": ["README.md", "docs/getting-started.md", "docs/local-development.md", "docs/deployment.md",
+                 "docs/acceptance-phase2.md", "docs/contracts/v2.md", "docs/contracts/v1.md",
                  "docs/architecture/plugin-integration.md", "docs/architecture/capability-matrix.md",
-                 "docs/architecture/observation-semantics.md", "docs/reuse-ledger.md", "docs/handoff/phase1.md"],
+                 "docs/architecture/observation-semantics.md", "docs/reuse-ledger.md", "docs/licenses.md",
+                 "docs/handoff/phase1.md", "docs/handoff/phase2.md"],
+        "follow_up_deployment": FOLLOW_UP,
         "deployment": {"compose": "deploy/compose/docker-compose.yaml", "helm_chart": "deploy/helm/formal-agent-lab"},
         "duration_s": round(time.time() - t0, 1),
     }
     (OUT / "manifest.json").write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\n")
-    evidence = ROOT / "docs" / "execution" / "evidence" / "release-manifest.json"
+    evidence = ROOT / "docs" / "execution" / "evidence" / "phase2" / "release-manifest.json"  # phase-1 file stays
     evidence.write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\n")
     print(f"==> {OUT / 'manifest.json'} ({len(wheel_info)} wheels, {len(images)} images) in {manifest['duration_s']} s")
+
+
+FOLLOW_UP = [  # deployment work outside this phase: when it becomes necessary and what it depends on
+    {"item": "publish images to a registry", "trigger": "use on another machine than the builder",
+     "depends_on": "registry and credentials (not configured); digests already pinned in the manifest"},
+    {"item": "native amd64 image run", "trigger": "an amd64 host becomes available",
+     "depends_on": "the amd64 build of this manifest; CI already runs the Python code natively on x86_64"},
+    {"item": "authentication, TLS and multi-user isolation", "trigger": "any access beyond the loopback interface",
+     "depends_on": "an identity provider / gateway; the chart exposes the ingress hook"},
+    {"item": "production Temporal and PostgreSQL", "trigger": "more than one worker host or durability beyond one disk",
+     "depends_on": "external HA services; chart values already point at external endpoints"},
+    {"item": "multi-node Kubernetes upgrade / rollback", "trigger": "deployment on a real cluster",
+     "depends_on": "cluster access; the kind check covers a single-node development cluster only"},
+]
+
+
+def cross_arch(rev: str) -> dict:
+    """Build the api image for the other architecture with the available builder and try it under emulation."""
+    other = "amd64" if os.uname().machine in ("aarch64", "arm64") else "arm64"
+    tag = f"formal-agent-lab/api:{rev[:12]}-{other}"
+    out: dict = {"arch": other, "image": tag}
+    builders = subprocess.run(["docker", "buildx", "ls"], capture_output=True, text=True).stdout
+    out["builder_platforms"] = sorted({p.strip().rstrip("*") for line in builders.splitlines()
+                                       for p in line.split() if p.startswith("linux/")})
+    t0 = time.time()
+    res = subprocess.run(["docker", "buildx", "build", "--platform", f"linux/{other}", "-f",
+                          "deploy/docker/python.Dockerfile", "--target", "api", "-t", tag, "--load",
+                          "--build-arg", f"FAL_SOURCE_REVISION={rev}", "."], cwd=ROOT, capture_output=True, text=True)
+    out["build"] = "PASS" if res.returncode == 0 else "FAIL"
+    out["build_seconds"] = round(time.time() - t0, 1)
+    if res.returncode != 0:
+        out["build_error"] = res.stderr.strip()[-600:]
+        out["run_emulated"] = "NOT_RUN: build failed"
+    else:
+        run = subprocess.run(["docker", "run", "--rm", "--platform", f"linux/{other}", tag, "python", "-c",
+                              "import platform, formal_lab_api, formal_lab_runtime; print(platform.machine())"],
+                             capture_output=True, text=True, timeout=600)
+        out["run_emulated"] = "PASS" if run.returncode == 0 else "FAIL"
+        out["run_emulated_output"] = (run.stdout.strip() or run.stderr.strip())[-300:]
+        info = json.loads(subprocess.run(["docker", "image", "inspect", tag], capture_output=True, text=True).stdout)[0]
+        out.update({"image_id": info["Id"], "size_bytes": info["Size"], "architecture": info["Architecture"]})
+    out["run_native"] = f"NOT_RUN: no {other} host available locally (release built on {os.uname().machine})"
+    return out
 
 
 def verify_sdk(wheels: Path) -> dict:

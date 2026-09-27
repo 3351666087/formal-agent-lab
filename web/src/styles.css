@@ -159,7 +159,7 @@ table.table { width: 100%; border-collapse: collapse; font-size: 13px; }
 table.table.wide { min-width: 760px; }
 .table td.tight, .table th.tight { white-space: nowrap; }
 
-.tabs { display: flex; gap: 2px; border-bottom: 1px solid var(--border); overflow-x: auto; }
+.tabs { display: flex; gap: 2px; border-bottom: 1px solid var(--border); overflow-x: auto; min-width: 0; max-width: 100%; }
 .tabs button { border: 0; background: transparent; padding: 8px 12px; cursor: pointer; font: inherit; color: var(--text-2);
   border-bottom: 2px solid transparent; white-space: nowrap; }
 .tabs button[aria-selected="true"] { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
@@ -200,3 +200,15 @@ svg text { font-family: var(--sans); }
 .modal > header h2 { flex: 1; }
 .modal > .body { padding: 14px 16px; display: grid; gap: 12px; }
 .modal > footer { padding: 10px 16px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 8px; }
+
+/* windowed tables (large event logs): fixed row height, single-line cells */
+.table-wrap.virtual tr.vrow { height: 30px; }
+.table-wrap.virtual td { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 360px; }
+
+.participant { border-left: 3px solid transparent; padding-left: 8px; }
+.participant.current { border-left-color: var(--accent, #3b82f6); }
+
+/* long option texts (e.g. version notes) must not widen the page on narrow screens */
+select { max-width: 100%; }
+.card-head { flex-wrap: wrap; }
+.card-head label select { max-width: min(60vw, 420px); }

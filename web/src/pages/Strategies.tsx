@@ -148,7 +148,8 @@ function StrategyEditor({ pid, strategy, onClose }: { pid: string; strategy: Str
       </div>
       {entry && <>
         {!entry.available && <div className="callout warn small">{entry.availability_note}</div>}
-        <SchemaForm schema={entry.descriptor.config_schema as never} value={config} onChange={setConfig} />
+        <SchemaForm schema={entry.descriptor.config_schema as never} value={config} onChange={setConfig}
+          error={save.error} basePath="/config" />
       </>}
       <InlineError error={save.error} />
     </Modal>

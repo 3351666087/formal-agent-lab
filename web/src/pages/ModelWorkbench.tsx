@@ -6,12 +6,13 @@ import {
   get, irOf, post, type CheckRecord, type ModelChange, type ModelSummary, type Validation, type VersionDetail,
 } from "../api";
 import { ModelGraph } from "../components/ModelGraph";
+import { ObjectivesAndReleases } from "../components/ReleasePanel";
 import { blankModel, effectLines, exprText, typeText } from "../ir";
 import {
   Empty, ErrorState, fmtTime, InlineError, Json, JsonField, KV, Loading, Modal, QueryState, Tabs, useToast, VerdictBadge,
 } from "../ui";
 
-type Tab = "graph" | "form" | "json" | "diff" | "check" | "caps";
+type Tab = "graph" | "form" | "json" | "diff" | "check" | "release" | "caps";
 const draftKey = (modelId: string) => `fal:model-draft:${modelId}`;
 
 export function ModelWorkbench() {
@@ -80,6 +81,7 @@ function CreateModel({ pid, onClose }: { pid: string; onClose: () => void }) {
 }
 
 function ModelEditor({ modelId }: { modelId: string }) {
+  const { pid } = useParams();
   const qc = useQueryClient();
   const toast = useToast();
   const model = useQuery({ queryKey: ["model", modelId], queryFn: () => get<ModelSummary>(`/models/${modelId}`) });
@@ -192,7 +194,8 @@ function ModelEditor({ modelId }: { modelId: string }) {
       <div className="card">
         <Tabs label="模型视图" value={tab} onChange={setTab} tabs={[
           { id: "graph", label: "结构图" }, { id: "form", label: "表单编辑" }, { id: "json", label: "JSON" },
-          { id: "diff", label: "版本差异" }, { id: "check", label: "编译与检查" }, { id: "caps", label: "能力矩阵" },
+          { id: "diff", label: "版本差异" }, { id: "check", label: "编译与检查" }, { id: "release", label: "目标与发布" },
+          { id: "caps", label: "能力矩阵" },
         ]} />
         <div className="card-body">
           {draft && tab === "graph" && <ModelGraph ir={draft} />}
@@ -200,6 +203,7 @@ function ModelEditor({ modelId }: { modelId: string }) {
           {draft && tab === "json" && <JsonField key={`${d.version}-${restored}`} value={draft} onChange={(v) => setDraft(v)} rows={28} />}
           {tab === "diff" && <DiffView modelId={modelId} versions={model.data!.versions?.map((v) => v.version) ?? []} current={d.version} />}
           {tab === "check" && <CheckPanel detail={d} dirty={Boolean(dirty)} />}
+          {tab === "release" && <ObjectivesAndReleases pid={pid!} detail={d} onDiff={() => setTab("diff")} />}
           {tab === "caps" && <CapabilityMatrix rows={d.capability_matrix} />}
         </div>
       </div>
@@ -433,6 +437,13 @@ function CheckPanel({ detail, dirty }: { detail: VersionDetail; dirty: boolean }
         <span className="muted small">后端：Z3 有界模型检查；见证由参考解释器独立重放。</span></div>
       <InlineError error={run.error} />
       {shown && <CheckResult result={shown.result} />}
+      {shown && (shown as CheckRecord & { explanation?: string[]; query_bundle_id?: string }).explanation?.length ? (
+        <div className="card pad stack small" data-testid="check-explanation">
+          <div className="row"><strong className="grow">解释（与导出的查询包相同）</strong>
+            {(shown as CheckRecord & { query_bundle_id?: string }).query_bundle_id &&
+              <a className="btn sm" href={`/api/v1/query-bundles/${(shown as CheckRecord & { query_bundle_id?: string }).query_bundle_id}/export`} download>⤓ 查询包</a>}</div>
+          <ul>{(shown as CheckRecord & { explanation?: string[] }).explanation!.map((x, i) => <li key={i}>{x}</li>)}</ul>
+        </div>) : null}
       <h3>历史检查</h3>
       <QueryState q={history} empty={<Empty title="此版本还没有检查记录" />}>
         {(list) => (

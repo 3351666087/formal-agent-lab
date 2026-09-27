@@ -150,10 +150,9 @@ handoff: ## regenerate docs/handoff/phase1.manifest.json from the repository and
 	uv run --frozen python scripts/handoff.py
 
 .PHONY: reclaim-disk
-reclaim-disk: ## drop Docker build cache / dangling images and return freed blocks to the host (VM disks are sparse)
-	# only our own artefacts: the Docker daemon may hold other projects' images — never prune -a / system prune
-	docker builder prune -af
-	docker image prune -f
+reclaim-disk: ## remove this project's dangling / commit-tagged images and return freed blocks to the host (VM disks are sparse)
+	# the Docker daemon is shared with other projects: only images labelled with this repository are removed; the
+	# global build cache and shared images (e.g. kindest/node) are left alone — never prune -a / system prune
+	docker image prune -f --filter label=org.opencontainers.image.source=https://github.com/3351666087/formal-agent-lab
 	-docker rmi $$(docker images --format '{{.Repository}}:{{.Tag}}' | grep -E '^formal-agent-lab/.+:[0-9a-f]{12}$$') 2>/dev/null
-	-docker rmi $$(docker images --format '{{.Repository}}@{{.Digest}}' | grep '^kindest/node') 2>/dev/null
 	sudo fstrim -av

@@ -1,0 +1,26 @@
+project 验收项目 a07b54 (prj_a17dfa0a70c14fa8851f); run run_13473f988ec946228b46: SUCCEEDED JOINT_GOAL_REACHED, 24 steps
+matrix view (acceptance): {"denominator_cells": 4, "run_status": {"SUCCEEDED": 4}, "not_run": 0, "run_failed": 0, "finished": 4, "goal_reached": 4, "goal_not_reached": [], "metric_missing": {"goal_reached": 0, "steps_used": 0, "rejected_actions": 0, "effect_mismatches": 0, "model_calls": 0, "tokens": 0, "wall_seconds": 0}, "metric_not_applicable": {"model_calls": 4, "tokens": 4}, "failures": []}
+
+$ fal replay verify
+OK formal-lab/replay-bundle@2 run=run_13473f988ec946228b46 events=234 artifacts=25 operations=24 participants=2 contract=formal-lab-contracts/v2 digest=bc24e5e96b69b9b6c85fa610ba7e21737a11d60ffb94b7b6095de2988f20bdbf causality=ok
+
+$ fal replay turns (first 6)
+step   1  round   1  dispatcher_a   #1   assign(m=m1, op=o1_cut)                  APPLIED
+step   2  round   1  dispatcher_b   #1   assign(m=m2, op=o1_cut)                  REJECTED
+step   3  round   2  dispatcher_a   #2   assign(m=m2, op=o2_cut)                  APPLIED
+step   4  round   2  dispatcher_b   #2   assign(m=m2, op=o2_cut)                  REJECTED
+step   5  round   3  dispatcher_a   #3   advance()                                APPLIED
+step   6  round   3  dispatcher_b   #3   advance()                                APPLIED
+
+$ fal replay model
+model line-scheduling@1 digest 03595b998939082d (bundled package digest 03595b998939082d)
+rules —
+release — (not pinned)
+  step 2: assign differs — on[o1_cut,m1]: False→True, on[o1_cut,m2]: True→False; constants read: 
+  step 6: advance differs — clock: 1→2, finish[o1_cut]: 0→2, on[o1_cut,m1]: True→False; constants read: degraded
+  step 12: advance differs — clock: 3→4, remaining[o1_weld]: 2→1, tick_parity: True→False; constants read: degraded
+  step 14: assign differs — on[o2_paint,m2]: False→True, on[o3_weld,m2]: True→False, phase[o2_paint]: waiting→running; constants read: 
+  step 16: advance differs — clock: 5→6, finish[o2_paint]: 0→6, on[o2_paint,m2]: True→False; constants read: degraded
+  step 20: advance differs — clock: 7→8, finish[o3_weld]: 0→8, on[o3_weld,m2]: True→False; constants read: degraded
+  step 22: assign differs — on[o3_paint,m2]: False→True, on[o3_paint,m3]: True→False; constants read: 
+  step 24: advance differs — clock: 9→10, finish[o3_paint]: 0→10, on[o3_paint,m2]: True→False; constants read: degraded

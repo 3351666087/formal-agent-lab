@@ -3,8 +3,12 @@
     uv run --frozen python scripts/offline_bundle.py [--verify]
 
 Output: out/offline/formal-agent-lab-offline-<rev>/ (+ .tar) containing
-    images/*.tar.gz        docker save of api, worker, web and the pinned service images
-    wheels/                project wheels + the complete third-party wheel closure of formal-lab-sdk[offline]
+    images/platform.tar.gz one `docker save` of api, worker, web and orders: layers shared by the images (the
+                           Python runtime and dependency closure) are stored once; the manifest records each image id
+                           and the size the separate saves would have taken
+    images/*.tar.gz        the pinned service images (PostgreSQL, Temporal, SeaweedFS)
+    wheels/                project wheels + the third-party wheel closure of formal-lab-sdk[offline] and of the
+                           standalone scheduling example (rule / Z3 demo without any server)
     web/                   static web bundle (also inside the web image)
     compose.yaml           compose file that uses only the bundled image tags (pull_policy: never)
     install.sh             load images, install the SDK/CLI with --no-index, start the stack
@@ -32,6 +36,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SERVICE_IMAGES = ["postgres:16-alpine", "temporalio/temporal:1.9.1", "chrislusf/seaweedfs:4.47"]
+PLATFORM = ("api", "worker", "web", "orders")
 
 
 def sh(*cmd: str, cwd: Path = ROOT, env: dict | None = None, check: bool = True) -> str:
@@ -61,6 +66,7 @@ x-platform-env: &platform-env
   FAL_S3_ACCESS_KEY_ID: fal-offline-access
   FAL_S3_SECRET_ACCESS_KEY: fal-offline-secret-key
   FAL_DEPLOYMENT_PROFILE: offline-compose
+  FAL_ORDERS_ENDPOINT: http://orders:8765
 services:
   postgres:
     image: postgres:16-alpine
@@ -97,6 +103,11 @@ services:
     pull_policy: never
     environment: *platform-env
     depends_on: {{ migrate: {{ condition: service_completed_successfully }}, temporal: {{ condition: service_healthy }} }}
+  orders:
+    image: formal-agent-lab/orders:{tag}
+    pull_policy: never
+    command: ["python", "-m", "formal_lab_example_orders.service", "--data", "/data", "--host", "0.0.0.0", "--port", "8765", "--project", "offline"]
+    volumes: [ordersdata:/data]
   web:
     image: formal-agent-lab/web:{tag}
     pull_policy: never
@@ -104,7 +115,7 @@ services:
     ports: ["127.0.0.1:${{FAL_WEB_PORT:-8080}}:8080"]
     depends_on: {{ api: {{ condition: service_healthy }} }}
     healthcheck: {{ test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8080/health"], interval: 5s, retries: 20 }}
-volumes: {{ pgdata: {{}}, temporaldata: {{}}, s3data: {{}} }}
+volumes: {{ pgdata: {{}}, temporaldata: {{}}, s3data: {{}}, ordersdata: {{}} }}
 """
 
 INSTALL = """\
@@ -114,7 +125,7 @@ set -euo pipefail
 cd "$(dirname "$0")"
 for f in images/*.tar.gz; do echo "loading $f"; gunzip -c "$f" | docker load; done
 python3 -m venv .venv
-.venv/bin/pip install --no-index --find-links wheels "formal-lab-sdk[offline]"
+.venv/bin/pip install --no-index --find-links wheels "formal-lab-sdk[offline]" formal-lab-example-scheduling
 docker compose -f compose.yaml up -d --wait
 docker compose -f compose.yaml run --rm api python -m formal_lab_api.seed
 echo "web: http://127.0.0.1:${FAL_WEB_PORT:-8080}   CLI: .venv/bin/fal --help"
@@ -135,11 +146,31 @@ def build(verify: bool) -> Path:
     sh("docker", "compose", "-f", "deploy/compose/docker-compose.yaml", "build", "--quiet",
        env={"FAL_SOURCE_REVISION": rev})
     images = []
-    for name in ("api", "worker", "web"):
+    platform_refs = [f"formal-agent-lab/{n}:{tag}" for n in PLATFORM]
+    for name in PLATFORM:
         sh("docker", "tag", f"formal-agent-lab/{name}:local", f"formal-agent-lab/{name}:{tag}")
-    for ref in [f"formal-agent-lab/{n}:{tag}" for n in ("api", "worker", "web")] + SERVICE_IMAGES:
-        sh("docker", "image", "inspect", ref) if ":" in ref else None
-        if sh("docker", "image", "inspect", ref, check=False) == "":
+    combined = out / "images" / "platform.tar.gz"
+    with combined.open("wb") as fh:
+        save = subprocess.Popen(["docker", "save", *platform_refs], stdout=subprocess.PIPE)
+        subprocess.run(["gzip", "-1"], stdin=save.stdout, stdout=fh, check=True)
+        save.wait()
+        assert save.returncode == 0
+    separate = {}
+    with tempfile.TemporaryDirectory() as tmp:  # what one file per image would take (for the comparison only)
+        for ref in platform_refs:
+            f = Path(tmp) / "x.tar.gz"
+            subprocess.run(f"docker save {ref} | gzip -1 > {f}", shell=True, check=True)
+            separate[ref] = f.stat().st_size
+    for ref in platform_refs:
+        info = json.loads(sh("docker", "image", "inspect", ref))[0]
+        images.append({"ref": ref, "image_id": info["Id"], "architecture": info["Architecture"], "os": info["Os"],
+                       "file": f"images/{combined.name}", "layers": len(info["RootFS"]["Layers"])})
+    dedupe = {"combined_file": f"images/{combined.name}", "combined_bytes": combined.stat().st_size,
+              "combined_sha256": sha256(combined), "separate_bytes": separate,
+              "separate_total_bytes": sum(separate.values()),
+              "saved_bytes": sum(separate.values()) - combined.stat().st_size}
+    for ref in SERVICE_IMAGES:
+        if sh("docker", "image", "inspect", ref, check=False).strip() in ("", "[]"):
             sh("docker", "pull", ref)
         info = json.loads(sh("docker", "image", "inspect", ref))[0]
         file = out / "images" / (ref.replace("/", "_").replace(":", "__") + ".tar.gz")
@@ -159,7 +190,7 @@ def build(verify: bool) -> Path:
         pip = [str(venv / "bin" / "python"), "-m", "pip"]
         sh("uv", "pip", "install", "--python", str(venv / "bin" / "python"), "pip")
         sh(*pip, "download", "--quiet", "--dest", str(out / "wheels"), "--find-links", str(out / "wheels"),
-           "--only-binary=:all:", "formal-lab-sdk[offline]")
+           "--only-binary=:all:", "formal-lab-sdk[offline]", "formal-lab-example-scheduling")
 
     print("==> web, compose, install script")
     sh("pnpm", "--dir", "web", "exec", "vite", "build")
@@ -171,15 +202,16 @@ def build(verify: bool) -> Path:
         shutil.copyfile(ROOT / name, out / name)
 
     files = sorted(p for p in out.rglob("*") if p.is_file())
-    contracts = json.loads((ROOT / "contracts" / "v1" / "DIGEST.json").read_text())
+    contracts = json.loads((ROOT / "contracts" / "v2" / "DIGEST.json").read_text())
     manifest = {
-        "format": "formal-agent-lab/offline-manifest@1",
+        "format": "formal-agent-lab/offline-manifest@2",
         "generated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         "source": {"revision": rev, "dirty": bool(sh("git", "status", "--porcelain").strip())},
         "contract": {"version": contracts["contract_version"], "digest": contracts["digest"]},
         "platform": {"architecture": platform.machine(), "python_tag": "cp312 / py3", "os": "linux"},
         "included": {
             "images": images,
+            "image_dedupe": dedupe,
             "wheels": [{"file": f"wheels/{p.name}", "sha256": sha256(p), "bytes": p.stat().st_size}
                        for p in sorted((out / "wheels").glob("*.whl"))],
             "web": {"dir": "web", "files": len(list((out / "web").rglob("*")))},
@@ -212,7 +244,7 @@ def build(verify: bool) -> Path:
     if verify:
         manifest["verification"] = verify_bundle(tar_path, tag)
         (out / "manifest.json").write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\n")
-    evidence = ROOT / "docs" / "execution" / "evidence" / "offline-manifest.json"
+    evidence = ROOT / "docs" / "execution" / "evidence" / "phase2" / "offline-manifest.json"  # phase-1 file stays
     evidence.write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\n")
     return tar_path
 
@@ -224,12 +256,23 @@ def verify_bundle(tar_path: Path, tag: str) -> dict:
         with tarfile.open(tar_path) as tar:
             tar.extractall(tmp, filter="data")
         root = next(Path(tmp).iterdir())
+        manifest = json.loads((root / "manifest.json").read_text())
         for f in sorted((root / "images").glob("*.tar.gz")):
             subprocess.run(f"gunzip -c '{f}' | docker load -q", shell=True, check=True, capture_output=True)
+        ids = {i["ref"]: json.loads(sh("docker", "image", "inspect", i["ref"]))[0]["Id"]
+               for i in manifest["included"]["images"]}
+        ids_match = all(ids[i["ref"]] == i["image_id"] for i in manifest["included"]["images"])
         venv = root / ".venv"
         sh(shutil.which("python3") or "/usr/bin/python3", "-m", "venv", str(venv))  # same as install.sh
         sh(str(venv / "bin" / "pip"), "install", "--quiet", "--no-index", "--find-links", str(root / "wheels"),
-           "formal-lab-sdk[offline]")
+           "formal-lab-sdk[offline]", "formal-lab-example-scheduling")
+        demo = {}
+        for strategy in ("rule", "z3"):  # the standalone example: no server, no package index, no model API
+            r = subprocess.run([str(venv / "bin" / "python"), "-m", "formal_lab_example_scheduling", "run",
+                                "--scenario", "normal", "--strategy", strategy, "--seed", "1"], capture_output=True,
+                               text=True, timeout=900, cwd=root)
+            demo[strategy] = {"exit_code": r.returncode, "succeeded": "SUCCEEDED" in r.stdout,
+                              "tail": r.stdout.strip().splitlines()[-3:]}
         env = {"FAL_PROJECT": "fal-offline-verify", "FAL_WEB_PORT": "18080"}
         compose = ["docker", "compose", "-f", str(root / "compose.yaml")]
         try:
@@ -240,8 +283,11 @@ def verify_bundle(tar_path: Path, tag: str) -> dict:
             run = subprocess.run([fal, "run", "start", "--project", "生产调度示例", "--scenario", "正常调度",
                                   "--strategy", "EDD 规则", "--wait"], capture_output=True, text=True,
                                  env={**os.environ, **api}, timeout=600)
-            ok = run.returncode == 0 and "SUCCEEDED" in run.stdout
+            ok = run.returncode == 0 and "SUCCEEDED" in run.stdout and ids_match and \
+                all(d["succeeded"] for d in demo.values())
             return {"extracted_to_empty_dir": True, "cli_install": "pip --no-index from bundled wheels",
+                    "image_ids_match_manifest": ids_match, "standalone_demo": demo,
+                    "model_api": "not needed: rule and Z3 strategies; an LLM strategy needs FAL_LLM_* (not bundled)",
                     "compose_pull_policy": "never", "experiment": run.stdout.strip().splitlines()[-12:],
                     "exit_code": run.returncode, "passed": ok, "duration_s": round(time.time() - t0, 1)}
         finally:

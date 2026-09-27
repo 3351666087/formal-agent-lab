@@ -5,12 +5,19 @@ import type { ScenarioManifest } from "@formal-lab/contracts";
 import { irOf, del, get, post, put, type CatalogEntry, type ModelSummary, type RunSummary, type Scenario, type VersionDetail } from "../api";
 import { Empty, fmtTime, InlineError, Loading, QueryState, SchemaForm, useToast } from "../ui";
 
+type Termination = { joint_goal: string | null; actor_goals: "IGNORE" | "ALL" | "ANY"; invariants: string[];
+  on_no_action: "FAIL" | "SKIP_ACTOR" | "END"; no_progress_limit: number | null };
+type Turns = { mode: "ROUND_ROBIN" | "FIXED_TABLE"; table: string[]; observation_timing: "TURN_START" | "ROUND_START";
+  conflict_policy: "REVALIDATE" | "REJECT_STALE" };
 type Draft = {
   name: string; description: string; model_version_id: string;
   environment: ScenarioManifest["environment"]; participants: ScenarioManifest["participants"];
   objectives: ScenarioManifest["objectives"]; budget: ScenarioManifest["budget"]; seed: number;
   stop_conditions: ScenarioManifest["stop_conditions"];
+  // v2 (P2-091): turn order, joint termination; v1 stop conditions stay usable for single-participant scenarios
+  turns: Turns; termination: Termination | null;
 };
+const DEFAULT_TURNS: Turns = { mode: "ROUND_ROBIN", table: [], observation_timing: "TURN_START", conflict_policy: "REVALIDATE" };
 
 export function ScenariosPage() {
   const { pid, sid } = useParams();
@@ -75,7 +82,7 @@ function ScenarioEditor({ pid, sid }: { pid: string; sid: string }) {
       environment: { plugin: { plugin_id: "formal-lab.env.ir-world", version: "1.1.0" }, config: {} },
       participants: [{ actor_id: "agent", role: "operator", strategy: { plugin: { plugin_id: "formal-lab.planner.z3-bounded", version: "1.0.0" }, config: {} } }],
       objectives: [], budget: { max_steps: 60, max_wall_seconds: 600, max_model_calls: null, max_tokens: null }, seed: 0,
-      stop_conditions: [{ kind: "NO_APPLICABLE_ACTION", property_id: null }],
+      stop_conditions: [{ kind: "NO_APPLICABLE_ACTION", property_id: null }], turns: DEFAULT_TURNS, termination: null,
     } as unknown as Draft));
   }, [isNew, draft, models.data]);
 
@@ -86,12 +93,17 @@ function ScenarioEditor({ pid, sid }: { pid: string; sid: string }) {
     setModelId(scenario.data.model_id ?? "");
     setDraft({ name: m.name, description: m.description ?? "", model_version_id: scenario.data.model_version_id,
       environment: m.environment, participants: m.participants, objectives: m.objectives, budget: m.budget, seed: m.seed,
-      stop_conditions: m.stop_conditions });
+      stop_conditions: m.stop_conditions, turns: { ...DEFAULT_TURNS, ...((m as never as { turns?: Turns }).turns ?? {}) },
+      termination: ((m as never as { termination?: Termination | null }).termination ?? null) });
   }, [isNew, scenario.data]);
 
   const save = useMutation({
-    mutationFn: () => isNew ? post<Scenario>(`/projects/${pid}/scenarios`, draft)
-      : put<Scenario>(`/scenarios/${sid}`, { ...draft, expected_revision: scenario.data?.revision }),
+    mutationFn: () => {
+      // v2 termination replaces the v1 stop conditions (the contract accepts one or the other)
+      const body = draft!.termination ? { ...draft, stop_conditions: [] } : { ...draft, termination: null };
+      return isNew ? post<Scenario>(`/projects/${pid}/scenarios`, body)
+        : put<Scenario>(`/scenarios/${sid}`, { ...body, expected_revision: scenario.data?.revision });
+    },
     onSuccess: (s) => {
       qc.invalidateQueries({ queryKey: ["scenarios", pid] });
       qc.invalidateQueries({ queryKey: ["scenario", s.id] });
@@ -158,6 +170,7 @@ function ScenarioEditor({ pid, sid }: { pid: string; sid: string }) {
                 setDraft({ ...draft, environment: { plugin: { plugin_id, version }, config: {} } });
               }}>{envs.data?.map((e) => <option key={e.descriptor.plugin_id} value={`${e.descriptor.plugin_id}@${e.descriptor.version}`}>{e.descriptor.ui.label} ({e.descriptor.version})</option>)}</select></label>
             {envEntry && <SchemaForm schema={envEntry.descriptor.config_schema as never} value={draft.environment.config}
+              error={save.error} basePath="/environment/config"
               onChange={(config) => setDraft({ ...draft, environment: { ...draft.environment, config } })} />}
             <div className="small muted">observation.delay_steps 使参与者看到延迟的事实：当前值为“未知”，并附带上次已知值（实验语义，不改变模型）。</div>
           </div>
@@ -186,31 +199,90 @@ function ScenarioEditor({ pid, sid }: { pid: string; sid: string }) {
         </div>
       </div>
 
-      <div className="card">
-        <div className="card-head"><h3 className="grow">参与者与默认策略</h3></div>
+      <div className="card" data-testid="participants-editor">
+        <div className="card-head"><h3 className="grow">参与者与默认策略</h3>
+          <button className="btn sm" onClick={() => setDraft({ ...draft, participants: [...draft.participants, {
+            ...draft.participants[draft.participants.length - 1], actor_id: `agent_${draft.participants.length + 1}`,
+            label: null, goal: null, budget: null } as never] })}>＋ 参与者</button></div>
         <div className="card-body stack">
           {draft.participants.map((p, i) => {
             const entry = planners.data?.find((x) => x.descriptor.plugin_id === p.strategy.plugin.plugin_id);
+            const pb = (p as never as { budget?: Record<string, number | null> | null }).budget ?? null;
             return (
-              <div key={i} className="stack">
+              <div key={i} className="stack participant-edit" role="group" aria-label={`参与者 ${p.actor_id}`}>
                 <div className="form-grid">
                   <label className="field"><span>参与者 ID</span><input value={p.actor_id} onChange={(e) => setP(i, { actor_id: e.target.value })} /></label>
+                  <label className="field"><span>显示名</span><input value={(p as never as { label?: string }).label ?? ""} onChange={(e) => setP(i, { label: e.target.value || null } as never)} /></label>
                   <label className="field"><span>角色</span><input value={p.role} onChange={(e) => setP(i, { role: e.target.value })} /></label>
+                  <label className="field"><span>自身目标</span>
+                    <select value={(p as never as { goal?: string }).goal ?? ""} onChange={(e) => setP(i, { goal: e.target.value || null } as never)}>
+                      <option value="">— 无（只看联合目标）—</option>
+                      {props.filter((x) => x.kind === "goal").map((x) => <option key={x.id} value={x.id}>{x.label ?? x.id}</option>)}</select></label>
                   <label className="field" style={{ gridColumn: "span 2" }}><span>策略插件</span>
                     <select value={`${p.strategy.plugin.plugin_id}@${p.strategy.plugin.version}`} onChange={(e) => {
                       const [plugin_id, version] = e.target.value.split("@");
                       setP(i, { strategy: { plugin: { plugin_id, version }, config: {} } });
-                    }}>{planners.data?.map((x) => <option key={x.descriptor.plugin_id} value={`${x.descriptor.plugin_id}@${x.descriptor.version}`} disabled={!x.available && x.descriptor.plugin_id !== p.strategy.plugin.plugin_id}>
+                    }}>{planners.data?.map((x) => <option key={`${x.descriptor.plugin_id}@${x.descriptor.version}`} value={`${x.descriptor.plugin_id}@${x.descriptor.version}`} disabled={!x.available && x.descriptor.plugin_id !== p.strategy.plugin.plugin_id}>
                       {x.descriptor.ui.label} ({x.descriptor.version}){x.available ? "" : " — 未配置"}</option>)}</select></label>
+                  <label className="field"><span>独立预算：步数</span><input type="number" min={1} placeholder="共享" value={pb?.max_steps ?? ""}
+                    onChange={(e) => setP(i, { budget: e.target.value === "" ? null : { ...(pb ?? {}), max_steps: Number(e.target.value) } } as never)} /></label>
+                  <label className="field"><span>独立预算：模型调用</span><input type="number" min={0} placeholder="共享" value={pb?.max_model_calls ?? ""}
+                    onChange={(e) => setP(i, { budget: e.target.value === "" && !pb?.max_steps ? null : { max_steps: pb?.max_steps ?? draft.budget.max_steps, ...(pb ?? {}), max_model_calls: e.target.value === "" ? null : Number(e.target.value) } } as never)} /></label>
                 </div>
                 {entry && <SchemaForm schema={entry.descriptor.config_schema as never} value={p.strategy.config}
+                  error={save.error} basePath={`/participants/${i}/strategy/config`}
                   onChange={(config) => setP(i, { strategy: { ...p.strategy, config } })} />}
+                {draft.participants.length > 1 && <div className="row end"><button className="btn sm danger" onClick={() => setDraft({
+                  ...draft, participants: draft.participants.filter((_, j) => j !== i) as Draft["participants"],
+                  turns: { ...draft.turns, table: draft.turns.table.filter((a) => a !== p.actor_id) } })}>移除该参与者</button></div>}
               </div>
             );
           })}
-          <div className="small muted">运行时可在实验运行台选择项目中的其它策略配置覆盖默认策略。</div>
+          <div className="small muted">运行时可在实验运行台选择项目中的其它策略配置覆盖默认策略（可逐个参与者指定）。</div>
         </div>
       </div>
+
+      {(draft.participants.length > 1 || draft.termination) && <div className="grid cols-2">
+        <div className="card" data-testid="turns-editor">
+          <div className="card-head"><h3 className="grow">轮次</h3></div>
+          <div className="card-body stack">
+            <label className="field"><span>轮次方式</span>
+              <select value={draft.turns.mode} onChange={(e) => setDraft({ ...draft, turns: { ...draft.turns, mode: e.target.value as Turns["mode"],
+                table: e.target.value === "FIXED_TABLE" ? draft.participants.map((x) => x.actor_id) : [] } })}>
+                <option value="ROUND_ROBIN">轮流（按参与者顺序）</option><option value="FIXED_TABLE">固定轮次表</option></select></label>
+            {draft.turns.mode === "FIXED_TABLE" && <label className="field"><span>轮次表（参与者 ID，逗号分隔，可重复）</span>
+              <input value={draft.turns.table.join(",")} onChange={(e) => setDraft({ ...draft, turns: { ...draft.turns,
+                table: e.target.value.split(",").map((x) => x.trim()).filter(Boolean) } })} /></label>}
+            <label className="field"><span>观测时点</span>
+              <select value={draft.turns.observation_timing} onChange={(e) => setDraft({ ...draft, turns: { ...draft.turns, observation_timing: e.target.value as Turns["observation_timing"] } })}>
+                <option value="TURN_START">轮到时观测</option><option value="ROUND_START">每轮开始时统一观测（可能过时）</option></select></label>
+            <label className="field"><span>共享资源冲突</span>
+              <select value={draft.turns.conflict_policy} onChange={(e) => setDraft({ ...draft, turns: { ...draft.turns, conflict_policy: e.target.value as Turns["conflict_policy"] } })}>
+                <option value="REVALIDATE">重新校验前提（仍成立则执行）</option><option value="REJECT_STALE">依赖位置已变化则拒绝</option></select></label>
+          </div>
+        </div>
+        <div className="card" data-testid="termination-editor">
+          <div className="card-head"><h3 className="grow">联合终止条件</h3></div>
+          <div className="card-body stack">
+            {draft.termination ? <>
+              <label className="field"><span>联合目标</span>
+                <select value={draft.termination.joint_goal ?? ""} onChange={(e) => setDraft({ ...draft, termination: { ...draft.termination!, joint_goal: e.target.value || null } })}>
+                  <option value="">— 无 —</option>{props.filter((x) => x.kind === "goal").map((x) => <option key={x.id} value={x.id}>{x.label ?? x.id}</option>)}</select></label>
+              <label className="field"><span>参与者目标</span>
+                <select value={draft.termination.actor_goals} onChange={(e) => setDraft({ ...draft, termination: { ...draft.termination!, actor_goals: e.target.value as Termination["actor_goals"] } })}>
+                  <option value="IGNORE">只报告，不结束运行</option><option value="ALL">全部达成即成功</option><option value="ANY">任一达成即成功</option></select></label>
+              <label className="field"><span>无可选动作时</span>
+                <select value={draft.termination.on_no_action} onChange={(e) => setDraft({ ...draft, termination: { ...draft.termination!, on_no_action: e.target.value as Termination["on_no_action"] } })}>
+                  <option value="FAIL">运行失败</option><option value="SKIP_ACTOR">该参与者跳过本轮</option><option value="END">结束（目标成立则成功）</option></select></label>
+              <label className="field"><span>无进展上限（连续轮次）</span><input type="number" min={1} placeholder="不限" value={draft.termination.no_progress_limit ?? ""}
+                onChange={(e) => setDraft({ ...draft, termination: { ...draft.termination!, no_progress_limit: e.target.value === "" ? null : Number(e.target.value) } })} /></label>
+              <button className="btn sm" onClick={() => setDraft({ ...draft, termination: null })}>改用 v1 停止条件</button>
+            </> : <button className="btn sm" onClick={() => setDraft({ ...draft, termination: {
+              joint_goal: draft.stop_conditions.find((x) => x.kind === "GOAL_REACHED")?.property_id ?? props.find((x) => x.kind === "goal")?.id ?? null,
+              actor_goals: "IGNORE", invariants: [], on_no_action: "SKIP_ACTOR", no_progress_limit: 12 } })}>启用 v2 联合终止条件</button>}
+          </div>
+        </div>
+      </div>}
 
       <InlineError error={save.error ?? start.error ?? copy.error ?? remove.error} />
       <div className="row end">

@@ -38,7 +38,7 @@ PORTS = {
     8000: "platform API (dev)",
     5173: "web dev server (dev)",
     8080: "full Compose stack web (local-services, compose profile)",
-    8090: "local order service (local-services)",
+    8765: "local order service (make orders-up; local-lite and local-services)",
 }
 
 PROFILES = {
@@ -51,7 +51,7 @@ PROFILES = {
     "local-services": {
         "description": "PostgreSQL + Temporal + S3 + API + worker + web + local order service",
         "requires": ["python3", "uv", "venv", "docker", "compose", "node", "pnpm"],
-        "ports": [5432, 7233, 8233, 8333, 8000, 5173, 8090],
+        "ports": [5432, 7233, 8233, 8333, 8000, 5173, 8765],
         "estimate": {"cpus": 2, "memory_mib": 2600, "disk_gib": 6},
     },
     "local-kind": {
@@ -264,7 +264,7 @@ def services(owners: dict[int, str]) -> dict:
         "api": http_ok("http://127.0.0.1:8000/health"),
         "web_dev": port_open(5173),
         "compose_web": http_ok("http://127.0.0.1:8080/health") or port_open(8080),
-        "order_service": http_ok("http://127.0.0.1:8090/health"),
+        "order_service": http_ok("http://127.0.0.1:8765/health"),
     }
 
 
