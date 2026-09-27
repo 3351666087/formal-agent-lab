@@ -74,6 +74,8 @@ class ModelVersion(Base):
     digest: Mapped[str] = mapped_column(String(64), index=True)
     semantic_profile: Mapped[str] = mapped_column(String(80))
     package: Mapped[dict[str, Any]] = mapped_column(JsonType, doc="ModelPackage contract object")
+    contract_version: Mapped[str] = mapped_column(String(40), default="formal-lab-contracts/v2",
+                                                  doc="contract version the package JSON was written in")
     parent_version: Mapped[int | None] = mapped_column(Integer)
     note: Mapped[str | None] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
@@ -87,6 +89,7 @@ class Scenario(Base):
     name: Mapped[str] = mapped_column(String(200))
     revision: Mapped[int] = mapped_column(Integer, default=1)
     manifest: Mapped[dict[str, Any]] = mapped_column(JsonType, doc="ScenarioManifest contract object")
+    contract_version: Mapped[str] = mapped_column(String(40), default="formal-lab-contracts/v2")
     copied_from: Mapped[str | None] = mapped_column(String(40))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now, onupdate=_now)
@@ -126,6 +129,11 @@ class Run(Base):
     status: Mapped[str] = mapped_column(String(24), index=True)
     status_reason: Mapped[str | None] = mapped_column(Text)
     manifest: Mapped[dict[str, Any]] = mapped_column(JsonType, doc="RunManifest contract object")
+    contract_version: Mapped[str] = mapped_column(String(40), default="formal-lab-contracts/v2",
+                                                  doc="contract version of manifest/events as stored (v1 rows are "
+                                                      "read through formal_lab_contracts.compat)")
+    carry: Mapped[dict[str, Any] | None] = mapped_column(JsonType, doc="engine CarryState after last_step")
+    termination_reason: Mapped[str | None] = mapped_column(String(40))
     workflow_id: Mapped[str | None] = mapped_column(String(80))
     event_seq: Mapped[int] = mapped_column(BigInteger, default=0)
     last_step: Mapped[int] = mapped_column(Integer, default=0)
@@ -155,6 +163,8 @@ class RunEvent(Base):
     payload_schema: Mapped[str] = mapped_column(String(120))
     payload: Mapped[dict[str, Any]] = mapped_column(JsonType)
     idempotency_key: Mapped[str] = mapped_column(String(200))
+    turn: Mapped[dict[str, Any] | None] = mapped_column(JsonType, doc="TurnRef (v2)")
+    stage: Mapped[str | None] = mapped_column(String(24), doc="ExecutionStage (v2)")
 
 
 class Operation(Base):
@@ -168,6 +178,97 @@ class Operation(Base):
     status: Mapped[str] = mapped_column(String(16))  # STARTED | COMPLETED | FAILED
     attempts: Mapped[int] = mapped_column(Integer, default=1)
     result: Mapped[dict[str, Any] | None] = mapped_column(JsonType)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now, onupdate=_now)
+
+
+class OperationRecordRow(Base):
+    """Coordination record of one environment operation (OperationRecord); every transition is committed before
+    the next action, so a crash is reconciled from here."""
+
+    __tablename__ = "operation_records"
+    operation_id: Mapped[str] = mapped_column(String(160), primary_key=True)
+    run_id: Mapped[str] = mapped_column(ForeignKey("runs.id", ondelete="CASCADE"), index=True)
+    step: Mapped[int] = mapped_column(Integer)
+    actor_id: Mapped[str | None] = mapped_column(String(80))
+    state: Mapped[str] = mapped_column(String(24), index=True)
+    needs_review: Mapped[bool] = mapped_column(default=False, index=True)
+    record: Mapped[dict[str, Any]] = mapped_column(JsonType, doc="OperationRecord")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now, onupdate=_now)
+
+
+class RuleSetRow(Base):
+    """Immutable rule-set versions: editing inserts a new version."""
+
+    __tablename__ = "rulesets"
+    __table_args__ = (UniqueConstraint("project_id", "ruleset_id", "version"),)
+    id: Mapped[str] = mapped_column(String(40), primary_key=True)
+    project_id: Mapped[str] = mapped_column(ForeignKey("projects.id", ondelete="CASCADE"), index=True)
+    ruleset_id: Mapped[str] = mapped_column(String(120))
+    version: Mapped[int] = mapped_column(Integer)
+    digest: Mapped[str] = mapped_column(String(64), index=True)
+    model_version_id: Mapped[str] = mapped_column(ForeignKey("model_versions.id"), index=True)
+    body: Mapped[dict[str, Any]] = mapped_column(JsonType, doc="RuleSet")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+
+class ReleaseRow(Base):
+    __tablename__ = "model_releases"
+    release_id: Mapped[str] = mapped_column(String(40), primary_key=True)
+    project_id: Mapped[str] = mapped_column(ForeignKey("projects.id", ondelete="CASCADE"), index=True)
+    model_version_id: Mapped[str] = mapped_column(ForeignKey("model_versions.id"), index=True)
+    ruleset_row_id: Mapped[str | None] = mapped_column(ForeignKey("rulesets.id"))
+    status: Mapped[str] = mapped_column(String(16))
+    digest: Mapped[str] = mapped_column(String(64))
+    record: Mapped[dict[str, Any]] = mapped_column(JsonType, doc="ModelReleaseRecord")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+
+class QueryBundleRow(Base):
+    __tablename__ = "query_bundles"
+    id: Mapped[str] = mapped_column(String(40), primary_key=True)
+    project_id: Mapped[str] = mapped_column(ForeignKey("projects.id", ondelete="CASCADE"), index=True)
+    model_version_id: Mapped[str] = mapped_column(ForeignKey("model_versions.id", ondelete="CASCADE"), index=True)
+    check_id: Mapped[str | None] = mapped_column(String(40), index=True)
+    bundle: Mapped[dict[str, Any]] = mapped_column(JsonType, doc="QueryBundle")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+
+class RegressionCaseRow(Base):
+    __tablename__ = "regression_cases"
+    case_id: Mapped[str] = mapped_column(String(60), primary_key=True)
+    project_id: Mapped[str] = mapped_column(ForeignKey("projects.id", ondelete="CASCADE"), index=True)
+    model_digest: Mapped[str] = mapped_column(String(64), index=True)
+    source: Mapped[str] = mapped_column(String(24))
+    origin_run_id: Mapped[str | None] = mapped_column(String(40), index=True)
+    case: Mapped[dict[str, Any]] = mapped_column(JsonType, doc="RegressionCase")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+
+class EnvironmentSessionRow(Base):
+    __tablename__ = "environment_sessions"
+    session_id: Mapped[str] = mapped_column(String(60), primary_key=True)
+    project_id: Mapped[str | None] = mapped_column(ForeignKey("projects.id", ondelete="CASCADE"), index=True)
+    plugin_id: Mapped[str] = mapped_column(String(200))
+    status: Mapped[str] = mapped_column(String(16), index=True)
+    record: Mapped[dict[str, Any]] = mapped_column(JsonType, doc="EnvironmentSession")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now, onupdate=_now)
+
+
+class MatrixCellRow(Base):
+    """Queue entry of one matrix cell (deduplicated by its full configuration digest)."""
+
+    __tablename__ = "matrix_cells"
+    matrix_id: Mapped[str] = mapped_column(ForeignKey("matrices.id", ondelete="CASCADE"), primary_key=True)
+    cell_id: Mapped[str] = mapped_column(String(40), primary_key=True)
+    config_digest: Mapped[str] = mapped_column(String(64), index=True)
+    spec: Mapped[dict[str, Any]] = mapped_column(JsonType, doc="MatrixCellSpec")
+    status: Mapped[str] = mapped_column(String(16), index=True)  # QUEUED | RUNNING | DONE | FAILED
+    run_id: Mapped[str | None] = mapped_column(String(40))
+    attempts: Mapped[int] = mapped_column(Integer, default=0)
+    error: Mapped[str | None] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now, onupdate=_now)
 

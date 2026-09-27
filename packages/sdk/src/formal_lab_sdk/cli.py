@@ -294,8 +294,12 @@ def replay_verify(path: Path) -> None:
         b = read_bundle(path.read_bytes())
     except FormalLabError as exc:
         _fail(exc)
+    causality = b.info.get("causality_problems", [])
+    upgraded = f" upgraded-from={b.info['upgraded_from']}" if b.info.get("upgraded_from") else ""
     typer.echo(f"OK {b.info['format']} run={b.manifest.run_id} events={len(b.events)} artifacts={len(b.artifacts)} "
-               f"contract={b.info['contract_version']} digest={b.info.get('contract_digest')}")
+               f"operations={len(b.operations)} participants={len(b.manifest.participants)} "
+               f"contract={b.info['contract_version']} digest={b.info.get('contract_digest')}{upgraded} "
+               f"causality={'ok' if not causality else f'{len(causality)} problem(s)'}")
 
 
 @replay_app.command("view")
@@ -306,23 +310,29 @@ def replay_view(path: Path, events: bool = typer.Option(False, "--events")) -> N
     except FormalLabError as exc:
         _fail(exc)
     m = b.manifest
-    typer.echo(f"run {m.run_id}  status {m.status.value} ({m.status_reason})")
-    typer.echo(f"scenario {m.scenario.name}  seed {m.seed}  model {m.model.package_id}@{m.model.version}")
-    strat = m.participants[0].strategy
-    typer.echo(f"strategy {strat.plugin.plugin_id}@{strat.plugin.version} {strat.config or ''}")
+    typer.echo(f"run {m.run_id}  status {m.status.value} ({m.status_reason})"
+               + (f"  termination={m.termination_reason.value}" if m.termination_reason else ""))
+    typer.echo(f"scenario {m.scenario.name}  seed {m.seed}  model {m.model.package_id}@{m.model.version}"
+               f"  turns={m.turns.mode.value}")
+    for p in m.participants:
+        typer.echo(f"participant {p.actor_id}: {p.strategy.plugin.plugin_id}@{p.strategy.plugin.version} "
+                   f"{p.strategy.config or ''}")
+    multi = len(m.participants) > 1
     for step in b.steps():
         d = b.step(step)
         a = d.get("proposal", {}).get("proposal", {}).get("action", {})
         o = d.get("outcome", {}).get("outcome", {})
         cmp = (o.get("effect_comparison") or {}).get("verdict", "")
-        chk = d.get("check", {}).get("result", {}).get("verdict", "")
-        typer.echo(f"  step {step:3d}  {a.get('action_type', '?')}({', '.join(f'{k}={v}' for k, v in a.get('params', {}).items())})"
+        chk = (d.get("checks") or [{}])[0].get("result", {}).get("verdict", "")
+        who = f" [{d.get('actor_id')} r{(d.get('turn_ref') or {}).get('round', '?')}]" if multi else ""
+        typer.echo(f"  step {step:3d}{who}  {a.get('action_type', '?')}"
+                   f"({', '.join(f'{k}={v}' for k, v in a.get('params', {}).items())})"
                    f"  check={chk} outcome={o.get('status')} effect={cmp}")
     typer.echo("metrics: " + ", ".join(f"{x.metric_id}={x.value if x.value is not None else x.status.value}"
                                        for x in b.metrics))
     if events:
         for row in b.timeline():
-            typer.echo(f"{row['seq']:5d} {row['type']:18s} step={row['step']}")
+            typer.echo(f"{row['seq']:5d} {row['type']:24s} step={row['step']} actor={row['actor'] or '-'}")
 
 
 @replay_app.command("step")

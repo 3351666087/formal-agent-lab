@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate, useParams } from "react-router";
 import type { PluginDescriptor } from "@formal-lab/contracts";
-import { get, post, TERMINAL, type CatalogEntry, type RunDetail, type VersionDetail } from "../api";
+import { irOf, get, post, TERMINAL, type CatalogEntry, type RunDetail, type VersionDetail } from "../api";
 import { groupSteps, StateChart, StepDetail, Timeline } from "../components/Steps";
 import { makeLabels } from "../labels";
 import { useRunEvents } from "../sse";
@@ -207,6 +207,6 @@ export function useRunLabels(run?: RunDetail) {
   return useMemo(() => {
     const pinned = new Set(run?.manifest.plugins.map((p) => `${p.plugin_id}@${p.version}`));
     const descs: PluginDescriptor[] = (plugins.data ?? []).map((p) => p.descriptor).filter((d) => pinned.has(`${d.plugin_id}@${d.version}`));
-    return makeLabels(version.data?.package.ir ?? null, descs);
+    return makeLabels(irOf(version.data?.package), descs);
   }, [version.data, plugins.data, run]);
 }

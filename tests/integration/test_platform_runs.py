@@ -155,7 +155,7 @@ def test_model_versions_are_immutable_and_runs_keep_their_version(stack, demo):
     models = stack.get(f"/projects/{project}/models")
     model = next(m for m in models if m["package_id"] == "neutral-scheduling")
     v1 = stack.get(f"/models/{model['id']}/versions/1")
-    ir = v1["package"]["ir"]
+    ir = v1["package"]["payload"]["ir"]
     ir["constants"] = [c if c["name"] != "due" else {**c, "value": {"cells": [
         {"index": ["o1"], "value": 7}, {"index": ["o2"], "value": 7}, {"index": ["o3"], "value": 8}]}}
         for c in ir["constants"]]

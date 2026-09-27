@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate, useParams } from "react-router";
 import type { ScenarioManifest } from "@formal-lab/contracts";
-import { del, get, post, put, type CatalogEntry, type ModelSummary, type RunSummary, type Scenario, type VersionDetail } from "../api";
+import { irOf, del, get, post, put, type CatalogEntry, type ModelSummary, type RunSummary, type Scenario, type VersionDetail } from "../api";
 import { Empty, fmtTime, InlineError, Loading, QueryState, SchemaForm, useToast } from "../ui";
 
 type Draft = {
@@ -72,7 +72,7 @@ function ScenarioEditor({ pid, sid }: { pid: string; sid: string }) {
     setModelId(m.id);
     get<ModelSummary>(`/models/${m.id}`).then((md) => setDraft({
       name: "新场景", description: "", model_version_id: md.versions!.at(-1)!.id,
-      environment: { plugin: { plugin_id: "formal-lab.env.ir-world", version: "1.0.0" }, config: {} },
+      environment: { plugin: { plugin_id: "formal-lab.env.ir-world", version: "1.1.0" }, config: {} },
       participants: [{ actor_id: "agent", role: "operator", strategy: { plugin: { plugin_id: "formal-lab.planner.z3-bounded", version: "1.0.0" }, config: {} } }],
       objectives: [], budget: { max_steps: 60, max_wall_seconds: 600, max_model_calls: null, max_tokens: null }, seed: 0,
       stop_conditions: [{ kind: "NO_APPLICABLE_ACTION", property_id: null }],
@@ -114,7 +114,7 @@ function ScenarioEditor({ pid, sid }: { pid: string; sid: string }) {
 
   if (!isNew && scenario.isPending) return <div className="card"><Loading /></div>;
   if (!draft) return <div className="card">{isNew && models.data?.length === 0 ? <Empty title="项目中没有模型" hint="先在模型工作台创建模型。" /> : <Loading />}</div>;
-  const ir = versionDetail.data?.package.ir;
+  const ir = irOf(versionDetail.data?.package) ?? undefined;
   const props = ir?.properties ?? [];
   const envEntry = envs.data?.find((e) => e.descriptor.plugin_id === draft.environment.plugin.plugin_id);
   const setP = (i: number, patch: Partial<Draft["participants"][number]>) =>

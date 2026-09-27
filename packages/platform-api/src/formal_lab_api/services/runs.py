@@ -5,13 +5,15 @@ from __future__ import annotations
 from typing import Any
 
 from formal_lab_contracts import (
+    CONTRACT_VERSION,
     TERMINAL_RUN_STATUSES,
     Budget,
     Participant,
     PluginRef,
-    RunManifest,
+    ReleaseRef,
     RunStatus,
     ScenarioManifest,
+    compat,
     utcnow,
 )
 from formal_lab_contracts.errors import Conflict, InvalidInput
@@ -61,9 +63,11 @@ def create_run(s: Session, project_id: str, body: dict[str, Any], *, client_requ
         if existing is not None:
             return existing, False
     run_id = new_id("run")
+    release = None
     if source_run is not None:  # re-run: same pinned scenario snapshot / participants / seed / budget
-        src = RunManifest.model_validate(source_run.manifest)
+        src = compat.upgrade_run_manifest(source_run.manifest)
         scenario, participants, seed, budget = src.scenario, src.participants, src.seed, src.budget
+        release = src.release
         evaluators = [PluginRef(plugin_id=p.plugin_id, version=p.version) for p in src.plugins
                       if p.role.startswith("evaluator")]
         scenario_id, strategy_id, config = source_run.scenario_id, source_run.strategy_config_id, {
@@ -72,27 +76,44 @@ def create_run(s: Session, project_id: str, body: dict[str, Any], *, client_requ
         sc_row = get_or_404(s, Scenario, body.get("scenario_id"), "scenario")
         if sc_row.project_id != project_id:
             raise InvalidInput("scenario belongs to another project")
-        scenario = ScenarioManifest.model_validate(sc_row.manifest)
+        scenario = compat.upgrade_scenario(sc_row.manifest)
         participants = list(scenario.participants)
         strategy_id = body.get("strategy_config_id")
-        if strategy_id:
-            st = get_or_404(s, StrategyConfig, strategy_id, "strategy")
-            participants = [Participant(actor_id=p.actor_id, role=p.role,
-                                        strategy={"plugin": {"plugin_id": st.plugin_id, "version": st.plugin_version},
-                                                  "config": st.config}) for p in participants]
+        per_actor = dict(body.get("participant_strategies") or {})
+        unknown = set(per_actor) - {p.actor_id for p in participants}
+        if unknown:
+            raise InvalidInput(f"participant_strategies names unknown participants {sorted(unknown)}")
+
+        def with_strategy(p: Participant, sid: str) -> Participant:
+            st = get_or_404(s, StrategyConfig, sid, "strategy")
+            return p.model_copy(update={"strategy": {"plugin": {"plugin_id": st.plugin_id,
+                                                                "version": st.plugin_version},
+                                                     "config": st.config}})
+
+        participants = [with_strategy(p, per_actor.get(p.actor_id) or strategy_id)
+                        if (per_actor.get(p.actor_id) or strategy_id) else p for p in participants]
+        participants = [Participant.model_validate(p.model_dump(mode="json")) for p in participants]
         seed = int(body["seed"]) if body.get("seed") is not None else scenario.seed
         budget = Budget.model_validate({**scenario.budget.model_dump(exclude_none=True), **(body.get("budget") or {})})
         evaluators = evaluators_for(scenario.model.package_id, body.get("evaluators"))
         scenario_id, config = sc_row.id, dict(body.get("config") or {})
     package = _package_for(s, scenario)
+    if body.get("release_id"):
+        from ..db import ReleaseRow
+
+        rel = get_or_404(s, ReleaseRow, body["release_id"], "release")
+        if rel.status != "RELEASED":
+            raise InvalidInput(f"release {rel.release_id} was rejected; it cannot be run")
+        release = ReleaseRef(release_id=rel.release_id, digest={"value": rel.digest})
     manifest = make_manifest(run_id=run_id, project_id=project_id, scenario=scenario, package=package,
                              registry=registry(), participants=participants, evaluators=evaluators, config=config,
                              source_run_id=source_run.id if source_run else None, matrix_id=matrix_id, seed=seed,
-                             budget=budget)
+                             budget=budget, release=release)
     run = Run(id=run_id, project_id=project_id, scenario_id=scenario_id, strategy_config_id=strategy_id,
               matrix_id=matrix_id, source_run_id=source_run.id if source_run else None,
               client_request_id=client_request_id, status=RunStatus.CREATED.value,
-              manifest=manifest.model_dump(mode="json"), usage={}, workflow_id=f"run-{run_id}")
+              manifest=manifest.model_dump(mode="json"), usage={}, workflow_id=f"run-{run_id}",
+              contract_version=CONTRACT_VERSION)
     s.add(run)
     s.flush()
     append_events(s, run, [draft(f"{run_id}:run:created", "RUN_CREATED", None,
@@ -163,6 +184,7 @@ def run_dict(run: Run, s: Session, *, full: bool = False) -> dict[str, Any]:
     m = run.manifest
     participants = m.get("participants", [])
     strategy = participants[0]["strategy"]["plugin"] if participants else None
+    carry = run.carry or {}
     out: dict[str, Any] = {
         "id": run.id, "project_id": run.project_id, "scenario_id": run.scenario_id, "status": run.status,
         "status_reason": run.status_reason, "source_run_id": run.source_run_id, "matrix_id": run.matrix_id,
@@ -171,12 +193,17 @@ def run_dict(run: Run, s: Session, *, full: bool = False) -> dict[str, Any]:
         "usage": run.usage, "event_seq": run.event_seq, "last_step": run.last_step, "imported": run.imported,
         "created_at": run.created_at, "started_at": run.started_at, "finished_at": run.finished_at,
         "error": run.error,
+        "participants": [{"actor_id": p["actor_id"], "role": p.get("role"), "strategy": p["strategy"]["plugin"],
+                          "goal": p.get("goal")} for p in participants],
+        "termination_reason": run.termination_reason, "turn": carry.get("turn"),
+        "actor_usage": (run.usage or {}).get("actors", {}), "stored_contract_version": run.contract_version,
     }
     metrics = s.scalars(select(MetricRow).where(MetricRow.run_id == run.id)).all()
     out["metrics"] = {mr.metric_id: {"value": mr.value, "status": mr.status, "unit": mr.result.get("unit")}
                       for mr in metrics}
     if full:
-        out["manifest"] = m
+        out["manifest"] = compat.upgrade_run_manifest(m).model_dump(mode="json")
+        out["carry"] = carry
         out["final_state"] = run.final_state
         out["lineage"] = {"source_run_id": run.source_run_id,
                           "reruns": [r.id for r in s.scalars(select(Run).where(Run.source_run_id == run.id))]}

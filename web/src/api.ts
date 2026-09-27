@@ -63,7 +63,10 @@ export interface VersionSummary {
   parent_version: number | null; note: string | null; created_at: string;
 }
 export interface VersionDetail extends VersionSummary {
-  package: { ir: ModelIR; digest: { value: string }; package_id: string; version: number };
+  package: {
+    payload: { kind: "fal-ir"; ir: ModelIR } | { kind: "namespaced"; namespace: string; schema_id: string; data: Record<string, unknown> };
+    digest: { value: string }; package_id: string; version: number; semantic_profile: string;
+  };
   action_specs: { action_type: string; label?: string | null; preconditions: string[]; expected_effects: string[];
     params_schema: { properties: Record<string, { enum?: string[]; minimum?: number; maximum?: number; type: string }> } }[];
   summary: { state_locations: number; ground_actions: number };
@@ -147,3 +150,8 @@ export interface MatrixReport {
 export type { TraceEvent };
 
 export const TERMINAL = new Set(["SUCCEEDED", "FAILED", "CANCELLED", "BUDGET_EXHAUSTED"]);
+
+/** The neutral IR of a model package (null for profile-specific payloads such as the warehouse model). */
+export function irOf(pkg: VersionDetail["package"] | undefined | null): ModelIR | null {
+  return pkg && pkg.payload.kind === "fal-ir" ? pkg.payload.ir : null;
+}

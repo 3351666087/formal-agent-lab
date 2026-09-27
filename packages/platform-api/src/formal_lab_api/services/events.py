@@ -72,18 +72,24 @@ def append_events(s: Session, run: Run, drafts: Iterable[EventDraft]) -> list[Ru
         row = RunEvent(run_id=run.id, seq=run.event_seq, event_id=d.event_id, event_type=d.event_type.value,
                        logical_step=d.step, wall_time=now, actor_id=d.actor_id,
                        causal_parents=[event_id_for(k) for k in d.parents], payload_schema=d.payload_schema,
-                       payload=d.payload, idempotency_key=d.key)
+                       payload=d.payload, idempotency_key=d.key,
+                       turn=d.turn.model_dump(mode="json") if d.turn else None,
+                       stage=d.stage.value if d.stage else None)
         s.add(row)
         added.append(row)
     s.flush()
     return added
 
 
-def to_trace_event(row: RunEvent) -> TraceEvent:
+def to_trace_event(row: RunEvent, *, upgrade: bool = False) -> TraceEvent:
+    """TraceEvent of a stored row; `upgrade` rewrites embedded v1 objects of phase-1 rows to v2 (exports)."""
+    from formal_lab_contracts import compat
+
+    payload = compat.upgrade_event_payload(row.event_type, row.payload) if upgrade else row.payload
     return TraceEvent(event_id=row.event_id, run_id=row.run_id, seq=row.seq, event_type=row.event_type,
                       causal_parents=row.causal_parents, logical_step=row.logical_step, wall_time=row.wall_time,
-                      actor_id=row.actor_id, payload_schema=row.payload_schema, payload=row.payload,
-                      idempotency_key=row.idempotency_key)
+                      actor_id=row.actor_id, payload_schema=row.payload_schema, payload=payload,
+                      idempotency_key=row.idempotency_key, turn=row.turn, stage=row.stage)
 
 
 def list_events(s: Session, run_id: str, *, after_seq: int = 0, limit: int = 500,

@@ -1,7 +1,7 @@
 // Live run events over SSE. EventSource reconnects automatically and sends Last-Event-ID, so a dropped
 // connection (or a page refresh that restores `known`) continues exactly after the last seen seq.
 import { useEffect, useRef, useState } from "react";
-import type { TraceEvent } from "@formal-lab/contracts";
+import { EVENT_TYPES, type TraceEvent } from "@formal-lab/contracts";
 import { API, get } from "./api";
 
 export type StreamState = "connecting" | "live" | "reconnecting" | "ended" | "error";
@@ -42,6 +42,7 @@ export function useRunEvents(runId: string | undefined) {
         setEvents((xs) => [...xs, ev]);
       };
       source.onmessage = onEvent;
+      // every event type of the contract (generated list): named SSE events are only delivered to listeners
       for (const t of EVENT_TYPES) source.addEventListener(t, onEvent as EventListener);
     })().catch(() => setState("error"));
     return () => { closed = true; source?.close(); };
@@ -49,7 +50,3 @@ export function useRunEvents(runId: string | undefined) {
 
   return { events, state };
 }
-
-const EVENT_TYPES = ["RUN_CREATED", "RUN_QUEUED", "RUN_STARTED", "OBSERVATION", "CANDIDATES", "ACTION_PROPOSED",
-  "CHECK_COMPLETED", "ACTION_OUTCOME", "EFFECT_COMPARED", "STATE_SNAPSHOT", "RUN_PAUSING", "RUN_PAUSED", "RUN_RESUMED",
-  "RUN_CANCELLING", "RUN_CANCELLED", "BUDGET_EXHAUSTED", "RUN_SUCCEEDED", "RUN_FAILED", "METRICS_COMPUTED", "LOG"];

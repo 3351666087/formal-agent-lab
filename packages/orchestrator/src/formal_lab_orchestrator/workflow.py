@@ -81,6 +81,8 @@ class ExperimentWorkflow:
                 if res.get("terminal"):
                     return await self._finish(run_id, res)
                 self.step = int(res["next_step"])
+                if res.get("pause_requested"):  # a PAUSE rule fired: the run is PAUSING; stop at this boundary
+                    self.pause_requested = True
                 if workflow.info().is_continue_as_new_suggested():
                     workflow.continue_as_new({"run_id": run_id, "next_step": self.step,
                                               "pause_requested": self.pause_requested})

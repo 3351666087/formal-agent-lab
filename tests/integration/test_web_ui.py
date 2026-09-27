@@ -1,7 +1,7 @@
 """Browser tests of the six Web areas against the real stack (Playwright + Chromium, P1-090…P1-096, P1-124).
 
 The built web app is served by `vite preview` and proxies /api to the test API. Screenshots are written to
-docs/execution/evidence/ui/ and every page is checked for horizontal overflow at desktop and phone widths.
+docs/execution/evidence/phase2/ui/ (phase-1 shots in evidence/ui/ are history and are not overwritten) and every page is checked for horizontal overflow at desktop and phone widths.
 """
 
 from __future__ import annotations
@@ -19,7 +19,7 @@ import pytest
 
 pytestmark = [pytest.mark.integration, pytest.mark.ui]
 ROOT = Path(__file__).resolve().parents[2]
-SHOTS = ROOT / "docs" / "execution" / "evidence" / "ui"
+SHOTS = ROOT / "docs" / "execution" / "evidence" / "phase2" / "ui"
 DESKTOP = {"width": 1440, "height": 900}
 PHONE = {"width": 375, "height": 812}
 

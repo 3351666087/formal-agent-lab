@@ -80,14 +80,20 @@ def test_cli_export_offline_replay_import_and_rerun(stack, sdk, demo, tmp_path):
     shutil.copy(bundle_path, empty / "bundle.zip")
     offline = {"FAL_API_URL": "http://127.0.0.1:9/api/v1"}  # unreachable: proves no server is needed
     verify = fal(stack, "replay", "verify", "bundle.zip", cwd=empty, env=offline)
-    assert verify.stdout.startswith("OK formal-lab/replay-bundle@1")
+    assert verify.stdout.startswith("OK formal-lab/replay-bundle@2")
     view = fal(stack, "replay", "view", "bundle.zip", cwd=empty, env=offline)
     assert "step   1" in view.stdout and "effect=DIFFERENT" in view.stdout
     step = json.loads(fal(stack, "replay", "step", "bundle.zip", "3", cwd=empty, env=offline).stdout)
-    assert {"observation", "candidates", "proposal", "check", "outcome", "comparison"} <= set(step)
+    assert {"observation", "candidates", "proposal", "checks", "outcome", "comparison", "turn_ref"} <= set(step)
     bundle = read_bundle((empty / "bundle.zip").read_bytes())
-    assert "contracts/v1/DIGEST.json" in bundle.info["files"] and bundle.artifacts  # contracts + snapshots inside
+    assert "contracts/v2/DIGEST.json" in bundle.info["files"] and bundle.artifacts  # contracts + snapshots inside
     assert len(bundle.events) == sdk.run(run_id)["event_seq"]
+    assert bundle.operations and all(o.state.value == "COMPLETED" for o in bundle.operations)
+    # a phase-1 bundle (formal-lab/replay-bundle@1, v1 contract) stays readable offline
+    phase1 = Path(__file__).resolve().parents[1] / "compat" / "fixtures" / "phase1" / "state-delay.replay.zip"
+    shutil.copy(phase1, empty / "phase1.zip")
+    old = fal(stack, "replay", "verify", "phase1.zip", cwd=empty, env=offline)
+    assert old.stdout.startswith("OK formal-lab/replay-bundle@1") and "upgraded" in old.stdout
 
     project = sdk.create_project(f"import-{uuid.uuid4().hex[:6]}")
     # a run id is unique per server: importing a bundle of a run that still exists is a CONFLICT

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from formal_lab_contracts import MetricDefinition, MetricResult, PluginRef, RunManifest
+from formal_lab_contracts import MetricDefinition, MetricResult, PluginRef, RunManifest, compat
 from formal_lab_contracts.errors import InvalidInput
 from formal_lab_eval.matrix import Cell, CellRun, build_report, expand
 from sqlalchemy import select
@@ -53,11 +53,17 @@ def attach_runs(s: Session, matrix_id: str, run_ids: list[str]) -> None:
 
 
 def _strategy_label(manifest: RunManifest) -> tuple[str, str]:
-    p = manifest.participants[0].strategy
-    stub = p.config.get("client") == "stub"
-    entry = registry().get(p.plugin)
-    key = p.plugin.plugin_id + (":stub" if stub else "")
-    return key, entry.descriptor.ui.label + (" (stub)" if stub else "")
+    """Strategy key/label of a run; several participants → the combination (actor=strategy, in turn order)."""
+    parts = []
+    for part in manifest.participants:
+        p = part.strategy
+        stub = p.config.get("client") == "stub"
+        entry = registry().resolve(p.plugin)
+        parts.append((part.actor_id, p.plugin.plugin_id + (":stub" if stub else ""),
+                      entry.descriptor.ui.label + (" (stub)" if stub else "")))
+    if len(parts) == 1:
+        return parts[0][1], parts[0][2]
+    return "+".join(f"{a}={k}" for a, k, _ in parts), " + ".join(f"{a}: {lab}" for a, _, lab in parts)
 
 
 def report(s: Session, matrix_id: str) -> dict[str, Any]:
@@ -68,7 +74,7 @@ def report(s: Session, matrix_id: str) -> dict[str, Any]:
     definitions: dict[str, MetricDefinition] = {}
     cell_runs: list[CellRun] = []
     for run in runs:
-        manifest = RunManifest.model_validate(run.manifest)
+        manifest = compat.upgrade_run_manifest(run.manifest)
         package = _package(s, manifest)
         for pin in manifest.plugins:
             if pin.role.startswith("evaluator"):

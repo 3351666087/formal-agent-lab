@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate, useParams } from "react-router";
 import type { BoundedCheckResult, ModelIR } from "@formal-lab/contracts";
 import {
-  get, post, type CheckRecord, type ModelChange, type ModelSummary, type Validation, type VersionDetail,
+  get, irOf, post, type CheckRecord, type ModelChange, type ModelSummary, type Validation, type VersionDetail,
 } from "../api";
 import { ModelGraph } from "../components/ModelGraph";
 import { blankModel, effectLines, exprText, typeText } from "../ir";
@@ -104,10 +104,10 @@ function ModelEditor({ modelId }: { modelId: string }) {
         if (parsed.base === detail.data.version) { setDraft(parsed.ir); setRestored(true); return; }
       } catch { /* ignore broken drafts */ }
     }
-    setDraft(structuredClone(detail.data.package.ir));
+    setDraft(structuredClone(irOf(detail.data.package)!));
   }, [detail.data, modelId, version]);
 
-  const baseIr = detail.data?.package.ir;
+  const baseIr = irOf(detail.data?.package) ?? undefined;
   const dirty = useMemo(() => draft && baseIr && JSON.stringify(draft) !== JSON.stringify(baseIr), [draft, baseIr]);
   useEffect(() => {
     if (!draft || !detail.data) return;
@@ -164,14 +164,14 @@ function ModelEditor({ modelId }: { modelId: string }) {
             ["创建", `${fmtTime(d.created_at)}${d.parent_version ? ` · 基于 v${d.parent_version}` : ""}`],
           ]} />
           {restored && <div className="callout warn small">已恢复刷新前未保存的草稿（基于 v{d.version}）。
-            <button className="btn sm ghost" onClick={() => { localStorage.removeItem(draftKey(modelId)); setDraft(structuredClone(d.package.ir)); setRestored(false); }}>丢弃草稿</button></div>}
+            <button className="btn sm ghost" onClick={() => { localStorage.removeItem(draftKey(modelId)); setDraft(structuredClone(irOf(d.package)!)); setRestored(false); }}>丢弃草稿</button></div>}
           <div className="row">
             <span className={`badge ${!validation ? "" : validation.valid ? "ok" : "err"}`} role="status">
               {!validation ? "校验中…" : validation.valid ? "类型检查通过" : `${issues.length + schemaErrors.length} 个问题`}
             </span>
             {dirty ? <span className="badge warn">有未保存修改</span> : <span className="badge">与 v{d.version} 一致</span>}
             <input style={{ flex: 1, minWidth: 160 }} placeholder="版本说明（可选）" value={note} onChange={(e) => setNote(e.target.value)} aria-label="版本说明" />
-            <button className="btn" disabled={!dirty} onClick={() => setDraft(structuredClone(d.package.ir))}>撤销修改</button>
+            <button className="btn" disabled={!dirty} onClick={() => setDraft(structuredClone(irOf(d.package)!))}>撤销修改</button>
             <button className="btn primary" disabled={!dirty || invalid || save.isPending} onClick={() => save.mutate()}
               title={invalid ? "存在类型错误，不能保存" : undefined}>{save.isPending ? "保存中…" : "保存为新版本"}</button>
           </div>
@@ -385,7 +385,7 @@ function DiffView({ modelId, versions, current }: { modelId: string; versions: n
 // ------------------------------------------------------------------ bounded checks
 function CheckPanel({ detail, dirty }: { detail: VersionDetail; dirty: boolean }) {
   const qc = useQueryClient();
-  const ir = detail.package.ir;
+  const ir = irOf(detail.package)!;
   const props = ir.properties ?? [];
   const [kind, setKind] = useState<"GOAL_REACHABILITY" | "INVARIANT_VIOLATION" | "ACTION_PRECONDITION">("GOAL_REACHABILITY");
   const [prop, setProp] = useState(props.find((p) => p.kind === "goal")?.id ?? props[0]?.id ?? "");

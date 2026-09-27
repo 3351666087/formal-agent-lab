@@ -4,9 +4,19 @@ from __future__ import annotations
 
 from typing import Any
 
-from formal_lab_contracts import CheckQuery, ModelIR, ModelPackage, ModelSource, PluginRef
+from formal_lab_contracts import (
+    CONTRACT_VERSION,
+    CheckQuery,
+    ModelIR,
+    ModelPackage,
+    ModelSource,
+    PluginRef,
+    compat,
+    digest_of,
+    utcnow,
+)
 from formal_lab_contracts.errors import Conflict, InvalidInput
-from formal_lab_model import action_specs, check_model, diff_models, ir_digest, parse_ir
+from formal_lab_model import check_model, diff_models, ir_digest, parse_ir
 from formal_lab_model.capability_matrix import MATRIX
 from formal_lab_model.frontend import SOURCE_FORMAT, build_package
 from sqlalchemy import func, select
@@ -84,18 +94,26 @@ def model_dict(m: Model) -> dict[str, Any]:
 def version_dict(v: ModelVersion, *, full: bool = True) -> dict[str, Any]:
     out = {"id": v.id, "model_id": v.model_id, "version": v.version, "digest": v.digest,
            "semantic_profile": v.semantic_profile, "parent_version": v.parent_version, "note": v.note,
-           "created_at": v.created_at}
+           "created_at": v.created_at, "stored_contract_version": v.contract_version}
     if full:
-        out["package"] = v.package
+        out["package"] = package_of(v).model_dump(mode="json")  # v2 view; v1 rows are upgraded on the way
     return out
 
 
 def package_of(v: ModelVersion) -> ModelPackage:
-    return ModelPackage.model_validate(v.package)
+    """The v2 ModelPackage of a stored version (phase-1 rows are validated as v1, then upgraded)."""
+    return compat.upgrade_model_package(v.package)
 
 
-def create_model(s: Session, project_id: str, *, package_id: str, name: str | None, ir: dict[str, Any],
-                 description: str | None = None, origin: str = "api") -> tuple[Model, ModelVersion]:
+def loaded_of(package: ModelPackage):
+    """The package loaded by the semantic driver of its profile (any profile)."""
+    driver = registry().create(registry().driver_for(package.semantic_profile).descriptor.ref(), {}, None)
+    return driver.load(package)
+
+
+def create_model(s: Session, project_id: str, *, package_id: str, name: str | None, ir: dict[str, Any] | None = None,
+                 description: str | None = None, origin: str = "api",
+                 payload: dict[str, Any] | None = None) -> tuple[Model, ModelVersion]:
     get_or_404(s, Project, project_id, "project")
     if s.scalar(select(Model).where(Model.project_id == project_id, Model.package_id == package_id)):
         raise Conflict(f"model {package_id!r} already exists in this project")
@@ -103,16 +121,60 @@ def create_model(s: Session, project_id: str, *, package_id: str, name: str | No
                   description=description)
     s.add(model)
     s.flush()
-    version = add_version(s, model.id, ir=ir, note="initial version", origin=origin)
+    version = add_version(s, model.id, ir=ir, payload=payload, note="initial version", origin=origin)
     return model, version
 
 
-def add_version(s: Session, model_id: str, *, ir: dict[str, Any] | ModelIR, note: str | None = None,
-                parent_version: int | None = None, origin: str = "editor") -> ModelVersion:
+def _namespaced_package(model: Model, version: int, payload: dict[str, Any], origin: str,
+                        parent_version: int | None) -> ModelPackage:
+    """A model in a profile-specific format: validated by the semantic driver of its profile (P2-013)."""
+    profile = payload.get("semantic_profile")
+    if not profile:
+        raise InvalidInput("a namespaced model needs `semantic_profile`")
+    body = {k: payload[k] for k in ("namespace", "schema_id", "data") if k in payload}
+    if len(body) != 3:
+        raise InvalidInput("a namespaced model needs namespace, schema_id and data")
+    entry = registry().driver_for(profile)
+    frontend = payload.get("frontend") or entry.descriptor.ref().model_dump()
+    package = ModelPackage(package_id=model.package_id, version=version, frontend=frontend,
+                           semantic_profile=profile, digest=digest_of(body),
+                           payload={"kind": "namespaced", **body},
+                           source=ModelSource(format=payload.get("source_format", f"{body['schema_id']}+json"),
+                                              origin=origin, parent_version=parent_version),
+                           created_at=utcnow())
+    problems = registry().create(entry.descriptor.ref(), {}, None).validate(package)
+    if problems:
+        raise InvalidInput(f"model does not satisfy {entry.descriptor.plugin_id}",
+                           details={"problems": problems[:20]})
+    return package
+
+
+def add_version(s: Session, model_id: str, *, ir: dict[str, Any] | ModelIR | None = None, note: str | None = None,
+                parent_version: int | None = None, origin: str = "editor",
+                payload: dict[str, Any] | None = None) -> ModelVersion:
     """Editing a model = inserting a new immutable version. Unchanged content returns the latest version."""
     model = s.get(Model, model_id, with_for_update=True)
     if model is None:
         raise InvalidInput(f"model {model_id} not found")
+    if payload is not None:
+        version_no = model.latest_version + 1
+        package = _namespaced_package(model, version_no, payload, origin,
+                                      parent_version or (model.latest_version or None))
+        if model.latest_version:
+            latest = s.scalar(select(ModelVersion).where(ModelVersion.model_id == model_id,
+                                                         ModelVersion.version == model.latest_version))
+            if latest is not None and latest.digest == package.digest.value:
+                return latest
+        row = ModelVersion(id=new_id("mv"), model_id=model_id, version=version_no, digest=package.digest.value,
+                           semantic_profile=package.semantic_profile, package=package.model_dump(mode="json"),
+                           contract_version=CONTRACT_VERSION, parent_version=package.source.parent_version,
+                           note=note)
+        model.latest_version = version_no
+        s.add(row)
+        s.flush()
+        return row
+    if ir is None:
+        raise InvalidInput("give `ir` (neutral IR model) or `payload` (profile-specific model)")
     parsed = ir if isinstance(ir, ModelIR) else parse_ir(ir)
     digest = ir_digest(parsed).value
     if model.latest_version:
@@ -127,6 +189,7 @@ def add_version(s: Session, model_id: str, *, ir: dict[str, Any] | ModelIR, note
                                                (model.latest_version or None)))
     row = ModelVersion(id=new_id("mv"), model_id=model_id, version=version, digest=digest,
                        semantic_profile=package.semantic_profile, package=package.model_dump(mode="json"),
+                       contract_version=CONTRACT_VERSION,
                        parent_version=parent_version or (model.latest_version or None), note=note)
     model.latest_version = version
     s.add(row)
@@ -148,18 +211,35 @@ def list_versions(s: Session, model_id: str) -> list[ModelVersion]:
 
 def diff_versions(s: Session, model_id: str, a: int, b: int) -> list[dict[str, Any]]:
     va, vb = get_version(s, model_id, a), get_version(s, model_id, b)
-    return [c.model_dump() for c in diff_models(package_of(va).ir, package_of(vb).ir)]
+    pa, pb = package_of(va), package_of(vb)
+    if not (pa.is_ir and pb.is_ir):
+        from formal_lab_model.diff import ModelChange
+
+        changes = [] if pa.digest == pb.digest else [ModelChange(
+            section="payload", name=pa.semantic_profile, kind="changed", before=pa.digest.value,
+            after=pb.digest.value)]
+        return [c.model_dump() for c in changes]
+    return [c.model_dump() for c in diff_models(pa.ir, pb.ir)]
 
 
 def version_details(v: ModelVersion) -> dict[str, Any]:
     package = package_of(v)
-    checked = check_model(package.ir)
-    return {
+    loaded = loaded_of(package)
+    out = {
         **version_dict(v),
-        "action_specs": [spec.model_dump(mode="json") for spec in action_specs(checked)],
-        "summary": {"state_locations": len(checked.state_paths()), "ground_actions": len(checked.ground_actions)},
+        "action_specs": [spec.model_dump(mode="json") for spec in loaded.action_specs()],
+        "summary": {"state_locations": len(loaded.state_paths()),
+                    "ground_actions": loaded.display().get("ground_actions")},
+        "display": loaded.display(),
+        "driver": registry().driver_for(package.semantic_profile).descriptor.ref().model_dump(),
         "capability_matrix": [row.model_dump() for row in MATRIX],
     }
+    if package.is_ir:
+        checked = check_model(package.ir)
+        out["summary"] = {"state_locations": len(checked.state_paths()),
+                          "ground_actions": len(checked.ground_actions)}
+        out["objectives"] = [o.model_dump(mode="json") for o in package.ir.objectives]
+    return out
 
 
 # ------------------------------------------------------------------------ checks
