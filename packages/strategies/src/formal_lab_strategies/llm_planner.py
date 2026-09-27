@@ -1,8 +1,15 @@
 """Generic LLM strategy: structured observation + candidate schema in, ActionProposal out.
 
-The planner is domain-neutral: it renders the observation, unknowns, goal properties and candidates from
-contract objects and plugin/model metadata, and asks the model to pick one candidate index (JSON-Schema
+The planner is domain-neutral: it renders the observation, unknowns, goal and candidates from contract objects and
+the model's semantic driver (any profile), and asks the model to pick one candidate index (JSON-Schema
 constrained). The model never gets free-form tools; it can only choose among environment candidates.
+
+Accounting (P2-036 / P2-044 / P2-055): `usage.model_calls` counts schema-valid answers, `usage.attempts` every HTTP
+attempt, `unreported_calls` answers without usage data and `unconfirmed_calls` requests whose answer was lost.
+Transport failures, format failures (not the requested JSON) and business rejections (index out of range) are
+recorded separately in the call records. When the model stays unavailable, `on_model_failure: fallback` (default)
+proposes the first applicable candidate by `fallback_preference`, labelled as a RULE fallback with the failed
+call ids, so the attempted usage is still committed with the step; `fail` raises instead.
 """
 
 from __future__ import annotations
@@ -19,13 +26,12 @@ from formal_lab_contracts import (
     ProposalSource,
 )
 from formal_lab_contracts import capabilities as caps
-from formal_lab_contracts.errors import InvalidInput, RetryableFailure
-from formal_lab_model import check_model, expr_text
+from formal_lab_contracts.errors import FormalLabError, InvalidInput, NonRetryableFailure, RetryableFailure
 
-from .model_clients import ModelClient, ModelResponse, OpenAICompatibleClient, StubModelClient
+from .model_clients import FormatError, ModelCall, ModelClient, OpenAICompatibleClient, StubModelClient
 
 PLANNER_ID = "formal-lab.planner.llm"
-PLANNER_VERSION = "1.0.0"
+PLANNER_VERSION = "1.1.0"
 MAX_ATTEMPTS = 2
 
 CONFIG_SCHEMA = {
@@ -37,6 +43,12 @@ CONFIG_SCHEMA = {
         "goal_property": {"type": "string"},
         "stub_preference": {"type": "array", "items": {"type": "string"},
                             "description": "client=stub only: action types in preference order"},
+        "on_model_failure": {"type": "string", "enum": ["fallback", "fail"], "default": "fallback"},
+        "fallback_preference": {"type": "array", "items": {"type": "string"},
+                                "description": "action types preferred by the fallback (in order)"},
+        "timeout_s": {"type": "number", "exclusiveMinimum": 0, "description": "per-attempt timeout"},
+        "max_attempts": {"type": "integer", "minimum": 1, "maximum": 8, "default": 4},
+        "temperature": {"type": "number", "minimum": 0, "maximum": 2},
     },
     "additionalProperties": False,
 }
@@ -46,12 +58,13 @@ DESCRIPTOR = PluginDescriptor(
     version=PLANNER_VERSION,
     interface="PLANNER",
     capabilities=[{"id": caps.PLAN_LLM}],
-    semantic_profiles=["deterministic_finite_v1"],
+    requires=[{"id": caps.DRIVER_CANDIDATES, "params": {"of": "driver"}}],
+    semantic_profiles=[],
     config_schema=CONFIG_SCHEMA,
     entrypoint="formal_lab_strategies.llm_planner:create",
     ui={"label": "LLM 策略", "category": "llm",
-        "description": "Chooses one candidate action with a language model (JSON-schema output). "
-        "client=stub gives a labelled deterministic stand-in."},
+        "description": "Chooses one candidate action with a language model (JSON-schema output), for any model "
+        "profile. client=stub gives a labelled deterministic stand-in."},
     license="Apache-2.0",
     source="formal-lab-strategies",
 )
@@ -76,30 +89,60 @@ SYSTEM_PROMPT = (
 )
 
 
+def usage_of(calls: list[ModelCall]) -> ModelUsage:
+    ok = [c for c in calls if c.outcome == "OK"]
+    return ModelUsage(model_calls=len(ok), attempts=sum(c.attempts for c in calls),
+                      input_tokens=sum(c.input_tokens for c in calls), output_tokens=sum(c.output_tokens for c in calls),
+                      unreported_calls=sum(1 for c in ok if not c.usage_reported),
+                      unconfirmed_calls=sum(1 for c in calls if c.unconfirmed))
+
+
 class LLMPlanner:
     descriptor = DESCRIPTOR
 
-    def __init__(self, package: ModelPackage, client: ModelClient, config: dict[str, Any] | None = None):
-        cfg = {"max_candidates": 60, **(config or {})}
+    def __init__(self, package: ModelPackage, client: ModelClient, config: dict[str, Any] | None = None,
+                 loaded: Any = None):
+        cfg = {"max_candidates": 60, "on_model_failure": "fallback", **(config or {})}
         self.package = package
         self.client = client
-        self.model = check_model(package.ir)
+        self.loaded = loaded
         self.max_candidates = int(cfg["max_candidates"])
-        goals = [p for p in package.ir.properties if p.kind == "goal"]
-        self.goal = next((p for p in goals if p.id == cfg.get("goal_property")), goals[0] if goals else None)
-        self.action_labels = {a.name: a.label or a.name for a in package.ir.actions}
-        self.state_labels = {s.name: s.label or s.name for s in package.ir.state}
-        self.last_calls: list[ModelResponse] = []
+        self.on_failure = cfg["on_model_failure"]
+        self.fallback_preference = list(cfg.get("fallback_preference") or cfg.get("stub_preference") or [])
+        self.goal_override = cfg.get("goal_property")
+        specs = loaded.action_specs() if loaded is not None else []
+        self.action_labels = {s.action_type: s.label or s.action_type for s in specs}
+        self.state_labels: dict[str, str] = {}
+        self.goal_text: dict[str, str] = {}
+        if package.is_ir:
+            from formal_lab_model import expr_text
+
+            self.state_labels = {s.name: s.label or s.name for s in package.ir.state}
+            self.goal_text = {p.id: expr_text(p.expr) for p in package.ir.properties}
+            self.goal_labels = {p.id: p.label for p in package.ir.properties}
+        else:
+            self.goal_labels = {}
+        self.kinds = loaded.property_kinds() if loaded is not None else {}
+        self.last_calls: list[Any] = []
+        self.call_records: list[dict[str, Any]] = []
+
+    def _goal(self, ctx: PlanningContext) -> str | None:
+        return self.goal_override or ctx.goal or next((p for p, k in self.kinds.items() if k == "goal"), None)
 
     def _payload(self, ctx: PlanningContext) -> dict[str, Any]:
         cands = ctx.candidates[: self.max_candidates]
+        goal = self._goal(ctx)
         return {
-            "goal": {"id": self.goal.id, "label": self.goal.label, "condition": expr_text(self.goal.expr)}
-            if self.goal else None,
-            "model": {"name": self.package.ir.name, "description": self.package.ir.description},
+            "goal": {"id": goal, "label": self.goal_labels.get(goal), "condition": self.goal_text.get(goal)}
+            if goal else None,
+            "model": {"name": self.package.package_id, "profile": self.package.semantic_profile,
+                      "description": self.package.ir.description if self.package.is_ir else None},
+            "actor": ctx.actor_id,
+            "participants": ctx.participants,
             "step": ctx.step,
             "budget": ctx.budget.model_dump(exclude_none=True),
             "usage": ctx.usage.model_dump(),
+            "objective": ctx.objective.model_dump(mode="json") if ctx.objective else None,
             "facts": {f.path: f.value for f in ctx.observation.facts},
             "unknown": [{"path": u.path, "reason": u.reason,
                          "last_known": u.last_known.value if u.last_known else None,
@@ -118,39 +161,58 @@ class LLMPlanner:
             raise InvalidInput("LLM planner needs at least one candidate")
         payload = self._payload(context)
         user = "Decision input (JSON):\n" + json.dumps(payload, ensure_ascii=False, sort_keys=True)
-        usage = ModelUsage()
+        start = len(self.client.calls)
         self.last_calls = []
         last_error = ""
+        failure: FormalLabError | None = None
         for attempt in range(MAX_ATTEMPTS):
             prompt = user if attempt == 0 else user + f"\n\nYour previous answer was invalid ({last_error}). " \
                                                       f"Return an index between 0 and {len(payload['candidates']) - 1}."
-            resp = self.client.complete_json(system=SYSTEM_PROMPT, user=prompt, schema=RESPONSE_SCHEMA,
-                                             schema_name="choose_candidate", payload=payload)
+            try:
+                resp = self.client.complete_json(system=SYSTEM_PROMPT, user=prompt, schema=RESPONSE_SCHEMA,
+                                                 schema_name="choose_candidate", payload=payload)
+            except FormatError as exc:
+                last_error, failure = exc.message, exc
+                continue
+            except (RetryableFailure, NonRetryableFailure) as exc:  # transport: no point asking again now
+                failure = exc
+                break
             self.last_calls.append(resp)
-            usage.model_calls += 1
-            usage.input_tokens += resp.input_tokens
-            usage.output_tokens += resp.output_tokens
             index = resp.content.get("index")
             if isinstance(index, int) and 0 <= index < len(payload["candidates"]):
+                calls = self.client.calls[start:]
+                self.call_records = [c.as_record() for c in calls]
                 chosen = context.candidates[index]
-                return ActionProposal(
-                    proposal_id=f"{context.step_id}:proposal",
-                    run_id=context.run_id,
-                    step_id=context.step_id,
-                    step=context.step,
-                    actor_id=context.actor_id,
-                    action=chosen.action,
-                    based_on_revision=context.observation.state_revision,
-                    source=ProposalSource(kind="LLM_STUB" if self.client.is_stub else "LLM",
-                                          strategy=self.descriptor.ref(), model=resp.model,
-                                          model_call_ids=[c.call_id for c in self.last_calls]),
-                    rationale=str(resp.content.get("rationale", ""))[:2000],
-                    candidates_considered=len(payload["candidates"]),
-                    usage=usage,
-                )
-            last_error = f"index {index!r} out of range"
-        raise RetryableFailure(f"model did not return a valid candidate index after {MAX_ATTEMPTS} attempts: "
-                               f"{last_error}", details={"usage": usage.model_dump()})
+                return self._proposal(context, chosen.action, ProposalSource(
+                    kind="LLM_STUB" if self.client.is_stub else "LLM", strategy=self.descriptor.ref(),
+                    model=resp.model, model_call_ids=[c.call_id for c in calls]),
+                    str(resp.content.get("rationale", ""))[:2000], usage_of(calls))
+            last_error = f"index {index!r} out of range (business rejection of a schema-valid answer)"
+        calls = self.client.calls[start:]
+        self.call_records = [c.as_record() for c in calls]
+        usage = usage_of(calls)
+        reason = failure.message if failure is not None else last_error
+        if self.on_failure == "fail":
+            raise RetryableFailure(f"model did not return a usable choice after {len(calls)} call(s): {reason}",
+                                   details={"usage": usage.model_dump(), "calls": self.call_records})
+        pref = {t: i for i, t in enumerate(self.fallback_preference)}
+        applicable = [c for c in context.candidates if str(c.belief_applicability) == "APPLICABLE"] or \
+            [c for c in context.candidates if str(c.belief_applicability) == "UNKNOWN"]
+        if not applicable:
+            raise NonRetryableFailure("model unavailable and no applicable candidate for the fallback")
+        chosen = min(applicable, key=lambda c: (pref.get(c.action.action_type, len(pref)),
+                                                context.candidates.index(c)))
+        return self._proposal(context, chosen.action, ProposalSource(
+            kind="RULE", strategy=self.descriptor.ref(), model=None, model_call_ids=[c.call_id for c in calls]),
+            f"model unavailable ({reason[:300]}); fallback to the first applicable candidate by preference", usage)
+
+    def _proposal(self, context: PlanningContext, action, source: ProposalSource, rationale: str,
+                  usage: ModelUsage) -> ActionProposal:
+        return ActionProposal(proposal_id=f"{context.step_id}:proposal", run_id=context.run_id,
+                              step_id=context.step_id, step=context.step, actor_id=context.actor_id, action=action,
+                              based_on_revision=context.observation.state_revision, source=source,
+                              rationale=rationale, candidates_considered=min(len(context.candidates),
+                                                                            self.max_candidates), usage=usage)
 
 
 def client_from_settings(config: dict[str, Any], services: Any) -> ModelClient:
@@ -165,7 +227,9 @@ def client_from_settings(config: dict[str, Any], services: Any) -> ModelClient:
         base_url=services.get_setting("FAL_LLM_BASE_URL") or "https://api.openai.com/v1",
         api_key=api_key,
         model=config.get("model") or services.get_setting("FAL_LLM_MODEL") or "gpt-5.6-sol",
-        timeout_s=float(services.get_setting("FAL_LLM_TIMEOUT_SECONDS") or 120),
+        timeout_s=float(config.get("timeout_s") or services.get_setting("FAL_LLM_TIMEOUT_SECONDS") or 120),
+        max_attempts=int(config.get("max_attempts", 4)),
+        temperature=config.get("temperature"),
     )
 
 
@@ -174,7 +238,8 @@ def create(config: dict[str, Any] | None, services: Any) -> LLMPlanner:
     unknown = set(config) - set(CONFIG_SCHEMA["properties"])
     if unknown:
         raise InvalidInput(f"unknown LLM planner config keys {sorted(unknown)}")
-    return LLMPlanner(services.pinned_model(), client_from_settings(config, services), config)
+    loaded = services.loaded_model() if hasattr(services, "loaded_model") else None
+    return LLMPlanner(services.pinned_model(), client_from_settings(config, services), config, loaded)
 
 
 def registrations():

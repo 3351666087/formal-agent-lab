@@ -89,7 +89,8 @@ CHECKS: list[Check] = [
     Check("helm-install", ["P1-127", "P1-113"], "Helm 安装（kind 临时集群，状态单独记录）",
           "scripts/helm-install-check.sh", ["docs/execution/evidence/helm/install.json"], requires="docker"),
     Check("llm-real", ["P1-074"], "真实模型集成检查（OpenAI 兼容端点）",
-          f"{PYTEST} -q -m llm tests/integration/test_llm_real.py",
+          f"FAL_LLM_EVIDENCE=docs/execution/evidence/P1-074-llm-integration.json {PYTEST} -q -m llm "
+          "tests/integration/test_llm_real.py",
           ["docs/execution/evidence/P1-074-llm-integration.json"], requires="llm"),
     Check("ci-remote", ["P1-040"], "GitHub Actions 最近一次 CI 运行（远端）", "(GitHub API)",
           ["docs/execution/evidence/ci-run.json"], requires="network"),

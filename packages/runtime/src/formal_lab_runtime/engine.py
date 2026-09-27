@@ -473,6 +473,7 @@ class PlanPhase:
     checkpoint: dict[str, Any] | None = None
     stages: list[StageRecord] = field(default_factory=list)
     observation_requests: int = 0
+    last_request: dict[str, Any] | None = None  # {paths digest, revision} of the request served this turn
     elapsed_s: float = 0.0
 
     def to_json(self) -> dict[str, Any]:
@@ -494,6 +495,7 @@ class PlanPhase:
             "checkpoint": self.checkpoint,
             "stages": [s.model_dump(mode="json") for s in self.stages],
             "observation_requests": self.observation_requests,
+            "last_request": self.last_request,
             "elapsed_s": self.elapsed_s,
         }
 
@@ -518,6 +520,7 @@ class PlanPhase:
             checkpoint=data.get("checkpoint"),
             stages=[StageRecord.model_validate(s) for s in data.get("stages", [])],
             observation_requests=data.get("observation_requests", 0),
+            last_request=data.get("last_request"),
             elapsed_s=data.get("elapsed_s", 0.0),
         )
 
@@ -670,19 +673,29 @@ def plan_step(rc: RunComponents, snapshot: EnvironmentSnapshot, step: int, usage
     previous_plan = (cp_json or {}).get("plan") or {}
     proposal = _propose(rc, plan, step, turn, obs, belief, usage, carry)
     if proposal.observation_request is not None and can_request and plan.observation_requests == 0:
-        obs, belief = _observe_more(rc, plan, step, turn, proposal.observation_request.paths,
-                                    f"strategy: {proposal.observation_request.reason}", tkey("candidates"))
-        plan.candidates = rc.loaded.candidates(belief, scope=participant.scope, partial_checker=partial_checker(rc))
+        request = proposal.observation_request
+        seen = {"paths": _digest(sorted(request.paths)), "revision": obs.state_revision, "step": step}
+        previous = carry.flags.get(actor, {}).get("last_request")
         first = plan.usage_delta
+        if previous and previous["paths"] == seen["paths"] and previous["revision"] == obs.state_revision:
+            # P2-047: the same locations were already re-observed and nothing has changed since — answering again
+            # would repeat the same facts; the strategy decides without it and the refusal is on the record
+            plan.events.append(EventDraft(
+                event_key(rc.run_id, step, "observe-more-repeated", actor), EventType.OBSERVATION_REQUESTED, step,
+                {"paths": request.paths, "reason": f"strategy: {request.reason}", "served": False,
+                 "declined": f"repeated request: the same locations were re-observed at step {previous['step']} "
+                             f"and the world revision is unchanged ({obs.state_revision})"},
+                [tkey("candidates")], actor, turn, ExecutionStage.OBSERVE))
+        else:
+            obs, belief = _observe_more(rc, plan, step, turn, request.paths, f"strategy: {request.reason}",
+                                        tkey("candidates"))
+            plan.last_request = seen
+            plan.candidates = rc.loaded.candidates(belief, scope=participant.scope,
+                                                   partial_checker=partial_checker(rc))
         proposal = _propose(rc, plan, step, turn, obs, belief, usage, carry, allow_request=False)
         plan.usage_delta = _sum_usage(first, plan.usage_delta)
     plan.proposal = proposal
     plan.observation = obs
-    for call in getattr(planner, "last_calls", []) or []:
-        plan.model_calls.append({"call_id": call.call_id, "model": call.model, "request": call.request,
-                                 "response": call.raw_text, "input_tokens": call.input_tokens,
-                                 "output_tokens": call.output_tokens, "latency_ms": call.latency_ms,
-                                 "usage_reported": getattr(call, "usage_reported", True)})
     plan.events.append(EventDraft(tkey("proposal"), EventType.ACTION_PROPOSED, step,
                                   {"proposal": proposal.model_dump(mode="json"),
                                    "model_call_ids": proposal.source.model_call_ids},
@@ -744,7 +757,19 @@ def _propose(rc: RunComponents, plan: PlanPhase, step: int, turn: TurnRef, obs: 
         last_outcome=ActionOutcome.model_validate(last) if last else None,
         replan_requested=flags.get("replan"),
     )
-    proposal = rc.planners[actor].propose(context)
+    planner = rc.planners[actor]
+    proposal = planner.propose(context)
+    # model call records of this proposal (all attempts incl. transport / format failures when the strategy
+    # keeps them; older strategies expose only the successful responses)
+    records = getattr(planner, "call_records", None)
+    if records is not None:
+        plan.model_calls.extend(records)
+    else:
+        for call in getattr(planner, "last_calls", []) or []:
+            plan.model_calls.append({"call_id": call.call_id, "model": call.model, "request": call.request,
+                                     "response": call.raw_text, "input_tokens": call.input_tokens,
+                                     "output_tokens": call.output_tokens, "latency_ms": call.latency_ms,
+                                     "usage_reported": getattr(call, "usage_reported", True), "outcome": "OK"})
     ids = {"proposal_id": f"{turn_id(m.run_id, step, actor)}:proposal", "turn": turn}
     if proposal.assumptions is None:
         from formal_lab_contracts import AssumptionSetRef, PlanBasis
@@ -803,6 +828,8 @@ def _merge_plan_into_carry(carry: CarryState, plan: PlanPhase) -> CarryState:
         flags = dict(new.flags.get(actor, {}))
         flags.pop("observe_paths", None)
         flags.pop("replan", None)
+        if plan.last_request is not None:
+            flags["last_request"] = plan.last_request
         new.flags[actor] = flags
     return new
 

@@ -252,3 +252,49 @@ def test_worker_revalidates_plugin_config_against_the_pinned_schema(reg, pkg):
     assert exc.value.field_errors and exc.value.field_errors[0].path.startswith("/participants/dispatcher/config")
     pins = {p.role: p for p in m.plugins}
     assert pins["strategy:dispatcher"].version == "1.1.0" and pins["strategy:dispatcher"].descriptor_digest.value
+
+
+def test_repeated_observation_request_is_declined_and_no_progress_ends_the_run(pkg):
+    """P2-047: a strategy that keeps asking for the same locations while nothing changes gets its first request
+    answered, the repeats declined on the record (`served: false`), and the run ends with NO_PROGRESS."""
+    from formal_lab_contracts import (
+        ActionProposal,
+        ObservationRequest,
+        PluginDescriptor,
+        ProposalSource,
+        TerminationPolicy,
+    )
+    from formal_lab_contracts import capabilities as caps
+    from formal_lab_contracts.interfaces import PluginRegistration
+    from formal_lab_runtime.registry import PluginRegistry
+
+    desc = PluginDescriptor(plugin_id="test.planner.nagging", version="1.0.0", interface="PLANNER",
+                            capabilities=[{"id": caps.PLAN_RULE}], semantic_profiles=["deterministic_finite_v1"],
+                            entrypoint="tests:nagging", license="Apache-2.0", source="tests",
+                            ui={"label": "nagging", "category": "rule"})
+
+    class Nagging:
+        descriptor = desc
+
+        def propose(self, context):
+            wait = next(c for c in context.candidates if c.action.action_type == "advance")  # nothing runs yet
+            return ActionProposal(
+                proposal_id=f"{context.step_id}:p", run_id=context.run_id, step_id=context.step_id,
+                step=context.step, actor_id=context.actor_id, action=wait.action,
+                based_on_revision=context.observation.state_revision,
+                source=ProposalSource(kind="RULE", strategy=desc.ref()), rationale="wait and look again",
+                observation_request=ObservationRequest(paths=["phase[o1_cut]", "on[o1_cut,m1]"], reason="look"))
+
+    reg = PluginRegistry().discover()
+    reg.register(PluginRegistration(descriptor=desc, factory=lambda config, services: Nagging()))
+    sc = scenario("state-delay", pkg, seed=1, strategy={"plugin": {"plugin_id": desc.plugin_id,
+                                                                   "version": "1.0.0"}, "config": {}})
+    sc = sc.model_copy(update={"stop_conditions": [], "termination": TerminationPolicy(
+        joint_goal="all_done", on_no_action="END", no_progress_limit=4)})
+    m = make_manifest(run_id="run_nag", project_id="p", scenario=sc, package=pkg, registry=reg, seed=1)
+    res = run_local(m, pkg, reg)
+    assert res.termination_reason == "NO_PROGRESS" and res.usage.steps == 4
+    requests = [e for e in res.events if str(e.event_type) == "OBSERVATION_REQUESTED"]
+    assert [e.payload.get("served", True) for e in requests] == [True, False, False, False]
+    assert all("repeated request" in e.payload["declined"] for e in requests[1:])
+    assert any(p.plugin_id == desc.plugin_id for p in m.plugins)

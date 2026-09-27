@@ -392,7 +392,7 @@ def step_records(s: Session, run_id: str) -> list[StepRecord]:
         if row.event_type == "OBSERVATION":
             slot["observation"] = Observation.model_validate(p["observation"])
             slot.setdefault("actor_id", row.actor_id)
-        elif row.event_type == "OBSERVATION_REQUESTED":
+        elif row.event_type == "OBSERVATION_REQUESTED" and p.get("observation"):  # a declined repeat has none
             slot["observation"] = Observation.model_validate(p["observation"])
         elif row.event_type == "ACTION_PROPOSED":
             slot["proposal"] = ActionProposal.model_validate(p["proposal"])

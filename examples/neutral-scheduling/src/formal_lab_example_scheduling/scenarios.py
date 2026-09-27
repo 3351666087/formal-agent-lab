@@ -16,7 +16,17 @@ Z3_STRATEGY = {"plugin": {"plugin_id": "formal-lab.planner.z3-bounded", "version
 LLM_STRATEGY = {"plugin": {"plugin_id": "formal-lab.planner.llm", "version": "1.0.0"}, "config": {}}
 LLM_STUB_STRATEGY = {"plugin": {"plugin_id": "formal-lab.planner.llm", "version": "1.0.0"},
                      "config": {"client": "stub", "stub_preference": ["assign", "resume", "advance"]}}
-STRATEGIES = {"rule": RULE_STRATEGY, "z3": Z3_STRATEGY, "llm": LLM_STRATEGY, "llm-stub": LLM_STUB_STRATEGY}
+TASK = {"plugin_id": "formal-lab.example.scheduling.task-planner", "version": "1.0.0"}
+TASK_RULE = {"plugin": TASK, "config": {"generator": "rule"}}
+TASK_SYMBOLIC = {"plugin": TASK, "config": {"generator": "symbolic", "horizon": 18}}
+TASK_MODEL = {"plugin": TASK, "config": {"generator": "model"}}
+TASK_MODEL_STUB = {"plugin": TASK, "config": {"generator": "model", "client": "stub"}}
+Z3_COST = {"plugin": {"plugin_id": "formal-lab.planner.z3-bounded", "version": "1.1.0"},
+           "config": {"mode": "cost", "horizon": 18, "timeout_ms": 30000, "fallback_order": ["assign", "resume",
+                                                                                            "advance"]}}
+STRATEGIES = {"rule": RULE_STRATEGY, "z3": Z3_STRATEGY, "llm": LLM_STRATEGY, "llm-stub": LLM_STUB_STRATEGY,
+              "task-rule": TASK_RULE, "task-symbolic": TASK_SYMBOLIC, "task-model": TASK_MODEL,
+              "task-model-stub": TASK_MODEL_STUB, "z3-cost": Z3_COST}
 BUDGET = {"max_steps": 60, "max_wall_seconds": 600, "max_model_calls": 80, "max_tokens": 800_000}
 STOP = [{"kind": "GOAL_REACHED", "property_id": "all_done"}, {"kind": "NO_APPLICABLE_ACTION"}]
 VARIATION = [{"var": "proc_time", "delta_min": -1, "delta_max": 1}]
@@ -56,8 +66,16 @@ def model_package(version: int = 1) -> ModelPackage:
                                             origin="examples/neutral-scheduling"))
 
 
-def scenario(key: str, package: ModelPackage, *, seed: int = 0, strategy: dict | None = None) -> ScenarioManifest:
+def scenario(key: str, package: ModelPackage, *, seed: int = 0, strategy: dict | None = None,
+             no_progress_limit: int | None = None) -> ScenarioManifest:
+    """One of the single-dispatcher scenarios. With `no_progress_limit` the v1 stop conditions are replaced by the
+    equivalent v2 termination policy plus a stop after that many consecutive turns without a state change (P2-047);
+    without it the manifest is exactly the phase-1 one."""
     cfg = SCENARIO_CONFIGS[key]
+    ending: dict = {"stop_conditions": STOP}
+    if no_progress_limit is not None:
+        ending = {"termination": {"joint_goal": "all_done", "on_no_action": "FAIL",
+                                  "no_progress_limit": no_progress_limit}}
     return ScenarioManifest(
         scenario_id=f"sched-{key}",
         name=cfg["name"],
@@ -69,7 +87,7 @@ def scenario(key: str, package: ModelPackage, *, seed: int = 0, strategy: dict |
                     {"metric_id": "delay_cost", "description": "minimise simulated delay cost"}],
         budget=BUDGET,
         seed=seed,
-        stop_conditions=STOP,
+        **ending,
     )
 
 

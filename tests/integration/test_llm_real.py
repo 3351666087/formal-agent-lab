@@ -1,11 +1,14 @@
 """Real-model integration check (P1-074): runs only when FAL_LLM_API_KEY is configured (pytest -m llm).
 
-Evidence is written to docs/execution/evidence/P1-074-llm-integration.json.
+Evidence is written to var/evidence/P1-074-llm-integration.json; the phase-1 acceptance check sets
+FAL_LLM_EVIDENCE to docs/execution/evidence/P1-074-llm-integration.json, so an ordinary test run never rewrites
+the recorded phase-1 evidence.
 """
 
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 
 import pytest
@@ -14,7 +17,8 @@ from formal_lab_example_scheduling.scenarios import STRATEGIES, model_package, s
 from formal_lab_runtime import default_registry, make_manifest, new_run_id, run_local
 from formal_lab_runtime.settings import get_setting, llm_configured
 
-EVIDENCE = Path(__file__).resolve().parents[2] / "docs" / "execution" / "evidence" / "P1-074-llm-integration.json"
+ROOT = Path(__file__).resolve().parents[2]
+EVIDENCE = Path(os.environ.get("FAL_LLM_EVIDENCE") or ROOT / "var" / "evidence" / "P1-074-llm-integration.json")
 
 pytestmark = [pytest.mark.llm,
               pytest.mark.skipif(not llm_configured(), reason="FAL_LLM_API_KEY not configured (NOT_RUN)")]
@@ -31,6 +35,7 @@ def test_real_llm_strategy_runs_an_episode():
     res = run_local(manifest, pkg, reg)
     sources = {s.proposal.source.kind for s in res.steps if s.proposal}
     models = {s.proposal.source.model for s in res.steps if s.proposal}
+    EVIDENCE.parent.mkdir(parents=True, exist_ok=True)
     EVIDENCE.write_text(json.dumps({
         "check": "P1-074 real model integration",
         "endpoint": get_setting("FAL_LLM_BASE_URL"),
