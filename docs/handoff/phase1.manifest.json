@@ -1,0 +1,540 @@
+{
+  "handoff_version": "phase-handoff/v1",
+  "phase": 1,
+  "status": "complete",
+  "status_blockers": [],
+  "generated_at": "2026-09-27T02:02:04Z",
+  "source_revision": {
+    "checked_commit": "5f0af4a5b2a61862340142d3b369c7ca23ad194e",
+    "checked_worktree_dirty": false,
+    "manifest_generated_on": "5f0af4a5b2a61862340142d3b369c7ca23ad194e",
+    "worktree_dirty_at_generation": true,
+    "note": "the acceptance outputs and handoff artefacts (this file, phase1.md, phase1-checks.json, check logs, task-book ticks) are committed on top of the checked commit; no product code changes after the acceptance run",
+    "agent_changes": {
+      "commits": 14,
+      "first": "09f3cd668b7adceff7c12b69b3289e6c37c38f72",
+      "last": "5f0af4a5b2a61862340142d3b369c7ca23ad194e",
+      "author": [
+        "3351666087"
+      ],
+      "log": "git log --format='%h %s' (all commits of this phase were made by the agent on the user's behalf)"
+    },
+    "user_uncommitted_changes": {
+      "at_start": "none (empty repository, fresh clone; docs/execution/evidence/P1-001-environment.md)",
+      "at_generation": "none; the files below are uncommitted outputs of the acceptance run and of this generator",
+      "acceptance_outputs_uncommitted": [
+        "docs/execution/evidence/P1-074-llm-integration.json",
+        "docs/execution/evidence/checks/boundaries.log",
+        "docs/execution/evidence/checks/ci-remote.log",
+        "docs/execution/evidence/checks/compose-e2e.log",
+        "docs/execution/evidence/checks/contract-semantics.log",
+        "docs/execution/evidence/checks/contracts.log",
+        "docs/execution/evidence/checks/engine.log",
+        "docs/execution/evidence/checks/evaluation-stats.log",
+        "docs/execution/evidence/checks/example-sentinel.log",
+        "docs/execution/evidence/checks/helm-install.log",
+        "docs/execution/evidence/checks/helm-render.log",
+        "docs/execution/evidence/checks/interface-examples.log",
+        "docs/execution/evidence/checks/lint.log",
+        "docs/execution/evidence/checks/llm-real.log",
+        "docs/execution/evidence/checks/product-ui.log",
+        "docs/execution/evidence/checks/runtime-integration.log",
+        "docs/execution/evidence/checks/sdk-cli-replay-matrix.log",
+        "docs/execution/evidence/checks/semantics-differential.log",
+        "docs/execution/evidence/checks/strategy-comparison.json",
+        "docs/execution/evidence/checks/strategy-comparison.log",
+        "docs/execution/evidence/checks/unit-suite.log",
+        "docs/execution/evidence/checks/web-build.log",
+        "docs/execution/evidence/compose-smoke.json",
+        "docs/execution/evidence/helm/install.json",
+        "docs/execution/evidence/helm/install.log",
+        "docs/execution/evidence/ui/01-projects.jpg",
+        "docs/execution/evidence/ui/02-error-state.jpg",
+        "docs/execution/evidence/ui/03-model-graph.jpg",
+        "docs/execution/evidence/ui/04-model-form.jpg",
+        "docs/execution/evidence/ui/05-model-check.jpg",
+        "docs/execution/evidence/ui/06-scenario.jpg",
+        "docs/execution/evidence/ui/07-run-console.jpg",
+        "docs/execution/evidence/ui/08-run-state-chart.jpg",
+        "docs/execution/evidence/ui/09-run-events.jpg",
+        "docs/execution/evidence/ui/10-strategies.jpg",
+        "docs/execution/evidence/ui/11-evidence-replay.jpg",
+        "docs/execution/evidence/ui/12-evidence-artifacts.jpg",
+        "docs/execution/evidence/ui/13-benchmarks.jpg",
+        "docs/execution/evidence/ui/20-phone-benchmarks.jpg",
+        "docs/execution/evidence/ui/20-phone-evidence.jpg",
+        "docs/execution/evidence/ui/20-phone-models.jpg",
+        "docs/execution/evidence/ui/20-phone-projects.jpg",
+        "docs/execution/evidence/ui/20-phone-runs.jpg",
+        "docs/execution/evidence/ui/20-phone-scenarios.jpg",
+        "docs/execution/evidence/ui/20-phone-strategies.jpg",
+        "docs/execution/phase-1.md",
+        "docs/handoff/phase1-checks.json",
+        "docs/handoff/phase1.md",
+        "scripts/handoff.py",
+        "docs/api/",
+        "docs/handoff/phase1.manifest.json"
+      ]
+    }
+  },
+  "contract_version": "formal-lab-contracts/v1",
+  "contract_digest": {
+    "algorithm": "sha256",
+    "value": "0cbd6256c21eead867cdd3bcf8ea7f1011207d4dacd6d09996b543575e21312b",
+    "method": "sha256 over lines 'relative_path NUL sha256(file)' + LF, files sorted by relative path (DIGEST.json itself excluded)",
+    "files": 28,
+    "source": "contracts/v1/DIGEST.json"
+  },
+  "paths": {
+    "contracts": "contracts/v1/",
+    "contract_source": "packages/contracts/src/formal_lab_contracts/",
+    "contract_types_ts": "packages/contracts-ts/src/generated.ts",
+    "contract_docs": "docs/contracts/v1.md",
+    "contract_tests": "tests/contracts/",
+    "api": {
+      "package": "packages/platform-api/",
+      "openapi": "docs/api/openapi.json",
+      "base_url": "/api/v1"
+    },
+    "engine": {
+      "model_core": "packages/model-core/",
+      "z3": "packages/solver-adapters/z3/",
+      "environment": "packages/neutral-environment/",
+      "runtime": "packages/runtime/",
+      "strategies": "packages/strategies/",
+      "evaluation": "packages/evaluation/",
+      "orchestrator": "packages/orchestrator/"
+    },
+    "sdk_cli": "packages/sdk/",
+    "web": "web/",
+    "examples": {
+      "scheduling": "examples/neutral-scheduling/",
+      "external_plugin": "examples/external-plugin/",
+      "interfaces": "examples/interfaces/"
+    },
+    "deploy": {
+      "compose_dev_services": "deploy/compose/services.dev.yaml",
+      "compose_full_stack": "deploy/compose/docker-compose.yaml",
+      "dockerfiles": "deploy/docker/",
+      "helm_chart": "deploy/helm/formal-agent-lab/",
+      "helm_test_fixture": "deploy/helm/test/"
+    },
+    "logs": {
+      "acceptance": "docs/execution/evidence/checks/",
+      "dev_processes": "var/log/ (not committed)"
+    },
+    "reports": {
+      "checks": "docs/handoff/phase1-checks.json",
+      "handoff": "docs/handoff/phase1.md",
+      "evidence": "docs/execution/evidence/",
+      "task_book": "docs/execution/phase-1.md",
+      "decisions": "docs/execution/decisions.md",
+      "strategy_comparison": "examples/neutral-scheduling/results/comparison.json"
+    },
+    "release": {
+      "manifest": "docs/execution/evidence/release-manifest.json (copy of out/release/manifest.json)",
+      "offline_manifest": "docs/execution/evidence/offline-manifest.json",
+      "build_outputs": "out/release/, out/offline/ (not committed; rebuilt by make release / make offline-bundle)"
+    }
+  },
+  "commands": {
+    "bootstrap": "bash scripts/bootstrap-dev-vm.sh && make bootstrap",
+    "dev": "make services-up && make dev-up   # web http://127.0.0.1:5173, api http://127.0.0.1:8000",
+    "demo": "make demo   # standalone, no services",
+    "phase1_check": "make phase1-check",
+    "export": "fal export <run_id> -o run.replay.zip",
+    "replay": "fal replay view run.replay.zip   # offline; fal replay step <bundle> <n>",
+    "build": "make build && make images && make release",
+    "compose": "make compose-up   # http://127.0.0.1:8080",
+    "test": "make test-unit && make test-integration && make test-ui"
+  },
+  "implemented_capabilities": [
+    "formal-lab-contracts/v1: 12 frozen objects + supporting types, JSON Schema, TypeScript, contract tests, drift check in CI",
+    "deterministic_finite_v1 IR: parser/type checker, canonical form + sha256 digest, reference interpreter, exhaustive BFS",
+    "Z3 compiler (per-thread contexts) with GOAL_REACHABILITY / INVARIANT_VIOLATION / ACTION_PRECONDITION, bounded verdicts, UNKNOWN on timeout, UNSUPPORTED, interpreter-replayed witnesses",
+    "IR world environment: pure-data simulator, observation delay (unknowns with last-known facts), truth-constant overrides, seeded variation, snapshot/restore, idempotent operations",
+    "effect comparison MATCH / DIFFERENT / INSUFFICIENT_INFORMATION with field-level diffs",
+    "strategies: EDD rule (example plugin), Z3 bounded receding-horizon planner, LLM planner over an OpenAI-compatible endpoint (real-model check passed) and labelled deterministic stub",
+    "platform: PostgreSQL persistence with immutable model versions, pinned RunManifest, gap-free idempotent event log, SSE with Last-Event-ID resume, budgets (steps, wall clock, model calls, tokens), artifacts via local or S3 store",
+    "Temporal ExperimentWorkflow: start, pause at step boundaries, resume, cancel, budget exhaustion, SIGKILL worker recovery via heartbeats and operation records",
+    "evaluation: scenario x strategy x seed x budget matrices, missing semantics, Wilson / bootstrap intervals, exact Wilcoxon only when informative, Inspect adapter and log import",
+    "replay bundles with embedded contracts and digests, offline viewer, import and re-run with lineage",
+    "Web: six functional areas on the real API (model workbench, scenarios, strategy registry, run console, evidence & replay, benchmarks), responsive, keyboard, Playwright-tested",
+    "CLI (fal) and Python SDK; out-of-tree plugin registered via entry point using only the SDK",
+    "OCI images (arm64), full-stack Compose (verified), Helm chart (lint/template/kubeconform + install on kind), release manifest, verified offline bundle"
+  ],
+  "unsupported_capabilities": [
+    "dense_time: real-valued clocks / continuous time → UNSUPPORTED (extension: new semantic profile + ModelFrontend/Verifier plugins)",
+    "concurrent_actions: several actions in one logical step → UNSUPPORTED (extension: new semantic profile (e.g. concurrent_finite_v1))",
+    "probabilistic_effects: stochastic transitions / probabilities → UNSUPPORTED (extension: new semantic profile + probabilistic Verifier plugin)",
+    "unbounded_integers: integer state without declared bounds → UNSUPPORTED (extension: new semantic profile)",
+    "authentication, authorisation and multi-tenant isolation (single-user local profile)",
+    "high-availability deployment (Temporal dev server, single PostgreSQL / S3 instances); multi-node Kubernetes, ingress controllers, upgrades/rollbacks are not verified",
+    "linux/amd64 container images (only arm64 built; code tested on x86_64 in CI)",
+    "optimisation objectives in the Z3 planner (it minimises plan length, not weighted delay cost)"
+  ],
+  "deferred_work": [
+    {
+      "item": "choose a license for the repository (plugin metadata currently says UNLICENSED)",
+      "depends_on": "repository owner decision"
+    },
+    {
+      "item": "domain extension phases (new semantic profiles, domain environments/planners)",
+      "depends_on": "formal-lab-contracts/v1 + plugin interfaces (docs/architecture/plugin-integration.md)"
+    },
+    {
+      "item": "authentication / multi-user projects and audit",
+      "depends_on": "API gateway or identity provider choice"
+    },
+    {
+      "item": "production deployment profile (HA Temporal, managed PostgreSQL/S3, TLS)",
+      "depends_on": "target infrastructure"
+    },
+    {
+      "item": "amd64 / multi-arch images and a registry publish step",
+      "depends_on": "registry credentials, buildx builder"
+    },
+    {
+      "item": "cost-aware Z3 planning (Optimize over delay cost)",
+      "depends_on": "IR aggregate operators (max over domain)"
+    },
+    {
+      "item": "UI bundle code-splitting (475 kB single chunk)",
+      "depends_on": "none"
+    }
+  ],
+  "checks": [
+    {
+      "id": "contracts",
+      "tasks": [
+        "P1-040",
+        "P1-047",
+        "P1-120",
+        "P1-134"
+      ],
+      "result": "PASS",
+      "exit_code": 0,
+      "log": "docs/execution/evidence/checks/contracts.log",
+      "evidence": [
+        "contracts/v1/DIGEST.json",
+        "docs/contracts/v1.md"
+      ],
+      "summary": "ℹ duration_ms 197.747724"
+    },
+    {
+      "id": "contract-semantics",
+      "tasks": [
+        "P1-120",
+        "P1-043",
+        "P1-045",
+        "P1-049",
+        "P1-050"
+      ],
+      "result": "PASS",
+      "exit_code": 0,
+      "log": "docs/execution/evidence/checks/contract-semantics.log",
+      "evidence": [],
+      "summary": "6 passed in 0.25s"
+    },
+    {
+      "id": "engine",
+      "tasks": [
+        "P1-121",
+        "P1-022",
+        "P1-023"
+      ],
+      "result": "PASS",
+      "exit_code": 0,
+      "log": "docs/execution/evidence/checks/engine.log",
+      "evidence": [],
+      "summary": "27 passed, 81 deselected in 2.19s"
+    },
+    {
+      "id": "semantics-differential",
+      "tasks": [
+        "P1-122",
+        "P1-063"
+      ],
+      "result": "PASS",
+      "exit_code": 0,
+      "log": "docs/execution/evidence/checks/semantics-differential.log",
+      "evidence": [],
+      "summary": "81 passed, 7 deselected in 5.37s"
+    },
+    {
+      "id": "runtime-integration",
+      "tasks": [
+        "P1-123",
+        "P1-024",
+        "P1-025",
+        "P1-026",
+        "P1-027",
+        "P1-028",
+        "P1-080",
+        "P1-081",
+        "P1-082",
+        "P1-083",
+        "P1-084",
+        "P1-085",
+        "P1-086"
+      ],
+      "result": "PASS",
+      "exit_code": 0,
+      "log": "docs/execution/evidence/checks/runtime-integration.log",
+      "evidence": [],
+      "summary": "12 passed in 94.97s (0:01:34)"
+    },
+    {
+      "id": "product-ui",
+      "tasks": [
+        "P1-124",
+        "P1-090",
+        "P1-091",
+        "P1-092",
+        "P1-093",
+        "P1-094",
+        "P1-095",
+        "P1-096"
+      ],
+      "result": "PASS",
+      "exit_code": 0,
+      "log": "docs/execution/evidence/checks/product-ui.log",
+      "evidence": [
+        "docs/execution/evidence/ui/"
+      ],
+      "summary": "12 passed in 149.83s (0:02:29)"
+    },
+    {
+      "id": "sdk-cli-replay-matrix",
+      "tasks": [
+        "P1-124",
+        "P1-125",
+        "P1-126",
+        "P1-100",
+        "P1-103",
+        "P1-104",
+        "P1-105",
+        "P1-106",
+        "P1-029",
+        "P1-032"
+      ],
+      "result": "PASS",
+      "exit_code": 0,
+      "log": "docs/execution/evidence/checks/sdk-cli-replay-matrix.log",
+      "evidence": [],
+      "summary": "6 passed in 288.31s (0:04:48)"
+    },
+    {
+      "id": "evaluation-stats",
+      "tasks": [
+        "P1-101",
+        "P1-102",
+        "P1-030",
+        "P1-031"
+      ],
+      "result": "PASS",
+      "exit_code": 0,
+      "log": "docs/execution/evidence/checks/evaluation-stats.log",
+      "evidence": [],
+      "summary": "6 passed in 4.39s"
+    },
+    {
+      "id": "strategy-comparison",
+      "tasks": [
+        "P1-125",
+        "P1-075",
+        "P1-135"
+      ],
+      "result": "PASS",
+      "exit_code": 0,
+      "log": "docs/execution/evidence/checks/strategy-comparison.log",
+      "evidence": [
+        "docs/execution/evidence/checks/strategy-comparison.json",
+        "examples/neutral-scheduling/results/comparison.json"
+      ],
+      "summary": "wrote docs/execution/evidence/checks/strategy-comparison.json"
+    },
+    {
+      "id": "example-sentinel",
+      "tasks": [
+        "P1-135",
+        "P1-070",
+        "P1-071"
+      ],
+      "result": "PASS",
+      "exit_code": 0,
+      "log": "docs/execution/evidence/checks/example-sentinel.log",
+      "evidence": [],
+      "summary": "6 passed in 53.90s"
+    },
+    {
+      "id": "interface-examples",
+      "tasks": [
+        "P1-042",
+        "P1-041"
+      ],
+      "result": "PASS",
+      "exit_code": 0,
+      "log": "docs/execution/evidence/checks/interface-examples.log",
+      "evidence": [],
+      "summary": "6 passed in 6.95s"
+    },
+    {
+      "id": "boundaries",
+      "tasks": [
+        "P1-128",
+        "P1-010",
+        "P1-012"
+      ],
+      "result": "PASS",
+      "exit_code": 0,
+      "log": "docs/execution/evidence/checks/boundaries.log",
+      "evidence": [],
+      "summary": "20 passed in 0.32s"
+    },
+    {
+      "id": "unit-suite",
+      "tasks": [
+        "P1-129"
+      ],
+      "result": "PASS",
+      "exit_code": 0,
+      "log": "docs/execution/evidence/checks/unit-suite.log",
+      "evidence": [],
+      "summary": "211 passed, 31 deselected in 116.85s (0:01:56)"
+    },
+    {
+      "id": "lint",
+      "tasks": [
+        "P1-129"
+      ],
+      "result": "PASS",
+      "exit_code": 0,
+      "log": "docs/execution/evidence/checks/lint.log",
+      "evidence": [],
+      "summary": "All checks passed!"
+    },
+    {
+      "id": "web-build",
+      "tasks": [
+        "P1-090"
+      ],
+      "result": "PASS",
+      "exit_code": 0,
+      "log": "docs/execution/evidence/checks/web-build.log",
+      "evidence": [],
+      "summary": "✓ built in 281ms"
+    },
+    {
+      "id": "compose-e2e",
+      "tasks": [
+        "P1-127",
+        "P1-111",
+        "P1-112"
+      ],
+      "result": "PASS",
+      "exit_code": 0,
+      "log": "docs/execution/evidence/checks/compose-e2e.log",
+      "evidence": [
+        "docs/execution/evidence/compose-smoke.json"
+      ],
+      "summary": "==> OK (docs/execution/evidence/compose-smoke.json)"
+    },
+    {
+      "id": "helm-render",
+      "tasks": [
+        "P1-127",
+        "P1-113"
+      ],
+      "result": "PASS",
+      "exit_code": 0,
+      "log": "docs/execution/evidence/checks/helm-render.log",
+      "evidence": [
+        "docs/execution/evidence/helm/"
+      ],
+      "summary": "Summary: 6 resources found parsing stdin - Valid: 6, Invalid: 0, Errors: 0, Skipped: 0"
+    },
+    {
+      "id": "helm-install",
+      "tasks": [
+        "P1-127",
+        "P1-113"
+      ],
+      "result": "PASS",
+      "exit_code": 0,
+      "log": "docs/execution/evidence/checks/helm-install.log",
+      "evidence": [
+        "docs/execution/evidence/helm/install.json"
+      ],
+      "summary": "==> OK (docs/execution/evidence/helm/install.json)"
+    },
+    {
+      "id": "llm-real",
+      "tasks": [
+        "P1-074"
+      ],
+      "result": "PASS",
+      "exit_code": 0,
+      "log": "docs/execution/evidence/checks/llm-real.log",
+      "evidence": [
+        "docs/execution/evidence/P1-074-llm-integration.json"
+      ],
+      "summary": "1 passed in 96.56s (0:01:36)"
+    },
+    {
+      "id": "ci-remote",
+      "tasks": [
+        "P1-040"
+      ],
+      "result": "PASS",
+      "exit_code": 0,
+      "log": "docs/execution/evidence/checks/ci-remote.log",
+      "evidence": [
+        "docs/execution/evidence/ci-run.json"
+      ],
+      "summary": "CI run https://github.com/3351666087/formal-agent-lab/actions/runs/36286170803 on HEAD 5f0af4a5b2: success"
+    }
+  ],
+  "checks_summary": {
+    "PASS": 20,
+    "FAIL": 0,
+    "NOT_RUN": 0
+  },
+  "reuse_ledger": "docs/reuse-ledger.md",
+  "known_issues": [
+    {
+      "issue": "EDD rule strategy under state delay reaches the goal in 4/5 seeds (one run exhausts the step budget)",
+      "impact": "strategy behaviour, not a platform defect; visible in examples/neutral-scheduling/results/comparison.json",
+      "reproduce": "python -m formal_lab_example_scheduling compare --scenarios state-delay --strategies rule --seeds 1,2,3,4,5"
+    },
+    {
+      "issue": "the deterministic LLM stand-in never completes the state-delay scenario (keeps probing the same UNKNOWN action)",
+      "impact": "stub results are labelled LLM_STUB and kept separate from real-model results",
+      "reproduce": "same command with --strategies llm-stub"
+    },
+    {
+      "issue": "some models on the configured relay answered 'upstream service temporarily unavailable'",
+      "impact": "real-model runs depend on relay availability; default model gpt-5.6-sol was available",
+      "reproduce": "switch FAL_LLM_MODEL"
+    },
+    {
+      "issue": "api and worker images are saved separately in the offline bundle (shared layers stored twice)",
+      "impact": "offline bundle ~220 MB larger than necessary",
+      "reproduce": "make offline-bundle"
+    },
+    {
+      "issue": "Vite dev server inside the VM needs polling to see host-side edits (virtiofs)",
+      "impact": "development only; configured in web/vite.config.ts",
+      "reproduce": "edit web/src on macOS while make dev-up runs"
+    },
+    {
+      "issue": "Temporal-dev/compose persistence is single-node SQLite",
+      "impact": "not suitable for production; Helm expects an external Temporal",
+      "reproduce": "n/a"
+    }
+  ],
+  "local_development_limitations": [
+    "services bind to 127.0.0.1 only; no authentication",
+    "verified on Ubuntu 24.04.4 aarch64 (Colima on Apple M4, 4 vCPU, 5.9 GiB) and CI ubuntu-24.04 x86_64"
+  ]
+}

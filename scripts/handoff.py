@@ -47,7 +47,8 @@ def main() -> None:
     digest = json.loads((ROOT / "contracts" / "v1" / "DIGEST.json").read_text())
     head = git("rev-parse", "HEAD")
     commit_rows = [c.split("|", 2) for c in git("log", "--format=%H|%an|%s").splitlines()]
-    dirty = git("status", "--porcelain")
+    dirty = [line[3:] for line in subprocess.run(["git", "status", "--porcelain"], cwd=ROOT, capture_output=True,
+                                                 text=True, check=True).stdout.splitlines()]
     failed = [c["id"] for c in checks if c["result"] == "FAIL"]
     not_run = [c for c in checks if c["result"] == "NOT_RUN"]
     required_not_run = [c["id"] for c in not_run if c["id"] not in CONDITIONAL]
@@ -69,15 +70,18 @@ def main() -> None:
             "checked_worktree_dirty": checks_doc["source_revision"]["dirty"],
             "manifest_generated_on": head,
             "worktree_dirty_at_generation": bool(dirty),
-            "note": "handoff artefacts (this file, phase1.md, phase1-checks.json) are committed on top of the checked "
-                    "commit; no source changes are made after the acceptance run",
+            "note": "the acceptance outputs and handoff artefacts (this file, phase1.md, phase1-checks.json, check logs, "
+                    "task-book ticks) are committed on top of the checked commit; no product code changes after the "
+                    "acceptance run",
             "agent_changes": {"commits": len(commit_rows), "first": commit_rows[-1][0], "last": commit_rows[0][0],
                               "author": sorted({c[1] for c in commit_rows}),
                               "log": "git log --format='%h %s' (all commits of this phase were made by the agent "
                                      "on the user's behalf)"},
             "user_uncommitted_changes": {"at_start": "none (empty repository, fresh clone; "
                                                      "docs/execution/evidence/P1-001-environment.md)",
-                                         "at_generation": dirty.splitlines() if dirty else []},
+                                         "at_generation": "none; the files below are uncommitted outputs of the "
+                                                          "acceptance run and of this generator",
+                                         "acceptance_outputs_uncommitted": dirty},
         },
         "contract_version": digest["contract_version"],
         "contract_digest": {"algorithm": digest["algorithm"], "value": digest["digest"], "method": digest["method"],
