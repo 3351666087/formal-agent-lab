@@ -190,3 +190,65 @@ def test_query_bundle_records_inputs_and_replays(reg):
     assert any(line.startswith("objective level fare: value 3, optimal (proven)") for line in bundle.explanation)
     again = replay_query(reg, package, bundle)
     assert again["same"] and again["values_after"] == {"fare": 3}
+
+
+def test_negotiation_refuses_unsupported_combinations_before_the_run(reg, pkg):
+    """Incompatible plugins are refused with UNSUPPORTED and reasons before any run exists (P2-015)."""
+    from formal_lab_contracts import Participant
+    from formal_lab_contracts.errors import Unsupported
+
+    sc = scenario("normal", pkg, seed=1)
+    m = make_manifest(run_id="run_n", project_id="p", scenario=sc, package=pkg, registry=reg)
+    roles = {n.role: n for n in m.negotiation}
+    assert roles["driver"].verdict == "SUPPORTED" and roles["environment"].compatible
+    assert {p.role for p in m.plugins} >= {"driver", "environment", "strategy:dispatcher", "verifier"}
+    # two participants, but an environment that does not declare env.multi_actor
+    from formal_lab_contracts import ScenarioManifest
+    from formal_lab_contracts.interfaces import PluginRegistration
+    from formal_lab_runtime import PluginRegistry
+
+    local = PluginRegistry().discover()
+    base_env = local.resolve(sc.environment.plugin).descriptor
+    fake_env = base_env.model_copy(update={"plugin_id": "x.single-actor-env", "version": "1.0.0",
+                                           "capabilities": [c for c in base_env.capabilities
+                                                            if c.id != "env.multi_actor"]})
+    local.register(PluginRegistration(fake_env, lambda c, s: None))
+    data = sc.model_dump(mode="json")
+    data["participants"].append({**data["participants"][0], "actor_id": "second"})
+    data["environment"] = {"plugin": {"plugin_id": "x.single-actor-env", "version": "1.0.0"}, "config": {}}
+    bad = ScenarioManifest.model_validate(data)
+    with pytest.raises(Unsupported) as exc:
+        make_manifest(run_id="run_b", project_id="p", scenario=bad, package=pkg, registry=local,
+                      participants=[Participant.model_validate(p.model_dump()) for p in bad.participants])
+    assert "env.multi_actor" in exc.value.message and exc.value.details["negotiation"]
+
+
+def test_every_step_records_typed_stages(reg, pkg):
+    """TURN → OBSERVE → PROPOSE → CHECK → EXECUTE → COMPARE with retry semantics and digests (P2-016)."""
+    res = run_local(manifest(reg, pkg, "normal", "rule", 1, "run_st"), pkg, reg)
+    step = res.steps[0]
+    stages = [s.stage.value for s in step.stages]
+    assert stages[:3] == ["TURN", "OBSERVE", "PROPOSE"] and "EXECUTE" in stages and stages[-1] == "COMPARE"
+    by = {s.stage.value: s for s in step.stages}
+    assert by["TURN"].retry == "IDEMPOTENT" and by["PROPOSE"].retry == "RECONCILE_THEN_RETRY"
+    assert by["EXECUTE"].output_digest and by["OBSERVE"].input_digest
+    assert step.operation is not None and step.operation.state == "COMPLETED"
+    assert [t.state.value for t in step.operation.transitions] == ["PREPARED", "DISPATCHED", "COMPLETED"]
+    stage_events = {str(e.stage) for e in res.events if e.stage is not None}
+    assert {"TURN", "OBSERVE", "PROPOSE", "CHECK", "EXECUTE", "COMPARE", "TERMINATE"} <= stage_events
+
+
+def test_worker_revalidates_plugin_config_against_the_pinned_schema(reg, pkg):
+    """A stored manifest whose strategy config no longer matches the plugin schema is refused when the run is
+    opened (the same field-level check the API applies when a scenario is saved) (P2-017)."""
+    from formal_lab_contracts.errors import InvalidInput
+    from formal_lab_runtime import open_components
+
+    m = manifest(reg, pkg, "normal", "z3", 1, "run_cfg")
+    broken = m.model_copy(update={"participants": [m.participants[0].model_copy(update={
+        "strategy": m.participants[0].strategy.model_copy(update={"config": {"horizon": "far"}})})]})
+    with pytest.raises(InvalidInput) as exc:
+        open_components(broken, pkg, reg)
+    assert exc.value.field_errors and exc.value.field_errors[0].path.startswith("/participants/dispatcher/config")
+    pins = {p.role: p for p in m.plugins}
+    assert pins["strategy:dispatcher"].version == "1.1.0" and pins["strategy:dispatcher"].descriptor_digest.value

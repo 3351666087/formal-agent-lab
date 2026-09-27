@@ -257,6 +257,11 @@ def open_components(manifest: RunManifest, package: ModelPackage, registry: Plug
     loaded = driver.load(package)
     services = RuntimeServices(package, loaded=loaded)
     scenario = manifest.scenario
+    # the worker re-validates every configuration against the pinned plugin's schema — the same check the API runs
+    # when a scenario is saved (P2-017): a plugin upgraded since then cannot silently accept a stale config
+    registry.validate_config(scenario.environment.plugin, scenario.environment.config, path="/environment/config")
+    for p in manifest.participants:
+        registry.validate_config(p.strategy.plugin, p.strategy.config, path=f"/participants/{p.actor_id}/config")
     env_entry = registry.resolve(scenario.environment.plugin)
     env = registry.create(scenario.environment.plugin, scenario.environment.config, services,
                           expect=PluginInterface.ENVIRONMENT)

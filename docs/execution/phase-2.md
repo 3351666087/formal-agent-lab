@@ -52,7 +52,9 @@
 
 - [x] **P2-001** 读取 README、阶段一三份 handoff、插件指南、能力矩阵、复用记录和现有开发命令；检查 HEAD 与工作区修改。
   - 证据：接手检查于 46400ad（= 任务书基线，工作区干净）：读取 README、docs/handoff/phase1.{md,manifest.json}、phase1-checks.json、plugin-integration.md、capability-matrix.md、reuse-ledger.md、Makefile 目标与 scripts/dev.sh；按任务书定位的缺口逐一核对源码（engine.py participants[0]、execution.py 快照恢复、z3 planner 最短路径与缓存键、belief.py last-known、main.tsx 静态导入）
-- [ ] **P2-002** 将本文件登记为 docs/execution/phase-2.md；在 docs/execution/decisions.md 追加实际架构决策。
+- [x] **P2-002** 将本文件登记为 docs/execution/phase-2.md；在 docs/execution/decisions.md 追加实际架构决策。
+  - 证据：任务书登记为 docs/execution/phase-2.md（scripts/tick.py 按编号前缀选择任务书、绑定实现文件与状态）；docs/execution/decisions.md 追加阶段二实际架构决策 D-015（契约 v2 + v1 冻结/适配器）、D-016（内核经语义驱动）、D-017（Z3 可复现）、D-018（操作协调状态机）、D-019（存原始 JSON + 读时升级），后续决策继续追加
+  - 实现：`docs/execution/phase-2.md`、`scripts/tick.py`、`docs/execution/decisions.md`
 - [x] **P2-003** 保存阶段一交接与契约摘要基线；新的测试输出写入阶段二目录，保留历史报告的源码与时间含义。
   - 证据：docs/execution/evidence/phase2/baseline/phase1-baseline.json 固定阶段一交接（checked_commit f3afa5c、20 PASS、契约摘要 0cbd6256…、交接文件 sha256）；v1 兼容样例 tests/compat/fixtures/phase1/（46400ad 上由 capture_phase1.py 生成的 2 个 v1 回放包与 v1 对象）；阶段二输出统一写入 docs/execution/evidence/phase2/，phase1 报告不再被覆盖
   - 实现：`tests/compat/capture_phase1.py`、`docs/execution/evidence/phase2/baseline/phase1-baseline.json`
@@ -81,14 +83,28 @@
 | ModelReleaseRecord | 固定模型版本、编译产物、查询配置、回归结果和适用范围 |
 | ProbeResult | 独立业务观测的来源、时间、值、缺失原因和证据 |
 
-- [ ] **P2-010** 从 RunComponents.__post_init__、compute_candidates、plan_step、apply_step 提取 SemanticDriver；runtime 根据注册表和运行版本选取驱动。
-- [ ] **P2-011** 为现有 deterministic_finite_v1 提供驱动，原生产调度样例保持相同语义与可读历史结果。
+- [x] **P2-010** 从 RunComponents.__post_init__、compute_candidates、plan_step、apply_step 提取 SemanticDriver；runtime 根据注册表和运行版本选取驱动。
+  - 证据：RunComponents 不再构造 CheckedModel/Interpreter：open_components 按 manifest 固定的 driver pin（或按 profile 由 registry.driver_for 选择）创建 SEMANTIC_DRIVER 并 load，候选/预测/性质/信念全部经 LoadedModel；compute_candidates/plan_step/apply_step 改为驱动调用（partial_checker 由运行的验证器判定补全）；测试 packages/runtime/tests/test_kernel.py、test_runtime.py
+  - 实现：`packages/runtime/src/formal_lab_runtime/engine.py`、`packages/model-core/src/formal_lab_model/driver.py`、`packages/runtime/src/formal_lab_runtime/registry.py`、`packages/contracts/src/formal_lab_contracts/interfaces.py`
+- [x] **P2-011** 为现有 deterministic_finite_v1 提供驱动，原生产调度样例保持相同语义与可读历史结果。
+  - 证据：IR 驱动 formal-lab.driver.ir-finite 保持 deterministic_finite_v1 语义：阶段一回放包 normal.replay.zip 的逐步动作/结果/指标由新内核逐一复现（test_single_participant_run_reproduces_the_phase1_trajectory）；哨兵 compare（4 场景 × rule/z3 × 种子 1-3）中规则策略全部指标与改动前基线逐格一致；Z3 格的差异经证实源于阶段一结果依赖进程内运行顺序（阶段一代码自身单独/批量 12 格中 8 格不同），新内核单独=批量（docs/execution/evidence/phase2/z3-reproducibility.json，D-017）；阶段一回放包仍可读（@1 → v2 升级）
+  - 实现：`packages/model-core/src/formal_lab_model/driver.py`、`packages/runtime/tests/test_kernel.py`、`docs/execution/evidence/phase2/z3-reproducibility.json`
 - [ ] **P2-012** 用第二个独立实现的仓储资源分配插件验证候选、预测和性质计算来自驱动；通用 runtime 无须识别具体场景名称。
-- [ ] **P2-013** 审查 ModelPackage.ir 的强制 ModelIR 类型及 PluginInterface 枚举。兼容扩展使用有 schema 的命名空间载荷；确需非 ModelIR 载荷时交付真实的并行 v2 契约与 v1 适配器。
-- [ ] **P2-014** 契约升级覆盖 Pydantic、JSON Schema、TypeScript、数据库读取、API、CLI、SDK、事件与回放；保留 v1 固定样例和原始解释。
-- [ ] **P2-015** 新 profile 真实描述自己的载荷；能力协商在运行前产生可解释结果，模型类型、驱动、环境和验证器不匹配时返回 UNSUPPORTED。
-- [ ] **P2-016** 将步骤生命周期表达为可替换的类型化阶段；每段输入输出、重试语义、错误和证据均有合同。
-- [ ] **P2-017** 插件 descriptor 与配置 schema 在 API 和 Worker 启动时一致校验，运行 manifest 固定实际插件版本与摘要。
+- [x] **P2-013** 审查 ModelPackage.ir 的强制 ModelIR 类型及 PluginInterface 枚举。兼容扩展使用有 schema 的命名空间载荷；确需非 ModelIR 载荷时交付真实的并行 v2 契约与 v1 适配器。
+  - 证据：审查结论：v1 ModelPackage.ir 为必填 ModelIR、PluginInterface 封闭枚举，第二语义（非 IR 载荷）与 SEMANTIC_DRIVER/PROBE 无法在 v1 兼容表达（v1 消费者会拒绝），故交付并行 formal-lab-contracts/v2（ModelPackage.payload = fal-ir | namespaced{namespace, schema_id, data}，ir 保留为访问器）与 v1 适配器 formal_lab_contracts.compat；兼容扩展仍走带 schema 的命名空间 extensions；决策 D-015
+  - 实现：`packages/contracts/src/formal_lab_contracts/objects.py`、`packages/contracts/src/formal_lab_contracts/compat.py`、`packages/contracts/src/formal_lab_contracts/v1/__init__.py`
+- [x] **P2-014** 契约升级覆盖 Pydantic、JSON Schema、TypeScript、数据库读取、API、CLI、SDK、事件与回放；保留 v1 固定样例和原始解释。
+  - 证据：Pydantic（v2 源 + 冻结 v1）、JSON Schema（contracts/v2 新增，contracts/v1 逐字节不变）、TypeScript（generated.ts v2 + generated.v1.ts 命名空间 V1）、数据库读取（迁移 0002 contract_version 列，读时 compat 升级）、API（返回 v2 视图，v1 行升级）、CLI（replay verify/view 读 @1/@2）、SDK（RunManifest/QueryBundle v2）、事件（payload 升级 upgrade_event_payload，turn/stage 列）、回放（@2 写、@1 读）；v1 固定样例保留在 tests/contracts/fixtures/v1 并逐一验证为 v1 且升级后通过 v2 schema；tests/contracts 127 项、TS 91 项、集成 30 项通过
+  - 实现：`packages/contracts/src/formal_lab_contracts/compat.py`、`packages/contracts/src/formal_lab_contracts/bundle.py`、`packages/contracts-ts/scripts/generate.mjs`、`packages/platform-api/src/formal_lab_api/migrations/versions/0002_phase2_kernel.py`、`tests/contracts/test_contracts.py`
+- [x] **P2-015** 新 profile 真实描述自己的载荷；能力协商在运行前产生可解释结果，模型类型、驱动、环境和验证器不匹配时返回 UNSUPPORTED。
+  - 证据：新 profile 以 NamespacedPayload（namespace + schema_id + data，驱动描述符 input_schema 给出 schema）描述自身载荷，驱动 validate 校验；make_manifest→negotiate_run 在创建运行前逐角色协商（驱动 profile/候选/预测、环境 profile/多参与者/恢复能力、策略 profile 与 requires、验证器 profile），结果写入 RunManifest.negotiation（SUPPORTED/PARTIAL/UNSUPPORTED + reasons），不兼容时抛 UNSUPPORTED 并附全部理由；验证器不支持 profile 时记录为 UNSUPPORTED 角色、检查回答 UNSUPPORTED；测试 test_negotiation_refuses_unsupported_combinations_before_the_run、test_non_ir_package_is_unsupported
+  - 实现：`packages/runtime/src/formal_lab_runtime/manifest.py`、`packages/contracts/src/formal_lab_contracts/capabilities.py`
+- [x] **P2-016** 将步骤生命周期表达为可替换的类型化阶段；每段输入输出、重试语义、错误和证据均有合同。
+  - 证据：ExecutionStage（TURN/OBSERVE/PROPOSE/CHECK/EXECUTE/RECONCILE/PROBE/COMPARE/TERMINATE）每段输出 StageRecord（状态、重试语义 IDEMPOTENT/RECONCILE_THEN_RETRY/NOT_RETRYABLE、输入/输出摘要、耗时、ErrorInfo、证据），写入事件 stage 字段与 StepRecord.stages；阶段契约表见 docs/contracts/v2.md“执行阶段”；测试 test_every_step_records_typed_stages
+  - 实现：`packages/runtime/src/formal_lab_runtime/engine.py`、`packages/contracts/src/formal_lab_contracts/execution.py`、`packages/contracts/src/formal_lab_contracts/kernel.py`
+- [x] **P2-017** 插件 descriptor 与配置 schema 在 API 和 Worker 启动时一致校验，运行 manifest 固定实际插件版本与摘要。
+  - 证据：注册表在 API 与 Worker 启动时同样校验描述符（契约/接口版本、v2 专属接口、config_schema 本身为合法 JSON Schema）；配置按 schema 校验在 API 保存场景时（registry.validate_config，字段级错误）与 Worker 打开运行时（open_components）使用同一函数；manifest 固定实际解析到的插件版本与描述符摘要（含 driver 角色）；测试 test_registry_interface_and_contract_versions、test_worker_revalidates_plugin_config_against_the_pinned_schema
+  - 实现：`packages/runtime/src/formal_lab_runtime/registry.py`、`packages/runtime/src/formal_lab_runtime/engine.py`、`packages/platform-api/src/formal_lab_api/services/scenarios.py`
 - [ ] **P2-018** 新建插件合同测试工具，覆盖初始化、能力协商、观察、提案、状态推进、恢复与结束；通过公共 SDK 验证包外插件。
 - [ ] **P2-019** 更新依赖方向检查，使纯算法包、运行核心、业务服务适配包各有明确职责；保持原纯数据示例的独立运行路径。
 
@@ -96,15 +112,33 @@
 
 直接复用 [Z3Prover/z3](https://github.com/Z3Prover/z3) 官方 Python 绑定；优化功能参考 [Z3 Optimization](https://microsoft.github.io/z3guide/docs/optimization/intro/)。保留当前锁定版本作为起点，按兼容性决定是否升级。
 
-- [ ] **P2-020** 定义 ObjectiveSpec：目标表达式、单位、优化方向、字典序优先级、终止目标、有限 horizon 与成本累计方式。
-- [ ] **P2-021** 在已有编译器旁实现成本优化；支持生产延期成本与动作成本，并保留现有最短路径策略作为独立基线。
-- [ ] **P2-022** 优先用现有 sum、min/max、ite 组合表达成本；只有实际表达不足时扩展 IR，补齐解释器与编译器的同语义实现。
-- [ ] **P2-023** 保存可行见证、目标值、求解状态及已证实的最优性范围。超时得到的可行方案与已证明最优方案分别展示。
-- [ ] **P2-024** 用可穷举小模型对照最优成本、目标达成与见证重放；构造一个“更短但更贵”的案例确认优化实际生效。
-- [ ] **P2-025** 显式表示已知、过期、未知及初值假设。使用 last-known 的规划标记为基于假设的计划，保存假设集合。
-- [ ] **P2-026** 为有限不完备状态实现“所有允许补全均满足单步条件”的检查；多步先支持给定动作序列的稳健性检查，明确与可随观测分支的策略综合之区别。
-- [ ] **P2-027** 当未知补全产生不同结果时保存 UNKNOWN 或反例补全；将额外观测需求作为类型化结果供生产调度策略使用。
-- [ ] **P2-028** 补齐规划缓存键：模型/驱动版本、目标、优化配置、horizon、未知与假设集合、相关预算配置；缓存有容量上限，区别见证和有界无见证结果。
+- [x] **P2-020** 定义 ObjectiveSpec：目标表达式、单位、优化方向、字典序优先级、终止目标、有限 horizon 与成本累计方式。
+  - 证据：ObjectiveSpec：字典序层级（minimize/maximize，单位）、CostTerm（action_cost / state_rate / terminal，权重）、goal_property 终止目标、有限 horizon、until_goal 累计方式；模型可声明 ObjectiveDecl 供场景按 id 引用；契约样例与测试 tests/contracts/fixtures/v2/valid/ObjectiveSpec.json
+  - 实现：`packages/contracts/src/formal_lab_contracts/kernel.py`、`packages/contracts/src/formal_lab_contracts/ir.py`
+- [x] **P2-021** 在已有编译器旁实现成本优化；支持生产延期成本与动作成本，并保留现有最短路径策略作为独立基线。
+  - 证据：OPTIMIZE_OBJECTIVE 在已有编译器旁实现（formal_lab_solver_z3/optimize.py：done 标志展开 + 逐层界收紧）；生产调度模型 v2 声明 delay_cost（按订单完工的延期成本）与 effort（动作成本）；Z3 规划器 mode=cost 使用场景目标，mode=shortest 保留最短路径基线；实测调度正常实例 16/18 步 horizon 下证明最优（delay 0、effort 14，8–10 s）
+  - 实现：`packages/solver-adapters/z3/src/formal_lab_solver_z3/optimize.py`、`packages/solver-adapters/z3/src/formal_lab_solver_z3/planner.py`、`examples/neutral-scheduling/src/formal_lab_example_scheduling/model.py`
+- [x] **P2-022** 优先用现有 sum、min/max、ite 组合表达成本；只有实际表达不足时扩展 IR，补齐解释器与编译器的同语义实现。
+  - 证据：成本优先用 sum/ite/min/max 表达；按订单的完工时间需要“域上的最大值”，现有 IR 无法表达，故新增量词 max_over/min_over（where + default），解释器与 Z3 编译器同语义实现，v1 模型规范形式与摘要不变（V2_IR_DEFAULTS）；测试 test_extremum_quantifiers_agree_with_the_interpreter、test_state_rate_and_extremum_costs_match_reference、test_canonical_ir_keeps_v1_digests
+  - 实现：`packages/contracts/src/formal_lab_contracts/ir.py`、`packages/model-core/src/formal_lab_model/interpreter.py`、`packages/solver-adapters/z3/src/formal_lab_solver_z3/compiler.py`
+- [x] **P2-023** 保存可行见证、目标值、求解状态及已证实的最优性范围。超时得到的可行方案与已证明最优方案分别展示。
+  - 证据：结果保存可行见证（解释器重放并重新计算成本）、每层目标值、求解状态与已证实范围（proven_lower/proven_upper/optimal）；OPTIMAL 与超时得到的 FEASIBLE 分开表示与解释；测试 test_timeout_gives_feasible_with_proven_interval_or_unknown、test_shorter_but_more_expensive_plan_is_not_chosen
+  - 实现：`packages/solver-adapters/z3/src/formal_lab_solver_z3/optimize.py`、`packages/contracts/src/formal_lab_contracts/kernel.py`
+- [x] **P2-024** 用可穷举小模型对照最优成本、目标达成与见证重放；构造一个“更短但更贵”的案例确认优化实际生效。
+  - 证据：可穷举参考 formal_lab_model.objectives.optimal_by_search（状态 × 剩余步 DP）对照：随机模型 20 个种子 × 4 个目标 × 2 组层级共 160 例，最优值、计划长度与见证重放全部一致（含 ≥10 例界内无计划、≥20 例长度 ≥2 的防空转守卫）；“更短但更贵”案例 samples.shortcut：最短路径选 express（1 步、费用 10），优化选 walk×3（费用 3，证明最优）
+  - 实现：`packages/model-core/src/formal_lab_model/objectives.py`、`packages/model-core/src/formal_lab_model/samples.py`、`packages/solver-adapters/z3/tests/test_optimize.py`
+- [x] **P2-025** 显式表示已知、过期、未知及初值假设。使用 last-known 的规划标记为基于假设的计划，保存假设集合。
+  - 证据：BeliefState 为每个位置标注 KNOWN/STALE/UNKNOWN/ASSUMED_INITIAL（附时点），非 KNOWN 位置组成带摘要的 AssumptionSet；使用 last-known/初值的提案标为 ASSUMPTION_BASED 并携带 AssumptionSetRef，计划保存 assumptions_digest；测试 test_plan_revisions_record_their_trigger（状态延迟场景出现 ASSUMPTION_BASED）
+  - 实现：`packages/model-core/src/formal_lab_model/belief.py`、`packages/runtime/src/formal_lab_runtime/engine.py`
+- [x] **P2-026** 为有限不完备状态实现“所有允许补全均满足单步条件”的检查；多步先支持给定动作序列的稳健性检查，明确与可随观测分支的策略综合之区别。
+  - 证据：单步：ACTION_PRECONDITION 判断“所有允许补全均满足”；多步：ROBUST_SEQUENCE 检查给定动作序列对全部补全的稳健性（反例补全经解释器重放确认失败位置）；与可随观测分支的策略综合之区别写入 docs/architecture/observation-semantics.md 与 docs/contracts/v2.md；测试 test_robust_sequence_over_unknown_completions
+  - 实现：`packages/solver-adapters/z3/src/formal_lab_solver_z3/optimize.py`、`docs/architecture/observation-semantics.md`
+- [x] **P2-027** 当未知补全产生不同结果时保存 UNKNOWN 或反例补全；将额外观测需求作为类型化结果供生产调度策略使用。
+  - 证据：补全结论不同 → UNKNOWN，并保存适用/不适用两个补全与 ObservationRequest（前提读取且取值不同的未知位置）；候选动作携带该请求；生产调度所用 Z3 规划器 request_observations=true 时据此先请求观测（环境 env.observe_on_request，事件 OBSERVATION_REQUESTED），状态延迟场景种子 2 的被拒动作少于不请求时；测试 test_unknown_precondition_carries_completions_and_observation_request、test_observation_requests_settle_unknown_actions
+  - 实现：`packages/solver-adapters/z3/src/formal_lab_solver_z3/verifier.py`、`packages/solver-adapters/z3/src/formal_lab_solver_z3/planner.py`、`packages/neutral-environment/src/formal_lab_env/ir_world.py`
+- [x] **P2-028** 补齐规划缓存键：模型/驱动版本、目标、优化配置、horizon、未知与假设集合、相关预算配置；缓存有容量上限，区别见证和有界无见证结果。
+  - 证据：PlanCache 键 = 模型摘要、驱动、模式、目标、目标函数摘要、受预算约束后的 horizon、信念状态摘要、假设集合；LRU 容量上限（cache_size，命中/未命中/淘汰计数）；缓存区分计划/界内无计划/超时部分结果（后者按超时另键）；每次查询新建 Z3 上下文使命中与重新求解一致；测试 test_planner_cache_key_covers_query_boundaries
+  - 实现：`packages/solver-adapters/z3/src/formal_lab_solver_z3/planner.py`
 - [ ] **P2-029** 为每次检查输出可回放查询包：输入版本、假设、范围、结果、见证/反例、耗时与后端；UI 和导出共享同一解释。
 
 ## 4. 真正的多参与者与轮次调度
