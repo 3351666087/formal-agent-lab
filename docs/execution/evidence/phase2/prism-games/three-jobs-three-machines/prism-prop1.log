@@ -1,0 +1,75 @@
+$ model.prism props.props -prop 1 -exportstrat strat.txt -exportmodel model.all
+PRISM-games
+===========
+
+Version: 3.2.4 (based on PRISM 4.10.1.dev)
+Date: Mon Sep 28 22:21:10 CST 2026
+Hostname: colima
+Memory limits: cudd=1g, java(heap)=1.4g
+Command line: prism-games model.prism props.props -prop 1 -exportstrat strat.txt -exportmodel model.all
+
+Parsing PRISM model file "model.prism"...
+
+Type:        SMG
+Players:     dispatcher environment
+Modules:     plant
+Actions:     [asg_a_m1] [asg_a_m2] [asg_a_m3] [asg_b_m1] [asg_b_m2] [asg_b_m3] [asg_c_m1] [asg_c_m2] [asg_c_m3] [asg_a_m1_b_m2] [asg_a_m1_b_m3] [asg_a_m2_b_m1] [asg_a_m2_b_m3] [asg_a_m3_b_m1] [asg_a_m3_b_m2] [asg_a_m1_c_m2] [asg_a_m1_c_m3] [asg_a_m2_c_m1] [asg_a_m2_c_m3] [asg_a_m3_c_m1] [asg_a_m3_c_m2] [asg_b_m1_c_m2] [asg_b_m1_c_m3] [asg_b_m2_c_m1] [asg_b_m2_c_m3] [asg_b_m3_c_m1] [asg_b_m3_c_m2] [asg_a_m1_b_m2_c_m3] [asg_a_m1_b_m3_c_m2] [asg_a_m2_b_m1_c_m3] [asg_a_m2_b_m3_c_m1] [asg_a_m3_b_m1_c_m2] [asg_a_m3_b_m2_c_m1] [slow_m1] [slow_m2] [slow_m3] [work]
+Variables:   t r d_a d_b d_c x_a x_b x_c sl
+Labels:      "done"
+
+Parsing properties file "props.props"...
+
+2 properties:
+(1) <<dispatcher>>Pmax=? [ F "done" ]
+(2) <<dispatcher,environment>>Pmax=? [ F "done" ]
+
+Switching to explicit engine, which supports SMGs...
+
+Building model (engine:explicit)...
+
+Computing reachable states... 1101 states
+Reachable states exploration and model construction done in 0.028 secs.
+Sorting reachable states list...
+
+Time for model construction: 0.041 seconds.
+
+Warning: Deadlocks detected and fixed in 11 states
+
+Type:        SMG
+Players:     2
+States:      1101 (1 initial)
+Transitions: 3869
+Choices:     1880
+Max/avg:     33/1.71
+
+Exporting model in plain text format to file "model.tra"...
+Exporting state rewards in plain text format to file "model.srew"...
+Exporting transition rewards in plain text format to file "model.trew"...
+Exporting reachable states in plain text format to file "model.sta"...
+Exporting labels and satisfying states in plain text format to file "model.lab"...
+Time for exporting: 0.121 seconds.
+
+---------------------------------------------------------------------
+
+Model checking: <<dispatcher>>Pmax=? [ F "done" ]
+
+Starting probabilistic reachability...
+Starting Prob0 (maxmin)...
+Prob0 (maxmin) took 6 iterations and 0.005 seconds.
+target=4, yes=4, no=187, maybe=910
+Starting value iteration (Gauss-Seidel, maxmin)...
+Value iteration (Gauss-Seidel, maxmin) took 10 iterations and 0.005 seconds.
+Probabilistic reachability took 0.014 seconds.
+
+Value in the initial state: 0.733502287872
+
+Time for model checking: 0.015 seconds.
+
+Result: 0.733502287872 (exact floating point)
+
+Exporting strategy as actions to file "strat.txt"...
+
+---------------------------------------------------------------------
+
+Note: There was 1 warning during computation.
+

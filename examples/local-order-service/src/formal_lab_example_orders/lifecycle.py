@@ -34,6 +34,8 @@ from typing import Any
 
 import httpx
 
+from .net import trust_env
+
 LABEL = "dev.formal-lab.project"
 COMPONENT = "dev.formal-lab.component"
 COMPONENT_NAME = "local-order-service"
@@ -191,7 +193,7 @@ class ServiceManager:
         last = ""
         while time.monotonic() < deadline:
             try:
-                resp = httpx.get(f"{self.endpoint}/health", timeout=2)
+                resp = httpx.get(f"{self.endpoint}/health", trust_env=trust_env(f"{self.endpoint}/health"), timeout=2)
                 if resp.status_code == 200 and resp.json().get("project") == self.project:
                     if self.status != "READY":
                         self._to("READY", f"health ok at {self.endpoint}")
@@ -209,7 +211,7 @@ class ServiceManager:
 
     def reset(self, tenant: str, *, case: str = "normal", seed: int = 0) -> dict[str, Any]:
         self._to("RESETTING", f"tenant {tenant} → {case}/{seed}")
-        resp = httpx.post(f"{self.endpoint}/t/{tenant}/admin/reset", json={"case": case, "seed": seed}, timeout=30)
+        resp = httpx.post(f"{self.endpoint}/t/{tenant}/admin/reset", trust_env=trust_env(f"{self.endpoint}/t/{tenant}/admin/reset"), json={"case": case, "seed": seed}, timeout=30)
         resp.raise_for_status()
         self._to("READY", f"tenant {tenant} reset")
         return resp.json()
@@ -355,7 +357,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "up":
         if info and info.get("status") == "READY":
             try:
-                if httpx.get(f"http://127.0.0.1:{info['port']}/health", timeout=2).status_code == 200:
+                if httpx.get(f"http://127.0.0.1:{info['port']}/health", trust_env=trust_env(f"http://127.0.0.1:{info['port']}/health"), timeout=2).status_code == 200:
                     print(json.dumps({"status": "already running", **info}))
                     return 0
             except httpx.HTTPError:
@@ -372,13 +374,13 @@ def main(argv: list[str] | None = None) -> int:
     endpoint = f"http://127.0.0.1:{info['port']}"
     if args.command == "status":
         try:
-            health = httpx.get(f"{endpoint}/health", timeout=2).json()
+            health = httpx.get(f"{endpoint}/health", trust_env=trust_env(f"{endpoint}/health"), timeout=2).json()
         except httpx.HTTPError as exc:
             health = {"status": "unreachable", "error": type(exc).__name__}
         print(json.dumps({**info, "health": health}, default=str))
         return 0
     if args.command == "reset":
-        r = httpx.post(f"{endpoint}/t/{args.tenant}/admin/reset", json={"case": args.case, "seed": args.seed},
+        r = httpx.post(f"{endpoint}/t/{args.tenant}/admin/reset", trust_env=trust_env(f"{endpoint}/t/{args.tenant}/admin/reset"), json={"case": args.case, "seed": args.seed},
                        timeout=30)
         r.raise_for_status()
         print(json.dumps({"tenant": args.tenant, "revision": r.json()["revision"]}))

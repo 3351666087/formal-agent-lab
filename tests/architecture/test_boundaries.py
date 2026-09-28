@@ -20,6 +20,7 @@ PACKAGES = {
     "formal_lab_contracts": "packages/contracts/src/formal_lab_contracts",
     "formal_lab_model": "packages/model-core/src/formal_lab_model",
     "formal_lab_solver_z3": "packages/solver-adapters/z3/src/formal_lab_solver_z3",
+    "formal_lab_solver_prism": "packages/solver-adapters/prism-games/src/formal_lab_solver_prism",
     "formal_lab_env": "packages/neutral-environment/src/formal_lab_env",
     "formal_lab_strategies": "packages/strategies/src/formal_lab_strategies",
     "formal_lab_runtime": "packages/runtime/src/formal_lab_runtime",
@@ -38,11 +39,15 @@ ALLOWED: dict[str, set[str]] = {
     "formal_lab_contracts": set(),
     "formal_lab_model": {"formal_lab_contracts"},
     "formal_lab_solver_z3": {"formal_lab_contracts", "formal_lab_model"},
+    # optional PRISM-games track: a self-contained payload + process adapter, no platform imports
+    "formal_lab_solver_prism": set(),
     "formal_lab_env": {"formal_lab_contracts", "formal_lab_model"},
     "formal_lab_strategies": {"formal_lab_contracts", "formal_lab_model"},
     "formal_lab_runtime": {"formal_lab_contracts", "formal_lab_model"},
     "formal_lab_eval": {"formal_lab_contracts", "formal_lab_runtime", "formal_lab_strategies", "formal_lab_sdk"},
-    "formal_lab_api": {"formal_lab_contracts", "formal_lab_model", "formal_lab_runtime", "formal_lab_eval"},
+    # the probabilistic-check endpoint is the one place that calls the PRISM-games extension (lazily)
+    "formal_lab_api": {"formal_lab_contracts", "formal_lab_model", "formal_lab_runtime", "formal_lab_eval",
+                       "formal_lab_solver_prism"},
     "formal_lab_orchestrator": {"formal_lab_contracts", "formal_lab_api"},
     # model-core via the optional [offline] extra; runtime only lazily, for `fal query replay --offline` (needs the
     # engine and a verifier plugin installed)
@@ -179,3 +184,16 @@ def test_business_service_and_its_adapter_stay_apart():
         mods = _imports(base / name)
         assert not mods & {"subprocess", "socket", "signal"}, f"{name} controls processes: {mods}"
     assert {"subprocess", "signal"} <= _imports(base / "lifecycle.py")
+
+
+def test_prism_games_runs_only_as_a_separate_process():
+    """P2-X04: PRISM-games (GPL-2.0) is never imported or linked — no JVM bridge; the adapter writes input files and
+    starts the installed binary. The game model and its independent solver are plain Python."""
+    base = ROOT / PACKAGES["formal_lab_solver_prism"]
+    assert "subprocess" in _imports(base / "adapter.py")
+    assert not _imports(base / "game.py") & {"subprocess", "socket", "os"}
+    for f in _files("formal_lab_solver_prism"):
+        assert not _imports(f) & {"jpype", "py4j", "jnius", "ctypes"}, f"{f.name} links a JVM / native library"
+    api = ROOT / PACKAGES["formal_lab_api"]
+    users = [f.name for f in api.rglob("*.py") if "formal_lab_solver_prism" in _imports(f)]
+    assert users == ["probabilistic.py"], users

@@ -25,11 +25,12 @@ from formal_lab_contracts.errors import (
     InvalidInput,
     NotFound,
 )
+from formal_lab_runtime.manifest import PLATFORM_VERSION
 from sqlalchemy import select, text
 
 from .db import CheckRow, Matrix, Model, ModelVersion, Project, Run, Scenario, StrategyConfig, session_scope
 from .orchestration import TemporalOrchestrator
-from .services import catalog, governance, modeling, operations, runs, scenarios
+from .services import catalog, governance, modeling, operations, probabilistic, runs, scenarios
 from .services.common import artifact_store, get_or_404
 from .services.events import list_events, to_trace_event
 from .settings import get_settings
@@ -57,7 +58,7 @@ def _sync_catalog() -> None:
 
 def create_app() -> FastAPI:
     settings = get_settings()
-    app = FastAPI(title="formal-agent-lab platform API", version="0.1.0", lifespan=lifespan,
+    app = FastAPI(title="formal-agent-lab platform API", version=PLATFORM_VERSION, lifespan=lifespan,
                   description=f"Contracts: {CONTRACT_VERSION}. Deployment profile: {settings.deployment_profile}.")
     app.add_middleware(CORSMiddleware, allow_origins=[o for o in settings.cors_origins.split(",") if o],
                        allow_methods=["*"], allow_headers=["*"], expose_headers=["*"])
@@ -224,9 +225,23 @@ def _routes(app: FastAPI) -> None:
             s, version_id, body["query"], body.get("state"), body.get("unknown_paths")), s))
 
     @app.get(f"{API}/model-versions/{{version_id}}/checks")
-    async def list_checks(version_id: str):
+    async def list_checks(version_id: str):  # deterministic (Z3) checks only; probabilistic ones have their own list
         return await db(lambda s: [modeling.check_dict(c, s) for c in s.scalars(
-            select(CheckRow).where(CheckRow.model_version_id == version_id).order_by(CheckRow.created_at.desc()))])
+            select(CheckRow).where(CheckRow.model_version_id == version_id,
+                                   CheckRow.verdict != probabilistic.VERDICT).order_by(CheckRow.created_at.desc()))])
+
+    # ---- optional PRISM-games extension: numerical results, kept apart from the deterministic checks
+    @app.get(f"{API}/extensions/prism-games")
+    async def prism_games():
+        return await run_in_threadpool(probabilistic.availability)
+
+    @app.post(f"{API}/model-versions/{{version_id}}/probabilistic-checks", status_code=201)
+    async def run_probabilistic(version_id: str, body: dict[str, Any] = Body(default={})):
+        return await db(lambda s: probabilistic.run(s, version_id, body))
+
+    @app.get(f"{API}/model-versions/{{version_id}}/probabilistic-checks")
+    async def list_probabilistic(version_id: str):
+        return await db(lambda s: probabilistic.listing(s, version_id))
 
     @app.get(f"{API}/query-bundles/{{bundle_id}}")
     async def get_query_bundle(bundle_id: str):

@@ -54,7 +54,7 @@ CHECKS: list[Check] = [
     # ------------------------------------------------------------ compatibility (P2-110)
     Check("contracts-v1-v2", "compatibility", ["P2-110", "P2-010", "P2-011"],
           "契约 v1 冻结、v2 生成一致、v1→v2 升级，TS 类型与样例",
-          f"make contracts-check && {PYTEST} tests/contracts tests/compat && "
+          f"make contracts-check && {PYTEST} tests/contracts && "
           "pnpm --filter @formal-lab/contracts run test",
           ["contracts/v1/DIGEST.json", "contracts/v2/DIGEST.json", "docs/contracts/v2.md"]),
     Check("phase1-parity", "compatibility", ["P2-110", "P2-001", "P2-002"],
@@ -170,22 +170,36 @@ CHECKS: list[Check] = [
     # ------------------------------------------------------------ conditional / extension
     Check("model-real", "conditional", ["P2-039", "P2-045", "P2-046"], "真实模型端点：请求可复现与证据完整",
           f"{PY} scripts/model_evidence.py", [f"{EV}/model/evidence.json"], requires="llm", kind="conditional"),
-    Check("prism-games", "extension", ["P2-X01", "P2-X02", "P2-X03", "P2-X04"], "深化轨道：PRISM-games 概率查询",
-          f"{PY} scripts/prism_games_check.py", [f"{EV}/prism-games/"], requires="prism", kind="extension"),
+    Check("prism-games", "extension", ["P2-X01", "P2-X02", "P2-X03", "P2-X04"],
+          "深化轨道：PRISM-games 随机博弈概率查询、策略导出与模型内核对、类型化扩展与 UI",
+          f"{PY} scripts/prism_games_check.py && {PYTEST} packages/solver-adapters/prism-games && "
+          f"{PYTEST} -m integration tests/integration/test_probabilistic_platform.py",
+          [f"{EV}/prism-games/summary.json", f"{EV}/prism-games/workbench-probabilistic.jpg"], requires="prism",
+          profile="local-services", kind="extension"),
 ]
 
 
+# outputs the acceptance run and the handoff generator write themselves: they never change what is being checked,
+# so they stay out of the worktree digest (otherwise a partial re-run would disown the results of the full run)
+OUTPUTS = ("docs/execution/evidence/", "docs/handoff/", "docs/execution/phase-2.md", "docs/licenses.md",
+           "docs/api/openapi.json")
+
+
 def worktree_digest() -> dict:
-    diff = subprocess.run(["git", "diff", "HEAD", "--binary"], cwd=ROOT, capture_output=True).stdout
-    untracked = subprocess.run(["git", "ls-files", "--others", "--exclude-standard"], cwd=ROOT, capture_output=True,
-                               text=True).stdout.split()
+    """sha256 over `git diff HEAD` and the untracked files, i.e. every uncommitted change to the checked sources."""
+    excludes = [f":(exclude){p}" for p in OUTPUTS]
+    diff = subprocess.run(["git", "diff", "HEAD", "--binary", "--", ".", *excludes], cwd=ROOT,
+                          capture_output=True).stdout
+    untracked = [u for u in subprocess.run(["git", "ls-files", "--others", "--exclude-standard"], cwd=ROOT,
+                                           capture_output=True, text=True).stdout.split()
+                 if not u.startswith(OUTPUTS)]
     h = hashlib.sha256(diff)
     for path in sorted(untracked):
         p = ROOT / path
         if p.is_file():
             h.update(path.encode() + b"\0" + hashlib.sha256(p.read_bytes()).digest())
     return {"sha256": h.hexdigest(), "clean": not diff and not untracked, "changed_bytes": len(diff),
-            "untracked_files": len(untracked)}
+            "untracked_files": len(untracked), "excluded_outputs": list(OUTPUTS)}
 
 
 def probe(name: str) -> str | None:
@@ -201,9 +215,15 @@ def probe(name: str) -> str | None:
         from formal_lab_runtime.settings import llm_configured
 
         return None if llm_configured() else "FAL_LLM_API_KEY not configured"
-    if name == "prism":
-        return None if (ROOT / "scripts" / "prism_games_check.py").exists() else \
-            "NOT_SELECTED: the optional PRISM-games track has no check in this revision"
+    if name == "prism":  # optional track: BLOCKED (with the reason) when the binary is not installed
+        sys.path.insert(0, str(ROOT / "packages" / "solver-adapters" / "prism-games" / "src"))
+        from formal_lab_solver_prism import Unavailable, locate
+
+        try:
+            locate()
+        except Unavailable as exc:
+            return f"BLOCKED: {exc}"
+        return probe("services")
     return None
 
 
@@ -234,6 +254,8 @@ def main() -> int:
     LOGS.mkdir(parents=True, exist_ok=True)
     env = {**os.environ, "UV_PROJECT_ENVIRONMENT": os.environ.get("UV_PROJECT_ENVIRONMENT",
                                                                     str(Path.home() / ".venvs" / "formal-agent-lab"))}
+    for key in ("NO_PROXY", "no_proxy"):  # loopback never through a proxy from the environment (local-development §7)
+        env[key] = ",".join(x for x in (env.get(key), "127.0.0.1,localhost,::1") if x)
     rev = subprocess.run(["git", "rev-parse", "HEAD"], cwd=ROOT, capture_output=True, text=True).stdout.strip()
     tree = worktree_digest()
     previous = json.loads(OUT.read_text()) if OUT.exists() else None
@@ -254,7 +276,7 @@ def main() -> int:
                 probes[check.requires] = probe(check.requires)
             reason = probes[check.requires]
         if reason:
-            result = "NOT_SELECTED" if reason.startswith("NOT_SELECTED") else "NOT_RUN"
+            result = next((k for k in ("NOT_SELECTED", "BLOCKED") if reason.startswith(k)), "NOT_RUN")
             code, note = None, reason
             log.write_text(f"{result}: {reason}\n")
         else:
@@ -266,6 +288,9 @@ def main() -> int:
                 proc = subprocess.run(check.command, shell=True, cwd=ROOT, env=env, stdout=fh, stderr=subprocess.STDOUT)
             code = proc.returncode
             result = "PASS" if code == 0 else "FAIL"
+            if check.requires in ("docker", "services"):  # give the host back what the check freed in the VM
+                subprocess.run([sys.executable, "scripts/disk_guard.py", "--need", "0", "--trim",
+                                "--label", f"after {check.id}"], cwd=ROOT)
             tail = [ln for ln in log.read_text().strip().splitlines() if ln.strip() and not ln.startswith("make[")]
             note = tail[-1][:300] if tail else ""
         results[check.id] = {

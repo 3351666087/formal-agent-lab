@@ -257,20 +257,23 @@ def test_lifecycle_labels_precheck_and_scoped_cleanup(tmp_path):
         precheck(tmp_path, min_disk_mb=10**9)
     a = ServiceManager(tmp_path, project="t-a").start()
     b = ServiceManager(tmp_path, project="t-b").start()
-    a.ready()
-    b.ready()
-    a.reset("x", case="normal", seed=0)
-    assert [t["status"] for t in a.transitions] == ["CREATED", "STARTING", "READY", "RESETTING", "READY"]
-    manifest = (a.home / "manifest.json").read_text()
-    assert '"dev.formal-lab.project": "t-a"' in manifest
-    st = a.stats()
-    assert st["rss_kb"] and st["data_bytes"] > 0
-    removed = cleanup_project(tmp_path, "t-a")  # as after a failure: a was never closed
-    assert removed["processes"] and not a.home.exists()
-    with pytest.raises(httpx.HTTPError):
-        httpx.get(f"{a.endpoint}/health", timeout=1)
-    assert httpx.get(f"{b.endpoint}/health").json()["project"] == "t-b"  # the other project is untouched
-    b.close()
+    try:
+        a.ready()
+        b.ready()
+        a.reset("x", case="normal", seed=0)
+        assert [t["status"] for t in a.transitions] == ["CREATED", "STARTING", "READY", "RESETTING", "READY"]
+        manifest = (a.home / "manifest.json").read_text()
+        assert '"dev.formal-lab.project": "t-a"' in manifest
+        st = a.stats()
+        assert st["rss_kb"] and st["data_bytes"] > 0
+        removed = cleanup_project(tmp_path, "t-a")  # as after a failure: a was never closed
+        assert removed["processes"] and not a.home.exists()
+        with pytest.raises(httpx.HTTPError):
+            httpx.get(f"{a.endpoint}/health", timeout=1)
+        assert httpx.get(f"{b.endpoint}/health").json()["project"] == "t-b"  # the other project is untouched
+    finally:
+        cleanup_project(tmp_path, "t-a")  # no leftover service when an assertion above fails
+        b.close()
     assert not (tmp_path / ".fal-orders").exists()
     with pytest.raises(LifecycleError):
         run_with_timeout(time.sleep, 0.2, 2)

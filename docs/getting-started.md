@@ -34,8 +34,11 @@ make demo              # 不需要任何服务：独立运行示例的有界检�
 make test-unit         # 单元 / 契约 / 架构测试
 make test-integration  # 需要 make services-up：平台、编排、SDK/CLI、回放、Inspect
 make test-ui           # 需要 uv run playwright install --with-deps chromium
-make phase1-check      # 全部阶段一验收，写入 docs/handoff/phase1-checks.json
+make phase1-check      # 阶段一验收（历史），写入 docs/handoff/phase1-checks.json
+make phase2-check      # 阶段二本地验收，写入 docs/handoff/phase2-checks.json（解读见 acceptance-phase2.md）
 ```
+
+阶段二的本地 profile、订单服务、备份恢复、磁盘余量与可选 PRISM-games 安装见 [local-development.md](local-development.md)。
 
 ## 4. 容器化整栈
 

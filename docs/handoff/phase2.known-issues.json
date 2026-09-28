@@ -1,0 +1,42 @@
+[
+  {
+    "issue": "the phase-1 EDD rule strategy under state delay still reaches the goal in 4/5 seeds (seed 5 exhausts the step budget after 37 rejected assignments)",
+    "impact": "strategy behaviour kept as the baseline; the task planners (task-rule / task-symbolic) reach the goal 5/5 without rejections",
+    "reproduce": "uv run --frozen python scripts/state_delay_report.py   # docs/execution/evidence/phase2/state-delay/report.md"
+  },
+  {
+    "issue": "the labelled LLM stand-in (llm-stub) never completes the state-delay scenario",
+    "impact": "with no_progress_limit it ends as FAILED/NO_PROGRESS instead of burning the budget; stub results stay labelled LLM_STUB",
+    "reproduce": "same report, strategy llm-stub"
+  },
+  {
+    "issue": "effect differences whose plan was made on an older revision (another actor moved first) produce no revision suggestion or regression case",
+    "impact": "by design (decision D-022): such a difference says the plan was stale, not that the model is wrong; the difference itself stays in the trace",
+    "reproduce": "two-dispatcher run with REVALIDATE; see packages/runtime/tests/test_multi_actor.py"
+  },
+  {
+    "issue": "real-model runs depend on the configured relay; some models answer 'upstream service temporarily unavailable'",
+    "impact": "the conditional model-real check records NOT_RUN or FAIL with the reason; default model gpt-5.6-sol answered in the recorded evidence",
+    "reproduce": "uv run --frozen python scripts/model_evidence.py (needs FAL_LLM_API_KEY in .env)"
+  },
+  {
+    "issue": "the Colima VM disks are sparse files on the Mac: on 2026-09-28 a full host disk aborted the Docker-disk journal (lost image layers, repaired with e2fsck; PostgreSQL recovered cleanly, pg_amcheck clean)",
+    "impact": "development environment only; heavy scripts now refuse to start without headroom (scripts/disk_guard.py) and return freed blocks with fstrim",
+    "reproduce": "n/a — see docs/local-development.md, 'Disk space'"
+  },
+  {
+    "issue": "when the host has an HTTP proxy, Lima copies it into the VM's /etc/environment without NO_PROXY: calls to 127.0.0.1 then go to the host's proxy, which reaches them only through Colima's port forwarding (502 / connect timeouts right after a service starts, 502 instead of 'connection refused' after it stops)",
+    "impact": "fixed in the platform's own clients (SDK, order-service adapter, probe and lifecycle bypass proxies for loopback); scripts/in-vm.sh, the Makefile and the test harnesses add loopback to NO_PROXY; make doctor warns when it is missing",
+    "reproduce": "env -u NO_PROXY -u no_proxy curl -v http://127.0.0.1:<port>/health inside the VM with HTTP_PROXY set"
+  },
+  {
+    "issue": "Temporal dev server (Compose) and the order service keep their state in single-node SQLite files",
+    "impact": "fine for local profiles; not a production configuration",
+    "reproduce": "n/a"
+  },
+  {
+    "issue": "Vite dev server inside the VM needs polling to see host-side edits (virtiofs)",
+    "impact": "development only; configured in web/vite.config.ts",
+    "reproduce": "edit web/src on macOS while make dev-up runs"
+  }
+]

@@ -1,0 +1,42 @@
+[
+  {
+    "item": "authentication, authorisation, multi-user projects and audit trail",
+    "trigger": "the platform is reachable by more than one person or from outside 127.0.0.1",
+    "depends_on": "choice of identity provider / API gateway; tenant model for projects, runs and order-service tenants"
+  },
+  {
+    "item": "production deployment profile: HA Temporal cluster, managed PostgreSQL and S3, TLS, backups on a schedule",
+    "trigger": "a shared or long-lived installation (beyond one developer machine or a kind cluster)",
+    "depends_on": "target infrastructure; Helm values for external Temporal/PostgreSQL/S3 already exist (chart 0.2.0)"
+  },
+  {
+    "item": "multi-node Kubernetes upgrade / rollback verification (zero-downtime migrations, PodDisruptionBudgets)",
+    "trigger": "running the chart on more than one node or needing upgrades without a maintenance window",
+    "depends_on": "a multi-node test cluster; migrations are additive (0002) and rollback-compatible on one node today"
+  },
+  {
+    "item": "publishing images and wheels to a registry, signed, with SBOMs",
+    "trigger": "anyone installs from somewhere other than a locally built release or the offline bundle",
+    "depends_on": "registry credentials; release manifest already records digests, licenses and source revision"
+  },
+  {
+    "item": "native linux/amd64 images built and run on amd64 hardware",
+    "trigger": "an amd64 deployment target",
+    "depends_on": "an amd64 builder (the Colima VM is arm64; emulated builds are reported separately in the release manifest)"
+  },
+  {
+    "item": "order service as a real external system (network faults beyond response loss, schema migrations, auth)",
+    "trigger": "connecting the environment adapter to a system not owned by the lab",
+    "depends_on": "that system's idempotency and query-by-operation-id guarantees (SessionEnvironment contract)"
+  },
+  {
+    "item": "probabilistic model checking in the platform install (PRISM-games or Storm as a service)",
+    "trigger": "stochastic transitions become part of a supported semantic profile, not only an extension track",
+    "depends_on": "a probabilistic semantic profile + driver; GPL-2.0 binary distribution arrangement (kept out of the images)"
+  },
+  {
+    "item": "real-model (LLM) planners in matrices at scale",
+    "trigger": "comparisons that need many real-model runs",
+    "depends_on": "a stable model endpoint and budget; relay availability varies (see known issues); FAL_LLM_* settings"
+  }
+]

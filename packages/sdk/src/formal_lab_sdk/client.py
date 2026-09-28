@@ -16,10 +16,19 @@ DEFAULT_URL = os.environ.get("FAL_API_URL", "http://127.0.0.1:8000/api/v1")
 TERMINAL = {"SUCCEEDED", "FAILED", "CANCELLED", "BUDGET_EXHAUSTED"}
 
 
+def is_loopback(url: str) -> bool:
+    """True for localhost / 127.0.0.0/8 / ::1: such traffic never goes through an HTTP proxy from the environment
+    (a system-wide HTTP_PROXY without NO_PROXY would otherwise send it to a proxy that cannot reach this machine's
+    loopback — the proxy answers 502 or the connection times out)."""
+    host = httpx.URL(url).host
+    return host in ("localhost", "::1") or host.startswith("127.")
+
+
 class Client:
     def __init__(self, base_url: str = DEFAULT_URL, timeout: float = 60.0, transport: httpx.BaseTransport | None = None):
         self.base_url = base_url.rstrip("/")
-        self._http = httpx.Client(base_url=self.base_url, timeout=timeout, transport=transport)
+        self._http = httpx.Client(base_url=self.base_url, timeout=timeout, transport=transport,
+                                  trust_env=not is_loopback(self.base_url))
 
     # ------------------------------------------------------------------ plumbing
     def _request(self, method: str, path: str, **kw: Any) -> Any:

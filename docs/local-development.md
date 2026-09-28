@@ -25,7 +25,8 @@ make services-up && make dev-up             # 后端服务 + API :8000 + Worker 
 make compose-up                             # 或：完整容器栈 http://127.0.0.1:8080（含订单服务 `orders`）
 
 # local-kind
-make helm-install-check                     # 临时 kind 集群：安装 → 实验 → 升级 → 回滚 → 删除
+make helm-install-check                     # 临时 kind 集群：安装当前 Chart → 实验 → 删除
+bash scripts/helm-upgrade-check.sh          # 临时 kind 集群：阶段一版本 → 升级到当前 → 回滚，每步读旧数据并跑实验
 ```
 
 种子数据包含三个项目：生产调度示例（单 / 双参与者、成本目标、任务计划策略）、仓储分配示例（第二语义 profile）、订单服务示例（五种案例的业务服务场景与纯数据对照；服务地址取 `FAL_ORDERS_ENDPOINT`，默认 `http://127.0.0.1:8765`，Compose 内为 `http://orders:8765`）。
@@ -38,8 +39,12 @@ make test-integration     # 平台（API + Worker + Temporal + PostgreSQL）：�
 make test-ui              # Playwright：六个区域、产品验收路径、界面状态与测量
 make test-llm             # 真实模型（需要 .env 中的 FAL_LLM_*；否则 NOT_RUN）
 make orders-e2e           # 订单服务从空目录到清理的端到端（进程 + Compose），日志写入 evidence/phase2/orders/
-make phase2-check         # 全部阶段二验收检查组，写入 docs/handoff/phase2-checks.json
+make phase2-check         # 全部阶段二验收检查组，写入 docs/handoff/phase2-checks.json（ARGS="--group g" 只跑一组）
+make handoff-phase2       # 由检查结果重新生成 docs/handoff/phase2.manifest.json 与 phase2.md 中的表
+make prism-games-check    # 可选：PRISM-games 概率查询，模型内核对（需要本地安装，见第 9 节）
 ```
+
+验收结果的读法见 [acceptance-phase2.md](acceptance-phase2.md)。
 
 ## 4. 中断与恢复
 
@@ -58,17 +63,27 @@ python scripts/local_data.py restore --from var/backups/2026-09-27 --yes
 python scripts/local_data.py reset --yes                                 # 清空数据库与产物并重新迁移
 ```
 
-备份覆盖 PostgreSQL（在 fal-dev 容器内 `pg_dump`）与本地产物目录（`FAL_ARTIFACT_ROOT`）；Temporal 自身的运行态不在其中，请在没有进行中运行时恢复。实际验证：`scripts/backup_restore_check.py` 在独立数据库中跑一次实验、导出回放包、备份 → 重置 → 恢复，确认行数一致且重新导出的回放包字节相同（`docs/execution/evidence/phase2/backup-restore.json`）。Compose / Helm 的 S3 产物用对象存储自身的工具备份。
+备份覆盖 PostgreSQL（在 fal-dev 容器内 `pg_dump`）与本地产物目录（`FAL_ARTIFACT_ROOT`）；Temporal 自身的运行态不在其中，请在没有进行中运行时恢复。实际验证：`scripts/backup_restore_check.py` 在独立数据库中跑一次实验、导出回放包、备份 → 重置 → 恢复，确认行数一致且重新导出的回放包内容相同——`bundle.json` 列出的每个文件摘要与来源信息逐项一致；zip 本身带导出时刻，两次导出的字节不同（`docs/execution/evidence/phase2/backup-restore.json`）。Compose / Helm 的 S3 产物用对象存储自身的工具备份。
 
 ## 6. 升级、回滚与卸载
 
-- **升级**：`git pull` → `make bootstrap`（锁文件安装）→ `make migrate`（Alembic 升级；旧行保留写入时的契约版本，读取时升级）→ `make dev-down && make dev-up`。迁移 0002 只增加列与表，旧代码可以读取升级后的数据库，因此 Helm 回滚到阶段一版本后应用仍可工作（`make helm-install-check` 的升级 / 回滚检查）。
+- **升级**：`git pull` → `make bootstrap`（锁文件安装）→ `make migrate`（Alembic 升级；旧行保留写入时的契约版本，读取时升级）→ `make dev-down && make dev-up`。迁移 0002 只增加列与表，旧代码可以读取升级后的数据库，因此 Helm 回滚到阶段一版本后应用仍可工作（`scripts/helm-upgrade-check.sh`：证据 `docs/execution/evidence/helm/upgrade.json`，仅单节点开发集群）。
 - **回滚代码**：`git checkout <旧提交>` 后 `make bootstrap`；数据库无需降级。需要降级数据库时 `uv run alembic -c packages/platform-api/alembic.ini downgrade 0001`（会删除阶段二新增的表与列）。
 - **卸载**：`make dev-down && make services-down`；删除数据卷：`docker compose -p fal-dev -f deploy/compose/services.dev.yaml down -v`；完整栈：`docker compose -f deploy/compose/docker-compose.yaml down -v`；订单服务：`make orders-down ARGS=--purge`。删除 `var/`、虚拟环境 `~/.venvs/formal-agent-lab` 与 `web/node_modules` 即完全移除。
 
-## 7. 磁盘整理（共享虚拟机）
+## 7. 磁盘空间与整理（共享虚拟机）
 
-虚拟机中的 Docker 守护进程与其它项目共享。`make reclaim-disk` 只删除带本仓库 OCI 标签的悬空镜像与按提交号标记的本项目镜像，然后 `fstrim` 归还空闲块；全局构建缓存和共享镜像（如 `kindest/node`）不动。**不要**使用 `docker system prune`、`docker image prune -a` 或无过滤的 `docker builder prune`。清理本项目某次临时环境：`python -m formal_lab_example_orders.lifecycle cleanup --project <name>`（只删除带 `dev.formal-lab.project=<name>` 标签的容器、卷与进程）。
+**宿主机余量**：Colima 的虚拟机磁盘是宿主机上的稀疏文件，只增不减——VM 里写入的镜像、kind 节点、构建缓存都占用 Mac 的磁盘，删除后要 `fstrim` 才会归还。2026-09-28 宿主机磁盘写满，VM 的 Docker 数据盘写入失败、ext4 日志中止，正在构建的镜像层丢失（`e2fsck` 修复；PostgreSQL 崩溃恢复后 `pg_amcheck` 无错）。因此：
+
+- `make disk-guard`（`python3 scripts/disk_guard.py --need 0 --trim`）报告宿主机（经共享仓库目录读取）与 `/var/lib/docker` 的剩余空间，并归还 VM 内已释放的块；
+- 重型脚本开始前自行检查余量，不足即拒绝：Compose 冒烟 6 GiB、发行构建 6 GiB、离线包 8 GiB、kind 安装 8 GiB、kind 升级 10 GiB（实测峰值约 7 GiB 加余量）；`make phase2-check` 在每个 Docker 检查后执行一次回收；
+- 建议宿主机保持 ≥ 15 GiB 空闲。
+
+虚拟机中的 Docker 守护进程与其它项目共享。`make reclaim-disk` 只删除带本仓库 OCI 标签的悬空镜像与按提交号标记的本项目镜像，然后 `fstrim` 归还空闲块；全局构建缓存和共享镜像（如 `kindest/node`）不动。**不要**使用 `docker system prune`、`docker image prune -a` 或卷清理：它们会删除其它项目的镜像与数据。构建缓存可以清理——`docker builder prune -af` 只删除 BuildKit 构建缓存，不动任何镜像或卷（先用 `docker buildx du --verbose` 看一眼条目来自哪些 Dockerfile）；本项目每次版本变化都会重建约 1 GiB 的虚拟环境层，缓存累积到 10 GiB 以上时清理一次，再 `make disk-guard` 归还给宿主机。清理本项目某次临时环境：`python -m formal_lab_example_orders.lifecycle cleanup --project <name>`（只删除带 `dev.formal-lab.project=<name>` 标签的容器、卷与进程）。
+
+### 网络代理
+
+宿主机设置了 HTTP 代理时，Lima 会把它写入虚拟机的 `/etc/environment`（`HTTP_PROXY=http://192.168.5.2:<端口>`），但不写 `NO_PROXY`。本机回环地址的请求若走这个代理，只能经 Colima 的端口转发绕回，服务刚启动时得到 502 或连接超时。平台自己的客户端（SDK、订单服务适配器 / 探针 / 生命周期）对回环地址不使用代理；`scripts/in-vm.sh`、Makefile 与测试夹具把 `127.0.0.1,localhost,::1` 加入 `NO_PROXY`；`make doctor` 在缺少时给出警告。直接登录虚拟机操作时：`export NO_PROXY=127.0.0.1,localhost,::1 no_proxy=127.0.0.1,localhost,::1`。
 
 ## 8. 结果解释
 
@@ -76,3 +91,20 @@ python scripts/local_data.py reset --yes                                 # 清�
 - **效果证据**：`observed`（本步新鲜观测）、`verified-within-scope`（服务操作查询等独立来源）、`unknown`（过时或缺失，不参与匹配）、`predicted`（模型预测）。
 - **矩阵报告**：先看分母（单元数、失败 / 未运行 / 目标未达成 / 指标缺失），再看逐场景（独立单位：场景内的一个种子）与跨场景（按场景聚类重采样）汇总；配对比较每次只改变一个维度，方法效果（participants）、机制消融（ablation）与环境后端（backend）分别列出。只有区间不含 0 的差异才进入结论。
 - **真实模型**：结果与请求记录在调用记录中（请求配置、返回型号、用量、是否报告）；重跑只保证请求与证据可复现，不保证回答相同。替身（`LLM_STUB`）永远单独标注。
+
+## 9. 可选：PRISM-games（深化轨道）
+
+概率查询不属于默认安装，平台也不分发 PRISM-games（GPL-2.0）：它作为本地安装的独立程序运行，平台只写入输入文件、读取输出文件（决策 D-023）。在虚拟机中安装（用户目录，不改系统包）：
+
+```bash
+mkdir -p ~/.local/opt/dl && cd ~/.local/opt/dl
+curl -fsSLO https://github.com/prismmodelchecker/prism-games/releases/download/v3.2.4/prism-games-3.2.4-linux64-arm.tar.gz
+sha256sum prism-games-3.2.4-linux64-arm.tar.gz   # 366f5fedf6d8be8b089372f64714edebda3fab26001bf38323905b8fcb62ce52
+curl -fsSL -o jre21.tar.gz "https://api.adoptium.net/v3/binary/latest/21/ga/linux/aarch64/jre/hotspot/normal/eclipse"
+cd .. && tar xzf dl/prism-games-3.2.4-linux64-arm.tar.gz && tar xzf dl/jre21.tar.gz
+cd prism-games-3.2.4-linux64-arm && ./install.sh
+```
+
+适配器默认在 `~/.local/opt/prism-games-*` 与 `~/.local/opt/jdk-*` 查找，也可设置 `FAL_PRISM_GAMES_HOME`、`FAL_PRISM_JAVA_HOME`。x86_64 使用同一发行的 `linux64-x86` 包（未在本环境运行）。安装后：`make prism-games-check`（证据写入 `docs/execution/evidence/phase2/prism-games/`），Web 模型工作台“概率扩展”页、`GET /api/v1/extensions/prism-games`、`POST /api/v1/model-versions/{id}/probabilistic-checks`。未安装时这些入口明确报告不可用及原因（UNSUPPORTED），不给替代答案。
+
+**结果解读**：`<<dispatcher>> Pmax=? [F "done"]` 是调度方在最坏环境下能保证的完成概率，`<<dispatcher,environment>>` 是双方合作时的上界；每个数值都与独立求解器（逐轮倒推）比较（容差 1e-6），状态数与参照图一致，导出的调度策略在最坏环境下的值等于报告值时才标为“模型内核对通过”。这些是数值结论，与 Z3 的确定性可达性结论不能互换。

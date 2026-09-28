@@ -1,0 +1,135 @@
+{
+  "check": "compose end-to-end (P1-111/P1-112/P1-127; phase 2: P2-101/P2-103)",
+  "date": "2026-09-28T14:20:58Z",
+  "entry_point": "http://127.0.0.1:8080/api/v1",
+  "ready": {
+    "ready": true,
+    "database": {
+      "ok": true
+    },
+    "temporal": {
+      "ok": true,
+      "address": "temporal:7233"
+    },
+    "artifact_store": {
+      "ok": true,
+      "backend": "s3",
+      "bucket": "formal-lab-artifacts",
+      "endpoint": "http://s3:8333"
+    }
+  },
+  "run": {
+    "id": "run_7c85541ae2b645fa95f3",
+    "status": "SUCCEEDED",
+    "events": 177,
+    "sse_events_streamed": 177,
+    "metrics": {
+      "delay_cost": 6.0,
+      "effect_mismatches": 5.0,
+      "goal_reached": 1.0,
+      "makespan": 10.0,
+      "mean_tardiness": 1.0,
+      "model_calls": null,
+      "orders_completed": 3.0,
+      "rejected_actions": 0.0,
+      "steps_used": 17.0,
+      "tokens": null,
+      "wall_seconds": 3.163
+    },
+    "artifacts_in_s3": 18,
+    "example_artifact_uri": "s3://formal-lab-artifacts/artifacts/e1/e1fb8d51bc9086775f052a2bd0f75679aa81328faa06db5a7fe5ed910a85dedb"
+  },
+  "bundle": {
+    "format": "formal-lab/replay-bundle@2",
+    "files": 78,
+    "events": 177,
+    "contract_digest": "bc24e5e96b69b9b6c85fa610ba7e21737a11d60ffb94b7b6095de2988f20bdbf"
+  },
+  "matrix": {
+    "id": "mtx_1195f80e5cb8446f836f",
+    "cells": 8,
+    "statuses": [
+      "SUCCEEDED"
+    ]
+  },
+  "orders": {
+    "订单：正常处理（业务服务）": {
+      "run": "run_7aa90d0ffbeb44ab8459",
+      "status": "SUCCEEDED",
+      "steps": 24,
+      "probes": 24,
+      "operations": {
+        "COMPLETED": 24
+      }
+    },
+    "订单：延迟响应（业务服务）": {
+      "run": "run_534534aabefc477bad85",
+      "status": "SUCCEEDED",
+      "steps": 24,
+      "probes": 24,
+      "operations": {
+        "RECONCILED": 6,
+        "COMPLETED": 18
+      }
+    }
+  },
+  "two_participants": {
+    "run": "run_762a36cda38740ac8727",
+    "status": "SUCCEEDED",
+    "steps": 22
+  },
+  "matrix_v2": {
+    "id": "mtx_15cd46e605a848c3a0c9",
+    "cells": 4,
+    "max_parallel": 1
+  },
+  "images": {
+    "api": {
+      "ref": "formal-agent-lab/api:local",
+      "id": "sha256:79363752c5203615863a6f1e37bad6b42d011322d7d20709c9b9f7a42765269c",
+      "created": "2026-09-28T22:18:19.374069885+08:00",
+      "size_mb": 224.2,
+      "architecture": "arm64",
+      "os": "linux",
+      "revision": "eed829ae5cf78a6879ac9ecc8e73b444ca27102b"
+    },
+    "worker": {
+      "ref": "formal-agent-lab/worker:local",
+      "id": "sha256:da64452bc024850dcb9923196b3b8aeccc8d38f84901fb6fc6a3444fb9ac319b",
+      "created": "2026-09-28T22:18:19.374069885+08:00",
+      "size_mb": 224.2,
+      "architecture": "arm64",
+      "os": "linux",
+      "revision": "eed829ae5cf78a6879ac9ecc8e73b444ca27102b"
+    },
+    "web": {
+      "ref": "formal-agent-lab/web:local",
+      "id": "sha256:690892192b3a142c45f74c6e6968896f204e083b1af9a1bc1c06682456a3da93",
+      "created": "2026-09-28T22:19:09.143530165+08:00",
+      "size_mb": 23.5,
+      "architecture": "arm64",
+      "os": "linux",
+      "revision": "eed829ae5cf78a6879ac9ecc8e73b444ca27102b"
+    },
+    "orders": {
+      "ref": "formal-agent-lab/orders:local",
+      "id": "sha256:9289df45b1ab9685b2bac92e6277c2c1c2feb8128526123070ff9f3d710c36de",
+      "created": "2026-09-28T22:18:19.516086982+08:00",
+      "size_mb": 224.2,
+      "architecture": "arm64",
+      "os": "linux",
+      "revision": "eed829ae5cf78a6879ac9ecc8e73b444ca27102b"
+    }
+  },
+  "services": [
+    "postgres:16-alpine",
+    "temporalio/temporal:1.9.1",
+    "chrislusf/seaweedfs:4.47",
+    "migrate",
+    "api",
+    "worker",
+    "web (caddy:2.11-alpine)",
+    "orders (local order service)"
+  ],
+  "duration_s": 85.7
+}

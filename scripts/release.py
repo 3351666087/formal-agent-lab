@@ -43,6 +43,7 @@ def sha256(path: Path) -> str:
 
 def main() -> None:
     t0 = time.time()
+    print(sh(sys.executable, "scripts/disk_guard.py", "--need", "6", "--label", "release build", "--trim").strip())
     rev = sh("git", "rev-parse", "HEAD").strip()
     dirty = bool(sh("git", "status", "--porcelain").strip())
     if OUT.exists():
@@ -174,6 +175,9 @@ def cross_arch(rev: str) -> dict:
         out["run_emulated_output"] = (run.stdout.strip() or run.stderr.strip())[-300:]
         info = json.loads(subprocess.run(["docker", "image", "inspect", tag], capture_output=True, text=True).stdout)[0]
         out.update({"image_id": info["Id"], "size_bytes": info["Size"], "architecture": info["Architecture"]})
+        # recorded above; the image itself is not part of the release and costs ~1 GiB of (host) disk
+        subprocess.run(["docker", "rmi", tag], capture_output=True)
+        out["image_removed_after_check"] = True
     out["run_native"] = f"NOT_RUN: no {other} host available locally (release built on {os.uname().machine})"
     return out
 
@@ -194,11 +198,16 @@ def verify_sdk(wheels: Path) -> dict:
         venv = tmp_path / "venv"
         sh("uv", "venv", "--python", sys.executable, str(venv))
         py = venv / "bin" / "python"
-        # only the built project wheels + their third-party deps from the local uv cache (no project sources)
+        # exactly the wheel files just built (by path, so no cached wheel of the same name can stand in for them) +
+        # their third-party dependencies from the index / uv cache; no project sources
+        built = {p.name.split("-")[0]: p for p in wheels.glob("formal_lab_*.whl")}
         sh("uv", "pip", "install", "--python", str(py), "--find-links", str(wheels),
-           "formal-lab-sdk[offline]", env={"UV_NO_INDEX": "0"})
+           f"{built['formal_lab_sdk']}[offline]", str(built["formal_lab_contracts"]), str(built["formal_lab_model_core"]),
+           env={"UV_NO_INDEX": "0"})
         installed = sh("uv", "pip", "list", "--python", str(py), "--format", "json")
         names = {p["name"]: p["version"] for p in json.loads(installed)}
+        if names.get("formal-lab-sdk") != VERSION:
+            raise SystemExit(f"SDK/CLI check: installed formal-lab-sdk {names.get('formal-lab-sdk')}, built {VERSION}")
         fal = venv / "bin" / "fal"
         commands = []
         for args in (["--help"], ["replay", "verify", str(bundle)], ["replay", "view", str(bundle)]):

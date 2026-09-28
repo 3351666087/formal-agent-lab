@@ -16,6 +16,7 @@ REV=$(git rev-parse HEAD); TAG=${REV:0:12}; PTAG=p1-$PREV
 OUT=docs/execution/evidence/helm/upgrade.json
 LOG=docs/execution/evidence/helm/upgrade.log
 exec > >(tee "$LOG") 2>&1
+python3 scripts/disk_guard.py --need 10 --label "helm upgrade check (measured peak ~7 GiB + reserve)" --trim
 WT=$(mktemp -d)/phase1
 stop_forward() { # never `kill 0`: with PF unset that would signal this whole process group
   if [[ -n "${PF:-}" ]]; then kill "$PF" 2>/dev/null || true; PF=; fi; }
@@ -23,6 +24,8 @@ cleanup() {
   stop_forward
   [[ "${1:-}" == "--keep" ]] || kind delete cluster --name $CLUSTER >/dev/null 2>&1 || true
   git worktree remove --force "$WT" >/dev/null 2>&1 || true
+  [[ "${1:-}" == "--keep" ]] || docker rmi formal-agent-lab/{api,worker,web}:$PTAG >/dev/null 2>&1 || true
+  python3 scripts/disk_guard.py --need 0 --label "after the upgrade check" --trim || true
 }
 trap cleanup EXIT
 
@@ -36,8 +39,9 @@ echo "==> kind cluster $CLUSTER"
 kind delete cluster --name $CLUSTER >/dev/null 2>&1 || true
 kind create cluster --name $CLUSTER --image "$NODE_IMAGE" --wait 180s
 for t in $PTAG $TAG; do for n in api worker web; do kind load docker-image --name $CLUSTER formal-agent-lab/$n:$t >/dev/null; done; done
+bash scripts/kind-load-public.sh $CLUSTER
 kubectl apply -f deploy/helm/test/backing-services.yaml
-kubectl rollout status deploy/postgres deploy/temporal deploy/s3 --timeout=180s
+kubectl rollout status deploy/postgres deploy/temporal deploy/s3 --timeout=600s  # node pulls these
 
 SET="--set image.pullPolicy=Never --set externalServices.temporal.address=temporal:7233 --set externalServices.artifacts.s3.endpoint=http://s3:8333"
 revision() { kubectl exec deploy/postgres -- psql -U fal -d fal -Atc "select version_num from alembic_version"; }
@@ -78,6 +82,10 @@ json.dump({"check": "P2-104 Helm upgrade / rollback on kind (single-node develop
            "date": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), "node_image": node,
            "previous": {"commit": prev, "chart": "0.1.0"}, "current": {"image_tag": tag, "chart": "0.2.0"},
            "phases": rows, "passed": passed,
+           "rollback_limitations": [
+               "strategy configurations created after the upgrade for plugins the older release does not have make "
+               "the older release's strategy list fail (NOT_FOUND); runs, scenarios and runs by id stay readable and "
+               "experiments with the older release's strategies run"] if by["rolled-back"].get("strategies_list_error") else [],
            "scope": "single-node kind; test-fixture backing services; not a multi-node or production upgrade"},
           open(out, "w"), indent=2, ensure_ascii=False)
 print(json.dumps({"passed": passed, **{r["phase"]: r.get("alembic", r.get("run_status")) for r in rows}}))

@@ -7,12 +7,13 @@ import {
 } from "../api";
 import { ModelGraph } from "../components/ModelGraph";
 import { ObjectivesAndReleases } from "../components/ReleasePanel";
+import { ProbabilisticPanel } from "../components/ProbabilisticPanel";
 import { blankModel, effectLines, exprText, typeText } from "../ir";
 import {
   Empty, ErrorState, fmtTime, InlineError, Json, JsonField, KV, Loading, Modal, QueryState, Tabs, useToast, VerdictBadge,
 } from "../ui";
 
-type Tab = "graph" | "form" | "json" | "diff" | "check" | "release" | "caps";
+type Tab = "graph" | "form" | "json" | "diff" | "check" | "release" | "prob" | "caps";
 const draftKey = (modelId: string) => `fal:model-draft:${modelId}`;
 
 export function ModelWorkbench() {
@@ -195,7 +196,7 @@ function ModelEditor({ modelId }: { modelId: string }) {
         <Tabs label="模型视图" value={tab} onChange={setTab} tabs={[
           { id: "graph", label: "结构图" }, { id: "form", label: "表单编辑" }, { id: "json", label: "JSON" },
           { id: "diff", label: "版本差异" }, { id: "check", label: "编译与检查" }, { id: "release", label: "目标与发布" },
-          { id: "caps", label: "能力矩阵" },
+          { id: "prob", label: "概率扩展" }, { id: "caps", label: "能力矩阵" },
         ]} />
         <div className="card-body">
           {draft && tab === "graph" && <ModelGraph ir={draft} />}
@@ -204,6 +205,7 @@ function ModelEditor({ modelId }: { modelId: string }) {
           {tab === "diff" && <DiffView modelId={modelId} versions={model.data!.versions?.map((v) => v.version) ?? []} current={d.version} />}
           {tab === "check" && <CheckPanel detail={d} dirty={Boolean(dirty)} />}
           {tab === "release" && <ObjectivesAndReleases pid={pid!} detail={d} onDiff={() => setTab("diff")} />}
+          {tab === "prob" && <ProbabilisticPanel versionId={d.id} />}
           {tab === "caps" && <CapabilityMatrix rows={d.capability_matrix} />}
         </div>
       </div>

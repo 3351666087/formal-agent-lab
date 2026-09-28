@@ -29,7 +29,11 @@ def main() -> int:
     row["platform_version"] = meta.get("platform_version") or meta.get("version")
     pid = c.find_project("生产调度示例")["id"]
     scs = {s["name"]: s["id"] for s in c.scenarios(pid)}
-    sts = {s["name"]: s["id"] for s in c.strategies(pid)}
+    try:
+        sts = {s["name"]: s["id"] for s in c.strategies(pid)}
+    except FormalLabError as exc:  # after a rollback: configurations of plugins the older release does not have
+        sts = {}
+        row["strategies_list_error"] = f"{exc.code}: {exc.message[:300]}"
     if first is not None:  # the run made before the upgrade must stay readable in every later version
         try:
             old = c.run(first["run_id"])
@@ -44,9 +48,11 @@ def main() -> int:
         row["runs_listed"] = None
         row["runs_list_error"] = exc.message[:300]
     scenario = "两名调度员（轮流）" if phase == "upgraded" and "两名调度员（轮流）" in scs else "状态延迟"
-    run = c.start_run(pid, scs[scenario], None if scenario.startswith("两名") else sts["Z3 有界规划"], seed=4)
+    strategy = None if scenario.startswith("两名") else sts.get("Z3 有界规划") or (first or {}).get("strategy_config_id")
+    run = c.start_run(pid, scs[scenario], strategy, seed=4)
     done = c.wait(run["id"], timeout=600)
-    row.update({"scenario": scenario, "run_id": run["id"], "run_status": done["status"], "steps": done["last_step"]})
+    row.update({"scenario": scenario, "strategy_config_id": strategy, "run_id": run["id"],
+                "run_status": done["status"], "steps": done["last_step"]})
     with open(state, "a") as fh:
         fh.write(json.dumps(row, ensure_ascii=False) + "\n")
     print(json.dumps(row, ensure_ascii=False))

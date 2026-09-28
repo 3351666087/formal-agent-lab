@@ -6,6 +6,10 @@ SHELL := /bin/bash
 export UV_PROJECT_ENVIRONMENT ?= $(HOME)/.venvs/formal-agent-lab
 export PATH := $(HOME)/.local/bin:$(PATH)
 UV_RUN := uv run --frozen
+# loopback never through an HTTP proxy from the environment (Lima copies the host's proxy into the VM)
+comma := ,
+export NO_PROXY := $(if $(NO_PROXY),$(NO_PROXY)$(comma))127.0.0.1,localhost,::1
+export no_proxy := $(NO_PROXY)
 PY := $(UV_RUN) python
 
 COMPOSE_DEV := docker compose -f deploy/compose/services.dev.yaml -p fal-dev
@@ -149,10 +153,23 @@ phase1-check: ## run every phase-1 acceptance check and write docs/handoff/phase
 handoff: ## regenerate docs/handoff/phase1.manifest.json from the repository and check results
 	uv run --frozen python scripts/handoff.py
 
+.PHONY: phase2-check handoff-phase2 prism-games-check disk-guard
+phase2-check: ## phase-2 local acceptance: all check groups → docs/handoff/phase2-checks.json (ARGS="--group g" / "--only id")
+	$(PY) scripts/phase2_check.py $(ARGS)
+
+handoff-phase2: ## regenerate docs/handoff/phase2.manifest.json and the tables in phase2.md from the check results
+	$(PY) scripts/handoff_phase2.py
+
+prism-games-check: ## optional track: PRISM-games queries verified in-model (needs a local PRISM-games, see docs/local-development.md)
+	$(PY) scripts/prism_games_check.py
+
+disk-guard: ## report free space on the host disk (through the shared repo) and /var/lib/docker; return freed VM blocks
+	python3 scripts/disk_guard.py --need 0 --trim
+
 .PHONY: reclaim-disk
 reclaim-disk: ## remove this project's dangling / commit-tagged images and return freed blocks to the host (VM disks are sparse)
 	# the Docker daemon is shared with other projects: only images labelled with this repository are removed; the
 	# global build cache and shared images (e.g. kindest/node) are left alone — never prune -a / system prune
 	docker image prune -f --filter label=org.opencontainers.image.source=https://github.com/3351666087/formal-agent-lab
-	-docker rmi $$(docker images --format '{{.Repository}}:{{.Tag}}' | grep -E '^formal-agent-lab/.+:[0-9a-f]{12}$$') 2>/dev/null
-	sudo fstrim -av
+	-docker rmi $$(docker images --format '{{.Repository}}:{{.Tag}}' | grep -E '^formal-agent-lab/.+:(p1-)?[0-9a-f]{7,12}$$') 2>/dev/null
+	python3 scripts/disk_guard.py --need 0 --trim

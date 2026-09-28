@@ -10,6 +10,7 @@ export FAL_SOURCE_REVISION="$(git rev-parse HEAD)"
 export FAL_IMAGE_TAG="${FAL_IMAGE_TAG:-local}"
 C="docker compose -f deploy/compose/docker-compose.yaml"
 OUT=docs/execution/evidence/phase2/compose-smoke.json   # phase-1 evidence (evidence/compose-smoke.json) stays
+python3 scripts/disk_guard.py --need 6 --label "compose smoke (image build + full stack)" --trim
 WORK=$(mktemp -d)
 trap 'rm -rf "$WORK"' EXIT
 

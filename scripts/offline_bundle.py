@@ -2,7 +2,8 @@
 
     uv run --frozen python scripts/offline_bundle.py [--verify]
 
-Output: out/offline/formal-agent-lab-offline-<rev>/ (+ .tar) containing
+Output: out/offline/formal-agent-lab-offline-<rev>.tar (+ .manifest.json beside it; the directory it is built
+from is removed once the tar is written, to keep host disk use down) containing
     images/platform.tar.gz one `docker save` of api, worker, web and orders: layers shared by the images (the
                            Python runtime and dependency closure) are stored once; the manifest records each image id
                            and the size the separate saves would have taken
@@ -134,6 +135,7 @@ echo "web: http://127.0.0.1:${FAL_WEB_PORT:-8080}   CLI: .venv/bin/fal --help"
 
 def build(verify: bool) -> Path:
     t0 = time.time()
+    print(sh(sys.executable, "scripts/disk_guard.py", "--need", "8", "--label", "offline bundle", "--trim").strip())
     rev = sh("git", "rev-parse", "HEAD").strip()
     tag = rev[:12]
     out = ROOT / "out" / "offline" / f"formal-agent-lab-offline-{tag}"
@@ -240,10 +242,13 @@ def build(verify: bool) -> Path:
     tar_path = out.with_suffix(".tar")
     with tarfile.open(tar_path, "w") as tar:
         tar.add(out, arcname=out.name)
+    shutil.rmtree(out)  # the .tar is the artifact; keeping the unpacked copy doubles its size on the host disk
+    side = out.with_suffix(".manifest.json")
+    side.write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\n")
     print(f"==> {tar_path} ({tar_path.stat().st_size / 1e6:.0f} MB, {len(files)} files) in {time.time() - t0:.0f} s")
     if verify:
         manifest["verification"] = verify_bundle(tar_path, tag)
-        (out / "manifest.json").write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\n")
+        side.write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\n")
     evidence = ROOT / "docs" / "execution" / "evidence" / "phase2" / "offline-manifest.json"  # phase-1 file stays
     evidence.write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\n")
     return tar_path

@@ -309,6 +309,17 @@ def concurrency_defaults(cm: dict) -> dict:
             "basis": f"{cpus} usable CPU(s), {mem} MiB usable memory"}
 
 
+def proxy_env() -> dict:
+    """HTTP proxies from the environment and whether loopback is excluded (Lima copies the host's proxy into the VM's
+    /etc/environment; without NO_PROXY every local call would go through it). The platform's own clients bypass
+    proxies for loopback; curl and other tools need NO_PROXY (scripts/in-vm.sh and the Makefile add it)."""
+    proxy = next((os.environ[k] for k in ("HTTPS_PROXY", "https_proxy", "HTTP_PROXY", "http_proxy") if os.environ.get(k)),
+                 None)
+    no_proxy = ",".join(os.environ.get(k, "") for k in ("NO_PROXY", "no_proxy"))
+    excluded = all(h in no_proxy for h in ("127.0.0.1", "localhost"))
+    return {"proxy": proxy, "no_proxy": no_proxy.strip(","), "loopback_excluded": excluded or proxy is None}
+
+
 def collect() -> dict:
     t0 = time.time()
     tools = {}
@@ -330,6 +341,7 @@ def collect() -> dict:
                   "owners": {p: owners[p] for p in sorted(owners) if p in PORTS},
                   "in_use": sorted(p for p in PORTS if p in owners or port_open(p))},
         "project_resources": project_owned(),
+        "network": proxy_env(),
     }
     report["services"] = services(owners)
     report["profiles"] = assess(report)
@@ -356,6 +368,9 @@ def summary(r: dict) -> str:
         "deps      " + ", ".join(f"{k}={v}" for k, v in r["dependencies"].items() if k != "venv"),
         "services  " + ", ".join(f"{k}={'up' if v else 'down'}" for k, v in r["services"].items()),
         "ports     in use: " + (", ".join(f"{p}" for p in r["ports"]["in_use"]) or "none"),
+        "proxy     " + ("none" if not r["network"]["proxy"] else r["network"]["proxy"] +
+                         (" (loopback excluded)" if r["network"]["loopback_excluded"]
+                          else " — WARNING: loopback not in NO_PROXY; export NO_PROXY=127.0.0.1,localhost,::1")),
         f"policy    {r['concurrency']['experiments']} experiment, {r['concurrency']['solver_threads']} solver "
         f"thread, matrix {r['concurrency']['matrix']} ({r['concurrency']['basis']})",
     ]

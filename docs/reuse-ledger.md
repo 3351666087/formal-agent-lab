@@ -1,6 +1,6 @@
 # 复用记录（Reuse Ledger）
 
-原则：优先使用正式发布的包与稳定 API；**本阶段没有复制或 fork 任何上游源码**，下列组件均以未修改的官方发行物（PyPI wheel / npm 包 / 官方镜像 / 官方二进制）使用，版本由 `uv.lock`、`pnpm-lock.yaml`、Dockerfile/Compose 与 `scripts/bootstrap-dev-vm.sh` 固定。许可信息取自安装包元数据与上游仓库（2026-09-27 核对）。
+原则：优先使用正式发布的包与稳定 API；**阶段一、二均没有复制或 fork 任何上游源码**，下列组件均以未修改的官方发行物（PyPI wheel / npm 包 / 官方镜像 / 官方二进制）使用，版本由 `uv.lock`、`pnpm-lock.yaml`、Dockerfile/Compose 与 `scripts/bootstrap-dev-vm.sh` 固定。许可信息取自安装包元数据与上游仓库（2026-09-27 核对）。
 
 ## 1. 三个核心复用项
 
@@ -67,6 +67,59 @@
 | Caddy 镜像 | caddy:2.11-alpine | Apache-2.0 | Web 静态服务 + /api 反向代理 | deploy/docker/web.Dockerfile |
 | Helm / kubeconform | 4.3.0 / 0.8.0 | Apache-2.0 | Chart lint/渲染/清单校验 | scripts/bootstrap-dev-vm.sh |
 | uv / pnpm / Node | 0.12.19 / 12.6.0 / 24.21.0 | MIT/Apache-2.0 / MIT / MIT | 构建工具链 | scripts/bootstrap-dev-vm.sh |
+
+## 2a. 阶段二新增与变化（2026-09-28 核对）
+
+阶段二仍未复制或 fork 任何上游源码；新增用法如下，版本固定方式不变（`uv.lock`、`pnpm-lock.yaml`、Dockerfile / Compose、脚本常量）。第三方依赖的逐包许可清单由 `scripts/license_inventory.py` 生成：[licenses.md](licenses.md)。
+
+### Z3 — 成本优化、鲁棒序列、查询包
+
+| 项 | 内容 |
+|---|---|
+| 版本 | 不变：`z3-solver==5.1.0.0`，MIT |
+| 新增调用位置 | `packages/solver-adapters/z3/src/formal_lab_solver_z3/optimize.py`：同一 `z3.Solver(ctx=…)` 上逐级收紧界（`solver.push()` / `solver.add(expr <= target)` / `solver.check()` / `solver.pop()`，倍增后二分），`solver.set("timeout", …)`、`solver.reason_unknown()`、`model.eval(…, model_completion=True)`；鲁棒序列在部分状态上把未知位置留为自由变量求反例。未使用 `z3.Optimize`：逐级收紧能在超时时保留已证下界 `proven_lower` 与可行解区间 |
+| 修改 | 上游无；本仓库新增 `optimize.py`，`compiler.py` 每次查询新建 `z3.Context()`（决策 D-017，保证单独 / 批量运行结果一致） |
+| 证据 | `packages/solver-adapters/z3/tests/test_optimize.py`（11 项：最优值与区间、超时保留可行解、见证由参考解释器重放并独立重算成本、鲁棒 / 反例）；`docs/execution/evidence/phase2/z3-reproducibility.json` |
+
+### Temporal — 矩阵队列
+
+| 项 | 内容 |
+|---|---|
+| 版本 | 不变：`temporalio==1.33.0`、CLI `v1.9.1`，MIT |
+| 新增调用位置 | `packages/orchestrator/src/formal_lab_orchestrator/workflow.py` 的 `MatrixWorkflow`（`workflow.execute_activity` 调用 `matrix_claim` / `matrix_settle`，`workflow.wait_condition`、`continue_as_new`）；`packages/platform-api/src/formal_lab_api/orchestration.py::start_matrix` |
+| 证据 | `tests/integration/test_matrix_v2_platform.py`（中断恢复、失败重跑、增量合并、跨矩阵复用） |
+
+### FastAPI / Uvicorn / SQLite — 本地订单服务（业务服务样例）
+
+| 项 | 内容 |
+|---|---|
+| 来源 / 版本 / 许可 | FastAPI 0.141.1（MIT）、Uvicorn 0.54.0（BSD-3）、Python 标准库 `sqlite3`（SQLite：公有领域）、httpx 0.28.1（BSD-3，适配器客户端） |
+| 位置 | `examples/local-order-service/src/formal_lab_example_orders/service.py`（独立进程，不导入平台任何包——架构测试守护）、`env.py`（环境适配器，经 HTTP 访问）、`lifecycle.py`（进程 / Compose 生命周期） |
+| 复用方式 | 原样使用；`BEGIN IMMEDIATE` 事务内按操作 id 主键去重、按字段变更日志做条件更新（决策 D-021） |
+| 证据 | `examples/local-order-service/tests/test_order_service.py`、`tests/integration/test_order_service_platform.py`、`docs/execution/evidence/phase2/orders/` |
+
+### PRISM-games — 可选深化轨道（SELECTED）
+
+| 项 | 内容 |
+|---|---|
+| 来源 | https://github.com/prismmodelchecker/prism-games ，https://www.prismmodelchecker.org/games/ |
+| 版本 | 3.2.4 官方二进制 `prism-games-3.2.4-linux64-arm.tar.gz`（sha256 `366f5fedf6d8be8b089372f64714edebda3fab26001bf38323905b8fcb62ce52`）；Java 运行时 Eclipse Temurin JRE 21.0.12+1（aarch64，`jre21-aarch64.tar.gz` sha256 `14be1f35…`） |
+| 许可 | PRISM-games：GPL-2.0；Temurin：GPL-2.0 with Classpath Exception |
+| 分发安排 | **不分发**：不进入 wheel、镜像、离线包；用户自行安装到 `~/.local/opt`，适配器以独立进程调用二进制，只写输入文件、读输出文件，不链接、不导入（`tests/architecture/test_boundaries.py::test_prism_games_runs_only_as_a_separate_process`） |
+| 采用模块 | `packages/solver-adapters/prism-games`（`formal_lab_solver_prism`，Apache-2.0，只依赖 pydantic）；`packages/platform-api/src/formal_lab_api/services/probabilistic.py`；`web/src/components/ProbabilisticPanel.tsx` |
+| 实际调用 | `bin/prism model.prism props.props -prop 1 -exportstrat strat.txt -exportmodel model.all`、`-prop 2`、`bin/prism -version`；解析 `Result:`、`States/Transitions/Choices`、`model.sta` 与 `strat.txt` |
+| 修改 | 上游无（官方 `install.sh` 只改写启动脚本中的安装路径） |
+| 证据 | `docs/execution/evidence/phase2/prism-games/`（原始模型、性质、两次调用日志、导出策略与显式模型、`result.json`、`summary.json`）；`packages/solver-adapters/prism-games/tests/test_prism_games.py`；`tests/integration/test_probabilistic_platform.py` |
+| 升级边界 | 固定版本与校验和；升级需重跑 `make prism-games-check`（数值与独立求解器一致、状态数一致、导出策略的值一致） |
+
+### 其它阶段二用法
+
+| 组件 | 版本 | 许可 | 用途 | 位置 |
+|---|---|---|---|---|
+| React `lazy` / `Suspense` | 19.3.0 | MIT | 路由分块 | web/src/main.tsx |
+| kind / kindest/node | v0.33.0 / v1.37.0（`a1ed56cf…`） | Apache-2.0 | 单节点 Chart 安装、升级与回滚检查 | scripts/helm-install-check.sh、helm-upgrade-check.sh |
+| Helm | 4.3.0 | Apache-2.0 | Chart 0.2.0 安装 / 升级 / 回滚 | 同上 |
+| PostgreSQL 客户端工具 | 16（fal-dev 容器内 `pg_dump` / `psql`） | PostgreSQL License | 本地备份 / 恢复 / 重置 | scripts/local_data.py |
 
 ## 3. 本仓库许可与兼容性
 

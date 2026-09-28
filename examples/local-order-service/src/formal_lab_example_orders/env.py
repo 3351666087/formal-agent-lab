@@ -47,6 +47,7 @@ from formal_lab_contracts import capabilities as caps
 from formal_lab_contracts.errors import InvalidInput, NonRetryableFailure, ResultUnknown
 
 from .instance import CASES, instance
+from .net import trust_env
 
 ENV_ID = "formal-lab.example.orders.service-env"
 ENV_VERSION = "1.0.0"
@@ -120,6 +121,7 @@ class OrderServiceEnvironment:
     def _http(self) -> httpx.Client:
         if self._client is None:
             self._client = httpx.Client(base_url=self.endpoint, timeout=float(self.config["timeout_s"]),
+                                         trust_env=trust_env(self.endpoint),
                                         transport=self._transport)
         return self._client
 

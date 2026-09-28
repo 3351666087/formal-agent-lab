@@ -22,6 +22,7 @@ from pathlib import Path
 from typing import Any
 
 from .lifecycle import ServiceManager, cleanup_project, precheck, run_with_timeout
+from .net import trust_env
 
 CASES = ["normal", "delayed", "deviation"]
 STRATEGIES = ["rule", "z3"]
@@ -124,7 +125,7 @@ def main(argv: list[str] | None = None) -> int:
         exports = out / "run1" / "service-state"
         exports.mkdir(parents=True, exist_ok=True)
         for key in first:
-            state = httpx.get(f"{mgr.endpoint}/t/{key}/admin/export", timeout=30).json()
+            state = httpx.get(f"{mgr.endpoint}/t/{key}/admin/export", trust_env=trust_env(f"{mgr.endpoint}/t/{key}/admin/export"), timeout=30).json()
             (exports / f"{key}.json").write_text(json.dumps(state, indent=1))
         summary["steps"]["export"] = {"bundles": len(first), "service_states": len(first),
                                       "bytes": sum(p.stat().st_size for p in out.rglob("*") if p.is_file())}
@@ -136,7 +137,7 @@ def main(argv: list[str] | None = None) -> int:
         for key in first:
             case, _, seed = key.rsplit("-", 2)[0], key.rsplit("-", 2)[1], int(key.rsplit("-", 1)[1])
             mgr.reset(key, case=case, seed=seed)
-            metrics = httpx.get(f"{mgr.endpoint}/t/{key}/metrics", timeout=10).json()
+            metrics = httpx.get(f"{mgr.endpoint}/t/{key}/metrics", trust_env=trust_env(f"{mgr.endpoint}/t/{key}/metrics"), timeout=10).json()
             resets[key] = {"clock": metrics["clock"], "backlog": metrics["backlog"], "queue": metrics["queue_length"]}
         assert all(r["clock"] == 0 and r["queue"] == 0 for r in resets.values()), resets
         summary["steps"]["reset"] = {"tenants": len(resets), "probe_after_reset": next(iter(resets.values())),

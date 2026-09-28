@@ -13,6 +13,7 @@ ARCH=$(uname -m | sed 's/aarch64/arm64/;s/x86_64/amd64/')
 OUT=docs/execution/evidence/helm/install.json
 LOG=docs/execution/evidence/helm/install.log
 exec > >(tee "$LOG") 2>&1
+python3 scripts/disk_guard.py --need 8 --label "helm install check (images + kind node)" --trim
 
 command -v kind >/dev/null && kind version | grep -q "$KIND_VERSION" || \
   curl -fsSLo "$HOME/.local/bin/kind" "https://github.com/kubernetes-sigs/kind/releases/download/${KIND_VERSION}/kind-linux-${ARCH}"
@@ -29,15 +30,17 @@ echo "==> kind cluster $CLUSTER ($NODE_IMAGE)"
 kind delete cluster --name $CLUSTER >/dev/null 2>&1 || true
 kind create cluster --name $CLUSTER --image "$NODE_IMAGE" --wait 180s
 trap '[[ "${1:-}" == "--keep" ]] || kind delete cluster --name '$CLUSTER' >/dev/null 2>&1' EXIT
-# our locally built (single-platform) images are loaded into the node; public backing-service images are pulled
-# by the node itself (kind load of multi-platform images fails with Docker's containerd image store)
+# our locally built (single-platform) images are loaded into the node; the public backing-service images are
+# exported for the node's platform only and loaded as archives (`kind load docker-image` of a multi-platform image
+# fails with Docker's containerd image store, and pulling seaweedfs from inside the node takes minutes)
 for img in formal-agent-lab/api:$TAG formal-agent-lab/worker:$TAG formal-agent-lab/web:$TAG; do
   kind load docker-image --name $CLUSTER $img >/dev/null
 done
+bash scripts/kind-load-public.sh $CLUSTER
 
 echo "==> test backing services"
 kubectl apply -f deploy/helm/test/backing-services.yaml
-kubectl rollout status deploy/postgres deploy/temporal deploy/s3 --timeout=180s
+kubectl rollout status deploy/postgres deploy/temporal deploy/s3 --timeout=600s  # node pulls these
 
 echo "==> helm install (images pinned by tag loaded into the node; pullPolicy Never)"
 T0=$(date +%s)

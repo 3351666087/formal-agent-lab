@@ -25,6 +25,7 @@ from formal_lab_contracts.errors import NonRetryableFailure
 from .env import ENV_ID
 from .instance import BASE_ORDERS, HORIZON
 from .model import PACKAGE_ID
+from .net import trust_env
 
 # ------------------------------------------------------------------ probe (P2-064)
 
@@ -75,7 +76,7 @@ class OrderProbe:
         url = f"{session.endpoint}/t/{tenant}/metrics"
         now = datetime.now(UTC)
         try:
-            data = httpx.get(url, params={"window": self.window}, timeout=5).json()
+            data = httpx.get(url, params={"window": self.window}, timeout=5, trust_env=trust_env(url)).json()
         except (httpx.HTTPError, ValueError) as exc:
             return [ProbeResult(probe_id=f"{d.metric_id}@{step}", probe=PROBE.ref(), source=f"GET {url}",
                                 metric=d.metric_id, value=None, unit=d.unit or "", status="ERROR",

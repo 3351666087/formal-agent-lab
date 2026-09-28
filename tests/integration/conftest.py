@@ -28,6 +28,11 @@ BASE_DB = os.environ.get("FAL_DATABASE_URL", "postgresql+psycopg://fal:fal@127.0
 TEST_DB = BASE_DB.rsplit("/", 1)[0] + "/fal_it"
 os.environ["FAL_DATABASE_URL"] = TEST_DB
 os.environ["FAL_ARTIFACT_ROOT"] = str(ROOT / "var" / "it-artifacts")
+# Loopback never through a proxy from the environment: a system-wide HTTP_PROXY without NO_PROXY (Lima copies the
+# host's proxy into the VM) would send every call to the API, the web server and the order service to a proxy that
+# cannot reach this machine's loopback. Inherited by the API / worker subprocesses.
+for _key in ("NO_PROXY", "no_proxy"):
+    os.environ[_key] = ",".join(x for x in (os.environ.get(_key), "127.0.0.1,localhost,::1") if x)
 
 
 def _ensure_test_database() -> None:
