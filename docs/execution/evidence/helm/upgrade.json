@@ -1,0 +1,73 @@
+{
+  "check": "P2-104 Helm upgrade / rollback on kind (single-node development cluster)",
+  "date": "2026-09-28T16:30:46Z",
+  "node_image": "kindest/node:v1.37.0@sha256:a1ed56cfb0e7b93589bdf97c8cd566405a265939e3620fc4f5de89adff580ae5",
+  "previous": {
+    "commit": "46400ad",
+    "chart": "0.1.0"
+  },
+  "current": {
+    "image_tag": "4e1f959e81f2",
+    "chart": "0.2.0"
+  },
+  "phases": [
+    {
+      "phase": "installed-revision",
+      "alembic": "0001"
+    },
+    {
+      "phase": "previous",
+      "at": "2026-09-28T16:29:32Z",
+      "ready": true,
+      "platform_version": "0.1.0",
+      "runs_listed": 0,
+      "scenario": "状态延迟",
+      "strategy_config_id": "stg_278cad2f08bf47b9aed5",
+      "run_id": "run_9b8aa4eac1cb46d785a7",
+      "run_status": "SUCCEEDED",
+      "steps": 31
+    },
+    {
+      "phase": "upgraded-revision",
+      "alembic": "0002"
+    },
+    {
+      "phase": "upgraded",
+      "at": "2026-09-28T16:30:08Z",
+      "ready": true,
+      "platform_version": "0.2.0",
+      "old_run_readable": true,
+      "old_run_contract": "formal-lab-contracts/v1",
+      "runs_listed": 1,
+      "scenario": "两名调度员（轮流）",
+      "strategy_config_id": null,
+      "run_id": "run_39e0984bef4f4e8ab667",
+      "run_status": "SUCCEEDED",
+      "steps": 20
+    },
+    {
+      "phase": "rolled-back-revision",
+      "alembic": "0002"
+    },
+    {
+      "phase": "rolled-back",
+      "at": "2026-09-28T16:30:33Z",
+      "ready": true,
+      "platform_version": "0.1.0",
+      "strategies_list_error": "NOT_FOUND: plugin formal-lab.example.scheduling.task-planner@1.0.0 is not installed",
+      "old_run_readable": true,
+      "old_run_contract": "(field not reported)",
+      "runs_listed": 2,
+      "scenario": "状态延迟",
+      "strategy_config_id": "stg_278cad2f08bf47b9aed5",
+      "run_id": "run_ba8529b585164e398991",
+      "run_status": "SUCCEEDED",
+      "steps": 31
+    }
+  ],
+  "passed": true,
+  "rollback_limitations": [
+    "strategy configurations created after the upgrade for plugins the older release does not have make the older release's strategy list fail (NOT_FOUND); runs, scenarios and runs by id stay readable and experiments with the older release's strategies run"
+  ],
+  "scope": "single-node kind; test-fixture backing services; not a multi-node or production upgrade"
+}

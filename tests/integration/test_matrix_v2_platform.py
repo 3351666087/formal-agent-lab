@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import asyncio
 import time
+import uuid
 
 import pytest
 
@@ -41,7 +42,11 @@ def terminate(workflow_id: str) -> None:
 
 def test_matrix_v2_queue_recovery_merge_and_report(stack, demo):
     pid = demo["project"]
-    delay = demo["scenarios"]["状态延迟"]["id"]
+    # a copy of the scenario per session: completed cells of the same configuration are reused across matrices of a
+    # project (by design, checked below with merge), so on a database kept from an earlier session a matrix of the
+    # original scenario would start fully reused
+    delay = stack.post(f"/scenarios/{demo['scenarios']['状态延迟']['id']}/copy",
+                       {"name": f"状态延迟（矩阵 v2 测试 {uuid.uuid4().hex[:6]}）"})["id"]
     strategies = {s["name"]: s["id"] for s in stack.get(f"/projects/{pid}/strategies")}
     edd, task = strategies["EDD 规则"], strategies["任务计划（规则生成）"]
     spec = {"version": 2, "name": "delay ablation", "scenarios": [delay],

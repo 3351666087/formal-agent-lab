@@ -1,0 +1,36 @@
+$ rm -rf var/orders-e2e-check && uv run --frozen python -m formal_lab_example_orders.e2e --workdir var/orders-e2e-check --mode process --project p2check --log docs/execution/evidence/phase2/orders/e2e-process.log --summary docs/execution/evidence/phase2/orders/e2e-process.json
+# started 2026-09-28T15:38:39Z at 4e1f959e81f282fd0b3d05103b5734437d357644 (tree e3b0c44298fc, profile local-lite)
+
+15:38:39.302  start  {"mode": "process", "project": "p2check", "workdir": "/Users/null3351/Code/formal-agent-lab/var/orders-e2e-check", "empty": true}
+15:38:39.303  precheck ok  {"cpus": 4, "mem_available_mb": 4789, "disk_free_mb": 14827, "floor": {"cpus": 1, "mem_mb": 256, "disk_mb": 200}, "ok": true, "problems": []}
+15:38:39.551  environment ready  {"endpoint": "http://127.0.0.1:37501", "pid": 148988, "seconds": 0.25}
+15:38:40.983  [run1] normal-rule-1: SUCCEEDED in 24 steps  {"operations": {"COMPLETED": 24}, "metrics": {"orders_completed": 6.0, "late_orders": 0.0, "mean_latency": 2.3333333333333335}, "seconds": 1.25}
+15:38:42.203  [run1] normal-rule-2: SUCCEEDED in 25 steps  {"operations": {"COMPLETED": 25}, "metrics": {"orders_completed": 6.0, "late_orders": 0.0, "mean_latency": 2.0}, "seconds": 1.22}
+15:39:04.500  [run1] normal-z3-1: SUCCEEDED in 26 steps  {"operations": {"COMPLETED": 26}, "metrics": {"orders_completed": 6.0, "late_orders": 0.0, "mean_latency": 2.3333333333333335}, "seconds": 22.3}
+15:39:20.667  [run1] normal-z3-2: SUCCEEDED in 27 steps  {"operations": {"COMPLETED": 27}, "metrics": {"orders_completed": 6.0, "late_orders": 0.0, "mean_latency": 2.1666666666666665}, "seconds": 16.17}
+15:39:28.082  [run1] delayed-rule-1: SUCCEEDED in 24 steps  {"operations": {"COMPLETED": 18, "RECONCILED": 6}, "metrics": {"orders_completed": 6.0, "late_orders": 0.0, "mean_latency": 2.3333333333333335}, "seconds": 7.41}
+15:39:35.599  [run1] delayed-rule-2: SUCCEEDED in 25 steps  {"operations": {"COMPLETED": 19, "RECONCILED": 6}, "metrics": {"orders_completed": 6.0, "late_orders": 0.0, "mean_latency": 2.0}, "seconds": 7.52}
+15:39:43.148  [run1] delayed-z3-1: SUCCEEDED in 26 steps  {"operations": {"COMPLETED": 20, "RECONCILED": 6}, "metrics": {"orders_completed": 6.0, "late_orders": 0.0, "mean_latency": 2.3333333333333335}, "seconds": 7.55}
+15:39:50.783  [run1] delayed-z3-2: SUCCEEDED in 27 steps  {"operations": {"COMPLETED": 21, "RECONCILED": 6}, "metrics": {"orders_completed": 6.0, "late_orders": 0.0, "mean_latency": 2.1666666666666665}, "seconds": 7.63}
+15:39:52.024  [run1] deviation-rule-1: SUCCEEDED in 26 steps  {"operations": {"COMPLETED": 26}, "metrics": {"orders_completed": 6.0, "late_orders": 1.0, "mean_latency": 3.3333333333333335}, "seconds": 1.24}
+15:39:53.312  [run1] deviation-rule-2: SUCCEEDED in 28 steps  {"operations": {"COMPLETED": 28}, "metrics": {"orders_completed": 6.0, "late_orders": 0.0, "mean_latency": 3.0}, "seconds": 1.29}
+15:40:07.212  [run1] deviation-z3-1: SUCCEEDED in 30 steps  {"operations": {"COMPLETED": 30}, "metrics": {"orders_completed": 6.0, "late_orders": 1.0, "mean_latency": 4.0}, "seconds": 13.9}
+15:40:15.700  [run1] deviation-z3-2: SUCCEEDED in 28 steps  {"operations": {"COMPLETED": 28}, "metrics": {"orders_completed": 6.0, "late_orders": 0.0, "mean_latency": 2.8333333333333335}, "seconds": 8.49}
+15:40:15.849  exported  {"bundles": 12, "service_states": 12, "bytes": 4070059}
+15:40:16.217  service-side reset verified by the service metrics  {"tenants": 12}
+15:40:17.399  [run2] normal-rule-1: SUCCEEDED in 24 steps  {"operations": {"COMPLETED": 24}, "metrics": {"orders_completed": 6.0, "late_orders": 0.0, "mean_latency": 2.3333333333333335}, "seconds": 1.18}
+15:40:18.553  [run2] normal-rule-2: SUCCEEDED in 25 steps  {"operations": {"COMPLETED": 25}, "metrics": {"orders_completed": 6.0, "late_orders": 0.0, "mean_latency": 2.0}, "seconds": 1.15}
+15:40:19.777  [run2] normal-z3-1: SUCCEEDED in 26 steps  {"operations": {"COMPLETED": 26}, "metrics": {"orders_completed": 6.0, "late_orders": 0.0, "mean_latency": 2.3333333333333335}, "seconds": 1.22}
+15:40:21.121  [run2] normal-z3-2: SUCCEEDED in 27 steps  {"operations": {"COMPLETED": 27}, "metrics": {"orders_completed": 6.0, "late_orders": 0.0, "mean_latency": 2.1666666666666665}, "seconds": 1.34}
+15:40:28.624  [run2] delayed-rule-1: SUCCEEDED in 24 steps  {"operations": {"COMPLETED": 18, "RECONCILED": 6}, "metrics": {"orders_completed": 6.0, "late_orders": 0.0, "mean_latency": 2.3333333333333335}, "seconds": 7.5}
+15:40:36.247  [run2] delayed-rule-2: SUCCEEDED in 25 steps  {"operations": {"COMPLETED": 19, "RECONCILED": 6}, "metrics": {"orders_completed": 6.0, "late_orders": 0.0, "mean_latency": 2.0}, "seconds": 7.62}
+15:40:43.821  [run2] delayed-z3-1: SUCCEEDED in 26 steps  {"operations": {"COMPLETED": 20, "RECONCILED": 6}, "metrics": {"orders_completed": 6.0, "late_orders": 0.0, "mean_latency": 2.3333333333333335}, "seconds": 7.57}
+15:40:51.392  [run2] delayed-z3-2: SUCCEEDED in 27 steps  {"operations": {"COMPLETED": 21, "RECONCILED": 6}, "metrics": {"orders_completed": 6.0, "late_orders": 0.0, "mean_latency": 2.1666666666666665}, "seconds": 7.57}
+15:40:52.705  [run2] deviation-rule-1: SUCCEEDED in 26 steps  {"operations": {"COMPLETED": 26}, "metrics": {"orders_completed": 6.0, "late_orders": 1.0, "mean_latency": 3.3333333333333335}, "seconds": 1.31}
+15:40:54.037  [run2] deviation-rule-2: SUCCEEDED in 28 steps  {"operations": {"COMPLETED": 28}, "metrics": {"orders_completed": 6.0, "late_orders": 0.0, "mean_latency": 3.0}, "seconds": 1.33}
+15:40:55.437  [run2] deviation-z3-1: SUCCEEDED in 30 steps  {"operations": {"COMPLETED": 30}, "metrics": {"orders_completed": 6.0, "late_orders": 1.0, "mean_latency": 4.0}, "seconds": 1.4}
+15:40:56.734  [run2] deviation-z3-2: SUCCEEDED in 28 steps  {"operations": {"COMPLETED": 28}, "metrics": {"orders_completed": 6.0, "late_orders": 0.0, "mean_latency": 2.8333333333333335}, "seconds": 1.3}
+15:40:56.736  rerun compared  {"identical_trajectories": 12, "cells": 12, "differing": []}
+15:40:56.737  resource usage  {"mode": "process", "pid": 148988, "data_bytes": 991232, "restarts": 0, "rss_kb": 51204, "cpu_seconds": 5.83}
+15:40:56.941  cleanup  {"removed": {"processes": [148988], "containers": [], "paths": ["/Users/null3351/Code/formal-agent-lab/var/orders-e2e-check/.fal-orders/p2check"]}, "leftover_after_close": {"processes": [], "containers": [], "volumes": [], "paths": []}, "state_dir_gone": true}
+15:40:56.941  done  {"ok": true}

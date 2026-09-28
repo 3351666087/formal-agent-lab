@@ -1,0 +1,829 @@
+{
+  "format": "phase2-checks@1",
+  "handoff_version": "phase-handoff/v1",
+  "phase": 2,
+  "generated_at": "2026-09-28T16:30:50Z",
+  "source_revision": {
+    "commit": "4e1f959e81f282fd0b3d05103b5734437d357644",
+    "worktree": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "clean": true,
+      "changed_bytes": 0,
+      "untracked_files": 0,
+      "excluded_outputs": [
+        "docs/execution/evidence/",
+        "docs/handoff/",
+        "docs/execution/phase-2.md",
+        "docs/licenses.md",
+        "docs/api/openapi.json"
+      ]
+    }
+  },
+  "command": "make phase2-check",
+  "environment": {
+    "os": "Ubuntu 24.04.4 LTS",
+    "arch": "aarch64",
+    "kernel": "6.8.0-117-generic",
+    "python": "3.12.3",
+    "uv": "uv 0.12.19 (aarch64-unknown-linux-gnu)",
+    "node": "v24.21.0",
+    "pnpm": "12.6.0",
+    "docker": "29.5.2",
+    "z3": "5.1.0",
+    "temporalio": "1.33.0",
+    "kind": "kind v0.33.0 go1.26.7 linux/arm64",
+    "helm": "v4.3.0+gbec5b06"
+  },
+  "summary": {
+    "PASS": 28,
+    "FAIL": 0,
+    "NOT_RUN": 0,
+    "NOT_SELECTED": 0,
+    "BLOCKED": 0
+  },
+  "groups": {
+    "compatibility": "PASS",
+    "semantic-driver": "PASS",
+    "planning-objectives": "PASS",
+    "multi-actor-recovery": "PASS",
+    "service-operations": "PASS",
+    "model-release": "PASS",
+    "evaluation-replay": "PASS",
+    "product-path": "PASS",
+    "local-release": "PASS",
+    "resource-profile": "PASS"
+  },
+  "mandatory_passed": true,
+  "duration_s": 779.1,
+  "checks": [
+    {
+      "id": "contracts-v1-v2",
+      "group": "compatibility",
+      "kind": "mandatory",
+      "tasks": [
+        "P2-110",
+        "P2-010",
+        "P2-011"
+      ],
+      "title": "契约 v1 冻结、v2 生成一致、v1→v2 升级，TS 类型与样例",
+      "profile": "local-lite",
+      "command": "make contracts-check && uv run --frozen pytest -p no:cacheprovider -q tests/contracts && pnpm --filter @formal-lab/contracts run test",
+      "result": "PASS",
+      "exit_code": 0,
+      "checked_commit": "4e1f959e81f282fd0b3d05103b5734437d357644",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "worktree_clean": true,
+      "started_at": "2026-09-28T14:56:54Z",
+      "finished_at": "2026-09-28T14:56:59Z",
+      "duration_s": 4.9,
+      "log": "docs/execution/evidence/phase2/checks/contracts-v1-v2.log",
+      "summary": "ℹ duration_ms 493.03418",
+      "evidence": [
+        "contracts/v1/DIGEST.json",
+        "contracts/v2/DIGEST.json",
+        "docs/contracts/v2.md"
+      ],
+      "inherited": false
+    },
+    {
+      "id": "phase1-parity",
+      "group": "compatibility",
+      "kind": "mandatory",
+      "tasks": [
+        "P2-110",
+        "P2-001",
+        "P2-002"
+      ],
+      "title": "阶段一单参与者调度轨迹、哨兵与旧回放包",
+      "profile": "local-lite",
+      "command": "uv run --frozen pytest -p no:cacheprovider -q examples/neutral-scheduling/tests/test_sentinel.py packages/runtime/tests/test_kernel.py::test_single_participant_run_reproduces_the_phase1_trajectory",
+      "result": "PASS",
+      "exit_code": 0,
+      "checked_commit": "4e1f959e81f282fd0b3d05103b5734437d357644",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "worktree_clean": true,
+      "started_at": "2026-09-28T14:56:59Z",
+      "finished_at": "2026-09-28T14:58:00Z",
+      "duration_s": 60.6,
+      "log": "docs/execution/evidence/phase2/checks/phase1-parity.log",
+      "summary": "7 passed in 60.41s (0:01:00)",
+      "evidence": [
+        "docs/execution/evidence/phase2/baseline/"
+      ],
+      "inherited": false
+    },
+    {
+      "id": "unit-all",
+      "group": "compatibility",
+      "kind": "mandatory",
+      "tasks": [
+        "P2-110"
+      ],
+      "title": "全部单元 / 架构 / 示例测试（无外部服务）",
+      "profile": "local-lite",
+      "command": "uv run --frozen pytest -p no:cacheprovider -q -m 'not integration and not llm and not ui'",
+      "result": "PASS",
+      "exit_code": 0,
+      "checked_commit": "4e1f959e81f282fd0b3d05103b5734437d357644",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "worktree_clean": true,
+      "started_at": "2026-09-28T14:58:00Z",
+      "finished_at": "2026-09-28T15:07:03Z",
+      "duration_s": 543.6,
+      "log": "docs/execution/evidence/phase2/checks/unit-all.log",
+      "summary": "428 passed, 48 deselected in 545.13s (0:09:05)",
+      "evidence": [],
+      "inherited": false
+    },
+    {
+      "id": "api-cli-sdk-old-bundles",
+      "group": "compatibility",
+      "kind": "mandatory",
+      "tasks": [
+        "P2-110",
+        "P2-093"
+      ],
+      "title": "API / CLI / SDK 与阶段一回放包读取（平台）",
+      "profile": "local-services",
+      "command": "uv run --frozen pytest -p no:cacheprovider -q -m integration tests/integration/test_sdk_cli_replay.py tests/integration/test_platform_runs.py",
+      "result": "PASS",
+      "exit_code": 0,
+      "checked_commit": "4e1f959e81f282fd0b3d05103b5734437d357644",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "worktree_clean": true,
+      "started_at": "2026-09-28T15:07:03Z",
+      "finished_at": "2026-09-28T15:15:26Z",
+      "duration_s": 502.9,
+      "log": "docs/execution/evidence/phase2/checks/api-cli-sdk-old-bundles.log",
+      "summary": "19 passed in 500.66s (0:08:20)",
+      "evidence": [],
+      "inherited": false
+    },
+    {
+      "id": "driver-and-second-profile",
+      "group": "semantic-driver",
+      "kind": "mandatory",
+      "tasks": [
+        "P2-111",
+        "P2-012",
+        "P2-013",
+        "P2-018"
+      ],
+      "title": "语义驱动替换、第二语义 profile（仓储）、插件合同工具与包外插件",
+      "profile": "local-lite",
+      "command": "uv run --frozen pytest -p no:cacheprovider -q packages/model-core tests/examples tests/architecture examples/external-plugin packages/runtime/tests/test_multi_actor.py",
+      "result": "PASS",
+      "exit_code": 0,
+      "checked_commit": "4e1f959e81f282fd0b3d05103b5734437d357644",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "worktree_clean": true,
+      "started_at": "2026-09-28T15:15:26Z",
+      "finished_at": "2026-09-28T15:16:58Z",
+      "duration_s": 91.7,
+      "log": "docs/execution/evidence/phase2/checks/driver-and-second-profile.log",
+      "summary": "87 passed in 92.12s (0:01:32)",
+      "evidence": [],
+      "inherited": false
+    },
+    {
+      "id": "second-profile-platform",
+      "group": "semantic-driver",
+      "kind": "mandatory",
+      "tasks": [
+        "P2-111",
+        "P2-012"
+      ],
+      "title": "第二 profile 经平台持久路径运行",
+      "profile": "local-services",
+      "command": "uv run --frozen pytest -p no:cacheprovider -q -m integration tests/integration/test_multi_actor_platform.py",
+      "result": "PASS",
+      "exit_code": 0,
+      "checked_commit": "4e1f959e81f282fd0b3d05103b5734437d357644",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "worktree_clean": true,
+      "started_at": "2026-09-28T15:16:58Z",
+      "finished_at": "2026-09-28T15:17:31Z",
+      "duration_s": 33.4,
+      "log": "docs/execution/evidence/phase2/checks/second-profile-platform.log",
+      "summary": "2 passed in 33.15s",
+      "evidence": [],
+      "inherited": false
+    },
+    {
+      "id": "objectives-unknowns-cache",
+      "group": "planning-objectives",
+      "kind": "mandatory",
+      "tasks": [
+        "P2-111",
+        "P2-020",
+        "P2-021",
+        "P2-022",
+        "P2-023",
+        "P2-024",
+        "P2-025",
+        "P2-026",
+        "P2-027",
+        "P2-028"
+      ],
+      "title": "成本优化、未知补全与稳健序列、见证重放、缓存边界与 Z3 可复现",
+      "profile": "local-lite",
+      "command": "uv run --frozen pytest -p no:cacheprovider -q packages/solver-adapters/z3 packages/runtime/tests/test_kernel.py packages/runtime/tests/test_runtime.py",
+      "result": "PASS",
+      "exit_code": 0,
+      "checked_commit": "4e1f959e81f282fd0b3d05103b5734437d357644",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "worktree_clean": true,
+      "started_at": "2026-09-28T15:17:31Z",
+      "finished_at": "2026-09-28T15:22:07Z",
+      "duration_s": 275.4,
+      "log": "docs/execution/evidence/phase2/checks/objectives-unknowns-cache.log",
+      "summary": "150 passed in 276.73s (0:04:36)",
+      "evidence": [
+        "docs/execution/evidence/phase2/z3-reproducibility.json"
+      ],
+      "inherited": false
+    },
+    {
+      "id": "task-plans-and-turns",
+      "group": "multi-actor-recovery",
+      "kind": "mandatory",
+      "tasks": [
+        "P2-112",
+        "P2-030",
+        "P2-040",
+        "P2-041",
+        "P2-046",
+        "P2-047"
+      ],
+      "title": "两种确定性策略的轮次运行、任务计划检查点与新进程恢复、无进展处理",
+      "profile": "local-lite",
+      "command": "uv run --frozen pytest -p no:cacheprovider -q examples/neutral-scheduling/tests/test_task_planner.py packages/runtime/tests/test_multi_actor.py && uv run --frozen python scripts/state_delay_report.py",
+      "result": "PASS",
+      "exit_code": 0,
+      "checked_commit": "4e1f959e81f282fd0b3d05103b5734437d357644",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "worktree_clean": true,
+      "started_at": "2026-09-28T15:22:07Z",
+      "finished_at": "2026-09-28T15:36:29Z",
+      "duration_s": 862.3,
+      "log": "docs/execution/evidence/phase2/checks/task-plans-and-turns.log",
+      "summary": "{\"strategy\": \"task-model-stub\", \"no_progress_limit\": 20, \"runs\": 5, \"succeeded\": 5, \"endings\": [\"SUCCEEDED/JOINT_GOAL_REACHED\"], \"mean_steps\": 16.2, \"mean_rejected\": 0.0, \"max_stall\": 0, \"mean_obs_requests\": 0.0, \"declined_repeats\": 0, \"mean_delay_cost_succeeded\": 1.4, \"mean_makespan_succeeded\": 9.2",
+      "evidence": [
+        "docs/execution/evidence/phase2/state-delay/report.md"
+      ],
+      "inherited": false
+    },
+    {
+      "id": "multi-actor-platform-recovery",
+      "group": "multi-actor-recovery",
+      "kind": "mandatory",
+      "tasks": [
+        "P2-112",
+        "P2-037"
+      ],
+      "title": "暂停 / 继续 / 取消 / Worker 重启后的轮次、计数与计划进度",
+      "profile": "local-services",
+      "command": "uv run --frozen pytest -p no:cacheprovider -q -m integration tests/integration/test_multi_actor_platform.py",
+      "result": "PASS",
+      "exit_code": 0,
+      "checked_commit": "4e1f959e81f282fd0b3d05103b5734437d357644",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "worktree_clean": true,
+      "started_at": "2026-09-28T15:36:29Z",
+      "finished_at": "2026-09-28T15:37:04Z",
+      "duration_s": 35.0,
+      "log": "docs/execution/evidence/phase2/checks/multi-actor-platform-recovery.log",
+      "summary": "2 passed in 34.74s",
+      "evidence": [],
+      "inherited": false
+    },
+    {
+      "id": "order-service",
+      "group": "service-operations",
+      "kind": "mandatory",
+      "tasks": [
+        "P2-113",
+        "P2-050",
+        "P2-051",
+        "P2-052",
+        "P2-053",
+        "P2-054",
+        "P2-056",
+        "P2-060",
+        "P2-064",
+        "P2-065",
+        "P2-066",
+        "P2-067",
+        "P2-068"
+      ],
+      "title": "订单服务：业务动作、独立探针、响应丢失对账、重复提交、重置与清理、五种案例、纯数据对照",
+      "profile": "local-lite",
+      "command": "uv run --frozen pytest -p no:cacheprovider -q examples/local-order-service && uv run --frozen python scripts/orders_report.py",
+      "result": "PASS",
+      "exit_code": 0,
+      "checked_commit": "4e1f959e81f282fd0b3d05103b5734437d357644",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "worktree_clean": true,
+      "started_at": "2026-09-28T15:37:04Z",
+      "finished_at": "2026-09-28T15:37:40Z",
+      "duration_s": 36.1,
+      "log": "docs/execution/evidence/phase2/checks/order-service.log",
+      "summary": "{\"normal\": 0, \"shortage\": 0, \"delayed\": 0, \"restart\": 0, \"deviation\": 0} 32 True True",
+      "evidence": [
+        "docs/execution/evidence/phase2/orders/comparison.md"
+      ],
+      "inherited": false
+    },
+    {
+      "id": "order-service-platform",
+      "group": "service-operations",
+      "kind": "mandatory",
+      "tasks": [
+        "P2-113",
+        "P2-054",
+        "P2-055",
+        "P2-057",
+        "P2-058"
+      ],
+      "title": "订单服务经持久路径：Worker 被杀、取消交错、本地与 Temporal 一致、人工复核",
+      "profile": "local-services",
+      "command": "uv run --frozen pytest -p no:cacheprovider -q -m integration tests/integration/test_order_service_platform.py",
+      "result": "PASS",
+      "exit_code": 0,
+      "checked_commit": "4e1f959e81f282fd0b3d05103b5734437d357644",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "worktree_clean": true,
+      "started_at": "2026-09-28T15:37:40Z",
+      "finished_at": "2026-09-28T15:38:39Z",
+      "duration_s": 58.5,
+      "log": "docs/execution/evidence/phase2/checks/order-service-platform.log",
+      "summary": "3 passed in 57.98s",
+      "evidence": [],
+      "inherited": false
+    },
+    {
+      "id": "order-service-e2e",
+      "group": "service-operations",
+      "kind": "mandatory",
+      "tasks": [
+        "P2-113",
+        "P2-069",
+        "P2-062"
+      ],
+      "title": "空目录创建环境 → 实验 → 导出 → 重置 → 重跑 → 清理（进程模式，真实日志）",
+      "profile": "local-lite",
+      "command": "rm -rf var/orders-e2e-check && uv run --frozen python -m formal_lab_example_orders.e2e --workdir var/orders-e2e-check --mode process --project p2check --log docs/execution/evidence/phase2/orders/e2e-process.log --summary docs/execution/evidence/phase2/orders/e2e-process.json",
+      "result": "PASS",
+      "exit_code": 0,
+      "checked_commit": "4e1f959e81f282fd0b3d05103b5734437d357644",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "worktree_clean": true,
+      "started_at": "2026-09-28T15:38:39Z",
+      "finished_at": "2026-09-28T15:40:56Z",
+      "duration_s": 137.8,
+      "log": "docs/execution/evidence/phase2/checks/order-service-e2e.log",
+      "summary": "15:40:56.941  done  {\"ok\": true}",
+      "evidence": [
+        "docs/execution/evidence/phase2/orders/e2e-process.log"
+      ],
+      "inherited": false
+    },
+    {
+      "id": "rules-releases",
+      "group": "model-release",
+      "kind": "mandatory",
+      "tasks": [
+        "P2-070",
+        "P2-071",
+        "P2-072",
+        "P2-073",
+        "P2-074",
+        "P2-076"
+      ],
+      "title": "规则类型检查、发布记录、回归案例、效果证据等级",
+      "profile": "local-lite",
+      "command": "uv run --frozen pytest -p no:cacheprovider -q packages/runtime/tests/test_release.py packages/model-core/tests/test_model_core.py::test_effect_evidence_levels_and_freshness",
+      "result": "PASS",
+      "exit_code": 0,
+      "checked_commit": "4e1f959e81f282fd0b3d05103b5734437d357644",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "worktree_clean": true,
+      "started_at": "2026-09-28T15:40:56Z",
+      "finished_at": "2026-09-28T15:41:01Z",
+      "duration_s": 4.4,
+      "log": "docs/execution/evidence/phase2/checks/rules-releases.log",
+      "summary": "4 passed in 4.16s",
+      "evidence": [],
+      "inherited": false
+    },
+    {
+      "id": "difference-to-revision",
+      "group": "model-release",
+      "kind": "mandatory",
+      "tasks": [
+        "P2-075",
+        "P2-077"
+      ],
+      "title": "差异 → 定位 → 新版本 → 检查 → 新实验（API / CLI）与规则暂停",
+      "profile": "local-services",
+      "command": "uv run --frozen pytest -p no:cacheprovider -q -m integration tests/integration/test_governance_platform.py",
+      "result": "PASS",
+      "exit_code": 0,
+      "checked_commit": "4e1f959e81f282fd0b3d05103b5734437d357644",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "worktree_clean": true,
+      "started_at": "2026-09-28T15:41:01Z",
+      "finished_at": "2026-09-28T15:41:13Z",
+      "duration_s": 12.3,
+      "log": "docs/execution/evidence/phase2/checks/difference-to-revision.log",
+      "summary": "2 passed in 11.85s",
+      "evidence": [],
+      "inherited": false
+    },
+    {
+      "id": "reports-offline",
+      "group": "evaluation-replay",
+      "kind": "mandatory",
+      "tasks": [
+        "P2-115",
+        "P2-082",
+        "P2-083",
+        "P2-084",
+        "P2-085",
+        "P2-087"
+      ],
+      "title": "配对比较与消融、划分、聚类统计、探针来源、空目录离线报告",
+      "profile": "local-lite",
+      "command": "uv run --frozen pytest -p no:cacheprovider -q packages/evaluation && uv run --frozen python scripts/offline_report_evidence.py; test $? -le 1",
+      "result": "PASS",
+      "exit_code": 0,
+      "checked_commit": "4e1f959e81f282fd0b3d05103b5734437d357644",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "worktree_clean": true,
+      "started_at": "2026-09-28T15:41:13Z",
+      "finished_at": "2026-09-28T15:41:26Z",
+      "duration_s": 12.5,
+      "log": "docs/execution/evidence/phase2/checks/reports-offline.log",
+      "summary": "{\"bundles\": 85, \"verified\": 84, \"rejected\": [\"run_off_corrupted.replay.zip\"], \"exit\": 1}",
+      "evidence": [
+        "docs/execution/evidence/phase2/offline-report/index.md"
+      ],
+      "inherited": false
+    },
+    {
+      "id": "matrix-v2-platform",
+      "group": "evaluation-replay",
+      "kind": "mandatory",
+      "tasks": [
+        "P2-115",
+        "P2-080",
+        "P2-081",
+        "P2-086"
+      ],
+      "title": "矩阵队列：中断恢复、失败重跑、增量合并、复用；回放定位与重新执行",
+      "profile": "local-services",
+      "command": "uv run --frozen pytest -p no:cacheprovider -q -m integration tests/integration/test_matrix_v2_platform.py tests/integration/test_sdk_cli_replay.py::test_offline_replay_navigation_and_reexecution",
+      "result": "PASS",
+      "exit_code": 0,
+      "checked_commit": "4e1f959e81f282fd0b3d05103b5734437d357644",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "worktree_clean": true,
+      "started_at": "2026-09-28T16:17:51Z",
+      "finished_at": "2026-09-28T16:21:12Z",
+      "duration_s": 201.3,
+      "log": "docs/execution/evidence/phase2/checks/matrix-v2-platform.log",
+      "summary": "2 passed in 198.31s (0:03:18)",
+      "evidence": [],
+      "inherited": false
+    },
+    {
+      "id": "web-product",
+      "group": "product-path",
+      "kind": "mandatory",
+      "tasks": [
+        "P2-114",
+        "P2-090",
+        "P2-091",
+        "P2-092",
+        "P2-093",
+        "P2-094",
+        "P2-095",
+        "P2-096",
+        "P2-098",
+        "P2-099"
+      ],
+      "title": "Web：新项目 → 两参与者成本对比 → 离线回放；界面状态与测量；六个区域",
+      "profile": "local-services",
+      "command": "uv run --frozen pytest -p no:cacheprovider -q -m 'integration and ui' tests/integration/test_web_ui.py tests/integration/test_web_product.py",
+      "result": "PASS",
+      "exit_code": 0,
+      "checked_commit": "4e1f959e81f282fd0b3d05103b5734437d357644",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "worktree_clean": true,
+      "started_at": "2026-09-28T15:41:38Z",
+      "finished_at": "2026-09-28T15:49:21Z",
+      "duration_s": 463.2,
+      "log": "docs/execution/evidence/phase2/checks/web-product.log",
+      "summary": "14 passed in 464.09s (0:07:44)",
+      "evidence": [
+        "docs/execution/evidence/phase2/ui/",
+        "docs/execution/evidence/phase2/web/measurements.json",
+        "docs/execution/evidence/phase2/web/product-acceptance.log"
+      ],
+      "inherited": false
+    },
+    {
+      "id": "sdk-vertical",
+      "group": "product-path",
+      "kind": "mandatory",
+      "tasks": [
+        "P2-114",
+        "P2-097"
+      ],
+      "title": "公共客户端完成与 Web 等价的纵向路径",
+      "profile": "local-services",
+      "command": "uv run --frozen pytest -p no:cacheprovider -q -m integration tests/integration/test_sdk_vertical.py",
+      "result": "PASS",
+      "exit_code": 0,
+      "checked_commit": "4e1f959e81f282fd0b3d05103b5734437d357644",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "worktree_clean": true,
+      "started_at": "2026-09-28T15:49:21Z",
+      "finished_at": "2026-09-28T15:50:15Z",
+      "duration_s": 53.7,
+      "log": "docs/execution/evidence/phase2/checks/sdk-vertical.log",
+      "summary": "1 passed in 53.29s",
+      "evidence": [],
+      "inherited": false
+    },
+    {
+      "id": "compose-smoke",
+      "group": "local-release",
+      "kind": "mandatory",
+      "tasks": [
+        "P2-116",
+        "P2-101",
+        "P2-103"
+      ],
+      "title": "原生本地 Compose 整栈：实验、矩阵、订单服务、两参与者、SSE、S3 产物",
+      "profile": "local-services",
+      "command": "bash scripts/compose-smoke.sh",
+      "result": "PASS",
+      "exit_code": 0,
+      "checked_commit": "4e1f959e81f282fd0b3d05103b5734437d357644",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "worktree_clean": true,
+      "started_at": "2026-09-28T15:50:15Z",
+      "finished_at": "2026-09-28T15:57:14Z",
+      "duration_s": 419.8,
+      "log": "docs/execution/evidence/phase2/checks/compose-smoke.log",
+      "summary": "==> OK (docs/execution/evidence/phase2/compose-smoke.json)",
+      "evidence": [
+        "docs/execution/evidence/phase2/compose-smoke.json"
+      ],
+      "inherited": false
+    },
+    {
+      "id": "orders-compose",
+      "group": "local-release",
+      "kind": "mandatory",
+      "tasks": [
+        "P2-116",
+        "P2-062",
+        "P2-069"
+      ],
+      "title": "订单服务 Compose 生命周期（项目标签、清理）",
+      "profile": "local-services",
+      "command": "rm -rf var/orders-e2e-compose && uv run --frozen python -m formal_lab_example_orders.e2e --workdir var/orders-e2e-compose --mode compose --project p2compose --log docs/execution/evidence/phase2/orders/e2e-compose.log --summary docs/execution/evidence/phase2/orders/e2e-compose.json",
+      "result": "PASS",
+      "exit_code": 0,
+      "checked_commit": "4e1f959e81f282fd0b3d05103b5734437d357644",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "worktree_clean": true,
+      "started_at": "2026-09-28T15:57:14Z",
+      "finished_at": "2026-09-28T15:59:39Z",
+      "duration_s": 144.2,
+      "log": "docs/execution/evidence/phase2/checks/orders-compose.log",
+      "summary": "15:59:38.670  done  {\"ok\": true}",
+      "evidence": [
+        "docs/execution/evidence/phase2/orders/e2e-compose.log"
+      ],
+      "inherited": false
+    },
+    {
+      "id": "offline-install",
+      "group": "local-release",
+      "kind": "mandatory",
+      "tasks": [
+        "P2-116",
+        "P2-106",
+        "P2-107"
+      ],
+      "title": "离线包：镜像去重、空目录无包仓库安装、规则 / 符号演示、整栈实验",
+      "profile": "local-services",
+      "command": "uv run --frozen python scripts/offline_bundle.py --verify",
+      "result": "PASS",
+      "exit_code": 0,
+      "checked_commit": "4e1f959e81f282fd0b3d05103b5734437d357644",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "worktree_clean": true,
+      "started_at": "2026-09-28T15:59:39Z",
+      "finished_at": "2026-09-28T16:01:53Z",
+      "duration_s": 134.7,
+      "log": "docs/execution/evidence/phase2/checks/offline-install.log",
+      "summary": "==> /Users/null3351/Code/formal-agent-lab/out/offline/formal-agent-lab-offline-4e1f959e81f2.tar (714 MB, 128 files) in 70 s",
+      "evidence": [
+        "docs/execution/evidence/phase2/offline-manifest.json"
+      ],
+      "inherited": false
+    },
+    {
+      "id": "release-manifest",
+      "group": "local-release",
+      "kind": "mandatory",
+      "tasks": [
+        "P2-105",
+        "P2-109",
+        "P2-006"
+      ],
+      "title": "发行 manifest：wheel / Web / 镜像摘要、异架构构建状态、许可证清单、资源读数",
+      "profile": "local-lite",
+      "command": "uv run --frozen python scripts/release.py",
+      "result": "PASS",
+      "exit_code": 0,
+      "checked_commit": "4e1f959e81f282fd0b3d05103b5734437d357644",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "worktree_clean": true,
+      "started_at": "2026-09-28T16:01:53Z",
+      "finished_at": "2026-09-28T16:05:21Z",
+      "duration_s": 207.3,
+      "log": "docs/execution/evidence/phase2/checks/release-manifest.log",
+      "summary": "==> /Users/null3351/Code/formal-agent-lab/out/release/manifest.json (15 wheels, 4 images) in 206.4 s",
+      "evidence": [
+        "docs/execution/evidence/phase2/release-manifest.json",
+        "docs/licenses.md"
+      ],
+      "inherited": false
+    },
+    {
+      "id": "kind-install-upgrade",
+      "group": "local-release",
+      "kind": "mandatory",
+      "tasks": [
+        "P2-116",
+        "P2-101",
+        "P2-104"
+      ],
+      "title": "kind：Chart 安装、从阶段一版本升级（迁移）与回滚（仅单节点开发集群）",
+      "profile": "local-kind",
+      "command": "bash scripts/helm-install-check.sh && bash scripts/helm-upgrade-check.sh",
+      "result": "PASS",
+      "exit_code": 0,
+      "checked_commit": "4e1f959e81f282fd0b3d05103b5734437d357644",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "worktree_clean": true,
+      "started_at": "2026-09-28T16:21:12Z",
+      "finished_at": "2026-09-28T16:30:50Z",
+      "duration_s": 577.6,
+      "log": "docs/execution/evidence/phase2/checks/kind-install-upgrade.log",
+      "summary": "disk-guard: after the upgrade check: host (repository filesystem) 8.1 GiB free, docker data (/var/lib/docker) 18.7 GiB free (needs 0.0 GiB)",
+      "evidence": [
+        "docs/execution/evidence/helm/install.json",
+        "docs/execution/evidence/helm/upgrade.json"
+      ],
+      "inherited": false
+    },
+    {
+      "id": "backup-restore",
+      "group": "local-release",
+      "kind": "mandatory",
+      "tasks": [
+        "P2-108"
+      ],
+      "title": "备份 → 重置 → 恢复，用一次实际实验验证",
+      "profile": "local-services",
+      "command": "uv run --frozen python scripts/backup_restore_check.py",
+      "result": "PASS",
+      "exit_code": 0,
+      "checked_commit": "4e1f959e81f282fd0b3d05103b5734437d357644",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "worktree_clean": true,
+      "started_at": "2026-09-28T16:07:10Z",
+      "finished_at": "2026-09-28T16:07:28Z",
+      "duration_s": 17.7,
+      "log": "docs/execution/evidence/phase2/checks/backup-restore.log",
+      "summary": "{\"ok\": true, \"run\": \"run_b874a5a3d6c945949a35\", \"status\": \"SUCCEEDED\", \"bundle_content_identical\": true, \"rows_after_reset\": 0, \"restored_rows\": {\"projects\": 3, \"model_versions\": 4, \"scenarios\": 17, \"runs\": 1, \"run_events\": 152, \"operation_records\": 18, \"model_releases\": 0, \"regression_cases\": 0, \"m",
+      "evidence": [
+        "docs/execution/evidence/phase2/backup-restore.json"
+      ],
+      "inherited": false
+    },
+    {
+      "id": "doctor",
+      "group": "resource-profile",
+      "kind": "mandatory",
+      "tasks": [
+        "P2-100",
+        "P2-004"
+      ],
+      "title": "三个 profile 的可用性、资源估计与端口冲突",
+      "profile": "local-lite",
+      "command": "python3 scripts/doctor.py --record docs/execution/evidence/phase2/doctor.json",
+      "result": "PASS",
+      "exit_code": 0,
+      "checked_commit": "4e1f959e81f282fd0b3d05103b5734437d357644",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "worktree_clean": true,
+      "started_at": "2026-09-28T16:07:28Z",
+      "finished_at": "2026-09-28T16:07:32Z",
+      "duration_s": 3.4,
+      "log": "docs/execution/evidence/phase2/checks/doctor.log",
+      "summary": "profile   local-kind      AVAILABLE    ~3000 MiB 2 CPU 5 GiB",
+      "evidence": [
+        "docs/execution/evidence/phase2/doctor.json"
+      ],
+      "inherited": false
+    },
+    {
+      "id": "concurrency",
+      "group": "resource-profile",
+      "kind": "mandatory",
+      "tasks": [
+        "P2-102"
+      ],
+      "title": "按实测资源设置并发：1 并发基线与 2 并发测量",
+      "profile": "local-lite",
+      "command": "uv run --frozen python scripts/concurrency_bench.py",
+      "result": "PASS",
+      "exit_code": 0,
+      "checked_commit": "4e1f959e81f282fd0b3d05103b5734437d357644",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "worktree_clean": true,
+      "started_at": "2026-09-28T16:07:32Z",
+      "finished_at": "2026-09-28T16:10:38Z",
+      "duration_s": 186.1,
+      "log": "docs/execution/evidence/phase2/checks/concurrency.log",
+      "summary": "{\"allowed\": 2, \"local\": [{\"concurrency\": 1, \"wall_seconds\": 94.87}, {\"concurrency\": 2, \"wall_seconds\": 91.15}], \"platform\": []}",
+      "evidence": [
+        "docs/execution/evidence/phase2/concurrency.json"
+      ],
+      "inherited": false
+    },
+    {
+      "id": "model-real",
+      "group": "conditional",
+      "kind": "conditional",
+      "tasks": [
+        "P2-039",
+        "P2-045",
+        "P2-046"
+      ],
+      "title": "真实模型端点：请求可复现与证据完整",
+      "profile": "local-lite",
+      "command": "uv run --frozen python scripts/model_evidence.py",
+      "result": "PASS",
+      "exit_code": 0,
+      "checked_commit": "4e1f959e81f282fd0b3d05103b5734437d357644",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "worktree_clean": true,
+      "started_at": "2026-09-28T16:10:38Z",
+      "finished_at": "2026-09-28T16:16:22Z",
+      "duration_s": 344.7,
+      "log": "docs/execution/evidence/phase2/checks/model-real.log",
+      "summary": "{\"requests\": \"PASS\", \"resume\": \"PASS\", \"per_step\": \"PASS\", \"mixed\": \"PASS\"}",
+      "evidence": [
+        "docs/execution/evidence/phase2/model/evidence.json"
+      ],
+      "inherited": false
+    },
+    {
+      "id": "prism-games",
+      "group": "extension",
+      "kind": "extension",
+      "tasks": [
+        "P2-X01",
+        "P2-X02",
+        "P2-X03",
+        "P2-X04"
+      ],
+      "title": "深化轨道：PRISM-games 随机博弈概率查询、策略导出与模型内核对、类型化扩展与 UI",
+      "profile": "local-services",
+      "command": "uv run --frozen python scripts/prism_games_check.py && uv run --frozen pytest -p no:cacheprovider -q packages/solver-adapters/prism-games && uv run --frozen pytest -p no:cacheprovider -q -m integration tests/integration/test_probabilistic_platform.py",
+      "result": "PASS",
+      "exit_code": 0,
+      "checked_commit": "4e1f959e81f282fd0b3d05103b5734437d357644",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "worktree_clean": true,
+      "started_at": "2026-09-28T16:16:22Z",
+      "finished_at": "2026-09-28T16:16:48Z",
+      "duration_s": 25.3,
+      "log": "docs/execution/evidence/phase2/checks/prism-games.log",
+      "summary": "4 passed in 15.50s",
+      "evidence": [
+        "docs/execution/evidence/phase2/prism-games/summary.json",
+        "docs/execution/evidence/phase2/prism-games/workbench-probabilistic.jpg"
+      ],
+      "inherited": false
+    }
+  ]
+}

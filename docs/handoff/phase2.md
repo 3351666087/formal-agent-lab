@@ -35,8 +35,45 @@ make release && make offline-bundle                   # 发行清单、去重离
 
 ## 3. 验收结果
 
+全量运行中 `matrix-v2-platform`（测试依赖全新的集成数据库）与 `kind-install-upgrade` 的升级半程（磁盘余量检查拒绝：宿主机 7.3 GiB，需要 10 GiB）首次失败；在同一提交、同一工作区摘要上重置测试库并清理本项目构建缓存后以 `--only` 重跑通过，下表为重跑结果（manifest `known_issues` 第一条）。并发测量在验收运行中几乎没有加速（94.9 s / 91.2 s），同日空闲时为 57.6 s / 31.8 s（第二条）。
+
 <!-- checks:begin -->
-（由 `make handoff-phase2` 生成）
+状态：**complete**
+
+`make phase2-check` 于 2026-09-28T16:30:50Z 在提交 `4e1f959e81f2`（工作区摘要 `e3b0c44298fc`，干净）上运行，Ubuntu 24.04.4 LTS，aarch64，Python 3.12.3，Docker 29.5.2，z3 5.1.0，temporalio 1.33.0，kind kind v0.33.0 go1.26.7 linux/arm64，helm v4.3.0+gbec5b06；耗时 779.1 s。
+
+检查组：compatibility **PASS**，semantic-driver **PASS**，planning-objectives **PASS**，multi-actor-recovery **PASS**，service-operations **PASS**，model-release **PASS**，evaluation-replay **PASS**，product-path **PASS**，local-release **PASS**，resource-profile **PASS**。计数：{'PASS': 28, 'FAIL': 0, 'NOT_RUN': 0, 'NOT_SELECTED': 0, 'BLOCKED': 0}。
+
+| 组 | 检查 | 任务 | 结果 | 退出码 | 耗时 s | 日志 |
+|---|---|---|---|---|---|---|
+| compatibility | 契约 v1 冻结、v2 生成一致、v1→v2 升级，TS 类型与样例 (`contracts-v1-v2`) | P2-110, P2-010, P2-011 | **PASS** | 0 | 4.9 | [log](../../docs/execution/evidence/phase2/checks/contracts-v1-v2.log) |
+| compatibility | 阶段一单参与者调度轨迹、哨兵与旧回放包 (`phase1-parity`) | P2-110, P2-001, P2-002 | **PASS** | 0 | 60.6 | [log](../../docs/execution/evidence/phase2/checks/phase1-parity.log) |
+| compatibility | 全部单元 / 架构 / 示例测试（无外部服务） (`unit-all`) | P2-110 | **PASS** | 0 | 543.6 | [log](../../docs/execution/evidence/phase2/checks/unit-all.log) |
+| compatibility | API / CLI / SDK 与阶段一回放包读取（平台） (`api-cli-sdk-old-bundles`) | P2-110, P2-093 | **PASS** | 0 | 502.9 | [log](../../docs/execution/evidence/phase2/checks/api-cli-sdk-old-bundles.log) |
+| semantic-driver | 语义驱动替换、第二语义 profile（仓储）、插件合同工具与包外插件 (`driver-and-second-profile`) | P2-111, P2-012, P2-013, P2-018 | **PASS** | 0 | 91.7 | [log](../../docs/execution/evidence/phase2/checks/driver-and-second-profile.log) |
+| semantic-driver | 第二 profile 经平台持久路径运行 (`second-profile-platform`) | P2-111, P2-012 | **PASS** | 0 | 33.4 | [log](../../docs/execution/evidence/phase2/checks/second-profile-platform.log) |
+| planning-objectives | 成本优化、未知补全与稳健序列、见证重放、缓存边界与 Z3 可复现 (`objectives-unknowns-cache`) | P2-111, P2-020, P2-021, P2-022 … | **PASS** | 0 | 275.4 | [log](../../docs/execution/evidence/phase2/checks/objectives-unknowns-cache.log) |
+| multi-actor-recovery | 两种确定性策略的轮次运行、任务计划检查点与新进程恢复、无进展处理 (`task-plans-and-turns`) | P2-112, P2-030, P2-040, P2-041 … | **PASS** | 0 | 862.3 | [log](../../docs/execution/evidence/phase2/checks/task-plans-and-turns.log) |
+| multi-actor-recovery | 暂停 / 继续 / 取消 / Worker 重启后的轮次、计数与计划进度 (`multi-actor-platform-recovery`) | P2-112, P2-037 | **PASS** | 0 | 35.0 | [log](../../docs/execution/evidence/phase2/checks/multi-actor-platform-recovery.log) |
+| service-operations | 订单服务：业务动作、独立探针、响应丢失对账、重复提交、重置与清理、五种案例、纯数据对照 (`order-service`) | P2-113, P2-050, P2-051, P2-052 … | **PASS** | 0 | 36.1 | [log](../../docs/execution/evidence/phase2/checks/order-service.log) |
+| service-operations | 订单服务经持久路径：Worker 被杀、取消交错、本地与 Temporal 一致、人工复核 (`order-service-platform`) | P2-113, P2-054, P2-055, P2-057 … | **PASS** | 0 | 58.5 | [log](../../docs/execution/evidence/phase2/checks/order-service-platform.log) |
+| service-operations | 空目录创建环境 → 实验 → 导出 → 重置 → 重跑 → 清理（进程模式，真实日志） (`order-service-e2e`) | P2-113, P2-069, P2-062 | **PASS** | 0 | 137.8 | [log](../../docs/execution/evidence/phase2/checks/order-service-e2e.log) |
+| model-release | 规则类型检查、发布记录、回归案例、效果证据等级 (`rules-releases`) | P2-070, P2-071, P2-072, P2-073 … | **PASS** | 0 | 4.4 | [log](../../docs/execution/evidence/phase2/checks/rules-releases.log) |
+| model-release | 差异 → 定位 → 新版本 → 检查 → 新实验（API / CLI）与规则暂停 (`difference-to-revision`) | P2-075, P2-077 | **PASS** | 0 | 12.3 | [log](../../docs/execution/evidence/phase2/checks/difference-to-revision.log) |
+| evaluation-replay | 配对比较与消融、划分、聚类统计、探针来源、空目录离线报告 (`reports-offline`) | P2-115, P2-082, P2-083, P2-084 … | **PASS** | 0 | 12.5 | [log](../../docs/execution/evidence/phase2/checks/reports-offline.log) |
+| evaluation-replay | 矩阵队列：中断恢复、失败重跑、增量合并、复用；回放定位与重新执行 (`matrix-v2-platform`) | P2-115, P2-080, P2-081, P2-086 | **PASS** | 0 | 201.3 | [log](../../docs/execution/evidence/phase2/checks/matrix-v2-platform.log) |
+| product-path | Web：新项目 → 两参与者成本对比 → 离线回放；界面状态与测量；六个区域 (`web-product`) | P2-114, P2-090, P2-091, P2-092 … | **PASS** | 0 | 463.2 | [log](../../docs/execution/evidence/phase2/checks/web-product.log) |
+| product-path | 公共客户端完成与 Web 等价的纵向路径 (`sdk-vertical`) | P2-114, P2-097 | **PASS** | 0 | 53.7 | [log](../../docs/execution/evidence/phase2/checks/sdk-vertical.log) |
+| local-release | 原生本地 Compose 整栈：实验、矩阵、订单服务、两参与者、SSE、S3 产物 (`compose-smoke`) | P2-116, P2-101, P2-103 | **PASS** | 0 | 419.8 | [log](../../docs/execution/evidence/phase2/checks/compose-smoke.log) |
+| local-release | 订单服务 Compose 生命周期（项目标签、清理） (`orders-compose`) | P2-116, P2-062, P2-069 | **PASS** | 0 | 144.2 | [log](../../docs/execution/evidence/phase2/checks/orders-compose.log) |
+| local-release | 离线包：镜像去重、空目录无包仓库安装、规则 / 符号演示、整栈实验 (`offline-install`) | P2-116, P2-106, P2-107 | **PASS** | 0 | 134.7 | [log](../../docs/execution/evidence/phase2/checks/offline-install.log) |
+| local-release | 发行 manifest：wheel / Web / 镜像摘要、异架构构建状态、许可证清单、资源读数 (`release-manifest`) | P2-105, P2-109, P2-006 | **PASS** | 0 | 207.3 | [log](../../docs/execution/evidence/phase2/checks/release-manifest.log) |
+| local-release | kind：Chart 安装、从阶段一版本升级（迁移）与回滚（仅单节点开发集群） (`kind-install-upgrade`) | P2-116, P2-101, P2-104 | **PASS** | 0 | 577.6 | [log](../../docs/execution/evidence/phase2/checks/kind-install-upgrade.log) |
+| local-release | 备份 → 重置 → 恢复，用一次实际实验验证 (`backup-restore`) | P2-108 | **PASS** | 0 | 17.7 | [log](../../docs/execution/evidence/phase2/checks/backup-restore.log) |
+| resource-profile | 三个 profile 的可用性、资源估计与端口冲突 (`doctor`) | P2-100, P2-004 | **PASS** | 0 | 3.4 | [log](../../docs/execution/evidence/phase2/checks/doctor.log) |
+| resource-profile | 按实测资源设置并发：1 并发基线与 2 并发测量 (`concurrency`) | P2-102 | **PASS** | 0 | 186.1 | [log](../../docs/execution/evidence/phase2/checks/concurrency.log) |
+| conditional | 真实模型端点：请求可复现与证据完整 (`model-real`) | P2-039, P2-045, P2-046 | **PASS** | 0 | 344.7 | [log](../../docs/execution/evidence/phase2/checks/model-real.log) |
+| extension | 深化轨道：PRISM-games 随机博弈概率查询、策略导出与模型内核对、类型化扩展与 UI (`prism-games`) | P2-X01, P2-X02, P2-X03, P2-X04 | **PASS** | 0 | 25.3 | [log](../../docs/execution/evidence/phase2/checks/prism-games.log) |
 <!-- checks:end -->
 
 ## 4. 内核类型（P2-123）
@@ -44,7 +81,15 @@ make release && make offline-bundle                   # 发行清单、去重离
 实际类型、定义位置、契约版本（均为 `formal-lab-contracts/v2`）、JSON Schema、例子与实现；由 `scripts/handoff_phase2.py` 导入代码生成，manifest 的 `types` 字段含完整路径与行号。
 
 <!-- types:begin -->
-（由 `make handoff-phase2` 生成）
+| 类型 | 种类 | 定义 | 记录 / schema / 例子 | 实现 |
+|---|---|---|---|---|
+| **SemanticDriver** | Protocol | `packages/contracts/src/formal_lab_contracts/interfaces.py:216` | `PluginDescriptor` · [schema](../../contracts/v2/schemas/PluginDescriptor.schema.json) · [例子](../../tests/contracts/fixtures/v2/valid/PluginDescriptor.driver.json) | `formal_lab_model.driver.IRFiniteDriver` ([src](../../packages/model-core/src/formal_lab_model/driver.py))<br>`formal_lab_example_warehouse.driver.WarehouseDriver` ([src](../../examples/warehouse-allocation/src/formal_lab_example_warehouse/driver.py)) |
+| **TurnScheduler** | Protocol | `packages/contracts/src/formal_lab_contracts/interfaces.py:230` | `TurnState` · [schema](../../contracts/v2/schemas/TurnState.schema.json) · [例子](../../tests/contracts/fixtures/v2/valid/TurnState.json) | `formal_lab_runtime.turns.CycleScheduler` ([src](../../packages/runtime/src/formal_lab_runtime/turns.py)) |
+| **PlannerCheckpoint** | contract object | `packages/contracts/src/formal_lab_contracts/execution.py:172`<br>协议 `formal_lab_contracts.interfaces.CheckpointingPlanner` | `PlannerCheckpoint` · [schema](../../contracts/v2/schemas/PlannerCheckpoint.schema.json) · [例子](../../tests/contracts/fixtures/v2/valid/PlannerCheckpoint.json) | `formal_lab_example_scheduling.task_planner.TaskPlanner` ([src](../../examples/neutral-scheduling/src/formal_lab_example_scheduling/task_planner.py))<br>`fal_example_external_plugin.checklist.ChecklistPlanner` ([src](../../examples/external-plugin/src/fal_example_external_plugin/checklist.py)) |
+| **EnvironmentSession** | contract object | `packages/contracts/src/formal_lab_contracts/execution.py:258`<br>协议 `formal_lab_contracts.interfaces.SessionEnvironment` | `EnvironmentSession` · [schema](../../contracts/v2/schemas/EnvironmentSession.schema.json) · [例子](../../tests/contracts/fixtures/v2/valid/EnvironmentSession.json) | `formal_lab_example_orders.env.OrderServiceEnvironment` ([src](../../examples/local-order-service/src/formal_lab_example_orders/env.py)) |
+| **ExecutionStage** | StrEnum | `packages/contracts/src/formal_lab_contracts/kernel.py:245` | `StageRecord` · [schema](../../contracts/v2/schemas/StageRecord.schema.json) · [例子](../../tests/contracts/fixtures/v2/valid/StageRecord.json) | `formal_lab_runtime.engine.plan_step` ([src](../../packages/runtime/src/formal_lab_runtime/engine.py)) |
+| **ProbeResult** | contract object | `packages/contracts/src/formal_lab_contracts/execution.py:284`<br>协议 `formal_lab_contracts.interfaces.Probe` | `ProbeResult` · [schema](../../contracts/v2/schemas/ProbeResult.schema.json) · [例子](../../tests/contracts/fixtures/v2/valid/ProbeResult.json) | `formal_lab_example_orders.plugins.OrderProbe` ([src](../../examples/local-order-service/src/formal_lab_example_orders/plugins.py)) |
+| **ModelReleaseRecord** | contract object | `packages/contracts/src/formal_lab_contracts/governance.py:150` | `ModelReleaseRecord` · [schema](../../contracts/v2/schemas/ModelReleaseRecord.schema.json) · [例子](../../tests/contracts/fixtures/v2/valid/ModelReleaseRecord.json) | `formal_lab_runtime.release.check_release` ([src](../../packages/runtime/src/formal_lab_runtime/release.py))<br>`formal_lab_api.services.governance.create_release` ([src](../../packages/platform-api/src/formal_lab_api/services/governance.py)) |
 <!-- types:end -->
 
 ## 5. 目录地图（阶段二新增与变化）

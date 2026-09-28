@@ -63,9 +63,15 @@
   - 实现：`scripts/doctor.py`、`Makefile`
 - [x] **P2-005** 先运行已有独立示例和针对本次改动的基线检查；完整回归安排在里程碑与最终验收，记录准确命令与退出码。
   - 证据：改动前基线（46400ad）：独立示例 compare rule,z3 × 4 场景 × 种子 1-3 退出码 0，单元套件 228 passed 退出码 0；命令、退出码、时间与日志见 docs/execution/evidence/phase2/baseline/baseline-checks.json；完整回归安排在里程碑与 make phase2-check
-- [ ] **P2-006** 增量扩展已有包；新包只在职责或运行生命周期确有差异时建立，更新 workspace、锁文件、依赖方向与许可证清单。
-- [ ] **P2-007** 每次勾选绑定实现文件及真实证据；状态区分 PASS、FAIL、BLOCKED、NOT_RUN、NOT_SELECTED，注明前提和解除条件。
-- [ ] **P2-008** 常规可逆工程选择自行推进；某一外部依赖缺失时继续完成独立任务，并保留精确阻塞记录。
+- [x] **P2-006** 增量扩展已有包；新包只在职责或运行生命周期确有差异时建立，更新 workspace、锁文件、依赖方向与许可证清单。
+  - 证据：增量扩展：新包只有 packages/solver-adapters/prism-games（独立外部进程适配器，生命周期不同）；workspace、uv.lock 与架构依赖方向同步更新；许可证清单 docs/licenses.md 与 evidence/phase2/licenses.json 由 scripts/license_inventory.py 生成并进入发行 manifest；验收 `make phase2-check` @ 4e1f959e81f2：docs/execution/evidence/phase2/checks/release-manifest.log、docs/execution/evidence/phase2/checks/unit-all.log
+  - 实现：`pyproject.toml`、`uv.lock`、`tests/architecture/test_boundaries.py`、`scripts/license_inventory.py`、`docs/licenses.md`
+- [x] **P2-007** 每次勾选绑定实现文件及真实证据；状态区分 PASS、FAIL、BLOCKED、NOT_RUN、NOT_SELECTED，注明前提和解除条件。
+  - 证据：所有勾选经 scripts/tick.py 写入证据与实现文件；状态区分 PASS（勾选）与 FAIL / BLOCKED / NOT_RUN / NOT_SELECTED（注明原因与解除条件）；验收结果另由 phase2-checks.json 逐项绑定提交与日志；验收 `make phase2-check` @ 4e1f959e81f2
+  - 实现：`scripts/tick.py`、`scripts/phase2_check.py`
+- [x] **P2-008** 常规可逆工程选择自行推进；某一外部依赖缺失时继续完成独立任务，并保留精确阻塞记录。
+  - 证据：可逆工程选择自行推进并记入 decisions.md（D-015 … D-024）；外部依赖缺失时继续独立任务并留下精确记录：真实模型不可用记 NOT_RUN、PRISM-games 未安装记 BLOCKED（附解除条件）；2026-09-28 宿主机磁盘写满时停止重型步骤并向用户报告，用户重启虚拟机后修复文件系统（e2fsck）并加入磁盘余量检查（D-024）；验收 `make phase2-check` @ 4e1f959e81f2
+  - 实现：`docs/execution/decisions.md`、`scripts/disk_guard.py`
 
 ## 2. 固定接口与可扩展运行内核
 
@@ -107,8 +113,12 @@
 - [x] **P2-017** 插件 descriptor 与配置 schema 在 API 和 Worker 启动时一致校验，运行 manifest 固定实际插件版本与摘要。
   - 证据：注册表在 API 与 Worker 启动时同样校验描述符（契约/接口版本、v2 专属接口、config_schema 本身为合法 JSON Schema）；配置按 schema 校验在 API 保存场景时（registry.validate_config，字段级错误）与 Worker 打开运行时（open_components）使用同一函数；manifest 固定实际解析到的插件版本与描述符摘要（含 driver 角色）；测试 test_registry_interface_and_contract_versions、test_worker_revalidates_plugin_config_against_the_pinned_schema
   - 实现：`packages/runtime/src/formal_lab_runtime/registry.py`、`packages/runtime/src/formal_lab_runtime/engine.py`、`packages/platform-api/src/formal_lab_api/services/scenarios.py`
-- [ ] **P2-018** 新建插件合同测试工具，覆盖初始化、能力协商、观察、提案、状态推进、恢复与结束；通过公共 SDK 验证包外插件。
-- [ ] **P2-019** 更新依赖方向检查，使纯算法包、运行核心、业务服务适配包各有明确职责；保持原纯数据示例的独立运行路径。
+- [x] **P2-018** 新建插件合同测试工具，覆盖初始化、能力协商、观察、提案、状态推进、恢复与结束；通过公共 SDK 验证包外插件。
+  - 证据：formal_lab_sdk.plugin_testing：check_planner（注册 / 初始化 / 协商 / 观察与提案 / 状态推进 / 恢复（含检查点逐一相同）/ 结束）与 check_environment；包外 examples/external-plugin 的两个规划器只经公共 SDK 通过全部阶段（examples/external-plugin/tests/test_contract.py）；验收 `make phase2-check` @ 4e1f959e81f2：docs/execution/evidence/phase2/checks/driver-and-second-profile.log
+  - 实现：`packages/sdk/src/formal_lab_sdk/plugin_testing.py`、`examples/external-plugin/tests/test_contract.py`
+- [x] **P2-019** 更新依赖方向检查，使纯算法包、运行核心、业务服务适配包各有明确职责；保持原纯数据示例的独立运行路径。
+  - 证据：tests/architecture/test_boundaries.py：纯算法包（model-core、solver z3 / prism-games）、运行核心、业务服务适配包各自的依赖方向；订单服务进程不导入平台包、适配器不控制进程；PRISM-games 只以独立进程调用；纯数据示例的独立运行路径保留（make demo、phase1-parity）；验收 `make phase2-check` @ 4e1f959e81f2：docs/execution/evidence/phase2/checks/driver-and-second-profile.log
+  - 实现：`tests/architecture/test_boundaries.py`
 
 ## 3. 形式化引擎：成本、假设与可解释结果
 
@@ -141,7 +151,9 @@
 - [x] **P2-028** 补齐规划缓存键：模型/驱动版本、目标、优化配置、horizon、未知与假设集合、相关预算配置；缓存有容量上限，区别见证和有界无见证结果。
   - 证据：PlanCache 键 = 模型摘要、驱动、模式、目标、目标函数摘要、受预算约束后的 horizon、信念状态摘要、假设集合；LRU 容量上限（cache_size，命中/未命中/淘汰计数）；缓存区分计划/界内无计划/超时部分结果（后者按超时另键）；每次查询新建 Z3 上下文使命中与重新求解一致；测试 test_planner_cache_key_covers_query_boundaries
   - 实现：`packages/solver-adapters/z3/src/formal_lab_solver_z3/planner.py`
-- [ ] **P2-029** 为每次检查输出可回放查询包：输入版本、假设、范围、结果、见证/反例、耗时与后端；UI 和导出共享同一解释。
+- [x] **P2-029** 为每次检查输出可回放查询包：输入版本、假设、范围、结果、见证/反例、耗时与后端；UI 和导出共享同一解释。
+  - 证据：每次检查写出 QueryBundle（输入模型版本与摘要、假设集、查询范围与界、结果、见证 / 反例、耗时、后端）；test_query_bundle_records_inputs_and_replays；平台 /query-bundles/{id}（导出与重放）、SDK query_bundle / replay_query、模型工作台“目标与发布”展示同一解释；验收 `make phase2-check` @ 4e1f959e81f2：docs/execution/evidence/phase2/checks/objectives-unknowns-cache.log
+  - 实现：`packages/runtime/src/formal_lab_runtime/query.py`、`packages/platform-api/src/formal_lab_api/services/modeling.py`、`web/src/components/ReleasePanel.tsx`
 
 ## 4. 真正的多参与者与轮次调度
 
@@ -153,7 +165,9 @@
 - [x] **P2-031** 持久化当前 actor、全局 step、actor_step、round 与调度游标；默认单参与者配置保持兼容。
   - 证据：当前参与者、全局步、actor_step、round 与调度游标（TurnState.position，含跳过/退役/已达目标/无进展计数）持久化在 CarryState（平台 runs.carry，随每步原子提交）与事件 turn 字段；单参与者 ROUND_ROBIN 与阶段一编号一致（阶段一回放包逐步复现）；平台测试暂停/Worker SIGKILL 后轮次连续
   - 实现：`packages/runtime/src/formal_lab_runtime/engine.py`、`packages/platform-api/src/formal_lab_api/services/execution.py`、`packages/contracts/src/formal_lab_contracts/execution.py`
-- [ ] **P2-032** 每个参与者获得自己的 Observation、目标、候选集合、策略实例与用量，展示层可切换参与者视角。
+- [x] **P2-032** 每个参与者获得自己的 Observation、目标、候选集合、策略实例与用量，展示层可切换参与者视角。
+  - 证据：每个参与者有自己的 Observation、目标、候选范围、策略实例与用量（test_per_participant_views_goals_scopes_and_budgets、test_two_dispatchers_take_turns_with_own_usage）；运行台参与者视角切换（ParticipantsPanel，test_product_acceptance…）；验收 `make phase2-check` @ 4e1f959e81f2：docs/execution/evidence/phase2/checks/task-plans-and-turns.log、docs/execution/evidence/phase2/checks/web-product.log
+  - 实现：`packages/runtime/src/formal_lab_runtime/engine.py`、`web/src/components/RunKernel.tsx`
 - [x] **P2-033** 明确轮次动作的观测时点、世界修订号与共享资源冲突裁决；为两位调度员同时希望分配同一机器的情形写确定性验收。
   - 证据：观测时点 TURN_START / ROUND_START，世界修订号随每个已应用动作递增；共享资源冲突裁决 REVALIDATE（前提仍成立则执行）/ REJECT_STALE（其依赖的位置在提案修订号之后被写过则拒绝），被拒结果携带 ConflictInfo（基于修订号、当前修订号、变更位置、写入者）；确定性验收：两名调度员 ROUND_START 下 B 提议 A 刚占用的同一工序/机器，两种策略下均被拒且两次运行完全一致；TURN_START 下无冲突（test_two_dispatchers_wanting_the_same_machine_is_arbitrated_deterministically）
   - 实现：`packages/neutral-environment/src/formal_lab_env/ir_world.py`、`packages/neutral-environment/src/formal_lab_env/driver_world.py`、`examples/neutral-scheduling/src/formal_lab_example_scheduling/scenarios.py`
@@ -169,7 +183,9 @@
 - [x] **P2-037** 多参与者暂停、继续、取消、Worker 重启后恢复到正确轮次，并保留各自计划进度。
   - 证据：多参与者暂停（在步边界、事件记录轮次游标）、继续、取消（CANCELLED + termination_reason）、Worker SIGKILL 后恢复到正确轮次：全局步逐一不重复、轮流顺序与各参与者 actor_step 连续、参与者用量之和等于全局步、Z3 调度员计划版本只增不减（检查点恢复而非重置）；tests/integration/test_multi_actor_platform.py 2 项通过
   - 实现：`tests/integration/test_multi_actor_platform.py`、`packages/platform-api/src/formal_lab_api/services/execution.py`
-- [ ] **P2-038** 更新 StepRecord、EpisodeRecord、矩阵维度、评分器输入和回放器对多参与者的支持；旧单参与者包继续可读。
+- [x] **P2-038** 更新 StepRecord、EpisodeRecord、矩阵维度、评分器输入和回放器对多参与者的支持；旧单参与者包继续可读。
+  - 证据：StepRecord / EpisodeRecord 带参与者与轮次、矩阵维度 participants、评分器按参与者用量、回放按参与者过滤（fal replay turns --actor）；阶段一单参与者回放包仍可读（test_cli_export_offline_replay_import_and_rerun、test_v1_samples_still_valid_v1_and_upgrade_to_v2）；验收 `make phase2-check` @ 4e1f959e81f2：docs/execution/evidence/phase2/checks/task-plans-and-turns.log、docs/execution/evidence/phase2/checks/matrix-v2-platform.log、docs/execution/evidence/phase2/checks/api-cli-sdk-old-bundles.log
+  - 实现：`packages/contracts/src/formal_lab_contracts/execution.py`、`packages/evaluation/src/formal_lab_eval/experiments.py`、`packages/sdk/src/formal_lab_sdk/cli.py`
 - [x] **P2-039** 交付规则+规则、规则+符号、可配置模型+符号三个运行配置；实测模型配置可用时运行第三种，其余两种始终可验收。
   - 证据：TWO_DISPATCHER_CONFIGS rule+rule / rule+symbolic / model+symbolic; seeded platform scenarios; test_multi_actor::test_delivered_two_participant_configurations (model+symbolic marked llm, skipped NOT_RUN without key) — 3 passed incl. real relay gpt-5.6-sol; evidence docs/execution/evidence/phase2/model/evidence.json (mixed: llm+z3 SUCCEEDED)
   - 实现：`examples/neutral-scheduling/src/formal_lab_example_scheduling/scenarios.py`、`packages/platform-api/src/formal_lab_api/seed.py`、`packages/runtime/tests/test_multi_actor.py`
@@ -295,50 +311,108 @@
 - [x] **P2-076** 将反例或效果差异转成最小可回归案例，保留模型、场景、种子、输入、预期与实测输出。
   - 证据：minimal RegressionCase (model, scenario, seed, input state, action, expected, observed, compared paths, origin); replayed on any version (PASS when it predicts the observation): POST /regression-cases/{id}/replay, fal regression replay; packages/runtime/tests/test_release.py, tests/integration/test_governance_platform.py
   - 实现：`packages/runtime/src/formal_lab_runtime/release.py`、`packages/platform-api/src/formal_lab_api/services/governance.py`
-- [ ] **P2-077** 交付一条“发现差异—定位模型—编辑新版本—重新检查—新实验比较”的完整 UI/CLI 路径。
+- [x] **P2-077** 交付一条“发现差异—定位模型—编辑新版本—重新检查—新实验比较”的完整 UI/CLI 路径。
+  - 证据：发现差异—定位模型—编辑新版本—重新检查—新实验比较：test_difference_to_released_revision_to_new_experiment（API / CLI：fal run suggestions、fal release、fal regression）；模型工作台“目标与发布”与版本差异入口；验收 `make phase2-check` @ 4e1f959e81f2：docs/execution/evidence/phase2/checks/difference-to-revision.log、docs/execution/evidence/phase2/checks/web-product.log
+  - 实现：`packages/platform-api/src/formal_lab_api/services/governance.py`、`packages/sdk/src/formal_lab_sdk/cli.py`、`web/src/components/ReleasePanel.tsx`
 
 ## 9. 评测、回放与研究数据
 
 直接扩展当前 packages/evaluation，保留 [Inspect AI](https://github.com/UKGovernmentBEIS/inspect_ai) 适配。将方法改变的效果与底层环境差异分别记录。
 
-- [ ] **P2-080** 矩阵支持参与者策略组合、环境后端、规则设置、模型版本、种子和预算，生成稳定 cell_id 与来源配置摘要。
-- [ ] **P2-081** 矩阵队列支持中断恢复、失败单元重跑和增量合并；已完成单元以完整配置摘要去重。
-- [ ] **P2-082** 实现规则、最短路径、成本优化、模型辅助策略的配对比较，并提供观测延迟与计划记忆等机制的配置消融。
-- [ ] **P2-083** 预先固定开发/验收场景划分与种子；报告所有失败、缺失、未配对样本和实际分母。
-- [ ] **P2-084** 对多场景重复种子的统计标明独立单位；逐场景汇总或采用按场景分组的重采样，避免把相关记录当独立样本。
-- [ ] **P2-085** 独立探针与环境评分进入同一报告但保留来源；实验状态失败、目标未达成与指标缺失分开表达。
-- [ ] **P2-086** 回放支持轮次、任务计划、操作协调和模型版本定位；记录式回放与重新执行继续使用不同入口。
-- [ ] **P2-087** 在空目录离线读包，校验版本、摘要、事件因果和必需产物；生成 JSON/CSV/Markdown 对比报告及明确的工程结论。
+- [x] **P2-080** 矩阵支持参与者策略组合、环境后端、规则设置、模型版本、种子和预算，生成稳定 cell_id 与来源配置摘要。
+  - 证据：矩阵 v2 维度：参与者策略组合、环境后端、规则设置、模型版本、种子（划分）与预算；cell_id 与完整配置摘要（MatrixCellSpec）；test_matrix_v2_queue_recovery_merge_and_report；验收 `make phase2-check` @ 4e1f959e81f2：docs/execution/evidence/phase2/checks/matrix-v2-platform.log
+  - 实现：`packages/platform-api/src/formal_lab_api/services/matrices.py`、`packages/contracts/src/formal_lab_contracts/execution.py`
+- [x] **P2-081** 矩阵队列支持中断恢复、失败单元重跑和增量合并；已完成单元以完整配置摘要去重。
+  - 证据：MatrixWorkflow 队列：中断后 resume、rerun-failed、merge 增量加入；已完成单元按完整配置摘要去重并跨矩阵复用（同一测试）；验收 `make phase2-check` @ 4e1f959e81f2：docs/execution/evidence/phase2/checks/matrix-v2-platform.log
+  - 实现：`packages/orchestrator/src/formal_lab_orchestrator/workflow.py`、`packages/orchestrator/src/formal_lab_orchestrator/activities.py`
+- [x] **P2-082** 实现规则、最短路径、成本优化、模型辅助策略的配对比较，并提供观测延迟与计划记忆等机制的配置消融。
+  - 证据：配对比较：规则、最短路径（Z3）、成本最优、模型辅助策略按场景 × 种子配对；机制消融（观测延迟、计划记忆等 ablations 维度）单独列出（test_method_and_environment_effects_are_compared_separately）；验收 `make phase2-check` @ 4e1f959e81f2：docs/execution/evidence/phase2/checks/reports-offline.log、docs/execution/evidence/phase2/checks/matrix-v2-platform.log
+  - 实现：`packages/evaluation/src/formal_lab_eval/experiments.py`
+- [x] **P2-083** 预先固定开发/验收场景划分与种子；报告所有失败、缺失、未配对样本和实际分母。
+  - 证据：开发 / 验收划分与种子在矩阵规格中预先固定；报告列出全部失败、缺失、未配对样本与实际分母（test_outcomes_are_separated_with_actual_denominators）；验收 `make phase2-check` @ 4e1f959e81f2：docs/execution/evidence/phase2/checks/reports-offline.log
+  - 实现：`packages/evaluation/src/formal_lab_eval/experiments.py`
+- [x] **P2-084** 对多场景重复种子的统计标明独立单位；逐场景汇总或采用按场景分组的重采样，避免把相关记录当独立样本。
+  - 证据：统计标明独立单位：逐场景汇总与按场景聚类的 bootstrap（test_statistics_name_their_independent_unit）；验收 `make phase2-check` @ 4e1f959e81f2：docs/execution/evidence/phase2/checks/reports-offline.log
+  - 实现：`packages/evaluation/src/formal_lab_eval/experiments.py`、`packages/evaluation/src/formal_lab_eval/stats.py`
+- [x] **P2-085** 独立探针与环境评分进入同一报告但保留来源；实验状态失败、目标未达成与指标缺失分开表达。
+  - 证据：独立探针（probe.*）与环境评分同报告、保留来源；实验失败、目标未达成、指标缺失分开计数（report v2 outcomes / sources）；验收 `make phase2-check` @ 4e1f959e81f2：docs/execution/evidence/phase2/checks/reports-offline.log、docs/execution/evidence/phase2/checks/matrix-v2-platform.log
+  - 实现：`packages/evaluation/src/formal_lab_eval/experiments.py`、`packages/platform-api/src/formal_lab_api/services/matrices.py`
+- [x] **P2-086** 回放支持轮次、任务计划、操作协调和模型版本定位；记录式回放与重新执行继续使用不同入口。
+  - 证据：回放按轮次 / 任务计划 / 操作协调 / 模型版本定位（fal replay turns|plans|operations|model，证据页导航）；记录式回放（fal replay）与重新执行（fal replay reexecute / 平台 rerun）入口分开（test_offline_replay_navigation_and_reexecution）；验收 `make phase2-check` @ 4e1f959e81f2：docs/execution/evidence/phase2/checks/matrix-v2-platform.log、docs/execution/evidence/phase2/checks/api-cli-sdk-old-bundles.log
+  - 实现：`packages/sdk/src/formal_lab_sdk/cli.py`、`web/src/pages/Evidence.tsx`
+- [x] **P2-087** 在空目录离线读包，校验版本、摘要、事件因果和必需产物；生成 JSON/CSV/Markdown 对比报告及明确的工程结论。
+  - 证据：空目录离线读包：校验格式、契约版本与摘要、事件因果与必需产物，被篡改的包被拒；每个模型包一份 JSON / CSV / Markdown 报告与工程结论（docs/execution/evidence/phase2/offline-report/index.md）；验收 `make phase2-check` @ 4e1f959e81f2：docs/execution/evidence/phase2/checks/reports-offline.log
+  - 实现：`packages/evaluation/src/formal_lab_eval/offline.py`、`scripts/offline_report_evidence.py`
 
 ## 10. Web、CLI 与 SDK 产品收尾
 
 沿用现有六个区域，通过插件元数据扩展；所有页面连接真实持久化对象。
 
-- [ ] **P2-090** 模型工作台增加成本目标、发布记录、查询包、假设说明和版本差异入口。
-- [ ] **P2-091** 场景编辑器支持多参与者配置、轮次顺序、联合终止条件、环境后端及独立预算。
-- [ ] **P2-092** 运行台显示当前参与者、计划进度、操作状态、资源使用、探针和恢复事件，暂停/继续/取消有明确反馈。
-- [ ] **P2-093** 证据页实现图、事件、计划、模型版本与业务指标相互定位；历史运行按当时 schema 展示。
-- [ ] **P2-094** 基准页支持配置筛选、配对样本数、失败/未知分布、成本与任务效果同时比较，并导出当前视图的数据依据。
-- [ ] **P2-095** 将 web/src/main.tsx 的页面静态导入改为路由分块；大事件列表按实际记录规模采用分页或虚拟列表。
-- [ ] **P2-096** 测量首屏产物体积与大轨迹交互响应；为 UI 空态、等待、失败、重连和窄屏保存真实截图。
-- [ ] **P2-097** 为新增操作补齐 fal 命令与 Python SDK，并从公共客户端完成与 Web 等价的纵向路径。
-- [ ] **P2-098** 用户配置通过 schema 表单创建和保存，错误定位到字段，示例参数可直接启动实际实验。
-- [ ] **P2-099** 完成一次从“新项目”到“两个参与者的成本对比及离线回放”的完整产品验收。
+- [x] **P2-090** 模型工作台增加成本目标、发布记录、查询包、假设说明和版本差异入口。
+  - 证据：模型工作台：成本目标与求最优、发布记录、查询包、假设说明、版本差异入口（目标与发布页）；概率扩展页单列；验收 `make phase2-check` @ 4e1f959e81f2：docs/execution/evidence/phase2/checks/web-product.log、docs/execution/evidence/phase2/checks/rules-releases.log
+  - 实现：`web/src/components/ReleasePanel.tsx`、`web/src/pages/ModelWorkbench.tsx`
+- [x] **P2-091** 场景编辑器支持多参与者配置、轮次顺序、联合终止条件、环境后端及独立预算。
+  - 证据：场景编辑器：多参与者、轮次顺序、联合终止、环境后端与独立预算（产品验收中实际创建两名参与者场景）；验收 `make phase2-check` @ 4e1f959e81f2：docs/execution/evidence/phase2/checks/web-product.log
+  - 实现：`web/src/pages/Scenarios.tsx`
+- [x] **P2-092** 运行台显示当前参与者、计划进度、操作状态、资源使用、探针和恢复事件，暂停/继续/取消有明确反馈。
+  - 证据：运行台：当前参与者、计划进度、环境操作、资源使用、探针与恢复事件（RecoveryLog）；暂停 / 继续 / 取消（可填原因）有明确反馈（ControlBanner）；验收 `make phase2-check` @ 4e1f959e81f2：docs/execution/evidence/phase2/checks/web-product.log、docs/execution/evidence/phase2/checks/multi-actor-platform-recovery.log
+  - 实现：`web/src/components/RunKernel.tsx`、`web/src/pages/RunConsole.tsx`
+- [x] **P2-093** 证据页实现图、事件、计划、模型版本与业务指标相互定位；历史运行按当时 schema 展示。
+  - 证据：证据页：图、事件、计划、模型版本与业务指标互相定位（Navigator）；历史运行按写入时的契约版本展示（schema 提示）；验收 `make phase2-check` @ 4e1f959e81f2：docs/execution/evidence/phase2/checks/web-product.log、docs/execution/evidence/phase2/checks/api-cli-sdk-old-bundles.log
+  - 实现：`web/src/pages/Evidence.tsx`
+- [x] **P2-094** 基准页支持配置筛选、配对样本数、失败/未知分布、成本与任务效果同时比较，并导出当前视图的数据依据。
+  - 证据：基准页 v2：配置筛选、配对样本数、失败 / 未知分布、成本与任务效果同表比较，导出当前视图的数据依据（CSV / JSON）；验收 `make phase2-check` @ 4e1f959e81f2：docs/execution/evidence/phase2/checks/web-product.log
+  - 实现：`web/src/components/MatrixV2.tsx`、`web/src/pages/Benchmarks.tsx`
+- [x] **P2-095** 将 web/src/main.tsx 的页面静态导入改为路由分块；大事件列表按实际记录规模采用分页或虚拟列表。
+  - 证据：路由级 React.lazy 分块；大事件列表用 VirtualTable（docs/execution/evidence/phase2/web/measurements.json：首屏体积下降，3207 事件轨迹只渲染可见行）；验收 `make phase2-check` @ 4e1f959e81f2：docs/execution/evidence/phase2/checks/web-product.log
+  - 实现：`web/src/main.tsx`、`web/src/ui.tsx`
+- [x] **P2-096** 测量首屏产物体积与大轨迹交互响应；为 UI 空态、等待、失败、重连和窄屏保存真实截图。
+  - 证据：测量首屏产物体积与大轨迹交互（docs/execution/evidence/phase2/web/measurements.json）；空态、等待、失败、重连、窄屏真实截图（docs/execution/evidence/phase2/ui/p2-*.jpg）；验收 `make phase2-check` @ 4e1f959e81f2：docs/execution/evidence/phase2/checks/web-product.log
+  - 实现：`tests/integration/test_web_product.py`
+- [x] **P2-097** 为新增操作补齐 fal 命令与 Python SDK，并从公共客户端完成与 Web 等价的纵向路径。
+  - 证据：新增操作的 fal 命令与 SDK 方法；test_public_client_covers_the_product_path 只用公共客户端完成与 Web 等价的纵向路径；验收 `make phase2-check` @ 4e1f959e81f2：docs/execution/evidence/phase2/checks/sdk-vertical.log
+  - 实现：`packages/sdk/src/formal_lab_sdk/client.py`、`packages/sdk/src/formal_lab_sdk/cli.py`、`tests/integration/test_sdk_vertical.py`
+- [x] **P2-098** 用户配置通过 schema 表单创建和保存，错误定位到字段，示例参数可直接启动实际实验。
+  - 证据：SchemaForm 由插件配置 schema 生成表单，服务端字段错误定位到字段（fieldErrorsAt），“填入示例”参数直接启动实际实验；验收 `make phase2-check` @ 4e1f959e81f2：docs/execution/evidence/phase2/checks/web-product.log
+  - 实现：`web/src/ui.tsx`、`web/src/pages/Strategies.tsx`
+- [x] **P2-099** 完成一次从“新项目”到“两个参与者的成本对比及离线回放”的完整产品验收。
+  - 证据：完整产品验收：新项目 → 模型 → 策略配置 → 两参与者场景 → 运行 → v2 成本对比 → 证据导航 → 空目录离线回放（docs/execution/evidence/phase2/web/product-acceptance.log，截图 docs/execution/evidence/phase2/ui/p2-*.jpg）；验收 `make phase2-check` @ 4e1f959e81f2：docs/execution/evidence/phase2/checks/web-product.log
+  - 实现：`tests/integration/test_web_product.py`
 
 ## 11. 本地运行、发行与性能
 
 复用 [Docker Compose](https://github.com/docker/compose)、现有 Helm Chart、[kind](https://github.com/kubernetes-sigs/kind)。镜像可通过 [Buildx OCI exporter](https://docs.docker.com/build/exporters/oci-docker/) 输出到本地文件；本地构建与远程 registry 发布是独立事项。
 
-- [ ] **P2-100** 提供 local-lite、local-services、local-kind 三个明确 profile，并统一由 doctor 报告可用性、预计资源和端口冲突。
-- [ ] **P2-101** local-lite 使用已有纯数据样例；local-services 验收平台及订单服务；local-kind 用于 Chart 安装/升级/回滚测试。
-- [ ] **P2-102** 先读取实际 VM 资源，再设置实验和求解并发；保存 1 并发基线与资源许可下的 2 并发测量，明确峰值内存、耗时和失败原因。
-- [ ] **P2-103** 扩展现有 Compose 冒烟测试，重型运行串行安排；确保清理本次临时项目后再开启下一套完整栈。
-- [ ] **P2-104** 对已有 kind 安装脚本增加本地升级/回滚检查，选择已支持的前后版本并验证数据库迁移兼容性；结果明确限于单节点开发集群。
-- [ ] **P2-105** 构建本机原生 arm64 wheel/Web/镜像，保存来源版本和摘要；amd64 本地构建采用可用 builder，分别报告构建、仿真运行和原生运行状态。
-- [ ] **P2-106** 离线包将 api/worker 等镜像合并导出或采用可验证的内容寻址去重；比较包体积并验证 docker load 与实际安装。
-- [ ] **P2-107** 为所发布 OS/架构收集兼容 wheels 和镜像；在空目录完成无包仓库下载的安装与规则/符号演示，模型 API 前提单独列明。
-- [ ] **P2-108** 提供本地数据备份/恢复、升级、卸载、重置和磁盘整理文档；备份恢复用一次实际实验验证。
-- [ ] **P2-109** 生成发行 manifest、依赖与许可证清单、真实资源读数和本地使用指南；后续部署事项登记触发条件和依赖。
+- [x] **P2-100** 提供 local-lite、local-services、local-kind 三个明确 profile，并统一由 doctor 报告可用性、预计资源和端口冲突。
+  - 证据：三个 profile 由 make doctor 统一报告可用性、预计资源与端口冲突（docs/execution/evidence/phase2/doctor.json）；验收 `make phase2-check` @ 4e1f959e81f2：docs/execution/evidence/phase2/checks/doctor.log
+  - 实现：`scripts/doctor.py`、`docs/local-development.md`
+- [x] **P2-101** local-lite 使用已有纯数据样例；local-services 验收平台及订单服务；local-kind 用于 Chart 安装/升级/回滚测试。
+  - 证据：local-lite 用纯数据样例（make demo、本地运行器）；local-services 验收平台与订单服务（compose-smoke、orders-*）；local-kind 只做 Chart 安装 / 升级 / 回滚；验收 `make phase2-check` @ 4e1f959e81f2：docs/execution/evidence/phase2/checks/doctor.log、docs/execution/evidence/phase2/checks/compose-smoke.log、docs/execution/evidence/phase2/checks/kind-install-upgrade.log
+  - 实现：`scripts/doctor.py`、`scripts/compose-smoke.sh`、`scripts/helm-install-check.sh`、`scripts/helm-upgrade-check.sh`
+- [x] **P2-102** 先读取实际 VM 资源，再设置实验和求解并发；保存 1 并发基线与资源许可下的 2 并发测量，明确峰值内存、耗时和失败原因。
+  - 证据：先读 VM 实际资源，再按 min(2, CPU, (可用内存−1 GiB)÷单次峰值) 设并发；1 并发基线与 2 并发测量含峰值内存、耗时与失败原因（docs/execution/evidence/phase2/concurrency.json）；验收 `make phase2-check` @ 4e1f959e81f2：docs/execution/evidence/phase2/checks/concurrency.log
+  - 实现：`scripts/concurrency_bench.py`
+- [x] **P2-103** 扩展现有 Compose 冒烟测试，重型运行串行安排；确保清理本次临时项目后再开启下一套完整栈。
+  - 证据：Compose 冒烟扩展到订单服务运行（正常 + 延迟，操作已对账）、两参与者运行与 v2 矩阵（max_parallel 1，串行）；清理本次项目后再启动下一套栈；磁盘余量检查（docs/execution/evidence/phase2/compose-smoke.json）；验收 `make phase2-check` @ 4e1f959e81f2：docs/execution/evidence/phase2/checks/compose-smoke.log
+  - 实现：`scripts/compose-smoke.sh`、`scripts/disk_guard.py`
+- [x] **P2-104** 对已有 kind 安装脚本增加本地升级/回滚检查，选择已支持的前后版本并验证数据库迁移兼容性；结果明确限于单节点开发集群。
+  - 证据：kind 单节点：阶段一 Chart 0.1.0（迁移 0001）→ 升级到 0.2.0（0002，旧运行可读、新实验成功）→ 回滚（阶段一应用在 0002 上服务并运行）；回滚限制写入证据；结果仅限单节点开发集群（docs/execution/evidence/helm/upgrade.json）；验收 `make phase2-check` @ 4e1f959e81f2：docs/execution/evidence/phase2/checks/kind-install-upgrade.log
+  - 实现：`scripts/helm-upgrade-check.sh`、`scripts/helm_upgrade_probe.py`、`scripts/kind-load-public.sh`
+- [x] **P2-105** 构建本机原生 arm64 wheel/Web/镜像，保存来源版本和摘要；amd64 本地构建采用可用 builder，分别报告构建、仿真运行和原生运行状态。
+  - 证据：原生 arm64 wheel / Web / 镜像及来源修订与摘要；amd64 用可用 builder 构建并分别报告构建、仿真运行与原生运行（docs/execution/evidence/phase2/release-manifest.json）；验收 `make phase2-check` @ 4e1f959e81f2：docs/execution/evidence/phase2/checks/release-manifest.log
+  - 实现：`scripts/release.py`
+- [x] **P2-106** 离线包将 api/worker 等镜像合并导出或采用可验证的内容寻址去重；比较包体积并验证 docker load 与实际安装。
+  - 证据：离线包把 api / worker / web / orders 合并为一次 docker save（共享层只存一份），比较合并前后体积，并验证 docker load 与实际安装（docs/execution/evidence/phase2/offline-manifest.json）；验收 `make phase2-check` @ 4e1f959e81f2：docs/execution/evidence/phase2/checks/offline-install.log
+  - 实现：`scripts/offline_bundle.py`
+- [x] **P2-107** 为所发布 OS/架构收集兼容 wheels 和镜像；在空目录完成无包仓库下载的安装与规则/符号演示，模型 API 前提单独列明。
+  - 证据：为 linux/arm64 收集 wheels 与镜像；空目录、无包仓库完成安装与规则 / 符号演示，模型 API 前提单独列明（docs/execution/evidence/phase2/offline-manifest.json）；验收 `make phase2-check` @ 4e1f959e81f2：docs/execution/evidence/phase2/checks/offline-install.log
+  - 实现：`scripts/offline_bundle.py`
+- [x] **P2-108** 提供本地数据备份/恢复、升级、卸载、重置和磁盘整理文档；备份恢复用一次实际实验验证。
+  - 证据：docs/local-development.md 备份 / 恢复 / 升级 / 卸载 / 重置 / 磁盘整理；备份→重置→恢复用一次实际实验验证，回放包内容逐文件一致（docs/execution/evidence/phase2/backup-restore.json）；验收 `make phase2-check` @ 4e1f959e81f2：docs/execution/evidence/phase2/checks/backup-restore.log
+  - 实现：`scripts/local_data.py`、`scripts/backup_restore_check.py`、`docs/local-development.md`
+- [x] **P2-109** 生成发行 manifest、依赖与许可证清单、真实资源读数和本地使用指南；后续部署事项登记触发条件和依赖。
+  - 证据：发行 manifest（docs/execution/evidence/phase2/release-manifest.json）、依赖与许可证清单（docs/licenses.md）、真实资源读数（doctor / concurrency）、本地使用指南（docs/local-development.md）；后续部署事项登记触发条件与依赖（manifest follow_up_deployment、docs/handoff/phase2.deferred.json）；验收 `make phase2-check` @ 4e1f959e81f2：docs/execution/evidence/phase2/checks/release-manifest.log、docs/execution/evidence/phase2/checks/doctor.log
+  - 实现：`scripts/release.py`、`docs/handoff/phase2.deferred.json`
 
 ## 12. 深化轨道：有限概率模型
 
@@ -346,23 +420,40 @@
 
 来源：[prismmodelchecker/prism-games](https://github.com/prismmodelchecker/prism-games)、[官方能力说明与论文入口](https://www.prismmodelchecker.org/games/)。采用有限、轮流行动、完全观测的小型资源分配模型；具体性质取决于已验证的后端支持。
 
-- [ ] **P2-X01** 固定实际版本、许可与 arm64/amd64 运行方式；给独立模型载荷和 profile，声明随机转移及观测假设。
-- [ ] **P2-X02** 通过独立适配器调用 PRISM-games，完成一个公开小例或资源分配例的概率查询，保存原始模型、性质、结果与求解日志。
-- [ ] **P2-X03** 若后端支持相应性质的策略导出，展示策略并验证模型内结果；状态规模、误差和支持范围进入能力表。
-- [ ] **P2-X04** 将数值结果接入类型化扩展与 UI；概率结论与确定性 Z3 结论分别呈现，记录实际分发许可安排。
+- [x] **P2-X01** 固定实际版本、许可与 arm64/amd64 运行方式；给独立模型载荷和 profile，声明随机转移及观测假设。
+  - 证据：SELECTED：固定 PRISM-games 3.2.4（linux64-arm 官方二进制 sha256 366f5fed…，GPL-2.0）+ Temurin JRE 21；x86_64 用同一发行的 linux64-x86 包（未在本环境运行）；独立载荷 org.formal-lab.prism-games/allocation-game@1 与 profile prism_smg_turn_based_v1，声明随机转移只在加工步、双方完全观测、轮流行动（docs/architecture/probabilistic-extension.md，决策 D-023）；验收 `make phase2-check` @ 4e1f959e81f2：docs/execution/evidence/phase2/checks/prism-games.log
+  - 实现：`packages/solver-adapters/prism-games/src/formal_lab_solver_prism/game.py`、`packages/solver-adapters/prism-games/src/formal_lab_solver_prism/adapter.py`
+- [x] **P2-X02** 通过独立适配器调用 PRISM-games，完成一个公开小例或资源分配例的概率查询，保存原始模型、性质、结果与求解日志。
+  - 证据：独立适配器以子进程调用 PRISM-games，完成资源分配博弈的鲁棒与合作概率查询；原始模型、性质、两次调用日志、结果保存在 docs/execution/evidence/phase2/prism-games/；验收 `make phase2-check` @ 4e1f959e81f2：docs/execution/evidence/phase2/checks/prism-games.log
+  - 实现：`packages/solver-adapters/prism-games/src/formal_lab_solver_prism/adapter.py`、`scripts/prism_games_check.py`
+- [x] **P2-X03** 若后端支持相应性质的策略导出，展示策略并验证模型内结果；状态规模、误差和支持范围进入能力表。
+  - 证据：后端支持 -exportstrat：导出调度方策略并在模型内核对（独立求解器评估该策略在最坏环境下的值 = 报告值，状态数与参照图一致 91 / 1101）；状态规模、误差（最大差 1.1e-16，容差 1e-6）与支持范围进入能力表 docs/architecture/probabilistic-extension.md；验收 `make phase2-check` @ 4e1f959e81f2：docs/execution/evidence/phase2/checks/prism-games.log
+  - 实现：`packages/solver-adapters/prism-games/src/formal_lab_solver_prism/game.py`、`scripts/prism_games_check.py`
+- [x] **P2-X04** 将数值结果接入类型化扩展与 UI；概率结论与确定性 Z3 结论分别呈现，记录实际分发许可安排。
+  - 证据：数值结果为类型化扩展 org.formal-lab.prism-games/result@1，平台以 PROBABILISTIC 检查单独存取与列出（不混入 Z3 列表）；Web 模型工作台“概率扩展”页与 Z3 确定性结论分开呈现（docs/execution/evidence/phase2/prism-games/workbench-probabilistic.jpg）；分发安排：不随平台分发，用户本地安装、独立进程调用（架构测试守护）；验收 `make phase2-check` @ 4e1f959e81f2：docs/execution/evidence/phase2/checks/prism-games.log
+  - 实现：`packages/platform-api/src/formal_lab_api/services/probabilistic.py`、`web/src/components/ProbabilisticPanel.tsx`、`tests/integration/test_probabilistic_platform.py`
 
 ## 13. 阶段二验收
 
 交付 **make phase2-check**。这是本地验收入口，不以远程 CI 或 registry 发布为通过条件。沿用阶段一有意义的测试，扩展关键行为测试。
 
-- [ ] **P2-110** 兼容性：旧模型、v1 合同样例、单参与者调度、API/CLI/SDK 与旧回放读取通过。
-- [ ] **P2-111** 引擎：第二语义驱动、成本优化、未知补全、见证重放和缓存边界通过。
-- [ ] **P2-112** 多参与者：两种确定性策略完成轮次运行；中断恢复后的任务进度、结果和计数正确。
-- [ ] **P2-113** 服务环境：空环境创建、业务动作、独立探针、响应丢失协调、重复提交、重置与清理均有真实记录。
-- [ ] **P2-114** 产品：Web 创建和运行多参与者场景，CLI 导出，SDK 读取，空目录离线回放通过。
-- [ ] **P2-115** 评测：配对矩阵及消融产生包含失败、未知、样本、成本和业务效果的实际报告。
-- [ ] **P2-116** 发行：原生本地 Compose、离线安装、kind 适用检查与资源测量有证据；模型实测和异架构状态独立列出。
-- [ ] **P2-117** 验收报告逐项绑定 checked_commit、工作区摘要、profile、命令、退出码、时间、日志和产物；跨修订继承的旧 PASS 仅作历史证据。
+- [x] **P2-110** 兼容性：旧模型、v1 合同样例、单参与者调度、API/CLI/SDK 与旧回放读取通过。
+  - 证据：compatibility 组全部 PASS；验收 `make phase2-check` @ 4e1f959e81f2：docs/execution/evidence/phase2/checks/contracts-v1-v2.log、docs/execution/evidence/phase2/checks/phase1-parity.log、docs/execution/evidence/phase2/checks/unit-all.log、docs/execution/evidence/phase2/checks/api-cli-sdk-old-bundles.log
+- [x] **P2-111** 引擎：第二语义驱动、成本优化、未知补全、见证重放和缓存边界通过。
+  - 证据：semantic-driver 与 planning-objectives 组全部 PASS；验收 `make phase2-check` @ 4e1f959e81f2：docs/execution/evidence/phase2/checks/driver-and-second-profile.log、docs/execution/evidence/phase2/checks/second-profile-platform.log、docs/execution/evidence/phase2/checks/objectives-unknowns-cache.log
+- [x] **P2-112** 多参与者：两种确定性策略完成轮次运行；中断恢复后的任务进度、结果和计数正确。
+  - 证据：multi-actor-recovery 组全部 PASS；验收 `make phase2-check` @ 4e1f959e81f2：docs/execution/evidence/phase2/checks/task-plans-and-turns.log、docs/execution/evidence/phase2/checks/multi-actor-platform-recovery.log
+- [x] **P2-113** 服务环境：空环境创建、业务动作、独立探针、响应丢失协调、重复提交、重置与清理均有真实记录。
+  - 证据：service-operations 组全部 PASS；验收 `make phase2-check` @ 4e1f959e81f2：docs/execution/evidence/phase2/checks/order-service.log、docs/execution/evidence/phase2/checks/order-service-platform.log、docs/execution/evidence/phase2/checks/order-service-e2e.log
+- [x] **P2-114** 产品：Web 创建和运行多参与者场景，CLI 导出，SDK 读取，空目录离线回放通过。
+  - 证据：product-path 组全部 PASS；验收 `make phase2-check` @ 4e1f959e81f2：docs/execution/evidence/phase2/checks/web-product.log、docs/execution/evidence/phase2/checks/sdk-vertical.log
+- [x] **P2-115** 评测：配对矩阵及消融产生包含失败、未知、样本、成本和业务效果的实际报告。
+  - 证据：evaluation-replay 组全部 PASS；验收 `make phase2-check` @ 4e1f959e81f2：docs/execution/evidence/phase2/checks/reports-offline.log、docs/execution/evidence/phase2/checks/matrix-v2-platform.log
+- [x] **P2-116** 发行：原生本地 Compose、离线安装、kind 适用检查与资源测量有证据；模型实测和异架构状态独立列出。
+  - 证据：local-release 与 resource-profile 组全部 PASS；模型实测（条件检查 model-real）与异架构状态（release manifest architectures.other）独立列出；验收 `make phase2-check` @ 4e1f959e81f2：docs/execution/evidence/phase2/checks/compose-smoke.log、docs/execution/evidence/phase2/checks/orders-compose.log、docs/execution/evidence/phase2/checks/offline-install.log、docs/execution/evidence/phase2/checks/release-manifest.log、docs/execution/evidence/phase2/checks/kind-install-upgrade.log、docs/execution/evidence/phase2/checks/backup-restore.log、docs/execution/evidence/phase2/checks/doctor.log、docs/execution/evidence/phase2/checks/concurrency.log
+- [x] **P2-117** 验收报告逐项绑定 checked_commit、工作区摘要、profile、命令、退出码、时间、日志和产物；跨修订继承的旧 PASS 仅作历史证据。
+  - 证据：docs/handoff/phase2-checks.json 每项绑定 checked_commit、工作区摘要、profile、命令、退出码、开始 / 结束时间、耗时、日志与产物；其它提交或工作区上的结果标记 inherited，只作历史证据，不计入组 PASS；验收 `make phase2-check` @ 4e1f959e81f2
+  - 实现：`scripts/phase2_check.py`
 
 建议至少包含以下 machine-readable 检查组：
 
@@ -383,14 +474,30 @@
 
 阶段二完成标准是本地必做能力均有证据。深化轨道、真实模型前提和后续部署状态独立记录，不混入已完成能力。
 
-- [ ] **P2-120** 生成 docs/handoff/phase2.md：新增能力、实际命令、目录地图、兼容决策、已知问题与接续入口。
-- [ ] **P2-121** 生成 docs/handoff/phase2.manifest.json 和 phase2-checks.json，沿用 phase-handoff/v1；phase=2，completion_scope=local-platform。保留 contract_version、contract_digest、checks 等原有必填字段，多版本与检查分类以新增字段表达。
-- [ ] **P2-122** manifest 的 status 使用 complete 或 blocked，并列出 mandatory_checks、conditional_checks、extension_checks、deferred_work；全部必做 PASS 才为 complete。
-- [ ] **P2-123** 将 SemanticDriver、TurnScheduler、PlannerCheckpoint、EnvironmentSession、ExecutionStage、ProbeResult、ModelReleaseRecord 的实际类型、版本、路径及例子写入交接。
-- [ ] **P2-124** 交付 examples/external-plugin 的增强版或第二个包外样例，证明新扩展通过公共接口接入。
-- [ ] **P2-125** 更新 docs/reuse-ledger.md，逐项记录上游 URL、固定版本、许可、实际调用位置、修改与证据。
-- [ ] **P2-126** 提供 docs/acceptance-phase2.md 与 docs/local-development.md，写清真实安装、启动、测试、恢复、清理和结果解释方法。
-- [ ] **P2-127** 总结必做完成情况、条件项、剩余问题及发行产物位置，以实际验收和交接文件结束本阶段。
+- [x] **P2-120** 生成 docs/handoff/phase2.md：新增能力、实际命令、目录地图、兼容决策、已知问题与接续入口。
+  - 证据：docs/handoff/phase2.md：新增能力与入口、实际命令、验收表（生成）、内核类型表（生成）、目录地图、兼容决策、已知问题 / 条件项 / 后续事项与发行产物位置、阶段三接续入口
+  - 实现：`docs/handoff/phase2.md`、`scripts/handoff_phase2.py`
+- [x] **P2-121** 生成 docs/handoff/phase2.manifest.json 和 phase2-checks.json，沿用 phase-handoff/v1；phase=2，completion_scope=local-platform。保留 contract_version、contract_digest、checks 等原有必填字段，多版本与检查分类以新增字段表达。
+  - 证据：docs/handoff/phase2.manifest.json（handoff_version phase-handoff/v1，phase 2，completion_scope local-platform；保留 contract_version / contract_digest / checks 等原有字段，多版本以 contract_versions / contract_digests 表达，检查分类为 mandatory_checks / conditional_checks / extension_checks / check_groups）与 docs/handoff/phase2-checks.json（make phase2-check @ 4e1f959e81f2）；均由 scripts/handoff_phase2.py、scripts/phase2_check.py 从仓库与实际结果生成
+  - 实现：`docs/handoff/phase2.manifest.json`、`docs/handoff/phase2-checks.json`、`scripts/handoff_phase2.py`
+- [x] **P2-122** manifest 的 status 使用 complete 或 blocked，并列出 mandatory_checks、conditional_checks、extension_checks、deferred_work；全部必做 PASS 才为 complete。
+  - 证据：status = complete：10 个必做检查组在 4e1f959e81f2（工作区干净）上全部 PASS、无继承结果、全部必做任务已勾选；manifest 列出 mandatory_checks、conditional_checks（model-real PASS）、extension_checks（prism-games PASS）、deferred_work（触发条件与依赖）、known_issues 与 post_acceptance_changes
+  - 实现：`docs/handoff/phase2.manifest.json`
+- [x] **P2-123** 将 SemanticDriver、TurnScheduler、PlannerCheckpoint、EnvironmentSession、ExecutionStage、ProbeResult、ModelReleaseRecord 的实际类型、版本、路径及例子写入交接。
+  - 证据：manifest types 与 phase2.md 第 4 节：SemanticDriver、TurnScheduler、PlannerCheckpoint、EnvironmentSession、ExecutionStage、ProbeResult、ModelReleaseRecord 的种类、定义文件与行号、契约版本 v2、JSON Schema、例子样例与实现（导入代码生成，非手写）
+  - 实现：`scripts/handoff_phase2.py`、`docs/handoff/phase2.md`
+- [x] **P2-124** 交付 examples/external-plugin 的增强版或第二个包外样例，证明新扩展通过公共接口接入。
+  - 证据：examples/external-plugin 0.2.0：新增 org.example.checklist-planner（版本化 TaskPlan + PlannerCheckpoint，只用 formal_lab_sdk.plugins 的公共接口，SDK 同时导出 CheckpointingPlanner / SessionEnvironment / Probe / SemanticDriver / TurnScheduler 等阶段二接口）；插件合同工具全部阶段通过、恢复后检查点逐一相同（examples/external-plugin/tests/test_contract.py）；经平台 Worker 运行、计划版本与检查点入库（test_external_plugin_registered_through_public_interfaces）；验收 make phase2-check @ 4e1f959e81f2：docs/execution/evidence/phase2/checks/driver-and-second-profile.log、docs/execution/evidence/phase2/checks/api-cli-sdk-old-bundles.log
+  - 实现：`examples/external-plugin/src/fal_example_external_plugin/checklist.py`、`packages/sdk/src/formal_lab_sdk/plugins.py`、`examples/external-plugin/tests/test_contract.py`
+- [x] **P2-125** 更新 docs/reuse-ledger.md，逐项记录上游 URL、固定版本、许可、实际调用位置、修改与证据。
+  - 证据：docs/reuse-ledger.md 新增“2a. 阶段二新增与变化”：Z3（成本优化 / 鲁棒序列的实际调用、D-017）、Temporal（MatrixWorkflow）、FastAPI / Uvicorn / SQLite（订单服务）、PRISM-games 3.2.4 与 Temurin JRE（URL、版本与 sha256、GPL-2.0、不分发、调用命令、证据）、kind / Helm / React lazy；逐包许可证清单 docs/licenses.md（scripts/license_inventory.py，发行 manifest 引用）
+  - 实现：`docs/reuse-ledger.md`、`docs/licenses.md`
+- [x] **P2-126** 提供 docs/acceptance-phase2.md 与 docs/local-development.md，写清真实安装、启动、测试、恢复、清理和结果解释方法。
+  - 证据：docs/acceptance-phase2.md（前提、检查组、结果与历史继承的读法、主要证据解读、失败时重跑）与 docs/local-development.md（三个 profile、启动、测试、中断与恢复、备份 / 恢复 / 重置、升级 / 回滚 / 卸载、磁盘余量与共享虚拟机整理、网络代理、结果解释、可选 PRISM-games 安装）；均按本环境实际执行的命令编写
+  - 实现：`docs/acceptance-phase2.md`、`docs/local-development.md`
+- [x] **P2-127** 总结必做完成情况、条件项、剩余问题及发行产物位置，以实际验收和交接文件结束本阶段。
+  - 证据：阶段二以实际验收结束：make phase2-check @ 4e1f959e81f2 全部 28 项 PASS（10 个必做组、条件项 model-real、扩展项 prism-games）；交接 docs/handoff/phase2.md 与 phase2.manifest.json（status complete）；剩余问题与后续事项见 manifest known_issues / deferred_work；发行产物 out/release/、out/offline/（清单副本 docs/execution/evidence/phase2/release-manifest.json、offline-manifest.json）
+  - 实现：`docs/handoff/phase2.md`、`docs/handoff/phase2.manifest.json`
 
 ### 14.1 交接必填字段
 

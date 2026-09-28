@@ -1,6 +1,6 @@
 {
   "format": "formal-agent-lab/doctor@1",
-  "captured_at": "2026-09-27T03:25:35Z",
+  "captured_at": "2026-09-28T16:07:28Z",
   "hostname": "colima",
   "os": {
     "system": "Linux",
@@ -10,37 +10,37 @@
     "distribution": "Ubuntu 24.04.4 LTS",
     "virtualization": "apple",
     "rosetta_binfmt": true,
-    "qemu_x86_64_binfmt": false
+    "qemu_x86_64_binfmt": true
   },
   "cpu_memory": {
     "cpus_online": 4,
     "cgroup_cpu_quota": null,
     "cpus_usable": 4,
     "memory_total_mib": 5910,
-    "memory_available_mib": 4392,
+    "memory_available_mib": 4764,
     "cgroup_memory_limit_mib": null,
     "memory_usable_mib": 5910,
     "loadavg": [
-      0.28,
-      0.53,
-      0.37
+      1.55,
+      1.32,
+      1.19
     ]
   },
   "disk": {
     "repository": {
       "path": "/Users/null3351/Code/formal-agent-lab",
       "total_gib": 228.3,
-      "free_gib": 8.1
+      "free_gib": 10.5
     },
     "home": {
       "path": "/home/null3351.guest",
       "total_gib": 18.3,
-      "free_gib": 14.4
+      "free_gib": 13.6
     },
     "tmp": {
       "path": "/tmp",
       "total_gib": 18.3,
-      "free_gib": 14.4
+      "free_gib": 13.6
     }
   },
   "docker": {
@@ -54,32 +54,32 @@
     "root_disk": {
       "path": "/var/lib/docker",
       "total_gib": 29.4,
-      "free_gib": 22.2
+      "free_gib": 18.6
     },
     "cgroup_driver": "cgroupfs",
     "cgroup_version": "2",
     "containers_running": 3,
-    "images": 8,
+    "images": 25,
     "usage": [
       {
         "type": "Images",
-        "size": "5.74GB",
-        "reclaimable": "1.4GB (24%)"
+        "size": "8.827GB",
+        "reclaimable": "1.32GB (14%)"
       },
       {
         "type": "Containers",
-        "size": "213kB",
+        "size": "389.1kB",
         "reclaimable": "0B (0%)"
       },
       {
         "type": "Local Volumes",
-        "size": "221.4MB",
+        "size": "528.6MB",
         "reclaimable": "836.2kB (0%)"
       },
       {
         "type": "Build Cache",
-        "size": "2.469GB",
-        "reclaimable": "1.693GB"
+        "size": "4.378GB",
+        "reclaimable": "4.352GB"
       }
     ],
     "buildx": "github.com/docker/buildx v0.34.1 e0b0e77d18d3379bc1e0d55f3b37de288d36fe47"
@@ -153,21 +153,17 @@
       "8000": "platform API (dev)",
       "5173": "web dev server (dev)",
       "8080": "full Compose stack web (local-services, compose profile)",
-      "8090": "local order service (local-services)"
+      "8765": "local order service (make orders-up; local-lite and local-services)"
     },
     "owners": {
-      "5173": "project:web (scripts/dev.sh)",
       "5432": "project:fal-dev-postgres-1",
       "7233": "project:fal-dev-temporal-1",
-      "8000": "project:api (scripts/dev.sh)",
       "8233": "project:fal-dev-temporal-1",
       "8333": "project:fal-dev-s3-1"
     },
     "in_use": [
-      5173,
       5432,
       7233,
-      8000,
       8233,
       8333
     ]
@@ -184,21 +180,36 @@
       "fal-dev_temporaldata"
     ],
     "images": [
-      "formal-agent-lab/api:f3afa5cb2080",
+      "formal-agent-lab/api:0.2.0",
+      "formal-agent-lab/api:4e1f959e81f2",
+      "formal-agent-lab/api:eed829ae5cf7",
       "formal-agent-lab/api:local",
-      "formal-agent-lab/web:f3afa5cb2080",
+      "formal-agent-lab/orders:0.2.0",
+      "formal-agent-lab/orders:4e1f959e81f2",
+      "formal-agent-lab/orders:eed829ae5cf7",
+      "formal-agent-lab/orders:local",
+      "formal-agent-lab/web:0.2.0",
+      "formal-agent-lab/web:4e1f959e81f2",
+      "formal-agent-lab/web:eed829ae5cf7",
       "formal-agent-lab/web:local",
-      "formal-agent-lab/worker:f3afa5cb2080",
+      "formal-agent-lab/worker:0.2.0",
+      "formal-agent-lab/worker:4e1f959e81f2",
+      "formal-agent-lab/worker:eed829ae5cf7",
       "formal-agent-lab/worker:local"
     ],
     "kind_clusters": []
+  },
+  "network": {
+    "proxy": "http://192.168.5.2:7897",
+    "no_proxy": "127.0.0.1,localhost,::1,127.0.0.1,localhost,::1,127.0.0.1,localhost,::1,127.0.0.1,localhost,::1,127.0.0.1,localhost,::1,127.0.0.1,localhost,::1",
+    "loopback_excluded": true
   },
   "services": {
     "postgres": true,
     "temporal": true,
     "s3": true,
-    "api": true,
-    "web_dev": true,
+    "api": false,
+    "web_dev": false,
     "compose_web": false,
     "order_service": false
   },
@@ -234,7 +245,7 @@
         8333,
         8000,
         5173,
-        8090
+        8765
       ]
     },
     "local-kind": {
@@ -259,8 +270,8 @@
     "basis": "4 usable CPU(s), 5910 MiB usable memory"
   },
   "repository": {
-    "revision": "46400ad8d3c882bcf62dc9fffded3152fc5c35b0",
-    "dirty_files": 6
+    "revision": "4e1f959e81f282fd0b3d05103b5734437d357644",
+    "dirty_files": 49
   },
-  "duration_s": 1.24
+  "duration_s": 3.37
 }

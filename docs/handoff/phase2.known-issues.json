@@ -1,5 +1,15 @@
 [
   {
+    "issue": "in the full `make phase2-check` run on 4e1f959 two checks failed first: matrix-v2-platform (the test created a matrix identical to one from an earlier session on the kept integration database, so all 12 cells were reused instead of queued) and the upgrade half of kind-install-upgrade (the disk guard refused it: 7.3 GiB free on the host, 10 GiB required; the install half had passed)",
+    "impact": "both re-run with --only on the same commit and worktree digest after resetting the integration database and clearing this project's build cache: PASS (the table shows the re-run results; their logs replaced the first ones). The test was then made independent of the database state (post_acceptance_changes)",
+    "reproduce": "var/log/phase2-check.out (full run) and var/log/phase2-check-rerun.out (not committed); docs/execution/evidence/phase2/checks/matrix-v2-repeatability.log"
+  },
+  {
+    "issue": "the concurrency measurement inside the acceptance run shows almost no gain from a second worker (8 runs: 94.9 s at concurrency 1, 91.2 s at 2), while the same benchmark on the idle VM earlier the same day gave 57.6 s and 31.8 s",
+    "impact": "the numbers depend on what else the host is doing; the recorded evidence (docs/execution/evidence/phase2/concurrency.json) is the in-run measurement. The allowed concurrency (2) is derived from resources, not from the speed-up",
+    "reproduce": "uv run --frozen python scripts/concurrency_bench.py on an otherwise idle VM"
+  },
+  {
     "issue": "the phase-1 EDD rule strategy under state delay still reaches the goal in 4/5 seeds (seed 5 exhausts the step budget after 37 rejected assignments)",
     "impact": "strategy behaviour kept as the baseline; the task planners (task-rule / task-symbolic) reach the goal 5/5 without rejections",
     "reproduce": "uv run --frozen python scripts/state_delay_report.py   # docs/execution/evidence/phase2/state-delay/report.md"

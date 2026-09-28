@@ -1,0 +1,119 @@
+$ make contracts-check && uv run --frozen pytest -p no:cacheprovider -q tests/contracts && pnpm --filter @formal-lab/contracts run test
+# started 2026-09-28T14:56:54Z at 4e1f959e81f282fd0b3d05103b5734437d357644 (tree e3b0c44298fc, profile local-lite)
+
+make[1]: Entering directory '/Users/null3351/Code/formal-agent-lab'
+uv run --frozen python -m formal_lab_contracts.schema_export --out contracts/v2 --v1-out contracts/v1
+formal-lab-contracts/v1 digest sha256:0cbd6256c21eead867cdd3bcf8ea7f1011207d4dacd6d09996b543575e21312b (28 files, frozen)
+formal-lab-contracts/v2 digest sha256:bc24e5e96b69b9b6c85fa610ba7e21737a11d60ffb94b7b6095de2988f20bdbf (54 files)
+pnpm --filter @formal-lab/contracts run generate
+$ node scripts/generate.mjs
+generated TypeScript for formal-lab-contracts/v2 (bc24e5e96b69) and v1 (0cbd6256c21e)
+uv run --frozen python -m formal_lab_contracts.docs --out docs/contracts/v2.md --v1-out docs/contracts/v1.md
+wrote docs/contracts/v2.md
+wrote docs/contracts/v1.md
+git diff --exit-code -- contracts packages/contracts-ts/src docs/contracts
+test -z "$(git status --porcelain --untracked-files=all -- contracts packages/contracts-ts/src docs/contracts)"
+make[1]: Leaving directory '/Users/null3351/Code/formal-agent-lab'
+........................................................................ [ 56%]
+.......................................................                  [100%]
+127 passed in 2.32s
+$ tsc --noEmit -p tsconfig.json && node --test test/*.test.mjs
+✔ v1 valid fixture ActionOutcome accepted (72.494721ms)
+✔ v1 valid fixture ActionProposal accepted (1.727018ms)
+✔ v1 valid fixture ActionSpec accepted (3.1229ms)
+✔ v1 valid fixture ArtifactRef accepted (0.870634ms)
+✔ v1 valid fixture BoundedCheckResult accepted (5.355787ms)
+✔ v1 valid fixture BoundedCheckResult.unsupported accepted (0.088806ms)
+✔ v1 valid fixture MetricDefinition accepted (0.857883ms)
+✔ v1 valid fixture MetricResult accepted (1.566951ms)
+✔ v1 valid fixture MetricResult.missing accepted (0.073637ms)
+✔ v1 valid fixture ModelPackage accepted (4.234572ms)
+✔ v1 valid fixture Observation accepted (1.377464ms)
+✔ v1 valid fixture PluginDescriptor accepted (3.724784ms)
+✔ v1 valid fixture RunManifest accepted (27.735459ms)
+✔ v1 valid fixture ScenarioManifest accepted (17.801089ms)
+✔ v1 valid fixture TraceEvent accepted (9.173795ms)
+✔ v1 invalid fixture bad-contract-version rejected (contract_version is fixed) (1.041203ms)
+✔ v1 invalid fixture bad-digest rejected (digest must be 64 lowercase hex chars) (0.120102ms)
+✔ v1 invalid fixture bad-extension-namespace rejected (extension keys are reverse-DNS namespaces) (0.570171ms)
+✔ v1 invalid fixture bad-plugin-id rejected (plugin ids are lowercase dotted) (0.122019ms)
+✔ v1 invalid fixture bad-query-kind rejected (query kind is a closed enum) (0.162275ms)
+✔ v1 invalid fixture empty-int-range-missing-max rejected (int type needs min and max) (0.490535ms)
+✔ v1 invalid fixture metric-direction rejected (direction is a closed enum) (0.147106ms)
+✔ v1 invalid fixture negative-seq rejected (seq is >= 1) (0.076845ms)
+✔ v1 invalid fixture outcome-status-enum rejected (outcome status is a closed enum) (0.080804ms)
+✔ v1 invalid fixture unknown-core-field rejected (core objects reject unknown fields) (0.227993ms)
+✔ v1 invalid fixture unknown-expr-op rejected (expression ops are a closed set) (0.967608ms)
+✔ v2 valid fixture ActionOutcome.conflict accepted (109.160979ms)
+✔ v2 valid fixture ActionOutcome accepted (0.076179ms)
+✔ v2 valid fixture ActionProposal accepted (3.33435ms)
+✔ v2 valid fixture ActionSpec accepted (2.630282ms)
+✔ v2 valid fixture ArtifactRef accepted (0.691649ms)
+✔ v2 valid fixture AssumptionSet accepted (0.57163ms)
+✔ v2 valid fixture BeliefState accepted (1.673301ms)
+✔ v2 valid fixture BoundedCheckResult accepted (5.386583ms)
+✔ v2 valid fixture BoundedCheckResult.optimize accepted (0.165067ms)
+✔ v2 valid fixture BoundedCheckResult.robust accepted (0.055259ms)
+✔ v2 valid fixture BoundedCheckResult.unknown-precondition accepted (0.045882ms)
+✔ v2 valid fixture BoundedCheckResult.unsupported accepted (0.037215ms)
+✔ v2 valid fixture EnvironmentSession accepted (1.583078ms)
+✔ v2 valid fixture MatrixCellSpec accepted (1.167473ms)
+✔ v2 valid fixture MetricDefinition accepted (0.626138ms)
+✔ v2 valid fixture MetricResult accepted (1.453641ms)
+✔ v2 valid fixture MetricResult.missing accepted (0.044549ms)
+✔ v2 valid fixture ModelPackage accepted (4.496362ms)
+✔ v2 valid fixture ModelPackage.namespaced accepted (0.058509ms)
+✔ v2 valid fixture ModelReleaseRecord accepted (2.338195ms)
+✔ v2 valid fixture ObjectiveSpec accepted (0.65756ms)
+✔ v2 valid fixture Observation accepted (1.572035ms)
+✔ v2 valid fixture OperationRecord accepted (2.109202ms)
+✔ v2 valid fixture PlannerCheckpoint accepted (2.832522ms)
+✔ v2 valid fixture PluginDescriptor.driver accepted (2.380327ms)
+✔ v2 valid fixture PluginDescriptor accepted (0.031255ms)
+✔ v2 valid fixture PluginDescriptor.v1-plugin accepted (0.028921ms)
+✔ v2 valid fixture ProbeResult accepted (1.199644ms)
+✔ v2 valid fixture QueryBundle accepted (2.662871ms)
+✔ v2 valid fixture RegressionCase accepted (2.285521ms)
+✔ v2 valid fixture RuleDecision accepted (0.870218ms)
+✔ v2 valid fixture RuleEvaluation accepted (0.631972ms)
+✔ v2 valid fixture RuleSet accepted (1.286824ms)
+✔ v2 valid fixture RunManifest accepted (5.185095ms)
+✔ v2 valid fixture ScenarioManifest accepted (3.539923ms)
+✔ v2 valid fixture ScenarioManifest.v1-style accepted (0.131229ms)
+✔ v2 valid fixture StageRecord accepted (1.142093ms)
+✔ v2 valid fixture TaskPlan accepted (1.150761ms)
+✔ v2 valid fixture TerminationPolicy accepted (0.607136ms)
+✔ v2 valid fixture TraceEvent accepted (1.745853ms)
+✔ v2 valid fixture TurnPolicy accepted (0.811125ms)
+✔ v2 valid fixture TurnState accepted (0.910266ms)
+✔ v2 invalid fixture bad-contract-version rejected (v2 objects declare formal-lab-contracts/v2) (0.541084ms)
+✔ v2 invalid fixture bad-digest rejected (digest must be 64 lowercase hex chars) (0.052342ms)
+✔ v2 invalid fixture bad-extension-namespace rejected (extension keys are reverse-DNS namespaces) (0.254415ms)
+✔ v2 invalid fixture bad-interface rejected (interface is a closed enum) (0.03984ms)
+✔ v2 invalid fixture bad-payload-kind rejected (payload kind is fal-ir or namespaced) (0.183237ms)
+✔ v2 invalid fixture bad-plugin-id rejected (plugin ids are lowercase dotted) (0.051174ms)
+✔ v2 invalid fixture bad-query-kind rejected (query kind is a closed enum) (0.139563ms)
+✔ v2 invalid fixture empty-int-range-missing-max rejected (int type needs min and max) (0.208115ms)
+✔ v2 invalid fixture evidence-status-enum rejected (effect evidence is observed/verified-within-scope/predicted/unknown) (0.049424ms)
+✔ v2 invalid fixture horizon-zero rejected (horizon is at least 1) (0.026129ms)
+✔ v2 invalid fixture metric-direction rejected (direction is a closed enum) (0.024421ms)
+✔ v2 invalid fixture negative-seq rejected (seq is >= 1) (0.039257ms)
+✔ v2 invalid fixture operation-state rejected (operation state is a closed enum) (0.04905ms)
+✔ v2 invalid fixture outcome-status-enum rejected (outcome status is a closed enum) (0.060968ms)
+✔ v2 invalid fixture probe-window rejected (window kind is logical steps or wall seconds) (0.037047ms)
+✔ v2 invalid fixture provenance-enum rejected (provenance is KNOWN/STALE/UNKNOWN/ASSUMED_INITIAL) (0.042965ms)
+✔ v2 invalid fixture rule-outcome rejected (rule outcomes are CONTINUE/OBSERVE_MORE/REPLAN/PAUSE) (0.092139ms)
+✔ v2 invalid fixture turn-mode rejected (turn mode is a closed enum) (0.074345ms)
+✔ v2 invalid fixture unknown-core-field rejected (core objects reject unknown fields) (0.148231ms)
+✔ v2 invalid fixture unknown-expr-op rejected (expression ops are a closed set) (0.196364ms)
+✔ v2 invalid fixture v1-contract-on-v2-object rejected (a v1 object must be upgraded, not relabelled) (0.109225ms)
+✔ v2 invalid fixture v1-ir-field rejected (v2 packages carry `payload`, not `ir`) (0.053092ms)
+✔ generated meta.ts matches DIGEST.json of v2 and v1 (4.031499ms)
+ℹ tests 91
+ℹ suites 0
+ℹ pass 91
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 493.03418
