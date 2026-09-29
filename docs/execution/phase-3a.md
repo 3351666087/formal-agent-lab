@@ -32,7 +32,9 @@
 
 ## G2 · 执行扩展点与操作一致性
 
-- [ ] **P3A-G2** 交付真实执行边界上的类型化扩展点，以及可靠的操作去重和未知结果恢复。
+- [x] **P3A-G2** 交付真实执行边界上的类型化扩展点，以及可靠的操作去重和未知结果恢复。
+  - 证据：ExecutionGate 插件接口（首次发送 / 重发 / 重执行前询问，决定写入操作记录与事件）；操作 id 绑定请求摘要（同 id 复用、异参冲突）；未知结果先查询、仅 env.idempotent_step 才重发否则 NEEDS_REVIEW；订单库存 / 仓储容量门控示例；真实订单服务证据 9/9 与持久路径（杀 Worker）测试通过。详见 docs/handoff/phase3-draft.md#g2
+  - 实现：`packages/runtime/src/formal_lab_runtime/coordination.py`、`packages/runtime/src/formal_lab_runtime/engine.py`、`packages/contracts/src/formal_lab_contracts/execution.py`、`examples/local-order-service/src/formal_lab_example_orders/gates.py`、`examples/warehouse-allocation/src/formal_lab_example_warehouse/gates.py`、`scripts/operation_consistency_evidence.py`、`tests/integration/test_operation_consistency_platform.py`
 
 当前 `apply_step` 记录检查结果后直接进入协调器。提供一个通用、可注入的执行前决策接口，以订单库存条件/仓储资源条件作为实现示例；决策与原因形成类型化记录，并在 local runner 和 Temporal 路径实际生效。现有默认行为与历史轨迹保持兼容，显式启用新决策的例子按新配置运行。
 

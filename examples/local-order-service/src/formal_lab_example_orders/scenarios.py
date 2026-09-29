@@ -17,6 +17,8 @@ from .env import ENV_ID, ENV_VERSION
 from .instance import CASES, initial_overrides, instance
 from .model import model_package
 
+INVENTORY_GATE_ID = "formal-lab.example.orders.inventory-gate"
+
 RULES = {"plugin": {"plugin_id": "formal-lab.example.orders.rules", "version": "1.0.0"}, "config": {}}
 Z3 = {"plugin": {"plugin_id": "formal-lab.planner.z3-bounded", "version": "1.1.0"},
       "config": {"horizon": 12, "fallback_order": ["start", "enqueue", "reserve", "restock", "tick"]}}
@@ -31,7 +33,9 @@ CASE_TIMEOUTS = {"delayed": 1.0}  # client timeout (s) below the service's hold,
 def scenario(case: str, *, backend: str = "service", seed: int = 0, strategy: str | dict = "rule",
              endpoint: str = "http://127.0.0.1:8765", tenant: str | None = None, two_actors: bool = False,
              conflict_policy: str = "REVALIDATE", timing: str = "TURN_START",
-             env_extra: dict[str, Any] | None = None) -> ScenarioManifest:
+             env_extra: dict[str, Any] | None = None, safety_stock: int | None = None) -> ScenarioManifest:
+    """`safety_stock` (phase 3A): consult the inventory execution gate before every send, keeping that many units of
+    each SKU after a reservation; None = no gate (phase-2 behaviour)."""
     if case not in CASES:
         raise KeyError(f"unknown case {case!r}")
     spec = CASES[case]
@@ -63,7 +67,10 @@ def scenario(case: str, *, backend: str = "service", seed: int = 0, strategy: st
         name=f"订单：{spec['label']}（{'业务服务' if backend == 'service' else '纯数据模型'}）",
         description=spec["description"], model=pkg.ref(), environment=environment, participants=participants,
         objectives=[{"property_id": "all_completed", "description": "complete every order"}],
-        budget=BUDGET, seed=seed, termination=TERMINATION, **({"turns": turns} if turns else {}))
+        budget=BUDGET, seed=seed, termination=TERMINATION, **({"turns": turns} if turns else {}),
+        execution_gates=[] if safety_stock is None else [
+            {"plugin": {"plugin_id": INVENTORY_GATE_ID, "version": "1.0.0"},
+             "config": {"min_stock_after": safety_stock}}])
 
 
 def run(case: str, *, backend: str = "service", seed: int = 0, strategy: str | dict = "rule", run_id: str | None = None,

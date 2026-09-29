@@ -66,12 +66,14 @@ class PluginInterface(StrEnum):
     ARTIFACT_STORE = "ARTIFACT_STORE"
     SEMANTIC_DRIVER = "SEMANTIC_DRIVER"  # v2: validates/loads a model payload, candidates, predictions, properties
     PROBE = "PROBE"  # v2: independent business observations of an environment session
+    EXECUTION_GATE = "EXECUTION_GATE"  # v2 (phase 3A): decides right before each send whether it may go ahead
 
 
 INTERFACE_VERSION = "2"
 # interface versions the registry accepts: v1 plugins keep working for the interfaces that existed in v1
 SUPPORTED_INTERFACE_VERSIONS = ("1", "2")
-V2_ONLY_INTERFACES = frozenset({PluginInterface.SEMANTIC_DRIVER, PluginInterface.PROBE})
+V2_ONLY_INTERFACES = frozenset({PluginInterface.SEMANTIC_DRIVER, PluginInterface.PROBE,
+                                PluginInterface.EXECUTION_GATE})
 
 
 class Capability(ContractModel):
@@ -94,6 +96,8 @@ class PluginUi(ContractModel):
     metric_labels: dict[str, str] = Field(default_factory=dict)
     entity_labels: dict[str, str] = Field(default_factory=dict)
     value_labels: dict[str, str] = Field(default_factory=dict, description="enum symbol → label")
+    condition_labels: dict[str, str] = Field(default_factory=dict, description="execution-gate condition name → label "
+                                             "(phase 3A)")
 
 
 class PluginDescriptor(ExtensibleModel):
@@ -286,6 +290,9 @@ class ScenarioManifest(ExtensibleModel):
     driver: PluginRef | None = Field(default=None, description="semantic driver; default: the one for the profile")
     rules: RuleSetRef | None = Field(default=None, description="event–condition–handler rules to apply (v2)")
     release: ReleaseRef | None = Field(default=None, description="checked model release the scenario runs on (v2)")
+    execution_gates: list[StrategySpec] = Field(
+        default_factory=list, description="pre-execution decision plugins (EXECUTION_GATE) consulted in order before "
+                                          "every send of an operation (phase 3A); none = phase-2 behaviour")
 
     @model_validator(mode="after")
     def _participants(self) -> ScenarioManifest:
@@ -702,6 +709,7 @@ class EventType(StrEnum):
     RECOVERY = "RECOVERY"
     MODEL_REVISION_SUGGESTED = "MODEL_REVISION_SUGGESTED"
     REGRESSION_CASE_CREATED = "REGRESSION_CASE_CREATED"
+    EXECUTION_DECIDED = "EXECUTION_DECIDED"  # phase 3A: a pre-execution gate allowed or denied a send
 
 
 class TraceEvent(ContractModel):

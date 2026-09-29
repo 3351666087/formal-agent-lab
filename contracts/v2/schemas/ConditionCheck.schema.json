@@ -1,0 +1,59 @@
+{
+  "$id": "https://formal-lab.dev/contracts/v2/ConditionCheck.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "One business / resource condition evaluated by an execution gate.",
+  "properties": {
+    "detail": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Detail"
+    },
+    "holds": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "None: the gate could not determine it",
+      "title": "Holds"
+    },
+    "name": {
+      "minLength": 1,
+      "title": "Name",
+      "type": "string"
+    },
+    "observed": {
+      "default": null,
+      "title": "Observed"
+    },
+    "paths": {
+      "description": "state locations the condition read",
+      "items": {
+        "type": "string"
+      },
+      "title": "Paths",
+      "type": "array"
+    },
+    "required": {
+      "default": null,
+      "title": "Required"
+    }
+  },
+  "required": [
+    "name",
+    "holds"
+  ],
+  "title": "ConditionCheck",
+  "type": "object"
+}

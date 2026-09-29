@@ -97,6 +97,9 @@ def _build_manifest(s: Session, scenario_id: str, revision: int, body: dict[str,
             if t not in action_types:
                 errors.append(FieldError(path=f"/participants/{i}/scope/action_types",
                                          message=f"unknown action type {t!r}"))
+    for i, g in enumerate(body.get("execution_gates") or []):  # phase 3A: pre-execution decision plugins
+        validate_plugin_config(PluginRef.model_validate(g["plugin"]), g.get("config", {}),
+                               PluginInterface.EXECUTION_GATE, f"/execution_gates/{i}/config")
     for i, sc in enumerate(body.get("stop_conditions", [])):
         if sc.get("property_id") and sc["property_id"] not in kinds:
             errors.append(FieldError(path=f"/stop_conditions/{i}/property_id",
@@ -126,6 +129,7 @@ def _build_manifest(s: Session, scenario_id: str, revision: int, body: dict[str,
             stop_conditions=body.get("stop_conditions", []), extensions=body.get("extensions", {}),
             turns=body.get("turns") or {}, termination=body.get("termination"), objective=objective,
             driver=body.get("driver"), rules=rules, release=release,
+            execution_gates=body.get("execution_gates") or [],
         )
     except ValidationError as exc:
         raise InvalidInput("invalid scenario", field_errors=[
@@ -172,7 +176,8 @@ def _editable(row: Scenario) -> dict[str, Any]:
            "environment": m["environment"], "participants": m["participants"], "objectives": m["objectives"],
            "budget": m["budget"], "seed": m["seed"], "stop_conditions": m["stop_conditions"],
            "extensions": m.get("extensions", {}), "turns": m["turns"], "termination": m.get("termination"),
-           "objective": m.get("objective"), "driver": m.get("driver")}
+           "objective": m.get("objective"), "driver": m.get("driver"),
+           "execution_gates": m.get("execution_gates", [])}
     if m.get("rules"):
         out["rules"] = {"ruleset_id": m["rules"]["ruleset_id"], "version": m["rules"]["version"]}
     if m.get("release"):

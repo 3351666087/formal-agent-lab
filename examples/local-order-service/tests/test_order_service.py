@@ -97,9 +97,12 @@ def test_a_stable_operation_id_takes_effect_once(svc):
                                                               run_id="run_t", step=1)
     assert seen == ["DISPATCHED"] and [t.state.value for t in res.record.transitions] == \
         ["PREPARED", "DISPATCHED", "COMPLETED"]
-    body = {"operation_id": "op-idem-1", "action": "reserve", "params": {"o": "o1"}}
-    again = httpx.post(f"{svc.endpoint}/t/idem/operations", json=body).json()
+    body = {"operation_id": "op-idem-1", "actor_id": "handler", "action": "reserve", "params": {"o": "o1"}}
+    again = httpx.post(f"{svc.endpoint}/t/idem/operations", json=body).json()  # the same request redelivered
     assert again["replayed"] is True and again["status"] == "APPLIED" and stock(env) == 4
+    other = httpx.post(f"{svc.endpoint}/t/idem/operations", json={**body, "params": {"o": "o3"}})
+    assert other.status_code == 409 and other.json()["error"] == "OPERATION_ID_CONFLICT"  # same id, other request
+    assert stock(env) == 4
     body = {"operation_id": "op-idem-2", "action": "reserve", "params": {"o": "o3"}}
     with concurrent.futures.ThreadPoolExecutor(8) as pool:
         answers = list(pool.map(lambda _: httpx.post(f"{svc.endpoint}/t/idem/operations", json=body,

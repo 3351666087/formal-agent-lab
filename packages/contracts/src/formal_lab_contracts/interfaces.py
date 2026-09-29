@@ -6,7 +6,7 @@ contract objects; persistence, eventing and orchestration belong to the platform
 
 v1 protocols are unchanged (a v1 plugin keeps working; it receives v2 objects whose v1 fields keep their meaning).
 v2 adds: SemanticDriver (+ LoadedModel), TurnScheduler, optional session/coordination methods of Environment,
-Probe, and optional checkpoint/restore of Planner.
+Probe, and optional checkpoint/restore of Planner; phase 3A adds ExecutionGate (a decision right before each send).
 """
 
 from __future__ import annotations
@@ -20,6 +20,8 @@ from .execution import (
     BeliefState,
     EnvironmentSession,
     EpisodeRecord,
+    GateRequest,
+    GateResult,
     PlannerCheckpoint,
     ProbeResult,
     TaskPlan,
@@ -164,6 +166,21 @@ class Probe(Plugin, Protocol):
     def definitions(self) -> list[MetricDefinition]: ...
 
     def sample(self, session: EnvironmentSession, *, step: int | None) -> list[ProbeResult]: ...
+
+
+@runtime_checkable
+class ExecutionGate(Plugin, Protocol):
+    """Phase 3A: decides right before each send of an operation — first send, re-send after an unknown outcome, and
+    re-execution on a pure-data environment — whether it may go ahead. Never consulted when a recorded or queried
+    result is reused (no new side effect). DENY → nothing is sent; the action is REJECTED with the gate's reason.
+
+    `paths(action)` names the state locations the gate needs; the kernel reads them right before the send (fresh
+    from the environment when it declares env.observe_on_request) and passes them in `GateRequest.values`.
+    """
+
+    def paths(self, action: GroundAction) -> list[str]: ...
+
+    def decide(self, request: GateRequest) -> GateResult: ...
 
 
 # ------------------------------------------------------------------ semantic drivers (v2)

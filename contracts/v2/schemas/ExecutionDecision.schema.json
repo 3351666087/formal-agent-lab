@@ -1,0 +1,201 @@
+{
+  "$defs": {
+    "ConditionCheck": {
+      "additionalProperties": false,
+      "description": "One business / resource condition evaluated by an execution gate.",
+      "properties": {
+        "detail": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Detail"
+        },
+        "holds": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "None: the gate could not determine it",
+          "title": "Holds"
+        },
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "observed": {
+          "default": null,
+          "title": "Observed"
+        },
+        "paths": {
+          "description": "state locations the condition read",
+          "items": {
+            "type": "string"
+          },
+          "title": "Paths",
+          "type": "array"
+        },
+        "required": {
+          "default": null,
+          "title": "Required"
+        }
+      },
+      "required": [
+        "name",
+        "holds"
+      ],
+      "title": "ConditionCheck",
+      "type": "object"
+    },
+    "ExecutionPhase": {
+      "description": "Which kind of send a pre-execution decision is about (phase 3A, G2).",
+      "enum": [
+        "FIRST_SEND",
+        "RESEND",
+        "REEXECUTE"
+      ],
+      "title": "ExecutionPhase",
+      "type": "string"
+    },
+    "GateVerdict": {
+      "enum": [
+        "ALLOW",
+        "DENY"
+      ],
+      "title": "GateVerdict",
+      "type": "string"
+    },
+    "PluginRef": {
+      "additionalProperties": false,
+      "properties": {
+        "plugin_id": {
+          "pattern": "^[a-z0-9]+([.-][a-z0-9]+)*(/[a-z0-9]+([.-][a-z0-9]+)*)?$",
+          "title": "Plugin Id",
+          "type": "string"
+        },
+        "version": {
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+([-+][0-9A-Za-z.-]+)?$",
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "plugin_id",
+        "version"
+      ],
+      "title": "PluginRef",
+      "type": "object"
+    }
+  },
+  "$id": "https://formal-lab.dev/contracts/v2/ExecutionDecision.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Typed record of one pre-execution decision (phase 3A, G2): kept on the operation record and as an event, so\ndecision, operation record and the backend's side effect can be traced to each other.",
+  "properties": {
+    "actor_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Actor Id"
+    },
+    "at": {
+      "format": "date-time",
+      "title": "At",
+      "type": "string"
+    },
+    "checked_at_revision": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Checked At Revision"
+    },
+    "conditions": {
+      "items": {
+        "$ref": "#/$defs/ConditionCheck"
+      },
+      "title": "Conditions",
+      "type": "array"
+    },
+    "decision_id": {
+      "title": "Decision Id",
+      "type": "string"
+    },
+    "gate": {
+      "$ref": "#/$defs/PluginRef"
+    },
+    "operation_id": {
+      "title": "Operation Id",
+      "type": "string"
+    },
+    "phase": {
+      "$ref": "#/$defs/ExecutionPhase"
+    },
+    "reason": {
+      "minLength": 1,
+      "title": "Reason",
+      "type": "string"
+    },
+    "request_digest": {
+      "title": "Request Digest",
+      "type": "string"
+    },
+    "run_id": {
+      "title": "Run Id",
+      "type": "string"
+    },
+    "step": {
+      "minimum": 0,
+      "title": "Step",
+      "type": "integer"
+    },
+    "values_source": {
+      "default": "NONE",
+      "enum": [
+        "FRESH",
+        "OBSERVATION",
+        "NONE"
+      ],
+      "title": "Values Source",
+      "type": "string"
+    },
+    "verdict": {
+      "$ref": "#/$defs/GateVerdict"
+    }
+  },
+  "required": [
+    "decision_id",
+    "run_id",
+    "step",
+    "operation_id",
+    "gate",
+    "phase",
+    "verdict",
+    "reason",
+    "request_digest",
+    "at"
+  ],
+  "title": "ExecutionDecision",
+  "type": "object"
+}

@@ -15,7 +15,8 @@ engine never sees a business client. Declared capabilities (negotiated at run st
 Not declared: env.pure_replayable, env.restore — a worker restoring an old snapshot cannot roll the service back.
 
 Failure mapping: no answer (timeout, connection refused / reset, 502–504) → ResultUnknown (the operation may have been
-committed; the coordinator settles it by id); 409 / other 4xx → NonRetryableFailure; service REJECTED → a REJECTED
+committed; the coordinator settles it by id); 409 (the id was received with another request) → Conflict; other
+4xx → NonRetryableFailure; service REJECTED → a REJECTED
 outcome with the service's reason (and ConflictInfo for stale revisions).
 """
 
@@ -44,7 +45,7 @@ from formal_lab_contracts import (
     digest_of,
 )
 from formal_lab_contracts import capabilities as caps
-from formal_lab_contracts.errors import InvalidInput, NonRetryableFailure, ResultUnknown
+from formal_lab_contracts.errors import Conflict, InvalidInput, NonRetryableFailure, ResultUnknown
 
 from .instance import CASES, instance
 from .net import trust_env
@@ -266,6 +267,10 @@ class OrderServiceEnvironment:
                 "step_id": proposal.step_id, "proposal_id": proposal.proposal_id,
                 "turn": proposal.turn.model_dump(mode="json") if proposal.turn else None}
         resp = self._call("POST", self._t("/operations"), json=body, lost_ok=True)
+        if resp.status_code == 409:
+            detail = resp.json() if resp.headers.get("content-type", "").startswith("application/json") else {}
+            raise Conflict(f"operation id {operation_id} was received before with another request: "
+                           f"{detail.get('recorded')}", details=detail)
         if resp.status_code != 200:
             raise NonRetryableFailure(f"order service refused operation {operation_id}: HTTP {resp.status_code} "
                                       f"{resp.text[:300]}")

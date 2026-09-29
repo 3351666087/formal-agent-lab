@@ -1,0 +1,67 @@
+{
+  "action": {
+    "action_type": "toggle",
+    "params": {}
+  },
+  "actor_id": "a",
+  "attempts": 0,
+  "based_on_revision": 11,
+  "decisions": [
+    {
+      "actor_id": "a",
+      "at": "2026-09-27T12:00:00Z",
+      "checked_at_revision": 11,
+      "conditions": [
+        {
+          "detail": "fresh value at revision 11",
+          "holds": false,
+          "name": "safety_stock",
+          "observed": 4,
+          "paths": [
+            "stock[a]"
+          ],
+          "required": ">= 5"
+        }
+      ],
+      "decision_id": "run_0002:s3:a:apply:gate0:first_send:0",
+      "gate": {
+        "plugin_id": "formal-lab.example.orders.inventory-gate",
+        "version": "1.0.0"
+      },
+      "operation_id": "run_0002:s3:a:apply",
+      "phase": "FIRST_SEND",
+      "reason": "stock[a] = 4 < 5: reserving 3 would leave less than the safety stock of 2",
+      "request_digest": "0000000000000000000000000000000000000000000000000000000000000000",
+      "run_id": "run_0002",
+      "step": 3,
+      "values_source": "FRESH",
+      "verdict": "DENY"
+    }
+  ],
+  "kind": "apply",
+  "operation_id": "run_0002:s3:a:apply",
+  "outcome": null,
+  "proposal_id": "run_0002:s3:a:proposal",
+  "reconciliation": null,
+  "request_digest": "0000000000000000000000000000000000000000000000000000000000000000",
+  "review": null,
+  "run_id": "run_0002",
+  "state": "FAILED",
+  "step": 3,
+  "transitions": [
+    {
+      "at": "2026-09-27T12:00:00Z",
+      "attempt": 1,
+      "effect": "NONE",
+      "reason": "intent recorded",
+      "state": "PREPARED"
+    },
+    {
+      "at": "2026-09-27T12:00:00Z",
+      "attempt": 1,
+      "effect": "NONE",
+      "reason": "denied before sending: inventory gate",
+      "state": "FAILED"
+    }
+  ]
+}

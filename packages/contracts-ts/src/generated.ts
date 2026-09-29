@@ -449,6 +449,16 @@ export type Verdict1 = ("SUPPORTED" | "PARTIAL" | "UNSUPPORTED") | null;
 export type Id2 = string;
 export type MinVersion = string;
 export type Optional = boolean;
+export type Detail = string | null;
+/**
+ * None: the gate could not determine it
+ */
+export type Holds = boolean | null;
+export type Name4 = string;
+/**
+ * state locations the condition read
+ */
+export type Paths1 = string[];
 export type Backend = "PURE_DATA" | "SERVICE";
 export type Capabilities = string[];
 export type CreatedAt = string;
@@ -506,9 +516,13 @@ export type MaxTokens = number | null;
 export type MaxWallSeconds = number | null;
 export type ContractVersion1 = "formal-lab-contracts/v2";
 export type Description2 = string | null;
+/**
+ * pre-execution decision plugins (EXECUTION_GATE) consulted in order before every send of an operation (phase 3A); none = phase-2 behaviour
+ */
+export type ExecutionGates = StrategySpec[];
 export type PackageId = string;
 export type Version4 = number;
-export type Name4 = string;
+export type Name5 = string;
 export type Description3 = string | null;
 export type MetricId = string | null;
 export type PropertyId1 = string | null;
@@ -616,8 +630,35 @@ export type Unknowns = UnknownItem[];
 export type ActorId6 = string | null;
 export type Attempts1 = number;
 export type BasedOnRevision2 = number | null;
-export type Kind7 = "apply" | "reset" | "probe";
+export type ActorId7 = string | null;
+export type At = string;
+export type CheckedAtRevision = number | null;
+export type Conditions = ConditionCheck[];
+export type DecisionId = string;
 export type OperationId1 = string;
+/**
+ * Which kind of send a pre-execution decision is about (phase 3A, G2).
+ *
+ * This interface was referenced by `FormalLabContractsV2`'s JSON-Schema
+ * via the `definition` "ExecutionPhase".
+ */
+export type ExecutionPhase = "FIRST_SEND" | "RESEND" | "REEXECUTE";
+export type Reason6 = string;
+export type RequestDigest = string;
+export type RunId4 = string;
+export type Step5 = number;
+export type ValuesSource = "FRESH" | "OBSERVATION" | "NONE";
+/**
+ * This interface was referenced by `FormalLabContractsV2`'s JSON-Schema
+ * via the `definition` "GateVerdict".
+ */
+export type GateVerdict = "ALLOW" | "DENY";
+/**
+ * pre-execution decisions (phase 3A)
+ */
+export type Decisions = ExecutionDecision[];
+export type Kind7 = "apply" | "reset" | "probe";
+export type OperationId2 = string;
 export type ProposalId2 = string | null;
 /**
  * the environment knows the operation (it took effect or was rejected)
@@ -625,15 +666,26 @@ export type ProposalId2 = string | null;
 export type Found = boolean;
 export type Method1 = "QUERY_OPERATION" | "STATE_COMPARISON" | "SNAPSHOT_REPLAY" | "MANUAL";
 export type Note2 = string;
-export type At = string;
+/**
+ * sha256 of the canonical request (actor, kind, action); the same id with another request is a conflict (phase 3A)
+ */
+export type RequestDigest1 = string | null;
+export type At1 = string;
 export type By = string;
 export type Note3 = string | null;
 export type Status2 = "NEEDS_REVIEW" | "CONFIRMED_APPLIED" | "CONFIRMED_NOT_APPLIED" | "TERMINATED";
-export type RunId4 = string;
-export type Step5 = number;
-export type At1 = string;
+export type RunId5 = string;
+export type Step6 = number;
+export type At2 = string;
 export type Attempt = number;
-export type Reason6 = string;
+/**
+ * What one operation transition did to the backend (phase 3A, G2): reading history is not a side effect.
+ *
+ * This interface was referenced by `FormalLabContractsV2`'s JSON-Schema
+ * via the `definition` "OperationEffect".
+ */
+export type OperationEffect = "NONE" | "SEND" | "QUERY" | "REUSE";
+export type Reason7 = string;
 export type Transitions = OperationTransition[];
 export type Probes1 = ProbeResult[];
 export type ElapsedMs1 = number;
@@ -658,7 +710,7 @@ export type ExecutionStage =
  */
 export type StageStatus = "OK" | "SKIPPED" | "FAILED" | "UNKNOWN";
 export type Stages = StageRecord[];
-export type Step6 = number;
+export type Step7 = number;
 export type Steps2 = StepRecord[];
 /**
  * This interface was referenced by `FormalLabContractsV2`'s JSON-Schema
@@ -676,6 +728,17 @@ export type TerminationReason =
   | "CANCELLED"
   | "FAILED"
   | "OPERATION_UNRESOLVED";
+export type ActorId8 = string | null;
+export type BasedOnRevision3 = number | null;
+export type OperationId3 = string;
+export type ProposalId3 = string | null;
+export type RequestDigest2 = string;
+export type RunId6 = string;
+export type Step8 = number;
+export type ValuesRevision = number | null;
+export type ValuesSource1 = "FRESH" | "OBSERVATION" | "NONE";
+export type Conditions1 = ConditionCheck[];
+export type Reason8 = string;
 /**
  * @minItems 1
  */
@@ -684,8 +747,8 @@ export type Cost1 = number;
 export type Description4 = string | null;
 export type Effects2 = (AssignEffect | WhenEffect | ForallEffect)[];
 export type Label5 = string | null;
-export type Name5 = string;
 export type Name6 = string;
+export type Name7 = string;
 export type Type = BoolType | IntType | EnumType | EntityType;
 export type Kind8 = "bool";
 export type Kind9 = "int";
@@ -695,7 +758,7 @@ export type Kind10 = "enum";
 /**
  * name of a declared enum
  */
-export type Name7 = string;
+export type Name8 = string;
 export type Kind11 = "entity";
 /**
  * name of a declared entity set
@@ -710,7 +773,7 @@ export type Description5 = string | null;
  * entity sets / enums indexing the table
  */
 export type Index2 = string[];
-export type Name8 = string;
+export type Name9 = string;
 export type Type1 = BoolType | IntType | EnumType | EntityType;
 export type Index3 = string[];
 export type Value7 = boolean | number | string;
@@ -724,20 +787,20 @@ export type Label6 = string | null;
  * @minItems 1
  */
 export type Members = [string, ...string[]];
-export type Name9 = string;
+export type Name10 = string;
 export type EntitySets = EntitySetDecl[];
 export type Description8 = string | null;
-export type Name10 = string;
+export type Name11 = string;
 /**
  * @minItems 1
  */
-export type Values = [string, ...string[]];
+export type Values1 = [string, ...string[]];
 export type Enums = EnumDecl[];
 /**
  * semantic features the model relies on beyond the profile (e.g. 'probabilistic_effects'); unsupported features make engines answer UNSUPPORTED
  */
 export type Features = string[];
-export type Name11 = string;
+export type Name12 = string;
 export type Description9 = string | null;
 export type Direction1 = "minimize" | "maximize";
 export type Id3 = string;
@@ -765,7 +828,7 @@ export type State2 = [StateVarDecl, ...StateVarDecl[]];
 export type Description11 = string | null;
 export type Index4 = string[];
 export type Label9 = string | null;
-export type Name12 = string;
+export type Name13 = string;
 /**
  * false: never revealed to agents directly
  */
@@ -852,7 +915,7 @@ export type Assumptions1 = string[];
  */
 export type Bounds = string[];
 export type CheckId1 = string | null;
-export type Detail = string | null;
+export type Detail1 = string | null;
 export type Kind15 = QueryKind | ("TYPE_CHECK" | "RULE_CHECK" | "OBJECTIVE_CHECK");
 export type Passed = boolean;
 /**
@@ -865,19 +928,19 @@ export type Compiled1 = CompiledArtifact[];
 export type CreatedAt2 = string;
 export type Reasons1 = string[];
 export type CaseId = string;
-export type Detail1 = string;
+export type Detail2 = string;
 export type Status3 = "PASS" | "FAIL" | "ERROR";
 export type Regression = RegressionResult[];
 export type ReleaseId1 = string;
 export type Scope2 = "MODEL_INTERNAL";
 export type Stages1 = StageRecord[];
 export type Status4 = "RELEASED" | "REJECTED";
-export type ActorId7 = string;
+export type ActorId9 = string;
 /**
  * keys of reusable solver/plan cache entries
  */
 export type CacheRefs = string[];
-export type ActorId8 = string;
+export type ActorId10 = string;
 export type AssumptionsDigest = string | null;
 export type CreatedAtStep = number;
 /**
@@ -906,7 +969,7 @@ export type ObjectiveValue = number | null;
 export type ParentVersion1 = number | null;
 export type PlanId1 = string;
 export type AtStep = number;
-export type Detail2 = string;
+export type Detail3 = string;
 /**
  * This interface was referenced by `FormalLabContractsV2`'s JSON-Schema
  * via the `definition` "PlanTrigger".
@@ -929,13 +992,13 @@ export type RngState = unknown[] | null;
 /**
  * global step after which the checkpoint was taken
  */
-export type Step7 = number;
+export type Step9 = number;
 /**
  * short natural-language summary (model-assisted)
  */
 export type Summary = string | null;
 export type ActionSpecs = ActionSpec[];
-export type ActorId9 = string;
+export type ActorId11 = string;
 export type Candidates = CandidateAction[];
 /**
  * the actor's goal (participant goal, else joint goal)
@@ -953,9 +1016,9 @@ export type Participants2 = string[];
  * reason a REPLAN rule fired for this actor (v2)
  */
 export type ReplanRequested = string | null;
-export type RunId5 = string;
+export type RunId7 = string;
 export type Seed2 = number;
-export type Step8 = number;
+export type Step10 = number;
 export type StepId2 = string;
 /**
  * e.g. query.goal_reachability, profile.deterministic_finite_v1
@@ -983,7 +1046,8 @@ export type PluginInterface =
   | "EVALUATOR"
   | "ARTIFACT_STORE"
   | "SEMANTIC_DRIVER"
-  | "PROBE";
+  | "PROBE"
+  | "EXECUTION_GATE";
 export type InterfaceVersion = string;
 export type License = string | null;
 export type OutputSchema = {
@@ -1074,11 +1138,12 @@ export type EventType =
   | "SESSION_STATE"
   | "RECOVERY"
   | "MODEL_REVISION_SUGGESTED"
-  | "REGRESSION_CASE_CREATED";
+  | "REGRESSION_CASE_CREATED"
+  | "EXECUTION_DECIDED";
 export type PriorityExplanation = string;
 export type Winner = string | null;
 export type CreatedAt5 = string | null;
-export type Name13 = string;
+export type Name14 = string;
 export type Note6 = string | null;
 export type ParentVersion2 = number | null;
 export type Condition1 = ConstExpr | VarExpr | RefExpr | ApplyExpr | QuantExpr;
@@ -1126,14 +1191,14 @@ export type Role2 = string;
 export type Version13 = string;
 export type Plugins = PluginPin[];
 export type ProjectId = string;
-export type RunId6 = string;
+export type RunId8 = string;
 export type Seed4 = number;
 /**
  * run this one re-runs (lineage)
  */
 export type SourceRunId = string | null;
 export type StatusReason = string | null;
-export type ActorId10 = string | null;
+export type ActorId12 = string | null;
 /**
  * event ids this event was caused by
  */
@@ -1145,7 +1210,7 @@ export type LogicalStep1 = number | null;
  * schema id of payload, e.g. formal-lab/events/ACTION_PROPOSED@1
  */
 export type PayloadSchema = string;
-export type RunId7 = string;
+export type RunId9 = string;
 /**
  * monotonic per-run sequence number, gap-free
  */
@@ -1219,12 +1284,16 @@ export interface FormalLabContractsV2 {
   CapabilityNegotiation?: CapabilityNegotiation;
   CapabilityRequirement?: CapabilityRequirement;
   CheckQuery?: CheckQuery;
+  ConditionCheck?: ConditionCheck;
   EnvironmentSession?: EnvironmentSession;
   EnvironmentSnapshot?: EnvironmentSnapshot;
   EpisodeRecord?: EpisodeRecord;
   ErrorInfo?: ErrorInfo;
   EvidenceRef?: EvidenceRef;
+  ExecutionDecision?: ExecutionDecision;
   Extension?: Extension;
+  GateRequest?: GateRequest;
+  GateResult?: GateResult;
   IRPayload?: IRPayload;
   MatrixCellSpec?: MatrixCellSpec;
   MetricDefinition?: MetricDefinition;
@@ -1981,6 +2050,26 @@ export interface CapabilityRequirement {
   optional: Optional;
 }
 /**
+ * One business / resource condition evaluated by an execution gate.
+ *
+ * This interface was referenced by `FormalLabContractsV2`'s JSON-Schema
+ * via the `definition` "ConditionCheck".
+ */
+export interface ConditionCheck {
+  detail: Detail;
+  holds: Holds;
+  name: Name4;
+  observed: Observed1;
+  paths: Paths1;
+  required: Required;
+}
+export interface Observed1 {
+  [k: string]: unknown | undefined;
+}
+export interface Required {
+  [k: string]: unknown | undefined;
+}
+/**
  * A running environment instance and its lifecycle (P2-050 / P2-062).
  *
  * This interface was referenced by `FormalLabContractsV2`'s JSON-Schema
@@ -2103,9 +2192,10 @@ export interface ScenarioManifest {
    */
   driver: PluginRef | null;
   environment: EnvironmentSpec;
+  execution_gates: ExecutionGates;
   extensions: Extensions1;
   model: ModelRef;
-  name: Name4;
+  name: Name5;
   /**
    * cost objective for planners and reports (v2)
    */
@@ -2149,6 +2239,17 @@ export interface EnvironmentSpec {
   plugin: PluginRef;
 }
 export interface Config {
+  [k: string]: unknown | undefined;
+}
+/**
+ * This interface was referenced by `FormalLabContractsV2`'s JSON-Schema
+ * via the `definition` "StrategySpec".
+ */
+export interface StrategySpec {
+  config: Config1;
+  plugin: PluginRef;
+}
+export interface Config1 {
   [k: string]: unknown | undefined;
 }
 /**
@@ -2216,17 +2317,6 @@ export interface Params1 {
 }
 /**
  * This interface was referenced by `FormalLabContractsV2`'s JSON-Schema
- * via the `definition` "StrategySpec".
- */
-export interface StrategySpec {
-  config: Config1;
-  plugin: PluginRef;
-}
-export interface Config1 {
-  [k: string]: unknown | undefined;
-}
-/**
- * This interface was referenced by `FormalLabContractsV2`'s JSON-Schema
  * via the `definition` "ReleaseRef".
  */
 export interface ReleaseRef {
@@ -2286,7 +2376,7 @@ export interface StepRecord {
   probes: Probes1;
   proposal: ActionProposal | null;
   stages: Stages;
-  step: Step6;
+  step: Step7;
   turn: TurnRef | null;
 }
 /**
@@ -2340,16 +2430,41 @@ export interface OperationRecord {
   actor_id: ActorId6;
   attempts: Attempts1;
   based_on_revision: BasedOnRevision2;
+  decisions: Decisions;
   kind: Kind7;
-  operation_id: OperationId1;
+  operation_id: OperationId2;
   outcome: ActionOutcome | null;
   proposal_id: ProposalId2;
   reconciliation: ReconciliationResult | null;
+  request_digest: RequestDigest1;
   review: ReviewMark | null;
-  run_id: RunId4;
+  run_id: RunId5;
   state: OperationState;
-  step: Step5;
+  step: Step6;
   transitions: Transitions;
+}
+/**
+ * Typed record of one pre-execution decision (phase 3A, G2): kept on the operation record and as an event, so
+ * decision, operation record and the backend's side effect can be traced to each other.
+ *
+ * This interface was referenced by `FormalLabContractsV2`'s JSON-Schema
+ * via the `definition` "ExecutionDecision".
+ */
+export interface ExecutionDecision {
+  actor_id: ActorId7;
+  at: At;
+  checked_at_revision: CheckedAtRevision;
+  conditions: Conditions;
+  decision_id: DecisionId;
+  gate: PluginRef;
+  operation_id: OperationId1;
+  phase: ExecutionPhase;
+  reason: Reason6;
+  request_digest: RequestDigest;
+  run_id: RunId4;
+  step: Step5;
+  values_source: ValuesSource;
+  verdict: GateVerdict;
 }
 /**
  * This interface was referenced by `FormalLabContractsV2`'s JSON-Schema
@@ -2366,7 +2481,7 @@ export interface ReconciliationResult {
  * via the `definition` "ReviewMark".
  */
 export interface ReviewMark {
-  at: At;
+  at: At1;
   by: By;
   note: Note3;
   status: Status2;
@@ -2376,9 +2491,13 @@ export interface ReviewMark {
  * via the `definition` "OperationTransition".
  */
 export interface OperationTransition {
-  at: At1;
+  at: At2;
   attempt: Attempt;
-  reason: Reason6;
+  /**
+   * what this transition did to the backend (phase 3A); absent in records written before it
+   */
+  effect: OperationEffect | null;
+  reason: Reason7;
   state: OperationState;
 }
 /**
@@ -2397,6 +2516,49 @@ export interface StageRecord {
   retry: RetrySemantics1;
   stage: ExecutionStage;
   status: StageStatus;
+}
+/**
+ * What an execution gate sees for one send (phase 3A, G2). `values` are the locations the gate asked for, read
+ * by the kernel right before the send: fresh from the environment when it answers observation requests
+ * (env.observe_on_request), else from the actor's current observation.
+ *
+ * This interface was referenced by `FormalLabContractsV2`'s JSON-Schema
+ * via the `definition` "GateRequest".
+ */
+export interface GateRequest {
+  action: GroundAction;
+  actor_id: ActorId8;
+  based_on_revision: BasedOnRevision3;
+  config: Config2;
+  operation_id: OperationId3;
+  phase: ExecutionPhase;
+  proposal_id: ProposalId3;
+  request_digest: RequestDigest2;
+  run_id: RunId6;
+  step: Step8;
+  values: Values;
+  values_revision: ValuesRevision;
+  values_source: ValuesSource1;
+}
+/**
+ * the gate's scenario configuration
+ */
+export interface Config2 {
+  [k: string]: unknown | undefined;
+}
+export interface Values {
+  [k: string]: boolean | number | string | undefined;
+}
+/**
+ * A gate's answer: ALLOW or DENY with the reason and the conditions it evaluated.
+ *
+ * This interface was referenced by `FormalLabContractsV2`'s JSON-Schema
+ * via the `definition` "GateResult".
+ */
+export interface GateResult {
+  conditions: Conditions1;
+  reason: Reason8;
+  verdict: GateVerdict;
 }
 /**
  * Model in the neutral finite-state IR (profile deterministic_finite_v1).
@@ -2419,7 +2581,7 @@ export interface ModelIR {
   entity_sets: EntitySets;
   enums: Enums;
   features: Features;
-  name: Name11;
+  name: Name12;
   objectives: Objectives1;
   properties: Properties;
   semantic_profile: SemanticProfile;
@@ -2434,7 +2596,7 @@ export interface ActionDecl {
   description: Description4;
   effects: Effects2;
   label: Label5;
-  name: Name5;
+  name: Name6;
   params: Params2;
   precondition: Precondition;
   retry: Retry;
@@ -2445,7 +2607,7 @@ export interface ActionDecl {
  * via the `definition` "ParamDecl".
  */
 export interface ParamDecl {
-  name: Name6;
+  name: Name7;
   type: Type;
 }
 /**
@@ -2470,7 +2632,7 @@ export interface IntType {
  */
 export interface EnumType {
   kind: Kind10;
-  name: Name7;
+  name: Name8;
 }
 /**
  * This interface was referenced by `FormalLabContractsV2`'s JSON-Schema
@@ -2487,7 +2649,7 @@ export interface EntityType {
 export interface ConstantDecl {
   description: Description5;
   index: Index2;
-  name: Name8;
+  name: Name9;
   type: Type1;
   value: ValueTable;
 }
@@ -2517,7 +2679,7 @@ export interface EntitySetDecl {
   description: Description7;
   label: Label6;
   members: Members;
-  name: Name9;
+  name: Name10;
 }
 /**
  * This interface was referenced by `FormalLabContractsV2`'s JSON-Schema
@@ -2525,8 +2687,8 @@ export interface EntitySetDecl {
  */
 export interface EnumDecl {
   description: Description8;
-  name: Name10;
-  values: Values;
+  name: Name11;
+  values: Values1;
 }
 /**
  * A named cost objective declared by the model: the sum of its terms over a path.
@@ -2562,7 +2724,7 @@ export interface StateVarDecl {
   index: Index4;
   initial: ValueTable;
   label: Label9;
-  name: Name12;
+  name: Name13;
   observable: Observable;
   type: Type2;
 }
@@ -2767,7 +2929,7 @@ export interface ModelReleaseRecord {
 export interface ReleaseCheck {
   bound: CheckBound | null;
   check_id: CheckId1;
-  detail: Detail;
+  detail: Detail1;
   kind: Kind15;
   passed: Passed;
   subject: Subject1;
@@ -2779,7 +2941,7 @@ export interface ReleaseCheck {
  */
 export interface RegressionResult {
   case_id: CaseId;
-  detail: Detail1;
+  detail: Detail2;
   status: Status3;
 }
 /**
@@ -2789,7 +2951,7 @@ export interface RegressionResult {
  * via the `definition` "PlannerCheckpoint".
  */
 export interface PlannerCheckpoint {
-  actor_id: ActorId7;
+  actor_id: ActorId9;
   cache_refs: CacheRefs;
   digest: Digest | null;
   plan: TaskPlan | null;
@@ -2797,7 +2959,7 @@ export interface PlannerCheckpoint {
   progress: Progress;
   remaining_budget: BudgetUsage | null;
   rng_state: RngState;
-  step: Step7;
+  step: Step9;
   summary: Summary;
 }
 /**
@@ -2807,7 +2969,7 @@ export interface PlannerCheckpoint {
  * via the `definition` "TaskPlan".
  */
 export interface TaskPlan {
-  actor_id: ActorId8;
+  actor_id: ActorId10;
   assumptions_digest: AssumptionsDigest;
   created_at_step: CreatedAtStep;
   cursor: Cursor;
@@ -2857,7 +3019,7 @@ export interface TaskNode {
  */
 export interface PlanRevision {
   at_step: AtStep;
-  detail: Detail2;
+  detail: Detail3;
   trigger: PlanTrigger;
 }
 /**
@@ -2873,7 +3035,7 @@ export interface Progress {
 export interface PlanningContext {
   action_specs: ActionSpecs;
   actor_budget: Budget | null;
-  actor_id: ActorId9;
+  actor_id: ActorId11;
   actor_usage: BudgetUsage | null;
   /**
    * provenance of the belief (v2)
@@ -2892,9 +3054,9 @@ export interface PlanningContext {
   observation_request_allowed: ObservationRequestAllowed;
   participants: Participants2;
   replan_requested: ReplanRequested;
-  run_id: RunId5;
+  run_id: RunId7;
   seed: Seed2;
-  step: Step8;
+  step: Step10;
   step_id: StepId2;
   /**
    * global/actor step of this decision (v2)
@@ -2955,6 +3117,7 @@ export interface PluginUi {
   action_display: ActionDisplay;
   action_labels: ActionLabels;
   category: Category;
+  condition_labels: ConditionLabels;
   description: Description13;
   entity_labels: EntityLabels;
   label: Label12;
@@ -2972,6 +3135,12 @@ export interface ActionDisplay {
  * action type → label
  */
 export interface ActionLabels {
+  [k: string]: string | undefined;
+}
+/**
+ * execution-gate condition name → label (phase 3A)
+ */
+export interface ConditionLabels {
   [k: string]: string | undefined;
 }
 export interface EntityLabels {
@@ -3038,7 +3207,7 @@ export interface RegressionCase {
   initial_state: InitialState1;
   minimized: Minimized;
   model: ModelRef;
-  observed: Observed1;
+  observed: Observed2;
   origin: Origin1;
   scenario: ScenarioManifest | null;
   seed: Seed3;
@@ -3056,7 +3225,7 @@ export interface InitialState1 {
 /**
  * what the run observed
  */
-export interface Observed1 {
+export interface Observed2 {
   [k: string]: boolean | number | string | undefined;
 }
 /**
@@ -3102,7 +3271,7 @@ export interface RuleSet {
   created_at: CreatedAt5;
   digest: Digest | null;
   model: ModelRef1;
-  name: Name13;
+  name: Name14;
   note: Note6;
   parent_version: ParentVersion2;
   rules: Rules;
@@ -3155,7 +3324,7 @@ export interface RunManifest {
   artifacts: Artifacts;
   budget: Budget;
   budget_usage: BudgetUsage;
-  config: Config2;
+  config: Config3;
   contract_version: ContractVersion4;
   created_at: CreatedAt6;
   extensions: Extensions4;
@@ -3169,7 +3338,7 @@ export interface RunManifest {
   project_id: ProjectId;
   release: ReleaseRef | null;
   rules: RuleSetRef | null;
-  run_id: RunId6;
+  run_id: RunId8;
   scenario: ScenarioManifest1;
   scenario_digest: Digest;
   seed: Seed4;
@@ -3189,7 +3358,7 @@ export interface RunManifest {
 export interface ActorUsage1 {
   [k: string]: BudgetUsage | undefined;
 }
-export interface Config2 {
+export interface Config3 {
   [k: string]: unknown | undefined;
 }
 /**
@@ -3230,9 +3399,10 @@ export interface ScenarioManifest1 {
    */
   driver: PluginRef | null;
   environment: EnvironmentSpec;
+  execution_gates: ExecutionGates;
   extensions: Extensions1;
   model: ModelRef;
-  name: Name4;
+  name: Name5;
   /**
    * cost objective for planners and reports (v2)
    */
@@ -3271,7 +3441,7 @@ export interface TurnPolicy1 {
  * via the `definition` "TraceEvent".
  */
 export interface TraceEvent {
-  actor_id: ActorId10;
+  actor_id: ActorId12;
   causal_parents: CausalParents;
   event_id: EventId;
   event_type: EventType;
@@ -3279,7 +3449,7 @@ export interface TraceEvent {
   logical_step: LogicalStep1;
   payload: Payload1;
   payload_schema: PayloadSchema;
-  run_id: RunId7;
+  run_id: RunId9;
   seq: Seq;
   /**
    * execution stage that emitted it (v2)

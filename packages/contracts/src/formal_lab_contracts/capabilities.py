@@ -106,3 +106,7 @@ def negotiate(descriptor: PluginDescriptor, requirements: list[CapabilityRequire
         verdict=verdict,
         reasons=reasons,
     )
+
+# phase 3A
+GATE_PRE_EXECUTION = "gate.pre_execution"  # an EXECUTION_GATE plugin: ALLOW / DENY before each send
+GATE_FRESH_VALUES = "gate.fresh_values"  # the gate asks for locations to be read right before the send

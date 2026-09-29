@@ -872,6 +872,63 @@
       "title": "ComparisonVerdict",
       "type": "string"
     },
+    "ConditionCheck": {
+      "additionalProperties": false,
+      "description": "One business / resource condition evaluated by an execution gate.",
+      "properties": {
+        "detail": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Detail"
+        },
+        "holds": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "None: the gate could not determine it",
+          "title": "Holds"
+        },
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "observed": {
+          "default": null,
+          "title": "Observed"
+        },
+        "paths": {
+          "description": "state locations the condition read",
+          "items": {
+            "type": "string"
+          },
+          "title": "Paths",
+          "type": "array"
+        },
+        "required": {
+          "default": null,
+          "title": "Required"
+        }
+      },
+      "required": [
+        "name",
+        "holds"
+      ],
+      "title": "ConditionCheck",
+      "type": "object"
+    },
     "ConflictInfo": {
       "additionalProperties": false,
       "description": "Why a proposal based on an older world revision was rejected (shared-resource arbitration).",
@@ -1231,6 +1288,117 @@
       "title": "EvidenceRef",
       "type": "object"
     },
+    "ExecutionDecision": {
+      "additionalProperties": false,
+      "description": "Typed record of one pre-execution decision (phase 3A, G2): kept on the operation record and as an event, so\ndecision, operation record and the backend's side effect can be traced to each other.",
+      "properties": {
+        "actor_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Actor Id"
+        },
+        "at": {
+          "format": "date-time",
+          "title": "At",
+          "type": "string"
+        },
+        "checked_at_revision": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Checked At Revision"
+        },
+        "conditions": {
+          "items": {
+            "$ref": "#/$defs/ConditionCheck"
+          },
+          "title": "Conditions",
+          "type": "array"
+        },
+        "decision_id": {
+          "title": "Decision Id",
+          "type": "string"
+        },
+        "gate": {
+          "$ref": "#/$defs/PluginRef"
+        },
+        "operation_id": {
+          "title": "Operation Id",
+          "type": "string"
+        },
+        "phase": {
+          "$ref": "#/$defs/ExecutionPhase"
+        },
+        "reason": {
+          "minLength": 1,
+          "title": "Reason",
+          "type": "string"
+        },
+        "request_digest": {
+          "title": "Request Digest",
+          "type": "string"
+        },
+        "run_id": {
+          "title": "Run Id",
+          "type": "string"
+        },
+        "step": {
+          "minimum": 0,
+          "title": "Step",
+          "type": "integer"
+        },
+        "values_source": {
+          "default": "NONE",
+          "enum": [
+            "FRESH",
+            "OBSERVATION",
+            "NONE"
+          ],
+          "title": "Values Source",
+          "type": "string"
+        },
+        "verdict": {
+          "$ref": "#/$defs/GateVerdict"
+        }
+      },
+      "required": [
+        "decision_id",
+        "run_id",
+        "step",
+        "operation_id",
+        "gate",
+        "phase",
+        "verdict",
+        "reason",
+        "request_digest",
+        "at"
+      ],
+      "title": "ExecutionDecision",
+      "type": "object"
+    },
+    "ExecutionPhase": {
+      "description": "Which kind of send a pre-execution decision is about (phase 3A, G2).",
+      "enum": [
+        "FIRST_SEND",
+        "RESEND",
+        "REEXECUTE"
+      ],
+      "title": "ExecutionPhase",
+      "type": "string"
+    },
     "ExecutionStage": {
       "enum": [
         "TURN",
@@ -1433,6 +1601,14 @@
       ],
       "title": "FieldError",
       "type": "object"
+    },
+    "GateVerdict": {
+      "enum": [
+        "ALLOW",
+        "DENY"
+      ],
+      "title": "GateVerdict",
+      "type": "string"
     },
     "GroundAction": {
       "additionalProperties": false,
@@ -1861,6 +2037,17 @@
       "title": "ObservationTiming",
       "type": "string"
     },
+    "OperationEffect": {
+      "description": "What one operation transition did to the backend (phase 3A, G2): reading history is not a side effect.",
+      "enum": [
+        "NONE",
+        "SEND",
+        "QUERY",
+        "REUSE"
+      ],
+      "title": "OperationEffect",
+      "type": "string"
+    },
     "OperationRecord": {
       "additionalProperties": false,
       "description": "Coordination record of one environment operation (P2-051). Intent is recorded before dispatch; every state\nchange is kept with its reason.",
@@ -1905,6 +2092,14 @@
           ],
           "default": null,
           "title": "Based On Revision"
+        },
+        "decisions": {
+          "description": "pre-execution decisions (phase 3A)",
+          "items": {
+            "$ref": "#/$defs/ExecutionDecision"
+          },
+          "title": "Decisions",
+          "type": "array"
         },
         "kind": {
           "default": "apply",
@@ -1953,6 +2148,19 @@
             }
           ],
           "default": null
+        },
+        "request_digest": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "sha256 of the canonical request (actor, kind, action); the same id with another request is a conflict (phase 3A)",
+          "title": "Request Digest"
         },
         "review": {
           "anyOf": [
@@ -2019,6 +2227,18 @@
           "minimum": 1,
           "title": "Attempt",
           "type": "integer"
+        },
+        "effect": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/OperationEffect"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "what this transition did to the backend (phase 3A); absent in records written before it"
         },
         "reason": {
           "title": "Reason",

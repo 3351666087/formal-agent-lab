@@ -6,13 +6,14 @@ order handling. Importing this package does not import the platform (the service
 def registrations():
     from formal_lab_contracts.interfaces import PluginRegistration
 
-    from . import env, plugins
+    from . import env, gates, plugins
 
     return [
         PluginRegistration(env.DESCRIPTOR, env.create),
         PluginRegistration(plugins.PROBE, plugins.create_probe),
         PluginRegistration(plugins.RULES, plugins.create_rules),
         PluginRegistration(plugins.SCORER, plugins.create_scorer),
+        PluginRegistration(gates.INVENTORY_GATE, gates.create_inventory_gate),
     ]
 
 

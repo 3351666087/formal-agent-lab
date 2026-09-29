@@ -129,7 +129,12 @@ class OrderRules:
     descriptor = RULES
 
     def propose(self, context: PlanningContext) -> ActionProposal:
-        ok = [c for c in context.candidates if str(c.belief_applicability) == "APPLICABLE"]
+        # an action an execution gate just refused is not proposed again on the very next turn (phase 3A): the
+        # restock / other orders / time branches below get their chance to change the condition
+        last = context.last_outcome
+        refused = (last.action if last is not None and last.status.value == "REJECTED"
+                   and str(last.result.get("reason", "")).startswith("EXECUTION_GATE") else None)
+        ok = [c for c in context.candidates if str(c.belief_applicability) == "APPLICABLE" and c.action != refused]
         by = lambda t: [c for c in ok if c.action.action_type == t]  # noqa: E731
         facts = {f.path: f.value for f in context.observation.facts}
         choice: CandidateAction | None = None

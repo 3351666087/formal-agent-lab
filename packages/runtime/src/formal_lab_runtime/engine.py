@@ -37,7 +37,11 @@ from formal_lab_contracts import (
     EffectComparison,
     EnvironmentSnapshot,
     EventType,
+    ExecutionDecision,
+    ExecutionPhase,
     ExecutionStage,
+    GateRequest,
+    GateVerdict,
     ModelPackage,
     ModelUsage,
     NoActionPolicy,
@@ -68,7 +72,7 @@ from formal_lab_contracts import (
 from formal_lab_contracts import capabilities as caps
 from formal_lab_contracts.errors import FormalLabError, NonRetryableFailure
 
-from .coordination import Coordinator, InMemoryLedger, OperationLedger
+from .coordination import Coordinator, GateHook, InMemoryLedger, OperationLedger, SendDecision
 from .registry import PluginRegistry
 from .settings import get_setting
 from .turns import CycleScheduler, scheduler_for
@@ -208,6 +212,7 @@ class RunComponents:
     rules: Any = None  # formal_lab_model.rules.RuleEvaluator (IR drivers only)
     scheduler: CycleScheduler | None = None
     termination: TerminationPolicy | None = None
+    gates: list[tuple[PluginRef, Any, dict[str, Any]]] = field(default_factory=list)  # (pinned ref, gate, config)
 
     def __post_init__(self) -> None:
         self.participants: dict[str, Participant] = {p.actor_id: p for p in self.manifest.participants}
@@ -285,6 +290,12 @@ def open_components(manifest: RunManifest, package: ModelPackage, registry: Plug
                         expect=PluginInterface.PROBE)
         for pin in manifest.plugins if pin.role.startswith("probe")
     ]
+    gates = []
+    for i, spec in enumerate(scenario.execution_gates):  # phase 3A: pinned versions, config re-validated
+        pinned = plugin_ref_for(manifest, f"gate:{i}") or spec.plugin
+        registry.validate_config(pinned, spec.config, path=f"/execution_gates/{i}/config")
+        gates.append((pinned, registry.create(pinned, spec.config, services, expect=PluginInterface.EXECUTION_GATE),
+                      dict(spec.config)))
     rules = None
     if manifest.rules is not None and manifest.config.get("rules_enabled", True):
         ruleset = (rulesets or {}).get(manifest.rules.digest.value)
@@ -296,7 +307,7 @@ def open_components(manifest: RunManifest, package: ModelPackage, registry: Plug
 
             rules = RuleEvaluator(ruleset, loaded.checked, loaded.interp)
     return RunComponents(manifest, package, env, planners, verifier, evaluators, registry, loaded=loaded,
-                         driver_ref=driver_ref, env_caps=env_caps, probes=probes, rules=rules)
+                         driver_ref=driver_ref, env_caps=env_caps, probes=probes, rules=rules, gates=gates)
 
 
 # ---------------------------------------------------------------------------- helpers
@@ -834,6 +845,44 @@ def _merge_plan_into_carry(carry: CarryState, plan: PlanPhase) -> CarryState:
     return new
 
 
+def _gate_values(rc: RunComponents, actor: str, paths: list[str]) -> tuple[dict[str, Any], str, int | None]:
+    """The locations a gate asked for, read right before the send: fresh when the environment answers observation
+    requests, else from the actor's current observation (stale / unknown values are left out)."""
+    if not paths:
+        return {}, "NONE", None
+    if caps.ENV_OBSERVE_ON_REQUEST in rc.env_caps and hasattr(rc.env, "observe_paths"):
+        obs, source = rc.env.observe_paths(actor, list(paths)), "FRESH"
+    else:
+        obs, source = rc.env.observe(actor), "OBSERVATION"
+    wanted = set(paths)
+    return {f.path: f.value for f in obs.facts if f.path in wanted}, source, obs.state_revision
+
+
+def _gate_hook(rc: RunComponents, step: int, actor: str) -> GateHook:
+    """The scenario's execution gates as the coordinator's pre-send hook (phase 3A, G2): consulted in order; the
+    first DENY stops the send. Every answer becomes an ExecutionDecision on the operation record."""
+
+    def hook(phase: ExecutionPhase, record: OperationRecord, proposal: ActionProposal) -> SendDecision:
+        made: list[ExecutionDecision] = []
+        for i, (ref, gate, cfg) in enumerate(rc.gates):
+            values, source, revision = _gate_values(rc, actor, list(gate.paths(proposal.action)))
+            request = GateRequest(run_id=rc.run_id, step=step, actor_id=actor, operation_id=record.operation_id,
+                                  phase=phase, action=proposal.action, proposal_id=proposal.proposal_id,
+                                  based_on_revision=proposal.based_on_revision, values=values, values_source=source,
+                                  values_revision=revision, request_digest=record.request_digest or "", config=cfg)
+            answer = gate.decide(request)
+            made.append(ExecutionDecision(
+                decision_id=f"{record.operation_id}:gate{i}:{phase.value.lower()}:{record.attempts}",
+                run_id=rc.run_id, step=step, actor_id=actor, operation_id=record.operation_id, gate=ref, phase=phase,
+                verdict=answer.verdict, reason=answer.reason, conditions=answer.conditions, values_source=source,
+                checked_at_revision=revision, request_digest=request.request_digest, at=utcnow()))
+            if answer.verdict == GateVerdict.DENY:
+                return SendDecision(False, f"{ref.plugin_id}: {answer.reason}", made)
+        return SendDecision(True, "every execution gate allows the send", made)
+
+    return hook
+
+
 def apply_step(rc: RunComponents, snapshot: EnvironmentSnapshot, plan: PlanPhase, carry: CarryState,
                ledger: OperationLedger | None = None) -> StepExecution:
     """CHECK, EXECUTE (+RECONCILE), PROBE, COMPARE and TERMINATE. Deterministic w.r.t. snapshot + carry + plan for
@@ -893,9 +942,14 @@ def apply_step(rc: RunComponents, snapshot: EnvironmentSnapshot, plan: PlanPhase
     # ---- EXECUTE (+ RECONCILE) through the coordinator
     t0 = time.perf_counter()
     op_id = f"{turn_id(run_id, step, actor)}:apply"
-    coordinator = Coordinator(rc.env, rc.env_caps, ledger or InMemoryLedger())
+    coordinator = Coordinator(rc.env, rc.env_caps, ledger or InMemoryLedger(),
+                              gate=_gate_hook(rc, step, actor) if rc.gates else None)
     result = coordinator.execute(proposal, op_id, run_id=run_id, step=step)
     ex.operation = result.record
+    for d in result.decisions:  # typed pre-execution decisions (phase 3A), keyed by gate / phase / attempt
+        ex.events.append(EventDraft(tkey("decision-" + d.decision_id[len(op_id) + 1:].replace(":", "-")),
+                                    EventType.EXECUTION_DECIDED, step, {"decision": d.model_dump(mode="json")},
+                                    [tkey("check")], actor, turn, ExecutionStage.EXECUTE))
     if result.transitions:
         ex.events.append(EventDraft(tkey("operation"), EventType.OPERATION_STATE, step,
                                     {"operation_id": op_id, "state": result.record.state.value,
@@ -915,10 +969,13 @@ def apply_step(rc: RunComponents, snapshot: EnvironmentSnapshot, plan: PlanPhase
                                 note=result.record.review.note if result.record.review else None))
         ex.events.append(EventDraft(tkey("review"), EventType.OPERATION_REVIEW, step,
                                     {"operation": result.record.model_dump(mode="json"),
+                                     "conflict": result.conflict,
+                                     "attempted_action": proposal.action.model_dump(mode="json"),
                                      "action": "run ends: the operation outcome cannot be settled automatically"},
                                     [tkey("proposal")], actor, turn, ExecutionStage.RECONCILE))
         ex.terminal, ex.termination_reason = RunStatus.FAILED, TerminationReason.OPERATION_UNRESOLVED
-        ex.terminal_reason = f"operation {op_id} unresolved: {result.record.review.note if result.record.review else ''}"
+        why = result.conflict or (result.record.review.note if result.record.review else "")
+        ex.terminal_reason = f"operation {op_id} unresolved: {why}"
         new.last_event_key = tkey("review")
         return ex
     outcome = result.outcome.model_copy(update={"turn": turn})
@@ -953,6 +1010,9 @@ def apply_step(rc: RunComponents, snapshot: EnvironmentSnapshot, plan: PlanPhase
     stale_basis = outcome.revision_before is not None and proposal.based_on_revision < outcome.revision_before
     basis_note = (f"; basis stale: planned at revision {proposal.based_on_revision}, executed at revision "
                   f"{outcome.revision_before}" if stale_basis else "")
+    if result.denied:  # not sent (execution gate): the world is expected to stay as the actor saw it
+        expected_post, written = dict(belief.state), []
+        basis_note += "; not sent: denied by an execution gate"
     ex.comparison = rc_compare(rc, expected_post=expected_post,
                                pre_state=belief.state, observation=next_obs, written=written,
                                expected_by=f"model:{rc.package.package_id}@{rc.package.version} on belief"
@@ -975,7 +1035,7 @@ def apply_step(rc: RunComponents, snapshot: EnvironmentSnapshot, plan: PlanPhase
     ex.stages.append(_stage(ExecutionStage.COMPARE, StageStatus.OK, RetrySemantics.IDEMPOTENT, t0,
                             out=ex.comparison.model_dump(mode="json"), note=ex.comparison.verdict.value))
     last_key = tkey("comparison")
-    model_difference = ex.comparison.verdict.value == "DIFFERENT" and not stale_basis
+    model_difference = ex.comparison.verdict.value == "DIFFERENT" and not stale_basis and not result.denied
     if model_difference:  # only a difference on the revision the action was planned from points at the model
         last_key = _on_difference(rc, ex, belief, proposal, step, turn, last_key)
 

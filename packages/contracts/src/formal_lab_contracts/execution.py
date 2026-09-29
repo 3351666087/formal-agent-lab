@@ -15,7 +15,10 @@ from .ir import Expr
 from .kernel import (
     OPERATION_TRANSITIONS,
     AssumptionSet,
+    ExecutionPhase,
     ExecutionStage,
+    GateVerdict,
+    OperationEffect,
     OperationState,
     Provenance,
     StageStatus,
@@ -192,6 +195,67 @@ class OperationTransition(ContractModel):
     at: datetime
     reason: str
     attempt: int = Field(default=1, ge=1)
+    effect: OperationEffect | None = Field(default=None, description="what this transition did to the backend "
+                                           "(phase 3A); absent in records written before it")
+
+
+class ConditionCheck(ContractModel):
+    """One business / resource condition evaluated by an execution gate."""
+
+    name: str = Field(min_length=1)
+    holds: bool | None = Field(description="None: the gate could not determine it")
+    observed: Any = None
+    required: Any = None
+    paths: list[str] = Field(default_factory=list, description="state locations the condition read")
+    detail: str | None = None
+
+
+class GateRequest(ContractModel):
+    """What an execution gate sees for one send (phase 3A, G2). `values` are the locations the gate asked for, read
+    by the kernel right before the send: fresh from the environment when it answers observation requests
+    (env.observe_on_request), else from the actor's current observation."""
+
+    run_id: str
+    step: int = Field(ge=0)
+    actor_id: str | None = None
+    operation_id: str
+    phase: ExecutionPhase
+    action: GroundAction
+    proposal_id: str | None = None
+    based_on_revision: int | None = None
+    values: dict[str, StateScalar] = Field(default_factory=dict)
+    values_source: Literal["FRESH", "OBSERVATION", "NONE"] = "NONE"
+    values_revision: int | None = None
+    request_digest: str
+    config: dict[str, Any] = Field(default_factory=dict, description="the gate's scenario configuration")
+
+
+class GateResult(ContractModel):
+    """A gate's answer: ALLOW or DENY with the reason and the conditions it evaluated."""
+
+    verdict: GateVerdict
+    reason: str = Field(min_length=1)
+    conditions: list[ConditionCheck] = Field(default_factory=list)
+
+
+class ExecutionDecision(ContractModel):
+    """Typed record of one pre-execution decision (phase 3A, G2): kept on the operation record and as an event, so
+    decision, operation record and the backend's side effect can be traced to each other."""
+
+    decision_id: str
+    run_id: str
+    step: int = Field(ge=0)
+    actor_id: str | None = None
+    operation_id: str
+    gate: PluginRef
+    phase: ExecutionPhase
+    verdict: GateVerdict
+    reason: str = Field(min_length=1)
+    conditions: list[ConditionCheck] = Field(default_factory=list)
+    values_source: Literal["FRESH", "OBSERVATION", "NONE"] = "NONE"
+    checked_at_revision: int | None = None
+    request_digest: str
+    at: datetime
 
 
 class ReconciliationResult(ContractModel):
@@ -226,6 +290,9 @@ class OperationRecord(ContractModel):
     reconciliation: ReconciliationResult | None = None
     review: ReviewMark | None = None
     attempts: int = Field(default=0, ge=0)
+    request_digest: str | None = Field(default=None, description="sha256 of the canonical request (actor, kind, "
+                                       "action); the same id with another request is a conflict (phase 3A)")
+    decisions: list[ExecutionDecision] = Field(default_factory=list, description="pre-execution decisions (phase 3A)")
 
     @model_validator(mode="after")
     def _transitions_valid(self) -> OperationRecord:

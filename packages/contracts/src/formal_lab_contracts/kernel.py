@@ -270,6 +270,28 @@ class OperationState(StrEnum):
     RECONCILED = "RECONCILED"  # an unknown outcome settled by querying the environment
 
 
+
+class OperationEffect(StrEnum):
+    """What one operation transition did to the backend (phase 3A, G2): reading history is not a side effect."""
+
+    NONE = "NONE"  # bookkeeping only (intent recorded, decision, review mark)
+    SEND = "SEND"  # the request was sent to the environment: it may take effect
+    QUERY = "QUERY"  # the environment was asked about an earlier attempt: no new side effect
+    REUSE = "REUSE"  # a recorded result was used: nothing was sent
+
+
+class ExecutionPhase(StrEnum):
+    """Which kind of send a pre-execution decision is about (phase 3A, G2)."""
+
+    FIRST_SEND = "FIRST_SEND"  # the operation has never been sent
+    RESEND = "RESEND"  # sent before, outcome unknown, the backend has no record of it: the same id is sent again
+    REEXECUTE = "REEXECUTE"  # pure-data environment: re-applied after restoring the pre-step snapshot
+
+
+class GateVerdict(StrEnum):
+    ALLOW = "ALLOW"
+    DENY = "DENY"
+
 OPERATION_TRANSITIONS: dict[OperationState, frozenset[OperationState]] = {
     OperationState.PREPARED: frozenset({OperationState.DISPATCHED, OperationState.FAILED}),
     OperationState.DISPATCHED: frozenset({OperationState.COMPLETED, OperationState.FAILED,

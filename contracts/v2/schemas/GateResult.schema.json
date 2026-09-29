@@ -1,0 +1,96 @@
+{
+  "$defs": {
+    "ConditionCheck": {
+      "additionalProperties": false,
+      "description": "One business / resource condition evaluated by an execution gate.",
+      "properties": {
+        "detail": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Detail"
+        },
+        "holds": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "None: the gate could not determine it",
+          "title": "Holds"
+        },
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "observed": {
+          "default": null,
+          "title": "Observed"
+        },
+        "paths": {
+          "description": "state locations the condition read",
+          "items": {
+            "type": "string"
+          },
+          "title": "Paths",
+          "type": "array"
+        },
+        "required": {
+          "default": null,
+          "title": "Required"
+        }
+      },
+      "required": [
+        "name",
+        "holds"
+      ],
+      "title": "ConditionCheck",
+      "type": "object"
+    },
+    "GateVerdict": {
+      "enum": [
+        "ALLOW",
+        "DENY"
+      ],
+      "title": "GateVerdict",
+      "type": "string"
+    }
+  },
+  "$id": "https://formal-lab.dev/contracts/v2/GateResult.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "A gate's answer: ALLOW or DENY with the reason and the conditions it evaluated.",
+  "properties": {
+    "conditions": {
+      "items": {
+        "$ref": "#/$defs/ConditionCheck"
+      },
+      "title": "Conditions",
+      "type": "array"
+    },
+    "reason": {
+      "minLength": 1,
+      "title": "Reason",
+      "type": "string"
+    },
+    "verdict": {
+      "$ref": "#/$defs/GateVerdict"
+    }
+  },
+  "required": [
+    "verdict",
+    "reason"
+  ],
+  "title": "GateResult",
+  "type": "object"
+}

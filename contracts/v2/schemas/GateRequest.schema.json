@@ -1,0 +1,166 @@
+{
+  "$defs": {
+    "ExecutionPhase": {
+      "description": "Which kind of send a pre-execution decision is about (phase 3A, G2).",
+      "enum": [
+        "FIRST_SEND",
+        "RESEND",
+        "REEXECUTE"
+      ],
+      "title": "ExecutionPhase",
+      "type": "string"
+    },
+    "GroundAction": {
+      "additionalProperties": false,
+      "properties": {
+        "action_type": {
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*$",
+          "title": "Action Type",
+          "type": "string"
+        },
+        "params": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "title": "Params",
+          "type": "object"
+        }
+      },
+      "required": [
+        "action_type"
+      ],
+      "title": "GroundAction",
+      "type": "object"
+    }
+  },
+  "$id": "https://formal-lab.dev/contracts/v2/GateRequest.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "What an execution gate sees for one send (phase 3A, G2). `values` are the locations the gate asked for, read\nby the kernel right before the send: fresh from the environment when it answers observation requests\n(env.observe_on_request), else from the actor's current observation.",
+  "properties": {
+    "action": {
+      "$ref": "#/$defs/GroundAction"
+    },
+    "actor_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Actor Id"
+    },
+    "based_on_revision": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Based On Revision"
+    },
+    "config": {
+      "additionalProperties": true,
+      "description": "the gate's scenario configuration",
+      "title": "Config",
+      "type": "object"
+    },
+    "operation_id": {
+      "title": "Operation Id",
+      "type": "string"
+    },
+    "phase": {
+      "$ref": "#/$defs/ExecutionPhase"
+    },
+    "proposal_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Proposal Id"
+    },
+    "request_digest": {
+      "title": "Request Digest",
+      "type": "string"
+    },
+    "run_id": {
+      "title": "Run Id",
+      "type": "string"
+    },
+    "step": {
+      "minimum": 0,
+      "title": "Step",
+      "type": "integer"
+    },
+    "values": {
+      "additionalProperties": {
+        "anyOf": [
+          {
+            "type": "boolean"
+          },
+          {
+            "type": "integer"
+          },
+          {
+            "type": "string"
+          }
+        ]
+      },
+      "title": "Values",
+      "type": "object"
+    },
+    "values_revision": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Values Revision"
+    },
+    "values_source": {
+      "default": "NONE",
+      "enum": [
+        "FRESH",
+        "OBSERVATION",
+        "NONE"
+      ],
+      "title": "Values Source",
+      "type": "string"
+    }
+  },
+  "required": [
+    "run_id",
+    "step",
+    "operation_id",
+    "phase",
+    "action",
+    "request_digest"
+  ],
+  "title": "GateRequest",
+  "type": "object"
+}

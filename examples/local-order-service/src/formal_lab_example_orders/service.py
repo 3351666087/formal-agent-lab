@@ -14,6 +14,8 @@ Fixed business API (per tenant = one environment session; each tenant is its own
   POST /t/{tenant}/admin/reset                   service-side reset to a case instance (SERVICE_RESET)
   GET  /t/{tenant}/admin/export                  business state export;  POST …/admin/import  (STATE_IMPORT)
   POST /t/{tenant}/admin/conditions              operating conditions (slow stations, held responses, crash)
+An operation id is bound to the request it was first received with: the same id with the same request returns the
+stored answer (`replayed`), with another actor / action / parameters it is refused with 409 OPERATION_ID_CONFLICT.
   DELETE /t/{tenant}                             remove the tenant (session close)
 
 Guarantees (and their limits): every operation runs in one SQLite transaction taken with BEGIN IMMEDIATE; the
@@ -392,6 +394,14 @@ def create_app(data_dir: Path, *, project: str = "local") -> Any:
             row = conn.execute("SELECT * FROM operations WHERE operation_id = ?", (op_id,)).fetchone()
             if row is not None:
                 conn.execute("COMMIT")
+                if (row["actor_id"], row["action"], json.loads(row["params"])) != (actor, action, params):
+                    # the id is bound to the request it was first received with: another request is a conflict,
+                    # never an answer for the first one (phase 3A, G2)
+                    return JSONResponse(status_code=409, content={
+                        "error": "OPERATION_ID_CONFLICT", "operation_id": op_id,
+                        "recorded": {"actor_id": row["actor_id"], "action": row["action"],
+                                     "params": json.loads(row["params"])},
+                        "requested": {"actor_id": actor, "action": action, "params": params}})
                 return JSONResponse({**stored(row), "replayed": True})
             revision = Store.meta(conn, "revision", 0)
             seq = Store.meta(conn, "op_seq", 0) + 1

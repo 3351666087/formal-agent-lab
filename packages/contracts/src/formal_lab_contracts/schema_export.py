@@ -46,6 +46,7 @@ V2_OBJECTS: list[type[BaseModel]] = [
     execution.PlannerCheckpoint,
     execution.EnvironmentSession,
     execution.OperationRecord,
+    execution.ExecutionDecision,
     execution.StageRecord,
     execution.ProbeResult,
     execution.QueryBundle,
@@ -75,6 +76,9 @@ SUPPORTING: list[type[BaseModel]] = [
     kernel.OptimizationResult,
     kernel.RobustnessResult,
     kernel.ObservationRequest,
+    execution.GateRequest,
+    execution.GateResult,
+    execution.ConditionCheck,
     EvidenceRef,
     Extension,
 ]

@@ -8,13 +8,14 @@ from .model import NAMESPACE, PROFILE, SCHEMA_ID, WarehouseModel, demo_model
 def registrations():
     from formal_lab_contracts.interfaces import PluginRegistration
 
-    from . import driver, plugins
+    from . import driver, gates, plugins
 
     return [
         PluginRegistration(driver.DESCRIPTOR, driver.create),
         PluginRegistration(plugins.FRONTEND, plugins.create_frontend),
         PluginRegistration(plugins.RULES, plugins.create_rules),
         PluginRegistration(plugins.SCORER, plugins.create_scorer),
+        PluginRegistration(gates.CAPACITY_GATE, gates.create_capacity_gate),
     ]
 
 

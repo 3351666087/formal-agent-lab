@@ -59,6 +59,9 @@ def registrations() -> list[PluginRegistration]:
 | `TurnPolicy`、`TurnRef`、`TurnState` | 数据对象 | `kernel.py` / `execution.py` | 场景声明 / 内核记录 | — |
 | `Evaluator` | 协议 | `interfaces.py` | 插件（EVALUATOR） | `eval.applies_to` |
 | `ArtifactStore` | 协议 | `interfaces.py` | 平台（本地 / S3） | — |
+| `ExecutionGate` | 协议（阶段三） | `interfaces.py` | 插件（EXECUTION_GATE，v2） | `gate.pre_execution`、`gate.fresh_values` |
+| `GateRequest`、`GateResult`、`ConditionCheck` | 数据对象（阶段三） | `execution.py` | 内核构造请求 / 门控插件回答 | — |
+| `ExecutionDecision` | 记录（阶段三） | `execution.py` | 内核写入操作记录与 `EXECUTION_DECIDED` 事件 | — |
 | `ExecutionStage`、`StageStatus`、`RetrySemantics` | 枚举 | `kernel.py` | — | — |
 | `StageRecord`、`StepRecord`、`OperationRecord` | 记录 | `execution.py` | 内核写入（插件不产生） | — |
 
@@ -153,7 +156,28 @@ class MyProbe:
 
 评分器 `metric_definitions()` / `score(episode)`，只由真值与轨迹确定性计算，无法计算时返回 `MISSING` / `NOT_APPLICABLE`；`eval.applies_to` 决定用于哪些模型包。产物存储 `put` / `get` / `describe`，按 sha256 内容寻址（`formal_lab_runtime/artifacts.py`）。
 
-### 3.9 执行阶段记录（内核写入）
+### 3.9 执行前决策（EXECUTION_GATE，阶段三）
+
+```python
+class MyGate:
+    descriptor = DESCRIPTOR   # interface="EXECUTION_GATE", interface_version="2", capabilities=[gate.pre_execution]
+    def paths(self, action: GroundAction) -> list[str]: ...       # 需要在发送前读取的状态位置
+    def decide(self, request: GateRequest) -> GateResult: ...     # ALLOW / DENY + 原因 + ConditionCheck[]
+```
+
+- 场景以 `execution_gates: [{plugin, config}]` 启用（默认空 = 阶段二行为）；运行 manifest 以 `gate:<i>` 固定版本，Worker 按 schema 重新校验配置。
+- 协调器在**每次发送**前按顺序询问：首次发送（`FIRST_SEND`）、结果未知且后端无记录时的重发（`RESEND`）、纯数据环境恢复后的重执行（`REEXECUTE`，必须与原决定一致）。复用已记录结果或向后端查询历史**不询问**门控，因为不产生新副作用。
+- `paths()` 中的位置由内核在发送前读取：环境声明 `env.observe_on_request` 时向环境取新鲜值（`values_source = FRESH`），否则取执行者当前观测（`OBSERVATION`）。
+- DENY：什么都不发送，操作记为 FAILED（确定未生效），动作以 `REJECTED`、原因 `EXECUTION_GATE: …` 返回规划器；效果比较以“世界不变”为预期，不作为模型偏差。每个决定写成 `ExecutionDecision`（门控、阶段、结论、条件、读取来源与修订号、请求摘要），挂在操作记录上并发 `EXECUTION_DECIDED` 事件。
+- 参考：`examples/local-order-service/.../gates.py`（库存安全线，新鲜值）、`examples/warehouse-allocation/.../gates.py`（库区装载率）。
+
+### 3.10 操作身份与未知结果（内核规则）
+
+- 操作 id 绑定规范化请求（执行者、种类、动作）的 `request_digest`：同 id 同请求复用已记录结果（转换 `effect = REUSE`，不发送）；同 id 不同请求为冲突，什么都不发送、运行以 `OPERATION_UNRESOLVED` 结束并说明。持久服务同样按 id 拒绝异参请求（订单服务 409 → `Conflict`）。
+- 响应丢失先按 id 查询（`effect = QUERY`）；查到则 RECONCILED、不再发送；查不到时**只有**环境声明 `env.idempotent_step` 才以同 id 重发，否则 `NEEDS_REVIEW`。
+- 每个转换标注 `effect`（SEND / QUERY / REUSE / NONE），据此可区分“查询历史结果”与“可能产生新副作用的发送”。
+
+### 3.11 执行阶段记录（内核写入）
 
 每步按 `ExecutionStage`（TURN → OBSERVE → PROPOSE → CHECK → EXECUTE → RECONCILE → PROBE → COMPARE → TERMINATE）写 `StageRecord`：输入 / 输出摘要、重试语义、错误与证据。插件不产生阶段记录；回放与证据页据此定位。
 

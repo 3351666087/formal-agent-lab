@@ -96,8 +96,12 @@ class WarehouseRules:
     def propose(self, context: PlanningContext) -> ActionProposal:
         belief = self.m.belief(context.observation)
         s = belief.state
+        last = context.last_outcome  # a put-away an execution gate just refused goes elsewhere next turn (phase 3A)
+        refused = (last.action if last is not None and last.status.value == "REJECTED"
+                   and str(last.result.get("reason", "")).startswith("EXECUTION_GATE") else None)
         ok = lambda t: [c for c in context.candidates  # noqa: E731
-                        if c.action.action_type == t and str(c.belief_applicability) == "APPLICABLE"]
+                        if c.action.action_type == t and str(c.belief_applicability) == "APPLICABLE"
+                        and c.action != refused]
         choice: CandidateAction | None = None
         reason = ""
         if self.role in ("receiver", "both") and (puts := ok("putaway")):

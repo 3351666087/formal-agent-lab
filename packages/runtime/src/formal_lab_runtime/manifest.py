@@ -145,6 +145,23 @@ def negotiate_run(registry: PluginRegistry, *, scenario: ScenarioManifest, packa
     for probe in probes:
         results.append(registry.negotiate(probe.descriptor.ref(), [CapabilityRequirement(id=caps.PROBE_METRICS)],
                                           role="probe"))
+    env_have = {c.id for c in env.descriptor.capabilities}
+    for i, spec in enumerate(scenario.execution_gates):  # phase 3A: pre-execution decisions
+        gd = registry.resolve(spec.plugin).descriptor
+        if gd.interface != PluginInterface.EXECUTION_GATE:
+            fatal.append(f"execution gate {i} ({gd.plugin_id}) is a {gd.interface.value} plugin, not EXECUTION_GATE")
+            continue
+        if gd.semantic_profiles and profile not in gd.semantic_profiles:
+            fatal.append(f"execution gate {gd.plugin_id} does not support profile {profile}")
+        res = registry.negotiate(gd.ref(), [CapabilityRequirement(id=caps.GATE_PRE_EXECUTION)], role=f"gate:{i}",
+                                 why={caps.GATE_PRE_EXECUTION: "decides before every send of an operation"})
+        source = ("values read fresh from the environment right before each send"
+                  if caps.ENV_OBSERVE_ON_REQUEST in env_have else
+                  "values taken from the actor's current observation (the environment does not answer "
+                  "observation requests)")
+        results.append(res.model_copy(update={"reasons": [*res.reasons, source]}))
+        if not res.compatible:
+            fatal.extend(res.reasons)
     if fatal:
         raise Unsupported("the scenario cannot run with these plugins: " + "; ".join(fatal),
                           details={"negotiation": [r.model_dump(mode="json") for r in results], "reasons": fatal})
@@ -200,6 +217,8 @@ def make_manifest(
         pins.append(_pin(f"evaluator:{i}", registry.resolve(ref)))
     for i, entry in enumerate(probe_entries):
         pins.append(_pin(f"probe:{i}", entry))
+    for i, spec in enumerate(scenario.execution_gates):
+        pins.append(_pin(f"gate:{i}", registry.resolve(spec.plugin)))
     # participants pin the resolved strategy versions too (a scenario may name an older compatible version)
     resolved = {pin.role.split(":", 1)[1]: pin for pin in pins if pin.role.startswith("strategy:")}
     effective = [p.model_copy(update={"strategy": p.strategy.model_copy(update={"plugin": PluginRef(

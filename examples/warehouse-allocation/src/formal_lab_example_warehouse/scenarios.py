@@ -8,6 +8,7 @@ from .model import demo_model, two_station_model
 from .plugins import build_package
 
 ENV = {"plugin_id": "formal-lab.env.driver-world", "version": "1.0.0"}
+CAPACITY_GATE = {"plugin_id": "formal-lab.example.warehouse.capacity-gate", "version": "1.0.0"}
 RULES = {"plugin_id": "formal-lab.example.warehouse.rules", "version": "1.0.0"}
 TERMINATION = {"joint_goal": "all_picked", "invariants": ["capacity_ok"], "on_no_action": "SKIP_ACTOR",
                "no_progress_limit": 12}
@@ -31,7 +32,7 @@ def single(pkg: ModelPackage, *, seed: int = 0, env: dict | None = None) -> Scen
 
 
 def receiver_and_picker(pkg: ModelPackage, *, seed: int = 0, env: dict | None = None,
-                        turns: dict | None = None) -> ScenarioManifest:
+                        turns: dict | None = None, max_fill: float | None = None) -> ScenarioManifest:
     """Two participants with separate action scopes, one shared world, round-robin turns: the receiver puts
     pallets away (its own goal: clear docks), the picker assigns the station and picks (joint goal)."""
     return ScenarioManifest(
@@ -44,4 +45,6 @@ def receiver_and_picker(pkg: ModelPackage, *, seed: int = 0, env: dict | None = 
             {"actor_id": "picker", "role": "picker", "strategy": {"plugin": RULES, "config": {"role": "picker"}},
              "scope": {"action_types": ["assign", "release", "pick", "tick"]}},
         ],
-        budget=BUDGET, seed=seed, termination=TERMINATION, turns=turns or {})
+        budget=BUDGET, seed=seed, termination=TERMINATION, turns=turns or {},
+        execution_gates=[] if max_fill is None else [  # phase 3A: zone fill-level gate before every send
+            {"plugin": CAPACITY_GATE, "config": {"max_fill": max_fill}}])

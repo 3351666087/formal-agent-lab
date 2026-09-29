@@ -26,6 +26,7 @@ from formal_lab_contracts import (
     BeliefState,
     BoundedCheckResult,
     EnvironmentSession,
+    ExecutionDecision,
     MatrixCellSpec,
     MetricDefinition,
     MetricResult,
@@ -319,6 +320,22 @@ def build_valid() -> dict[str, dict]:
         reconciliation={"method": "QUERY_OPERATION", "found": True, "note": "service applied it once"},
         attempts=1,
     )
+    exec_decision = ExecutionDecision(
+        decision_id="run_0002:s3:a:apply:gate0:first_send:0", run_id="run_0002", step=3, actor_id="a",
+        operation_id="run_0002:s3:a:apply", gate={"plugin_id": "formal-lab.example.orders.inventory-gate",
+                                                  "version": "1.0.0"},
+        phase="FIRST_SEND", verdict="DENY", reason="stock[a] = 4 < 5: reserving 3 would leave less than the safety "
+                                                   "stock of 2",
+        conditions=[{"name": "safety_stock", "holds": False, "observed": 4, "required": ">= 5",
+                     "paths": ["stock[a]"], "detail": "fresh value at revision 11"}],
+        values_source="FRESH", checked_at_revision=11, request_digest="0" * 64, at=T0)
+    gated = OperationRecord(
+        operation_id="run_0002:s3:a:apply", run_id="run_0002", step=3, actor_id="a", state="FAILED",
+        transitions=[{"state": "PREPARED", "at": T0, "reason": "intent recorded", "effect": "NONE"},
+                     {"state": "FAILED", "at": T0, "reason": "denied before sending: inventory gate",
+                      "effect": "NONE"}],
+        proposal_id="run_0002:s3:a:proposal", action=ACTION, based_on_revision=11, request_digest="0" * 64,
+        decisions=[exec_decision])
     stage = StageRecord(stage="EXECUTE", status="UNKNOWN", retry="RECONCILE_THEN_RETRY", input_digest="ab",
                         elapsed_ms=12.0, note="response lost; reconcile next")
     probe = ProbeResult(probe_id="prb_1", probe={"plugin_id": "formal-lab.probe.order-service", "version": "1.0.0"},
@@ -373,6 +390,7 @@ def build_valid() -> dict[str, dict]:
         "ObjectiveSpec": objective, "TurnPolicy": TurnPolicy(), "TerminationPolicy": TerminationPolicy(),
         "AssumptionSet": assumptions, "BeliefState": belief, "TurnState": turn_state, "TaskPlan": plan,
         "PlannerCheckpoint": checkpoint, "EnvironmentSession": session, "OperationRecord": operation,
+        "OperationRecord.gated": gated, "ExecutionDecision": exec_decision,
         "StageRecord": stage, "ProbeResult": probe, "QueryBundle": bundle, "RuleSet": ruleset,
         "RuleEvaluation": evaluation, "RuleDecision": decision, "ModelReleaseRecord": release,
         "RegressionCase": case, "MatrixCellSpec": cell,

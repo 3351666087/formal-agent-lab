@@ -1942,6 +1942,67 @@
       "title": "CompiledArtifact",
       "type": "object"
     },
+    "ConditionCheck": {
+      "additionalProperties": false,
+      "description": "One business / resource condition evaluated by an execution gate.",
+      "properties": {
+        "detail": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Detail"
+        },
+        "holds": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "None: the gate could not determine it",
+          "title": "Holds"
+        },
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "observed": {
+          "default": null,
+          "title": "Observed"
+        },
+        "paths": {
+          "description": "state locations the condition read",
+          "items": {
+            "type": "string"
+          },
+          "title": "Paths",
+          "type": "array"
+        },
+        "required": {
+          "default": null,
+          "title": "Required"
+        }
+      },
+      "required": [
+        "name",
+        "holds",
+        "observed",
+        "required",
+        "paths",
+        "detail"
+      ],
+      "title": "ConditionCheck",
+      "type": "object"
+    },
     "ConfidenceInterval": {
       "additionalProperties": false,
       "properties": {
@@ -2826,7 +2887,8 @@
         "SESSION_STATE",
         "RECOVERY",
         "MODEL_REVISION_SUGGESTED",
-        "REGRESSION_CASE_CREATED"
+        "REGRESSION_CASE_CREATED",
+        "EXECUTION_DECIDED"
       ],
       "title": "EventType",
       "type": "string"
@@ -2891,6 +2953,121 @@
       ],
       "title": "EvidenceRef",
       "type": "object"
+    },
+    "ExecutionDecision": {
+      "additionalProperties": false,
+      "description": "Typed record of one pre-execution decision (phase 3A, G2): kept on the operation record and as an event, so\ndecision, operation record and the backend's side effect can be traced to each other.",
+      "properties": {
+        "actor_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Actor Id"
+        },
+        "at": {
+          "format": "date-time",
+          "title": "At",
+          "type": "string"
+        },
+        "checked_at_revision": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Checked At Revision"
+        },
+        "conditions": {
+          "items": {
+            "$ref": "#/$defs/ConditionCheck"
+          },
+          "title": "Conditions",
+          "type": "array"
+        },
+        "decision_id": {
+          "title": "Decision Id",
+          "type": "string"
+        },
+        "gate": {
+          "$ref": "#/$defs/PluginRef"
+        },
+        "operation_id": {
+          "title": "Operation Id",
+          "type": "string"
+        },
+        "phase": {
+          "$ref": "#/$defs/ExecutionPhase"
+        },
+        "reason": {
+          "minLength": 1,
+          "title": "Reason",
+          "type": "string"
+        },
+        "request_digest": {
+          "title": "Request Digest",
+          "type": "string"
+        },
+        "run_id": {
+          "title": "Run Id",
+          "type": "string"
+        },
+        "step": {
+          "minimum": 0,
+          "title": "Step",
+          "type": "integer"
+        },
+        "values_source": {
+          "default": "NONE",
+          "enum": [
+            "FRESH",
+            "OBSERVATION",
+            "NONE"
+          ],
+          "title": "Values Source",
+          "type": "string"
+        },
+        "verdict": {
+          "$ref": "#/$defs/GateVerdict"
+        }
+      },
+      "required": [
+        "decision_id",
+        "run_id",
+        "step",
+        "actor_id",
+        "operation_id",
+        "gate",
+        "phase",
+        "verdict",
+        "reason",
+        "conditions",
+        "values_source",
+        "checked_at_revision",
+        "request_digest",
+        "at"
+      ],
+      "title": "ExecutionDecision",
+      "type": "object"
+    },
+    "ExecutionPhase": {
+      "description": "Which kind of send a pre-execution decision is about (phase 3A, G2).",
+      "enum": [
+        "FIRST_SEND",
+        "RESEND",
+        "REEXECUTE"
+      ],
+      "title": "ExecutionPhase",
+      "type": "string"
     },
     "ExecutionStage": {
       "enum": [
@@ -3213,6 +3390,169 @@
       ],
       "title": "ForallEffect",
       "type": "object"
+    },
+    "GateRequest": {
+      "additionalProperties": false,
+      "description": "What an execution gate sees for one send (phase 3A, G2). `values` are the locations the gate asked for, read\nby the kernel right before the send: fresh from the environment when it answers observation requests\n(env.observe_on_request), else from the actor's current observation.",
+      "properties": {
+        "action": {
+          "$ref": "#/$defs/GroundAction"
+        },
+        "actor_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Actor Id"
+        },
+        "based_on_revision": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Based On Revision"
+        },
+        "config": {
+          "additionalProperties": true,
+          "description": "the gate's scenario configuration",
+          "title": "Config",
+          "type": "object"
+        },
+        "operation_id": {
+          "title": "Operation Id",
+          "type": "string"
+        },
+        "phase": {
+          "$ref": "#/$defs/ExecutionPhase"
+        },
+        "proposal_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Proposal Id"
+        },
+        "request_digest": {
+          "title": "Request Digest",
+          "type": "string"
+        },
+        "run_id": {
+          "title": "Run Id",
+          "type": "string"
+        },
+        "step": {
+          "minimum": 0,
+          "title": "Step",
+          "type": "integer"
+        },
+        "values": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "title": "Values",
+          "type": "object"
+        },
+        "values_revision": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Values Revision"
+        },
+        "values_source": {
+          "default": "NONE",
+          "enum": [
+            "FRESH",
+            "OBSERVATION",
+            "NONE"
+          ],
+          "title": "Values Source",
+          "type": "string"
+        }
+      },
+      "required": [
+        "run_id",
+        "step",
+        "actor_id",
+        "operation_id",
+        "phase",
+        "action",
+        "proposal_id",
+        "based_on_revision",
+        "values",
+        "values_source",
+        "values_revision",
+        "request_digest",
+        "config"
+      ],
+      "title": "GateRequest",
+      "type": "object"
+    },
+    "GateResult": {
+      "additionalProperties": false,
+      "description": "A gate's answer: ALLOW or DENY with the reason and the conditions it evaluated.",
+      "properties": {
+        "conditions": {
+          "items": {
+            "$ref": "#/$defs/ConditionCheck"
+          },
+          "title": "Conditions",
+          "type": "array"
+        },
+        "reason": {
+          "minLength": 1,
+          "title": "Reason",
+          "type": "string"
+        },
+        "verdict": {
+          "$ref": "#/$defs/GateVerdict"
+        }
+      },
+      "required": [
+        "verdict",
+        "reason",
+        "conditions"
+      ],
+      "title": "GateResult",
+      "type": "object"
+    },
+    "GateVerdict": {
+      "enum": [
+        "ALLOW",
+        "DENY"
+      ],
+      "title": "GateVerdict",
+      "type": "string"
     },
     "GroundAction": {
       "additionalProperties": false,
@@ -4656,6 +4996,17 @@
       "title": "ObservationTiming",
       "type": "string"
     },
+    "OperationEffect": {
+      "description": "What one operation transition did to the backend (phase 3A, G2): reading history is not a side effect.",
+      "enum": [
+        "NONE",
+        "SEND",
+        "QUERY",
+        "REUSE"
+      ],
+      "title": "OperationEffect",
+      "type": "string"
+    },
     "OperationRecord": {
       "additionalProperties": false,
       "description": "Coordination record of one environment operation (P2-051). Intent is recorded before dispatch; every state\nchange is kept with its reason.",
@@ -4700,6 +5051,14 @@
           ],
           "default": null,
           "title": "Based On Revision"
+        },
+        "decisions": {
+          "description": "pre-execution decisions (phase 3A)",
+          "items": {
+            "$ref": "#/$defs/ExecutionDecision"
+          },
+          "title": "Decisions",
+          "type": "array"
         },
         "kind": {
           "default": "apply",
@@ -4749,6 +5108,19 @@
           ],
           "default": null
         },
+        "request_digest": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "sha256 of the canonical request (actor, kind, action); the same id with another request is a conflict (phase 3A)",
+          "title": "Request Digest"
+        },
         "review": {
           "anyOf": [
             {
@@ -4794,7 +5166,9 @@
         "outcome",
         "reconciliation",
         "review",
-        "attempts"
+        "attempts",
+        "request_digest",
+        "decisions"
       ],
       "title": "OperationRecord",
       "type": "object"
@@ -4825,6 +5199,18 @@
           "title": "Attempt",
           "type": "integer"
         },
+        "effect": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/OperationEffect"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "what this transition did to the backend (phase 3A); absent in records written before it"
+        },
         "reason": {
           "title": "Reason",
           "type": "string"
@@ -4837,7 +5223,8 @@
         "state",
         "at",
         "reason",
-        "attempt"
+        "attempt",
+        "effect"
       ],
       "title": "OperationTransition",
       "type": "object"
@@ -5659,7 +6046,8 @@
         "EVALUATOR",
         "ARTIFACT_STORE",
         "SEMANTIC_DRIVER",
-        "PROBE"
+        "PROBE",
+        "EXECUTION_GATE"
       ],
       "title": "PluginInterface",
       "type": "string"
@@ -5757,6 +6145,14 @@
           "default": null,
           "title": "Category"
         },
+        "condition_labels": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "execution-gate condition name → label (phase 3A)",
+          "title": "Condition Labels",
+          "type": "object"
+        },
         "description": {
           "anyOf": [
             {
@@ -5813,7 +6209,8 @@
         "action_display",
         "metric_labels",
         "entity_labels",
-        "value_labels"
+        "value_labels",
+        "condition_labels"
       ],
       "title": "PluginUi",
       "type": "object"
@@ -7676,6 +8073,14 @@
         "environment": {
           "$ref": "#/$defs/EnvironmentSpec"
         },
+        "execution_gates": {
+          "description": "pre-execution decision plugins (EXECUTION_GATE) consulted in order before every send of an operation (phase 3A); none = phase-2 behaviour",
+          "items": {
+            "$ref": "#/$defs/StrategySpec"
+          },
+          "title": "Execution Gates",
+          "type": "array"
+        },
         "extensions": {
           "description": "namespaced extension slots; keys are reverse-DNS namespaces, formal-lab.core.* is reserved",
           "patternProperties": {
@@ -7810,7 +8215,8 @@
         "objective",
         "driver",
         "rules",
-        "release"
+        "release",
+        "execution_gates"
       ],
       "title": "ScenarioManifest",
       "type": "object"
@@ -9294,6 +9700,9 @@
     "CheckQuery": {
       "$ref": "#/$defs/CheckQuery"
     },
+    "ConditionCheck": {
+      "$ref": "#/$defs/ConditionCheck"
+    },
     "EnvironmentSession": {
       "$ref": "#/$defs/EnvironmentSession"
     },
@@ -9309,8 +9718,17 @@
     "EvidenceRef": {
       "$ref": "#/$defs/EvidenceRef"
     },
+    "ExecutionDecision": {
+      "$ref": "#/$defs/ExecutionDecision"
+    },
     "Extension": {
       "$ref": "#/$defs/Extension"
+    },
+    "GateRequest": {
+      "$ref": "#/$defs/GateRequest"
+    },
+    "GateResult": {
+      "$ref": "#/$defs/GateResult"
     },
     "IRPayload": {
       "$ref": "#/$defs/IRPayload"
