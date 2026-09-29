@@ -23,10 +23,10 @@ STATUSES = ("FAIL", "BLOCKED", "NOT_RUN", "NOT_SELECTED")
 
 
 def taskbook(task_id: str) -> Path:
-    m = re.match(r"^P(\d+)-", task_id)
+    m = re.match(r"^P(\d+[a-z]?)-", task_id, flags=re.I)  # P2-004 → phase-2.md, P3A-G1 → phase-3a.md
     if not m:
         raise SystemExit(f"unrecognised task id {task_id!r}")
-    return ROOT / "docs" / "execution" / f"phase-{m.group(1)}.md"
+    return ROOT / "docs" / "execution" / f"phase-{m.group(1).lower()}.md"
 
 
 def main() -> None:
