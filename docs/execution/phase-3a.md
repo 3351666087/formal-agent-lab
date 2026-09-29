@@ -78,7 +78,9 @@
 
 ## G5 · 前端、Figma、GitHub 与 SVG 动画统一交付
 
-- [ ] **P3A-G5** 完成产品视觉定稿与真实功能接入，交付前端、Figma 设计文件、GitHub 展示和可编辑的 SVG 动画素材。
+- [x] **P3A-G5** 完成产品视觉定稿与真实功能接入，交付前端、Figma 设计文件、GitHub 展示和可编辑的 SVG 动画素材。
+  - 证据：Evidence Workbench tokens/components/six areas + batches/decisions/views/capabilities/reuse marker; Figma file uuV6JeilZQkhnIQcJYEUET (variables, components, screens, chart spec, storyboard); README with animated SVG + real screenshots (render checked); demo.svg/mp4/cover/html; docs/design-system.md; g5-flows 6/6, g5-web 8/8, UI 14/14
+  - 实现：`docs/design-system.md`、`design/figma.json`、`scripts/render_demo.py`、`scripts/capture_screens.py`、`scripts/product_flow_evidence.py`、`README.md`
 
 **设计与实现。** 先看现有前端与 README，选定一个完整方向并落实：专业研究工作台，强调清楚的模型结构、运行过程和证据，兼顾信息密度和可读性。建立字体、间距、颜色、状态、图表、圆角和动效 tokens，以及导航、表格、表单、侧栏、状态标签、空态/错误态等复用组件。品牌色和参与者/状态颜色分离。沿现有六个区域完成统一改造，保留真实 API、路由和用户流程；桌面优先，窄屏可用，支持键盘操作和减少动效的偏好。
 
