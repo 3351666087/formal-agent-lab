@@ -1,0 +1,115 @@
+#!/usr/bin/env python3
+"""Phase-3A local checks (G6): the checks of this round, on the engine of scripts/check_runner.py.
+
+    make phase3-check                                   # everything → docs/execution/evidence/phase3/checks/
+    make phase3-check ARGS="--group g4-batch"           # one group
+    make phase3-check ARGS="--only p3-matrix-kept-db --out out/checks/p3-matrix"
+    uv run --frozen python scripts/check_runner.py --suite phase3 --list
+
+Groups follow the task book's packages G1 … G6 plus `regression` (unit suite, full integration suite, the phase-1
+sentinel). The phase-2 acceptance (docs/handoff/phase2-checks.json) is historical evidence and is not re-run here;
+its checks stay loadable with `--suite phase2`. A check whose precondition is missing ends NOT_RUN (services,
+Docker, running dev stack) or BLOCKED (disk below the guard, optional backend absent) with the reason — never PASS.
+"""
+
+from __future__ import annotations
+
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from check_runner import ROOT, Check, Suite, main
+
+PYTEST = "uv run --frozen pytest -p no:cacheprovider -q"
+PY = "uv run --frozen python"
+EV = "docs/execution/evidence/phase3"
+IT = f"{PYTEST} -m integration"
+
+CHECKS = [
+    # ------------------------------------------------------------ G1 contracts and plugin compatibility
+    Check("p3-contracts", "g1-contracts", "契约 v2 增量无漂移（v1 冻结），Python / JSON Schema / TypeScript 样例往返",
+          f"make contracts-check && {PYTEST} tests/contracts packages/contracts && pnpm --filter @formal-lab/contracts run test",
+          ["P3A-G1"], ["contracts/v2/DIGEST.json", "docs/contracts/v2.md"]),
+    Check("p3-compat", "g1-contracts", "阶段二 v2 回放样本可读、包外插件合同检查、架构约束、SDK",
+          f"{PYTEST} tests/compat examples/external-plugin tests/architecture packages/sdk",
+          ["P3A-G1"], ["tests/compat/fixtures/phase2/CAPTURE.json"]),
+    # ------------------------------------------------------------ G2 execution gates and operation identity
+    Check("p3-ops-unit", "g2-operations", "执行门控、请求摘要、复用 / 冲突 / 安全重发（单元与订单示例）",
+          f"{PYTEST} packages/runtime/tests/test_operation_consistency.py examples/warehouse-allocation/tests/test_capacity_gate.py "
+          "examples/local-order-service", ["P3A-G2"]),
+    Check("p3-ops-evidence", "g2-operations", "真实订单服务进程：9 种一致性场景（逐项统计服务的操作表）",
+          f"{PY} scripts/operation_consistency_evidence.py", ["P3A-G2"], [f"{EV}/g2-operations.json"]),
+    Check("p3-ops-platform", "g2-operations", "持久路径：门控运行中杀 Worker、订单服务丢失应答与对账",
+          f"{IT} tests/integration/test_operation_consistency_platform.py tests/integration/test_order_service_platform.py",
+          ["P3A-G2"], requires="services", profile="local-services", retries=1),
+    # ------------------------------------------------------------ G3 drivers, rules, releases
+    Check("p3-release-unit", "g3-release", "能力报告、发布配置、流程完成与性质成立分开、最小驱动",
+          f"{PYTEST} packages/runtime/tests/test_release.py", ["P3A-G3"]),
+    Check("p3-release-evidence", "g3-release", "真实修订：差异 → 回归案例 → 旧版拒绝、修订版发布；陈旧依据分类",
+          f"{PY} scripts/model_revision_evidence.py", ["P3A-G3"], [f"{EV}/g3-release.json"]),
+    Check("p3-governance-platform", "g3-release", "API 能力报告、必需检查、差异 → 修订 → 新实验",
+          f"{IT} tests/integration/test_governance_platform.py", ["P3A-G3"], requires="services",
+          profile="local-services"),
+    # ------------------------------------------------------------ G4 joint batches, participant input
+    Check("p3-batch-unit", "g4-batch", "同步批次、成员状态、参与者视图与设置、顺序模式不变",
+          f"{PYTEST} examples/warehouse-allocation/tests packages/runtime/tests/test_participants.py "
+          "packages/runtime/tests/test_multi_actor.py", ["P3A-G4"]),
+    Check("p3-batch-evidence", "g4-batch", "仓储批次：一轮一个环境步、轮中重启、各看各的字段、阶段二轨迹不变",
+          f"{PY} scripts/joint_batch_evidence.py", ["P3A-G4"], [f"{EV}/g4-batch.json"]),
+    Check("p3-batch-platform", "g4-batch", "持久路径：轮中暂停 + 杀 Worker 继续批次、轮中取消、视图校验；多参与者回归",
+          f"{IT} tests/integration/test_joint_batch_platform.py tests/integration/test_multi_actor_platform.py",
+          ["P3A-G4"], requires="services", profile="local-services", retries=1),
+    # ------------------------------------------------------------ G5 product, design, media
+    Check("p3-design-sources", "g5-product", "tokens.css 与 design/tokens.json 一致；演示 SVG / 封面 / 预览 / 架构图与源一致",
+          "python3 scripts/design_tokens.py --check && python3 scripts/render_demo.py svg && "
+          "git diff --exit-code -- docs/assets/demo.svg docs/assets/demo-cover.svg docs/assets/demo.html docs/assets/architecture.svg",
+          ["P3A-G5"], ["web/src/tokens.css", "docs/assets/demo.svg"]),
+    Check("p3-web-build", "g5-product", "Web 类型检查与生产构建", "pnpm --dir web exec tsc --noEmit -p tsconfig.json && "
+          "pnpm --dir web exec vite build", ["P3A-G5"]),
+    Check("p3-web-ui", "g5-product", "Playwright：六个区域、新项目到两参与者成本对比、离线回放",
+          f"{PYTEST} -m 'integration and ui' tests/integration/test_web_ui.py tests/integration/test_web_product.py",
+          ["P3A-G5"], requires="services", profile="local-services"),
+    Check("p3-product-flows", "g5-product", "SDK / CLI：仓储批次与订单恢复的运行、查询、导出、离线读取",
+          f"{PY} scripts/product_flow_evidence.py", ["P3A-G5"], [f"{EV}/g5-flows.json"], requires="devstack",
+          profile="local-services"),
+    Check("p3-web-flows", "g5-product", "Web：同样两个流程 + 复用标记、窄屏、键盘、减少动态（截图写到检查目录）",
+          f"{PY} scripts/capture_screens.py --shots out/checks/phase3-screens", ["P3A-G5"], [f"{EV}/g5-web.json"],
+          requires="devstack", profile="local-services"),
+    # ------------------------------------------------------------ G6 local check and release tooling
+    Check("p3-matrix-kept-db", "g6-release", "矩阵测试在保留的数据库上连续两次通过（两个独立会话）",
+          f"{IT} tests/integration/test_matrix_v2_platform.py && {IT} tests/integration/test_matrix_v2_platform.py",
+          ["P3A-G6"], requires="services", profile="local-services"),
+    Check("p3-resources", "g6-release", "资源探测：宿主共享盘与 VM / Docker 盘（disk_guard）、profile 可用性",
+          f"python3 scripts/disk_guard.py --need 12 --label phase3-check && python3 scripts/doctor.py --record {EV}/doctor.json",
+          ["P3A-G6"], [f"{EV}/doctor.json"]),
+    Check("p3-release-light", "g6-release", "发行（不建镜像）：全部 wheel、Web 包、干净 venv 中的 SDK/CLI、许可证清单",
+          f"{PY} scripts/release.py --skip-images --out out/release-p3 --evidence {EV}/release-manifest.json",
+          ["P3A-G6"], [f"{EV}/release-manifest.json", "docs/licenses.md"], heavy_gib=3),
+    Check("p3-release-images", "g6-release", "发行（含 OCI 镜像与异架构构建）", f"{PY} scripts/release.py --out out/release-p3-images "
+          f"--evidence {EV}/release-manifest-images.json", ["P3A-G6"], [f"{EV}/release-manifest-images.json"],
+          requires="docker", kind="extension", heavy_gib=16),
+    Check("p3-offline-bundle", "g6-release", "去重离线包：空目录无包仓库安装与整栈实验", f"{PY} scripts/offline_bundle.py --verify",
+          ["P3A-G6"], ["docs/execution/evidence/phase2/offline-manifest.json"], requires="docker", kind="extension",
+          heavy_gib=20),
+    # ------------------------------------------------------------ regression
+    Check("p3-unit-all", "regression", "全部单元 / 契约 / 架构 / 示例测试（含阶段一哨兵）",
+          f"{PYTEST} -m 'not integration and not llm and not ui'"),
+    Check("p3-phase1-parity", "regression", "阶段一单参与者轨迹与哨兵",
+          f"{PYTEST} examples/neutral-scheduling/tests/test_sentinel.py "
+          "packages/runtime/tests/test_kernel.py::test_single_participant_run_reproduces_the_phase1_trajectory"),
+    Check("p3-integration-all", "regression", "与 CI 相同的平台集成测试（API、Worker、Temporal、SDK/CLI、回放）",
+          f"{PYTEST} tests/integration -m 'integration and not ui and not llm'", requires="services",
+          profile="local-services", retries=1),
+]
+
+SUITE = Suite(
+    name="phase3",
+    groups=["g1-contracts", "g2-operations", "g3-release", "g4-batch", "g5-product", "g6-release", "regression"],
+    checks=CHECKS,
+    out=ROOT / "docs" / "execution" / "evidence" / "phase3" / "checks",
+    # what the checks and the handoff write themselves: never part of what is being checked
+    outputs=("docs/execution/evidence/", "docs/handoff/", "docs/licenses.md", "docs/api/openapi.json", "out/"),
+)
+
+if __name__ == "__main__":
+    sys.exit(main(["--suite", "phase3", *sys.argv[1:]]))

@@ -153,6 +153,13 @@ phase1-check: ## run every phase-1 acceptance check and write docs/handoff/phase
 handoff: ## regenerate docs/handoff/phase1.manifest.json from the repository and check results
 	uv run --frozen python scripts/handoff.py
 
+.PHONY: phase3-check checks
+phase3-check: ## phase-3A local checks (engine: scripts/check_runner.py) → docs/execution/evidence/phase3/checks/ (ARGS="--group g" / "--only id" / "--out dir")
+	$(UV_RUN) python scripts/phase3_check.py $(ARGS)
+
+checks: ## any suite on the check engine: make checks SUITE=phase2 ARGS="--list"
+	$(UV_RUN) python scripts/check_runner.py --suite $(or $(SUITE),phase3) $(ARGS)
+
 .PHONY: phase2-check handoff-phase2 prism-games-check disk-guard
 phase2-check: ## phase-2 local acceptance: all check groups → docs/handoff/phase2-checks.json (ARGS="--group g" / "--only id")
 	$(PY) scripts/phase2_check.py $(ARGS)

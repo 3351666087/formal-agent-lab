@@ -55,7 +55,7 @@ def shot(page: Page, name: str, *, full: bool = False) -> str:
         ERROR_SCREENS.append(name)  # an error screen is never a baseline
     path = SHOTS / f"{name}.png"
     page.screenshot(path=str(path), full_page=full)
-    return str(path.relative_to(ROOT))
+    return str(path.relative_to(ROOT)) if path.is_relative_to(ROOT) else str(path)
 
 
 def run_from_scenario(page: Page, web: str, base: str, pid: str, sid: str, timeout: float = 300) -> str:
@@ -90,7 +90,10 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--web", default="http://127.0.0.1:5173")
     ap.add_argument("--api", default="http://127.0.0.1:8000")
+    ap.add_argument("--shots", default=str(SHOTS), help="where the screenshots go (default: the baseline in docs/assets)")
     args = ap.parse_args()
+    global SHOTS
+    SHOTS = Path(args.shots).resolve()
     web, base = args.web.rstrip("/"), args.api.rstrip("/")
     t0 = time.time()
     projects = api(base, "/projects")

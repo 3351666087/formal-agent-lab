@@ -1,6 +1,12 @@
 """Build the release: wheels (SDK, CLI, platform packages), web bundle, OCI images, manifest (phase 2: 0.2.0).
 
     uv run --frozen python scripts/release.py            → out/release/{wheels/, web-dist.tar.gz, manifest.json}
+    … --skip-images [--out DIR] [--evidence PATH]        wheels + web + SDK/CLI check + licenses, no OCI images
+                                                          (phase 3 check under a disk limit; images: SKIPPED + reason)
+
+Packaging slot for new packages: every uv workspace member (pyproject.toml [tool.uv.workspace]) is built as a wheel
+(`uv build --all-packages`) and listed in the manifest; plugins register through the `formal_lab.plugins` entry
+point, so a new plugin package needs no change here. Images come from deploy/compose/docker-compose.yaml.
 
 The SDK/CLI wheels are verified by installing them into a fresh virtual environment (project packages from the
 built wheels via --find-links; third-party dependencies from the package index / local cache) and running `fal`
@@ -42,8 +48,18 @@ def sha256(path: Path) -> str:
 
 
 def main() -> None:
+    import argparse
+
+    global OUT
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--skip-images", action="store_true", help="no OCI image builds (wheels, web, SDK/CLI, licenses)")
+    ap.add_argument("--out", default=str(OUT))
+    ap.add_argument("--evidence", default=str(ROOT / "docs" / "execution" / "evidence" / "phase2" / "release-manifest.json"))
+    args = ap.parse_args()
+    OUT = Path(args.out).resolve()
     t0 = time.time()
-    print(sh(sys.executable, "scripts/disk_guard.py", "--need", "6", "--label", "release build", "--trim").strip())
+    need = "2" if args.skip_images else "6"
+    print(sh(sys.executable, "scripts/disk_guard.py", "--need", need, "--label", "release build", "--trim").strip())
     rev = sh("git", "rev-parse", "HEAD").strip()
     dirty = bool(sh("git", "status", "--porcelain").strip())
     if OUT.exists():
@@ -65,11 +81,13 @@ def main() -> None:
     with tarfile.open(web_tar, "w:gz") as tar:
         tar.add(ROOT / "web" / "dist", arcname="web")
 
-    print("==> images")
-    env = {"FAL_SOURCE_REVISION": rev}
-    sh("docker", "compose", "-f", "deploy/compose/docker-compose.yaml", "build", "--quiet", env=env)
-    images = []
-    for name in IMAGES:
+    images: list[dict] = []
+    skipped = "--skip-images: OCI images not built by this run (make release builds them)" if args.skip_images else None
+    print("==> images" + (" (skipped)" if skipped else ""))
+    if not skipped:
+        sh("docker", "compose", "-f", "deploy/compose/docker-compose.yaml", "build", "--quiet",
+           env={"FAL_SOURCE_REVISION": rev})
+    for name in () if skipped else IMAGES:
         local = f"formal-agent-lab/{name}:local"
         for tag in (VERSION, rev[:12]):
             sh("docker", "tag", local, f"formal-agent-lab/{name}:{tag}")
@@ -84,7 +102,7 @@ def main() -> None:
     sdk_check = verify_sdk(wheels)
 
     print("==> amd64 (other architecture): build with the available builder, run under emulation if possible")
-    other_arch = cross_arch(rev)
+    other_arch = {"build": "NOT_RUN", "reason": skipped} if skipped else cross_arch(rev)
     print("==> license inventory")
     sh(sys.executable, "scripts/license_inventory.py")
     licenses = json.loads((ROOT / "docs/execution/evidence/phase2/licenses.json").read_text())
@@ -119,6 +137,7 @@ def main() -> None:
                     "entry_point": "fal = formal_lab_sdk.cli:main", "verification": sdk_check},
         "web": {"file": web_tar.name, "sha256": sha256(web_tar), "bytes": web_tar.stat().st_size},
         "images": images,
+        **({"images_skipped": skipped} if skipped else {}),
         "scenarios": {"model": {"package_id": pkg.package_id, "version": pkg.version, "digest": pkg.digest.value},
                       "scenario_ids": [f"sched-{k}" for k in SCENARIO_CONFIGS]},
         "docs": ["README.md", "docs/getting-started.md", "docs/local-development.md", "docs/deployment.md",
@@ -131,7 +150,8 @@ def main() -> None:
         "duration_s": round(time.time() - t0, 1),
     }
     (OUT / "manifest.json").write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\n")
-    evidence = ROOT / "docs" / "execution" / "evidence" / "phase2" / "release-manifest.json"  # phase-1 file stays
+    evidence = Path(args.evidence)  # phase 2's copy by default (the phase-1 file stays)
+    evidence.parent.mkdir(parents=True, exist_ok=True)
     evidence.write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\n")
     print(f"==> {OUT / 'manifest.json'} ({len(wheel_info)} wheels, {len(images)} images) in {manifest['duration_s']} s")
 
@@ -210,7 +230,8 @@ def verify_sdk(wheels: Path) -> dict:
             raise SystemExit(f"SDK/CLI check: installed formal-lab-sdk {names.get('formal-lab-sdk')}, built {VERSION}")
         fal = venv / "bin" / "fal"
         commands = []
-        for args in (["--help"], ["replay", "verify", str(bundle)], ["replay", "view", str(bundle)]):
+        for args in (["--help"], ["replay", "verify", str(bundle)], ["replay", "view", str(bundle)],
+                     ["replay", "batches", str(bundle)]):
             r = subprocess.run([str(fal), *args], capture_output=True, text=True,
                                env={**os.environ, "FAL_API_URL": "http://127.0.0.1:9/api/v1"}, cwd=tmp)
             commands.append({"command": "fal " + " ".join(a if not a.startswith(tmp) else "<bundle>" for a in args),
