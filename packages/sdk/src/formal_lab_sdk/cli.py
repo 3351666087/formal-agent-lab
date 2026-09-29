@@ -713,10 +713,40 @@ def replay_operations(path: Path, abnormal: bool = typer.Option(False, "--abnorm
         states = [t.state.value for t in op.transitions]
         if abnormal and "OUTCOME_UNKNOWN" not in states and op.review is None and op.state.value != "FAILED":
             continue
-        typer.echo(f"{op.operation_id}  step {op.step}  {op.action.action_type}  {' → '.join(states)}"
+        what = op.action.action_type if op.action else f"batch {op.batch_id} ({len(op.batch_outcomes)} proposals)"
+        typer.echo(f"{op.operation_id}  step {op.step}  {what}  {' → '.join(states)}"
                    + (f"  [review {op.review.status}]" if op.review else ""))
         for t in op.transitions:
             typer.echo(f"    {t.state.value:<16} {t.reason}")
+
+
+def _print_batches(batches: list[dict[str, Any]]) -> None:
+    for b in batches:
+        env = f"env step {b['env_step']}" if b.get("env_step") is not None else "not sent"
+        typer.echo(f"{b['batch_id']}  round {b['round']}  {b['status']}  {env}"
+                   + (f"  [{b['semantics']}{', joint prediction' if b.get('joint_prediction') else ''}]"
+                      if b.get("semantics") else ""))
+        for m in b["members"]:
+            a = m.get("action") or {}
+            act = f"{a.get('action_type')}({', '.join(f'{k}={v}' for k, v in a.get('params', {}).items())})" if a else ""
+            typer.echo(f"    {m['actor_id']:<14} {m['status']:<10} step {m.get('global_step') or '-'!s:>3}  {act:<36} "
+                       f"{m.get('outcome') or ''} {m.get('comparison') or ''}"
+                       + (f"  — {m.get('reason')}" if m.get("reason") else ""))
+
+
+@replay_app.command("batches")
+def replay_batches(path: Path) -> None:
+    """Navigate JOINT_BATCH rounds: members, statuses, environment step, outcomes (offline)."""
+    _print_batches(_bundle(path).batches())
+
+
+@run_app.command("batches")
+def run_batches(run_id: str, api: str = API) -> None:
+    """JOINT_BATCH rounds of a run (online)."""
+    try:
+        _print_batches(_client(api).batches(run_id))
+    except FormalLabError as exc:
+        _fail(exc)
 
 
 @replay_app.command("model")

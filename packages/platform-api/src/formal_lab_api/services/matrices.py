@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from formal_lab_contracts import MetricDefinition, MetricResult, PluginRef, RunManifest, compat
+from formal_lab_contracts import MetricDefinition, MetricResult, PluginRef, RunManifest, compat, digest_of
 from formal_lab_contracts.errors import FormalLabError, InvalidInput
 from formal_lab_eval.matrix import Cell, CellRun, build_report, expand
 from sqlalchemy import select
@@ -12,7 +12,7 @@ from sqlalchemy.orm import Session
 
 from ..db import Matrix, MatrixCellRow, MetricRow, Project, Run, RunEvent, Scenario, StrategyConfig
 from .common import get_or_404, new_id, registry
-from .runs import create_run
+from .runs import _package_for, create_run
 
 
 def matrix_dict(mx: Matrix, s: Session) -> dict[str, Any]:
@@ -184,21 +184,31 @@ def expand_v2(s: Session, project_id: str, spec: dict[str, Any]) -> list[dict[st
                                                                      "version": st.plugin_version},
                              "config": st.config, "label": st.name}
         env = backend["environment"] if backend else manifest.environment.model_dump(mode="json")
-        model_ref = manifest.model.model_dump(mode="json")
-        if mv:
-            model_ref = package_of_version(s, mv).ref().model_dump(mode="json")
+        package = package_of_version(s, mv) if mv else _package_for(s, manifest)
+        model_ref = package.ref().model_dump(mode="json")
+        # phase 3A reuse key: everything that can change a cell's result — the resolved plugins (descriptor
+        # digests: an upgraded plugin is another cell), what each participant's planner receives, the scenario
+        # manifest itself and the declared extension configurations
+        shared = {"plugins": _plugin_pins(manifest, package, env, chosen),
+                  "views": {p.actor_id: p.view.model_dump(mode="json") if p.view else None
+                            for p in manifest.participants},
+                  "scenario_digest": digest_of(sc.manifest).value,
+                  "extensions": {"scenario": {k: v.model_dump(mode="json") for k, v in manifest.extensions.items()},
+                                 "model": {k: v.model_dump(mode="json") if hasattr(v, "model_dump") else v
+                                           for k, v in package.extensions.items()}}}
         for split, seeds in sorted(splits.items()):
             for seed in seeds:
-                config = {"scenario_id": sid, "scenario_revision": sc.revision,
+                config = {"key_version": 2, "scenario_id": sid, "scenario_revision": sc.revision,
                           "participants": {a: {k: v for k, v in c.items() if k != "label"} for a, c in chosen.items()},
                           "environment": env, "rules": rule if rule not in (None,) else "scenario",
                           "model": model_ref, "seed": int(seed), "budget": budget,
-                          "ablations": {k: v for k, v in abl.items() if k != "label"}}
+                          "ablations": {k: v for k, v in abl.items() if k != "label"}, **shared}
                 digest = config_digest(config)
                 label = "+".join(f"{a}={c['label']}" for a, c in chosen.items()) if len(chosen) > 1 else \
                     next(iter(chosen.values()))["label"]
                 cells.append({
                     "cell_id": cell_id_of(digest), "config_digest": digest, "split": split, "seed": int(seed),
+                    "key_parts": {k: config_digest(v)[:12] for k, v in config.items() if k != "key_version"},
                     "scenario_id": sid, "scenario_revision": sc.revision, "config": config,
                     "labels": {"scenario": manifest.name, "participants": label, "backend": _label(backend),
                                "rules": _label(rule), "model": model_ref["package_id"] + f"@{model_ref['version']}",
@@ -214,6 +224,26 @@ def expand_v2(s: Session, project_id: str, spec: dict[str, Any]) -> list[dict[st
     if len(unique) > MAX_V2_CELLS:
         raise InvalidInput(f"matrix has {len(unique)} cells (limit {MAX_V2_CELLS})")
     return list(unique.values())
+
+
+def _plugin_pins(manifest: Any, package: Any, env: dict[str, Any], chosen: dict[str, dict[str, Any]]) -> dict[str, Any]:
+    """The plugins a cell's run resolves to, each with its descriptor digest (as pinned at run creation)."""
+    from formal_lab_runtime.engine import DEFAULT_VERIFIER
+
+    from .runs import evaluators_for
+
+    reg = registry()
+
+    def pin(ref: Any) -> dict[str, str]:
+        entry = reg.resolve(PluginRef.model_validate(ref))
+        return {"plugin_id": entry.descriptor.plugin_id, "version": entry.descriptor.version,
+                "descriptor_digest": entry.descriptor_digest}
+
+    driver = manifest.driver or reg.driver_for(package.semantic_profile).descriptor.ref()
+    return {"environment": pin(env["plugin"]), "driver": pin(driver), "verifier": pin(DEFAULT_VERIFIER),
+            "gates": [pin(g.plugin) for g in manifest.execution_gates],
+            "evaluators": [pin(r) for r in evaluators_for(package.package_id)],
+            "participants": {a: pin(c["plugin"]) for a, c in sorted(chosen.items())}}
 
 
 def package_of_version(s: Session, version_id: str):
@@ -239,6 +269,8 @@ def add_cells(s: Session, mx: Matrix, cells: list[dict[str, Any]]) -> dict[str, 
             counts["skipped"] += 1
             continue
         done = _done_elsewhere(s, mx.project_id, c["config_digest"])
+        if done:  # same full configuration already run: linked, and marked as reused (phase 3A)
+            c = {**c, "reused_from": {"matrix_id": done.matrix_id, "cell_id": done.cell_id, "run_id": done.run_id}}
         s.add(MatrixCellRow(matrix_id=mx.id, cell_id=c["cell_id"], config_digest=c["config_digest"], spec=c,
                             status="DONE" if done else "QUEUED", run_id=done.run_id if done else None,
                             attempts=0, error=None if not done else f"reused from matrix {done.matrix_id}"))
@@ -279,7 +311,8 @@ def cells_dict(s: Session, matrix_id: str) -> list[dict[str, Any]]:
         [c.run_id for c in cell_rows(s, matrix_id) if c.run_id])))}
     return [{"cell_id": c.cell_id, "status": c.status, "run_id": c.run_id, "attempts": c.attempts, "error": c.error,
              "split": c.spec["split"], "seed": c.spec["seed"], "labels": c.spec["labels"],
-             "config_digest": c.config_digest,
+             "config_digest": c.config_digest, "reused_from": c.spec.get("reused_from"),
+             "key_parts": c.spec.get("key_parts"),
              "run_status": runs[c.run_id].status if c.run_id in runs else None} for c in cell_rows(s, matrix_id)]
 
 

@@ -13,7 +13,8 @@ const RECOVERY_TYPES = new Set(["RECOVERY", "OPERATION_RECONCILED", "OPERATION_R
 
 export interface OperationRow {
   operation_id: string; step: number; actor_id: string | null; state: string; needs_review: boolean;
-  attempts: number; action: { action_type: string; params: Record<string, unknown> };
+  attempts: number; action: { action_type: string; params: Record<string, unknown> } | null;
+  kind?: string; batch_id?: string | null; batch_outcomes?: Record<string, any>[];
   transitions: { state: string; reason: string; at: string }[]; review: { status: string; note: string; by: string } | null;
   reconciliation: { method: string; found: boolean; note: string } | null;
 }
@@ -99,7 +100,7 @@ export function OperationsPanel({ runId }: { runId: string }) {
         <div className="table-wrap" style={{ maxHeight: 220 }}>
           <table className="table" aria-label="异常操作"><thead><tr><th className="num">步</th><th>动作</th><th>状态路径</th><th>复核</th></tr></thead>
             <tbody>{abnormal.map((o) => <tr key={o.operation_id}>
-              <td className="num">{o.step}</td><td className="small">{o.action.action_type}</td>
+              <td className="num">{o.step}</td><td className="small">{o.action?.action_type ?? `批次 ${o.batch_id ?? ""}`}</td>
               <td className="small" title={o.transitions.map((t) => `${t.state}: ${t.reason}`).join("\n")}>
                 {o.transitions.map((t) => t.state).join(" → ")}</td>
               <td>{o.review ? <span className={`badge ${o.review.status === "NEEDS_REVIEW" ? "warn" : "ok"}`} title={o.review.note}>{o.review.status}</span>

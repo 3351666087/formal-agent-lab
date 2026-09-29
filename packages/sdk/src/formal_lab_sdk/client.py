@@ -211,6 +211,10 @@ class Client:
             params["needs_review"] = str(needs_review).lower()
         return self.get(f"/runs/{run_id}/operations", params=params)
 
+    def batches(self, run_id: str) -> list[dict[str, Any]]:
+        """JOINT_BATCH rounds of a run: members, statuses, environment step, outcomes (phase 3A)."""
+        return self.get(f"/runs/{run_id}/batches")
+
     def operation(self, operation_id: str) -> dict[str, Any]:
         return self.get(f"/operations/{operation_id}")
 

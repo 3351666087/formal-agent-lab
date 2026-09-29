@@ -79,6 +79,9 @@ def test_worker_killed_mid_round_continues_the_batch(stack):
     ref_digests = [(e.logical_step, e.payload.get("planner_input_digest"))
                    for e in ref.events if str(e.event_type) == "ACTION_PROPOSED"]
     assert digests == ref_digests and all(d for _, d in digests), "each planner received the same input"
+    listed = stack.get(f"/runs/{run['id']}/batches")  # the API view of the rounds (Web, SDK `batches`, CLI)
+    assert [b["round"] for b in listed] == [b["round"] for b in submitted]
+    assert all(m["outcome"] and m["comparison"] and m["action"] for b in listed for m in b["members"])
     step = stack.get(f"/runs/{run['id']}/steps/1")
     assert step["events"] and any(ev["event_type"] == "BATCH_OPENED" for ev in step["events"])
 

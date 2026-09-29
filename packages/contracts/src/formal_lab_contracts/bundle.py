@@ -38,7 +38,35 @@ STEP_KEYS = {"OBSERVATION": "observation", "CANDIDATES": "candidates", "ACTION_P
              "CHECK_COMPLETED": "check", "ACTION_OUTCOME": "outcome", "EFFECT_COMPARED": "comparison",
              "TURN_STARTED": "turn", "TURN_SKIPPED": "skipped", "PLAN_UPDATED": "plan",
              "OPERATION_STATE": "operation", "OPERATION_RECONCILED": "reconciliation", "PROBE_SAMPLED": "probes",
-             "RULE_EVALUATED": "rules", "OBSERVATION_REQUESTED": "observation_request"}
+             "RULE_EVALUATED": "rules", "OBSERVATION_REQUESTED": "observation_request",
+             "BATCH_OPENED": "batch_opened", "BATCH_SUBMITTED": "batch", "EXECUTION_DECIDED": "decisions"}
+
+
+def summarize_batches(events: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """JOINT_BATCH rounds of a run (phase 3A) from its events ({event_type, logical_step, actor_id, payload}): the
+    final batch record joined with each member's proposal, outcome and comparison verdict. A batch that is still
+    open is listed with status OPEN."""
+    by_member: dict[tuple[int, str], dict[str, Any]] = {}
+    batches: dict[str, dict[str, Any]] = {}
+    for e in events:
+        kind, step, actor, payload = str(e["event_type"]), e.get("logical_step"), e.get("actor_id"), e["payload"]
+        if kind in ("BATCH_OPENED", "BATCH_SUBMITTED", "BATCH_CANCELLED"):
+            batches[payload["batch"]["batch_id"]] = dict(payload["batch"])
+        elif kind in ("ACTION_PROPOSED", "ACTION_OUTCOME", "EFFECT_COMPARED") and step and actor:
+            slot = by_member.setdefault((step, actor), {})
+            if kind == "ACTION_PROPOSED":
+                slot["action"] = payload["proposal"]["action"]
+            elif kind == "ACTION_OUTCOME":
+                out = payload["outcome"]
+                slot.update(outcome=out["status"], reason=(out.get("result") or {}).get("reason"),
+                            env_step=(out.get("turn") or {}).get("env_step"))
+            else:
+                slot["comparison"] = payload["comparison"]["verdict"]
+    out = []
+    for b in sorted(batches.values(), key=lambda b: b["round"]):
+        members = [{**m, **by_member.get((m.get("global_step") or 0, m["actor_id"]), {})} for m in b["members"]]
+        out.append({**b, "members": members})
+    return out
 
 
 def _sha(data: bytes) -> str:
@@ -98,6 +126,11 @@ class ReplayBundle:
             elif str(e.event_type) == "TURN_SKIPPED":
                 row["outcome"] = "SKIPPED"
         return [rows[k] for k in sorted(rows)]
+
+    def batches(self) -> list[dict[str, Any]]:
+        """JOINT_BATCH rounds with their members' actions, outcomes and comparisons (phase 3A)."""
+        return summarize_batches([{"event_type": e.event_type, "logical_step": e.logical_step, "actor_id": e.actor_id,
+                                   "payload": e.payload} for e in self.events])
 
     def plans(self, actor_id: str | None = None) -> list[dict[str, Any]]:
         return [e.payload for e in self.events if str(e.event_type) == "PLAN_UPDATED"

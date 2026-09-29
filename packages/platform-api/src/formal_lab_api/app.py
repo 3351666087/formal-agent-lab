@@ -28,7 +28,18 @@ from formal_lab_contracts.errors import (
 from formal_lab_runtime.manifest import PLATFORM_VERSION
 from sqlalchemy import select, text
 
-from .db import CheckRow, Matrix, Model, ModelVersion, Project, Run, Scenario, StrategyConfig, session_scope
+from .db import (
+    CheckRow,
+    Matrix,
+    Model,
+    ModelVersion,
+    Project,
+    Run,
+    RunEvent,
+    Scenario,
+    StrategyConfig,
+    session_scope,
+)
 from .orchestration import TemporalOrchestrator
 from .services import catalog, governance, modeling, operations, probabilistic, runs, scenarios
 from .services.common import artifact_store, get_or_404
@@ -37,6 +48,8 @@ from .settings import get_settings
 
 log = logging.getLogger("formal_lab.api")
 API = "/api/v1"
+BATCH_EVENT_TYPES = ("BATCH_OPENED", "BATCH_SUBMITTED", "BATCH_CANCELLED", "ACTION_PROPOSED", "ACTION_OUTCOME",
+                     "EFFECT_COMPARED")
 
 
 @asynccontextmanager
@@ -478,6 +491,20 @@ def _routes(app: FastAPI) -> None:
         def go(s):
             get_or_404(s, Run, run_id, "run")
             return operations.list_operations(s, run_id, state=state, needs_review=needs_review, abnormal=abnormal)
+
+        return jsonable_encoder(await db(go))
+
+    @app.get(f"{API}/runs/{{run_id}}/batches")
+    async def run_batches(run_id: str):
+        """JOINT_BATCH rounds of a run (phase 3A): members, statuses, environment step, outcomes."""
+        from formal_lab_contracts.bundle import summarize_batches
+
+        def go(s):
+            get_or_404(s, Run, run_id, "run")
+            rows = s.scalars(select(RunEvent).where(RunEvent.run_id == run_id,
+                                                    RunEvent.event_type.in_(BATCH_EVENT_TYPES)).order_by(RunEvent.seq))
+            return summarize_batches([{"event_type": r.event_type, "logical_step": r.logical_step,
+                                       "actor_id": r.actor_id, "payload": r.payload} for r in rows])
 
         return jsonable_encoder(await db(go))
 

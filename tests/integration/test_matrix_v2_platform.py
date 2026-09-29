@@ -5,6 +5,7 @@ and the v2 report (splits, per-dimension comparisons, probes/evaluators with sou
 from __future__ import annotations
 
 import asyncio
+import json
 import time
 import uuid
 
@@ -108,3 +109,51 @@ def test_matrix_v2_queue_recovery_merge_and_report(stack, demo):
     assert csv_text.startswith("section,split") and "comparison,acceptance" in csv_text
     md = stack.client.get(f"/matrices/{mid}/report", params={"format": "md"}).text
     assert "## Conclusions" in md and "### Paired comparisons" in md
+
+
+def test_reuse_key_covers_views_gates_and_extensions(stack):
+    """Phase 3A: a completed cell is reused (and marked) only for the same full configuration — model, plugins with
+    descriptor digests, rules, participant views, scenario, seed, budget and declared extension configs."""
+    wh = next(p for p in stack.get("/projects") if p["name"] == "仓储分配示例")
+    base = next(s for s in stack.get(f"/projects/{wh['id']}/scenarios") if s["name"] == "仓储：收货员 + 拣货员同步批次")
+    sid = stack.post(f"/scenarios/{base['id']}/copy", {"name": f"同步批次（复用键 {uuid.uuid4().hex[:6]}）"})["id"]
+    strategies = {s["name"]: s["id"] for s in stack.get(f"/projects/{wh['id']}/strategies")}
+    spec = {"version": 2, "name": "reuse key", "scenarios": [sid], "seeds": [0],
+            "participants": [{"receiver": strategies["仓储规则（收货）"], "picker": strategies["仓储规则（拣货）"]}]}
+    first = stack.post(f"/projects/{wh['id']}/matrices", spec)
+    assert first["cells"] == {"queued": 1, "reused": 0, "skipped": 0}
+    done = wait_cells(stack, first["matrix"]["id"], finished, timeout=300)
+    assert done[0]["status"] == "DONE" and done[0]["reused_from"] is None
+    parts = done[0]["key_parts"]
+    assert {"plugins", "views", "scenario_digest", "extensions", "model", "seed", "budget", "rules"} <= set(parts)
+
+    again = stack.post(f"/projects/{wh['id']}/matrices", {**spec, "name": "same configuration"})
+    assert again["cells"] == {"queued": 0, "reused": 1, "skipped": 0}
+    reused = stack.get(f"/matrices/{again['matrix']['id']}/cells")[0]
+    assert reused["cell_id"] == done[0]["cell_id"] and reused["run_id"] == done[0]["run_id"]
+    assert reused["reused_from"] == {"matrix_id": first["matrix"]["id"], "cell_id": done[0]["cell_id"],
+                                     "run_id": done[0]["run_id"]}
+
+    manifest = stack.get(f"/scenarios/{sid}")["manifest"]
+    body = {k: v for k, v in manifest.items() if k not in ("scenario_id", "revision", "model", "contract_version")}
+    model_version = stack.get(f"/scenarios/{sid}")["model_version_id"]
+
+    def changed(edit, name):
+        b = json.loads(json.dumps(body))
+        edit(b)
+        r = stack.client.put(f"/scenarios/{sid}", json={**b, "model_version_id": model_version})
+        assert r.status_code == 200, r.text
+        res = stack.post(f"/projects/{wh['id']}/matrices", {**spec, "name": name})
+        cell = stack.get(f"/matrices/{res['matrix']['id']}/cells")[0]
+        return res["cells"], cell
+
+    counts, view_cell = changed(lambda b: b["participants"][1]["view"].update(exclude=["dock", "done_at"]), "view")
+    assert counts == {"queued": 1, "reused": 0, "skipped": 0} and view_cell["cell_id"] != done[0]["cell_id"]
+    assert view_cell["key_parts"]["views"] != parts["views"] and view_cell["key_parts"]["plugins"] == parts["plugins"]
+    counts, gate_cell = changed(lambda b: b.update(execution_gates=[{
+        "plugin": {"plugin_id": "formal-lab.example.warehouse.capacity-gate", "version": "1.0.0"},
+        "config": {"max_fill": 0.9}}]), "gate")
+    assert counts["queued"] == 1 and gate_cell["key_parts"]["plugins"] != view_cell["key_parts"]["plugins"]
+    counts, ext_cell = changed(lambda b: b["extensions"].update({"org.example.note": {
+        "version": "1.0.0", "schema_id": "org.example.note/v1", "data": {"note": "changed"}}}), "extension")
+    assert counts["queued"] == 1 and ext_cell["key_parts"]["extensions"] != gate_cell["key_parts"]["extensions"]

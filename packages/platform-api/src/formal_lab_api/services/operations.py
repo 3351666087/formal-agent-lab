@@ -25,7 +25,9 @@ def operation_dict(row: OperationRecordRow) -> dict[str, Any]:
             "state": row.state, "needs_review": row.needs_review, "attempts": rec.get("attempts"),
             "action": rec.get("action"), "review": rec.get("review"), "reconciliation": rec.get("reconciliation"),
             "transitions": rec.get("transitions", []), "outcome": rec.get("outcome"), "updated_at": row.updated_at,
-            "request_digest": rec.get("request_digest"), "decisions": rec.get("decisions", [])}
+            "request_digest": rec.get("request_digest"), "decisions": rec.get("decisions", []),
+            "kind": rec.get("kind", "apply"), "batch_id": rec.get("batch_id"),
+            "batch_outcomes": rec.get("batch_outcomes", [])}
 
 
 def list_operations(s: Session, run_id: str, *, state: str | None = None, needs_review: bool | None = None,
