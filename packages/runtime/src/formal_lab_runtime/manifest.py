@@ -107,11 +107,26 @@ def negotiate_run(registry: PluginRegistry, *, scenario: ScenarioManifest, packa
     if len(participants) > 1:
         env_reqs.append(CapabilityRequirement(id=caps.ENV_MULTI_ACTOR))
         env_why[caps.ENV_MULTI_ACTOR] = f"{len(participants)} participants taking turns"
+    joint = str(scenario.turns.mode) == "JOINT_BATCH"
+    if joint:  # phase 3A: a round's proposals are applied together
+        env_reqs.append(CapabilityRequirement(id=caps.ENV_BATCH_STEP))
+        env_why[caps.ENV_BATCH_STEP] = "JOINT_BATCH: each round's proposals are applied in one environment step"
     env_reqs += [CapabilityRequirement(id=c, optional=True) for c in
                  (caps.ENV_PURE_REPLAYABLE, caps.ENV_PERSISTENT_SESSION, caps.ENV_QUERY_OPERATION,
                   caps.ENV_OBSERVE_ON_REQUEST)]
     needs(env, "environment", env_reqs, env_why)
-    results[-1] = results[-1].model_copy(update={"reasons": [*results[-1].reasons, recovery_path(env.descriptor)]})
+    notes = [recovery_path(env.descriptor)]
+    if joint:
+        batch_sem = next((c.params.get("semantics") for c in env.descriptor.capabilities
+                          if c.id == caps.ENV_BATCH_STEP), None)
+        joint_sem = next((c.params.get("semantics") for c in driver.descriptor.capabilities
+                          if c.id == caps.DRIVER_JOINT_PREDICT), None)
+        notes.append(f"batch semantics {batch_sem}; effects compared against a joint prediction"
+                     if batch_sem and batch_sem == joint_sem else
+                     f"batch semantics {batch_sem}; driver {driver.descriptor.plugin_id} declares no matching "
+                     f"{caps.DRIVER_JOINT_PREDICT} (has {joint_sem}): each member's effects are compared against "
+                     "its own action only")
+    results[-1] = results[-1].model_copy(update={"reasons": [*results[-1].reasons, *notes]})
     if not ({c.id for c in env.descriptor.capabilities} & {caps.ENV_PURE_REPLAYABLE, caps.ENV_SNAPSHOT_RESTORE,
                                                           caps.ENV_PERSISTENT_SESSION}):
         fatal.append(f"{env.descriptor.plugin_id} declares neither env.pure_replayable nor env.persistent_session: "

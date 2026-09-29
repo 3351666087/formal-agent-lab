@@ -2350,6 +2350,27 @@
           "default": null,
           "title": "Based On Revision"
         },
+        "batch_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "JOINT_BATCH: the batch this operation submitted",
+          "title": "Batch Id"
+        },
+        "batch_outcomes": {
+          "description": "JOINT_BATCH: one outcome per submitted proposal, in submission order",
+          "items": {
+            "$ref": "#/$defs/ActionOutcome"
+          },
+          "title": "Batch Outcomes",
+          "type": "array"
+        },
         "decisions": {
           "description": "pre-execution decisions (phase 3A)",
           "items": {
@@ -2363,7 +2384,8 @@
           "enum": [
             "apply",
             "reset",
-            "probe"
+            "probe",
+            "batch"
           ],
           "title": "Kind",
           "type": "string"
@@ -2661,6 +2683,18 @@
         },
         "strategy": {
           "$ref": "#/$defs/StrategySpec"
+        },
+        "view": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ParticipantView"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "data this participant's planner receives (phase 3A)"
         }
       },
       "required": [
@@ -2668,6 +2702,50 @@
         "strategy"
       ],
       "title": "Participant",
+      "type": "object"
+    },
+    "ParticipantView": {
+      "additionalProperties": false,
+      "description": "What one participant's planner receives (phase 3A, G4): observed values of locations outside the view are\nwithheld before its belief is built (they count as never observed), and settings are read from its own map\nfirst. The planner never sees the withheld values; the environment and the kernel still work on the truth.",
+      "properties": {
+        "exclude": {
+          "description": "families or paths withheld even if included",
+          "items": {
+            "type": "string"
+          },
+          "title": "Exclude",
+          "type": "array"
+        },
+        "include": {
+          "description": "location families or paths the planner may see (empty = every location)",
+          "items": {
+            "type": "string"
+          },
+          "title": "Include",
+          "type": "array"
+        },
+        "label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Label"
+        },
+        "settings": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "participant settings, read before the platform settings",
+          "title": "Settings",
+          "type": "object"
+        }
+      },
+      "title": "ParticipantView",
       "type": "object"
     },
     "PlanBasis": {
@@ -3981,7 +4059,8 @@
     "TurnMode": {
       "enum": [
         "ROUND_ROBIN",
-        "FIXED_TABLE"
+        "FIXED_TABLE",
+        "JOINT_BATCH"
       ],
       "title": "TurnMode",
       "type": "string"
@@ -3990,6 +4069,20 @@
       "additionalProperties": false,
       "description": "Explicit interleaving semantics: exactly one participant acts per logical (global) step.",
       "properties": {
+        "batch_timeout_s": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "JOINT_BATCH: wall-clock limit for collecting one round's proposals; members that have not proposed by then are recorded TIMED_OUT and the batch is submitted without them (phase 3A)",
+          "title": "Batch Timeout S"
+        },
         "conflict_policy": {
           "$ref": "#/$defs/ConflictPolicy",
           "default": "REVALIDATE"
@@ -4028,6 +4121,33 @@
           "minimum": 0,
           "title": "Actor Step",
           "type": "integer"
+        },
+        "batch_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "JOINT_BATCH: the round's batch (phase 3A)",
+          "title": "Batch Id"
+        },
+        "env_step": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "JOINT_BATCH: environment step the batch was applied at (one per batch, phase 3A)",
+          "title": "Env Step"
         },
         "global_step": {
           "minimum": 0,

@@ -19,7 +19,8 @@
     "TurnMode": {
       "enum": [
         "ROUND_ROBIN",
-        "FIXED_TABLE"
+        "FIXED_TABLE",
+        "JOINT_BATCH"
       ],
       "title": "TurnMode",
       "type": "string"
@@ -30,6 +31,20 @@
   "additionalProperties": false,
   "description": "Explicit interleaving semantics: exactly one participant acts per logical (global) step.",
   "properties": {
+    "batch_timeout_s": {
+      "anyOf": [
+        {
+          "exclusiveMinimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "JOINT_BATCH: wall-clock limit for collecting one round's proposals; members that have not proposed by then are recorded TIMED_OUT and the batch is submitted without them (phase 3A)",
+      "title": "Batch Timeout S"
+    },
     "conflict_policy": {
       "$ref": "#/$defs/ConflictPolicy",
       "default": "REVALIDATE"

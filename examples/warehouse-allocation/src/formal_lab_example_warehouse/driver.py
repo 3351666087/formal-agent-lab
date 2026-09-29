@@ -52,7 +52,10 @@ DESCRIPTOR = PluginDescriptor(
     interface="SEMANTIC_DRIVER",
     capabilities=[{"id": f"profile.{PROFILE}"}, {"id": caps.DRIVER_CANDIDATES}, {"id": caps.DRIVER_PREDICT},
                   {"id": caps.DRIVER_PROPERTIES}, {"id": caps.DRIVER_BELIEF}, {"id": caps.DRIVER_DISPLAY},
-                  {"id": caps.DRIVER_STATS}],
+                  {"id": caps.DRIVER_STATS},
+                  # phase 3A: simultaneous warehouse moves are independent on the round's start state; two moves
+                  # writing the same location conflict (the later one does not take effect)
+                  {"id": caps.DRIVER_JOINT_PREDICT, "params": {"semantics": caps.BATCH_START_STATE_DISJOINT_WRITES}}],
     semantic_profiles=[PROFILE],
     input_schema=json_schema(),
     config_schema={"type": "object", "properties": {}, "additionalProperties": False},

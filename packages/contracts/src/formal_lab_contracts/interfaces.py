@@ -160,6 +160,15 @@ class SessionEnvironment(Environment, Protocol):
 
 
 @runtime_checkable
+class BatchEnvironment(Environment, Protocol):
+    """Phase 3A, optional (capability env.batch_step with params.semantics): apply a JOINT_BATCH round's proposals in
+    one environment step and answer one outcome per proposal, in the given order. The same operation id returns the
+    recorded outcomes (idempotent)."""
+
+    def step_batch(self, proposals: list[ActionProposal], *, operation_id: str) -> list[ActionOutcome]: ...
+
+
+@runtime_checkable
 class Probe(Plugin, Protocol):
     """v2: independent observations of a business environment (not the agent's view)."""
 

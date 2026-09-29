@@ -400,6 +400,8 @@ def step_records(s: Session, run_id: str) -> list[StepRecord]:
             slot["proposal"] = ActionProposal.model_validate(p["proposal"])
         elif row.event_type == "ACTION_OUTCOME":
             slot["outcome"] = ActionOutcome.model_validate(p["outcome"])
+            if slot["outcome"].turn is not None:  # JOINT_BATCH: carries the batch's environment step
+                slot["turn"] = slot["outcome"].turn
             if p.get("operation"):
                 slot["operation"] = OperationRecord.model_validate(p["operation"])
         elif row.event_type == "CHECK_COMPLETED":
@@ -444,7 +446,7 @@ def finalize_run(run_id: str, status: str, reason: str | None = None, error: dic
             fin = finish_run(rc, status=target, reason=reason, final_snapshot=snapshot, usage=usage, steps=steps,
                              last_step=run.last_step, parent_key=parent, termination_reason=term,
                              actor_usage=carry.get("actor_usage", {}),
-                             probes=[p for st in steps for p in st.probes])
+                             probes=[p for st in steps for p in st.probes], carry=carry)
             metrics = fin.metrics
             append_events(s, run, fin.events)
             run.final_state = {"truth_state": fin.final_state, "properties": fin.properties}

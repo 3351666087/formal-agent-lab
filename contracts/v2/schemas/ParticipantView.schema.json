@@ -1,0 +1,46 @@
+{
+  "$id": "https://formal-lab.dev/contracts/v2/ParticipantView.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "What one participant's planner receives (phase 3A, G4): observed values of locations outside the view are\nwithheld before its belief is built (they count as never observed), and settings are read from its own map\nfirst. The planner never sees the withheld values; the environment and the kernel still work on the truth.",
+  "properties": {
+    "exclude": {
+      "description": "families or paths withheld even if included",
+      "items": {
+        "type": "string"
+      },
+      "title": "Exclude",
+      "type": "array"
+    },
+    "include": {
+      "description": "location families or paths the planner may see (empty = every location)",
+      "items": {
+        "type": "string"
+      },
+      "title": "Include",
+      "type": "array"
+    },
+    "label": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Label"
+    },
+    "settings": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "description": "participant settings, read before the platform settings",
+      "title": "Settings",
+      "type": "object"
+    }
+  },
+  "title": "ParticipantView",
+  "type": "object"
+}

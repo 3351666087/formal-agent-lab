@@ -238,6 +238,19 @@ class StrategySpec(ContractModel):
     config: dict[str, Any] = Field(default_factory=dict)
 
 
+class ParticipantView(ContractModel):
+    """What one participant's planner receives (phase 3A, G4): observed values of locations outside the view are
+    withheld before its belief is built (they count as never observed), and settings are read from its own map
+    first. The planner never sees the withheld values; the environment and the kernel still work on the truth."""
+
+    include: list[str] = Field(default_factory=list, description="location families or paths the planner may see "
+                                                                 "(empty = every location)")
+    exclude: list[str] = Field(default_factory=list, description="families or paths withheld even if included")
+    settings: dict[str, str] = Field(default_factory=dict, description="participant settings, read before the "
+                                                                       "platform settings")
+    label: str | None = None
+
+
 class Participant(ContractModel):
     actor_id: Identifier
     role: str = "operator"
@@ -246,6 +259,8 @@ class Participant(ContractModel):
     goal: Name | None = Field(default=None, description="the participant's own goal property (v2)")
     budget: Budget | None = Field(default=None, description="per-participant budget, counted separately (v2)")
     scope: ActionScope | None = Field(default=None, description="ground actions this participant may choose (v2)")
+    view: ParticipantView | None = Field(default=None, description="data this participant's planner receives "
+                                                                   "(phase 3A)")
 
 
 class EnvironmentSpec(ContractModel):
@@ -710,6 +725,9 @@ class EventType(StrEnum):
     MODEL_REVISION_SUGGESTED = "MODEL_REVISION_SUGGESTED"
     REGRESSION_CASE_CREATED = "REGRESSION_CASE_CREATED"
     EXECUTION_DECIDED = "EXECUTION_DECIDED"  # phase 3A: a pre-execution gate allowed or denied a send
+    BATCH_OPENED = "BATCH_OPENED"  # phase 3A: a JOINT_BATCH round started collecting proposals
+    BATCH_SUBMITTED = "BATCH_SUBMITTED"  # … the batch was applied in one environment step
+    BATCH_CANCELLED = "BATCH_CANCELLED"  # … the run ended before the batch was submitted: nothing was sent
 
 
 class TraceEvent(ContractModel):

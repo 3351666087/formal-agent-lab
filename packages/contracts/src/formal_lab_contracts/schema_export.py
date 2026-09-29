@@ -47,6 +47,7 @@ V2_OBJECTS: list[type[BaseModel]] = [
     execution.EnvironmentSession,
     execution.OperationRecord,
     execution.ExecutionDecision,
+    execution.BatchRecord,
     execution.StageRecord,
     execution.ProbeResult,
     execution.QueryBundle,
@@ -82,6 +83,8 @@ SUPPORTING: list[type[BaseModel]] = [
     execution.GateResult,
     execution.ConditionCheck,
     governance.FeatureSupport,
+    execution.BatchMember,
+    objects.ParticipantView,
     EvidenceRef,
     Extension,
 ]

@@ -21,6 +21,9 @@ from .ir import CostTerm
 class TurnMode(StrEnum):
     ROUND_ROBIN = "ROUND_ROBIN"  # participants in declaration order, one action per logical step
     FIXED_TABLE = "FIXED_TABLE"  # the scenario's `table` of actor ids, repeated
+    # phase 3A: every active participant proposes on the round-start observation; the proposals are submitted to the
+    # environment together as one batch (one environment step) when the round's last member has proposed
+    JOINT_BATCH = "JOINT_BATCH"
 
 
 class ObservationTiming(StrEnum):
@@ -40,13 +43,22 @@ class TurnPolicy(ContractModel):
     table: list[Identifier] = Field(default_factory=list, description="FIXED_TABLE: actor ids in turn order")
     observation_timing: ObservationTiming = ObservationTiming.TURN_START
     conflict_policy: ConflictPolicy = ConflictPolicy.REVALIDATE
+    batch_timeout_s: float | None = Field(
+        default=None, gt=0, description="JOINT_BATCH: wall-clock limit for collecting one round's proposals; members "
+                                        "that have not proposed by then are recorded TIMED_OUT and the batch is "
+                                        "submitted without them (phase 3A)")
 
     @model_validator(mode="after")
     def _table(self) -> TurnPolicy:
         if self.mode is TurnMode.FIXED_TABLE and not self.table:
             raise ValueError("FIXED_TABLE needs a non-empty `table`")
-        if self.mode is TurnMode.ROUND_ROBIN and self.table:
+        if self.mode in (TurnMode.ROUND_ROBIN, TurnMode.JOINT_BATCH) and self.table:
             raise ValueError("`table` is only used with FIXED_TABLE")
+        if self.mode is TurnMode.JOINT_BATCH and self.observation_timing is not ObservationTiming.ROUND_START:
+            raise ValueError("JOINT_BATCH proposals are made on the round-start observation: set "
+                             "observation_timing ROUND_START")
+        if self.batch_timeout_s is not None and self.mode is not TurnMode.JOINT_BATCH:
+            raise ValueError("`batch_timeout_s` is only used with JOINT_BATCH")
         return self
 
 
@@ -57,6 +69,9 @@ class TurnRef(ContractModel):
     round: int = Field(ge=0)
     actor_id: Identifier
     actor_step: int = Field(ge=0)
+    batch_id: str | None = Field(default=None, description="JOINT_BATCH: the round's batch (phase 3A)")
+    env_step: int | None = Field(default=None, ge=0, description="JOINT_BATCH: environment step the batch was "
+                                                                 "applied at (one per batch, phase 3A)")
 
 
 # =========================================================================== termination

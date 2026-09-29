@@ -159,7 +159,9 @@ def seed_warehouse(s) -> dict[str, object]:
                                       "仓储规则（拣货）": (rules["plugin_id"], rules["version"], {"role": "picker"})})
     existing = _existing_keys(s, project.id)
     package = modeling.package_of(version)
-    for key, manifest in (("wh-single", wh.single(package)), ("wh-two-roles", wh.receiver_and_picker(package))):
+    for key, manifest in (("wh-single", wh.single(package)), ("wh-two-roles", wh.receiver_and_picker(package)),
+                          # phase 3A: one batch per round, each role's planner sees only its own data fields
+                          ("wh-joint-batch", wh.receiver_and_picker(package, turns=wh.JOINT, views=wh.VIEWS))):
         if key in existing:
             continue
         body = manifest.model_dump(mode="json", exclude={"scenario_id", "revision", "model", "contract_version"})

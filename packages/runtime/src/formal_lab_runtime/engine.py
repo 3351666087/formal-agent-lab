@@ -14,6 +14,14 @@ ids and idempotency keys (P2-034).
 
 Model semantics come only from the semantic driver chosen for the pinned model (P2-010): the engine never builds
 an interpreter itself.
+
+JOINT_BATCH (phase 3A, G4): every member of a round still takes one global step for TURN → OBSERVE → PROPOSE →
+CHECK, on the round-start observation; its proposal is kept in the open `BatchRecord` of the carry state (so a
+restart continues the round). The step of the round's last member submits the batch through `env.step_batch` —
+one environment step — and records every member's outcome and comparison at the member's own proposal step.
+
+What a planner receives passes through its participant's `ParticipantInput` (view filter, settings); the kernel
+checks, predicts and compares on the full observation.
 """
 
 from __future__ import annotations
@@ -23,11 +31,15 @@ import copy
 import hashlib
 import time
 from dataclasses import dataclass, field
+from datetime import datetime
 from typing import Any
 
 from formal_lab_contracts import (
     ActionOutcome,
     ActionProposal,
+    BatchMember,
+    BatchMemberStatus,
+    BatchRecord,
     BeliefState,
     BoundedCheckResult,
     Budget,
@@ -64,6 +76,7 @@ from formal_lab_contracts import (
     StageStatus,
     TerminationPolicy,
     TerminationReason,
+    TurnMode,
     TurnRef,
     TurnState,
     digest_of,
@@ -72,7 +85,8 @@ from formal_lab_contracts import (
 from formal_lab_contracts import capabilities as caps
 from formal_lab_contracts.errors import FormalLabError, NonRetryableFailure
 
-from .coordination import Coordinator, GateHook, InMemoryLedger, OperationLedger, SendDecision
+from .coordination import Coordinator, GateHook, InMemoryLedger, OperationLedger, SendDecision, request_digest
+from .participants import ParticipantInput, ParticipantServices
 from .registry import PluginRegistry
 from .settings import get_setting
 from .turns import CycleScheduler, scheduler_for
@@ -176,18 +190,23 @@ class CarryState:
     flags: dict[str, dict[str, Any]] = field(default_factory=dict)  # actor → {replan, observe_paths, rejected}
     round_observations: dict[str, dict[str, Any]] = field(default_factory=dict)  # actor → Observation JSON
     last_event_key: str | None = None
+    # JOINT_BATCH: the open batch {record: BatchRecord, proposals / turns / observations: actor → JSON}
+    batch: dict[str, Any] | None = None
 
     def to_json(self) -> dict[str, Any]:
-        return {"turn": self.turn.model_dump(mode="json"), "checkpoints": self.checkpoints,
-                "last_outcomes": self.last_outcomes, "actor_usage": self.actor_usage, "flags": self.flags,
-                "round_observations": self.round_observations, "last_event_key": self.last_event_key}
+        out = {"turn": self.turn.model_dump(mode="json"), "checkpoints": self.checkpoints,
+               "last_outcomes": self.last_outcomes, "actor_usage": self.actor_usage, "flags": self.flags,
+               "round_observations": self.round_observations, "last_event_key": self.last_event_key}
+        if self.batch is not None:  # sequential runs keep the phase-2 carry shape
+            out["batch"] = self.batch
+        return out
 
     @classmethod
     def from_json(cls, data: dict[str, Any]) -> CarryState:
         return cls(turn=TurnState.model_validate(data["turn"]), checkpoints=data.get("checkpoints", {}),
                    last_outcomes=data.get("last_outcomes", {}), actor_usage=data.get("actor_usage", {}),
                    flags=data.get("flags", {}), round_observations=data.get("round_observations", {}),
-                   last_event_key=data.get("last_event_key"))
+                   last_event_key=data.get("last_event_key"), batch=data.get("batch"))
 
     def copy(self) -> CarryState:
         return CarryState.from_json(copy.deepcopy(self.to_json()))
@@ -213,9 +232,12 @@ class RunComponents:
     scheduler: CycleScheduler | None = None
     termination: TerminationPolicy | None = None
     gates: list[tuple[PluginRef, Any, dict[str, Any]]] = field(default_factory=list)  # (pinned ref, gate, config)
+    env_batch_semantics: str | None = None  # env.batch_step params.semantics
+    driver_joint_semantics: str | None = None  # driver.joint_predict params.semantics
 
     def __post_init__(self) -> None:
         self.participants: dict[str, Participant] = {p.actor_id: p for p in self.manifest.participants}
+        self.inputs: dict[str, ParticipantInput] = {a: ParticipantInput(p) for a, p in self.participants.items()}
         if self.scheduler is None:
             self.scheduler = scheduler_for(self.manifest.turns, list(self.participants))
         if self.termination is None:
@@ -239,6 +261,16 @@ class RunComponents:
     def is_ir(self) -> bool:
         return hasattr(self.loaded, "checked")
 
+    @property
+    def joint(self) -> bool:
+        return str(self.manifest.turns.mode) == TurnMode.JOINT_BATCH.value
+
+    @property
+    def joint_prediction(self) -> bool:
+        """Effects of a batch are compared against a joint prediction only when the driver gives simultaneous
+        actions the same meaning the environment applies them with."""
+        return self.env_batch_semantics is not None and self.env_batch_semantics == self.driver_joint_semantics
+
 
 def plugin_ref_for(manifest: RunManifest, role: str) -> PluginRef | None:
     for pin in manifest.plugins:
@@ -260,6 +292,7 @@ def open_components(manifest: RunManifest, package: ModelPackage, registry: Plug
         raise NonRetryableFailure("model package digest differs from the run manifest (version drift)")
     driver_ref = driver_ref_for(manifest, package, registry)
     driver = registry.create(driver_ref, {}, RuntimeServices(package), expect=PluginInterface.SEMANTIC_DRIVER)
+    driver_entry = registry.resolve(driver_ref)
     loaded = driver.load(package)
     services = RuntimeServices(package, loaded=loaded)
     scenario = manifest.scenario
@@ -272,8 +305,9 @@ def open_components(manifest: RunManifest, package: ModelPackage, registry: Plug
     env = registry.create(scenario.environment.plugin, scenario.environment.config, services,
                           expect=PluginInterface.ENVIRONMENT)
     env_caps = {c.id for c in env_entry.descriptor.capabilities}
-    planners = {
-        p.actor_id: registry.create(p.strategy.plugin, p.strategy.config, services, expect=PluginInterface.PLANNER)
+    planners = {  # phase 3A: each planner gets its participant's services (own settings first)
+        p.actor_id: registry.create(p.strategy.plugin, p.strategy.config, ParticipantServices(services, p),
+                                    expect=PluginInterface.PLANNER)
         for p in manifest.participants
     }
     verifier_ref = plugin_ref_for(manifest, "verifier") or DEFAULT_VERIFIER
@@ -302,14 +336,22 @@ def open_components(manifest: RunManifest, package: ModelPackage, registry: Plug
         if ruleset is None:
             raise NonRetryableFailure(f"rule set {manifest.rules.ruleset_id}@{manifest.rules.version} is not "
                                       "available to this runner")
-        driver_entry = registry.resolve(driver_ref)
         if not driver_entry.descriptor.has_capability(caps.DRIVER_IR):  # negotiation refuses this before a run
             raise NonRetryableFailure(f"rules need {caps.DRIVER_IR}; {driver_ref.plugin_id} does not declare it")
         from formal_lab_model.rules import RuleEvaluator
 
         rules = RuleEvaluator(ruleset, loaded.checked, loaded.interp)
+    semantics = {c.id: c.params.get("semantics") for c in [*env_entry.descriptor.capabilities,
+                                                           *driver_entry.descriptor.capabilities]
+                 if c.id in (caps.ENV_BATCH_STEP, caps.DRIVER_JOINT_PREDICT)}
+    if str(manifest.turns.mode) == TurnMode.JOINT_BATCH.value and not (caps.ENV_BATCH_STEP in env_caps
+                                                             and hasattr(env, "step_batch")):
+        raise NonRetryableFailure(f"JOINT_BATCH needs {caps.ENV_BATCH_STEP}; {scenario.environment.plugin.plugin_id} "
+                                  "does not declare it")
     return RunComponents(manifest, package, env, planners, verifier, evaluators, registry, loaded=loaded,
-                         driver_ref=driver_ref, env_caps=env_caps, probes=probes, rules=rules, gates=gates)
+                         driver_ref=driver_ref, env_caps=env_caps, probes=probes, rules=rules, gates=gates,
+                         env_batch_semantics=semantics.get(caps.ENV_BATCH_STEP),
+                         driver_joint_semantics=semantics.get(caps.DRIVER_JOINT_PREDICT))
 
 
 # ---------------------------------------------------------------------------- helpers
@@ -488,6 +530,9 @@ class PlanPhase:
     observation_requests: int = 0
     last_request: dict[str, Any] | None = None  # {paths digest, revision} of the request served this turn
     elapsed_s: float = 0.0
+    batch_open: dict[str, Any] | None = None  # JOINT_BATCH: the BatchRecord this step opened
+    proposed_at: str | None = None  # JOINT_BATCH: wall time the proposal was ready (batch deadline)
+    input_digest: str | None = None  # digest of the observation the planner finally received
 
     def to_json(self) -> dict[str, Any]:
         return {
@@ -510,6 +555,9 @@ class PlanPhase:
             "observation_requests": self.observation_requests,
             "last_request": self.last_request,
             "elapsed_s": self.elapsed_s,
+            **({"batch_open": self.batch_open} if self.batch_open is not None else {}),
+            **({"proposed_at": self.proposed_at} if self.proposed_at is not None else {}),
+            **({"input_digest": self.input_digest} if self.input_digest is not None else {}),
         }
 
     @classmethod
@@ -535,6 +583,9 @@ class PlanPhase:
             observation_requests=data.get("observation_requests", 0),
             last_request=data.get("last_request"),
             elapsed_s=data.get("elapsed_s", 0.0),
+            batch_open=data.get("batch_open"),
+            proposed_at=data.get("proposed_at"),
+            input_digest=data.get("input_digest"),
         )
 
 
@@ -605,9 +656,23 @@ def plan_step(rc: RunComponents, snapshot: EnvironmentSnapshot, step: int, usage
         plan.events.append(EventDraft(event_key(run_id, step, f"retired-{turn.actor_id}"), EventType.TURN_SKIPPED,
                                       step, {"actor_id": turn.actor_id, "reason": f"participant budget: {spent}",
                                              "retired": True}, [parent], turn.actor_id, turn, ExecutionStage.TURN))
+    if rc.joint:
+        turn = turn.model_copy(update={"batch_id": f"{run_id}:b{turn.round}"})
     plan.turn = turn
     actor = turn.actor_id
     tkey = lambda kind: event_key(run_id, step, kind, actor)  # noqa: E731
+    open_batch = (carry.batch or {}).get("record")
+    if rc.joint and open_batch is not None and open_batch["status"] == "OPEN" and open_batch["round"] != turn.round:
+        raise NonRetryableFailure(f"batch {open_batch['batch_id']} of round {open_batch['round']} was never "
+                                  f"submitted, and step {step} is in round {turn.round}")
+    if rc.joint and rc.scheduler.round_starts(state, turn):
+        record = BatchRecord(batch_id=turn.batch_id, run_id=run_id, round=turn.round, status="OPEN",
+                             expected=list(rc.scheduler.participants), opened_at_step=step, opened_at=utcnow(),
+                             semantics=rc.env_batch_semantics, joint_prediction=rc.joint_prediction)
+        plan.batch_open = record.model_dump(mode="json")
+        plan.events.append(EventDraft(tkey("batch-opened"), EventType.BATCH_OPENED, step,
+                                      {"batch": plan.batch_open}, [parent], actor, turn, ExecutionStage.TURN))
+        parent = tkey("batch-opened")
     plan.events.append(EventDraft(tkey("turn"), EventType.TURN_STARTED, step,
                                   {"turn": turn.model_dump(mode="json"), "cycle": rc.scheduler.cycle,
                                    "active": rc.scheduler.active(state), "retired": state.retired,
@@ -631,8 +696,13 @@ def plan_step(rc: RunComponents, snapshot: EnvironmentSnapshot, step: int, usage
     requested = list(flags.get("observe_paths", []))
     plan.observation = obs
     belief = rc.loaded.belief(obs)
-    plan.events.append(EventDraft(tkey("observation"), EventType.OBSERVATION, step,
-                                  {"observation": obs.model_dump(mode="json"), "belief": _belief_summary(belief)},
+    inp = rc.inputs[actor]
+    payload: dict[str, Any] = {"observation": obs.model_dump(mode="json"), "belief": _belief_summary(belief)}
+    if inp.filtered:
+        pobs, withheld = inp.observation(obs)
+        payload["planner_input"] = {"withheld": withheld, "digest": inp.digest(pobs),
+                                    "view": inp.view.model_dump(mode="json") if inp.view else None}
+    plan.events.append(EventDraft(tkey("observation"), EventType.OBSERVATION, step, payload,
                                   [tkey("turn")], actor, turn, ExecutionStage.OBSERVE))
     decision = _apply_rules(rc, "OBSERVATION", belief, _rule_context(obs, belief, step=step,
                                                                     rejected=flags.get("rejected", 0)))
@@ -651,10 +721,12 @@ def plan_step(rc: RunComponents, snapshot: EnvironmentSnapshot, step: int, usage
                               note=f"{len(obs.facts)} facts, {len(obs.unknowns)} unknown; "
                                    f"assumptions {belief.assumptions.counts}"))
 
-    # ---- candidates
+    # ---- candidates (on what the planner receives: withheld locations count as never observed)
     t0 = time.perf_counter()
     participant = rc.participants[actor]
-    plan.candidates = rc.loaded.candidates(belief, scope=participant.scope, partial_checker=partial_checker(rc))
+    pobs, _ = inp.observation(obs)
+    pbelief = rc.loaded.belief(pobs) if pobs is not obs else belief
+    plan.candidates = rc.loaded.candidates(pbelief, scope=participant.scope, partial_checker=partial_checker(rc))
     counts = {v.value: sum(c.belief_applicability == v for c in plan.candidates) for v in PreconditionVerdict}
     plan.events.append(EventDraft(tkey("candidates"), EventType.CANDIDATES, step,
                                   {"candidates": [c.model_dump(mode="json") for c in plan.candidates],
@@ -672,7 +744,7 @@ def plan_step(rc: RunComponents, snapshot: EnvironmentSnapshot, step: int, usage
             _terminal(plan, TerminationReason.NO_APPLICABLE_ACTION, text)
         else:
             goal = rc.termination.joint_goal
-            holds = bool(goal) and rc.loaded.properties(belief.state).get(goal, False)
+            holds = bool(goal) and rc.loaded.properties(belief.state).get(goal, False)  # kernel: full belief
             _terminal(plan, TerminationReason.NO_APPLICABLE_ACTION, text,
                       RunStatus.SUCCEEDED if holds else RunStatus.FAILED)
         plan.elapsed_s = time.perf_counter() - t_all
@@ -684,13 +756,20 @@ def plan_step(rc: RunComponents, snapshot: EnvironmentSnapshot, step: int, usage
     if cp_json is not None and hasattr(planner, "restore"):
         planner.restore(PlannerCheckpoint.model_validate(cp_json))
     previous_plan = (cp_json or {}).get("plan") or {}
-    proposal = _propose(rc, plan, step, turn, obs, belief, usage, carry)
+    proposal = _propose(rc, plan, step, turn, pobs, pbelief, usage, carry)
     if proposal.observation_request is not None and can_request and plan.observation_requests == 0:
         request = proposal.observation_request
+        served, declined = inp.request(request.paths)
         seen = {"paths": _digest(sorted(request.paths)), "revision": obs.state_revision, "step": step}
         previous = carry.flags.get(actor, {}).get("last_request")
         first = plan.usage_delta
-        if previous and previous["paths"] == seen["paths"] and previous["revision"] == obs.state_revision:
+        if declined and not served:  # phase 3A: locations outside the participant's view are never served
+            plan.events.append(EventDraft(
+                event_key(rc.run_id, step, "observe-more-withheld", actor), EventType.OBSERVATION_REQUESTED, step,
+                {"paths": request.paths, "reason": f"strategy: {request.reason}", "served": False,
+                 "declined": f"outside the participant's view: {declined}"},
+                [tkey("candidates")], actor, turn, ExecutionStage.OBSERVE))
+        elif previous and previous["paths"] == seen["paths"] and previous["revision"] == obs.state_revision:
             # P2-047: the same locations were already re-observed and nothing has changed since — answering again
             # would repeat the same facts; the strategy decides without it and the refusal is on the record
             plan.events.append(EventDraft(
@@ -700,18 +779,25 @@ def plan_step(rc: RunComponents, snapshot: EnvironmentSnapshot, step: int, usage
                              f"and the world revision is unchanged ({obs.state_revision})"},
                 [tkey("candidates")], actor, turn, ExecutionStage.OBSERVE))
         else:
-            obs, belief = _observe_more(rc, plan, step, turn, request.paths, f"strategy: {request.reason}",
-                                        tkey("candidates"))
+            why = f"strategy: {request.reason}" + (f" (withheld by the view: {declined})" if declined else "")
+            obs, belief = _observe_more(rc, plan, step, turn, served, why, tkey("candidates"))
             plan.last_request = seen
-            plan.candidates = rc.loaded.candidates(belief, scope=participant.scope,
+            pobs, _ = inp.observation(obs)
+            pbelief = rc.loaded.belief(pobs) if pobs is not obs else belief
+            plan.candidates = rc.loaded.candidates(pbelief, scope=participant.scope,
                                                    partial_checker=partial_checker(rc))
-        proposal = _propose(rc, plan, step, turn, obs, belief, usage, carry, allow_request=False)
+        proposal = _propose(rc, plan, step, turn, pobs, pbelief, usage, carry, allow_request=False)
         plan.usage_delta = _sum_usage(first, plan.usage_delta)
     plan.proposal = proposal
     plan.observation = obs
-    plan.events.append(EventDraft(tkey("proposal"), EventType.ACTION_PROPOSED, step,
-                                  {"proposal": proposal.model_dump(mode="json"),
-                                   "model_call_ids": proposal.source.model_call_ids},
+    proposed: dict[str, Any] = {"proposal": proposal.model_dump(mode="json"),
+                                "model_call_ids": proposal.source.model_call_ids}
+    if inp.filtered:
+        plan.input_digest = inp.digest(pobs)
+        proposed["planner_input_digest"] = plan.input_digest
+    if rc.joint:
+        plan.proposed_at = utcnow().isoformat()
+    plan.events.append(EventDraft(tkey("proposal"), EventType.ACTION_PROPOSED, step, proposed,
                                   [tkey("candidates")], actor, turn, ExecutionStage.PROPOSE))
     cp = planner.checkpoint() if hasattr(planner, "checkpoint") else None
     if cp is not None:
@@ -758,7 +844,7 @@ def _propose(rc: RunComponents, plan: PlanPhase, step: int, turn: TurnRef, obs: 
     m = rc.manifest
     actor = turn.actor_id
     participant = rc.participants[actor]
-    last = carry.last_outcomes.get(actor)
+    last = rc.inputs[actor].outcome(carry.last_outcomes.get(actor))
     flags = carry.flags.get(actor, {})
     can_request = allow_request and caps.ENV_OBSERVE_ON_REQUEST in rc.env_caps and hasattr(rc.env, "observe_paths")
     context = PlanningContext(
@@ -767,7 +853,7 @@ def _propose(rc: RunComponents, plan: PlanPhase, step: int, turn: TurnRef, obs: 
         turn=turn, goal=goal_of(rc, actor), objective=m.objective, actor_budget=participant.budget,
         actor_usage=carry.usage_of(actor), participants=list(rc.scheduler.cycle),
         observation_request_allowed=can_request, assumptions=belief.assumptions,
-        last_outcome=ActionOutcome.model_validate(last) if last else None,
+        last_outcome=last,
         replan_requested=flags.get("replan"),
     )
     planner = rc.planners[actor]
@@ -826,6 +912,8 @@ class StepExecution:
     regression_case: RegressionCase | None = None
     acted: bool = False
     elapsed_s: float = 0.0
+    batch_outcomes: dict[int, ActionOutcome] = field(default_factory=dict)  # JOINT_BATCH: earlier members' steps
+    batch: BatchRecord | None = None  # JOINT_BATCH: the batch submitted at this step
 
 
 def _merge_plan_into_carry(carry: CarryState, plan: PlanPhase) -> CarryState:
@@ -834,6 +922,8 @@ def _merge_plan_into_carry(carry: CarryState, plan: PlanPhase) -> CarryState:
         new.turn = CycleScheduler.retire(new.turn, actor)
     if plan.round_observations:
         new.round_observations = dict(plan.round_observations)
+    if plan.batch_open is not None:
+        new.batch = {"record": plan.batch_open, "proposals": {}, "turns": {}, "observations": {}}
     if plan.turn is not None:
         actor = plan.turn.actor_id
         if plan.checkpoint is not None:
@@ -906,6 +996,8 @@ def apply_step(rc: RunComponents, snapshot: EnvironmentSnapshot, plan: PlanPhase
     turn = plan.turn
     actor = turn.actor_id
     tkey = lambda kind: event_key(run_id, step, kind, actor)  # noqa: E731
+    if rc.joint:
+        return _apply_joint(rc, snapshot, plan, new, ex, ledger, t_all)
     if plan.skipped is not None:  # SKIP_ACTOR: record the pass, advance the turn, nothing changes in the world
         _restore(rc, snapshot)
         ex.snapshot = rc.env.snapshot()
@@ -1042,29 +1134,7 @@ def apply_step(rc: RunComponents, snapshot: EnvironmentSnapshot, plan: PlanPhase
         last_key = _on_difference(rc, ex, belief, proposal, step, turn, last_key)
 
     # ---- rules on the outcome
-    flags = dict(new.flags.get(actor, {}))
-    rejected = flags.get("rejected", 0) + 1 if outcome.status.value == "REJECTED" else 0
-    flags["rejected"] = rejected
-    different = sum(1 for d in ex.comparison.diffs if d.status == "DIFFERENT") if model_difference else 0
-    after_belief = rc.loaded.belief(next_obs)
-    for trigger in ("ACTION_OUTCOME", "EFFECT_COMPARED"):
-        decision = _apply_rules(rc, trigger, after_belief, _rule_context(
-            next_obs, after_belief, verdict=ex.comparison.verdict.value, outcome=outcome.status.value,
-            different=different, step=step, rejected=rejected))
-        if decision is None:
-            continue
-        key = tkey(f"rules-{trigger.lower()}")
-        ex.events.append(EventDraft(key, EventType.RULE_EVALUATED, step, {"decision": decision.model_dump(mode="json")},
-                                    [last_key], actor, turn, ExecutionStage.CHECK))
-        last_key = key
-        if decision.outcome is RuleOutcome.PAUSE:
-            ex.pause_requested = f"rule {decision.winner or 'conflict'}: {decision.priority_explanation}"
-        elif decision.outcome is RuleOutcome.REPLAN:
-            flags["replan"] = f"rule {decision.winner}: {decision.priority_explanation}"
-        elif decision.outcome is RuleOutcome.OBSERVE_MORE and decision.winner:
-            winner = next(r for r in rc.rules.ruleset.rules if r.rule_id == decision.winner)
-            flags["observe_paths"] = list(winner.observe_paths)
-    new.flags[actor] = flags
+    last_key = _outcome_rules(rc, ex, new, step, turn, outcome, ex.comparison, next_obs, model_difference, last_key)
 
     # ---- TERMINATE + carry
     new.last_outcomes[actor] = outcome.model_dump(mode="json")
@@ -1091,6 +1161,336 @@ def apply_step(rc: RunComponents, snapshot: EnvironmentSnapshot, plan: PlanPhase
     new.last_event_key = last_key
     ex.elapsed_s = plan.elapsed_s + time.perf_counter() - t_all
     return ex
+
+
+# ---------------------------------------------------------------------------- joint batches (phase 3A, G4)
+
+
+def _spent(rc: RunComponents, carry: CarryState, actor: str) -> bool:
+    p = rc.participants[actor]
+    dims = list(rc.manifest.config.get("budget_dimensions", ["steps", "wall_seconds"]))
+    return bool(p.budget and budget_exhausted(p.budget, carry.usage_of(actor), dims))
+
+
+def _precheck(rc: RunComponents, ex: StepExecution, belief: BeliefState, proposal: ActionProposal, step: int,
+              turn: TurnRef) -> None:
+    t0 = time.perf_counter()
+    actor = turn.actor_id
+    ex.precheck = rc.verifier.check(
+        rc.package,
+        CheckQuery(kind="ACTION_PRECONDITION", action=proposal.action, initial_state="GIVEN_STATE",
+                   bound={"max_steps": 0, "timeout_ms": 5000}),
+        state=belief.state, unknown_paths=belief.free_paths,
+    )
+    ex.events.append(EventDraft(event_key(rc.run_id, step, "check", actor), EventType.CHECK_COMPLETED, step,
+                                {"purpose": "precondition of the proposed action on the actor's belief",
+                                 "result": ex.precheck.model_dump(mode="json")},
+                                [event_key(rc.run_id, step, "proposal", actor)], actor, turn, ExecutionStage.CHECK))
+    ex.stages.append(_stage(ExecutionStage.CHECK, StageStatus.OK if str(ex.precheck.verdict) != "UNSUPPORTED"
+                            else StageStatus.SKIPPED, RetrySemantics.IDEMPOTENT, t0,
+                            inp=proposal.action.model_dump(mode="json"), out=str(ex.precheck.verdict)))
+
+
+def _apply_joint(rc: RunComponents, snapshot: EnvironmentSnapshot, plan: PlanPhase, new: CarryState,
+                 ex: StepExecution, ledger: OperationLedger | None, t_all: float) -> StepExecution:
+    """One member's step of a JOINT_BATCH round: CHECK its proposal and keep it in the open batch; the round's last
+    member (or the first one past the batch deadline) submits the batch."""
+    m = rc.manifest
+    step, turn = plan.step, plan.turn
+    assert turn is not None
+    actor = turn.actor_id
+    tkey = lambda kind: event_key(m.run_id, step, kind, actor)  # noqa: E731
+    if new.batch is None or new.batch["record"]["status"] != "OPEN":
+        raise NonRetryableFailure(f"JOINT_BATCH step {step}: no open batch for round {turn.round}")
+    record = BatchRecord.model_validate(new.batch["record"])
+    _restore(rc, snapshot)
+    last_key = plan.events[-1].key if plan.events else (new.last_event_key or event_key(m.run_id, 0, "snapshot"))
+    timeout = m.turns.batch_timeout_s
+    waited = ((datetime.fromisoformat(plan.proposed_at) - record.opened_at).total_seconds()
+              if plan.proposed_at else 0.0)
+    late = timeout is not None and plan.skipped is None and waited > timeout
+    acted = False
+    if plan.skipped is not None:
+        member = BatchMember(actor_id=actor, status=BatchMemberStatus.PASSED, global_step=step,
+                             actor_step=turn.actor_step, reason=plan.skipped)
+        ex.events.append(EventDraft(tkey("skipped"), EventType.TURN_SKIPPED, step,
+                                    {"actor_id": actor, "reason": plan.skipped, "retired": False,
+                                     "batch_id": record.batch_id}, [last_key], actor, turn, ExecutionStage.TURN))
+        last_key = tkey("skipped")
+    elif late:
+        assert plan.proposal is not None
+        member = BatchMember(actor_id=actor, status=BatchMemberStatus.TIMED_OUT, proposal_id=plan.proposal.proposal_id,
+                             global_step=step, actor_step=turn.actor_step,
+                             reason=f"proposal ready {waited:.2f}s after the batch opened (limit {timeout}s): "
+                                    "not submitted")
+    else:
+        assert plan.proposal is not None and plan.observation is not None
+        _precheck(rc, ex, rc.loaded.belief(plan.observation), plan.proposal, step, turn)
+        last_key = tkey("check")
+        member = BatchMember(actor_id=actor, status=BatchMemberStatus.PROPOSED, proposal_id=plan.proposal.proposal_id,
+                             global_step=step, actor_step=turn.actor_step)
+        new.batch["proposals"][actor] = plan.proposal.model_dump(mode="json")
+        new.batch["turns"][actor] = turn.model_dump(mode="json")
+        new.batch["observations"][actor] = plan.observation.model_dump(mode="json")
+        acted = True
+    record.members.append(member)
+    if acted or plan.usage_delta != ModelUsage():
+        new.actor_usage[actor] = add_usage(new.usage_of(actor), plan.usage_delta, steps=1 if acted else 0).model_dump()
+    new.turn = rc.scheduler.advance(new.turn, turn, acted=acted, progressed=None)
+    if acted and _spent(rc, new, actor):
+        new.turn = CycleScheduler.retire(new.turn, actor)
+        ex.events.append(EventDraft(tkey("retired"), EventType.TURN_SKIPPED, step,
+                                    {"actor_id": actor, "retired": True, "reason": "participant budget exhausted; "
+                                     "its proposal stays in the batch"}, [last_key], actor, turn,
+                                    ExecutionStage.TERMINATE))
+        last_key = tkey("retired")
+    done = {x.actor_id for x in record.members}
+    remaining = [a for a in record.expected if a not in done and a not in new.turn.retired and not _spent(rc, new, a)]
+    if remaining and not late:  # the round goes on: the world stays as it was at the round start
+        new.batch["record"] = record.model_dump(mode="json")
+        ex.snapshot = rc.env.snapshot()
+        new.last_event_key = last_key
+        ex.elapsed_s = plan.elapsed_s + time.perf_counter() - t_all
+        return ex
+    for a in record.expected:
+        if a in done:
+            continue
+        if late and a in remaining:
+            record.members.append(BatchMember(actor_id=a, status=BatchMemberStatus.TIMED_OUT,
+                                              reason=f"the batch deadline ({timeout}s) passed before its turn"))
+        else:
+            record.members.append(BatchMember(actor_id=a, status=BatchMemberStatus.ABSENT,
+                                              reason="retired: its own budget is exhausted"))
+    if late and remaining:
+        new.turn = rc.scheduler.close_round(new.turn, turn.round, remaining)
+    return _submit_batch(rc, plan, new, ex, record, ledger, last_key, t_all)
+
+
+def _joint_expectation(rc: RunComponents, state: dict[str, Any], actions: list[Any]) -> tuple[dict[str, Any], list[str]]:
+    """The model's prediction of a batch under START_STATE_DISJOINT_WRITES: every action on `state`; writes of
+    applicable actions merged; an action writing a location an earlier one wrote takes no effect."""
+    merged, written = dict(state), set()
+    for action in actions:
+        pred = rc.loaded.predict(state, action)
+        if not (pred.applicable and pred.next_state is not None):
+            continue
+        writes = set(pred.written_paths) | {p for p, v in pred.next_state.items() if state.get(p) != v}
+        if writes & written:
+            continue
+        for path in writes:
+            merged[path] = pred.next_state[path]
+        written |= writes
+    return merged, sorted(written)
+
+
+def _submit_batch(rc: RunComponents, plan: PlanPhase, new: CarryState, ex: StepExecution, record: BatchRecord,
+                  ledger: OperationLedger | None, last_key: str, t_all: float) -> StepExecution:
+    m = rc.manifest
+    step, turn = plan.step, plan.turn
+    assert turn is not None and new.batch is not None
+    actor = turn.actor_id
+    tkey = lambda kind: event_key(m.run_id, step, kind, actor)  # noqa: E731
+    t0 = time.perf_counter()
+    order = {a: i for i, a in enumerate(record.expected)}
+    record.members.sort(key=lambda x: order.get(x.actor_id, len(order)))
+    proposing = [x.actor_id for x in record.members if x.status is BatchMemberStatus.PROPOSED]
+    proposals = {a: ActionProposal.model_validate(new.batch["proposals"][a]) for a in proposing}
+    turns = {a: TurnRef.model_validate(new.batch["turns"][a]) for a in proposing}
+    op_id = f"{turn_id(m.run_id, step, actor)}:apply"
+    ledger = ledger or InMemoryLedger()
+    # ---- execution gates, member by member (a denied member is not sent; the others are)
+    decisions: list[ExecutionDecision] = []
+    denied: dict[str, SendDecision] = {}
+    if rc.gates:
+        phase = ExecutionPhase.FIRST_SEND if ledger.get(op_id) is None else ExecutionPhase.REEXECUTE
+        for a in proposing:
+            p = proposals[a]
+            view = OperationRecord(operation_id=f"{op_id}:{a}", run_id=m.run_id, step=turns[a].global_step,
+                                   actor_id=a, state="PREPARED", action=p.action, proposal_id=p.proposal_id,
+                                   based_on_revision=p.based_on_revision, request_digest=request_digest(p),
+                                   batch_id=record.batch_id)
+            verdict = _gate_hook(rc, turns[a].global_step, a)(phase, view, p)
+            decisions += verdict.decisions
+            if not verdict.allowed:
+                denied[a] = verdict
+    send = [proposals[a] for a in proposing if a not in denied]
+    # ---- EXECUTE: one environment step for the whole batch
+    outcomes: dict[str, ActionOutcome] = {}
+    result = None
+    if send:
+        result = Coordinator(rc.env, rc.env_caps, ledger).execute_batch(send, op_id, run_id=m.run_id, step=step,
+                                                                         batch_id=record.batch_id)
+        if decisions:
+            result.record = result.record.model_copy(update={"decisions": decisions})
+            ledger.put(result.record)
+        ex.operation = result.record
+        if result.unresolved:
+            ex.events.append(EventDraft(tkey("review"), EventType.OPERATION_REVIEW, step,
+                                        {"operation": result.record.model_dump(mode="json"),
+                                         "conflict": result.conflict, "batch_id": record.batch_id,
+                                         "action": "run ends: the batch outcome cannot be settled automatically"},
+                                        [last_key], actor, turn, ExecutionStage.RECONCILE))
+            ex.terminal, ex.termination_reason = RunStatus.FAILED, TerminationReason.OPERATION_UNRESOLVED
+            ex.terminal_reason = f"batch operation {op_id} unresolved: {result.conflict or ''}"
+            new.last_event_key = tkey("review")
+            return ex
+        outcomes = {p.actor_id: o for p, o in zip(send, result.outcomes, strict=True)}
+    for a, verdict in denied.items():
+        p = proposals[a]
+        outcomes[a] = ActionOutcome(
+            operation_id=f"{op_id}:{a}", run_id=m.run_id, step_id=p.step_id, proposal_id=p.proposal_id,
+            action=p.action, status="REJECTED", effect_applied=False, revision_before=p.based_on_revision,
+            revision_after=p.based_on_revision, turn=p.turn, operation_state="FAILED",
+            result={"reason": f"EXECUTION_GATE: {verdict.reason}", "not_sent": True,
+                    "decisions": [d.decision_id for d in verdict.decisions]})
+    ex.snapshot = rc.env.snapshot()
+    env_step = ex.snapshot.step
+    ex.stages.append(_stage(ExecutionStage.EXECUTE, StageStatus.OK, RetrySemantics.RECONCILE_THEN_RETRY, t0,
+                            inp=[p.model_dump(mode="json") for p in send],
+                            note=f"batch {record.batch_id}: {len(send)} sent, {len(denied)} denied by a gate"))
+    record = record.model_copy(update={
+        "status": "SUBMITTED", "submitted_at_step": step, "env_step": env_step if send else None,
+        "operation_id": op_id if send else None,
+        "note": None if send else "nothing to submit: no member proposed an action that could be sent"})
+    ex.batch = record
+    ex.events.append(EventDraft(tkey("batch-submitted"), EventType.BATCH_SUBMITTED, step,
+                                {"batch": record.model_dump(mode="json"),
+                                 "operation": result.record.model_dump(mode="json") if result else None},
+                                [last_key], actor, turn, ExecutionStage.EXECUTE))
+    last_key = tkey("batch-submitted")
+    for d in decisions:
+        ex.events.append(EventDraft(tkey(f"decision-{d.actor_id}-{d.gate.plugin_id}"), EventType.EXECUTION_DECIDED,
+                                    step, {"decision": d.model_dump(mode="json"), "batch_id": record.batch_id},
+                                    [last_key], actor, turn, ExecutionStage.EXECUTE))
+    if result is not None and result.transitions:
+        ex.events.append(EventDraft(tkey("operation"), EventType.OPERATION_STATE, step,
+                                    {"operation_id": op_id, "state": result.record.state.value, "kind": "batch",
+                                     "batch_id": record.batch_id,
+                                     "transitions": [{"state": st.value, "reason": r} for st, r in result.transitions],
+                                     "attempts": result.record.attempts},
+                                    [last_key], actor, turn, ExecutionStage.EXECUTE))
+    # ---- COMPARE, member by member, at each member's own proposal step
+    t0 = time.perf_counter()
+    sent_actions = [p.action for p in send]
+    applied_writes = {a: set(o.result.get("written_paths", [])) for a, o in outcomes.items()
+                      if o.status.value == "APPLIED"}
+    reported: set[str] = set()
+    for a in proposing:
+        mturn = turns[a].model_copy(update={"env_step": env_step, "batch_id": record.batch_id})
+        mstep = mturn.global_step
+        mkey = lambda kind, a=a, mstep=mstep: event_key(m.run_id, mstep, kind, a)  # noqa: E731
+        belief = rc.loaded.belief(Observation.model_validate(new.batch["observations"][a]))
+        next_obs = rc.env.observe(a)
+        outcome = outcomes[a]
+        others = set().union(*(w for b, w in applied_writes.items() if b != a))
+        if a in denied:
+            note = "not sent: denied by an execution gate"
+        else:
+            note = ""
+        if rc.joint_prediction:
+            expected_post, written = _joint_expectation(rc, belief.state, sent_actions)
+            by = (f"model:{rc.package.package_id}@{rc.package.version} joint prediction "
+                  f"({rc.driver_joint_semantics}) of batch {record.batch_id} on {a}'s belief")
+        else:
+            pred = rc.loaded.predict(belief.state, proposals[a].action)
+            applies = pred.applicable and a not in denied
+            expected_post = pred.next_state if applies else dict(belief.state)
+            written = pred.written_paths if applies else []
+            by = (f"model:{rc.package.package_id}@{rc.package.version} on {a}'s belief (own action only: the driver "
+                  f"declares no joint semantics matching {rc.env_batch_semantics}; locations written by other batch "
+                  f"members are not predicted)")
+        comparison = rc_compare(rc, expected_post=expected_post, pre_state=belief.state, observation=next_obs,
+                                written=written, expected_by=by + (f"; {note}" if note else ""),
+                                verified=outcome.result.get("verified") or {})
+        differing = {d.path for d in comparison.diffs if d.status == "DIFFERENT"}
+        if not rc.joint_prediction:
+            differing -= others
+        new_paths = differing - reported
+        model_difference = bool(new_paths) and a not in denied
+        outcome = outcome.model_copy(update={"turn": mturn, "effect_comparison": comparison})
+        ex.events.append(EventDraft(mkey("outcome"), EventType.ACTION_OUTCOME, mstep,
+                                    {"outcome": outcome.model_dump(mode="json"), "batch_id": record.batch_id,
+                                     "submitted_at_step": step, "snapshot_digest": ex.snapshot.digest.value,
+                                     "state_revision": ex.snapshot.state_revision,
+                                     "operation": result.record.model_dump(mode="json") if result else None},
+                                    [mkey("proposal"), tkey("batch-submitted")], a, mturn, ExecutionStage.EXECUTE))
+        ex.events.append(EventDraft(mkey("comparison"), EventType.EFFECT_COMPARED, mstep,
+                                    {"comparison": comparison.model_dump(mode="json"),
+                                     "observation_after": next_obs.model_dump(mode="json"),
+                                     "batch_id": record.batch_id},
+                                    [mkey("outcome")], a, mturn, ExecutionStage.COMPARE))
+        member_last = mkey("comparison")
+        if model_difference:
+            reported |= new_paths
+            suggestion = {"action": proposals[a].action.model_dump(mode="json"),
+                          "batch_id": record.batch_id, "batch_actions": [x.model_dump(mode="json")
+                                                                         for x in sent_actions],
+                          "different_fields": [d.model_dump(mode="json") for d in comparison.diffs
+                                               if d.path in new_paths],
+                          "state_families": sorted({x.split("[", 1)[0] for x in new_paths}),
+                          "regression_case": "not created: a regression case replays an action sequence, and a "
+                                             "joint batch is not one",
+                          "hint": "the model's prediction of this batch differs from the environment; edit the "
+                                  "model (effects or joint semantics), re-check it and compare in a new run"}
+            ex.events.append(EventDraft(mkey("revision-suggestion"), EventType.MODEL_REVISION_SUGGESTED, mstep,
+                                        suggestion, [member_last], a, mturn, ExecutionStage.COMPARE))
+            member_last = mkey("revision-suggestion")
+        member_last = _outcome_rules(rc, ex, new, mstep, mturn, outcome, comparison, next_obs, model_difference,
+                                     member_last)
+        new.last_outcomes[a] = outcome.model_dump(mode="json")
+        if a == actor:
+            ex.outcome, ex.comparison, ex.acted, ex.turn = outcome, comparison, True, mturn
+        else:
+            ex.batch_outcomes[mstep] = outcome
+        last_key = member_last
+    ex.stages.append(_stage(ExecutionStage.COMPARE, StageStatus.OK, RetrySemantics.IDEMPOTENT, t0,
+                            note=f"{len(proposing)} member comparison(s); joint prediction: {rc.joint_prediction}"))
+    # ---- TERMINATE
+    ex.properties = rc.env.truth_properties() if hasattr(rc.env, "truth_properties") else {}
+    progressed = any(o.status.value == "APPLIED" for o in outcomes.values())
+    new.turn = new.turn.model_copy(update={"no_progress": 0 if progressed else new.turn.no_progress + 1})
+    new.batch = None
+    _check_goals(rc, ex, new, actor)
+    if ex.terminal is None:
+        _check_no_progress(rc, ex, new)
+    if ex.terminal is None and not rc.scheduler.active(new.turn):
+        ex.terminal, ex.termination_reason = RunStatus.BUDGET_EXHAUSTED, TerminationReason.ACTOR_BUDGETS_EXHAUSTED
+        ex.terminal_reason = "every participant exhausted its own budget"
+    new.last_event_key = last_key
+    ex.elapsed_s = plan.elapsed_s + time.perf_counter() - t_all
+    return ex
+
+
+def _outcome_rules(rc: RunComponents, ex: StepExecution, new: CarryState, step: int, turn: TurnRef,
+                   outcome: ActionOutcome, comparison: EffectComparison, next_obs: Observation,
+                   model_difference: bool, last_key: str) -> str:
+    """Rules triggered by an outcome and its comparison (REPLAN / OBSERVE_MORE flags for the actor's next turn,
+    PAUSE for the run). Returns the last event key."""
+    actor = turn.actor_id
+    flags = dict(new.flags.get(actor, {}))
+    rejected = flags.get("rejected", 0) + 1 if outcome.status.value == "REJECTED" else 0
+    flags["rejected"] = rejected
+    different = sum(1 for d in comparison.diffs if d.status == "DIFFERENT") if model_difference else 0
+    after_belief = rc.loaded.belief(next_obs)
+    for trigger in ("ACTION_OUTCOME", "EFFECT_COMPARED"):
+        decision = _apply_rules(rc, trigger, after_belief, _rule_context(
+            next_obs, after_belief, verdict=comparison.verdict.value, outcome=outcome.status.value,
+            different=different, step=step, rejected=rejected))
+        if decision is None:
+            continue
+        key = event_key(rc.run_id, step, f"rules-{trigger.lower()}", actor)
+        ex.events.append(EventDraft(key, EventType.RULE_EVALUATED, step, {"decision": decision.model_dump(mode="json")},
+                                    [last_key], actor, turn, ExecutionStage.CHECK))
+        last_key = key
+        if decision.outcome is RuleOutcome.PAUSE:
+            ex.pause_requested = f"rule {decision.winner or 'conflict'}: {decision.priority_explanation}"
+        elif decision.outcome is RuleOutcome.REPLAN:
+            flags["replan"] = f"rule {decision.winner}: {decision.priority_explanation}"
+        elif decision.outcome is RuleOutcome.OBSERVE_MORE and decision.winner:
+            winner = next(r for r in rc.rules.ruleset.rules if r.rule_id == decision.winner)
+            flags["observe_paths"] = list(winner.observe_paths)
+    new.flags[actor] = flags
+    return last_key
 
 
 def rc_compare(rc: RunComponents, **kw: Any) -> EffectComparison:
@@ -1232,11 +1632,34 @@ TERMINAL_EVENT = {
 def finish_run(rc: RunComponents, *, status: RunStatus, reason: str | None, final_snapshot: EnvironmentSnapshot | None,
                usage: BudgetUsage, steps: list[Any], last_step: int, parent_key: str,
                termination_reason: TerminationReason | None = None, actor_usage: dict[str, Any] | None = None,
-               probes: list[Any] | None = None) -> FinishResult:
-    """Score the episode from the environment's truth and emit metrics + terminal events."""
+               probes: list[Any] | None = None, carry: CarryState | dict[str, Any] | None = None) -> FinishResult:
+    """Score the episode from the environment's truth and emit metrics + terminal events. A JOINT_BATCH round still
+    open at the end is cancelled: nothing of it was sent (BATCH_CANCELLED)."""
     from formal_lab_contracts import EpisodeRecord
 
     m = rc.manifest
+    events: list[EventDraft] = []
+    batch = carry.batch if isinstance(carry, CarryState) else (carry or {}).get("batch")
+    if batch and batch["record"]["status"] == "OPEN":
+        record = BatchRecord.model_validate(batch["record"])
+        done = {x.actor_id for x in record.members}
+        members = [x.model_copy(update={"status": BatchMemberStatus.CANCELLED,
+                                        "reason": f"run ended ({status.value}) before the batch was submitted: "
+                                                  "the proposal was not sent"})
+                   if x.status is BatchMemberStatus.PROPOSED else x for x in record.members]
+        retired = set(carry.turn.retired if isinstance(carry, CarryState) else
+                       (carry or {}).get("turn", {}).get("retired", []))
+        members += [BatchMember(actor_id=a, status=BatchMemberStatus.ABSENT, reason="retired: its own budget is "
+                                "exhausted") if a in retired else
+                    BatchMember(actor_id=a, status=BatchMemberStatus.CANCELLED,
+                                reason=f"run ended ({status.value}) before its turn") for a in record.expected
+                    if a not in done]
+        record = record.model_copy(update={"status": "CANCELLED", "members": members,
+                                           "note": f"run ended: {reason or status.value}"})
+        key = event_key(m.run_id, None, f"batch-cancelled-{record.round}")
+        events.append(EventDraft(key, EventType.BATCH_CANCELLED, last_step, {"batch": record.model_dump(mode="json")},
+                                 [parent_key], stage=ExecutionStage.TERMINATE))
+        parent_key = key
     final_state: dict[str, Any] = {}
     properties: dict[str, bool] = {}
     unavailable = None
@@ -1262,7 +1685,7 @@ def finish_run(rc: RunComponents, *, status: RunStatus, reason: str | None, fina
     metrics = []
     for ev in rc.evaluators:
         metrics.extend(ev.score(episode))
-    events = [
+    events += [
         EventDraft(event_key(m.run_id, None, "metrics"), EventType.METRICS_COMPUTED, last_step,
                    {"metrics": [x.model_dump(mode="json") for x in metrics],
                     "evaluators": [e.descriptor.plugin_id for e in rc.evaluators]}, [parent_key]),

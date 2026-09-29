@@ -2093,6 +2093,27 @@
           "default": null,
           "title": "Based On Revision"
         },
+        "batch_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "JOINT_BATCH: the batch this operation submitted",
+          "title": "Batch Id"
+        },
+        "batch_outcomes": {
+          "description": "JOINT_BATCH: one outcome per submitted proposal, in submission order",
+          "items": {
+            "$ref": "#/$defs/ActionOutcome"
+          },
+          "title": "Batch Outcomes",
+          "type": "array"
+        },
         "decisions": {
           "description": "pre-execution decisions (phase 3A)",
           "items": {
@@ -2106,7 +2127,8 @@
           "enum": [
             "apply",
             "reset",
-            "probe"
+            "probe",
+            "batch"
           ],
           "title": "Kind",
           "type": "string"
@@ -3208,6 +3230,33 @@
           "minimum": 0,
           "title": "Actor Step",
           "type": "integer"
+        },
+        "batch_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "JOINT_BATCH: the round's batch (phase 3A)",
+          "title": "Batch Id"
+        },
+        "env_step": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "JOINT_BATCH: environment step the batch was applied at (one per batch, phase 3A)",
+          "title": "Env Step"
         },
         "global_step": {
           "minimum": 0,

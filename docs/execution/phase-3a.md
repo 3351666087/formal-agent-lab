@@ -64,7 +64,9 @@
 
 ## G4 · 轮次与参与者输入接口
 
-- [ ] **P3A-G4** 提供可恢复的联合批次接口，以及可按参与者构造的 Planner 输入服务。
+- [x] **P3A-G4** 提供可恢复的联合批次接口，以及可按参与者构造的 Planner 输入服务。
+  - 证据：JOINT_BATCH (one env step per round, restart mid-round, per-member outcomes) + per-participant planner input; evidence g4-batch.json 9/9; unit 459, integration joint batch 3 + regressions pass
+  - 实现：`packages/runtime/src/formal_lab_runtime/engine.py`、`packages/runtime/src/formal_lab_runtime/participants.py`、`scripts/joint_batch_evidence.py`、`docs/handoff/phase3-draft.md`
 
 保持现有 ROUND_ROBIN、FIXED_TABLE、SIMULTANEOUS_SNAPSHOT 行为；后者含义仍为轮初共同观测、随后顺序执行。新增显式声明的批次能力：保存轮初观测和参与者提案，集齐后向支持批次的环境提交一次，再记录各参与者结果；中途重启可以继续。global_step、actor_step、round、environment step 的关系清楚，缺失成员、超时和取消有确定结果。批次运行能力与形式化模型对并发性质的支持分别声明。
 

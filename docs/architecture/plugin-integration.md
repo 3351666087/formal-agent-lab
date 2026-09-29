@@ -52,11 +52,15 @@ def registrations() -> list[PluginRegistration]:
 | `Verifier` | 协议 | `interfaces.py` | 插件（VERIFIER） | `query.*` |
 | `Environment` | 协议 | `interfaces.py` | 插件（ENVIRONMENT） | `env.*` |
 | `SessionEnvironment` | 协议（可选扩展 `Environment`） | `interfaces.py` | 持久业务服务的适配器 | `env.persistent_session`、`env.query_operation` … |
+| `BatchEnvironment` | 协议（阶段三，可选扩展 `Environment`） | `interfaces.py` | 能一次应用一轮提案的环境 | `env.batch_step`（`params.semantics`） |
 | `EnvironmentSession` | 数据对象 | `execution.py` | 会话环境产生 | — |
 | `Probe` | 协议 | `interfaces.py` | 插件（PROBE，v2） | `probe.metrics` |
 | `ProbeResult` | 数据对象 | `execution.py` | 探针产生，带 `EvidenceRef` 来源 | — |
 | `TurnScheduler` | 协议 | `interfaces.py` | 内核（`formal_lab_runtime.turns.CycleScheduler`）；`TurnPolicy` 选择模式 | — |
 | `TurnPolicy`、`TurnRef`、`TurnState` | 数据对象 | `kernel.py` / `execution.py` | 场景声明 / 内核记录 | — |
+| `ParticipantView` | 数据对象（阶段三） | `objects.py` | 场景为每个参与者声明（`Participant.view`） | — |
+| `BatchRecord`、`BatchMember` | 记录（阶段三） | `execution.py` | 内核写入运行携带状态与 `BATCH_*` 事件 | — |
+| `BatchMemberStatus` | 枚举（阶段三） | `execution.py` | PROPOSED / PASSED / ABSENT / TIMED_OUT / CANCELLED | — |
 | `Evaluator` | 协议 | `interfaces.py` | 插件（EVALUATOR） | `eval.applies_to` |
 | `ArtifactStore` | 协议 | `interfaces.py` | 平台（本地 / S3） | — |
 | `ExecutionGate` | 协议（阶段三） | `interfaces.py` | 插件（EXECUTION_GATE，v2） | `gate.pre_execution`、`gate.fresh_values` |
@@ -88,7 +92,7 @@ class MyDriver:
     def load(self, package: ModelPackage) -> LoadedModel: ...
 ```
 
-`LoadedModel` 是**协议**：`action_specs()`、`state_paths()`、`initial_state()`、`belief(observation)`、`candidates(belief, scope=, partial_checker=)`、`predict(state, action) -> Prediction`、`properties(state)`、`property_kinds()`、`display()`；可选 `stats()`（声明 `driver.stats` 时，发布记录用它统计规模）。内核、规则与发布只调用这些方法。
+`LoadedModel` 是**协议**：`action_specs()`、`state_paths()`、`initial_state()`、`belief(observation)`、`candidates(belief, scope=, partial_checker=)`、`predict(state, action) -> Prediction`、`properties(state)`、`property_kinds()`、`display()`；可选 `stats()`（声明 `driver.stats` 时，发布记录用它统计规模）。内核、规则与发布只调用这些方法。声明 `driver.joint_predict`（`params.semantics`，阶段三 G4）表示模型给同时动作的含义与该语义一致，联合批次的效果即按它组合 `predict()` 的结果来比较（见 3.7）。
 
 平台能对一个模型做什么由**能力报告**决定（阶段三 G3，`formal_lab_runtime.release.capability_report`，`GET /api/v1/model-versions/{id}/capabilities`，`fal release capabilities <id>`），只依据驱动的 `driver.*` 与已安装验证器对该 profile 声明的 `query.*`，从不根据载荷形状推断：
 
@@ -117,6 +121,7 @@ class MyPlanner:
 - `PlanningContext`（数据对象）包含观测、动作规格、候选（每个带 `belief_applicability`、原因与可选 `observation_request`）、预算与用量、种子，以及 v2 字段：`turn`、`goal`、`objective`、`actor_budget`/`actor_usage`、`participants`、`observation_request_allowed`、`assumptions`、`last_outcome`（含效果比较）、`replan_requested`。**只能从候选中选择**；环境拒绝非模型声明的动作。
 - 返回 `ActionProposal`：`proposal_id = f"{context.step_id}:proposal"`、`source.kind`（RULE / SYMBOLIC / LLM / LLM_STUB / HUMAN / EXTERNAL）、`rationale`、`usage`；可带 `observation_request`（能力 `plan.observation_requests`，环境 `env.observe_on_request` 时内核先补观测再重新询问一次）。
 - 实现检查点时，内核在每次提案后保存 `PlannerCheckpoint`，下一步先 `restore` 再 `propose`：暂停、取消后重跑或 Worker 重启都从同一状态继续（D-020）。检查点必须可 JSON 序列化并只含规划器自己的状态。
+- **参与者输入（阶段三 G4）**：工厂收到的 `services` 是该参与者的 `ParticipantServices`：`participant()` / `actor_id` 说明为谁规划，`get_setting(key)` 先读 `Participant.view.settings` 再读平台设置，`loaded_model()` 等与运行共用。场景可为参与者声明 `view`（`include` / `exclude` 为位置族或完整路径，空 `include` = 全部）：规划器收到的观测（回合初、轮初、按请求补观测）去掉视图外位置的事实与未知项，信念因此把它们当作“从未观测”（ASSUMED_INITIAL）；视图外的补观测请求不予满足并记录；`last_outcome` 的效果比较只保留视图内字段。内核的前置检查、预测与效果比较仍基于完整观测。事件 `OBSERVATION.planner_input`（被隐藏位置、输入摘要）与 `ACTION_PROPOSED.planner_input_digest` 记录规划器实际收到的内容；恢复前后同一步的摘要相同。实现：`formal_lab_runtime/participants.py`。
 - 参考：规则 `examples/neutral-scheduling/.../rule_planner.py`、任务计划 `.../task_planner.py`、Z3 `packages/solver-adapters/z3/.../planner.py`、LLM `packages/strategies/.../llm_planner.py`、包外 `examples/external-plugin/.../checklist.py`。
 
 ### 3.4 验证器（VERIFIER）
@@ -149,6 +154,8 @@ class MyEnvironment:
 
 在 `outcome.result["properties"]` 报告真值性质供停止条件使用；`Observation` 中不可知的当前值放 `unknowns`（附 `last_known`）。
 
+**批次（阶段三 G4，可选）**：声明 `env.batch_step`（`params.semantics` 写明同时动作的含义）并实现 `step_batch(proposals, *, operation_id) -> list[ActionOutcome]`（`BatchEnvironment`）的环境可运行 `JOINT_BATCH` 场景：一次调用应用一轮的全部提案，按给定顺序每个提案返回一个结果，环境步数（与有效果时的世界修订）只前进一次；同一 `operation_id` 重复调用返回已记录的结果。`formal-lab.env.driver-world` 的语义为 `START_STATE_DISJOINT_WRITES`：每个动作都在批次起始状态上判定，适用动作的写入合并；写入了本批次较早成员已写位置的动作被拒绝（`ConflictInfo`，原因 “batch write conflict”）。没有该能力的环境在协商阶段拒绝 `JOINT_BATCH`。
+
 ### 3.6 探针（PROBE）
 
 ```python
@@ -162,7 +169,18 @@ class MyProbe:
 
 ### 3.7 轮次（TurnScheduler）
 
-轮次由内核实现，场景以 `TurnPolicy` 选择：`ROUND_ROBIN`、`FIXED_TABLE`、`SIMULTANEOUS_SNAPSHOT`（轮初共同观测、随后顺序执行）；观测时机 `TURN_START` / `ROUND_START`；冲突策略 `REVALIDATE` / `REJECT_STALE`。游标（`TurnState`）随运行持久化。参考 `formal_lab_runtime/turns.py`。
+轮次由内核实现，场景以 `TurnPolicy` 选择模式：`ROUND_ROBIN`（参与者按声明顺序）、`FIXED_TABLE`（`table` 给出的顺序，可重复）、`JOINT_BATCH`（阶段三：每轮成员的提案合成一个批次一次提交）；观测时机 `TURN_START` / `ROUND_START`（`ROUND_START` 即“轮初共同观测、随后顺序执行”）；冲突策略 `REVALIDATE` / `REJECT_STALE`。游标（`TurnState`）随运行持久化。参考 `formal_lab_runtime/turns.py`。
+
+编号之间的关系：
+
+| 编号 | 含义 | 顺序模式 | `JOINT_BATCH` |
+|---|---|---|---|
+| `global_step` | 运行的逻辑步，每个参与者回合一步 | 每步执行一个动作 | 每个成员的提案占一步 |
+| `actor_step` | 该参与者行动（提案被执行 / 进入批次）的次数 | 同左 | 同左 |
+| `round` | 周期序号 | 周期走完一遍 | = 批次序号（`batch_id = <run>:b<round>`） |
+| `env_step` | 环境步数（`EnvironmentSnapshot.step`） | 未写入 `TurnRef`（每个执行的动作一步） | 写入成员结果的 `TurnRef`：每个批次一步 |
+
+`JOINT_BATCH` 要求 `observation_timing = ROUND_START`，可设 `batch_timeout_s`。每个成员照常经历 TURN → OBSERVE → PROPOSE → CHECK，提案存入运行携带状态中的开放批次（`BatchRecord`，事件 `BATCH_OPENED`），环境不变；本轮最后一个成员的那一步提交批次（`BATCH_SUBMITTED`，一个 `kind = "batch"` 的操作，`batch_outcomes` 按提交顺序），每个成员的结果与效果比较记在它自己的提案步。成员状态是确定的：PROPOSED、PASSED（无可行动作）、ABSENT（自身预算已用完而退出）、TIMED_OUT（提案完成时距批次打开已超过 `batch_timeout_s`：不提交，本轮其余成员同样 TIMED_OUT、批次立即提交）、CANCELLED（运行在提交前结束：`BATCH_CANCELLED`，什么都没有发送）。执行前门控逐个成员判断，被拒绝的成员不发送、其余成员照常提交。批次执行（环境能力 `env.batch_step`）与联合语义（驱动能力 `driver.joint_predict`）分开声明：两者 `params.semantics` 相同时，每个成员的效果与整个批次的联合预测比较；否则只与自己动作的预测比较，其他成员写入的位置不算模型差异（写入协商说明）。批次中的模型差异产生修订建议，但不生成回归案例（回归案例重放动作序列，批次不是序列）。
 
 ### 3.8 评分器（EVALUATOR）与产物存储（ARTIFACT_STORE）
 

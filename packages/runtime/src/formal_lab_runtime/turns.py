@@ -7,6 +7,11 @@ consuming a global step. The persistent `TurnState` (position, round, per-actor 
 actors, no-progress counter) lets a run resume on exactly the right turn after a pause, a worker crash or
 continue-as-new. A single participant under ROUND_ROBIN reproduces phase-1 numbering
 (round = actor step = global step).
+
+JOINT_BATCH (phase 3A) uses the ROUND_ROBIN cycle: round r is batch r; each member still takes one global step
+(its proposal), the environment steps once per round. `advance(progressed=None)` leaves the no-progress counter to
+the batch submission; `close_round` passes over the members that can no longer propose in a round whose batch was
+submitted early (deadline).
 """
 
 from __future__ import annotations
@@ -50,8 +55,9 @@ class CycleScheduler:
         return TurnRef(global_step=state.global_step + 1, round=slot // len(self.cycle) + 1, actor_id=actor,
                        actor_step=state.actor_steps.get(actor, 0) + 1)
 
-    def advance(self, state: TurnState, turn: TurnRef, *, acted: bool, progressed: bool) -> TurnState:
-        """State after `turn` was taken (acted = an action was executed; otherwise the actor passed its turn)."""
+    def advance(self, state: TurnState, turn: TurnRef, *, acted: bool, progressed: bool | None) -> TurnState:
+        """State after `turn` was taken (acted = an action was executed or joined a batch; otherwise the actor passed
+        its turn; progressed None = the no-progress counter is decided later)."""
         slot = self._slot(state, turn.actor_id)
         if slot is None:
             raise ValueError(f"{turn.actor_id} has no pending turn")
@@ -66,8 +72,16 @@ class CycleScheduler:
             "position": slot + 1,
             "actor_steps": steps,
             "skipped": skipped,
-            "no_progress": 0 if progressed else state.no_progress + 1,
+            "no_progress": state.no_progress if progressed is None else 0 if progressed else state.no_progress + 1,
         })
+
+    def close_round(self, state: TurnState, round_: int, passed: list[str]) -> TurnState:
+        """Move the cursor to the start of round `round_ + 1`; `passed` members lose their turn in this round."""
+        skipped = dict(state.skipped)
+        for actor in passed:
+            skipped[actor] = skipped.get(actor, 0) + 1
+        return state.model_copy(update={"position": max(state.position, round_ * len(self.cycle)),
+                                        "round": max(state.round, round_), "skipped": skipped})
 
     @staticmethod
     def retire(state: TurnState, actor_id: str) -> TurnState:

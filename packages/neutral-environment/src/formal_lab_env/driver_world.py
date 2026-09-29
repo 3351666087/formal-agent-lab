@@ -17,6 +17,11 @@ Several participants: every actor sees the same truth through its own view; the 
 actions; the scenario's conflict policy decides about proposals made on an older revision (REVALIDATE: apply if
 still applicable; REJECT_STALE: reject when a location the action reads — `LoadedModel.reads` when the driver
 offers it, otherwise any written location — changed since that revision).
+
+JOINT_BATCH rounds (phase 3A, `step_batch`, semantics START_STATE_DISJOINT_WRITES): every proposal is evaluated on
+the batch's start state; the writes of applicable proposals are merged; a proposal writing a location an earlier
+proposal of the same batch already wrote is rejected as a conflict. The world revision and the environment step
+advance once per batch (the revision only if something was applied).
 """
 
 from __future__ import annotations
@@ -85,7 +90,8 @@ DESCRIPTOR = PluginDescriptor(
     capabilities=[{"id": DRIVER_GENERIC}, {"id": caps.ENV_PURE_REPLAYABLE}, {"id": caps.ENV_SNAPSHOT},
                   {"id": caps.ENV_RESTORE}, {"id": caps.ENV_IDEMPOTENT_STEP}, {"id": caps.ENV_MULTI_ACTOR},
                   {"id": caps.ENV_OBSERVE_ON_REQUEST}, {"id": caps.ENV_OBSERVATION_DELAY},
-                  {"id": caps.ENV_SEEDED_VARIATION}],
+                  {"id": caps.ENV_SEEDED_VARIATION},
+                  {"id": caps.ENV_BATCH_STEP, "params": {"semantics": caps.BATCH_START_STATE_DISJOINT_WRITES}}],
     requires=[{"id": caps.DRIVER_PREDICT, "params": {"of": "driver"}},
               {"id": caps.DRIVER_PROPERTIES, "params": {"of": "driver"}}],
     semantic_profiles=[],
@@ -243,16 +249,79 @@ class DriverWorldEnvironment:
                                         "reason": f"precondition no longer holds: {pred.reason}; {conflict.reason}"})
                                     if conflict else None,
                                     result={"reason": pred.reason, "properties": self.truth_properties()})
-        data["step"] += 1
-        data["history"].append(data["state"])
-        keep = max([1, *self.config.get("observation", {}).get("delay_steps", {}).values(),
-                    *(v for view in self.config.get("observation", {}).get("per_actor", {}).values()
-                      for v in view.get("delay_steps", {}).values())]) + 1
-        data["history"] = data["history"][-keep:]
+        self._advance(data["state"])
         data["applied_ops"][operation_id] = outcome.model_dump(mode="json")
         if len(data["applied_ops"]) > MAX_OP_MEMORY:
             data["applied_ops"].pop(next(iter(data["applied_ops"])))
         return outcome
+
+    def step_batch(self, proposals: list[ActionProposal], *, operation_id: str) -> list[ActionOutcome]:
+        data = self._require()
+        key = f"batch:{operation_id}"
+        if key in data["applied_ops"]:
+            return [ActionOutcome.model_validate(o) for o in data["applied_ops"][key]]
+        before, start = data["revision"], data["state"]
+        merged = dict(start)
+        written_by: dict[str, str] = {}
+        results: list[tuple[ActionProposal, str, list[str], ConflictInfo | None, str | None]] = []
+        for proposal in proposals:
+            conflict = self._conflict(proposal, before)
+            pred = self.loaded.predict(start, proposal.action)
+            if conflict is not None and conflict.policy.value == "REJECT_STALE":
+                results.append((proposal, "REJECTED", [], conflict, f"STALE_REVISION: {conflict.reason}"))
+                continue
+            if not (pred.applicable and pred.next_state is not None):
+                results.append((proposal, "REJECTED", [], None, pred.reason))
+                continue
+            writes = sorted(set(pred.written_paths) | {p for p, v in pred.next_state.items() if start.get(p) != v})
+            clash = sorted(p for p in writes if p in written_by)
+            if clash:
+                by = sorted({written_by[p] for p in clash})
+                why = (f"batch write conflict: {', '.join(clash)} already written by {', '.join(by)} in this batch "
+                       f"(semantics {caps.BATCH_START_STATE_DISJOINT_WRITES})")
+                info = ConflictInfo(policy=data["conflict_policy"], based_on_revision=proposal.based_on_revision,
+                                    current_revision=before, changed_paths=clash, reason=why)
+                results.append((proposal, "REJECTED", [], info, why))
+                continue
+            for path in writes:
+                merged[path] = pred.next_state[path]
+                written_by[path] = proposal.actor_id
+            results.append((proposal, "APPLIED", writes, None, None))
+        progressed = bool(written_by)
+        after = before + 1 if progressed else before
+        data["state"] = merged
+        data["revision"] = after
+        for path, actor in written_by.items():
+            data["writes"][path] = [after, actor]
+        props = self.loaded.properties(merged)
+        outcomes = []
+        for proposal, status, writes, conflict, reason in results:
+            common = dict(operation_id=f"{operation_id}:{proposal.actor_id}", run_id=data["run_id"],
+                          step_id=proposal.step_id, proposal_id=proposal.proposal_id, action=proposal.action,
+                          revision_before=before)
+            if status == "APPLIED":
+                outcomes.append(ActionOutcome(**common, status=OutcomeStatus.APPLIED, effect_applied=True,
+                                              revision_after=after,
+                                              result={"written_paths": writes, "properties": props,
+                                                      "batch": operation_id}))
+            else:
+                outcomes.append(ActionOutcome(**common, status=OutcomeStatus.REJECTED, effect_applied=False,
+                                              revision_after=after, conflict=conflict,
+                                              result={"reason": reason, "properties": props, "batch": operation_id}))
+        self._advance(merged)
+        data["applied_ops"][key] = [o.model_dump(mode="json") for o in outcomes]
+        if len(data["applied_ops"]) > MAX_OP_MEMORY:
+            data["applied_ops"].pop(next(iter(data["applied_ops"])))
+        return outcomes
+
+    def _advance(self, state: dict[str, Any]) -> None:
+        data = self._require()
+        data["step"] += 1
+        data["history"].append(state)
+        keep = max([1, *self.config.get("observation", {}).get("delay_steps", {}).values(),
+                    *(v for view in self.config.get("observation", {}).get("per_actor", {}).values()
+                      for v in view.get("delay_steps", {}).values())]) + 1
+        data["history"] = data["history"][-keep:]
 
     # ------------------------------------------------------------------ persistence
     def snapshot(self) -> EnvironmentSnapshot:

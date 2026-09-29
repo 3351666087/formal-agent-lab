@@ -159,3 +159,9 @@
 - **决策**（阶段三 G3）：`capability_report(package, registry)` 只从驱动声明的 `driver.*` 能力与验证器对该 profile 声明的 `query.*` 能力推导每项功能（类型检查、候选 / 预测、回归重放、规则、成本目标、规模统计、五种查询）的 SUPPORTED / UNSUPPORTED、提供者与原因；发布按报告执行，缺能力的检查记为 UNSUPPORTED（executed = false）。`ReleaseConfig` 列出必需检查（默认 TYPE_CHECK；带规则集时加 RULE_CHECK，带回归案例时加 REGRESSION）与必需成立的性质；必需检查缺能力或无结论性结果 → `process_completed = false`、REJECTED；性质是否成立记在每项检查的 `property_holds` 与 `claim`（由查询种类与结论决定措辞），只有 `required_holds` 中的性质阻止发布。规模统计改用协议方法与可选的 `stats()`（`driver.stats`），不再调用未声明的 `ground_actions()`。场景带规则集而驱动未声明 `driver.ir` 时，运行在协商阶段被拒绝（阶段二会静默不执行规则）。
 - **理由**：阶段二的发布依赖 IR 分支与未声明的方法，非 IR 驱动的行为只能靠猜；`ReleaseCheck.passed` 同时表示“检查未报错”和“不阻止发布”，读者容易把“发现不变量可被违反”理解为发布失败或反之。
 - **影响**：已有 IR 模型的发布结论不变（新增字段带默认值，旧记录可读）；发布 id 的内容摘要包含配置。证据：`scripts/model_revision_evidence.py`（订单服务真实修订与陈旧依据分类）、`packages/runtime/tests/test_release.py`、`tests/integration/test_governance_platform.py`。
+
+## D-027 联合批次沿用“一个成员一步”，环境每批次一步；参与者视图只约束规划器
+
+- **决策**（阶段三 G4）：新增轮次模式 `JOINT_BATCH`（要求 `ROUND_START`）。每个成员的提案仍占一个全局步（TURN → OBSERVE → PROPOSE → CHECK），提案存入运行携带状态中的开放 `BatchRecord`；本轮最后一个成员的那一步通过 `env.batch_step`（`step_batch`）一次提交，环境只前进一步；每个成员的结果与比较记在它自己的提案步（`TurnRef.batch_id`、`env_step`）。缺席、超时、取消与门控拒绝都有确定的成员状态。批次执行（环境能力）与联合语义（驱动能力 `driver.joint_predict`）分开声明，语义一致时才按联合预测比较。参与者视图（`Participant.view`）与 `ParticipantServices` 决定规划器收到什么：视图外位置从观测中移除（信念视为从未观测），补观测请求与 `last_outcome` 的比较字段同样过滤，设置先读参与者自己的；内核的检查、预测与比较仍用完整观测。
+- **理由**：保留“一个全局步 = 一个参与者回合”使阶段二的持久化、恢复、预算与事件模型不必改变——批次只是跨步的携带状态，恢复时从数据库或 JSON 状态原样继续；把批次提交放在最后一个成员的步里，环境不会看到半个批次。批次执行与联合语义分开，是因为环境能同时应用动作不代表模型给出了同时动作的含义；混为一谈会把其他成员的写入误报为模型错误。视图若只在规划器内部自觉遵守就无法验证；在内核统一过滤并记录输入摘要，恢复前后可逐步比对。
+- **影响**：顺序模式的轨迹、事件与携带状态不变（仓储顺序运行与 `0ae4571` 捕获逐动作一致，单元与阶段一哨兵通过）；`CycleScheduler.advance` 接受 `progressed=None`。证据：`scripts/joint_batch_evidence.py`、`examples/warehouse-allocation/tests/test_joint_batch.py`、`packages/runtime/tests/test_participants.py`、`tests/integration/test_joint_batch_platform.py`。

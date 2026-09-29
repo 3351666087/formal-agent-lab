@@ -111,3 +111,7 @@ def negotiate(descriptor: PluginDescriptor, requirements: list[CapabilityRequire
 GATE_PRE_EXECUTION = "gate.pre_execution"  # an EXECUTION_GATE plugin: ALLOW / DENY before each send
 GATE_FRESH_VALUES = "gate.fresh_values"  # the gate asks for locations to be read right before the send
 DRIVER_STATS = "driver.stats"  # the loaded model offers stats() (sizes for release records); optional
+ENV_BATCH_STEP = "env.batch_step"  # step_batch(proposals, operation_id): one environment step for a JOINT_BATCH round
+DRIVER_JOINT_PREDICT = "driver.joint_predict"  # the model gives simultaneous actions a meaning (params.semantics)
+BATCH_START_STATE_DISJOINT_WRITES = "START_STATE_DISJOINT_WRITES"  # every action on the batch's start state;
+# disjoint writes merge, an action writing a location an earlier member already wrote is rejected (conflict)

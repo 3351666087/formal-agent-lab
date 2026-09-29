@@ -81,6 +81,13 @@ def request_digest(proposal: ActionProposal, kind: str = "apply") -> str:
     return hashlib.sha256(json.dumps(body, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
 
 
+def batch_request_digest(proposals: list[ActionProposal]) -> str:
+    """sha256 of a JOINT_BATCH submission: the member requests in submission order."""
+    body = [{"actor_id": p.actor_id, "action": p.action.model_dump(mode="json")} for p in proposals]
+    return hashlib.sha256(json.dumps({"kind": "batch", "members": body}, sort_keys=True,
+                                     separators=(",", ":")).encode()).hexdigest()
+
+
 def transition(record: OperationRecord, state: OperationState, reason: str, *,
                effect: OperationEffect = OperationEffect.NONE, **update: Any) -> OperationRecord:
     if state != record.state and state not in OPERATION_TRANSITIONS[record.state]:
@@ -118,6 +125,7 @@ class CoordinationResult:
     denied: bool = False  # a gate denied the send: nothing was sent
     reused: bool = False  # the recorded result was used: nothing was sent
     conflict: str | None = None  # the id was reused with another request: nothing was sent
+    outcomes: list[ActionOutcome] = field(default_factory=list)  # JOINT_BATCH: one per submitted proposal
 
 
 class Coordinator:
@@ -192,6 +200,84 @@ class Coordinator:
         phase = (ExecutionPhase.FIRST_SEND if record.attempts == 0 else
                  ExecutionPhase.REEXECUTE if self.pure else ExecutionPhase.RESEND)
         return self._dispatch(record, proposal, log, phase)
+
+    def execute_batch(self, proposals: list[ActionProposal], operation_id: str, *, run_id: str, step: int,
+                      batch_id: str) -> CoordinationResult:
+        """One JOINT_BATCH submission (phase 3A, G4): `env.step_batch` applies every proposal in one environment step.
+        Same identity rules as `execute`; a lost answer is re-sent with the same id only when the environment
+        deduplicates by id (env.idempotent_step), a pure-data environment re-executes and must answer the same."""
+        log: list[tuple[OperationState, str]] = []
+        digest = batch_request_digest(proposals)
+        record = self.ledger.get(operation_id)
+        if record is None:
+            record = OperationRecord(operation_id=operation_id, run_id=run_id, step=step, kind="batch",
+                                     state=OperationState.PREPARED, batch_id=batch_id, request_digest=digest,
+                                     based_on_revision=min((p.based_on_revision for p in proposals), default=None),
+                                     transitions=[OperationTransition(state=OperationState.PREPARED, at=utcnow(),
+                                                                      reason=f"batch intent recorded: "
+                                                                             f"{len(proposals)} proposal(s)",
+                                                                      effect=OperationEffect.NONE)])
+            self.ledger.put(record)
+            log.append((OperationState.PREPARED, "batch intent recorded before dispatch"))
+        elif record.request_digest != digest:
+            why = (f"operation id {operation_id} was recorded for another batch (digest {record.request_digest}) "
+                   f"and is now asked for digest {digest[:12]}: nothing is sent")
+            log.append((record.state, f"conflict: {why}"))
+            return CoordinationResult(None, record, log, unresolved=True, conflict=why)
+        elif record.state is OperationState.FAILED:  # the environment refused the batch: never sent again
+            return CoordinationResult(None, record, log, reused=True, outcomes=list(record.batch_outcomes))
+        elif record.state in (OperationState.COMPLETED, OperationState.RECONCILED):
+            if not self.pure:
+                record = self._save(record, log, record.state, "recorded batch result reused; nothing sent",
+                                    effect=OperationEffect.REUSE)
+                return CoordinationResult(None, record, log, reused=True, outcomes=list(record.batch_outcomes))
+            outcomes = self.env.step_batch(proposals, operation_id=operation_id)
+            if [_essence(o) for o in outcomes] != [_essence(o) for o in record.batch_outcomes]:
+                raise NonRetryableFailure(f"pure-data replay of batch {operation_id} differs from the recorded "
+                                          "outcomes")
+            return CoordinationResult(None, record, log, outcomes=outcomes)
+        elif record.state in (OperationState.DISPATCHED, OperationState.OUTCOME_UNKNOWN) and not self.pure \
+                and not self.resend_safe:
+            return self._unresolved(record, log, "batch interrupted after dispatch; the environment does not declare "
+                                                 "env.idempotent_step: re-sending could apply it twice")
+        while True:
+            if record.attempts >= self.MAX_DISPATCHES and not self.pure:
+                return self._unresolved(record, log, f"batch outcome still unknown after {record.attempts} "
+                                                     "dispatch(es)")
+            record = self._save(record, log, OperationState.DISPATCHED,
+                                "batch sent to the environment" if record.attempts == 0 else
+                                "batch re-sent with the same id", effect=OperationEffect.SEND)
+            try:
+                outcomes = self.env.step_batch(proposals, operation_id=operation_id)
+            except (ResultUnknown, Timeout) as exc:
+                record = self._save(record, log, OperationState.OUTCOME_UNKNOWN, f"{exc.code.value}: {exc.message}")
+                if self.pure:
+                    raise
+                if not self.resend_safe:
+                    return self._unresolved(record, log, "batch answer lost; the environment does not declare "
+                                                         "env.idempotent_step: re-sending could apply it twice")
+                continue
+            except FormalLabError as exc:
+                if exc.retryable:
+                    raise
+                record = self._save(record, log, OperationState.FAILED, f"{exc.code.value}: {exc.message}")
+                failed = [ActionOutcome(operation_id=f"{operation_id}:{p.actor_id}", run_id=p.run_id,
+                                        step_id=p.step_id, proposal_id=p.proposal_id, action=p.action,
+                                        status=OutcomeStatus.FAILED_NON_RETRYABLE, effect_applied=False,
+                                        revision_before=p.based_on_revision, error=exc.to_info(), turn=p.turn,
+                                        operation_state=OperationState.FAILED) for p in proposals]
+                record = record.model_copy(update={"batch_outcomes": failed})
+                self.ledger.put(record)
+                return CoordinationResult(None, record, log, outcomes=failed)
+            if len(outcomes) != len(proposals):
+                raise NonRetryableFailure(f"step_batch answered {len(outcomes)} outcome(s) for {len(proposals)} "
+                                          "proposal(s)")
+            outcomes = [o.model_copy(update={"operation_state": OperationState.COMPLETED}) for o in outcomes]
+            applied = sum(o.status is OutcomeStatus.APPLIED for o in outcomes)
+            record = self._save(record, log, OperationState.COMPLETED,
+                                f"environment applied the batch: {applied}/{len(outcomes)} APPLIED",
+                                batch_outcomes=outcomes)
+            return CoordinationResult(None, record, log, outcomes=outcomes)
 
     # ------------------------------------------------------------------ sends
     def _decide(self, phase: ExecutionPhase, record: OperationRecord, proposal: ActionProposal,

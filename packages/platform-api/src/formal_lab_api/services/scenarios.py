@@ -86,8 +86,15 @@ def _build_manifest(s: Session, scenario_id: str, revision: int, body: dict[str,
         raise InvalidInput("a scenario needs at least one participant with a strategy",
                            field_errors=[FieldError(path="/participants", message="at least one participant")])
     action_types = {spec.action_type for spec in loaded.action_specs()}
+    paths = set(loaded.state_paths())
+    families = {x.split("[", 1)[0] for x in paths}
     errors: list[FieldError] = []
     for i, p in enumerate(participants):
+        for key in ("include", "exclude"):  # phase 3A: a view names location families or full paths of the model
+            for pattern in (p.get("view") or {}).get(key, []):
+                if pattern not in families and pattern not in paths:
+                    errors.append(FieldError(path=f"/participants/{i}/view/{key}",
+                                             message=f"{pattern!r} is neither a state location nor a family"))
         ref = PluginRef.model_validate(p["strategy"]["plugin"])
         validate_plugin_config(ref, p["strategy"].get("config", {}), PluginInterface.PLANNER,
                                f"/participants/{i}/strategy/config")

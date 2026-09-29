@@ -78,6 +78,48 @@ class BeliefState(ContractModel):
         return sorted(p for p, v in self.provenance.items() if v is provenance)
 
 
+# =========================================================================== joint batches (phase 3A, G4)
+
+
+class BatchMemberStatus(StrEnum):
+    PROPOSED = "PROPOSED"  # proposed on the round-start observation; submitted with the batch
+    PASSED = "PASSED"  # had its turn but no applicable action (SKIP_ACTOR)
+    ABSENT = "ABSENT"  # retired (own budget) before it could propose in this round
+    TIMED_OUT = "TIMED_OUT"  # had not proposed within the round's batch_timeout_s; its proposal is not submitted
+    CANCELLED = "CANCELLED"  # the run was cancelled before the batch was submitted
+
+
+class BatchMember(ContractModel):
+    actor_id: Identifier
+    status: BatchMemberStatus
+    proposal_id: str | None = None
+    global_step: int | None = Field(default=None, ge=0, description="global step of its proposal")
+    actor_step: int | None = Field(default=None, ge=0)
+    reason: str | None = None
+
+
+class BatchRecord(ContractModel):
+    """One round of a JOINT_BATCH run: who proposed at which global step, and the single environment step the batch
+    was applied at. Kept in the run's carry state while open, so a restart continues the round."""
+
+    batch_id: str
+    run_id: str
+    round: int = Field(ge=1)
+    status: Literal["OPEN", "SUBMITTED", "CANCELLED"]
+    expected: list[Identifier] = Field(description="every participant, in turn order; each ends with one member "
+                                                  "status")
+    members: list[BatchMember] = Field(default_factory=list)
+    opened_at_step: int = Field(ge=1)
+    opened_at: datetime
+    submitted_at_step: int | None = None
+    env_step: int | None = Field(default=None, ge=0, description="environment step count after the batch")
+    operation_id: str | None = None
+    semantics: str | None = Field(default=None, description="the environment's declared batch semantics")
+    joint_prediction: bool = Field(default=False, description="the driver declares the same joint semantics, so "
+                                                              "effects are compared against a joint prediction")
+    note: str | None = None
+
+
 # =========================================================================== task plans / checkpoints
 
 
@@ -280,7 +322,7 @@ class OperationRecord(ContractModel):
     run_id: str
     step: int = Field(ge=0)
     actor_id: str | None = None
-    kind: Literal["apply", "reset", "probe"] = "apply"
+    kind: Literal["apply", "reset", "probe", "batch"] = "apply"
     state: OperationState
     transitions: list[OperationTransition] = Field(default_factory=list)
     proposal_id: str | None = None
@@ -293,6 +335,9 @@ class OperationRecord(ContractModel):
     request_digest: str | None = Field(default=None, description="sha256 of the canonical request (actor, kind, "
                                        "action); the same id with another request is a conflict (phase 3A)")
     decisions: list[ExecutionDecision] = Field(default_factory=list, description="pre-execution decisions (phase 3A)")
+    batch_id: str | None = Field(default=None, description="JOINT_BATCH: the batch this operation submitted")
+    batch_outcomes: list[ActionOutcome] = Field(default_factory=list, description="JOINT_BATCH: one outcome per "
+                                                "submitted proposal, in submission order")
 
     @model_validator(mode="after")
     def _transitions_valid(self) -> OperationRecord:

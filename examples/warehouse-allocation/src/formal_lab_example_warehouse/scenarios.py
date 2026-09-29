@@ -31,19 +31,30 @@ def single(pkg: ModelPackage, *, seed: int = 0, env: dict | None = None) -> Scen
         budget=BUDGET, seed=seed, termination=TERMINATION)
 
 
+JOINT = {"mode": "JOINT_BATCH", "observation_timing": "ROUND_START"}
+# phase 3A: what each role's planner receives — the receiver works docks and stock, the picker never sees the docks
+VIEWS = {"receiver": {"include": ["clock", "dock", "stock"], "label": "docks + stock"},
+         "picker": {"exclude": ["dock"], "label": "everything but the docks"}}
+
+
 def receiver_and_picker(pkg: ModelPackage, *, seed: int = 0, env: dict | None = None,
-                        turns: dict | None = None, max_fill: float | None = None) -> ScenarioManifest:
+                        turns: dict | None = None, max_fill: float | None = None,
+                        views: dict[str, dict] | None = None) -> ScenarioManifest:
     """Two participants with separate action scopes, one shared world, round-robin turns: the receiver puts
-    pallets away (its own goal: clear docks), the picker assigns the station and picks (joint goal)."""
+    pallets away (its own goal: clear docks), the picker assigns the station and picks (joint goal). `turns=JOINT`
+    submits both proposals of a round as one batch; `views=VIEWS` gives each planner only its own data fields."""
+    views = views or {}
+    joint = (turns or {}).get("mode") == "JOINT_BATCH"
     return ScenarioManifest(
-        scenario_id="wh-two-roles", name="仓储：收货员 + 拣货员轮流作业", model=pkg.ref(),
+        scenario_id="wh-joint-batch" if joint else "wh-two-roles",
+        name="仓储：收货员 + 拣货员同步批次" if joint else "仓储：收货员 + 拣货员轮流作业", model=pkg.ref(),
         environment={"plugin": ENV, "config": env or {}},
         participants=[
             {"actor_id": "receiver", "role": "receiver", "goal": "docks_clear", "budget": {"max_steps": 30},
              "strategy": {"plugin": RULES, "config": {"role": "receiver"}},
-             "scope": {"action_types": ["putaway", "tick"]}},
+             "scope": {"action_types": ["putaway", "tick"]}, "view": views.get("receiver")},
             {"actor_id": "picker", "role": "picker", "strategy": {"plugin": RULES, "config": {"role": "picker"}},
-             "scope": {"action_types": ["assign", "release", "pick", "tick"]}},
+             "scope": {"action_types": ["assign", "release", "pick", "tick"]}, "view": views.get("picker")},
         ],
         budget=BUDGET, seed=seed, termination=TERMINATION, turns=turns or {},
         execution_gates=[] if max_fill is None else [  # phase 3A: zone fill-level gate before every send

@@ -1055,6 +1055,221 @@
       "title": "BackendInfo",
       "type": "object"
     },
+    "BatchMember": {
+      "additionalProperties": false,
+      "properties": {
+        "actor_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:@/-]{0,254}$",
+          "title": "Actor Id",
+          "type": "string"
+        },
+        "actor_step": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Actor Step"
+        },
+        "global_step": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "global step of its proposal",
+          "title": "Global Step"
+        },
+        "proposal_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Proposal Id"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reason"
+        },
+        "status": {
+          "$ref": "#/$defs/BatchMemberStatus"
+        }
+      },
+      "required": [
+        "actor_id",
+        "status"
+      ],
+      "title": "BatchMember",
+      "type": "object"
+    },
+    "BatchMemberStatus": {
+      "enum": [
+        "PROPOSED",
+        "PASSED",
+        "ABSENT",
+        "TIMED_OUT",
+        "CANCELLED"
+      ],
+      "title": "BatchMemberStatus",
+      "type": "string"
+    },
+    "BatchRecord": {
+      "additionalProperties": false,
+      "description": "One round of a JOINT_BATCH run: who proposed at which global step, and the single environment step the batch\nwas applied at. Kept in the run's carry state while open, so a restart continues the round.",
+      "properties": {
+        "batch_id": {
+          "title": "Batch Id",
+          "type": "string"
+        },
+        "env_step": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "environment step count after the batch",
+          "title": "Env Step"
+        },
+        "expected": {
+          "description": "every participant, in turn order; each ends with one member status",
+          "items": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:@/-]{0,254}$",
+            "type": "string"
+          },
+          "title": "Expected",
+          "type": "array"
+        },
+        "joint_prediction": {
+          "default": false,
+          "description": "the driver declares the same joint semantics, so effects are compared against a joint prediction",
+          "title": "Joint Prediction",
+          "type": "boolean"
+        },
+        "members": {
+          "items": {
+            "$ref": "#/$defs/BatchMember"
+          },
+          "title": "Members",
+          "type": "array"
+        },
+        "note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Note"
+        },
+        "opened_at": {
+          "format": "date-time",
+          "title": "Opened At",
+          "type": "string"
+        },
+        "opened_at_step": {
+          "minimum": 1,
+          "title": "Opened At Step",
+          "type": "integer"
+        },
+        "operation_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Operation Id"
+        },
+        "round": {
+          "minimum": 1,
+          "title": "Round",
+          "type": "integer"
+        },
+        "run_id": {
+          "title": "Run Id",
+          "type": "string"
+        },
+        "semantics": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "the environment's declared batch semantics",
+          "title": "Semantics"
+        },
+        "status": {
+          "enum": [
+            "OPEN",
+            "SUBMITTED",
+            "CANCELLED"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "submitted_at_step": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Submitted At Step"
+        }
+      },
+      "required": [
+        "batch_id",
+        "run_id",
+        "round",
+        "status",
+        "expected",
+        "opened_at_step",
+        "opened_at"
+      ],
+      "title": "BatchRecord",
+      "type": "object"
+    },
     "BeliefState": {
       "additionalProperties": false,
       "description": "What one participant may plan with: every location has a value, each with its provenance (P2-025).",
@@ -2782,7 +2997,10 @@
         "RECOVERY",
         "MODEL_REVISION_SUGGESTED",
         "REGRESSION_CASE_CREATED",
-        "EXECUTION_DECIDED"
+        "EXECUTION_DECIDED",
+        "BATCH_OPENED",
+        "BATCH_SUBMITTED",
+        "BATCH_CANCELLED"
       ],
       "title": "EventType",
       "type": "string"
@@ -4920,6 +5138,27 @@
           "default": null,
           "title": "Based On Revision"
         },
+        "batch_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "JOINT_BATCH: the batch this operation submitted",
+          "title": "Batch Id"
+        },
+        "batch_outcomes": {
+          "description": "JOINT_BATCH: one outcome per submitted proposal, in submission order",
+          "items": {
+            "$ref": "#/$defs/ActionOutcome"
+          },
+          "title": "Batch Outcomes",
+          "type": "array"
+        },
         "decisions": {
           "description": "pre-execution decisions (phase 3A)",
           "items": {
@@ -4933,7 +5172,8 @@
           "enum": [
             "apply",
             "reset",
-            "probe"
+            "probe",
+            "batch"
           ],
           "title": "Kind",
           "type": "string"
@@ -5273,6 +5513,18 @@
         },
         "strategy": {
           "$ref": "#/$defs/StrategySpec"
+        },
+        "view": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ParticipantView"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "data this participant's planner receives (phase 3A)"
         }
       },
       "required": [
@@ -5280,6 +5532,50 @@
         "strategy"
       ],
       "title": "Participant",
+      "type": "object"
+    },
+    "ParticipantView": {
+      "additionalProperties": false,
+      "description": "What one participant's planner receives (phase 3A, G4): observed values of locations outside the view are\nwithheld before its belief is built (they count as never observed), and settings are read from its own map\nfirst. The planner never sees the withheld values; the environment and the kernel still work on the truth.",
+      "properties": {
+        "exclude": {
+          "description": "families or paths withheld even if included",
+          "items": {
+            "type": "string"
+          },
+          "title": "Exclude",
+          "type": "array"
+        },
+        "include": {
+          "description": "location families or paths the planner may see (empty = every location)",
+          "items": {
+            "type": "string"
+          },
+          "title": "Include",
+          "type": "array"
+        },
+        "label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Label"
+        },
+        "settings": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "participant settings, read before the platform settings",
+          "title": "Settings",
+          "type": "object"
+        }
+      },
+      "title": "ParticipantView",
       "type": "object"
     },
     "PlanBasis": {
@@ -8916,7 +9212,8 @@
     "TurnMode": {
       "enum": [
         "ROUND_ROBIN",
-        "FIXED_TABLE"
+        "FIXED_TABLE",
+        "JOINT_BATCH"
       ],
       "title": "TurnMode",
       "type": "string"
@@ -8925,6 +9222,20 @@
       "additionalProperties": false,
       "description": "Explicit interleaving semantics: exactly one participant acts per logical (global) step.",
       "properties": {
+        "batch_timeout_s": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "JOINT_BATCH: wall-clock limit for collecting one round's proposals; members that have not proposed by then are recorded TIMED_OUT and the batch is submitted without them (phase 3A)",
+          "title": "Batch Timeout S"
+        },
         "conflict_policy": {
           "$ref": "#/$defs/ConflictPolicy",
           "default": "REVALIDATE"
@@ -8963,6 +9274,33 @@
           "minimum": 0,
           "title": "Actor Step",
           "type": "integer"
+        },
+        "batch_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "JOINT_BATCH: the round's batch (phase 3A)",
+          "title": "Batch Id"
+        },
+        "env_step": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "JOINT_BATCH: environment step the batch was applied at (one per batch, phase 3A)",
+          "title": "Env Step"
         },
         "global_step": {
           "minimum": 0,
@@ -9448,6 +9786,12 @@
     "AssumptionSet": {
       "$ref": "#/$defs/AssumptionSet"
     },
+    "BatchMember": {
+      "$ref": "#/$defs/BatchMember"
+    },
+    "BatchRecord": {
+      "$ref": "#/$defs/BatchRecord"
+    },
     "BeliefState": {
       "$ref": "#/$defs/BeliefState"
     },
@@ -9543,6 +9887,9 @@
     },
     "OptimizationResult": {
       "$ref": "#/$defs/OptimizationResult"
+    },
+    "ParticipantView": {
+      "$ref": "#/$defs/ParticipantView"
     },
     "PlannerCheckpoint": {
       "$ref": "#/$defs/PlannerCheckpoint"

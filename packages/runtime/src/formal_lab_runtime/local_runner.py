@@ -187,6 +187,9 @@ def _continue(rc, state: LocalRunState, package: ModelPackage, *, stop_after: in
                                           outcome=ex.outcome, checks=checks, actor_id=ex.turn.actor_id if ex.turn
                                           else None, turn=ex.turn, stages=ex.stages, operation=ex.operation,
                                           probes=ex.probes))
+        for k, outcome in ex.batch_outcomes.items():  # JOINT_BATCH: members' outcomes land on their own steps
+            state.steps = [r.model_copy(update={"outcome": outcome, "turn": outcome.turn}) if r.step == k else r
+                           for r in state.steps]
         if ex.terminal is not None:
             status, reason, term = ex.terminal, ex.terminal_reason, ex.termination_reason
             break
@@ -204,7 +207,8 @@ def _continue(rc, state: LocalRunState, package: ModelPackage, *, stop_after: in
     parent = state.carry.last_event_key or event_key(run_id, 0, "snapshot")
     fin = finish_run(rc, status=status, reason=reason, final_snapshot=state.snapshot, usage=state.usage,
                      steps=state.steps, last_step=state.steps[-1].step if state.steps else 0, parent_key=parent,
-                     termination_reason=term, actor_usage=state.carry.actor_usage, probes=state.probes)
+                     termination_reason=term, actor_usage=state.carry.actor_usage, probes=state.probes,
+                     carry=state.carry)
     state.drafts += fin.events
     events = to_trace_events(run_id, state.drafts, 1)
     final_manifest = state.manifest.model_copy(update={

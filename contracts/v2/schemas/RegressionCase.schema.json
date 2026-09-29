@@ -714,6 +714,18 @@
         },
         "strategy": {
           "$ref": "#/$defs/StrategySpec"
+        },
+        "view": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ParticipantView"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "data this participant's planner receives (phase 3A)"
         }
       },
       "required": [
@@ -721,6 +733,50 @@
         "strategy"
       ],
       "title": "Participant",
+      "type": "object"
+    },
+    "ParticipantView": {
+      "additionalProperties": false,
+      "description": "What one participant's planner receives (phase 3A, G4): observed values of locations outside the view are\nwithheld before its belief is built (they count as never observed), and settings are read from its own map\nfirst. The planner never sees the withheld values; the environment and the kernel still work on the truth.",
+      "properties": {
+        "exclude": {
+          "description": "families or paths withheld even if included",
+          "items": {
+            "type": "string"
+          },
+          "title": "Exclude",
+          "type": "array"
+        },
+        "include": {
+          "description": "location families or paths the planner may see (empty = every location)",
+          "items": {
+            "type": "string"
+          },
+          "title": "Include",
+          "type": "array"
+        },
+        "label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Label"
+        },
+        "settings": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "participant settings, read before the platform settings",
+          "title": "Settings",
+          "type": "object"
+        }
+      },
+      "title": "ParticipantView",
       "type": "object"
     },
     "PluginRef": {
@@ -1299,7 +1355,8 @@
     "TurnMode": {
       "enum": [
         "ROUND_ROBIN",
-        "FIXED_TABLE"
+        "FIXED_TABLE",
+        "JOINT_BATCH"
       ],
       "title": "TurnMode",
       "type": "string"
@@ -1308,6 +1365,20 @@
       "additionalProperties": false,
       "description": "Explicit interleaving semantics: exactly one participant acts per logical (global) step.",
       "properties": {
+        "batch_timeout_s": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "JOINT_BATCH: wall-clock limit for collecting one round's proposals; members that have not proposed by then are recorded TIMED_OUT and the batch is submitted without them (phase 3A)",
+          "title": "Batch Timeout S"
+        },
         "conflict_policy": {
           "$ref": "#/$defs/ConflictPolicy",
           "default": "REVALIDATE"

@@ -1,0 +1,219 @@
+{
+  "$defs": {
+    "BatchMember": {
+      "additionalProperties": false,
+      "properties": {
+        "actor_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:@/-]{0,254}$",
+          "title": "Actor Id",
+          "type": "string"
+        },
+        "actor_step": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Actor Step"
+        },
+        "global_step": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "global step of its proposal",
+          "title": "Global Step"
+        },
+        "proposal_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Proposal Id"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reason"
+        },
+        "status": {
+          "$ref": "#/$defs/BatchMemberStatus"
+        }
+      },
+      "required": [
+        "actor_id",
+        "status"
+      ],
+      "title": "BatchMember",
+      "type": "object"
+    },
+    "BatchMemberStatus": {
+      "enum": [
+        "PROPOSED",
+        "PASSED",
+        "ABSENT",
+        "TIMED_OUT",
+        "CANCELLED"
+      ],
+      "title": "BatchMemberStatus",
+      "type": "string"
+    }
+  },
+  "$id": "https://formal-lab.dev/contracts/v2/BatchRecord.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "One round of a JOINT_BATCH run: who proposed at which global step, and the single environment step the batch\nwas applied at. Kept in the run's carry state while open, so a restart continues the round.",
+  "properties": {
+    "batch_id": {
+      "title": "Batch Id",
+      "type": "string"
+    },
+    "env_step": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "environment step count after the batch",
+      "title": "Env Step"
+    },
+    "expected": {
+      "description": "every participant, in turn order; each ends with one member status",
+      "items": {
+        "pattern": "^[A-Za-z0-9][A-Za-z0-9._:@/-]{0,254}$",
+        "type": "string"
+      },
+      "title": "Expected",
+      "type": "array"
+    },
+    "joint_prediction": {
+      "default": false,
+      "description": "the driver declares the same joint semantics, so effects are compared against a joint prediction",
+      "title": "Joint Prediction",
+      "type": "boolean"
+    },
+    "members": {
+      "items": {
+        "$ref": "#/$defs/BatchMember"
+      },
+      "title": "Members",
+      "type": "array"
+    },
+    "note": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Note"
+    },
+    "opened_at": {
+      "format": "date-time",
+      "title": "Opened At",
+      "type": "string"
+    },
+    "opened_at_step": {
+      "minimum": 1,
+      "title": "Opened At Step",
+      "type": "integer"
+    },
+    "operation_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Operation Id"
+    },
+    "round": {
+      "minimum": 1,
+      "title": "Round",
+      "type": "integer"
+    },
+    "run_id": {
+      "title": "Run Id",
+      "type": "string"
+    },
+    "semantics": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "the environment's declared batch semantics",
+      "title": "Semantics"
+    },
+    "status": {
+      "enum": [
+        "OPEN",
+        "SUBMITTED",
+        "CANCELLED"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "submitted_at_step": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Submitted At Step"
+    }
+  },
+  "required": [
+    "batch_id",
+    "run_id",
+    "round",
+    "status",
+    "expected",
+    "opened_at_step",
+    "opened_at"
+  ],
+  "title": "BatchRecord",
+  "type": "object"
+}
