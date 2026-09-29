@@ -115,6 +115,9 @@ def main() -> int:
         page.locator("table[aria-label='步骤列表'] tbody tr").nth(6).click()
         page.get_by_test_id("planner-input").wait_for()
         out["screens"]["run_batch_step"] = shot(page, "run-batch-step", full=True)
+        page.get_by_test_id("planner-input").scroll_into_view_if_needed()
+        page.evaluate("window.scrollBy(0, -120)")
+        out["screens"]["run_step"] = shot(page, "run-step")
 
         # ---- flow 2: order recovery through the Web
         order_run = run_from_scenario(page, web, base, od, od_sc)
@@ -164,7 +167,9 @@ def main() -> int:
             page.goto(f"{web}/p/{sch}/benchmarks/{reused[0]['id']}", wait_until="networkidle")
             page.get_by_text("单元队列").click()
             out["benchmarks_reused_badges"] = page.get_by_test_id("reused-cell").count()
-            out["screens"]["benchmarks_reused"] = shot(page, "benchmarks-reused", full=True)
+            page.get_by_test_id("reused-cell").first.scroll_into_view_if_needed()
+            page.evaluate("window.scrollBy(0, 200)")
+            out["screens"]["benchmarks_reused"] = shot(page, "benchmarks-reused")
 
         # ---- dark, narrow
         dark = browser.new_context(viewport=VIEW, device_scale_factor=1.5, color_scheme="dark")

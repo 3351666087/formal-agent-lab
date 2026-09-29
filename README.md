@@ -25,7 +25,7 @@
 <table>
 <tr>
 <td width="50%"><img src="docs/assets/screens/run-batch.png" alt="实验运行台：仓储同步批次"><br><sub><b>实验运行台 · 仓储同步批次</b>：收货员与拣货员每轮在同一观测上各自提案，一轮一个环境步；成员结果、联合预测比较与参与者颜色。</sub></td>
-<td width="50%"><img src="docs/assets/screens/run-batch-step.png" alt="步骤详情：规划器输入与证据等级"><br><sub><b>步骤详情</b>：参与者视图隐藏了哪些位置、字段级效果比较（● 观测 · ◆ 范围内核实 · ◌ 预测 · ○ 未知）。</sub></td>
+<td width="50%"><img src="docs/assets/screens/run-step.png" alt="步骤详情：规划器输入与证据等级"><br><sub><b>步骤详情</b>：参与者视图隐藏了哪些位置、字段级效果比较（● 观测 · ◆ 范围内核实 · ◌ 预测 · ○ 未知）。</sub></td>
 </tr>
 <tr>
 <td><img src="docs/assets/screens/models.png" alt="模型工作台"><br><sub><b>模型工作台</b>：结构图（领域 → 状态 → 动作 → 性质）、版本差异、编译与有界检查、能力报告。</sub></td>
