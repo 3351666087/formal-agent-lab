@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { irOf, get, post, type CheckRecord, type VersionDetail } from "../api";
+import { Icon } from "../icons";
 import { Empty, fmtTime, InlineError, KV, QueryState, useToast, VerdictBadge } from "../ui";
 
 export interface ReleaseRow {
@@ -70,7 +71,7 @@ export function ObjectivesAndReleases({ pid, detail, onDiff }: { pid: string; de
             <td className="small">{String(c.query.kind)} {String(c.query.property_id ?? (c.query.objective as { objective_id?: string })?.objective_id ?? "")}</td>
             <td><VerdictBadge verdict={c.verdict} /></td>
             <td className="small">{(c.explanation ?? []).slice(0, 2).join("；") || "—"}</td>
-            <td>{c.query_bundle_id ? <a className="btn sm" href={`/api/v1/query-bundles/${c.query_bundle_id}/export`} download>⤓ {c.query_bundle_id.slice(0, 10)}</a> : "—"}</td>
+            <td>{c.query_bundle_id ? <a className="btn sm" href={`/api/v1/query-bundles/${c.query_bundle_id}/export`} download><Icon name="export" size="sm" />{c.query_bundle_id.slice(0, 10)}</a> : "—"}</td>
           </tr>)}</tbody></table></div>}
       </QueryState>
     </div>

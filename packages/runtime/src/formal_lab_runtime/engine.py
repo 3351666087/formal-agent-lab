@@ -1040,7 +1040,9 @@ def apply_step(rc: RunComponents, snapshot: EnvironmentSnapshot, plan: PlanPhase
                               gate=_gate_hook(rc, step, actor) if rc.gates else None)
     result = coordinator.execute(proposal, op_id, run_id=run_id, step=step)
     ex.operation = result.record
-    for d in result.decisions:  # typed pre-execution decisions (phase 3A), keyed by gate / phase / attempt
+    # typed pre-execution decisions (phase 3A), keyed by gate / phase / attempt: every decision on the durable record,
+    # including one made by an attempt that crashed before its events were committed (keys are idempotent)
+    for d in {x.decision_id: x for x in [*result.record.decisions, *result.decisions]}.values():
         ex.events.append(EventDraft(tkey("decision-" + d.decision_id[len(op_id) + 1:].replace(":", "-")),
                                     EventType.EXECUTION_DECIDED, step, {"decision": d.model_dump(mode="json")},
                                     [tkey("check")], actor, turn, ExecutionStage.EXECUTE))

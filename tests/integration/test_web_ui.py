@@ -97,10 +97,10 @@ def test_scenario_edit_persists_and_starts_run(page, web, stack):
     assert page.locator("label.field:has(> span:text-is('种子')) input").first.input_value() == "5"
     assert page.locator(".card-head .badge", has_text="修订").first.inner_text() != before
     shot(page, "06-scenario")
-    page.get_by_role("button", name="▶ 运行实验").click()
+    page.get_by_role("button", name="运行实验").click()
     page.wait_for_url(re.compile(r"/runs/run_"))
     page.get_by_text("成功").first.wait_for(timeout=120000)
-    assert page.get_by_role("button", name="⏸ 暂停").is_disabled()  # disabled state once finished
+    assert page.get_by_role("button", name="暂停").is_disabled()  # disabled state once finished
     shot(page, "07-run-console")
 
 
@@ -109,7 +109,7 @@ def test_run_console_live_sse_resume_after_reload(page, web, stack):
     page.goto(f"{web}/p/{pid}/runs")
     delay = next(s for s in stack.get(f"/projects/{pid}/scenarios") if s["name"] == "状态延迟")
     page.locator("label.field:has(> span:text-is('场景')) select").select_option(label=f"状态延迟 (r{delay['revision']})")
-    page.get_by_role("button", name="▶ 启动").click()
+    page.get_by_role("button", name="启动").click()
     page.wait_for_url(re.compile(r"/runs/(run_\w+)"))
     run_id = page.url.rsplit("/", 1)[1]
     page.get_by_text("实时").first.wait_for(timeout=30000)
@@ -164,7 +164,7 @@ def test_strategies_evidence_and_benchmarks(page, web, stack):
     dialog.get_by_label("Z3 有界规划").check()
     dialog.locator("label.field:has(> span:text-is('种子（逗号分隔）')) input").fill("1,2")
     dialog.get_by_text("将创建 8 个实验").wait_for()
-    dialog.get_by_role("button", name="▶ 创建并运行").click()
+    dialog.get_by_role("button", name="创建并运行").click()
     page.get_by_text("全部完成").wait_for(timeout=240000)
     page.get_by_role("heading", name=re.compile("配对比较")).wait_for()
     page.locator("svg[aria-label='指标柱状图']").wait_for()

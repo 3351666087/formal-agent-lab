@@ -2,7 +2,8 @@ import { useMemo, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Link, useNavigate, useParams } from "react-router";
 import { get, post, type MatrixReport, type MatrixSummary, type Scenario, type Strategy } from "../api";
-import { Empty, fmtNum, fmtTime, InlineError, KV, Loading, Modal, QueryState, StatusBadge } from "../ui";
+import { Icon } from "../icons";
+import { Empty, fmtNum, fmtTime, InlineError, KV, Loading, Modal, QueryState, StatusBadge, PageHead } from "../ui";
 import { ReportV2, V2Fields } from "../components/MatrixV2";
 
 export function BenchmarksPage() {
@@ -13,9 +14,9 @@ export function BenchmarksPage() {
   const [creating, setCreating] = useState(false);
   return (
     <>
-      <div className="page-head"><div className="grow"><h1>基准对比</h1>
-        <p>同场景 / 预算 / 种子下比较策略：指标带单位、方向、样本数、缺失值与区间方法；显著性只在统计条件满足时报告。</p></div>
-        <button className="btn primary" onClick={() => setCreating(true)}>新建矩阵</button></div>
+      <PageHead area="基准" icon="benchmark" title="基准对比"
+        description="同场景 / 预算 / 种子下比较策略：指标带单位、方向、样本数、缺失值与区间方法；显著性只在统计条件满足时报告。同一完整配置的单元格被复用并标明来源。"
+        actions={<button className="btn primary" onClick={() => setCreating(true)}>新建矩阵</button>} />
       <div className="split">
         <div className="card">
           <div className="card-head"><h2 className="grow">矩阵</h2></div>
@@ -73,7 +74,7 @@ function CreateMatrix({ pid, onClose, onCreated }: { pid: string; onClose: () =>
     <Modal title="新建实验矩阵" onClose={onClose} footer={<>
       <span className="muted small" style={{ marginRight: "auto" }}>将创建 {total} 个实验</span>
       <button className="btn" onClick={onClose}>取消</button>
-      <button className="btn primary" disabled={!total || total > 600 || create.isPending} onClick={() => create.mutate()}>▶ 创建并运行</button></>}>
+      <button className="btn primary" disabled={!total || total > 600 || create.isPending} onClick={() => create.mutate()}><Icon name="play" />创建并运行</button></>}>
       <label className="field"><span>名称</span><input value={name} onChange={(e) => setName(e.target.value)} /></label>
       <fieldset className="stack" style={{ border: 0, padding: 0, margin: 0 }}><legend className="small muted">场景</legend>
         <div className="chip-list">{scenarios.data?.map((s) => (
@@ -176,7 +177,8 @@ function MetricChart({ report, metric, unit }: { report: MatrixReport; metric: s
     return [...byScenario.entries()];
   }, [report]);
   const strategies = [...new Set(report.aggregates.map((a) => a.strategy_label))];
-  const palette = ["var(--accent)", "var(--info)", "var(--ok)", "var(--warn)", "var(--err)"];
+  // series use the categorical palette (design/tokens.json participant): status colours are reserved for states
+  const palette = ["var(--p1)", "var(--p2)", "var(--p3)", "var(--p4)", "var(--p5)", "var(--p6)", "var(--p7)", "var(--p8)"];
   const vals = report.aggregates.flatMap((a) => { const m = a.metrics[metric]?.result; return m ? [m.value ?? 0, m.ci?.high ?? 0] : []; });
   const max = Math.max(1e-9, ...vals);
   const BW = 28, GAP = 28, H = 180, LEFT = 44, MIN_GROUP = 120;

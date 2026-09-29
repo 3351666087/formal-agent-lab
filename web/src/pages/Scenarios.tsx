@@ -3,12 +3,15 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate, useParams } from "react-router";
 import type { ScenarioManifest } from "@formal-lab/contracts";
 import { irOf, del, get, post, put, type CatalogEntry, type ModelSummary, type RunSummary, type Scenario, type VersionDetail } from "../api";
-import { Empty, fmtTime, InlineError, Loading, QueryState, SchemaForm, useToast } from "../ui";
+import { Icon } from "../icons";
+import { Empty, fmtTime, InlineError, Loading, QueryState, SchemaForm, useToast, PageHead } from "../ui";
 
 type Termination = { joint_goal: string | null; actor_goals: "IGNORE" | "ALL" | "ANY"; invariants: string[];
   on_no_action: "FAIL" | "SKIP_ACTOR" | "END"; no_progress_limit: number | null };
-type Turns = { mode: "ROUND_ROBIN" | "FIXED_TABLE"; table: string[]; observation_timing: "TURN_START" | "ROUND_START";
-  conflict_policy: "REVALIDATE" | "REJECT_STALE" };
+type Turns = { mode: "ROUND_ROBIN" | "FIXED_TABLE" | "JOINT_BATCH"; table: string[]; observation_timing: "TURN_START" | "ROUND_START";
+  conflict_policy: "REVALIDATE" | "REJECT_STALE"; batch_timeout_s?: number | null };
+type View = { include: string[]; exclude: string[]; settings: Record<string, string>; label: string | null };
+const csv = (v: string) => v.split(",").map((x) => x.trim()).filter(Boolean);
 type Draft = {
   name: string; description: string; model_version_id: string;
   environment: ScenarioManifest["environment"]; participants: ScenarioManifest["participants"];
@@ -25,11 +28,9 @@ export function ScenariosPage() {
   const scenarios = useQuery({ queryKey: ["scenarios", pid], queryFn: () => get<Scenario[]>(`/projects/${pid}/scenarios`) });
   return (
     <>
-      <div className="page-head">
-        <div className="grow"><h1>场景管理</h1>
-          <p>场景固定模型版本、环境配置、参与者与策略、预算、种子和停止条件；每次保存修订号 +1，运行时固定当时的场景快照。</p></div>
-        <button className="btn" onClick={() => navigate(`/p/${pid}/scenarios/new`)}>新建场景</button>
-      </div>
+      <PageHead area="场景" icon="scenario" title="场景管理"
+        description="场景固定模型版本、环境配置、参与者（策略、范围、视图）、轮次、预算、种子和停止条件；每次保存修订号 +1，运行时固定当时的场景快照。"
+        actions={<button className="btn" onClick={() => navigate(`/p/${pid}/scenarios/new`)}>新建场景</button>} />
       <div className="split">
         <div className="card">
           <div className="card-head"><h2 className="grow">场景</h2></div>
@@ -229,6 +230,7 @@ function ScenarioEditor({ pid, sid }: { pid: string; sid: string }) {
                   <label className="field"><span>独立预算：模型调用</span><input type="number" min={0} placeholder="共享" value={pb?.max_model_calls ?? ""}
                     onChange={(e) => setP(i, { budget: e.target.value === "" && !pb?.max_steps ? null : { max_steps: pb?.max_steps ?? draft.budget.max_steps, ...(pb ?? {}), max_model_calls: e.target.value === "" ? null : Number(e.target.value) } } as never)} /></label>
                 </div>
+                <ViewFields value={(p as never as { view?: View | null }).view ?? null} onChange={(view) => setP(i, { view } as never)} />
                 {entry && <SchemaForm schema={entry.descriptor.config_schema as never} value={p.strategy.config}
                   error={save.error} basePath={`/participants/${i}/strategy/config`}
                   onChange={(config) => setP(i, { strategy: { ...p.strategy, config } })} />}
@@ -248,13 +250,22 @@ function ScenarioEditor({ pid, sid }: { pid: string; sid: string }) {
           <div className="card-body stack">
             <label className="field"><span>轮次方式</span>
               <select value={draft.turns.mode} onChange={(e) => setDraft({ ...draft, turns: { ...draft.turns, mode: e.target.value as Turns["mode"],
-                table: e.target.value === "FIXED_TABLE" ? draft.participants.map((x) => x.actor_id) : [] } })}>
-                <option value="ROUND_ROBIN">轮流（按参与者顺序）</option><option value="FIXED_TABLE">固定轮次表</option></select></label>
+                table: e.target.value === "FIXED_TABLE" ? draft.participants.map((x) => x.actor_id) : [],
+                observation_timing: e.target.value === "JOINT_BATCH" ? "ROUND_START" : draft.turns.observation_timing,
+                batch_timeout_s: e.target.value === "JOINT_BATCH" ? draft.turns.batch_timeout_s ?? null : null } })}>
+                <option value="ROUND_ROBIN">轮流（按参与者顺序）</option><option value="FIXED_TABLE">固定轮次表</option>
+                <option value="JOINT_BATCH">同步批次（每轮一次提交）</option></select></label>
+            {draft.turns.mode === "JOINT_BATCH" && <>
+              <div className="callout info small">每轮成员在轮初观测上各自提案，最后一名成员的那一步把整批一次提交给环境（环境需声明 env.batch_step）。</div>
+              <label className="field"><span>批次期限（秒，可选）</span><input type="number" min={0.1} step={0.1} placeholder="不限"
+                value={draft.turns.batch_timeout_s ?? ""} onChange={(e) => setDraft({ ...draft, turns: { ...draft.turns,
+                  batch_timeout_s: e.target.value === "" ? null : Number(e.target.value) } })} />
+                <span className="hint">超过期限仍未完成提案的成员记为 TIMED_OUT，其提案不提交</span></label></>}
             {draft.turns.mode === "FIXED_TABLE" && <label className="field"><span>轮次表（参与者 ID，逗号分隔，可重复）</span>
               <input value={draft.turns.table.join(",")} onChange={(e) => setDraft({ ...draft, turns: { ...draft.turns,
                 table: e.target.value.split(",").map((x) => x.trim()).filter(Boolean) } })} /></label>}
             <label className="field"><span>观测时点</span>
-              <select value={draft.turns.observation_timing} onChange={(e) => setDraft({ ...draft, turns: { ...draft.turns, observation_timing: e.target.value as Turns["observation_timing"] } })}>
+              <select value={draft.turns.observation_timing} disabled={draft.turns.mode === "JOINT_BATCH"} onChange={(e) => setDraft({ ...draft, turns: { ...draft.turns, observation_timing: e.target.value as Turns["observation_timing"] } })}>
                 <option value="TURN_START">轮到时观测</option><option value="ROUND_START">每轮开始时统一观测（可能过时）</option></select></label>
             <label className="field"><span>共享资源冲突</span>
               <select value={draft.turns.conflict_policy} onChange={(e) => setDraft({ ...draft, turns: { ...draft.turns, conflict_policy: e.target.value as Turns["conflict_policy"] } })}>
@@ -289,9 +300,27 @@ function ScenarioEditor({ pid, sid }: { pid: string; sid: string }) {
         {!isNew && <button className="btn danger" onClick={() => { if (confirm("删除该场景？已完成的实验保留其场景快照。")) remove.mutate(); }}>删除</button>}
         {!isNew && <button className="btn" onClick={() => copy.mutate()} disabled={copy.isPending}>复制</button>}
         <button className="btn primary" onClick={() => save.mutate()} disabled={save.isPending}>{save.isPending ? "保存中…" : isNew ? "创建场景" : "保存（新修订）"}</button>
-        {!isNew && <button className="btn primary" onClick={() => start.mutate()} disabled={start.isPending}>▶ 运行实验</button>}
+        {!isNew && <button className="btn primary" onClick={() => start.mutate()} disabled={start.isPending}><Icon name="play" />运行实验</button>}
       </div>
       {!isNew && <div className="muted small">更新于 {fmtTime(scenario.data!.updated_at)}</div>}
+    </div>
+  );
+}
+
+/** What this participant's planner receives (phase 3A): location families or paths; empty include = everything. */
+function ViewFields({ value, onChange }: { value: View | null; onChange: (v: View | null) => void }) {
+  const v: View = value ?? { include: [], exclude: [], settings: {}, label: null };
+  const set = (patch: Partial<View>) => {
+    const next = { ...v, ...patch };
+    onChange(!next.include.length && !next.exclude.length && !Object.keys(next.settings).length && !next.label ? null : next);
+  };
+  return (
+    <div className="form-grid" role="group" aria-label="参与者视图">
+      <label className="field"><span>视图：只含位置族</span><input value={v.include.join(", ")} placeholder="全部（留空）"
+        onChange={(e) => set({ include: csv(e.target.value) })} /><span className="hint">逗号分隔，如 clock, dock, stock</span></label>
+      <label className="field"><span>视图：隐藏位置族</span><input value={v.exclude.join(", ")} placeholder="无"
+        onChange={(e) => set({ exclude: csv(e.target.value) })} /><span className="hint">规划器把隐藏位置当作从未观测</span></label>
+      <label className="field"><span>视图名称</span><input value={v.label ?? ""} onChange={(e) => set({ label: e.target.value || null })} /></label>
     </div>
   );
 }

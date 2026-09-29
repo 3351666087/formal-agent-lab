@@ -6,8 +6,9 @@ import { irOf, get, post, TERMINAL, type CatalogEntry, type RunDetail, type Vers
 import { groupSteps, StateChart, StepDetail, Timeline } from "../components/Steps";
 import { makeLabels } from "../labels";
 import { useRunEvents } from "../sse";
-import { ControlBanner, EnvironmentPanel, OperationsPanel, ParticipantsPanel, RecoveryLog } from "../components/RunKernel";
-import { Empty, ErrorState, fmtNum, fmtTime, KV, Loading, StatusBadge, Tabs, useToast, VirtualTable } from "../ui";
+import { BatchPanel, ControlBanner, EnvironmentPanel, OperationsPanel, ParticipantsPanel, RecoveryLog } from "../components/RunKernel";
+import { Icon } from "../icons";
+import { Empty, ErrorState, fmtNum, fmtTime, KV, Loading, ParticipantChip, StatusBadge, Tabs, useToast, VirtualTable } from "../ui";
 import { CheckResult } from "./ModelWorkbench";
 
 export function RunConsole() {
@@ -78,22 +79,23 @@ export function RunConsole() {
             <span className={`dot ${state === "live" ? "live" : ""}`} aria-hidden />{" "}
             {{ connecting: "连接中", live: "实时", reconnecting: "重连中…", ended: "已结束", error: "连接错误" }[state]} · {events.length} 事件
           </span>
-          <button className="btn" disabled={r.status !== "RUNNING" || control.isPending} onClick={() => control.mutate("pause")}>⏸ 暂停</button>
-          <button className="btn" disabled={!["PAUSED", "PAUSING"].includes(r.status) || control.isPending} onClick={() => control.mutate("resume")}>▶ 继续</button>
+          <button className="btn" disabled={r.status !== "RUNNING" || control.isPending} onClick={() => control.mutate("pause")}><Icon name="pause" />暂停</button>
+          <button className="btn" disabled={!["PAUSED", "PAUSING"].includes(r.status) || control.isPending} onClick={() => control.mutate("resume")}><Icon name="play" />继续</button>
           <button className="btn danger" disabled={terminal || r.status === "CANCELLING" || control.isPending}
             onClick={() => {
               const reason = prompt("取消该实验？将在当前步完成后结束并保留已产生的证据。\n可选：填写终止原因（记录为可解释终止）", "");
               if (reason === null) return;
               cancelReason.current = reason.trim() || null;
               control.mutate("cancel");
-            }}>■ 取消</button>
-          <button className="btn" disabled={!terminal || control.isPending} onClick={() => control.mutate("rerun")}>↻ 重新运行</button>
-          <a className="btn" href={`/api/v1/runs/${r.id}/export`} download>⤓ 导出</a>
-          <Link className="btn" to={`/p/${pid}/evidence/${r.id}`}>证据与回放</Link>
+            }}><Icon name="stop" />取消</button>
+          <button className="btn" disabled={!terminal || control.isPending} onClick={() => control.mutate("rerun")}><Icon name="rerun" />重新运行</button>
+          <a className="btn" href={`/api/v1/runs/${r.id}/export`} download><Icon name="export" />导出</a>
+          <Link className="btn" to={`/p/${pid}/evidence/${r.id}`}><Icon name="evidence" />证据与回放</Link>
         </div>
       </div>
       {r.error && <div className="callout err small" role="alert"><strong>{r.error.code}</strong> {r.error.message}</div>}
       <ControlBanner run={r} />
+      {m.turns.mode === "JOINT_BATCH" && <BatchPanel run={r} events={events} labels={labels} />}
       <div className="grid cols-2">
         <ParticipantsPanel run={r} events={events} />
         <EnvironmentPanel run={r} events={events} />
@@ -157,11 +159,12 @@ export function RunConsole() {
           <div className="card-head"><h3 className="grow">步骤</h3></div>
           <div className="table-wrap" style={{ maxHeight: 560 }}>
             <table className="table" aria-label="步骤列表">
-              <thead><tr><th className="num">步</th><th>动作</th><th>结果</th></tr></thead>
+              <thead><tr><th className="num">步</th>{m.participants.length > 1 && <th>参与者</th>}<th>动作</th><th>结果</th></tr></thead>
               <tbody>{steps.map((s) => (
                 <tr key={s.step} className={`selectable ${selected === s.step ? "selected" : ""}`} tabIndex={0}
                   onClick={() => { setFollow(false); setSelected(s.step); }} onKeyDown={(e) => { if (e.key === "Enter") { setFollow(false); setSelected(s.step); } }}>
                   <td className="num">{s.step}</td>
+                  {m.participants.length > 1 && <td className="small">{actorOf(s) ? <ParticipantChip actorId={actorOf(s)!} order={m.participants.map((p) => p.actor_id)} /> : "—"}</td>}
                   <td className="small">{s.proposal ? labels.actionText(s.proposal.action as never) : s.step === 0 ? "初始观测" : "…"}</td>
                   <td className="nowrap">{s.outcome ? <span className={`badge ${s.outcome.status === "APPLIED" ? "ok" : "err"}`}>{s.outcome.status === "APPLIED" ? "施加" : "拒绝"}</span> : null}
                     {s.comparison?.verdict === "DIFFERENT" && <span className="badge err" title="效果与预期不符">≠</span>}</td>

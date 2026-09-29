@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { del, get, post, put, type CatalogEntry, type Scenario, type Strategy } from "../api";
-import { Empty, InlineError, Json, Modal, QueryState, SchemaForm, Tabs, useToast } from "../ui";
+import { Empty, InlineError, Json, Modal, QueryState, SchemaForm, Tabs, useToast, PageHead } from "../ui";
 import { useParams } from "react-router";
 
 type Iface = "PLANNER" | "ENVIRONMENT" | "VERIFIER" | "EVALUATOR" | "MODEL_FRONTEND";
@@ -22,11 +22,9 @@ export function StrategiesPage() {
   });
   return (
     <>
-      <div className="page-head">
-        <div className="grow"><h1>策略注册表</h1>
-          <p>插件通过 entry point 注册；能力、配置 schema、版本与兼容性全部来自插件描述符。项目中的策略配置固定插件版本与参数。</p></div>
-        <button className="btn primary" onClick={() => setEditing("new")}>新建策略配置</button>
-      </div>
+      <PageHead area="策略与插件" icon="strategy" title="策略注册表"
+        description="插件通过 entry point 注册；能力、配置 schema、版本与兼容性全部来自插件描述符。项目中的策略配置固定插件版本与参数。"
+        actions={<button className="btn primary" onClick={() => setEditing("new")}>新建策略配置</button>} />
 
       <div className="card">
         <div className="card-head"><h2 className="grow">项目策略配置</h2>

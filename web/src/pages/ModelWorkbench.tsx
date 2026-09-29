@@ -9,9 +9,9 @@ import { ModelGraph } from "../components/ModelGraph";
 import { ObjectivesAndReleases } from "../components/ReleasePanel";
 import { ProbabilisticPanel } from "../components/ProbabilisticPanel";
 import { blankModel, effectLines, exprText, typeText } from "../ir";
+import { Icon } from "../icons";
 import {
-  Empty, ErrorState, fmtTime, InlineError, Json, JsonField, KV, Loading, Modal, QueryState, Tabs, useToast, VerdictBadge,
-} from "../ui";
+  Empty, ErrorState, fmtTime, InlineError, Json, JsonField, KV, Loading, Modal, QueryState, Tabs, useToast, VerdictBadge, PageHead } from "../ui";
 
 type Tab = "graph" | "form" | "json" | "diff" | "check" | "release" | "prob" | "caps";
 const draftKey = (modelId: string) => `fal:model-draft:${modelId}`;
@@ -26,13 +26,9 @@ export function ModelWorkbench() {
   }, [modelId, models.data, pid, navigate]);
   return (
     <>
-      <div className="page-head">
-        <div className="grow">
-          <h1>模型工作台</h1>
-          <p>编辑有限状态模型（deterministic_finite_v1）：结构图、表单、类型错误、版本差异、编译与有界检查。每次保存产生不可变的新版本。</p>
-        </div>
-        <button className="btn" onClick={() => setCreating(true)}>新建模型</button>
-      </div>
+      <PageHead area="模型" icon="model" title="模型工作台"
+        description="编辑有限状态模型（deterministic_finite_v1）：结构图、表单、类型错误、版本差异、编译与有界检查。每次保存产生不可变的新版本；能力报告说明每个语义驱动与验证器实际能做什么。"
+        actions={<button className="btn" onClick={() => setCreating(true)}>新建模型</button>} />
       <div className="split">
         <div className="card">
           <div className="card-head"><h2 className="grow">模型</h2></div>
@@ -206,7 +202,7 @@ function ModelEditor({ modelId }: { modelId: string }) {
           {tab === "check" && <CheckPanel detail={d} dirty={Boolean(dirty)} />}
           {tab === "release" && <ObjectivesAndReleases pid={pid!} detail={d} onDiff={() => setTab("diff")} />}
           {tab === "prob" && <ProbabilisticPanel versionId={d.id} />}
-          {tab === "caps" && <CapabilityMatrix rows={d.capability_matrix} />}
+          {tab === "caps" && <div className="stack"><CapabilityReportView versionId={d.id} /><CapabilityMatrix rows={d.capability_matrix} /></div>}
         </div>
       </div>
     </div>
@@ -443,7 +439,7 @@ function CheckPanel({ detail, dirty }: { detail: VersionDetail; dirty: boolean }
         <div className="card pad stack small" data-testid="check-explanation">
           <div className="row"><strong className="grow">解释（与导出的查询包相同）</strong>
             {(shown as CheckRecord & { query_bundle_id?: string }).query_bundle_id &&
-              <a className="btn sm" href={`/api/v1/query-bundles/${(shown as CheckRecord & { query_bundle_id?: string }).query_bundle_id}/export`} download>⤓ 查询包</a>}</div>
+              <a className="btn sm" href={`/api/v1/query-bundles/${(shown as CheckRecord & { query_bundle_id?: string }).query_bundle_id}/export`} download><Icon name="export" size="sm" />查询包</a>}</div>
           <ul>{(shown as CheckRecord & { explanation?: string[] }).explanation!.map((x, i) => <li key={i}>{x}</li>)}</ul>
         </div>) : null}
       <h3>历史检查</h3>
@@ -504,6 +500,32 @@ export function CheckResult({ result }: { result: BoundedCheckResult }) {
       )}
       <details><summary className="small muted">完整 BoundedCheckResult</summary><Json value={r} /></details>
     </div>
+  );
+}
+
+interface FeatureRow { feature: string; status: string; provider: { plugin_id: string; version: string } | null; requires: string[]; reason: string }
+
+/** What the platform can do with this model version, derived only from the declared driver.* / query.* capabilities
+ *  of the installed plugins (phase 3A G3, GET /model-versions/{id}/capabilities). */
+function CapabilityReportView({ versionId }: { versionId: string }) {
+  const q = useQuery({ queryKey: ["capabilities", versionId],
+    queryFn: () => get<{ semantic_profile: string; driver: { plugin_id: string; version: string }; features: FeatureRow[] }>(`/model-versions/${versionId}/capabilities`) });
+  return (
+    <section className="stack" data-testid="capability-report">
+      <div className="row"><h3 className="grow">能力报告</h3>
+        {q.data && <span className="small muted">profile <code>{q.data.semantic_profile}</code> · 驱动 <code>{q.data.driver.plugin_id}@{q.data.driver.version}</code></span>}</div>
+      <QueryState q={q}>{(r) => (
+        <div className="table-wrap">
+          <table className="table" aria-label="能力报告">
+            <thead><tr><th>功能</th><th>状态</th><th>提供者</th><th>依据 / 原因</th></tr></thead>
+            <tbody>{r.features.map((f) => (
+              <tr key={f.feature}><td><code className="small">{f.feature}</code></td>
+                <td><span className={`badge ${f.status === "SUPPORTED" ? "ok" : f.status === "PARTIAL" ? "warn" : ""}`}>{f.status === "SUPPORTED" ? "✓ " : "· "}{f.status}</span></td>
+                <td className="small">{f.provider ? <code>{f.provider.plugin_id}</code> : "—"}</td>
+                <td className="small">{f.reason}{f.requires.length ? <div className="muted">需要 {f.requires.join("、")}</div> : null}</td></tr>))}</tbody>
+          </table>
+        </div>)}</QueryState>
+    </section>
   );
 }
 

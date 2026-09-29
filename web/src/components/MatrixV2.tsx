@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "react-router";
 import { get, post } from "../api";
+import { Icon } from "../icons";
 import { Empty, fmtNum, InlineError, Loading, StatusBadge, useToast } from "../ui";
 
 type M = Record<string, any>;
@@ -14,7 +15,8 @@ export interface MatrixReportV2 {
   metric_sources: Record<string, string>; conclusions: string[]; complete: boolean;
   matrix: { id: string; name: string; spec: M; statuses: Record<string, number> };
   cells: { cell_id: string; status: string; run_id: string | null; attempts: number; error: string | null; split: string;
-    seed: number; labels: Record<string, string>; run_status: string | null }[];
+    seed: number; labels: Record<string, string>; run_status: string | null; config_digest?: string;
+    reused_from?: { matrix_id: string; cell_id: string; run_id: string } | null; key_parts?: Record<string, string> | null }[];
 }
 
 const COST = ["delay_cost", "steps_used", "model_calls", "tokens", "wall_seconds", "makespan", "late_orders", "mean_latency"];
@@ -84,9 +86,9 @@ export function ReportV2({ mid, pid }: { mid: string; pid: string }) {
             <label className="row">成本指标<select value={cm} onChange={(e) => setCostMetric(e.target.value)}>{cost.map((d) => <option key={d.metric_id} value={d.metric_id}>{d.label}</option>)}</select></label>
             <label className="row">任务效果<select value={em} onChange={(e) => setEffectMetric(e.target.value)}>{effect.map((d) => <option key={d.metric_id} value={d.metric_id}>{d.label}</option>)}</select></label>
             <span className="grow" />
-            <button className="btn sm" onClick={() => download(`matrix-${mid}-view.json`, JSON.stringify(view, null, 2), "application/json")}>⤓ 当前视图 JSON</button>
-            <button className="btn sm" onClick={() => download(`matrix-${mid}-view.csv`, csvView(), "text/csv")}>⤓ 当前视图 CSV</button>
-            <a className="btn sm" href={`/api/v1/matrices/${mid}/report?format=md`} download>⤓ 完整报告 MD</a>
+            <button className="btn sm" onClick={() => download(`matrix-${mid}-view.json`, JSON.stringify(view, null, 2), "application/json")}><Icon name="export" size="sm" />当前视图 JSON</button>
+            <button className="btn sm" onClick={() => download(`matrix-${mid}-view.csv`, csvView(), "text/csv")}><Icon name="export" size="sm" />当前视图 CSV</button>
+            <a className="btn sm" href={`/api/v1/matrices/${mid}/report?format=md`} download><Icon name="export" size="sm" />完整报告 MD</a>
           </div>
         </div>
       </div>
@@ -127,11 +129,13 @@ export function ReportV2({ mid, pid }: { mid: string; pid: string }) {
             <td className="small">{c.ci ? `[${fmtNum(c.ci.low)}, ${fmtNum(c.ci.high)}]` : "—"}</td><td className="small">{c.better ?? "—"}</td></tr>)}</tbody></table></div>
         <div className="card-body small muted">指标来源：{Object.entries(r.metric_sources).filter(([k]) => [cm, em].includes(k)).map(([k, v]) => `${k} ← ${v}`).join("；")}</div>
       </div>
-      <details className="card pad"><summary><strong>单元队列（{r.cells.length}）</strong></summary>
+      <details className="card pad"><summary><strong>单元队列（{r.cells.length}{r.cells.some((c) => c.reused_from) ? `，其中复用 ${r.cells.filter((c) => c.reused_from).length}` : ""}）</strong></summary>
+        <p className="small muted">复用键由完整配置决定：模型、插件（含描述符摘要）、规则、参与者视图、场景、种子、预算与声明的扩展配置；任一项变化即为新单元格。悬停“键”查看各部分摘要。</p>
         <div className="table-wrap tall" style={{ marginTop: 8 }}><table className="table wide" aria-label="单元">
           <thead><tr><th>单元</th><th>状态</th><th>划分</th><th className="num">种子</th><th>配置</th><th className="num">尝试</th><th>实验</th></tr></thead>
-          <tbody>{r.cells.map((c) => <tr key={c.cell_id}><td><code className="small">{c.cell_id}</code></td>
-            <td><span className={`badge ${c.status === "DONE" ? "ok" : c.status === "FAILED" ? "err" : ""}`} title={c.error ?? ""}>{c.status}</span></td>
+          <tbody>{r.cells.map((c) => <tr key={c.cell_id}><td><code className="small" title={c.key_parts ? Object.entries(c.key_parts).map(([k, v]) => `${k}: ${v}`).join("\n") : c.config_digest}>{c.cell_id}</code></td>
+            <td><span className={`badge ${c.status === "DONE" ? "ok" : c.status === "FAILED" ? "err" : ""}`} title={c.error ?? ""}>{c.status}</span>
+              {c.reused_from && <span className="badge info" title={`同一完整配置已在矩阵 ${c.reused_from.matrix_id} 完成：链接其实验，不重新运行`} data-testid="reused-cell">复用</span>}</td>
             <td className="small">{c.split}</td><td className="num">{c.seed}</td>
             <td className="small">{c.labels.scenario} × {c.labels.participants} · {c.labels.backend} · {c.labels.ablation}</td>
             <td className="num">{c.attempts}</td>

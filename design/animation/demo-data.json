@@ -1,0 +1,290 @@
+{
+  "source": {
+    "example": "examples/local-order-service, case 'deviation' (station p2 runs at half speed; the model predicts nominal speed)",
+    "run": "var/demo_data.py equivalent: run_local on the real order service process, seed 1, initial_check_horizon 12",
+    "revision_evidence": "docs/execution/evidence/phase3/g3-release.json (scripts/model_revision_evidence.py)",
+    "captured_at_commit": "8223426"
+  },
+  "model": {
+    "state_locations": 49,
+    "ground_actions": 27,
+    "actions": [
+      "reserve",
+      "enqueue",
+      "start",
+      "tick",
+      "restock"
+    ],
+    "entities": [
+      [
+        "订单 orders",
+        6
+      ],
+      [
+        "库存品 skus",
+        2
+      ],
+      [
+        "处理工位 stations",
+        2
+      ]
+    ],
+    "properties": [
+      [
+        "all_completed",
+        "目标"
+      ],
+      [
+        "on_time",
+        "不变量"
+      ],
+      [
+        "station_capacity",
+        "不变量"
+      ]
+    ],
+    "initial_check": {
+      "verdict": "NO_WITNESS_WITHIN_BOUND",
+      "explanation": "no path of ≤ 12 step(s) reaches 'all_completed' (bounded conclusion; nothing is claimed for longer paths)"
+    }
+  },
+  "run": {
+    "status": "SUCCEEDED",
+    "steps": 26,
+    "events": 251,
+    "metrics": {
+      "goal_reached": 1.0,
+      "steps_used": 26.0,
+      "rejected_actions": 0.0,
+      "effect_mismatches": 4.0,
+      "wall_seconds": 0.705,
+      "model_calls": null,
+      "tokens": null,
+      "orders_completed": 6.0,
+      "late_orders": 1.0,
+      "mean_latency": 3.3333333333333335
+    },
+    "first_steps": [
+      {
+        "step": 1,
+        "action": "reserve",
+        "params": {
+          "o": "o1"
+        },
+        "outcome": "APPLIED",
+        "verdict": "MATCH",
+        "ops": [
+          "PREPARED",
+          "DISPATCHED",
+          "COMPLETED"
+        ]
+      },
+      {
+        "step": 2,
+        "action": "enqueue",
+        "params": {
+          "o": "o1"
+        },
+        "outcome": "APPLIED",
+        "verdict": "MATCH",
+        "ops": [
+          "PREPARED",
+          "DISPATCHED",
+          "COMPLETED"
+        ]
+      },
+      {
+        "step": 3,
+        "action": "start",
+        "params": {
+          "o": "o1",
+          "st": "p1"
+        },
+        "outcome": "APPLIED",
+        "verdict": "MATCH",
+        "ops": [
+          "PREPARED",
+          "DISPATCHED",
+          "COMPLETED"
+        ]
+      },
+      {
+        "step": 4,
+        "action": "reserve",
+        "params": {
+          "o": "o2"
+        },
+        "outcome": "APPLIED",
+        "verdict": "MATCH",
+        "ops": [
+          "PREPARED",
+          "DISPATCHED",
+          "COMPLETED"
+        ]
+      },
+      {
+        "step": 5,
+        "action": "enqueue",
+        "params": {
+          "o": "o2"
+        },
+        "outcome": "APPLIED",
+        "verdict": "MATCH",
+        "ops": [
+          "PREPARED",
+          "DISPATCHED",
+          "COMPLETED"
+        ]
+      },
+      {
+        "step": 6,
+        "action": "start",
+        "params": {
+          "o": "o2",
+          "st": "p2"
+        },
+        "outcome": "APPLIED",
+        "verdict": "MATCH",
+        "ops": [
+          "PREPARED",
+          "DISPATCHED",
+          "COMPLETED"
+        ]
+      },
+      {
+        "step": 7,
+        "action": "reserve",
+        "params": {
+          "o": "o3"
+        },
+        "outcome": "APPLIED",
+        "verdict": "MATCH",
+        "ops": [
+          "PREPARED",
+          "DISPATCHED",
+          "COMPLETED"
+        ]
+      },
+      {
+        "step": 8,
+        "action": "enqueue",
+        "params": {
+          "o": "o3"
+        },
+        "outcome": "APPLIED",
+        "verdict": "MATCH",
+        "ops": [
+          "PREPARED",
+          "DISPATCHED",
+          "COMPLETED"
+        ]
+      },
+      {
+        "step": 9,
+        "action": "tick",
+        "params": {},
+        "outcome": "APPLIED",
+        "verdict": "DIFFERENT",
+        "ops": [
+          "PREPARED",
+          "DISPATCHED",
+          "COMPLETED"
+        ]
+      },
+      {
+        "step": 10,
+        "action": "start",
+        "params": {
+          "o": "o3",
+          "st": "p1"
+        },
+        "outcome": "APPLIED",
+        "verdict": "MATCH",
+        "ops": [
+          "PREPARED",
+          "DISPATCHED",
+          "COMPLETED"
+        ]
+      },
+      {
+        "step": 11,
+        "action": "tick",
+        "params": {},
+        "outcome": "APPLIED",
+        "verdict": "MATCH",
+        "ops": [
+          "PREPARED",
+          "DISPATCHED",
+          "COMPLETED"
+        ]
+      },
+      {
+        "step": 12,
+        "action": "reserve",
+        "params": {
+          "o": "o4"
+        },
+        "outcome": "APPLIED",
+        "verdict": "MATCH",
+        "ops": [
+          "PREPARED",
+          "DISPATCHED",
+          "COMPLETED"
+        ]
+      }
+    ],
+    "first_difference": {
+      "step": 9,
+      "expected_by": "model:local-order-service@1 on belief",
+      "diffs": [
+        {
+          "path": "remaining[o2]",
+          "expected": 3,
+          "observed": 4,
+          "status": "DIFFERENT",
+          "evidence": "observed",
+          "observed_at_step": 9,
+          "freshness": "FRESH"
+        }
+      ]
+    }
+  },
+  "revision": {
+    "comparisons": 26,
+    "different": 4,
+    "suggestion": {
+      "action": {
+        "action_type": "tick",
+        "params": {}
+      },
+      "state_families": [
+        "remaining"
+      ],
+      "constants_read": [
+        "arrive_at",
+        "slow"
+      ]
+    },
+    "regression_cases": 4,
+    "old_release": {
+      "status": "REJECTED",
+      "cases": [
+        "FAIL",
+        "FAIL",
+        "FAIL",
+        "FAIL"
+      ]
+    },
+    "revised_release": {
+      "status": "RELEASED",
+      "cases": [
+        "PASS",
+        "PASS",
+        "PASS",
+        "PASS"
+      ],
+      "change": "slow[p2] = true"
+    },
+    "after_different": 0
+  }
+}

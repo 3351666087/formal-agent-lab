@@ -86,7 +86,7 @@ def test_product_acceptance_new_project_to_two_participant_cost_comparison(page,
     field(page, "名称").first.fill("两名调度员：成本对比")
     editor = page.get_by_test_id("participants-editor")
     editor.get_by_role("button", name="＋ 参与者").click()
-    groups = editor.get_by_role("group")
+    groups = editor.get_by_role("group", name=re.compile(r"^参与者 "))  # not the nested 参与者视图 groups
     field(groups.nth(0), "参与者 ID").fill("dispatcher_a")
     field(groups.nth(1), "参与者 ID").fill("dispatcher_b")
     field(groups.nth(0), "策略插件").select_option("formal-lab.example.scheduling.edd-dispatch@1.0.0")
@@ -96,7 +96,7 @@ def test_product_acceptance_new_project_to_two_participant_cost_comparison(page,
     shot(page, "p2-03-scenario-two-participants")
     page.get_by_role("button", name="创建场景").click()
     page.wait_for_url(re.compile(r"/scenarios/scn_"))
-    page.get_by_role("button", name="▶ 运行实验").click()
+    page.get_by_role("button", name="运行实验").click()
     page.wait_for_url(re.compile(r"/runs/run_"))
     run_id = page.url.rsplit("/", 1)[1]
     panel = page.get_by_test_id("participants-panel")
@@ -116,13 +116,13 @@ def test_product_acceptance_new_project_to_two_participant_cost_comparison(page,
     dialog.get_by_label("Z3", exact=True).check()
     field(dialog, "验收种子（acceptance）").fill("2,3")
     dialog.get_by_text("将创建 6 个实验").wait_for()
-    dialog.get_by_role("button", name="▶ 创建并运行").click()
+    dialog.get_by_role("button", name="创建并运行").click()
     page.get_by_test_id("matrix-v2").wait_for()
     page.get_by_text("全部完成").wait_for(timeout=600000)
     page.get_by_test_id("outcome-distribution").get_by_text("分母 4 个单元").wait_for()
     page.get_by_label("划分").select_option("acceptance")
     with page.expect_download() as dl:
-        page.get_by_role("button", name="⤓ 当前视图 JSON").click()
+        page.get_by_role("button", name="当前视图 JSON").click()
     view = json.loads(Path(dl.value.path()).read_text())
     assert view["split"] == "acceptance" and view["outcomes"]["denominator_cells"] == 4
     assert any(c["kind"] == "method" for c in view["comparisons"])

@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useId, useRef, useState, type ReactNode } from "react";
 import type { UseQueryResult } from "@tanstack/react-query";
 import { ApiError } from "./api";
+import { Icon, type IconName } from "./icons";
 
 // ------------------------------------------------------------------ states
 export function Loading({ label = "加载中…" }: { label?: string }) {
@@ -16,6 +17,7 @@ export function ErrorState({ error, retry }: { error: unknown; retry?: () => voi
   const info = error instanceof ApiError ? error.info : null;
   return (
     <div className="state error" role="alert">
+      <div className="state-icon"><Icon name="alert" /></div>
       <div className="title">{info ? `${info.code}` : "出错了"}</div>
       <div>{info ? info.message : String(error)}</div>
       {info?.field_errors?.length ? (
@@ -31,6 +33,7 @@ export function ErrorState({ error, retry }: { error: unknown; retry?: () => voi
 export function Empty({ title, hint, action }: { title: string; hint?: ReactNode; action?: ReactNode }) {
   return (
     <div className="state">
+      <div className="state-icon"><Icon name="empty" /></div>
       <div className="title">{title}</div>
       {hint && <div className="small">{hint}</div>}
       {action}
@@ -59,6 +62,59 @@ export function InlineError({ error }: { error: unknown }) {
   );
 }
 
+// ------------------------------------------------------------------ page structure
+/** Page header of every area: eyebrow (area, with its icon) · title · description · actions. */
+export function PageHead({ area, icon, title, description, actions, crumbs }: {
+  area?: string; icon?: IconName; title: ReactNode; description?: ReactNode; actions?: ReactNode; crumbs?: ReactNode;
+}) {
+  return (
+    <header className="page-head">
+      <div className="grow">
+        {crumbs ? <div className="crumbs">{crumbs}</div>
+          : area && <div className="eyebrow">{icon && <Icon name={icon} size="sm" />}{area}</div>}
+        <h1 className="row" style={{ marginTop: 4 }}>{title}</h1>
+        {description && <p>{description}</p>}
+      </div>
+      {actions && <div className="row">{actions}</div>}
+    </header>
+  );
+}
+
+export function Stat({ label, value, note }: { label: ReactNode; value: ReactNode; note?: ReactNode }) {
+  return <div className="stat"><span className="label">{label}</span><span className="value">{value}</span>{note && <span className="note">{note}</span>}</div>;
+}
+
+// ------------------------------------------------------------------ participants: categorical colour + initial
+/** Participant colour slot (1…8) by position in the run's participant list: stable within a run, never the only cue. */
+export function participantSlot(order: string[], actorId: string): number {
+  const i = order.indexOf(actorId);
+  return (i < 0 ? 0 : i) % 8 + 1;
+}
+export function ParticipantChip({ actorId, order, label }: { actorId: string; order: string[]; label?: string }) {
+  const slot = participantSlot(order, actorId);
+  return (
+    <span className="pchip" style={{ ["--pc" as string]: `var(--p${slot})` }}>
+      <span className="swatch" aria-hidden>{(label ?? actorId).slice(0, 1).toUpperCase()}</span>{label ?? actorId}
+    </span>
+  );
+}
+export const participantColor = (order: string[], actorId: string) => `var(--p${participantSlot(order, actorId)})`;
+
+// ------------------------------------------------------------------ evidence levels (compare.py, P2-074)
+const EVIDENCE: Record<string, [string, string, string, string]> = {
+  observed: ["observed", "●", "观测", "observed fresh by the participant at this step"],
+  "verified-within-scope": ["verified", "◆", "范围内核实", "established by an independent source within its stated scope (probe or operation query)"],
+  predicted: ["predicted", "◌", "预测", "what the model predicts — not an observation"],
+  unknown: ["unknown", "○", "未知", "neither observed nor verified: not comparable"],
+};
+export function EvidenceTag({ level }: { level: string }) {
+  const [cls, glyph, label, title] = EVIDENCE[level] ?? ["unknown", "○", level, level];
+  return <span className={`ev ${cls}`} title={`${level}: ${title}`}><span aria-hidden>{glyph}</span>{label}</span>;
+}
+export function EvidenceLegend() {
+  return <div className="legend" aria-label="证据等级">{Object.keys(EVIDENCE).map((k) => <EvidenceTag key={k} level={k} />)}</div>;
+}
+
 // ------------------------------------------------------------------ badges
 const STATUS_TONE: Record<string, string> = {
   SUCCEEDED: "ok", RUNNING: "accent", QUEUED: "info", CREATED: "", PAUSING: "warn", PAUSED: "warn",
@@ -68,11 +124,13 @@ const STATUS_LABEL: Record<string, string> = {
   CREATED: "已创建", QUEUED: "排队", RUNNING: "运行中", PAUSING: "暂停中", PAUSED: "已暂停", CANCELLING: "取消中",
   CANCELLED: "已取消", SUCCEEDED: "成功", FAILED: "失败", BUDGET_EXHAUSTED: "预算结束",
 };
+const STATUS_GLYPH: Record<string, string> = { ok: "✓", err: "✕", warn: "‖", info: "…", accent: "", "": "·" };
 export function StatusBadge({ status }: { status: string }) {
   const live = status === "RUNNING" || status === "QUEUED" || status === "PAUSING" || status === "CANCELLING";
+  const tone = STATUS_TONE[status] ?? "";
   return (
-    <span className={`badge ${STATUS_TONE[status] ?? ""}`} title={status}>
-      {live && <span className="dot live" aria-hidden />}
+    <span className={`badge ${tone}`} title={status}>
+      {live ? <span className="dot live" aria-hidden /> : <span className="glyph" aria-hidden>{STATUS_GLYPH[tone]}</span>}
       {STATUS_LABEL[status] ?? status}
     </span>
   );

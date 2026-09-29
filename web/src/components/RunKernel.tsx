@@ -5,7 +5,9 @@ import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { TraceEvent } from "@formal-lab/contracts";
 import { get, post, type RunDetail } from "../api";
-import { fmtNum, fmtTime, StatusBadge, useToast } from "../ui";
+import type { Labels } from "../labels";
+import { Icon } from "../icons";
+import { ComparisonBadge, fmtNum, fmtTime, ParticipantChip, participantColor, StatusBadge, useToast } from "../ui";
 
 type Payload = Record<string, any>;
 const RECOVERY_TYPES = new Set(["RECOVERY", "OPERATION_RECONCILED", "OPERATION_REVIEW", "RUN_PAUSING", "RUN_PAUSED",
@@ -44,6 +46,8 @@ export function ParticipantsPanel({ run, events }: { run: RunDetail & { particip
     return out;
   }, [events]);
   const participants = run.participants ?? run.manifest.participants.map((p) => ({ actor_id: p.actor_id, strategy: p.strategy.plugin }));
+  const order = run.manifest.participants.map((p) => p.actor_id);
+  const views = Object.fromEntries(run.manifest.participants.map((p) => [p.actor_id, (p as Payload).view]));
   const turn = (lastTurn?.payload as Payload | undefined)?.turn ?? run.turn;
   return (
     <div className="card pad stack" data-testid="participants-panel">
@@ -56,12 +60,16 @@ export function ParticipantsPanel({ run, events }: { run: RunDetail & { particip
         const total = Object.values(progress).reduce((a, b) => a + (typeof b === "number" ? b : 0), 0);
         const done = typeof progress.DONE === "number" ? progress.DONE : 0;
         return (
-          <div key={p.actor_id} className={`stack participant ${p.actor_id === current ? "current" : ""}`} style={{ gap: 4 }}>
+          <div key={p.actor_id} className={`stack participant ${p.actor_id === current ? "current" : ""}`}
+            style={{ gap: 4, ["--pc" as string]: participantColor(order, p.actor_id) }}>
             <div className="row small">
-              <strong>{p.actor_id}</strong>{p.actor_id === current && <span className="badge accent">当前轮次</span>}
+              <ParticipantChip actorId={p.actor_id} order={order} />{p.actor_id === current && <span className="badge accent">当前轮次</span>}
               <code className="small muted">{p.strategy?.plugin_id}</code>
               <span className="grow" /><span className="mono">{usage.steps ?? 0} 步 · 模型 {usage.model_calls ?? 0}/{usage.model_attempts ?? 0} 次</span>
             </div>
+            {views[p.actor_id] && <div className="small muted">视图 {views[p.actor_id].label ? `「${views[p.actor_id].label}」` : ""}：
+              {views[p.actor_id].include?.length ? `只含 ${views[p.actor_id].include.join("、")}` : "全部位置"}
+              {views[p.actor_id].exclude?.length ? `，不含 ${views[p.actor_id].exclude.join("、")}` : ""}</div>}
             {plan ? <>
               <div className="small">计划 v{plan.version}（{plan.generator?.kind}）· 修订原因 {plan.revision?.trigger ?? "—"}
                 {plan.revision?.detail ? <span className="muted"> — {String(plan.revision.detail).slice(0, 80)}</span> : null}</div>
@@ -71,6 +79,42 @@ export function ParticipantsPanel({ run, events }: { run: RunDetail & { particip
             </> : <div className="small muted">该策略没有任务计划</div>}
           </div>);
       })}
+    </div>
+  );
+}
+
+/** JOINT_BATCH rounds (phase 3A): one row per round, one cell per member, and the environment step it was applied at. */
+export function BatchPanel({ run, events, labels }: { run: RunDetail; events: TraceEvent[]; labels?: Labels }) {
+  const lastSeq = events.at(-1)?.seq ?? 0;
+  const batches = useQuery({ queryKey: ["batches", run.id, lastSeq], queryFn: () => get<Payload[]>(`/runs/${run.id}/batches`),
+    placeholderData: (prev) => prev });
+  const order = run.manifest.participants.map((p) => p.actor_id);
+  const rows = batches.data ?? [];
+  const TONE: Record<string, string> = { PROPOSED: "", PASSED: "muted", ABSENT: "muted", TIMED_OUT: "muted", CANCELLED: "muted" };
+  return (
+    <div className="card pad stack" data-testid="batch-panel">
+      <div className="row"><h3 className="grow panel-title"><Icon name="batch" />同步批次</h3>
+        <span className="small muted">{rows.length} 轮 · 语义 {rows[0]?.semantics ?? "—"}{rows[0]?.joint_prediction ? " · 联合预测" : ""}</span></div>
+      <div className="small muted">每轮成员在轮初观测上各自提案（各占一个全局步），最后一名成员的那一步把整批一次提交给环境（一个环境步）。</div>
+      {rows.length === 0 ? <div className="small muted">第一轮尚未开始</div> :
+        <div className="batch-grid" role="table" aria-label="批次" style={{ maxHeight: 420, overflowY: "auto" }}>
+          {rows.map((b) => (
+            <div key={b.batch_id} className="batch-row" role="row">
+              <div className="round" role="cell"><strong>第 {b.round} 轮</strong><StatusBadge status={b.status === "SUBMITTED" ? "SUCCEEDED" : b.status === "OPEN" ? "RUNNING" : "CANCELLED"} /></div>
+              <div className="members" role="cell">
+                {b.members.map((m: Payload) => (
+                  <div key={m.actor_id} className={`batch-cell ${TONE[m.status] ?? ""}`} style={{ ["--pc" as string]: participantColor(order, m.actor_id) }}
+                    title={m.reason ?? ""}>
+                    <div className="row" style={{ gap: 6 }}><ParticipantChip actorId={m.actor_id} order={order} />
+                      <span className="badge">{m.status}</span>{m.global_step ? <span className="muted">步 {m.global_step}</span> : null}</div>
+                    <div className="ellipsis">{m.action ? (labels ? labels.actionText(m.action) : `${m.action.action_type}(${Object.values(m.action.params ?? {}).join(", ")})`) : m.reason ?? "—"}</div>
+                    {m.outcome && <div className="row" style={{ gap: 4 }}><span className={`badge ${m.outcome === "APPLIED" ? "ok" : "err"}`}>{m.outcome}</span>
+                      <ComparisonBadge verdict={m.comparison} /></div>}
+                  </div>))}
+              </div>
+              <div className="env" role="cell">{b.env_step !== null && b.env_step !== undefined ? `环境步 ${b.env_step}` : b.status === "OPEN" ? "收集中" : "未发送"}</div>
+            </div>))}
+        </div>}
     </div>
   );
 }

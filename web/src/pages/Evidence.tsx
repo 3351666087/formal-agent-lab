@@ -4,10 +4,12 @@ import { Link, useNavigate, useParams } from "react-router";
 import type { TraceEvent } from "@formal-lab/contracts";
 import { fetchAllEvents, get, type RunDetail, type RunSummary } from "../api";
 import { groupSteps, StepDetail } from "../components/Steps";
-import { Empty, fmtTime, fmtValue, Json, KV, Loading, QueryState, shortId, StatusBadge, Tabs } from "../ui";
+import { BatchPanel } from "../components/RunKernel";
+import { Icon } from "../icons";
+import { Empty, fmtTime, fmtValue, Json, KV, Loading, QueryState, shortId, StatusBadge, Tabs, PageHead } from "../ui";
 import { useRunLabels } from "./RunConsole";
 
-type Tab = "replay" | "navigate" | "causal" | "diff" | "artifacts" | "lineage";
+type Tab = "replay" | "navigate" | "causal" | "diff" | "artifacts" | "lineage" | "batches";
 
 export function EvidencePage() {
   const { pid, runId } = useParams();
@@ -19,8 +21,8 @@ export function EvidencePage() {
   }, [runId, runs.data, pid, navigate]);
   return (
     <>
-      <div className="page-head"><div className="grow"><h1>证据与回放</h1>
-        <p>回放查看原始轨迹（只读，不重新执行）；重新运行会创建新实验并记录来源。真值快照是环境证据，参与者在运行时不可见。</p></div></div>
+      <PageHead area="证据" icon="evidence" title="证据与回放"
+        description="回放查看原始轨迹（只读，不重新执行）；重新运行会创建新实验并记录来源。真值快照是环境证据，参与者在运行时不可见。" />
       <div className="split">
         <div className="card">
           <div className="card-head"><h2 className="grow">实验</h2></div>
@@ -53,25 +55,28 @@ function RunEvidence({ pid, runId }: { pid: string; runId: string }) {
   if (run.isPending || events.isPending) return <div className="card"><Loading /></div>;
   if (!run.data || !events.data) return <div className="card"><Empty title="无法加载实验" /></div>;
   const stored = (run.data as RunDetail & { stored_contract_version?: string }).stored_contract_version;
+  const joint = run.data.manifest.turns.mode === "JOINT_BATCH";
   return (
     <div className="stack">
       <div className="card">
         <div className="card-head">
           <h2 className="grow">{run.data.scenario_name} <code className="small">{run.data.id}</code></h2>
           <StatusBadge status={run.data.status} />
-          <a className="btn sm" href={`/api/v1/runs/${runId}/export`} download>⤓ 导出回放包</a>
-          <Link className="btn sm" to={`/p/${pid}/runs/${runId}`}>运行台</Link>
+          <a className="btn sm" href={`/api/v1/runs/${runId}/export`} download><Icon name="export" size="sm" />导出回放包</a>
+          <Link className="btn sm" to={`/p/${pid}/runs/${runId}`}><Icon name="run" size="sm" />运行台</Link>
         </div>
         {stored && stored !== "formal-lab-contracts/v2" && <div className="callout small" data-testid="schema-note">
           该运行按 <code>{stored}</code> 记录：展示时逐字段升级，原始记录保持写入时的内容与含义。</div>}
         <Tabs label="证据视图" value={tab} onChange={setTab} tabs={[
           { id: "replay", label: "按步回放" }, { id: "navigate", label: "关联定位" }, { id: "causal", label: "因果时间线" },
-          { id: "diff", label: "差异报告" }, { id: "artifacts", label: "产物" }, { id: "lineage", label: "来源与清单" }]} />
+          { id: "diff", label: "差异报告" }, ...(joint ? [{ id: "batches" as Tab, label: "同步批次" }] : []),
+          { id: "artifacts", label: "产物" }, { id: "lineage", label: "来源与清单" }]} />
         <div className="card-body">
           {tab === "replay" && <Replay events={events.data} runId={runId} labels={labels} focus={focus} />}
           {tab === "navigate" && <Navigator pid={pid} run={run.data} events={events.data} goto={goto} />}
           {tab === "causal" && <Causal events={events.data} goto={goto} />}
           {tab === "diff" && <DiffReport events={events.data} labels={labels} />}
+          {tab === "batches" && <BatchPanel run={run.data} events={events.data} labels={labels} />}
           {tab === "artifacts" && <Artifacts runId={runId} />}
           {tab === "lineage" && <Lineage run={run.data} pid={pid} />}
         </div>
@@ -105,7 +110,9 @@ function Replay({ events, runId, labels, focus }: { events: TraceEvent[]; runId:
   const artifacts = useQuery({ queryKey: ["artifacts", runId], queryFn: () => get<{ kind: string; digest: string; step: number | null }[]>(`/runs/${runId}/artifacts`) });
   const snapArtifact = artifacts.data?.find((a) => a.kind === "snapshot" && a.step === cur?.step);
   const snapshot = useQuery({ queryKey: ["snapshot", snapArtifact?.digest], enabled: Boolean(snapArtifact),
-    queryFn: () => get<{ data: { data: { state: Record<string, unknown>; step: number } } }>(`/artifacts/${snapArtifact!.digest}`) });
+    queryFn: () => get<{ kind?: string; data: { data?: { state?: Record<string, unknown>; step: number } } & Record<string, unknown> }>(`/artifacts/${snapArtifact!.digest}`) });
+  // a live session (e.g. the order service) keeps its state outside: its snapshot is a marker, not the full state
+  const truth = snapshot.data?.data?.data?.state;
   if (!steps.length) return <Empty title="没有步骤可回放" />;
   return (
     <div className="stack">
@@ -123,10 +130,15 @@ function Replay({ events, runId, labels, focus }: { events: TraceEvent[]; runId:
         <div className="card pad stack">
           <div className="row"><h3 style={{ flex: 1 }}>真值快照（证据）</h3><span className="badge outline">参与者不可见</span></div>
           {!snapArtifact ? <div className="muted small">{snapDigest ? "该步快照未单独存档" : "该步没有快照"}</div>
-            : snapshot.isPending ? <Loading /> : snapshot.data ? (
+            : snapshot.isPending ? <Loading /> : snapshot.data && !truth ? (
+              <div className="small stack" data-testid="session-snapshot">
+                <div className="callout info">该环境是持久会话（{snapshot.data.kind ?? "SESSION_MARKER"}）：状态保存在外部业务服务中，快照只记录会话与修订。
+                  这一步的证据见左侧的操作状态路径与效果比较，以及“关联定位”中的独立探针。</div>
+                <Json value={snapshot.data} maxHeight={220} />
+              </div>) : snapshot.data && truth ? (
               <div className="table-wrap tall">
                 <table className="table"><thead><tr><th>位置</th><th>真值</th><th>观测</th></tr></thead>
-                  <tbody>{Object.entries(snapshot.data.data.data.state).map(([k, v]) => {
+                  <tbody>{Object.entries(truth).map(([k, v]) => {
                     const after = cur.observationAfter ?? cur.observation;
                     const fact = after?.facts.find((f) => f.path === k);
                     const unknown = after?.unknowns?.find((u) => u.path === k);

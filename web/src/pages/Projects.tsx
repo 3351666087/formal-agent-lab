@@ -2,7 +2,17 @@ import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate } from "react-router";
 import { del, get, post, type Meta, type Project } from "../api";
-import { Empty, fmtTime, InlineError, Modal, QueryState, useToast } from "../ui";
+import { Icon, type IconName } from "../icons";
+import { Empty, fmtTime, InlineError, Modal, PageHead, QueryState, useToast } from "../ui";
+
+// the product loop every area serves: model → plan → run → deviation → evidence
+const LOOP: { icon: IconName; title: string; text: string }[] = [
+  { icon: "model", title: "模型", text: "状态、动作、性质；类型检查与有界查询" },
+  { icon: "strategy", title: "计划", text: "规则 / Z3 / LLM 策略只从模型候选中选择" },
+  { icon: "run", title: "运行", text: "参与者轮流或同步批次，操作有账本可对账" },
+  { icon: "alert", title: "偏差", text: "效果与预测逐字段比较，差异生成修订建议" },
+  { icon: "evidence", title: "证据", text: "事件因果链、回放包与指标，离线可读" },
+];
 
 export function ProjectsPage() {
   const qc = useQueryClient();
@@ -31,13 +41,16 @@ export function ProjectsPage() {
   }
   return (
     <>
-      <div className="page-head">
-        <div className="grow">
-          <h1>项目</h1>
-          <p>项目组织模型、场景、策略和实验；分组仅用于组织，不影响权限。</p>
-        </div>
-        <button className="btn primary" onClick={() => setCreating(true)}>新建项目</button>
-      </div>
+      <PageHead area="工作区" icon="projects" title="项目"
+        description="项目组织模型、场景、策略和实验；分组仅用于组织，不影响权限。"
+        actions={<button className="btn primary" onClick={() => setCreating(true)}>新建项目</button>} />
+      <section className="card pad" aria-label="工作流程">
+        <ol className="loop">
+          {LOOP.map((x, i) => (
+            <li key={x.title}><span className="loop-icon"><Icon name={x.icon} /></span>
+              <span><strong>{i + 1}. {x.title}</strong><span className="small muted">{x.text}</span></span></li>))}
+        </ol>
+      </section>
       {meta.data && (
         <div className="callout small">
           <strong>运行配置：</strong>{meta.data.deployment_profile} — {meta.data.capability_level}。
@@ -51,22 +64,22 @@ export function ProjectsPage() {
           <div className="stack">
             {[...groups.entries()].map(([group, items]) => (
               <section key={group} className="stack" aria-label={group}>
-                <h2 className="muted" style={{ fontSize: 13 }}>{group}</h2>
+                <div className="eyebrow">{group}</div>
                 <div className="grid cols-3">
                   {items.map((p) => (
                     <article key={p.id} className="card pad stack">
                       <div className="row">
                         <Link to={`/p/${p.id}/models`} className="grow"><h2>{p.name}</h2></Link>
-                        <button className="btn sm ghost danger" aria-label={`删除 ${p.name}`}
+                        <button className="btn sm ghost quiet-danger" aria-label={`删除 ${p.name}`}
                           onClick={() => { if (confirm(`删除项目「${p.name}」及其全部数据？`)) remove.mutate(p.id); }}>删除</button>
                       </div>
                       <div className="muted small">{p.description || "—"}</div>
-                      <div className="row small">
-                        <span className="badge">模型 {p.counts?.models ?? 0}</span>
-                        <span className="badge">场景 {p.counts?.scenarios ?? 0}</span>
-                        <Link to={`/p/${p.id}/runs`} className="badge accent">实验 {p.counts?.runs ?? 0}</Link>
-                        <span className="muted" style={{ marginLeft: "auto" }}>{fmtTime(p.created_at)}</span>
+                      <div className="project-counts">
+                        <Link to={`/p/${p.id}/models`}><Icon name="model" size="sm" /><b>{p.counts?.models ?? 0}</b> 模型</Link>
+                        <Link to={`/p/${p.id}/scenarios`}><Icon name="scenario" size="sm" /><b>{p.counts?.scenarios ?? 0}</b> 场景</Link>
+                        <Link to={`/p/${p.id}/runs`}><Icon name="run" size="sm" /><b>{p.counts?.runs ?? 0}</b> 实验</Link>
                       </div>
+                      <div className="muted small">创建于 {fmtTime(p.created_at)}</div>
                     </article>
                   ))}
                 </div>

@@ -1,0 +1,18 @@
+{
+  "name": "formal-agent-lab product demo",
+  "duration_s": 20,
+  "cover_time_s": 15.2,
+  "description": "20 秒循环：订单服务示例的一次真实运行——模型结构与有界检查，策略逐步提案，操作先记账再发送，tick 的效果与服务不符（工位 p2 半速），修订建议与回归案例，修订后的模型通过回归并发布，回放包离线可读。",
+  "scenes": [
+    {"id": "model", "label": "模型", "start": 0, "end": 4, "title": "模型", "caption": "状态、动作、性质都在模型里声明；类型检查与有界查询先于任何运行。",
+     "motion": "nodes stagger in by column (80 ms), then write/read edges draw (70 ms stagger), chips last"},
+    {"id": "plan", "label": "计划", "start": 4, "end": 8, "title": "计划", "caption": "策略只从模型给出的候选中选择；每个提案先经过前提检查。",
+     "motion": "decision pipeline lights up stage by stage; the run's first eight proposals appear in order (280 ms)"},
+    {"id": "run", "label": "运行", "start": 8, "end": 12.5, "title": "运行", "caption": "每个环境操作先记录意图再发送，结果按操作 id 可查询、可对账。",
+     "motion": "step cells fill left to right (100 ms each); one operation walks PREPARED → DISPATCHED → COMPLETED"},
+    {"id": "deviation", "label": "偏差", "start": 12.5, "end": 16.5, "title": "偏差", "caption": "逐字段比较模型预测与服务观测；差异生成修订建议与最小回归案例。",
+     "motion": "step 9 marked; predicted tag, observed tag, verdict appear in sequence; truth card and suggestion follow"},
+    {"id": "evidence", "label": "证据", "start": 16.5, "end": 20, "title": "证据", "caption": "回归案例拒绝原模型、通过修订版；整个过程在回放包中离线可读。",
+     "motion": "v1 card (4 × FAIL, REJECTED), then v2 (4 × PASS, RELEASED), result banner, bundle card, evidence legend"}
+  ]
+}

@@ -2,7 +2,8 @@ import { useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Link, useNavigate, useParams } from "react-router";
 import { get, post, TERMINAL, type RunSummary, type Scenario, type Strategy } from "../api";
-import { Empty, fmtNum, fmtTime, InlineError, QueryState, shortId, StatusBadge } from "../ui";
+import { Icon } from "../icons";
+import { Empty, fmtNum, fmtTime, InlineError, QueryState, shortId, StatusBadge, PageHead } from "../ui";
 
 const STATUSES = ["", "RUNNING", "PAUSED", "SUCCEEDED", "FAILED", "CANCELLED", "BUDGET_EXHAUSTED"];
 
@@ -26,8 +27,8 @@ export function RunsPage() {
   });
   return (
     <>
-      <div className="page-head"><div className="grow"><h1>实验运行台</h1>
-        <p>启动实验并实时查看事件、候选、检查与效果；运行由 Temporal 持久编排，刷新页面或断线后从最后一个事件继续。</p></div></div>
+      <PageHead area="运行" icon="run" title="实验运行台"
+        description="启动实验并实时查看事件、候选、检查与效果；运行由 Temporal 持久编排，刷新页面或断线后从最后一个事件继续。" />
       <div className="card">
         <div className="card-head"><h2 className="grow">启动实验</h2></div>
         <div className="card-body stack">
@@ -40,7 +41,7 @@ export function RunsPage() {
             <label className="field"><span>步数预算</span><input type="number" min={1} placeholder="场景默认" value={form.max_steps} onChange={(e) => setForm({ ...form, max_steps: e.target.value })} /></label>
           </div>
           <div className="row"><button className="btn primary" disabled={!form.scenario_id || start.isPending} onClick={() => start.mutate()}>
-            {start.isPending ? "启动中…" : "▶ 启动"}</button>{scenarios.data?.length === 0 && <span className="muted small">项目中还没有场景。</span>}</div>
+            {start.isPending ? "启动中…" : <><Icon name="play" />启动</>}</button>{scenarios.data?.length === 0 && <span className="muted small">项目中还没有场景。</span>}</div>
           <InlineError error={start.error} />
         </div>
       </div>
