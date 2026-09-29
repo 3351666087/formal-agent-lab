@@ -46,6 +46,18 @@ make prism-games-check    # 可选：PRISM-games 概率查询，模型内核对�
 
 验收结果的读法见 [acceptance-phase2.md](acceptance-phase2.md)。
 
+### 阶段三检查（检查引擎）
+
+```bash
+make phase3-check                                    # 全部 → docs/execution/evidence/phase3/checks/results.json
+make phase3-check ARGS="--group g4-batch"            # 一组；--only id,id；--skip id；--retries N；--list
+make phase3-check ARGS="--only p3-matrix-kept-db --out out/checks/matrix"   # 独立输出目录
+make checks SUITE=phase2 ARGS="--list"               # 同一引擎加载阶段二的检查（make phase2-check 的输出不变）
+make design-check                                    # tokens.css / 演示 SVG 与源一致（等同 p3-design-sources）
+```
+
+引擎 `scripts/check_runner.py` 为每次尝试单独写日志（`logs/<id>/<时间>-attempt-<n>.log`），保留首次失败、重试与最终结果，并记录源码提交、工作区摘要、配置摘要（检查定义、`uv.lock`、`pnpm-lock.yaml`、Compose 文件）与运行前后的资源读数；另一提交 / 工作区 / 配置上的结果标为 `inherited`，不算当前通过。完整执行耗时（`timing.last_full_run_s`）与单项重跑（`timing.partial_runs`）分开统计。检查逐个运行（并发 1）；声明 `heavy_gib` 的检查先经 `disk_guard`，空间不足时记为 BLOCKED 并写明读数。`p3-product-flows` 与 `p3-web-flows` 需要运行中的开发栈（`scripts/dev.sh up`，建议用干净数据库 `FAL_DATABASE_URL=…/fal_demo`），否则 NOT_RUN。
+
 ## 4. 中断与恢复
 
 - **Worker 退出 / 重启**：运行在 Temporal 中持久化；新 Worker 从数据库中的提案、检查点、轮次和操作账本继续（事件 `RECOVERY`）。操作结果未知时按操作 id 向服务查询后对账（`OPERATION_RECONCILED`），不会重复产生业务效果。

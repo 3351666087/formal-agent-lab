@@ -249,7 +249,8 @@ def build(verify: bool) -> Path:
     if verify:
         manifest["verification"] = verify_bundle(tar_path, tag)
         side.write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\n")
-    evidence = ROOT / "docs" / "execution" / "evidence" / "phase2" / "offline-manifest.json"  # phase-1 file stays
+    # the round this run belongs to (phase 3 by default; scripts/phase2_check.py sets phase 2); the phase-1 file stays
+    evidence = ROOT / os.environ.get("FAL_EVIDENCE_DIR", "docs/execution/evidence/phase3") / "offline-manifest.json"
     evidence.write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\n")
     return tar_path
 

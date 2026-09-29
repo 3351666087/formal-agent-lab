@@ -3,13 +3,14 @@ record out, kept apart from the deterministic Z3 checks — over the API and in 
 
 from __future__ import annotations
 
+import os
 from pathlib import Path
 
 import pytest
 from formal_lab_solver_prism import EXAMPLE, Unavailable, locate
 
 pytestmark = pytest.mark.integration
-SHOTS = Path(__file__).resolve().parents[2] / "docs" / "execution" / "evidence" / "phase2" / "prism-games"
+SHOTS = Path(__file__).resolve().parents[2] / os.environ.get("FAL_EVIDENCE_DIR", "docs/execution/evidence/phase3") / "prism-games"  # phase 2 sets FAL_EVIDENCE_DIR
 
 
 def _installed() -> bool:

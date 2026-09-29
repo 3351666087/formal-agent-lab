@@ -25,15 +25,27 @@ def of(events, kind):
 
 
 def pause_inside_a_round(stack, run_id: str, at_least: int) -> dict:
-    """Pause at a step boundary inside a round (odd global step: the receiver proposed, the picker not yet)."""
-    stack.wait_step(run_id, at_least)
-    for _ in range(4):
+    """Pause at a step boundary inside a round (odd global step: the receiver proposed, the picker not yet).
+
+    A pause takes effect after the step in flight. In a batch round the odd step (a proposal) is quick and the even
+    step (the submission) is slow, so a request sent at a random moment mostly lands on a round boundary; the
+    request is therefore sent right after an even step has finished, while the odd one is in flight."""
+    for _ in range(8):
+        deadline = time.time() + 120
+        while True:
+            run = stack.get(f"/runs/{run_id}")
+            if run["status"] in ("SUCCEEDED", "FAILED", "CANCELLED", "BUDGET_EXHAUSTED"):
+                raise AssertionError(f"run ended ({run['status']}) before it could be paused inside a round")
+            if run["status"] == "RUNNING" and run["last_step"] >= at_least and run["last_step"] % 2 == 0:
+                break
+            assert time.time() < deadline, "the run did not advance"
+            time.sleep(0.01)
         stack.post(f"/runs/{run_id}/pause")
         paused = stack.wait_status(run_id, {"PAUSED"}, timeout=120)
         if paused["last_step"] % 2 == 1:
             return paused
+        at_least = paused["last_step"] + 2
         stack.post(f"/runs/{run_id}/resume")
-        stack.wait_step(run_id, paused["last_step"] + 1)
     raise AssertionError("could not pause inside a round")
 
 
@@ -51,7 +63,7 @@ def test_worker_killed_mid_round_continues_the_batch(stack):
     wh = project(stack, "仓储分配示例")
     sc = scenario(stack, wh["id"], "仓储：收货员 + 拣货员同步批次")
     run = stack.post(f"/projects/{wh['id']}/runs", {"scenario_id": sc["id"], "seed": 0})
-    paused = pause_inside_a_round(stack, run["id"], 3)
+    paused = pause_inside_a_round(stack, run["id"], 2)
     carry_batch = [e for e in stack.events(run["id"]) if e["event_type"] == "BATCH_OPENED"][-1]["payload"]["batch"]
     mid_round = paused["last_step"] % 2 == 1
     stack.post(f"/runs/{run['id']}/resume")
@@ -90,7 +102,7 @@ def test_cancel_mid_round_cancels_the_open_batch(stack):
     wh = project(stack, "仓储分配示例")
     sc = scenario(stack, wh["id"], "仓储：收货员 + 拣货员同步批次")
     run = stack.post(f"/projects/{wh['id']}/runs", {"scenario_id": sc["id"], "seed": 0})
-    paused = pause_inside_a_round(stack, run["id"], 1)
+    paused = pause_inside_a_round(stack, run["id"], 0)
     stack.post(f"/runs/{run['id']}/cancel")
     cancelled = stack.wait_status(run["id"], {"CANCELLED"}, timeout=120)
     events = stack.events(run["id"])

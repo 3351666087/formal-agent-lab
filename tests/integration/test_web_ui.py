@@ -6,6 +6,7 @@ docs/execution/evidence/phase2/ui/ (phase-1 shots in evidence/ui/ are history an
 
 from __future__ import annotations
 
+import os
 import re
 import time
 from pathlib import Path
@@ -14,7 +15,8 @@ import pytest
 
 pytestmark = [pytest.mark.integration, pytest.mark.ui]
 ROOT = Path(__file__).resolve().parents[2]
-SHOTS = ROOT / "docs" / "execution" / "evidence" / "phase2" / "ui"
+# FAL_EVIDENCE_DIR: the round this run belongs to (phase 3 by default; scripts/phase2_check.py sets phase 2)
+SHOTS = ROOT / os.environ.get("FAL_EVIDENCE_DIR", "docs/execution/evidence/phase3") / "ui"
 DESKTOP = {"width": 1440, "height": 900}
 PHONE = {"width": 375, "height": 812}
 

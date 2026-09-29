@@ -87,12 +87,12 @@ def download_and_read(page: Page, name: str) -> dict:
 
 
 def main() -> int:
+    global SHOTS
     ap = argparse.ArgumentParser()
     ap.add_argument("--web", default="http://127.0.0.1:5173")
     ap.add_argument("--api", default="http://127.0.0.1:8000")
     ap.add_argument("--shots", default=str(SHOTS), help="where the screenshots go (default: the baseline in docs/assets)")
     args = ap.parse_args()
-    global SHOTS
     SHOTS = Path(args.shots).resolve()
     web, base = args.web.rstrip("/"), args.api.rstrip("/")
     t0 = time.time()

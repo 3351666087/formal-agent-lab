@@ -20,7 +20,7 @@ What is recorded (DIR/results.json, format `checks@2`):
   every partial re-run (with its selection) separately.
 
 Checks run one at a time (concurrency 1); a check that declares `heavy_gib` first asks scripts/disk_guard.py and is
-BLOCKED (not FAIL) when the host or Docker disk is short. Loopback never goes through a proxy (NO_PROXY), the proxy
+BLOCKED (not FAIL) when the host or Docker disk would drop below the reserve (FAL_DISK_RESERVE_GIB, default 15). Loopback never goes through a proxy (NO_PROXY), the proxy
 variables themselves are kept for checks that reach a real model endpoint.
 """
 
@@ -41,6 +41,9 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 PY = "uv run --frozen python"
+# free space every heavy check must leave on the host and Docker disks (GiB): the Mac shares its disk with the VM's
+# sparse disk images, and a full host disk once aborted the VM's journal (2026-09-28)
+RESERVE_GIB = float(os.environ.get("FAL_DISK_RESERVE_GIB", "15"))
 CONFIG_FILES = ("uv.lock", "pnpm-lock.yaml", "deploy/compose/services.dev.yaml", "deploy/compose/docker-compose.yaml")
 HISTORY = 20
 
@@ -259,8 +262,10 @@ def main(argv: list[str] | None = None) -> int:
                 probes[check.requires] = probe(check.requires)
             reason = probes[check.requires]
         if not reason and check.heavy_gib:
-            g = subprocess.run([sys.executable, "scripts/disk_guard.py", "--need", str(check.heavy_gib), "--label",
-                                check.id, "--trim"], cwd=ROOT, capture_output=True, text=True)
+            need = check.heavy_gib + RESERVE_GIB  # what it writes + what must stay free
+            g = subprocess.run([sys.executable, "scripts/disk_guard.py", "--need", str(need), "--label",
+                                f"{check.id} ({check.heavy_gib} GiB + {RESERVE_GIB} GiB reserve)", "--trim"],
+                               cwd=ROOT, capture_output=True, text=True)
             if g.returncode != 0:
                 reason = f"BLOCKED: {(g.stderr or g.stdout).strip()[-300:]}"
         attempts: list[dict[str, Any]] = []

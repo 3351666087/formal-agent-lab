@@ -254,6 +254,7 @@ def main() -> int:
     LOGS.mkdir(parents=True, exist_ok=True)
     env = {**os.environ, "UV_PROJECT_ENVIRONMENT": os.environ.get("UV_PROJECT_ENVIRONMENT",
                                                                     str(Path.home() / ".venvs" / "formal-agent-lab"))}
+    env["FAL_EVIDENCE_DIR"] = EV  # tests and tools that write evidence write phase 2's (history) only from here
     for key in ("NO_PROXY", "no_proxy"):  # loopback never through a proxy from the environment (local-development §7)
         env[key] = ",".join(x for x in (env.get(key), "127.0.0.1,localhost,::1") if x)
     rev = subprocess.run(["git", "rev-parse", "HEAD"], cwd=ROOT, capture_output=True, text=True).stdout.strip()

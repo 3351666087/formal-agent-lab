@@ -7,7 +7,7 @@ runtime closure (`uv export --no-dev`) or only to development / test tooling. No
 dependencies from `pnpm licenses list --prod`. Entries whose license needs attention (copyleft, or not declared)
 are listed separately with where they are used.
 
-Writes docs/execution/evidence/phase2/licenses.json and docs/licenses.md.
+Writes $FAL_EVIDENCE_DIR/licenses.json (default docs/execution/evidence/phase3; phase 2 wrote phase2/) and docs/licenses.md.
 
     scripts/in-vm.sh 'uv run --frozen python scripts/license_inventory.py'
 """
@@ -15,6 +15,7 @@ Writes docs/execution/evidence/phase2/licenses.json and docs/licenses.md.
 from __future__ import annotations
 
 import json
+import os
 import re
 import subprocess
 import sys
@@ -23,7 +24,7 @@ from importlib import metadata
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-OUT_JSON = ROOT / "docs/execution/evidence/phase2/licenses.json"
+OUT_JSON = ROOT / os.environ.get("FAL_EVIDENCE_DIR", "docs/execution/evidence/phase3") / "licenses.json"
 OUT_MD = ROOT / "docs/licenses.md"
 ATTENTION = re.compile(r"\b(A?GPL|LGPL|MPL|EPL|CDDL|SSPL|EUPL)\b", re.I)
 PROJECT = re.compile(r"^(formal-lab-|formal-agent-lab|fal-example-)")
@@ -115,7 +116,7 @@ def main() -> int:
     OUT_JSON.write_text(json.dumps(report, indent=2, ensure_ascii=False) + "\n")
     lines = ["# 第三方依赖与许可证清单", "",
              f"由 `scripts/license_inventory.py` 生成（{report['generated_at']}）：Python 环境中实际安装的发行包（区分运行时闭包与开发/测试工具）与 Web 生产依赖。"
-             "许可证取自包元数据；逐项清单见 `docs/execution/evidence/phase2/licenses.json`。项目本身：Apache-2.0（`LICENSE`、`NOTICE`）。"
+             f"许可证取自包元数据；逐项清单见 `{OUT_JSON.relative_to(ROOT)}`。项目本身：Apache-2.0（`LICENSE`、`NOTICE`）。"
              "上游复用与调用位置见 [reuse-ledger.md](reuse-ledger.md)。", "",
              f"- Python 运行时依赖 {report['counts']['python_runtime']} 个，开发/测试工具 {report['counts']['python_development']} 个；"
              f"Web 生产依赖 {report['counts']['node']} 个。", "", "## 按许可证", "", "| 许可证 | 包数 |", "|---|---|"]

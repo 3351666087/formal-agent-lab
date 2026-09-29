@@ -25,7 +25,7 @@ import pytest
 from formal_lab_example_scheduling.model import build_model
 
 ROOT = _P(__file__).resolve().parents[2]
-SHOTS = ROOT / "docs" / "execution" / "evidence" / "phase2" / "ui"
+SHOTS = ROOT / os.environ.get("FAL_EVIDENCE_DIR", "docs/execution/evidence/phase3") / "ui"  # FAL_EVIDENCE_DIR: phase 3 by default; scripts/phase2_check.py sets phase 2
 DESKTOP = {"width": 1440, "height": 900}
 PHONE = {"width": 375, "height": 812}
 
@@ -40,7 +40,7 @@ def no_overflow(page) -> None:
     assert widths[0] <= widths[1] + 1, f"horizontal page overflow {widths} on {page.url}"
 
 pytestmark = [pytest.mark.integration, pytest.mark.ui]
-EVIDENCE = ROOT / "docs" / "execution" / "evidence" / "phase2" / "web"
+EVIDENCE = ROOT / os.environ.get("FAL_EVIDENCE_DIR", "docs/execution/evidence/phase3") / "web"
 
 
 def field(scope, label: str):

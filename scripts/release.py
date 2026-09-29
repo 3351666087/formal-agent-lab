@@ -54,7 +54,8 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--skip-images", action="store_true", help="no OCI image builds (wheels, web, SDK/CLI, licenses)")
     ap.add_argument("--out", default=str(OUT))
-    ap.add_argument("--evidence", default=str(ROOT / "docs" / "execution" / "evidence" / "phase2" / "release-manifest.json"))
+    evidence_dir = ROOT / os.environ.get("FAL_EVIDENCE_DIR", "docs/execution/evidence/phase3")  # phase 2: phase2/
+    ap.add_argument("--evidence", default=str(evidence_dir / "release-manifest.json"))
     args = ap.parse_args()
     OUT = Path(args.out).resolve()
     t0 = time.time()
@@ -105,7 +106,7 @@ def main() -> None:
     other_arch = {"build": "NOT_RUN", "reason": skipped} if skipped else cross_arch(rev)
     print("==> license inventory")
     sh(sys.executable, "scripts/license_inventory.py")
-    licenses = json.loads((ROOT / "docs/execution/evidence/phase2/licenses.json").read_text())
+    licenses = json.loads((evidence_dir / "licenses.json").read_text())
     import importlib.util
 
     spec = importlib.util.spec_from_file_location("doctor", ROOT / "scripts" / "doctor.py")

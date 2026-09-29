@@ -84,13 +84,13 @@ CHECKS = [
           ["P3A-G6"], [f"{EV}/doctor.json"]),
     Check("p3-release-light", "g6-release", "发行（不建镜像）：全部 wheel、Web 包、干净 venv 中的 SDK/CLI、许可证清单",
           f"{PY} scripts/release.py --skip-images --out out/release-p3 --evidence {EV}/release-manifest.json",
-          ["P3A-G6"], [f"{EV}/release-manifest.json", "docs/licenses.md"], heavy_gib=3),
+          ["P3A-G6"], [f"{EV}/release-manifest.json", "docs/licenses.md"], heavy_gib=1),
     Check("p3-release-images", "g6-release", "发行（含 OCI 镜像与异架构构建）", f"{PY} scripts/release.py --out out/release-p3-images "
           f"--evidence {EV}/release-manifest-images.json", ["P3A-G6"], [f"{EV}/release-manifest-images.json"],
-          requires="docker", kind="extension", heavy_gib=16),
+          requires="docker", kind="extension", heavy_gib=8),
     Check("p3-offline-bundle", "g6-release", "去重离线包：空目录无包仓库安装与整栈实验", f"{PY} scripts/offline_bundle.py --verify",
-          ["P3A-G6"], ["docs/execution/evidence/phase2/offline-manifest.json"], requires="docker", kind="extension",
-          heavy_gib=20),
+          ["P3A-G6"], [f"{EV}/offline-manifest.json"], requires="docker", kind="extension",
+          heavy_gib=12),
     # ------------------------------------------------------------ regression
     Check("p3-unit-all", "regression", "全部单元 / 契约 / 架构 / 示例测试（含阶段一哨兵）",
           f"{PYTEST} -m 'not integration and not llm and not ui'"),
