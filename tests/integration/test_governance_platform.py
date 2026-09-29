@@ -112,3 +112,27 @@ def test_a_rule_pauses_the_affected_plan_on_an_effect_difference(stack, demo):
     assert decisions[-1]["payload"]["decision"]["priority_explanation"]
     stack.post(f"/runs/{run['id']}/resume")
     stack.wait_status(run["id"], {"PAUSED", "SUCCEEDED"}, timeout=300)
+
+
+def test_capability_report_and_required_checks_over_the_api(stack):
+    """Phase 3A, G3: feature support of a model version from declared capabilities; a release names what it
+    requires, and a required property that does not hold within the bound is not passed while the process completes."""
+    project = next(p for p in stack.get("/projects") if p["name"] == "生产调度示例")["id"]
+    model = stack.get(f"/projects/{project}/models")[0]
+    version = stack.get(f"/models/{model['id']}/versions/{model['latest_version']}")
+    rep = stack.get(f"/model-versions/{version['id']}/capabilities")
+    features = {f["feature"]: f for f in rep["features"]}
+    assert features["rules"]["status"] == features["query.goal_reachability"]["status"] == "SUPPORTED"
+    assert features["query.goal_reachability"]["provider"]["plugin_id"]
+    goal = next(p for p, k in version["property_kinds"].items() if k == "goal") if "property_kinds" in version else \
+        "all_done"
+    rel = stack.post(f"/model-versions/{version['id']}/releases",
+                     {"regression": "none", "horizon": 1, "required_checks": ["TYPE_CHECK", "GOAL_REACHABILITY"],
+                      "required_holds": [goal]})
+    rec = rel["record"]
+    assert rec["process_completed"] is True and rel["status"] == "REJECTED"
+    assert rec["config"]["required_holds"] == [goal]
+    check = next(c for c in rec["checks"] if c["subject"] == goal)
+    assert check["required"] and check["property_holds"] is False and "not reachable within 1 steps" in check["claim"]
+    bad = stack.client.post(f"/model-versions/{version['id']}/releases", json={"required_checks": ["NOPE"]})
+    assert bad.status_code == 422

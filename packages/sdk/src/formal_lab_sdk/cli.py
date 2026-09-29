@@ -363,7 +363,12 @@ def rules_list(project: str = typer.Option(...), api: str = API) -> None:
 @release_app.command("check")
 def release_check(model_version: str, ruleset: str = typer.Option(None, help="id@version"),
                   regression: str = typer.Option("model", help="model | none | comma-separated case ids"),
-                  horizon: int = 6, api: str = API) -> None:
+                  horizon: int = 6,
+                  require: list[str] = typer.Option([], help="required check (TYPE_CHECK, RULE_CHECK, "
+                                                             "GOAL_REACHABILITY, INVARIANT_VIOLATION, OBJECTIVE_CHECK, "
+                                                             "REGRESSION); repeatable"),
+                  require_holds: list[str] = typer.Option([], help="property that must hold; repeatable"),
+                  api: str = API) -> None:
     """compile, type-check, query and replay regression cases; prints the release record"""
     rs = None
     if ruleset:
@@ -371,19 +376,42 @@ def release_check(model_version: str, ruleset: str = typer.Option(None, help="id
         rs = (rid, int(ver))
     sel: str | list[str] = regression if regression in ("model", "none") else regression.split(",")
     try:
-        rel = _client(api).release(model_version, ruleset=rs, regression=sel, horizon=horizon)
+        rel = _client(api).release(model_version, ruleset=rs, regression=sel, horizon=horizon,
+                                   required_checks=[r.upper() for r in require] or None,
+                                   required_holds=require_holds or None)
     except FormalLabError as exc:
         _fail(exc)
     rec = rel["record"]
     typer.echo(f"{rel['release_id']}  {rel['status']}  model {rec['model']['package_id']}@{rec['model']['version']}")
+    done = rec.get("process_completed")
+    if done is not None:
+        typer.echo(f"  process {'completed' if done else 'INCOMPLETE'} (required: "
+                   f"{', '.join((rec.get('config') or {}).get('required_checks', []))})")
     for chk in rec["checks"]:
-        typer.echo(f"  {'✓' if chk['passed'] else '✗'} {chk['kind']:<20} {chk['subject']:<28} {chk['verdict']}")
+        holds = {True: "holds", False: "does not hold", None: ""}[chk.get("property_holds")]
+        flag = "✓" if chk["passed"] else "✗"
+        typer.echo(f"  {flag} {chk['kind']:<20} {chk['subject']:<28} {chk['verdict']:<24} {holds}"
+                   + ("  [required]" if chk.get("required") else ""))
     for r in rec["regression"]:
         typer.echo(f"  {'✓' if r['status'] == 'PASS' else '✗'} regression {r['case_id']}  {r['status']}: {r['detail']}")
     for reason in rec["reasons"]:
         typer.secho(f"  reason: {reason}", fg="red")
     if rel["status"] != "RELEASED":
         raise typer.Exit(1)
+
+
+@release_app.command("capabilities")
+def release_capabilities(model_version: str, api: str = API) -> None:
+    """what the platform can do with a model version (from declared capabilities)"""
+    try:
+        rep = _client(api).capabilities(model_version)
+    except FormalLabError as exc:
+        _fail(exc)
+    typer.echo(f"{rep['model']['package_id']}@{rep['model']['version']}  profile {rep['semantic_profile']}  "
+               f"driver {rep['driver']['plugin_id']}@{rep['driver']['version']}")
+    for f in rep["features"]:
+        provider = f"{f['provider']['plugin_id']}" if f.get("provider") else "—"
+        typer.echo(f"  {f['status']:<11} {f['feature']:<28} {provider:<40} {f['reason']}")
 
 
 @regression_app.command("list")

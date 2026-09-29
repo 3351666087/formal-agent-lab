@@ -63,6 +63,7 @@ def create(config: dict[str, Any] | None, services: Any) -> PreferencePlanner:
 
 
 def registrations() -> list[PluginRegistration]:
-    from . import checklist
+    from . import checklist, counter_driver
 
-    return [PluginRegistration(DESCRIPTOR, create), PluginRegistration(checklist.DESCRIPTOR, checklist.create)]
+    return [PluginRegistration(DESCRIPTOR, create), PluginRegistration(checklist.DESCRIPTOR, checklist.create),
+            PluginRegistration(counter_driver.DESCRIPTOR, counter_driver.create)]

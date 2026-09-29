@@ -131,8 +131,15 @@ def create_release(s: Session, model_version_id: str, body: dict[str, Any]) -> d
         missing = wanted - {c.case_id for c in cases}
         if missing:
             raise NotFound(f"regression case(s) not found: {sorted(missing)}")
-    record, log = check_release(package, registry(), ruleset=ruleset, cases=cases,
-                                horizon=int(body.get("horizon", 6)), timeout_ms=int(body.get("timeout_ms", 10000)))
+    from formal_lab_contracts import ReleaseConfig
+
+    try:  # G3: required checks / properties; without them the phase-2 behaviour (type check required)
+        config = ReleaseConfig(required_checks=body.get("required_checks") or ["TYPE_CHECK"],
+                               required_holds=body.get("required_holds") or [],
+                               horizon=int(body.get("horizon", 6)), timeout_ms=int(body.get("timeout_ms", 10000)))
+    except ValueError as exc:
+        raise InvalidInput(f"invalid release configuration: {exc}") from exc
+    record, log = check_release(package, registry(), ruleset=ruleset, cases=cases, config=config)
     # content-addressed per model version: the same IR in another project (or version row) is a different release
     import hashlib
 
@@ -217,3 +224,21 @@ def revision_suggestions(s: Session, run_id: str) -> list[dict[str, Any]]:
     return [{"step": r.logical_step, "actor_id": r.actor_id, "seq": r.seq, **r.payload,
              "regression_case_id": cases.get((r.logical_step, r.actor_id))}
             for r in rows if r.event_type == "MODEL_REVISION_SUGGESTED"]
+
+
+def capability_report(s: Session, model_version_id: str) -> dict[str, Any]:
+    """G3: what the platform can do with this model version, from declared capabilities (driver, verifiers); the
+    optional PRISM-games extension is listed when the version carries its payload."""
+    from formal_lab_runtime.release import capability_report as report_for
+
+    version_row = get_or_404(s, ModelVersion, model_version_id, "model version")
+    package = package_of(version_row)
+    out = report_for(package, registry()).model_dump(mode="json")
+    if "org.formal-lab.prism-games" in package.extensions:
+        from .probabilistic import availability
+
+        info = availability()
+        out["features"].append({"feature": "extension.prism_games", "status": "SUPPORTED" if info["available"]
+                                else "UNSUPPORTED", "provider": None, "requires": ["FAL_PRISM_GAMES_HOME"],
+                                "reason": info.get("reason") or f"PRISM-games {info['backend']['version']}"})
+    return out

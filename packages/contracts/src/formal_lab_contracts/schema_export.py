@@ -54,6 +54,8 @@ V2_OBJECTS: list[type[BaseModel]] = [
     governance.RuleEvaluation,
     governance.RuleDecision,
     governance.ModelReleaseRecord,
+    governance.CapabilityReport,
+    governance.ReleaseConfig,
     governance.RegressionCase,
     governance.MatrixCellSpec,
 ]
@@ -79,6 +81,7 @@ SUPPORTING: list[type[BaseModel]] = [
     execution.GateRequest,
     execution.GateResult,
     execution.ConditionCheck,
+    governance.FeatureSupport,
     EvidenceRef,
     Extension,
 ]

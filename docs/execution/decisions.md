@@ -153,3 +153,9 @@
 - **决策**（阶段三 G2）：新增插件接口 `EXECUTION_GATE`（v2 增量）。场景声明 `execution_gates` 后，协调器在每次发送前（首次发送、结果未知且后端无记录时的重发、纯数据环境的重执行）按顺序询问门控；门控声明需要读取的位置，内核在发送前读取（能按请求观测的环境取新鲜值），门控回答 ALLOW / DENY 与条件。决定写成 `ExecutionDecision`，挂在操作记录上并发事件；DENY 时什么都不发送，操作 FAILED、动作 REJECTED。复用已记录结果与查询历史不询问门控。操作记录新增 `request_digest`（执行者、种类、动作的规范化摘要）：同 id 同请求复用结果，同 id 异参为冲突、不发送；订单服务同样以 409 拒绝。结果未知且后端查无记录时，只有环境声明 `env.idempotent_step` 才重发，否则 NEEDS_REVIEW（阶段二代码在此情形下无条件重发）。每个转换标注 `effect`（SEND / QUERY / REUSE / NONE）。
 - **理由**：阶段二在检查后直接进入协调器，业务条件只能由服务在事务内拒绝，无法在执行边界按策略阻止、也不留类型化原因；按 id 复用而不比对请求内容，会把另一请求错当成已完成；无幂等声明的重发可能产生第二次副作用。放在协调器内使本地运行器与 Temporal 路径共用同一规则。
 - **影响**：不声明门控的场景行为与阶段二相同（轨迹不变，单元回归与阶段一哨兵通过）；持久环境的已完成操作被再次投递时，记录多一条 `REUSE` 转换。规划器通过 `last_outcome` 看到 `EXECUTION_GATE` 拒绝，两个示例规则规划器在下一回合不再提出同一动作。证据：`scripts/operation_consistency_evidence.py`（真实订单服务进程）、`tests/integration/test_operation_consistency_platform.py`（持久路径 + Worker 被杀）。
+
+## D-026 能力报告决定规则 / 查询 / 发布能做什么；“流程完成”与“性质成立”分开
+
+- **决策**（阶段三 G3）：`capability_report(package, registry)` 只从驱动声明的 `driver.*` 能力与验证器对该 profile 声明的 `query.*` 能力推导每项功能（类型检查、候选 / 预测、回归重放、规则、成本目标、规模统计、五种查询）的 SUPPORTED / UNSUPPORTED、提供者与原因；发布按报告执行，缺能力的检查记为 UNSUPPORTED（executed = false）。`ReleaseConfig` 列出必需检查（默认 TYPE_CHECK；带规则集时加 RULE_CHECK，带回归案例时加 REGRESSION）与必需成立的性质；必需检查缺能力或无结论性结果 → `process_completed = false`、REJECTED；性质是否成立记在每项检查的 `property_holds` 与 `claim`（由查询种类与结论决定措辞），只有 `required_holds` 中的性质阻止发布。规模统计改用协议方法与可选的 `stats()`（`driver.stats`），不再调用未声明的 `ground_actions()`。场景带规则集而驱动未声明 `driver.ir` 时，运行在协商阶段被拒绝（阶段二会静默不执行规则）。
+- **理由**：阶段二的发布依赖 IR 分支与未声明的方法，非 IR 驱动的行为只能靠猜；`ReleaseCheck.passed` 同时表示“检查未报错”和“不阻止发布”，读者容易把“发现不变量可被违反”理解为发布失败或反之。
+- **影响**：已有 IR 模型的发布结论不变（新增字段带默认值，旧记录可读）；发布 id 的内容摘要包含配置。证据：`scripts/model_revision_evidence.py`（订单服务真实修订与陈旧依据分类）、`packages/runtime/tests/test_release.py`、`tests/integration/test_governance_platform.py`。

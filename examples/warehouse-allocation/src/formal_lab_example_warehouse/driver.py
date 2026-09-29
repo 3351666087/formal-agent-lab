@@ -51,7 +51,8 @@ DESCRIPTOR = PluginDescriptor(
     version="1.0.0",
     interface="SEMANTIC_DRIVER",
     capabilities=[{"id": f"profile.{PROFILE}"}, {"id": caps.DRIVER_CANDIDATES}, {"id": caps.DRIVER_PREDICT},
-                  {"id": caps.DRIVER_PROPERTIES}, {"id": caps.DRIVER_BELIEF}, {"id": caps.DRIVER_DISPLAY}],
+                  {"id": caps.DRIVER_PROPERTIES}, {"id": caps.DRIVER_BELIEF}, {"id": caps.DRIVER_DISPLAY},
+                  {"id": caps.DRIVER_STATS}],
     semantic_profiles=[PROFILE],
     input_schema=json_schema(),
     config_schema={"type": "object", "properties": {}, "additionalProperties": False},
@@ -140,6 +141,10 @@ class WarehouseLoaded:
         return list(range(self.m.horizon + 2))  # done_at, clock
 
     # ------------------------------------------------------------------ actions
+    def stats(self) -> dict[str, int]:
+        """Sizes for release records (capability driver.stats)."""
+        return {"ground_actions": len(self.ground_actions()), "state_locations": len(self.state_paths())}
+
     def ground_actions(self, scope: Any = None) -> list[GroundAction]:
         acts = [GroundAction(action_type="putaway", params={"inbound": i, "zone": z})
                 for i in self.inbound for z in self.zones]

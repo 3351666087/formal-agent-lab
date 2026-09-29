@@ -172,11 +172,22 @@ class Client:
                                                                "name": name, "note": note})
 
     def release(self, model_version_id: str, *, ruleset: tuple[str, int] | None = None,
-                regression: str | list[str] = "model", horizon: int = 6) -> dict[str, Any]:
+                regression: str | list[str] = "model", horizon: int = 6, required_checks: list[str] | None = None,
+                required_holds: list[str] | None = None) -> dict[str, Any]:
+        """Run the pre-release checks. `required_checks` must run with a conclusive result, `required_holds` names
+        properties that must hold within the horizon (phase 3A)."""
         body: dict[str, Any] = {"regression": regression, "horizon": horizon}
         if ruleset:
             body["ruleset"] = {"ruleset_id": ruleset[0], "version": ruleset[1]}
+        if required_checks:
+            body["required_checks"] = required_checks
+        if required_holds:
+            body["required_holds"] = required_holds
         return self.post(f"/model-versions/{model_version_id}/releases", body)
+
+    def capabilities(self, model_version_id: str) -> dict[str, Any]:
+        """Feature support of a model version from declared capabilities (phase 3A)."""
+        return self.get(f"/model-versions/{model_version_id}/capabilities")
 
     def releases(self, project_id: str) -> list[dict[str, Any]]:
         return self.get(f"/projects/{project_id}/releases")

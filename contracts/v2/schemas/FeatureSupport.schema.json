@@ -1,0 +1,79 @@
+{
+  "$defs": {
+    "PluginRef": {
+      "additionalProperties": false,
+      "properties": {
+        "plugin_id": {
+          "pattern": "^[a-z0-9]+([.-][a-z0-9]+)*(/[a-z0-9]+([.-][a-z0-9]+)*)?$",
+          "title": "Plugin Id",
+          "type": "string"
+        },
+        "version": {
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+([-+][0-9A-Za-z.-]+)?$",
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "plugin_id",
+        "version"
+      ],
+      "title": "PluginRef",
+      "type": "object"
+    },
+    "SupportStatus": {
+      "enum": [
+        "SUPPORTED",
+        "UNSUPPORTED"
+      ],
+      "title": "SupportStatus",
+      "type": "string"
+    }
+  },
+  "$id": "https://formal-lab.dev/contracts/v2/FeatureSupport.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Whether one feature (a release check, rules, a query kind, statistics …) is available for a model, derived\nfrom the declared capabilities of its semantic driver and of the installed verifiers (phase 3A, G3).",
+  "properties": {
+    "feature": {
+      "description": "e.g. release.type_check, rules, query.goal_reachability",
+      "minLength": 1,
+      "title": "Feature",
+      "type": "string"
+    },
+    "provider": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/PluginRef"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "plugin that provides it (when supported)"
+    },
+    "reason": {
+      "title": "Reason",
+      "type": "string"
+    },
+    "requires": {
+      "description": "capability ids it needs",
+      "items": {
+        "type": "string"
+      },
+      "title": "Requires",
+      "type": "array"
+    },
+    "status": {
+      "$ref": "#/$defs/SupportStatus"
+    }
+  },
+  "required": [
+    "feature",
+    "status",
+    "reason"
+  ],
+  "title": "FeatureSupport",
+  "type": "object"
+}

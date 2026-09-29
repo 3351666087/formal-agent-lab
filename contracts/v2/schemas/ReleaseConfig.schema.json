@@ -1,0 +1,45 @@
+{
+  "$id": "https://formal-lab.dev/contracts/v2/ReleaseConfig.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "What a release must establish (phase 3A, G3). `required_checks` must run and give a conclusive result;\n`required_holds` names properties that must hold within the bound. Without a required capability or result the\nrelease is not passed, with the reason.",
+  "properties": {
+    "horizon": {
+      "default": 6,
+      "minimum": 1,
+      "title": "Horizon",
+      "type": "integer"
+    },
+    "required_checks": {
+      "items": {
+        "enum": [
+          "TYPE_CHECK",
+          "RULE_CHECK",
+          "GOAL_REACHABILITY",
+          "INVARIANT_VIOLATION",
+          "OBJECTIVE_CHECK",
+          "REGRESSION"
+        ],
+        "type": "string"
+      },
+      "title": "Required Checks",
+      "type": "array"
+    },
+    "required_holds": {
+      "description": "property ids that must hold (bounded)",
+      "items": {
+        "type": "string"
+      },
+      "title": "Required Holds",
+      "type": "array"
+    },
+    "timeout_ms": {
+      "default": 10000,
+      "minimum": 1,
+      "title": "Timeout Ms",
+      "type": "integer"
+    }
+  },
+  "title": "ReleaseConfig",
+  "type": "object"
+}

@@ -446,6 +446,25 @@ export type Role = string | null;
  * SUPPORTED: all granted; PARTIAL: optional ones missing; UNSUPPORTED (v2)
  */
 export type Verdict1 = ("SUPPORTED" | "PARTIAL" | "UNSUPPORTED") | null;
+/**
+ * e.g. release.type_check, rules, query.goal_reachability
+ */
+export type Feature1 = string;
+export type Reason5 = string;
+/**
+ * capability ids it needs
+ */
+export type Requires = string[];
+/**
+ * This interface was referenced by `FormalLabContractsV2`'s JSON-Schema
+ * via the `definition` "SupportStatus".
+ */
+export type SupportStatus = "SUPPORTED" | "UNSUPPORTED";
+export type Features = FeatureSupport[];
+export type GeneratedAt = string;
+export type PackageId = string;
+export type Version4 = number;
+export type SemanticProfile = string;
 export type Id2 = string;
 export type MinVersion = string;
 export type Optional = boolean;
@@ -520,8 +539,6 @@ export type Description2 = string | null;
  * pre-execution decision plugins (EXECUTION_GATE) consulted in order before every send of an operation (phase 3A); none = phase-2 behaviour
  */
 export type ExecutionGates = StrategySpec[];
-export type PackageId = string;
-export type Version4 = number;
 export type Name5 = string;
 export type Description3 = string | null;
 export type MetricId = string | null;
@@ -625,7 +642,7 @@ export type StateRevision1 = number;
 export type Step4 = number;
 export type ObservationTiming1 = "TURN_START" | "ROUND_START";
 export type Path4 = string;
-export type Reason5 = "OBSERVATION_DELAY" | "NOT_OBSERVABLE" | "NOT_YET_OBSERVED";
+export type Reason6 = "OBSERVATION_DELAY" | "NOT_OBSERVABLE" | "NOT_YET_OBSERVED";
 export type Unknowns = UnknownItem[];
 export type ActorId6 = string | null;
 export type Attempts1 = number;
@@ -643,7 +660,7 @@ export type OperationId1 = string;
  * via the `definition` "ExecutionPhase".
  */
 export type ExecutionPhase = "FIRST_SEND" | "RESEND" | "REEXECUTE";
-export type Reason6 = string;
+export type Reason7 = string;
 export type RequestDigest = string;
 export type RunId4 = string;
 export type Step5 = number;
@@ -685,7 +702,7 @@ export type Attempt = number;
  * via the `definition` "OperationEffect".
  */
 export type OperationEffect = "NONE" | "SEND" | "QUERY" | "REUSE";
-export type Reason7 = string;
+export type Reason8 = string;
 export type Transitions = OperationTransition[];
 export type Probes1 = ProbeResult[];
 export type ElapsedMs1 = number;
@@ -738,7 +755,7 @@ export type Step8 = number;
 export type ValuesRevision = number | null;
 export type ValuesSource1 = "FRESH" | "OBSERVATION" | "NONE";
 export type Conditions1 = ConditionCheck[];
-export type Reason8 = string;
+export type Reason9 = string;
 /**
  * @minItems 1
  */
@@ -799,7 +816,7 @@ export type Enums = EnumDecl[];
 /**
  * semantic features the model relies on beyond the profile (e.g. 'probabilistic_effects'); unsupported features make engines answer UNSUPPORTED
  */
-export type Features = string[];
+export type Features1 = string[];
 export type Name12 = string;
 export type Description9 = string | null;
 export type Direction1 = "minimize" | "maximize";
@@ -820,7 +837,7 @@ export type Id4 = string;
 export type Kind12 = "goal" | "invariant";
 export type Label8 = string | null;
 export type Properties = PropertyDecl[];
-export type SemanticProfile = string;
+export type SemanticProfile1 = string;
 /**
  * @minItems 1
  */
@@ -893,7 +910,7 @@ export type Payload = IRPayload | NamespacedPayload;
 export type Kind14 = "namespaced";
 export type Namespace = string;
 export type SchemaId1 = string;
-export type SemanticProfile1 = string;
+export type SemanticProfile2 = string;
 export type Author = string | null;
 /**
  * source format, e.g. fal-ir-json/v1
@@ -914,10 +931,37 @@ export type Assumptions1 = string[];
  * bounds the checks used
  */
 export type Bounds = string[];
+/**
+ * capability report used (phase 3A)
+ */
+export type Capabilities1 = FeatureSupport[];
 export type CheckId1 = string | null;
+/**
+ * the result in words, as far as the verdict supports it
+ */
+export type Claim = string | null;
 export type Detail1 = string | null;
-export type Kind15 = QueryKind | ("TYPE_CHECK" | "RULE_CHECK" | "OBJECTIVE_CHECK");
+/**
+ * the check ran and produced a result (False: UNSUPPORTED)
+ */
+export type Executed = boolean;
+export type Kind15 = QueryKind | ("TYPE_CHECK" | "RULE_CHECK" | "OBJECTIVE_CHECK" | "REGRESSION");
+/**
+ * this check does not block the release (a violated invariant found by a query is a fact, not a failure, unless its property is in required_holds)
+ */
 export type Passed = boolean;
+/**
+ * the checked property holds (None: no claim)
+ */
+export type PropertyHolds = boolean | null;
+/**
+ * named in the release config (phase 3A)
+ */
+export type Required1 = boolean;
+/**
+ * what the result covers, e.g. MODEL_INTERNAL within 6 steps
+ */
+export type Scope2 = string | null;
 /**
  * property / rule / objective checked
  */
@@ -925,14 +969,27 @@ export type Subject1 = string;
 export type Verdict2 = string;
 export type Checks1 = ReleaseCheck[];
 export type Compiled1 = CompiledArtifact[];
+export type Horizon2 = number;
+export type RequiredChecks = (
+  "TYPE_CHECK" | "RULE_CHECK" | "GOAL_REACHABILITY" | "INVARIANT_VIOLATION" | "OBJECTIVE_CHECK" | "REGRESSION"
+)[];
+/**
+ * property ids that must hold (bounded)
+ */
+export type RequiredHolds = string[];
+export type TimeoutMs2 = number;
 export type CreatedAt2 = string;
+/**
+ * every required check ran with a conclusive result (phase 3A); independent of whether any property holds — see each check's property_holds
+ */
+export type ProcessCompleted = boolean | null;
 export type Reasons1 = string[];
 export type CaseId = string;
 export type Detail2 = string;
 export type Status3 = "PASS" | "FAIL" | "ERROR";
 export type Regression = RegressionResult[];
 export type ReleaseId1 = string;
-export type Scope2 = "MODEL_INTERNAL";
+export type Scope3 = "MODEL_INTERNAL";
 export type Stages1 = StageRecord[];
 export type Status4 = "RELEASED" | "REJECTED";
 export type ActorId9 = string;
@@ -1025,7 +1082,7 @@ export type StepId2 = string;
  */
 export type Id5 = string;
 export type Version9 = string;
-export type Capabilities1 = Capability[];
+export type Capabilities2 = Capability[];
 export type ContractVersion3 = "formal-lab-contracts/v1" | "formal-lab-contracts/v2";
 /**
  * python import path 'module:attr' of the factory
@@ -1057,7 +1114,7 @@ export type PluginId2 = string;
 /**
  * capabilities this plugin needs from its collaborators; params.of names the role (driver / environment / verifier), e.g. {id: env.persistent_session, params: {of: environment}}
  */
-export type Requires = Capability[];
+export type Requires1 = Capability[];
 export type SemanticProfiles = string[];
 /**
  * package name / URL providing the plugin
@@ -1282,6 +1339,7 @@ export interface FormalLabContractsV2 {
   BudgetUsage?: BudgetUsage;
   CandidateAction?: CandidateAction;
   CapabilityNegotiation?: CapabilityNegotiation;
+  CapabilityReport?: CapabilityReport;
   CapabilityRequirement?: CapabilityRequirement;
   CheckQuery?: CheckQuery;
   ConditionCheck?: ConditionCheck;
@@ -1292,6 +1350,7 @@ export interface FormalLabContractsV2 {
   EvidenceRef?: EvidenceRef;
   ExecutionDecision?: ExecutionDecision;
   Extension?: Extension;
+  FeatureSupport?: FeatureSupport;
   GateRequest?: GateRequest;
   GateResult?: GateResult;
   IRPayload?: IRPayload;
@@ -1313,6 +1372,7 @@ export interface FormalLabContractsV2 {
   ProbeResult?: ProbeResult;
   QueryBundle?: QueryBundle;
   RegressionCase?: RegressionCase;
+  ReleaseConfig?: ReleaseConfig;
   RobustnessResult?: RobustnessResult;
   RuleDecision?: RuleDecision;
   RuleEvaluation?: RuleEvaluation;
@@ -2041,6 +2101,46 @@ export interface CapabilityNegotiation {
   verdict: Verdict1;
 }
 /**
+ * What the platform can do with one model version, feature by feature — never inferred from the payload's
+ * shape, only from declared capabilities and the public protocols.
+ *
+ * This interface was referenced by `FormalLabContractsV2`'s JSON-Schema
+ * via the `definition` "CapabilityReport".
+ */
+export interface CapabilityReport {
+  driver: PluginRef;
+  features: Features;
+  generated_at: GeneratedAt;
+  model: ModelRef;
+  semantic_profile: SemanticProfile;
+}
+/**
+ * Whether one feature (a release check, rules, a query kind, statistics …) is available for a model, derived
+ * from the declared capabilities of its semantic driver and of the installed verifiers (phase 3A, G3).
+ *
+ * This interface was referenced by `FormalLabContractsV2`'s JSON-Schema
+ * via the `definition` "FeatureSupport".
+ */
+export interface FeatureSupport {
+  feature: Feature1;
+  /**
+   * plugin that provides it (when supported)
+   */
+  provider: PluginRef | null;
+  reason: Reason5;
+  requires: Requires;
+  status: SupportStatus;
+}
+/**
+ * This interface was referenced by `FormalLabContractsV2`'s JSON-Schema
+ * via the `definition` "ModelRef".
+ */
+export interface ModelRef {
+  digest: Digest;
+  package_id: PackageId;
+  version: Version4;
+}
+/**
  * This interface was referenced by `FormalLabContractsV2`'s JSON-Schema
  * via the `definition` "CapabilityRequirement".
  */
@@ -2260,15 +2360,6 @@ export interface Extensions1 {
 }
 /**
  * This interface was referenced by `FormalLabContractsV2`'s JSON-Schema
- * via the `definition` "ModelRef".
- */
-export interface ModelRef {
-  digest: Digest;
-  package_id: PackageId;
-  version: Version4;
-}
-/**
- * This interface was referenced by `FormalLabContractsV2`'s JSON-Schema
  * via the `definition` "Objective".
  */
 export interface Objective {
@@ -2416,7 +2507,7 @@ export interface Fact {
 export interface UnknownItem {
   last_known: Fact | null;
   path: Path4;
-  reason: Reason5;
+  reason: Reason6;
 }
 /**
  * Coordination record of one environment operation (P2-051). Intent is recorded before dispatch; every state
@@ -2459,7 +2550,7 @@ export interface ExecutionDecision {
   gate: PluginRef;
   operation_id: OperationId1;
   phase: ExecutionPhase;
-  reason: Reason6;
+  reason: Reason7;
   request_digest: RequestDigest;
   run_id: RunId4;
   step: Step5;
@@ -2497,7 +2588,7 @@ export interface OperationTransition {
    * what this transition did to the backend (phase 3A); absent in records written before it
    */
   effect: OperationEffect | null;
-  reason: Reason7;
+  reason: Reason8;
   state: OperationState;
 }
 /**
@@ -2557,7 +2648,7 @@ export interface Values {
  */
 export interface GateResult {
   conditions: Conditions1;
-  reason: Reason8;
+  reason: Reason9;
   verdict: GateVerdict;
 }
 /**
@@ -2580,11 +2671,11 @@ export interface ModelIR {
   description: Description6;
   entity_sets: EntitySets;
   enums: Enums;
-  features: Features;
+  features: Features1;
   name: Name12;
   objectives: Objectives1;
   properties: Properties;
-  semantic_profile: SemanticProfile;
+  semantic_profile: SemanticProfile1;
   state: State2;
 }
 /**
@@ -2830,7 +2921,7 @@ export interface ModelPackage {
   frontend: PluginRef1;
   package_id: PackageId1;
   payload: Payload;
-  semantic_profile: SemanticProfile1;
+  semantic_profile: SemanticProfile2;
   source: ModelSource;
   version: Version7;
 }
@@ -2906,19 +2997,25 @@ export interface ModelSource {
 export interface ModelReleaseRecord {
   assumptions: Assumptions1;
   bounds: Bounds;
+  capabilities: Capabilities1;
   checks: Checks1;
   compiled: Compiled1;
+  /**
+   * required checks / properties (phase 3A)
+   */
+  config: ReleaseConfig | null;
   created_at: CreatedAt2;
   digest: Digest;
   driver: PluginRef | null;
   log: ArtifactRef | null;
   model: ModelRef;
   objective: ObjectiveSpec | null;
+  process_completed: ProcessCompleted;
   reasons: Reasons1;
   regression: Regression;
   release_id: ReleaseId1;
   ruleset: RuleSetRef | null;
-  scope: Scope2;
+  scope: Scope3;
   stages: Stages1;
   status: Status4;
 }
@@ -2927,13 +3024,36 @@ export interface ModelReleaseRecord {
  * via the `definition` "ReleaseCheck".
  */
 export interface ReleaseCheck {
+  /**
+   * plugin that produced the result
+   */
+  backend: PluginRef | null;
   bound: CheckBound | null;
   check_id: CheckId1;
+  claim: Claim;
   detail: Detail1;
+  executed: Executed;
   kind: Kind15;
   passed: Passed;
+  property_holds: PropertyHolds;
+  required: Required1;
+  scope: Scope2;
   subject: Subject1;
   verdict: Verdict2;
+}
+/**
+ * What a release must establish (phase 3A, G3). `required_checks` must run and give a conclusive result;
+ * `required_holds` names properties that must hold within the bound. Without a required capability or result the
+ * release is not passed, with the reason.
+ *
+ * This interface was referenced by `FormalLabContractsV2`'s JSON-Schema
+ * via the `definition` "ReleaseConfig".
+ */
+export interface ReleaseConfig {
+  horizon: Horizon2;
+  required_checks: RequiredChecks;
+  required_holds: RequiredHolds;
+  timeout_ms: TimeoutMs2;
 }
 /**
  * This interface was referenced by `FormalLabContractsV2`'s JSON-Schema
@@ -3069,7 +3189,7 @@ export interface PlanningContext {
  * via the `definition` "PluginDescriptor".
  */
 export interface PluginDescriptor {
-  capabilities: Capabilities1;
+  capabilities: Capabilities2;
   config_schema: ConfigSchema;
   contract_version: ContractVersion3;
   entrypoint: Entrypoint;
@@ -3080,7 +3200,7 @@ export interface PluginDescriptor {
   license: License;
   output_schema: OutputSchema;
   plugin_id: PluginId2;
-  requires: Requires;
+  requires: Requires1;
   semantic_profiles: SemanticProfiles;
   source: Source2;
   ui: PluginUi;

@@ -1726,6 +1726,43 @@
       "title": "CapabilityNegotiation",
       "type": "object"
     },
+    "CapabilityReport": {
+      "additionalProperties": false,
+      "description": "What the platform can do with one model version, feature by feature — never inferred from the payload's\nshape, only from declared capabilities and the public protocols.",
+      "properties": {
+        "driver": {
+          "$ref": "#/$defs/PluginRef"
+        },
+        "features": {
+          "items": {
+            "$ref": "#/$defs/FeatureSupport"
+          },
+          "title": "Features",
+          "type": "array"
+        },
+        "generated_at": {
+          "format": "date-time",
+          "title": "Generated At",
+          "type": "string"
+        },
+        "model": {
+          "$ref": "#/$defs/ModelRef"
+        },
+        "semantic_profile": {
+          "title": "Semantic Profile",
+          "type": "string"
+        }
+      },
+      "required": [
+        "model",
+        "semantic_profile",
+        "driver",
+        "features",
+        "generated_at"
+      ],
+      "title": "CapabilityReport",
+      "type": "object"
+    },
     "CapabilityRequirement": {
       "additionalProperties": false,
       "properties": {
@@ -3158,6 +3195,54 @@
       "title": "Fact",
       "type": "object"
     },
+    "FeatureSupport": {
+      "additionalProperties": false,
+      "description": "Whether one feature (a release check, rules, a query kind, statistics …) is available for a model, derived\nfrom the declared capabilities of its semantic driver and of the installed verifiers (phase 3A, G3).",
+      "properties": {
+        "feature": {
+          "description": "e.g. release.type_check, rules, query.goal_reachability",
+          "minLength": 1,
+          "title": "Feature",
+          "type": "string"
+        },
+        "provider": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PluginRef"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "plugin that provides it (when supported)"
+        },
+        "reason": {
+          "title": "Reason",
+          "type": "string"
+        },
+        "requires": {
+          "description": "capability ids it needs",
+          "items": {
+            "type": "string"
+          },
+          "title": "Requires",
+          "type": "array"
+        },
+        "status": {
+          "$ref": "#/$defs/SupportStatus"
+        }
+      },
+      "required": [
+        "feature",
+        "status",
+        "provider",
+        "requires",
+        "reason"
+      ],
+      "title": "FeatureSupport",
+      "type": "object"
+    },
     "FieldDiff": {
       "additionalProperties": false,
       "properties": {
@@ -4200,6 +4285,14 @@
           "title": "Bounds",
           "type": "array"
         },
+        "capabilities": {
+          "description": "capability report used (phase 3A)",
+          "items": {
+            "$ref": "#/$defs/FeatureSupport"
+          },
+          "title": "Capabilities",
+          "type": "array"
+        },
         "checks": {
           "items": {
             "$ref": "#/$defs/ReleaseCheck"
@@ -4213,6 +4306,18 @@
           },
           "title": "Compiled",
           "type": "array"
+        },
+        "config": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ReleaseConfig"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "required checks / properties (phase 3A)"
         },
         "created_at": {
           "format": "date-time",
@@ -4257,6 +4362,19 @@
             }
           ],
           "default": null
+        },
+        "process_completed": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "every required check ran with a conclusive result (phase 3A); independent of whether any property holds — see each check's property_holds",
+          "title": "Process Completed"
         },
         "reasons": {
           "items": {
@@ -4327,7 +4445,10 @@
         "digest",
         "created_at",
         "log",
-        "stages"
+        "stages",
+        "config",
+        "process_completed",
+        "capabilities"
       ],
       "title": "ModelReleaseRecord",
       "type": "object"
@@ -7139,6 +7260,18 @@
     "ReleaseCheck": {
       "additionalProperties": false,
       "properties": {
+        "backend": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PluginRef"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "plugin that produced the result"
+        },
         "bound": {
           "anyOf": [
             {
@@ -7162,6 +7295,19 @@
           "default": null,
           "title": "Check Id"
         },
+        "claim": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "the result in words, as far as the verdict supports it",
+          "title": "Claim"
+        },
         "detail": {
           "anyOf": [
             {
@@ -7174,6 +7320,12 @@
           "default": null,
           "title": "Detail"
         },
+        "executed": {
+          "default": true,
+          "description": "the check ran and produced a result (False: UNSUPPORTED)",
+          "title": "Executed",
+          "type": "boolean"
+        },
         "kind": {
           "anyOf": [
             {
@@ -7183,7 +7335,8 @@
               "enum": [
                 "TYPE_CHECK",
                 "RULE_CHECK",
-                "OBJECTIVE_CHECK"
+                "OBJECTIVE_CHECK",
+                "REGRESSION"
               ],
               "type": "string"
             }
@@ -7191,8 +7344,41 @@
           "title": "Kind"
         },
         "passed": {
+          "description": "this check does not block the release (a violated invariant found by a query is a fact, not a failure, unless its property is in required_holds)",
           "title": "Passed",
           "type": "boolean"
+        },
+        "property_holds": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "the checked property holds (None: no claim)",
+          "title": "Property Holds"
+        },
+        "required": {
+          "default": false,
+          "description": "named in the release config (phase 3A)",
+          "title": "Required",
+          "type": "boolean"
+        },
+        "scope": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "what the result covers, e.g. MODEL_INTERNAL within 6 steps",
+          "title": "Scope"
         },
         "subject": {
           "description": "property / rule / objective checked",
@@ -7211,9 +7397,64 @@
         "verdict",
         "check_id",
         "passed",
-        "detail"
+        "detail",
+        "required",
+        "executed",
+        "backend",
+        "scope",
+        "property_holds",
+        "claim"
       ],
       "title": "ReleaseCheck",
+      "type": "object"
+    },
+    "ReleaseConfig": {
+      "additionalProperties": false,
+      "description": "What a release must establish (phase 3A, G3). `required_checks` must run and give a conclusive result;\n`required_holds` names properties that must hold within the bound. Without a required capability or result the\nrelease is not passed, with the reason.",
+      "properties": {
+        "horizon": {
+          "default": 6,
+          "minimum": 1,
+          "title": "Horizon",
+          "type": "integer"
+        },
+        "required_checks": {
+          "items": {
+            "enum": [
+              "TYPE_CHECK",
+              "RULE_CHECK",
+              "GOAL_REACHABILITY",
+              "INVARIANT_VIOLATION",
+              "OBJECTIVE_CHECK",
+              "REGRESSION"
+            ],
+            "type": "string"
+          },
+          "title": "Required Checks",
+          "type": "array"
+        },
+        "required_holds": {
+          "description": "property ids that must hold (bounded)",
+          "items": {
+            "type": "string"
+          },
+          "title": "Required Holds",
+          "type": "array"
+        },
+        "timeout_ms": {
+          "default": 10000,
+          "minimum": 1,
+          "title": "Timeout Ms",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "required_checks",
+        "required_holds",
+        "horizon",
+        "timeout_ms"
+      ],
+      "title": "ReleaseConfig",
       "type": "object"
     },
     "ReleaseRef": {
@@ -8638,6 +8879,14 @@
       "title": "StrategySpec",
       "type": "object"
     },
+    "SupportStatus": {
+      "enum": [
+        "SUPPORTED",
+        "UNSUPPORTED"
+      ],
+      "title": "SupportStatus",
+      "type": "string"
+    },
     "TaskNode": {
       "additionalProperties": false,
       "properties": {
@@ -9694,6 +9943,9 @@
     "CapabilityNegotiation": {
       "$ref": "#/$defs/CapabilityNegotiation"
     },
+    "CapabilityReport": {
+      "$ref": "#/$defs/CapabilityReport"
+    },
     "CapabilityRequirement": {
       "$ref": "#/$defs/CapabilityRequirement"
     },
@@ -9723,6 +9975,9 @@
     },
     "Extension": {
       "$ref": "#/$defs/Extension"
+    },
+    "FeatureSupport": {
+      "$ref": "#/$defs/FeatureSupport"
     },
     "GateRequest": {
       "$ref": "#/$defs/GateRequest"
@@ -9786,6 +10041,9 @@
     },
     "RegressionCase": {
       "$ref": "#/$defs/RegressionCase"
+    },
+    "ReleaseConfig": {
+      "$ref": "#/$defs/ReleaseConfig"
     },
     "RobustnessResult": {
       "$ref": "#/$defs/RobustnessResult"

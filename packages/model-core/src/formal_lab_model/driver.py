@@ -48,6 +48,7 @@ DESCRIPTOR = PluginDescriptor(
         {"id": caps.DRIVER_BELIEF},
         {"id": caps.DRIVER_DISPLAY},
         {"id": caps.DRIVER_IR},
+        {"id": caps.DRIVER_STATS},
     ],
     semantic_profiles=["deterministic_finite_v1"],
     input_schema={"$ref": "https://formal-lab.dev/contracts/v2/IRPayload.schema.json"},
@@ -84,6 +85,10 @@ class IRLoadedModel:
 
     def belief(self, observation: Observation) -> BeliefState:
         return belief_state(observation, self.checked)
+
+    def stats(self) -> dict[str, int]:
+        """Sizes for release records (capability driver.stats)."""
+        return {"ground_actions": len(self.ground_actions()), "state_locations": len(self.state_paths())}
 
     def ground_actions(self, scope: Any = None) -> list[GroundAction]:
         out = []

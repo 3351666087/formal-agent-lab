@@ -48,7 +48,9 @@
 
 ## G3 · 语义驱动、规则与发布能力
 
-- [ ] **P3A-G3** 完成公开驱动协议到规则/查询/模型发布的能力协商和结果记录。
+- [x] **P3A-G3** 完成公开驱动协议到规则/查询/模型发布的能力协商和结果记录。
+  - 证据：能力报告（只依据驱动 driver.* 与验证器 query.* 声明）决定规则 / 查询 / 发布；ReleaseConfig 必需检查与必需性质，缺能力或无结论 → 流程未完成、REJECTED；process_completed 与 property_holds 分开；去掉 ground_actions() 未声明依赖；规则集需 driver.ir 否则协商拒绝；最小协议驱动 counter_v1；订单服务真实修订（旧版 REJECTED、修订版 RELEASED、新运行 0 差异）与陈旧依据分类（4 个差异、0 建议）。详见 docs/handoff/phase3-draft.md#g3
+  - 实现：`packages/runtime/src/formal_lab_runtime/release.py`、`packages/contracts/src/formal_lab_contracts/governance.py`、`examples/external-plugin/src/fal_example_external_plugin/counter_driver.py`、`packages/platform-api/src/formal_lab_api/services/governance.py`、`scripts/model_revision_evidence.py`
 
 修正 `release.py::check_release` 对 `loaded.ground_actions()` 的未声明依赖，采用正式兼容接口或可选统计能力。使用只实现公开协议的最小驱动验证这一点。
 

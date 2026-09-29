@@ -1,0 +1,532 @@
+{
+  "generated_at": "2026-09-29T14:38:23Z",
+  "duration_s": 3.6,
+  "checks": {
+    "IR model released, process completed": true,
+    "minimal driver: rules/queries/stats UNSUPPORTED": true,
+    "minimal driver: default release passes": true,
+    "minimal driver: required query not passed": true,
+    "revision: differences found": true,
+    "revision: old REJECTED, revised RELEASED": true,
+    "revision: no model difference after": true,
+    "stale basis: classified, no suggestion": true
+  },
+  "ok": true,
+  "ir_model": {
+    "features": {
+      "release.type_check": "SUPPORTED",
+      "run.candidates": "SUPPORTED",
+      "run.predict": "SUPPORTED",
+      "release.regression_replay": "SUPPORTED",
+      "rules": "SUPPORTED",
+      "release.objectives": "SUPPORTED",
+      "release.stats": "SUPPORTED",
+      "query.goal_reachability": "SUPPORTED",
+      "query.invariant_violation": "SUPPORTED",
+      "query.action_precondition": "SUPPORTED",
+      "query.optimize_objective": "SUPPORTED",
+      "query.robust_sequence": "SUPPORTED"
+    },
+    "release": {
+      "status": "RELEASED",
+      "process_completed": true,
+      "reasons": [],
+      "checks": [
+        {
+          "kind": "TYPE_CHECK",
+          "subject": "local-order-service@1",
+          "verdict": "OK",
+          "executed": true,
+          "required": true,
+          "property_holds": true,
+          "claim": "the payload is valid for its profile",
+          "backend": "formal-lab.driver.ir-finite"
+        },
+        {
+          "kind": "GOAL_REACHABILITY",
+          "subject": "all_completed",
+          "verdict": "NO_WITNESS_WITHIN_BOUND",
+          "executed": true,
+          "required": false,
+          "property_holds": false,
+          "claim": "goal all_completed is not reachable within 4 steps (nothing claimed beyond the bound)",
+          "backend": "formal-lab.verifier.z3-bmc"
+        },
+        {
+          "kind": "INVARIANT_VIOLATION",
+          "subject": "on_time",
+          "verdict": "NO_WITNESS_WITHIN_BOUND",
+          "executed": true,
+          "required": false,
+          "property_holds": true,
+          "claim": "invariant on_time holds on every path of up to 4 steps",
+          "backend": "formal-lab.verifier.z3-bmc"
+        },
+        {
+          "kind": "INVARIANT_VIOLATION",
+          "subject": "station_capacity",
+          "verdict": "NO_WITNESS_WITHIN_BOUND",
+          "executed": true,
+          "required": false,
+          "property_holds": true,
+          "claim": "invariant station_capacity holds on every path of up to 4 steps",
+          "backend": "formal-lab.verifier.z3-bmc"
+        }
+      ],
+      "regression": [],
+      "compiled": [
+        {
+          "state_locations": 49,
+          "action_types": 5,
+          "properties": 3,
+          "ground_actions": 27
+        }
+      ]
+    }
+  },
+  "minimal_driver": {
+    "features": [
+      {
+        "feature": "release.type_check",
+        "status": "SUPPORTED",
+        "provider": {
+          "plugin_id": "org.example.counter-driver",
+          "version": "0.1.0"
+        },
+        "requires": [],
+        "reason": "org.example.counter-driver validates counter_v1 payloads"
+      },
+      {
+        "feature": "run.candidates",
+        "status": "SUPPORTED",
+        "provider": {
+          "plugin_id": "org.example.counter-driver",
+          "version": "0.1.0"
+        },
+        "requires": [
+          "driver.candidates"
+        ],
+        "reason": "ground candidates with applicability on a belief"
+      },
+      {
+        "feature": "run.predict",
+        "status": "SUPPORTED",
+        "provider": {
+          "plugin_id": "org.example.counter-driver",
+          "version": "0.1.0"
+        },
+        "requires": [
+          "driver.predict"
+        ],
+        "reason": "predicted effects for effect comparison"
+      },
+      {
+        "feature": "release.regression_replay",
+        "status": "SUPPORTED",
+        "provider": {
+          "plugin_id": "org.example.counter-driver",
+          "version": "0.1.0"
+        },
+        "requires": [
+          "driver.predict"
+        ],
+        "reason": "regression cases are replayed through the driver's predict()"
+      },
+      {
+        "feature": "rules",
+        "status": "UNSUPPORTED",
+        "provider": null,
+        "requires": [
+          "driver.ir"
+        ],
+        "reason": "org.example.counter-driver does not declare driver.ir (rule evaluation needs the neutral IR)"
+      },
+      {
+        "feature": "release.objectives",
+        "status": "UNSUPPORTED",
+        "provider": null,
+        "requires": [
+          "driver.ir"
+        ],
+        "reason": "org.example.counter-driver does not declare driver.ir (objectives are part of the neutral IR)"
+      },
+      {
+        "feature": "release.stats",
+        "status": "UNSUPPORTED",
+        "provider": null,
+        "requires": [
+          "driver.stats"
+        ],
+        "reason": "org.example.counter-driver does not declare driver.stats (release records then count only protocol-level sizes)"
+      },
+      {
+        "feature": "query.goal_reachability",
+        "status": "UNSUPPORTED",
+        "provider": null,
+        "requires": [
+          "profile.counter_v1",
+          "query.goal_reachability"
+        ],
+        "reason": "no installed verifier declares query.goal_reachability for profile counter_v1"
+      },
+      {
+        "feature": "query.invariant_violation",
+        "status": "UNSUPPORTED",
+        "provider": null,
+        "requires": [
+          "profile.counter_v1",
+          "query.invariant_violation"
+        ],
+        "reason": "no installed verifier declares query.invariant_violation for profile counter_v1"
+      },
+      {
+        "feature": "query.action_precondition",
+        "status": "UNSUPPORTED",
+        "provider": null,
+        "requires": [
+          "profile.counter_v1",
+          "query.action_precondition"
+        ],
+        "reason": "no installed verifier declares query.action_precondition for profile counter_v1"
+      },
+      {
+        "feature": "query.optimize_objective",
+        "status": "UNSUPPORTED",
+        "provider": null,
+        "requires": [
+          "profile.counter_v1",
+          "query.optimize_objective"
+        ],
+        "reason": "no installed verifier declares query.optimize_objective for profile counter_v1"
+      },
+      {
+        "feature": "query.robust_sequence",
+        "status": "UNSUPPORTED",
+        "provider": null,
+        "requires": [
+          "profile.counter_v1",
+          "query.robust_sequence"
+        ],
+        "reason": "no installed verifier declares query.robust_sequence for profile counter_v1"
+      }
+    ],
+    "default_release": {
+      "status": "RELEASED",
+      "process_completed": true,
+      "reasons": [],
+      "checks": [
+        {
+          "kind": "TYPE_CHECK",
+          "subject": "counter@1",
+          "verdict": "OK",
+          "executed": true,
+          "required": true,
+          "property_holds": true,
+          "claim": "the payload is valid for its profile",
+          "backend": "org.example.counter-driver"
+        },
+        {
+          "kind": "GOAL_REACHABILITY",
+          "subject": "reached",
+          "verdict": "UNSUPPORTED",
+          "executed": false,
+          "required": false,
+          "property_holds": null,
+          "claim": null,
+          "backend": null
+        },
+        {
+          "kind": "INVARIANT_VIOLATION",
+          "subject": "bounded",
+          "verdict": "UNSUPPORTED",
+          "executed": false,
+          "required": false,
+          "property_holds": null,
+          "claim": null,
+          "backend": null
+        }
+      ],
+      "regression": [],
+      "compiled": [
+        {
+          "state_locations": 1,
+          "action_types": 2,
+          "properties": 2
+        }
+      ]
+    },
+    "requires_goal_reachability": {
+      "status": "REJECTED",
+      "process_completed": false,
+      "reasons": [
+        "required check GOAL_REACHABILITY (reached) cannot run: no installed verifier declares query.goal_reachability for profile counter_v1"
+      ],
+      "checks": [
+        {
+          "kind": "TYPE_CHECK",
+          "subject": "counter@1",
+          "verdict": "OK",
+          "executed": true,
+          "required": true,
+          "property_holds": true,
+          "claim": "the payload is valid for its profile",
+          "backend": "org.example.counter-driver"
+        },
+        {
+          "kind": "GOAL_REACHABILITY",
+          "subject": "reached",
+          "verdict": "UNSUPPORTED",
+          "executed": false,
+          "required": true,
+          "property_holds": null,
+          "claim": null,
+          "backend": null
+        },
+        {
+          "kind": "INVARIANT_VIOLATION",
+          "subject": "bounded",
+          "verdict": "UNSUPPORTED",
+          "executed": false,
+          "required": false,
+          "property_holds": null,
+          "claim": null,
+          "backend": null
+        }
+      ],
+      "regression": [],
+      "compiled": [
+        {
+          "state_locations": 1,
+          "action_types": 2,
+          "properties": 2
+        }
+      ]
+    }
+  },
+  "revision": {
+    "service_truth": {
+      "slow_stations": [
+        "p2"
+      ]
+    },
+    "before": {
+      "status": "SUCCEEDED",
+      "comparisons": 26,
+      "different": 4,
+      "different_stale_basis": 0,
+      "suggestions": 4,
+      "regression_cases": 4
+    },
+    "suggestion": {
+      "action": {
+        "action_type": "tick",
+        "params": {}
+      },
+      "state_families": [
+        "remaining"
+      ],
+      "constants_read": [
+        "arrive_at",
+        "slow"
+      ]
+    },
+    "regression_cases": 4,
+    "old_version_release": {
+      "status": "REJECTED",
+      "process_completed": true,
+      "reasons": [
+        "4 of 4 regression case(s) do not pass: reg_146428c5e5bdcd9a FAIL; reg_44c885bdf909ee73 FAIL; reg_95bd641b69bbdb69 FAIL"
+      ],
+      "checks": [
+        {
+          "kind": "TYPE_CHECK",
+          "subject": "local-order-service@1",
+          "verdict": "OK",
+          "executed": true,
+          "required": true,
+          "property_holds": true,
+          "claim": "the payload is valid for its profile",
+          "backend": "formal-lab.driver.ir-finite"
+        },
+        {
+          "kind": "GOAL_REACHABILITY",
+          "subject": "all_completed",
+          "verdict": "NO_WITNESS_WITHIN_BOUND",
+          "executed": true,
+          "required": false,
+          "property_holds": false,
+          "claim": "goal all_completed is not reachable within 4 steps (nothing claimed beyond the bound)",
+          "backend": "formal-lab.verifier.z3-bmc"
+        },
+        {
+          "kind": "INVARIANT_VIOLATION",
+          "subject": "on_time",
+          "verdict": "NO_WITNESS_WITHIN_BOUND",
+          "executed": true,
+          "required": false,
+          "property_holds": true,
+          "claim": "invariant on_time holds on every path of up to 4 steps",
+          "backend": "formal-lab.verifier.z3-bmc"
+        },
+        {
+          "kind": "INVARIANT_VIOLATION",
+          "subject": "station_capacity",
+          "verdict": "NO_WITNESS_WITHIN_BOUND",
+          "executed": true,
+          "required": false,
+          "property_holds": true,
+          "claim": "invariant station_capacity holds on every path of up to 4 steps",
+          "backend": "formal-lab.verifier.z3-bmc"
+        },
+        {
+          "kind": "REGRESSION",
+          "subject": "4 case(s)",
+          "verdict": "FAIL",
+          "executed": true,
+          "required": true,
+          "property_holds": false,
+          "claim": "0/4 case(s) predict what was observed",
+          "backend": "formal-lab.driver.ir-finite"
+        }
+      ],
+      "regression": [
+        {
+          "case_id": "reg_146428c5e5bdcd9a",
+          "status": "FAIL",
+          "detail": "still differs — remaining[o2]: predicts 3, observed 4"
+        },
+        {
+          "case_id": "reg_44c885bdf909ee73",
+          "status": "FAIL",
+          "detail": "still differs — remaining[o2]: predicts 2, observed 3"
+        },
+        {
+          "case_id": "reg_95bd641b69bbdb69",
+          "status": "FAIL",
+          "detail": "still differs — remaining[o2]: predicts 1, observed 2"
+        },
+        {
+          "case_id": "reg_61998c4dbb1a0fe0",
+          "status": "FAIL",
+          "detail": "still differs — done_at[o2]: predicts 7, observed 0, on[o2,p2]: predicts False, observed True, remaining[o2]: predicts 0, observed 1, status[o2]: predicts 'completed', observed 'processing'"
+        }
+      ],
+      "compiled": [
+        {
+          "state_locations": 49,
+          "action_types": 5,
+          "properties": 3,
+          "ground_actions": 27
+        }
+      ]
+    },
+    "revised_version_release": {
+      "status": "RELEASED",
+      "process_completed": true,
+      "reasons": [],
+      "checks": [
+        {
+          "kind": "TYPE_CHECK",
+          "subject": "local-order-service@2",
+          "verdict": "OK",
+          "executed": true,
+          "required": true,
+          "property_holds": true,
+          "claim": "the payload is valid for its profile",
+          "backend": "formal-lab.driver.ir-finite"
+        },
+        {
+          "kind": "GOAL_REACHABILITY",
+          "subject": "all_completed",
+          "verdict": "NO_WITNESS_WITHIN_BOUND",
+          "executed": true,
+          "required": false,
+          "property_holds": false,
+          "claim": "goal all_completed is not reachable within 4 steps (nothing claimed beyond the bound)",
+          "backend": "formal-lab.verifier.z3-bmc"
+        },
+        {
+          "kind": "INVARIANT_VIOLATION",
+          "subject": "on_time",
+          "verdict": "NO_WITNESS_WITHIN_BOUND",
+          "executed": true,
+          "required": false,
+          "property_holds": true,
+          "claim": "invariant on_time holds on every path of up to 4 steps",
+          "backend": "formal-lab.verifier.z3-bmc"
+        },
+        {
+          "kind": "INVARIANT_VIOLATION",
+          "subject": "station_capacity",
+          "verdict": "NO_WITNESS_WITHIN_BOUND",
+          "executed": true,
+          "required": false,
+          "property_holds": true,
+          "claim": "invariant station_capacity holds on every path of up to 4 steps",
+          "backend": "formal-lab.verifier.z3-bmc"
+        },
+        {
+          "kind": "REGRESSION",
+          "subject": "4 case(s)",
+          "verdict": "PASS",
+          "executed": true,
+          "required": true,
+          "property_holds": true,
+          "claim": "4/4 case(s) predict what was observed",
+          "backend": "formal-lab.driver.ir-finite"
+        }
+      ],
+      "regression": [
+        {
+          "case_id": "reg_146428c5e5bdcd9a",
+          "status": "PASS",
+          "detail": "predicts the observed values at 1 location(s)"
+        },
+        {
+          "case_id": "reg_44c885bdf909ee73",
+          "status": "PASS",
+          "detail": "predicts the observed values at 1 location(s)"
+        },
+        {
+          "case_id": "reg_95bd641b69bbdb69",
+          "status": "PASS",
+          "detail": "predicts the observed values at 1 location(s)"
+        },
+        {
+          "case_id": "reg_61998c4dbb1a0fe0",
+          "status": "PASS",
+          "detail": "predicts the observed values at 4 location(s)"
+        }
+      ],
+      "compiled": [
+        {
+          "state_locations": 49,
+          "action_types": 5,
+          "properties": 3,
+          "ground_actions": 27
+        }
+      ]
+    },
+    "after": {
+      "status": "SUCCEEDED",
+      "comparisons": 26,
+      "different": 0,
+      "different_stale_basis": 0,
+      "suggestions": 0,
+      "regression_cases": 0
+    }
+  },
+  "stale_basis": {
+    "status": "SUCCEEDED",
+    "comparisons": 44,
+    "different": 4,
+    "different_stale_basis": 4,
+    "suggestions": 0,
+    "regression_cases": 0,
+    "examples": [
+      "model:local-order-service@1 on belief; basis stale: planned at revision 8, executed at revision 9",
+      "model:local-order-service@1 on belief; basis stale: planned at revision 13, executed at revision 14",
+      "model:local-order-service@1 on belief; basis stale: planned at revision 21, executed at revision 22"
+    ]
+  }
+}

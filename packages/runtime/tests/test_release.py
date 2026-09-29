@@ -93,3 +93,89 @@ def test_rules_are_type_checked_with_the_model(reg):
         assert rule_checks["pause_on_difference"].passed
         if status == "REJECTED":
             assert not rule_checks["broken"].passed and "broken" in rule_checks["broken"].subject
+
+
+# ------------------------------------------------------------------ phase 3A, G3: capability report and required checks
+
+def test_capability_report_for_the_ir_model_and_its_release_fields(reg):
+    """IR model: every feature is SUPPORTED by a declared provider; query checks say what they establish
+    (`property_holds`, `claim`) separately from the release process; sizes come from the declared stats()."""
+    from formal_lab_runtime.release import capability_report
+
+    pkg = model_package()
+    report = capability_report(pkg, reg)
+    assert {f.feature: f.status.value for f in report.features} == {
+        "release.type_check": "SUPPORTED", "run.candidates": "SUPPORTED", "run.predict": "SUPPORTED",
+        "release.regression_replay": "SUPPORTED", "rules": "SUPPORTED", "release.objectives": "SUPPORTED",
+        "release.stats": "SUPPORTED", "query.goal_reachability": "SUPPORTED",
+        "query.invariant_violation": "SUPPORTED", "query.action_precondition": "SUPPORTED",
+        "query.optimize_objective": "SUPPORTED", "query.robust_sequence": "SUPPORTED"}
+    rec, log = check_release(pkg, reg, horizon=4)
+    assert rec.status == "RELEASED" and rec.process_completed is True and rec.config.required_checks == ["TYPE_CHECK"]
+    queries = [c for c in rec.checks if str(c.kind) in ("GOAL_REACHABILITY", "INVARIANT_VIOLATION")]
+    assert queries and all(c.executed and c.backend is not None and c.claim for c in queries)
+    assert rec.compiled[0].stats["ground_actions"] > 0 and "action_types" in rec.compiled[0].stats
+    assert "[process] completed" in log
+
+
+def test_minimal_protocol_only_driver_gets_an_accurate_report_and_explicit_rejections(reg):
+    """A driver that implements only the public protocol (no IR, no stats) is released on what it supports; each
+    missing capability is UNSUPPORTED with its reason, and a release that requires it is not passed."""
+    from fal_example_external_plugin.counter_driver import package
+    from formal_lab_contracts import GroundAction, ReleaseConfig
+    from formal_lab_runtime.release import capability_report
+
+    pkg = package()
+    report = capability_report(pkg, reg)
+    status = {f.feature: f.status.value for f in report.features}
+    assert status["release.type_check"] == status["release.regression_replay"] == "SUPPORTED"
+    assert status["rules"] == status["release.stats"] == status["query.goal_reachability"] == "UNSUPPORTED"
+    assert "counter_v1" in next(f.reason for f in report.features if f.feature == "query.goal_reachability")
+
+    rec, _ = check_release(pkg, reg)  # default config: only the type check is required
+    assert rec.status == "RELEASED" and rec.process_completed is True
+    unsupported = [c for c in rec.checks if c.verdict == "UNSUPPORTED"]
+    assert {c.subject for c in unsupported} == {"reached", "bounded"} and not any(c.executed for c in unsupported)
+    assert "ground_actions" not in rec.compiled[0].stats and rec.compiled[0].stats["state_locations"] == 1
+
+    rec, _ = check_release(pkg, reg, config=ReleaseConfig(required_checks=["TYPE_CHECK", "GOAL_REACHABILITY"]))
+    assert rec.status == "REJECTED" and rec.process_completed is False
+    assert "GOAL_REACHABILITY" in rec.reasons[0] and "no installed verifier" in rec.reasons[0]
+
+    rules = RuleSet(ruleset_id="guard", version=1, name="guard", model=pkg.ref(), rules=[{
+        "rule_id": "pause", "trigger": {"events": ["ACTION_OUTCOME"]}, "condition": {"op": "const", "value": True},
+        "priority": 1, "outcome": "PAUSE", "message": "x"}])
+    rec, _ = check_release(pkg, reg, ruleset=rules)
+    assert rec.status == "REJECTED" and rec.process_completed is False
+    assert any(c.kind == "RULE_CHECK" and c.verdict == "UNSUPPORTED" for c in rec.checks)
+
+    case = RegressionCase(case_id="reg_counter", source="EFFECT_DIFFERENCE", model=pkg.ref(), seed=0,
+                          initial_state={"count": 1}, actions=[GroundAction(action_type="inc")],
+                          expected={"count": 2}, observed={"count": 2}, compared_paths=["count"], minimized=True,
+                          created_at="2026-09-29T00:00:00Z")
+    rec, _ = check_release(pkg, reg, cases=[case])
+    assert rec.status == "RELEASED" and rec.regression[0].status == "PASS"
+
+
+def test_process_completed_and_property_holds_are_separate(reg):
+    """Requiring a property to hold: every required check runs conclusively (the process completes), and the release
+    is still not passed when the property does not hold within the bound. queue-costs needs 3 steps to serve every
+    job: within 2 the goal is conclusively unreachable (NO_WITNESS_WITHIN_BOUND, not a missing result)."""
+    from formal_lab_contracts import ReleaseConfig
+    from formal_lab_model.samples import queue_costs
+
+    ir = queue_costs()
+    pkg = build_package(ir, package_id="queue-costs", version=1,
+                        source=ModelSource(format="fal-ir-json/v1", text=ir.model_dump_json(), origin="test"))
+    need = ["TYPE_CHECK", "GOAL_REACHABILITY"]
+    rec, _ = check_release(pkg, reg, config=ReleaseConfig(required_checks=need, required_holds=["all_served"],
+                                                          horizon=2))
+    check = next(c for c in rec.checks if c.subject == "all_served")
+    assert check.executed and check.verdict == "NO_WITNESS_WITHIN_BOUND" and check.property_holds is False
+    assert "not reachable within 2 steps" in check.claim
+    assert rec.process_completed is True and rec.status == "REJECTED"
+    assert any("all_served" in r and "does not hold" in r for r in rec.reasons)
+    rec, _ = check_release(pkg, reg, config=ReleaseConfig(required_checks=need, required_holds=["all_served"],
+                                                          horizon=3))
+    assert next(c for c in rec.checks if c.subject == "all_served").property_holds is True
+    assert rec.process_completed is True and rec.status == "RELEASED"

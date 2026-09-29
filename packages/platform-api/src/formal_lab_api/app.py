@@ -230,6 +230,10 @@ def _routes(app: FastAPI) -> None:
             select(CheckRow).where(CheckRow.model_version_id == version_id,
                                    CheckRow.verdict != probabilistic.VERDICT).order_by(CheckRow.created_at.desc()))])
 
+    @app.get(f"{API}/model-versions/{{version_id}}/capabilities")
+    async def model_capabilities(version_id: str):  # G3: feature support from declared capabilities
+        return await db(lambda s: governance.capability_report(s, version_id))
+
     # ---- optional PRISM-games extension: numerical results, kept apart from the deterministic checks
     @app.get(f"{API}/extensions/prism-games")
     async def prism_games():

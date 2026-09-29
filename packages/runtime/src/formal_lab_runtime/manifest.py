@@ -145,6 +145,11 @@ def negotiate_run(registry: PluginRegistry, *, scenario: ScenarioManifest, packa
     for probe in probes:
         results.append(registry.negotiate(probe.descriptor.ref(), [CapabilityRequirement(id=caps.PROBE_METRICS)],
                                           role="probe"))
+    if scenario.rules is not None and not driver.descriptor.has_capability(caps.DRIVER_IR):
+        # G3: rules are type-checked and evaluated on the neutral IR; say so instead of running without them
+        fatal.append(f"the scenario's rule set {scenario.rules.ruleset_id}@{scenario.rules.version} needs "
+                     f"{caps.DRIVER_IR}; driver {driver.descriptor.plugin_id} does not declare it (rules UNSUPPORTED "
+                     "for this profile)")
     env_have = {c.id for c in env.descriptor.capabilities}
     for i, spec in enumerate(scenario.execution_gates):  # phase 3A: pre-execution decisions
         gd = registry.resolve(spec.plugin).descriptor

@@ -302,10 +302,12 @@ def open_components(manifest: RunManifest, package: ModelPackage, registry: Plug
         if ruleset is None:
             raise NonRetryableFailure(f"rule set {manifest.rules.ruleset_id}@{manifest.rules.version} is not "
                                       "available to this runner")
-        if hasattr(loaded, "checked"):
-            from formal_lab_model.rules import RuleEvaluator
+        driver_entry = registry.resolve(driver_ref)
+        if not driver_entry.descriptor.has_capability(caps.DRIVER_IR):  # negotiation refuses this before a run
+            raise NonRetryableFailure(f"rules need {caps.DRIVER_IR}; {driver_ref.plugin_id} does not declare it")
+        from formal_lab_model.rules import RuleEvaluator
 
-            rules = RuleEvaluator(ruleset, loaded.checked, loaded.interp)
+        rules = RuleEvaluator(ruleset, loaded.checked, loaded.interp)
     return RunComponents(manifest, package, env, planners, verifier, evaluators, registry, loaded=loaded,
                          driver_ref=driver_ref, env_caps=env_caps, probes=probes, rules=rules, gates=gates)
 

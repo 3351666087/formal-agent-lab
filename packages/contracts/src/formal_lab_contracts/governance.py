@@ -131,14 +131,66 @@ class RuleDecision(ContractModel):
 # =========================================================================== releases (P2-072 / P2-073)
 
 
+ReleaseCheckKind = Literal["TYPE_CHECK", "RULE_CHECK", "GOAL_REACHABILITY", "INVARIANT_VIOLATION",
+                           "OBJECTIVE_CHECK", "REGRESSION"]
+
+
+class SupportStatus(StrEnum):
+    SUPPORTED = "SUPPORTED"
+    UNSUPPORTED = "UNSUPPORTED"
+
+
+class FeatureSupport(ContractModel):
+    """Whether one feature (a release check, rules, a query kind, statistics …) is available for a model, derived
+    from the declared capabilities of its semantic driver and of the installed verifiers (phase 3A, G3)."""
+
+    feature: str = Field(min_length=1, description="e.g. release.type_check, rules, query.goal_reachability")
+    status: SupportStatus
+    provider: PluginRef | None = Field(default=None, description="plugin that provides it (when supported)")
+    requires: list[str] = Field(default_factory=list, description="capability ids it needs")
+    reason: str
+
+
+class CapabilityReport(ContractModel):
+    """What the platform can do with one model version, feature by feature — never inferred from the payload's
+    shape, only from declared capabilities and the public protocols."""
+
+    model: ModelRef
+    semantic_profile: str
+    driver: PluginRef
+    features: list[FeatureSupport] = Field(default_factory=list)
+    generated_at: datetime
+
+    def status(self, feature: str) -> SupportStatus | None:
+        return next((f.status for f in self.features if f.feature == feature), None)
+
+
+class ReleaseConfig(ContractModel):
+    """What a release must establish (phase 3A, G3). `required_checks` must run and give a conclusive result;
+    `required_holds` names properties that must hold within the bound. Without a required capability or result the
+    release is not passed, with the reason."""
+
+    required_checks: list[ReleaseCheckKind] = Field(default_factory=lambda: ["TYPE_CHECK"])
+    required_holds: list[str] = Field(default_factory=list, description="property ids that must hold (bounded)")
+    horizon: int = Field(default=6, ge=1)
+    timeout_ms: int = Field(default=10000, ge=1)
+
+
 class ReleaseCheck(ContractModel):
-    kind: QueryKind | Literal["TYPE_CHECK", "RULE_CHECK", "OBJECTIVE_CHECK"]
+    kind: QueryKind | Literal["TYPE_CHECK", "RULE_CHECK", "OBJECTIVE_CHECK", "REGRESSION"]
     subject: str = Field(description="property / rule / objective checked")
     bound: CheckBound | None = None
     verdict: str
     check_id: str | None = None
-    passed: bool
+    passed: bool = Field(description="this check does not block the release (a violated invariant found by a query "
+                                     "is a fact, not a failure, unless its property is in required_holds)")
     detail: str | None = None
+    required: bool = Field(default=False, description="named in the release config (phase 3A)")
+    executed: bool = Field(default=True, description="the check ran and produced a result (False: UNSUPPORTED)")
+    backend: PluginRef | None = Field(default=None, description="plugin that produced the result")
+    scope: str | None = Field(default=None, description="what the result covers, e.g. MODEL_INTERNAL within 6 steps")
+    property_holds: bool | None = Field(default=None, description="the checked property holds (None: no claim)")
+    claim: str | None = Field(default=None, description="the result in words, as far as the verdict supports it")
 
 
 class RegressionResult(ContractModel):
@@ -168,6 +220,11 @@ class ModelReleaseRecord(ContractModel):
     created_at: datetime
     log: ArtifactRef | None = None
     stages: list[StageRecord] = Field(default_factory=list)
+    config: ReleaseConfig | None = Field(default=None, description="required checks / properties (phase 3A)")
+    process_completed: bool | None = Field(
+        default=None, description="every required check ran with a conclusive result (phase 3A); independent of "
+                                  "whether any property holds — see each check's property_holds")
+    capabilities: list[FeatureSupport] = Field(default_factory=list, description="capability report used (phase 3A)")
 
 
 class RegressionCase(ContractModel):

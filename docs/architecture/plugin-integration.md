@@ -88,7 +88,19 @@ class MyDriver:
     def load(self, package: ModelPackage) -> LoadedModel: ...
 ```
 
-`LoadedModel` 是**协议**：`action_specs()`、`state_paths()`、`initial_state()`、`belief(observation)`、`candidates(belief, scope=, partial_checker=)`、`predict(state, action) -> Prediction`、`properties(state)`、`property_kinds()`、`display()`。内核、规则与发布只调用这些方法；只有声明 `driver.ir` 的驱动才会被 Z3 查询、IR 规则与成本目标使用，其余能力按声明协商（见第 5 节与 [capability-matrix.md](capability-matrix.md)）。参考：`formal_lab_model/driver.py::IRFiniteDriver`（deterministic_finite_v1）、`examples/warehouse-allocation/.../driver.py::WarehouseDriver`（第二 profile）。
+`LoadedModel` 是**协议**：`action_specs()`、`state_paths()`、`initial_state()`、`belief(observation)`、`candidates(belief, scope=, partial_checker=)`、`predict(state, action) -> Prediction`、`properties(state)`、`property_kinds()`、`display()`；可选 `stats()`（声明 `driver.stats` 时，发布记录用它统计规模）。内核、规则与发布只调用这些方法。
+
+平台能对一个模型做什么由**能力报告**决定（阶段三 G3，`formal_lab_runtime.release.capability_report`，`GET /api/v1/model-versions/{id}/capabilities`，`fal release capabilities <id>`），只依据驱动的 `driver.*` 与已安装验证器对该 profile 声明的 `query.*`，从不根据载荷形状推断：
+
+| 功能 | 需要 | 未声明时 |
+|---|---|---|
+| `release.type_check` | 驱动 `validate()` | —（总是支持） |
+| `run.candidates` / `run.predict` / `release.regression_replay` | `driver.candidates` / `driver.predict` | UNSUPPORTED |
+| `rules`、`release.objectives` | `driver.ir`（规则与成本目标在中性 IR 上检查与求值） | 场景带规则集的运行在协商时被拒绝；发布中 RULE_CHECK 记为 UNSUPPORTED |
+| `release.stats` | `driver.stats` | 发布只记协议层规模（位置数、动作类型数、性质数） |
+| `query.<kind>` | 某验证器同时声明 `profile.<p>` 与 `query.<kind>` | 查询记为 UNSUPPORTED（executed = false） |
+
+发布配置 `ReleaseConfig`（`required_checks`、`required_holds`、`horizon`、`timeout_ms`）：必需检查缺少能力或没有结论性结果时 `process_completed = false`、发布 REJECTED 并写明原因；某性质是否成立单独记在每项检查的 `property_holds` 与 `claim` 中，只有列在 `required_holds` 的性质会阻止发布。最小的只实现公开协议的驱动见 `examples/external-plugin/.../counter_driver.py`（profile `counter_v1`）。参考：`formal_lab_model/driver.py::IRFiniteDriver`（deterministic_finite_v1）、`examples/warehouse-allocation/.../driver.py::WarehouseDriver`（第二 profile）。
 
 ### 3.3 规划器（PLANNER）与 `CheckpointingPlanner`
 
