@@ -1,0 +1,58 @@
+{
+  "schema": "formal-lab.mal.scenario/v1",
+  "scenario_id": "corelang-net-app-data",
+  "title": "coreLang: read secret data on a networked application",
+  "description": "A minimal, fully pinned coreLang scenario. An attacker who already has full access to an application tries to read a secret data object it contains. The confidentiality of that data is the target security property; the red team looking for a way to read it is doing its job, not breaking the lab's rules.",
+  "language": {
+    "name": "coreLang",
+    "version": "1.0.0",
+    "source": "https://github.com/mal-lang/coreLang",
+    "ref": "v1.0.0",
+    "license": "Apache-2.0",
+    "mar": "corelang-1.0.0.mar",
+    "mar_sha256": "9aabc828b5174ebe202cf8120a8e13a989c2f6e03d5908d8c65a4cc8adb3b150"
+  },
+  "toolchain": {
+    "mal_toolbox": "2.11.0",
+    "mal_simulator": "3.2.1",
+    "python": "3.12"
+  },
+  "model": {
+    "ref": "../src/formal_lab_domain_mal/models/net_app_data.json",
+    "name": "corelang-net-app-data",
+    "language": "coreLang",
+    "language_version": "1.0.0",
+    "assets": [
+      {"type": "Network", "name": "net"},
+      {"type": "Application", "name": "app"},
+      {"type": "Data", "name": "secret"}
+    ],
+    "associations": [
+      {"asset": "app", "field": "networks", "targets": ["net"]},
+      {"asset": "app", "field": "containedData", "targets": ["secret"]}
+    ]
+  },
+  "entry_points": ["app:fullAccess"],
+  "goal": "secret:read",
+  "semantic_profile": "deterministic_finite_v1",
+  "lab_policy": {
+    "allowed_assets": ["app", "secret", "net"],
+    "allowed_steps": [],
+    "forbidden_steps": [],
+    "max_attack_steps": 40,
+    "note": "Experiment boundary: the red team may traverse any step of the three in-scope assets, up to 40 actions. This bounds the experiment; it says nothing about whether the target is secure."
+  },
+  "target_security": {
+    "property_id": "secret-confidentiality",
+    "reach_forbidden": "secret:read",
+    "kind": "confidentiality",
+    "label": "The secret data cannot be read by the attacker"
+  },
+  "business_slo": {
+    "metric": "modeled_attack_cost",
+    "direction": "HIGHER_IS_BETTER",
+    "threshold": 6,
+    "unit": "steps",
+    "label": "Reading the secret should cost the attacker at least 6 steps from full application access"
+  }
+}

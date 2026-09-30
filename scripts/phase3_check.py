@@ -91,6 +91,13 @@ CHECKS = [
     Check("p3-offline-bundle", "g6-release", "去重离线包：空目录无包仓库安装与整栈实验", f"{PY} scripts/offline_bundle.py --verify",
           ["P3A-G6"], [f"{EV}/offline-manifest.json"], requires="docker", kind="extension",
           heavy_gib=12),
+    # ------------------------------------------------------------ D1 MAL model and native simulator
+    Check("p3-mal-lowering", "d1-mal",
+          "coreLang 攻击图降低到确定性 IR；原生模拟器 / 参考解释器 / Z3 三引擎一致；红队在 ir-world 中到达目标；配置往返（离线夹具，无需 MAL 工具链）",
+          f"{PYTEST} packages/domain-mal/tests packages/environment-mal/tests", ["P3B-D1"]),
+    Check("p3-mal-evidence", "d1-mal",
+          "版本固定场景包导入 / 展示 / 运行；主动动作与自动效果对照；见证 / 未知 / 超时不支持 / 无法比较真实记录；原生工具链缺失时回退到固定夹具",
+          f"{PY} scripts/d1_mal_evidence.py", ["P3B-D1"], [f"{EV}/d1-mal.json"]),
     # ------------------------------------------------------------ regression
     Check("p3-unit-all", "regression", "全部单元 / 契约 / 架构 / 示例测试（含阶段一哨兵）",
           f"{PYTEST} -m 'not integration and not llm and not ui'"),
@@ -104,7 +111,8 @@ CHECKS = [
 
 SUITE = Suite(
     name="phase3",
-    groups=["g1-contracts", "g2-operations", "g3-release", "g4-batch", "g5-product", "g6-release", "regression"],
+    groups=["g1-contracts", "g2-operations", "g3-release", "g4-batch", "g5-product", "g6-release", "d1-mal",
+            "regression"],
     checks=CHECKS,
     out=ROOT / "docs" / "execution" / "evidence" / "phase3" / "checks",
     # what the checks and the handoff write themselves: never part of what is being checked

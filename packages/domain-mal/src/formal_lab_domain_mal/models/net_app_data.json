@@ -1,0 +1,15 @@
+{
+  "name": "corelang-net-app-data",
+  "description": "Minimal coreLang model: an application on a network holds a secret data object. An attacker with full access to the application can read the data (a confidentiality target).",
+  "language": "coreLang",
+  "language_version": "1.0.0",
+  "assets": [
+    {"type": "Network", "name": "net"},
+    {"type": "Application", "name": "app"},
+    {"type": "Data", "name": "secret"}
+  ],
+  "associations": [
+    {"asset": "app", "field": "networks", "targets": ["net"]},
+    {"asset": "app", "field": "containedData", "targets": ["secret"]}
+  ]
+}

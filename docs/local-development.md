@@ -120,3 +120,29 @@ cd prism-games-3.2.4-linux64-arm && ./install.sh
 适配器默认在 `~/.local/opt/prism-games-*` 与 `~/.local/opt/jdk-*` 查找，也可设置 `FAL_PRISM_GAMES_HOME`、`FAL_PRISM_JAVA_HOME`。x86_64 使用同一发行的 `linux64-x86` 包（未在本环境运行）。安装后：`make prism-games-check`（证据写入 `docs/execution/evidence/phase2/prism-games/`），Web 模型工作台“概率扩展”页、`GET /api/v1/extensions/prism-games`、`POST /api/v1/model-versions/{id}/probabilistic-checks`。未安装时这些入口明确报告不可用及原因（UNSUPPORTED），不给替代答案。
 
 **结果解读**：`<<dispatcher>> Pmax=? [F "done"]` 是调度方在最坏环境下能保证的完成概率，`<<dispatcher,environment>>` 是双方合作时的上界；每个数值都与独立求解器（逐轮倒推）比较（容差 1e-6），状态数与参照图一致，导出的调度策略在最坏环境下的值等于报告值时才标为“模型内核对通过”。这些是数值结论，与 Z3 的确定性可达性结论不能互换。
+
+## 10. 可选：MAL 工具链（领域轨道 D1）
+
+MAL 领域（coreLang 攻击图）需要 mal-toolbox 与 mal-simulator。它们的依赖（antlr、tree-sitter、pettingzoo 等）与冻结的平台锁冲突，因此和 PRISM 一样放在**独立虚拟环境**里，通过类型化子进程（`packages/environment-mal/src/formal_lab_env_mal/_worker.py`）调用，绝不进入平台环境（决策 D-023 的同一模式）。三个上游包都是 Apache-2.0，可再分发；隔离只为解决依赖冲突，不是许可原因。固定版本：mal-toolbox 2.11.0、mal-simulator 3.2.1、coreLang v1.0.0。
+
+在虚拟机中安装（用户目录）：
+
+```bash
+python3 -m venv ~/.venvs/fal-mal
+~/.venvs/fal-mal/bin/pip install "mal-toolbox==2.11.0" "mal-simulator==3.2.1"
+git clone --depth 1 --branch v1.0.0 https://github.com/mal-lang/coreLang ~/.venvs/fal-mal/src/coreLang
+mkdir -p ~/.venvs/fal-mal/corelang
+~/.venvs/fal-mal/bin/python - <<'PY'
+from pathlib import Path
+from maltoolbox.language import LanguageGraph
+spec = Path.home() / ".venvs/fal-mal/src/coreLang/src/main/mal/coreLang.mal"
+LanguageGraph.from_mal_spec(str(spec)).to_mar_archive(
+    str(Path.home() / ".venvs/fal-mal/corelang/corelang-1.0.0.mar"))
+PY
+sha256sum ~/.venvs/fal-mal/corelang/corelang-1.0.0.mar
+# 9aabc828b5174ebe202cf8120a8e13a989c2f6e03d5908d8c65a4cc8adb3b150
+```
+
+桥默认在 `~/.venvs/fal-mal` 找 venv、在其 `corelang/*.mar` 找语言归档，也可设置 `FAL_MAL_HOME`、`FAL_MAL_MAR`。安装后：`packages/environment-mal/tests` 的桥往返测试实际运行（否则按 `mal` 标记自动跳过），`scripts/d1_mal_evidence.py` 从原生工具链实时导入（证据 `import.source="live"` 且与提交的夹具摘要一致）。未安装时领域包仍可离线运行——降低、参考解释器、Z3 验证与 ir-world 平台运行都只用平台环境和提交的 `packages/domain-mal/tests/fixtures/`，证据脚本回退为 `import.source="fixture"`。
+
+**结果解读**：场景包 `packages/domain-mal/scenarios/*.scenario.json` 固定语言/工具链版本与摘要、模型、入口点、目标，以及 LabPolicy（实验边界）/ TargetSecurity（目标性质）/ BusinessSLO（业务目标）。首个闭环把目标相关子集降低到 `deterministic_finite_v1` IR：原生模拟器的可达集是 fold 预言，参考解释器与 Z3 有界验证器独立复核，三者必须一致。见证=攻击路径；无见证=目标在界内成立；未知=求解器超时；概率 / 到达时间查询超出该 profile（UNSUPPORTED）；原生 TTC 已禁用，与 IR 单位步数不可比。这些结论与 CAGE、本地探针在各自语义范围内交叉检查，不能互换。

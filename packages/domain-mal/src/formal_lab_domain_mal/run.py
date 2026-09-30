@@ -1,0 +1,63 @@
+"""Run a lowered MAL model on the platform (phase 3B, D1).
+
+The formal closed loop's `run` step: a red-team attacker, played by the bounded Z3 planner, drives the neutral
+`ir-world` environment on the lowered package until it reaches the target step — a real platform episode (import →
+lower → run), not just a static reachability check. D3 adds richer red/blue strategies and model revision; this is the
+minimal single-attacker episode D1 needs.
+"""
+
+from __future__ import annotations
+
+from typing import Any
+
+from formal_lab_contracts import ModelPackage, ScenarioManifest
+
+IR_WORLD = {"plugin_id": "formal-lab.env.ir-world", "version": "1.0.0"}
+Z3_PLANNER = {"plugin_id": "formal-lab.planner.z3-bounded", "version": "1.1.0"}
+
+
+def red_team_scenario(package: ModelPackage, *, goal_property: str = "target_reached", horizon: int = 60,
+                      seed: int = 0, scenario_id: str | None = None, name: str = "MAL red-team",
+                      description: str = "") -> ScenarioManifest:
+    """A single-attacker scenario: the Z3 bounded planner plans `compromise` actions toward `goal_property` in the
+    ir-world environment."""
+    return ScenarioManifest(
+        scenario_id=scenario_id or f"mal-{package.package_id}",
+        name=name,
+        description=description or f"A red-team attacker plans its way to {goal_property} on {package.package_id}.",
+        model=package.ref(),
+        environment={"plugin": IR_WORLD, "config": {}},
+        participants=[{"actor_id": "red", "role": "attacker",
+                       "strategy": {"plugin": Z3_PLANNER,
+                                    "config": {"goal_property": goal_property, "horizon": horizon,
+                                               "fallback_order": ["compromise"]}}}],
+        objectives=[{"property_id": goal_property, "description": "the attacker reaches the target step"}],
+        budget={"max_steps": horizon, "max_wall_seconds": 300, "max_model_calls": 0, "max_tokens": 0},
+        seed=seed,
+        stop_conditions=[{"kind": "GOAL_REACHED", "property_id": goal_property}, {"kind": "NO_APPLICABLE_ACTION"}],
+    )
+
+
+def run_red_team(package: ModelPackage, *, registry: Any = None, goal_property: str = "target_reached",
+                 horizon: int = 60, seed: int = 0, project_id: str = "phase3b-d1") -> Any:
+    """Run one red-team episode in-process and return the LocalRunResult."""
+    from formal_lab_runtime import default_registry, make_manifest, new_run_id, run_local
+
+    reg = registry or default_registry()
+    scn = red_team_scenario(package, goal_property=goal_property, horizon=horizon, seed=seed)
+    manifest = make_manifest(run_id=new_run_id(), project_id=project_id, scenario=scn, package=package, registry=reg)
+    return run_local(manifest, package, reg)
+
+
+def run_summary(result: Any, id_map: dict[str, str] | None = None) -> dict[str, Any]:
+    """A compact, offline-readable summary of a red-team episode: status, why it ended, and the attack it performed."""
+    inv = {v: k for k, v in (id_map or {}).items()}
+    plan = []
+    for st in result.steps:
+        action = (st.proposal.action if st.proposal else None)
+        if action is not None:
+            n = action.params.get("n")
+            plan.append({"step": st.step, "action": action.action_type, "target": inv.get(n, n)})
+    return {"status": str(result.status), "reason": result.reason,
+            "termination_reason": str(result.termination_reason), "steps": len(result.steps),
+            "attack_path": plan}

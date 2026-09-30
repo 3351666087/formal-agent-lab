@@ -99,3 +99,25 @@ scripts/in-vm.sh 'uv run --frozen python scripts/{operation_consistency,model_re
 - **已完成**：P3A-G1 … G6（本文件各节）；证据 `docs/execution/evidence/phase3/`（doctor、g2-operations、g3-release、g4-batch、g5-flows、g5-web、g5-readme-rendered、release-manifest、licenses、checks/）；Figma 文件与 `design/figma.json`；README 与设计系统文档。
 - **阻塞 / 未执行**（原因明确，均非代码缺陷）：带 OCI 镜像的发行与去重离线包——本机宿主盘 16 GiB，低于写入量 + 15 GiB 保留量，检查记为 BLOCKED（在更空的磁盘上 `make phase3-check ARGS="--only p3-release-images,p3-offline-bundle"`）；真实 LLM 端点与 PRISM-games 不在阶段三检查集中（阶段二的条件 / 扩展检查结论保持，`make checks SUITE=phase2 ARGS="--only model-real,prism-games"` 可重跑）；Figma 视频导出未使用（视频由同一 SVG 在本地导出，理由见 G5）。
 - **下一步（后续领域集成文件）**：新插件用公开接口接入——语义驱动（`driver.*` 能力决定能力报告，联合语义用 `driver.joint_predict`）、环境（`env.batch_step`、会话 / 对账能力）、执行门控（`EXECUTION_GATE`）、评分器；标签与值写在描述符 `ui` 中，不改核心 UI；新增检查加入 `scripts/phase3_check.py` 或新套件模块（同一引擎），写证据的工具读取 `FAL_EVIDENCE_DIR`；视觉以 `docs/design-system.md` 与基准截图为基线；完整产品验收在全部集成完成后统一收口。
+
+---
+
+# 阶段 3B：领域集成（Opus 4.8）
+
+任务书：[docs/execution/phase-3b.md](../execution/phase-3b.md)（原文 `03_phase3_domain_integration .md`，修订 2026-09-29）。执行 D1 → D6，每包完成在本文件追加证据。基线为 3A 收口后的 main。
+
+## D1 · MAL 模型与原生模拟器
+
+- **上游固定**（全部 Apache-2.0）：mal-toolbox 2.11.0、mal-simulator 3.2.1、coreLang v1.0.0；编译语言归档 `corelang-1.0.0.mar` sha256 `9aabc828b5174ebe202cf8120a8e13a989c2f6e03d5908d8c65a4cc8adb3b150`（19 资产）。安装见 [local-development.md 第 10 节](../local-development.md)。决策 D-028。
+- **隔离与桥**（D-023 同一模式）：MAL 工具链装在独立 venv（默认 `~/.venvs/fal-mal`，`FAL_MAL_HOME`/`FAL_MAL_MAR` 覆盖），平台侧经类型化子进程调用，绝不进入冻结平台锁。`packages/environment-mal/src/formal_lab_env_mal/_worker.py`（venv 内，stdlib+MAL；命令 `versions`/`describe`/`simulate`，TTCMode.DISABLED、关闭攻防 Bernoulli，确定性）；`bridge.py`（平台侧 stdlib，`available()` 缺失即返回原因供记 BLOCKED，`versions`/`describe`/`simulate`）；`importer.py`（`import_model`/`import_scenario`：describe+simulate→包）。
+- **领域包 `packages/domain-mal`**：`config.py` 三类意图 `LabPolicy`（实验边界，`.permits()`）/`TargetSecurity`（目标性质，`reach_forbidden`）/`BusinessSLO`（业务目标），均为场景扩展记录、非平台契约；`lowering.py` 把目标的 or/and 祖先中**原生实际到达**的步骤降低到 `deterministic_finite_v1` IR（原生可达集为 fold 预言，存在步与已禁用防御折叠为其原生真值，`compromise(n)` 动作单位成本，性质 `target_reached`，目标 `attack_cost`）；`frontend.py` `MalFrontend`（`MODEL_FRONTEND`，源格式 `mal-attack-graph/v1`）保留原始模型、语言版本、图摘要与完整攻击图于扩展 `org.mal-lang.attack-graph`；`run.py` `run_red_team()`：Z3 有界规划器（`formal-lab.planner.z3-bounded`）在 `formal-lab.env.ir-world` 环境中作为红方到达目标——一次真实平台运行（导入→降低→运行）。
+- **插件注册**：`domain-mal` 经 entry-point 组 `formal_lab.plugins` 注册 `MalFrontend`；registry `discover()` 无错误发现 `formal-lab.domain.mal.frontend 1.0.0 MODEL_FRONTEND profiles=['deterministic_finite_v1']`（25 插件、0 错误）。两包加入 workspace 成员、根 `[project].dependencies` 与 `[tool.uv.sources]`；新增 `mal` pytest 标记（工具链缺失自动跳过桥测试）。
+- **闭环与三引擎**：可达情形（入口 `app:fullAccess`，目标 `secret:read`）原生可达=参考解释器 BFS=Z3 `WITNESS` 三者一致，见证攻击路径 6 步（app:attemptRead→successfulRead→read→secret:attemptRead→successfulRead→read）；无入口情形三引擎一致目标不可达（Z3 `NO_WITNESS_WITHIN_BOUND`）；`OPTIMIZE_OBJECTIVE` 最小攻击代价 6（=BusinessSLO 阈值）；平台运行 `SUCCEEDED`（JOINT_GOAL_REACHED，6 步）。
+- **判定分类（真实记录）**：见证=可达攻击路径；无见证=目标在界内成立；未知=Z3 `timeout_ms=1` 真实超时返回 `UNKNOWN`；不支持=确定性 profile 的 `QueryKind` 无概率 / 到达时间查询（构造即被契约拒绝）；不可比=原生 TTC 已禁用（全 None），与 IR 单位步数不同量纲。主动动作（红队 29 个建模步 / 6 步见证）与自动效果（0 自动激活、21 永久阻塞步，降低时折叠）有对照。
+- **边界**：TargetSecurity `secret-confidentiality` 被违反（`secret:read` 可达）= 红方找到反例、实验成功，**非** LabPolicy 违规；整条攻击路径在允许资产 `['app','secret']` 与 40 步预算内，LabPolicy 遵守；无入口时目标成立。
+- **证据**：`docs/execution/evidence/phase3/d1-mal.json`（离线可查，实时导入 `import.source="live"` 且与提交夹具摘要一致；工具链缺失回退 `fixture`）。场景包 `packages/domain-mal/scenarios/net_app_data.scenario.json`（版本固定）；夹具 `packages/domain-mal/tests/fixtures/`。检查组 `d1-mal`：`p3-mal-lowering`（11 测试）+ `p3-mal-evidence` 均 PASS。
+- **命令**：
+  ```bash
+  scripts/in-vm.sh 'export UV_PROJECT_ENVIRONMENT=$HOME/.venvs/formal-agent-lab; export FAL_MAL_HOME=$HOME/.venvs/fal-mal; cd <repo>; uv run --no-sync python scripts/d1_mal_evidence.py'
+  scripts/in-vm.sh 'export UV_PROJECT_ENVIRONMENT=$HOME/.venvs/formal-agent-lab; cd <repo>; uv run --frozen python scripts/check_runner.py --suite phase3 --group d1-mal'
+  ```

@@ -10,6 +10,8 @@ dependencies = [
     "formal-lab-model-core",
     "formal-lab-solver-z3",
     "formal-lab-solver-prism-games",
+    "formal-lab-domain-mal",
+    "formal-lab-env-mal",
     "formal-lab-neutral-env",
     "formal-lab-strategies",
     "formal-lab-evaluation",
@@ -42,6 +44,8 @@ members = [
     "packages/model-core",
     "packages/solver-adapters/z3",
     "packages/solver-adapters/prism-games",
+    "packages/domain-mal",
+    "packages/environment-mal",
     "packages/neutral-environment",
     "packages/strategies",
     "packages/evaluation",
@@ -60,6 +64,8 @@ formal-lab-contracts = { workspace = true }
 formal-lab-model-core = { workspace = true }
 formal-lab-solver-z3 = { workspace = true }
 formal-lab-solver-prism-games = { workspace = true }
+formal-lab-domain-mal = { workspace = true }
+formal-lab-env-mal = { workspace = true }
 formal-lab-neutral-env = { workspace = true }
 formal-lab-strategies = { workspace = true }
 formal-lab-evaluation = { workspace = true }
@@ -82,6 +88,7 @@ markers = [
     "integration: needs PostgreSQL / Temporal services (make services-up)",
     "llm: calls the configured real LLM endpoint",
     "ui: browser tests against the running web app (Playwright)",
+    "mal: needs the isolated MAL toolchain venv (fal-mal); skipped when unavailable",
 ]
 addopts = "-ra --strict-markers --import-mode=importlib"
 
