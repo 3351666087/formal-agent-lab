@@ -112,6 +112,13 @@ CHECKS = [
     Check("p3-strategies-evidence", "d3-strategies",
           "固定场景/种子/预算下红蓝基线完成实验（裁判以环境状态判定）；检查点恢复；真实模型条件项如实报告；一次修订 + 一次陈旧不污染",
           f"{PY} scripts/d3_strategies_evidence.py", ["P3B-D3"], [f"{EV}/d3-strategies.json"]),
+    # ------------------------------------------------------------ D4 local service experiment loop
+    Check("p3-service-unit", "d4-service",
+          "领域准入规则集；Broker 门控特权动作（拒绝不触达服务）；服务/模型性质对照（一致/偏差/无法判断）",
+          f"{PYTEST} examples/local-order-service/tests/test_domain_lab.py", ["P3B-D4"]),
+    Check("p3-service-evidence", "d4-service",
+          "真实订单服务进程全生命周期：创建→就绪→正常业务+领域实验→探针→导出→复位→二次运行→异常终止资源核对→清理；合同动作只经 Broker",
+          f"{PY} scripts/d4_service_lab_evidence.py", ["P3B-D4"], [f"{EV}/d4-service-lab.json"]),
     # ------------------------------------------------------------ regression
     Check("p3-unit-all", "regression", "全部单元 / 契约 / 架构 / 示例测试（含阶段一哨兵）",
           f"{PYTEST} -m 'not integration and not llm and not ui'"),
@@ -126,7 +133,7 @@ CHECKS = [
 SUITE = Suite(
     name="phase3",
     groups=["g1-contracts", "g2-operations", "g3-release", "g4-batch", "g5-product", "g6-release", "d1-mal",
-            "d2-broker", "d3-strategies", "regression"],
+            "d2-broker", "d3-strategies", "d4-service", "regression"],
     checks=CHECKS,
     out=ROOT / "docs" / "execution" / "evidence" / "phase3" / "checks",
     # what the checks and the handoff write themselves: never part of what is being checked

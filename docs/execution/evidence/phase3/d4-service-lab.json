@@ -1,0 +1,220 @@
+{
+  "deliverable": "phase3B-D4",
+  "mode": "process (local-lite, no Docker)",
+  "precheck": {
+    "ok": true,
+    "cpus": 4,
+    "disk_free_mb": 16814
+  },
+  "environment": {
+    "identity": "order-service",
+    "endpoint": "http://127.0.0.1:51119",
+    "project": "phase3b-d4",
+    "ready": "ok",
+    "test_identity": "redlab"
+  },
+  "normal_business": {
+    "reserved": [
+      200,
+      200,
+      200
+    ],
+    "applied": 3
+  },
+  "contract_action_via_broker": {
+    "denied_without_receipt": {
+      "admitted": false,
+      "applied": false,
+      "verdict": "DENY",
+      "reasons": [
+        "binding=False"
+      ],
+      "failed": [
+        "no receipt bound to this request"
+      ]
+    },
+    "conditions_before": {},
+    "conditions_after_deny": {},
+    "conditions_after_allow": {
+      "slow_stations": [
+        "p2"
+      ]
+    },
+    "zero_side_effect_on_service": true,
+    "allowed_with_receipt": {
+      "admitted": true,
+      "applied": true,
+      "verdict": "ALLOW",
+      "service_conditions": {
+        "slow_stations": [
+          "p2"
+        ]
+      }
+    },
+    "conditions_changed_after_allow": true
+  },
+  "simulator_comparison": {
+    "authorized": {
+      "result": "CONSISTENT",
+      "service": true,
+      "model": true,
+      "detail": "the service and the model agree the unauthorized action is prevented"
+    },
+    "unauthorized": {
+      "result": "CONSISTENT",
+      "service": true,
+      "model": true,
+      "detail": "the service and the model agree the unauthorized action is prevented"
+    },
+    "out_of_scope": {
+      "result": "UNDECIDABLE",
+      "detail": "the service state has no comparable model state (out of scope)"
+    }
+  },
+  "reset_and_rerun": {
+    "second_run_applied": 3,
+    "reproduces_first_run": true,
+    "recovery": {
+      "baseline_revision": 3,
+      "current_revision": 3,
+      "reset_to_baseline": true
+    }
+  },
+  "probes": {
+    "before": {
+      "access": {
+        "operations": 3,
+        "endpoint": "http://127.0.0.1:51119",
+        "tenant": "redlab"
+      },
+      "config": null,
+      "service_state": {
+        "health": "ready",
+        "revision": 3,
+        "clock": 0
+      },
+      "success_rate": null,
+      "cost": {
+        "mode": "process",
+        "pid": 1050478,
+        "data_bytes": 57344,
+        "restarts": 0,
+        "rss_kb": 50148,
+        "cpu_seconds": 0.17
+      },
+      "recovery": {
+        "baseline_revision": 3,
+        "current_revision": 3,
+        "reset_to_baseline": true
+      }
+    },
+    "after": {
+      "access": {
+        "operations": 3,
+        "endpoint": "http://127.0.0.1:51119",
+        "tenant": "redlab"
+      },
+      "config": null,
+      "service_state": {
+        "health": "ready",
+        "revision": 3,
+        "clock": 0
+      },
+      "success_rate": null,
+      "cost": {
+        "mode": "process",
+        "pid": 1050478,
+        "data_bytes": 57344,
+        "restarts": 0,
+        "rss_kb": 50216,
+        "cpu_seconds": 0.17
+      },
+      "recovery": {
+        "baseline_revision": 3,
+        "current_revision": 3,
+        "reset_to_baseline": true
+      }
+    },
+    "after_reset": {
+      "access": {
+        "operations": 3,
+        "endpoint": "http://127.0.0.1:51119",
+        "tenant": "redlab"
+      },
+      "config": null,
+      "service_state": {
+        "health": "ready",
+        "revision": 3,
+        "clock": 0
+      },
+      "success_rate": null,
+      "cost": {
+        "mode": "process",
+        "pid": 1050478,
+        "data_bytes": 57344,
+        "restarts": 0,
+        "rss_kb": 50236,
+        "cpu_seconds": 0.19
+      },
+      "recovery": {
+        "baseline_revision": 3,
+        "current_revision": 3,
+        "reset_to_baseline": true
+      }
+    }
+  },
+  "export_size": 4353,
+  "abnormal_termination": {
+    "killed_pid": 1050478,
+    "process_alive": true,
+    "data_dir_present": true,
+    "data_dir": "var/d4-lab/.fal-orders/phase3b-d4/data",
+    "resources_accountable": true
+  },
+  "cleanup": {
+    "removed_data": true,
+    "detail": {
+      "processes": [
+        1050478
+      ],
+      "containers": [],
+      "paths": [
+        "/Users/null3351/Code/formal-agent-lab/var/d4-lab/.fal-orders/phase3b-d4"
+      ]
+    }
+  },
+  "lifecycle": [
+    "create",
+    "ready",
+    "register(reset+synthetic-data)",
+    "normal-business",
+    "broker-gated-privileged-action",
+    "probe+export",
+    "reset+rerun",
+    "abnormal-termination+resource-check",
+    "cleanup"
+  ],
+  "container_vs_vm_boundary": "process mode (local-lite): the service is a loopback child process in this VM; host/VM management stays in the ServiceManager lifecycle component. compose mode (local-services) would run it as a Docker container labelled with the project; cleanup removes exactly this project's process/containers/volumes, never another project's.",
+  "conclusion": {
+    "full_lifecycle": [
+      "create",
+      "ready",
+      "register(reset+synthetic-data)",
+      "normal-business",
+      "broker-gated-privileged-action",
+      "probe+export",
+      "reset+rerun",
+      "abnormal-termination+resource-check",
+      "cleanup"
+    ],
+    "normal_business_and_domain_experiment": true,
+    "contract_action_only_via_broker": true,
+    "denied_action_never_reached_service": true,
+    "probes_independent": true,
+    "reset_reproduces": true,
+    "resources_accountable_after_crash": true,
+    "cleaned_up": true,
+    "simulator_comparison_recorded": true,
+    "offline_readable": true
+  }
+}

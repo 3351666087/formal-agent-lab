@@ -150,3 +150,17 @@ scripts/in-vm.sh 'uv run --frozen python scripts/{operation_consistency,model_re
   scripts/in-vm.sh 'export UV_PROJECT_ENVIRONMENT=$HOME/.venvs/formal-agent-lab; cd <repo>; uv run --no-sync python scripts/d3_strategies_evidence.py'
   scripts/in-vm.sh 'export UV_PROJECT_ENVIRONMENT=$HOME/.venvs/formal-agent-lab; cd <repo>; uv run --frozen python scripts/check_runner.py --suite phase3 --group d3-strategies'
   ```
+
+## D4 · 本地服务实验闭环
+
+- **在运行中的订单服务上加安全领域层**（决策 D-031），不改业务代码：`examples/local-order-service/src/formal_lab_example_orders/domain_lab.py`——`SecurityProbe`（独立从服务 state/metrics/health/conditions 读取，记录访问/配置/服务状态/成功率/代价/恢复）、`gated_condition_change`（特权动作只经 D2 Broker）、`orders_admission_ruleset`（发布规则集）、`check_property_vs_model`（一致/偏差/无法判断）。
+- **全生命周期**（process/local-lite，无需 Docker，由既有 ServiceManager 驱动）：创建 → 就绪 → 登记(复位+合成数据，租户 redlab) → 正常业务(reserve o1/o2/o3，3/3 applied) → 探针 → 导出 → 复位 → 二次运行(重现首轮) → 异常终止(杀进程，数据目录仍在可核对) → 清理(删本项目数据)。
+- **合同动作只经 Broker**：更改运行条件（重配置目标）无凭据 → Broker DENY → 服务未被调用（零副作用，`conditions` 前后一致）；带绑定当前修订的凭据 → ALLOW → `POST /admin/conditions` 生效（slow_stations 出现）。
+- **与模拟器对照**：可比较状态上服务实测准入与 MAL 模型预测一致（CONSISTENT）；超出模型范围的服务状态记为 UNDECIDABLE。
+- **容器/VM 边界（依实际配置）**：进程模式下服务是本 VM 内的回环子进程，宿主/VM 管理留在 ServiceManager；compose 模式则为带项目标签的容器，清理只删本项目自己的进程/容器/卷，绝不动别的项目。
+- **证据**：`docs/execution/evidence/phase3/d4-service-lab.json`；`examples/local-order-service/tests/test_domain_lab.py`（4）；检查组 `d4-service` 两项 PASS。
+- **命令**：
+  ```bash
+  scripts/in-vm.sh 'export UV_PROJECT_ENVIRONMENT=$HOME/.venvs/formal-agent-lab; cd <repo>; uv run --no-sync python scripts/d4_service_lab_evidence.py'
+  scripts/in-vm.sh 'export UV_PROJECT_ENVIRONMENT=$HOME/.venvs/formal-agent-lab; cd <repo>; uv run --frozen python scripts/check_runner.py --suite phase3 --group d4-service'
+  ```

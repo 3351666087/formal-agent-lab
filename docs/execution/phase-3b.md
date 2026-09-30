@@ -53,7 +53,9 @@
 
 ## D4 · 本地服务实验闭环
 
-- [ ] **P3B-D4** 在已有订单服务与生命周期上完成一个领域场景，保持正常业务与独立探针。
+- [x] **P3B-D4** 在已有订单服务与生命周期上完成一个领域场景，保持正常业务与独立探针。
+  - 证据：在运行中的订单服务(进程模式)上加安全领域层，不改业务代码：全生命周期 创建→就绪→登记→正常业务→探针→导出→复位→二次运行→异常终止资源核对→清理；正常业务照常，特权动作(重配置)只经 D2 Broker（拒绝不触达服务=零副作用，凭据放行才生效）；SecurityProbe 独立从服务读取访问/配置/状态/成功率/代价/恢复；与 MAL 模拟器按可比较状态对照记录一致/偏差/无法判断；容器/VM 边界依实际配置说明。详见 docs/handoff/phase3-draft.md · D4
+  - 实现：`examples/local-order-service/src/formal_lab_example_orders/domain_lab.py`、`scripts/d4_service_lab_evidence.py`、`examples/local-order-service/tests/test_domain_lab.py`
 
 保留原订单样例，在独立场景包中增加领域状态和预定义管理/测试接口；合同动作只通过 D2 的执行路径调用。正常业务持续运行，探针独立记录访问、配置、服务状态、成功率、代价与恢复。复用 SessionEnvironment、Probe、reset/export/import/cleanup、Compose 与备份/恢复工具。
 
