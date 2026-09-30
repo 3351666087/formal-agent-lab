@@ -33,7 +33,9 @@
 
 ## D2 · Broker、领域规则与角色边界
 
-- [ ] **P3B-D2** 在 G2—G4 的接口上完成领域准入、验证凭据和红蓝数据边界，验证拒绝零副作用。
+- [x] **P3B-D2** 在 G2—G4 的接口上完成领域准入、验证凭据和红蓝数据边界，验证拒绝零副作用。
+  - 证据：领域准入 Broker 作为 G2 执行门控：验证凭据（HMAC 签名 + 绑定 run/step/actor/operation/参数摘要/状态修订/版本/范围/期限）；四类判定 LabPolicy/动作前提/角色/TargetSecurity 各自解释；正常放行 + 8 类零副作用拒绝；有凭据全部放行到达目标、无凭据全部拒绝零副作用；红蓝边界与标记数据泄漏检查；进程内非沙箱如实记录。详见 docs/handoff/phase3-draft.md · D2
+  - 实现：`packages/domain-broker/src/formal_lab_domain_broker/receipt.py`、`packages/domain-broker/src/formal_lab_domain_broker/rules.py`、`packages/domain-broker/src/formal_lab_domain_broker/roles.py`、`packages/domain-broker/src/formal_lab_domain_broker/broker.py`、`packages/domain-mal/src/formal_lab_domain_mal/admission.py`、`packages/domain-mal/src/formal_lab_domain_mal/gate.py`、`packages/domain-mal/src/formal_lab_domain_mal/demo.py`、`scripts/d2_broker_evidence.py`
 
 实现领域动作合同（参数、环境/session、可观测前提、预期效果、失败/未知结果、时间、重试和探针）；类型化规则表达事件—条件—处理，自然语言转换的规则先可审查、再固定版本发布。VerificationReceipt 用成熟签名库与固定规范化格式，绑定 run/step/turn/actor、环境/session、operation_id、动作参数摘要、状态修订、模型/适配器/规则/投影版本、检查依据、范围及期限；Broker 验证绑定、服务身份与当前状态。通过 G2 的发送扩展点覆盖 local runner、Temporal、重发与模拟器重执行。使用 G4 参与者输入接口实施领域可见性；真值/凭据不进入策略工厂、调用记录、恢复或下载路径。
 

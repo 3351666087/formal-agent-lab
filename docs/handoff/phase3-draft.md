@@ -121,3 +121,17 @@ scripts/in-vm.sh 'uv run --frozen python scripts/{operation_consistency,model_re
   scripts/in-vm.sh 'export UV_PROJECT_ENVIRONMENT=$HOME/.venvs/formal-agent-lab; export FAL_MAL_HOME=$HOME/.venvs/fal-mal; cd <repo>; uv run --no-sync python scripts/d1_mal_evidence.py'
   scripts/in-vm.sh 'export UV_PROJECT_ENVIRONMENT=$HOME/.venvs/formal-agent-lab; cd <repo>; uv run --frozen python scripts/check_runner.py --suite phase3 --group d1-mal'
   ```
+
+## D2 · Broker、领域规则与角色边界
+
+- **可复用包 `packages/domain-broker`**（决策 D-029）：`receipt.py` 的 `VerificationReceipt`（HMAC-SHA256 签名、规范化 JSON、绑定 run/step/turn/actor、环境/session、operation_id、动作参数摘要、状态修订、模型/适配器/规则/投影版本、检查基础、范围、期限；`Signer`/`Verifier` 抽象可换非对称后端；`KeyStore` 与环境凭据分离）；`rules.py` 的类型化事件—条件—处理规则（DRAFT→REVIEWED→`released()` 冻结版本+摘要；三值条件：未知 None 与判定假 False 区分）；`roles.py` 的红蓝边界（`ParticipantView` 过滤 + 独立 `leaks()` 泄漏检查）；`broker.py` 的 `admit()`（纯函数）与 `BrokerGate`（EXECUTION_GATE 适配）。
+- **Broker = G2 执行门控**：只有凭据签名有效、绑定本次请求、状态修订等于当前、未过期、检查基础授权动作、且通过发布规则时才放行；DENY 永不发送 → 拒绝零副作用（复用 G2 在 local runner / Temporal / 重发 / 纯数据重执行的保证）。签名只提供来源与完整性；数学保证等于凭据 check_basis/scope，模型 RELEASED 标签不构成准入。
+- **MAL 绑定（`packages/domain-mal`）**：`admission.py`（`mal_ruleset()` 四类规则 lab_policy/action_precondition/role_rule/target_security，各留自然语言 source，发布摘要 `8f69eedfca8d`；`issue_receipt()` 签发器；LabPolicy/TargetSecurity 条件）；`gate.py` 的 `formal-lab.domain.mal.broker-gate`（注入领域上下文）；`demo.py` 的 `gated_red_team()` 三遍闭环。两个门控经 registry 发现无错误（共 27 插件）。
+- **平台运行验证**：有凭据时 6 步全部 ALLOW、到达目标 `SUCCEEDED`；无凭据时全部 DENY（60 次拒绝）、目标从未攻陷、零副作用。准入分类 9 种：正常放行 + 8 类零副作用拒绝（缺凭据、签名被篡改、绑定不符、状态修订陈旧、过期、错角色、LabPolicy 越界、TargetSecurity 不符），各自解释失败原因。过期凭据仍可验证来源（查看历史不受影响）。角色边界：标记载荷中的 `ground_truth`/`signing_key`/`service_token` 被检出并拦截，合法观测完整。
+- **隔离强度（如实记录）**：隔离来自门控边界 + 密钥独立存储 + 角色视图；进程内 Python 对象**不是**代码沙箱，进程/容器/网络隔离是 D4 的范围。
+- **证据**：`docs/execution/evidence/phase3/d2-broker.json`；`packages/domain-broker/tests`（16）、`packages/domain-mal/tests/test_admission.py`（6）；检查组 `d2-broker` 两项 PASS。
+- **命令**：
+  ```bash
+  scripts/in-vm.sh 'export UV_PROJECT_ENVIRONMENT=$HOME/.venvs/formal-agent-lab; cd <repo>; uv run --no-sync python scripts/d2_broker_evidence.py'
+  scripts/in-vm.sh 'export UV_PROJECT_ENVIRONMENT=$HOME/.venvs/formal-agent-lab; cd <repo>; uv run --frozen python scripts/check_runner.py --suite phase3 --group d2-broker'
+  ```

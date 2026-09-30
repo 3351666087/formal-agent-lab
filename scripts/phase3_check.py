@@ -98,6 +98,13 @@ CHECKS = [
     Check("p3-mal-evidence", "d1-mal",
           "版本固定场景包导入 / 展示 / 运行；主动动作与自动效果对照；见证 / 未知 / 超时不支持 / 无法比较真实记录；原生工具链缺失时回退到固定夹具",
           f"{PY} scripts/d1_mal_evidence.py", ["P3B-D1"], [f"{EV}/d1-mal.json"]),
+    # ------------------------------------------------------------ D2 broker, receipts and role boundaries
+    Check("p3-broker-unit", "d2-broker",
+          "验证凭据签名 / 绑定 / 状态修订 / 期限；准入规则集发布与未知条件；红蓝角色边界与凭据泄漏防护；MAL 领域准入",
+          f"{PYTEST} packages/domain-broker/tests packages/domain-mal/tests/test_admission.py", ["P3B-D2"]),
+    Check("p3-broker-evidence", "d2-broker",
+          "准入分类（正常 + 8 类零副作用拒绝）；Broker 门控真实运行：有凭据全部放行且到达目标，无凭据全部拒绝且零副作用；标记数据泄漏检查",
+          f"{PY} scripts/d2_broker_evidence.py", ["P3B-D2"], [f"{EV}/d2-broker.json"]),
     # ------------------------------------------------------------ regression
     Check("p3-unit-all", "regression", "全部单元 / 契约 / 架构 / 示例测试（含阶段一哨兵）",
           f"{PYTEST} -m 'not integration and not llm and not ui'"),
@@ -112,7 +119,7 @@ CHECKS = [
 SUITE = Suite(
     name="phase3",
     groups=["g1-contracts", "g2-operations", "g3-release", "g4-batch", "g5-product", "g6-release", "d1-mal",
-            "regression"],
+            "d2-broker", "regression"],
     checks=CHECKS,
     out=ROOT / "docs" / "execution" / "evidence" / "phase3" / "checks",
     # what the checks and the handoff write themselves: never part of what is being checked

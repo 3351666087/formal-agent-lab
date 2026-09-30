@@ -1,0 +1,18 @@
+[project]
+name = "formal-lab-domain-broker"
+version = "0.3.0"
+description = "Domain admission broker (phase 3B, D2): signed VerificationReceipts, typed event-condition-action rules, red/blue role boundaries, and an ExecutionGate that admits a side-effect action only against a verified receipt bound to the current state — rejection has zero side effects"
+requires-python = ">=3.12"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+dependencies = ["formal-lab-contracts"]
+
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/formal_lab_domain_broker"]
+
+[project.entry-points."formal_lab.plugins"]
+domain-broker = "formal_lab_domain_broker:registrations"

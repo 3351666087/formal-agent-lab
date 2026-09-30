@@ -7,6 +7,7 @@ members = [
     "fal-example-external-plugin",
     "formal-agent-lab",
     "formal-lab-contracts",
+    "formal-lab-domain-broker",
     "formal-lab-domain-mal",
     "formal-lab-env-mal",
     "formal-lab-evaluation",
@@ -339,6 +340,7 @@ version = "0.2.0"
 source = { virtual = "." }
 dependencies = [
     { name = "formal-lab-contracts" },
+    { name = "formal-lab-domain-broker" },
     { name = "formal-lab-domain-mal" },
     { name = "formal-lab-env-mal" },
     { name = "formal-lab-evaluation" },
@@ -370,6 +372,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "formal-lab-contracts", editable = "packages/contracts" },
+    { name = "formal-lab-domain-broker", editable = "packages/domain-broker" },
     { name = "formal-lab-domain-mal", editable = "packages/domain-mal" },
     { name = "formal-lab-env-mal", editable = "packages/environment-mal" },
     { name = "formal-lab-evaluation", editable = "packages/evaluation" },
@@ -410,11 +413,23 @@ dependencies = [
 requires-dist = [{ name = "pydantic", specifier = ">=2.13,<3" }]
 
 [[package]]
+name = "formal-lab-domain-broker"
+version = "0.3.0"
+source = { editable = "packages/domain-broker" }
+dependencies = [
+    { name = "formal-lab-contracts" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "formal-lab-contracts", editable = "packages/contracts" }]
+
+[[package]]
 name = "formal-lab-domain-mal"
 version = "0.3.0"
 source = { editable = "packages/domain-mal" }
 dependencies = [
     { name = "formal-lab-contracts" },
+    { name = "formal-lab-domain-broker" },
     { name = "formal-lab-model-core" },
     { name = "formal-lab-runtime" },
 ]
@@ -422,6 +437,7 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "formal-lab-contracts", editable = "packages/contracts" },
+    { name = "formal-lab-domain-broker", editable = "packages/domain-broker" },
     { name = "formal-lab-model-core", editable = "packages/model-core" },
     { name = "formal-lab-runtime", editable = "packages/runtime" },
 ]

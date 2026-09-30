@@ -18,9 +18,9 @@ Z3_PLANNER = {"plugin_id": "formal-lab.planner.z3-bounded", "version": "1.1.0"}
 
 def red_team_scenario(package: ModelPackage, *, goal_property: str = "target_reached", horizon: int = 60,
                       seed: int = 0, scenario_id: str | None = None, name: str = "MAL red-team",
-                      description: str = "") -> ScenarioManifest:
+                      description: str = "", execution_gates: list[dict] | None = None) -> ScenarioManifest:
     """A single-attacker scenario: the Z3 bounded planner plans `compromise` actions toward `goal_property` in the
-    ir-world environment."""
+    ir-world environment. `execution_gates` (D2) wires pre-send gates such as the MAL admission Broker."""
     return ScenarioManifest(
         scenario_id=scenario_id or f"mal-{package.package_id}",
         name=name,
@@ -34,6 +34,7 @@ def red_team_scenario(package: ModelPackage, *, goal_property: str = "target_rea
         objectives=[{"property_id": goal_property, "description": "the attacker reaches the target step"}],
         budget={"max_steps": horizon, "max_wall_seconds": 300, "max_model_calls": 0, "max_tokens": 0},
         seed=seed,
+        execution_gates=execution_gates or [],
         stop_conditions=[{"kind": "GOAL_REACHED", "property_id": goal_property}, {"kind": "NO_APPLICABLE_ACTION"}],
     )
 
