@@ -40,10 +40,14 @@ def _digest(obj: Any) -> str:
 
 def package_from_graph(graph: dict[str, Any], entry_points: list[str], goal: str, *, package_id: str, version: int,
                        reachable: list[str] | None = None, model: dict[str, Any] | None = None,
-                       language: dict[str, Any] | None = None) -> ModelPackage:
-    """Lower a captured attack graph to a ModelPackage, preserving the MAL provenance in an extension."""
+                       language: dict[str, Any] | None = None, include_defense: bool = False,
+                       initial_hardened: list[str] | None = None) -> ModelPackage:
+    """Lower a captured attack graph to a ModelPackage, preserving the MAL provenance in an extension.
+    `include_defense` (D3) adds the defender (harden) action so the package supports a red/blue game;
+    `initial_hardened` pre-hardens steps (a blue defence configuration chosen before the episode)."""
     reach = reachable if reachable is not None else entry_points
-    ir, report = lower(graph, entry_points, goal, reach, name=package_id)
+    ir, report = lower(graph, entry_points, goal, reach, name=package_id, include_defense=include_defense,
+                       initial_hardened=initial_hardened)
     language = language or {"name": graph.get("language", "coreLang"),
                             "version": graph.get("language_version", "unknown")}
     graph_digest = _digest(graph)

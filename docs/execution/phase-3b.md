@@ -43,7 +43,9 @@
 
 ## D3 · 红蓝策略与模型修订闭环
 
-- [ ] **P3B-D3** 交付确定性红蓝基线、混合策略和独立结果复核，完成一次领域模型修订。
+- [x] **P3B-D3** 交付确定性红蓝基线、混合策略和独立结果复核，完成一次领域模型修订。
+  - 证据：红方规则/符号(z3)/混合三基线在固定场景/种子/预算下到达目标（裁判以环境状态判定）；蓝方最小代价割(最大流)选配置、加固包阻断全部红方；检查点恢复(resume_local)保持计划进度；混合真实模型为条件项(未配置端点则标注替身)；模型修订沿用 D-022：真实偏差生成回归案例并修订成功，陈旧观测差异不入回归库。详见 docs/handoff/phase3-draft.md · D3
+  - 实现：`packages/domain-mal/src/formal_lab_domain_mal/lowering.py`、`packages/domain-mal/src/formal_lab_domain_mal/strategies.py`、`packages/domain-mal/src/formal_lab_domain_mal/revision.py`、`packages/domain-mal/src/formal_lab_domain_mal/run.py`、`scripts/d3_strategies_evidence.py`
 
 红方规则/符号策略与蓝方规则策略（蓝方在业务代价下选择观测、配置和恢复）；再实现混合策略统一输出 ActionProposal，复用 TaskPlan、CheckpointingPlanner、模型客户端、预算、调用记录与暂停恢复。规则/符号/混合使用相同角色可见信息，真值保留给独立裁判。区分陈旧观测、不完整信息、随机结果与真实模型偏差（D-022）；可比较状态上的真实偏差才产生修订/回归案例。
 

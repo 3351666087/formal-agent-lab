@@ -135,3 +135,18 @@ scripts/in-vm.sh 'uv run --frozen python scripts/{operation_consistency,model_re
   scripts/in-vm.sh 'export UV_PROJECT_ENVIRONMENT=$HOME/.venvs/formal-agent-lab; cd <repo>; uv run --no-sync python scripts/d2_broker_evidence.py'
   scripts/in-vm.sh 'export UV_PROJECT_ENVIRONMENT=$HOME/.venvs/formal-agent-lab; cd <repo>; uv run --frozen python scripts/check_runner.py --suite phase3 --group d2-broker'
   ```
+
+## D3 · 红蓝策略与模型修订闭环
+
+- **防御化降低**（决策 D-030）：`lower(..., include_defense=True, initial_hardened=[...])` 增加 `hardened[steps]` 状态、`harden(n)` 动作、`compromise` 的 `not hardened` 守卫——同一攻击图上的红蓝博弈（MAL 防御的 IR 级抽象，具体 coreLang 防御语义另行声明）。
+- **红方三基线**（回合式，输出 ActionProposal，裁判以环境状态判定）：`formal-lab.domain.mal.red-rule`（贪心最近目标）、符号红方复用 `formal-lab.planner.z3-bounded`、`formal-lab.domain.mal.red-hybrid`（模型给候选 + 规则核验）。固定场景/种子/预算下三者均到达目标 `SUCCEEDED`（6 步）。
+- **蓝方配置策略**：`min_cost_cut` 用最大流最小顶点割（入口点/目标不可加固）选出割集，`harden_package` 预加固；对本模型割集 `['app:attemptRead']`（业务代价 1）即阻断全部三种红方（目标从不被攻陷）。
+- **检查点恢复**：符号红方 `run_local(stop_after=k)` → `resume_local` 在新运行器中续跑，最终结果与整跑一致（计划进度保留，不重启）。
+- **混合真实模型条件项**：未配置 `FAL_LLM_BASE_URL`/`ANTHROPIC_BASE_URL` 时以标注替身运行（`mode=STUB`），如实报告为条件项，不冒充已交付；配置端点则 `mode=REAL`。
+- **模型修订（D-022）**：belief 模型来自不完整原生捕获（漏掉目标传播）→ 在可比较初始状态上 belief 认为目标不可达、truth 可达 → 真实偏差 → 生成 `RegressionCase`、旧模型 v1 被拒、修订版 v2 发布并通过复验；陈旧观测差异（belief 修订 0 vs 观测修订 N）归类 STALE、不入回归库（`regression_library_clean=True`）。
+- **证据**：`docs/execution/evidence/phase3/d3-strategies.json`；`packages/domain-mal/tests/test_strategies.py`（6）；检查组 `d3-strategies` 两项 PASS。注：`stop_after` 精确停点在共享进程/pytest 下受计划缓存影响，测试断言功能性（续跑同结果），证据脚本独立进程记录精确停点。
+- **命令**：
+  ```bash
+  scripts/in-vm.sh 'export UV_PROJECT_ENVIRONMENT=$HOME/.venvs/formal-agent-lab; cd <repo>; uv run --no-sync python scripts/d3_strategies_evidence.py'
+  scripts/in-vm.sh 'export UV_PROJECT_ENVIRONMENT=$HOME/.venvs/formal-agent-lab; cd <repo>; uv run --frozen python scripts/check_runner.py --suite phase3 --group d3-strategies'
+  ```

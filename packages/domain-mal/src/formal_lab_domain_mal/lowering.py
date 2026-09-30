@@ -50,9 +50,15 @@ def ancestors(nodes: dict[str, dict[str, Any]], goal: str) -> set[str]:
 
 
 def lower(graph: dict[str, Any], entry_points: list[str], goal: str, reachable: list[str], *,
-          name: str | None = None) -> tuple[ModelIR, dict[str, Any]]:
+          name: str | None = None, include_defense: bool = False,
+          initial_hardened: list[str] | None = None) -> tuple[ModelIR, dict[str, Any]]:
     """Return (IR, lowering report). `reachable` is the native simulator's compromised set from these entry points;
-    it is the oracle for which ancestors are modeled and which steps seed without a modeled parent."""
+    it is the oracle for which ancestors are modeled and which steps seed without a modeled parent.
+
+    `include_defense` (phase 3B, D3) adds a defender: state `hardened[steps]`, a `harden(n)` action that blocks a
+    not-yet-compromised step, and a `not hardened[n]` guard on `compromise(n)` — a red/blue game over the same graph.
+    Hardening a step is an IR-level abstraction of enabling a MAL defence / patching that step; the native defence
+    semantics (which steps a specific coreLang defence disables) are out of this deterministic subset and declared so."""
     nodes = {n["full_name"]: n for n in graph["nodes"]}
     if goal not in nodes:
         raise ValueError(f"goal {goal!r} is not a step of this model")
@@ -85,10 +91,28 @@ def lower(graph: dict[str, Any], entry_points: list[str], goal: str, reachable: 
     parent_compromised = q("exists", "p", "steps", ap("and", v("edge", ref("p"), ref("n")), v("compromised", ref("p"))))
     all_parents = q("forall", "p", "steps", ap("or", ap("not", v("edge", ref("p"), ref("n"))),
                                                v("compromised", ref("p"))))
-    precond = ap("and", ap("not", v("compromised", ref("n"))),
-                 ap("or",
-                    ap("and", ap("not", v("is_and", ref("n"))), ap("or", v("seed", ref("n")), parent_compromised)),
-                    ap("and", v("is_and", ref("n")), all_parents)))
+    compromise_core = ap("and", ap("not", v("compromised", ref("n"))),
+                         ap("or",
+                            ap("and", ap("not", v("is_and", ref("n"))),
+                               ap("or", v("seed", ref("n")), parent_compromised)),
+                            ap("and", v("is_and", ref("n")), all_parents)))
+    # with a defender, a step can only be compromised while it is not hardened
+    precond = ap("and", ap("not", v("hardened", ref("n"))), compromise_core) if include_defense else compromise_core
+
+    extra_state: list[dict[str, Any]] = []
+    extra_actions: list[dict[str, Any]] = []
+    hardened0 = {fn for fn in (initial_hardened or []) if fn in modeled}
+    if include_defense:
+        extra_state.append(
+            {"name": "hardened", "type": {"kind": "bool"}, "index": ["steps"],
+             "initial": table(hardened0), "label": "已加固", "observable": True})
+        extra_actions.append(
+            {"name": "harden", "label": "加固步骤", "cost": 1,
+             "params": [{"name": "n", "type": {"kind": "entity", "set": "steps"}}],
+             "precondition": ap("and", ap("not", v("hardened", ref("n"))), ap("not", v("compromised", ref("n")))),
+             "effects": [{"kind": "assign", "target": {"var": "hardened", "index": [ref("n")]},
+                          "value": {"op": "const", "value": True}}]})
+
     ir_dict = {
         "semantic_profile": "deterministic_finite_v1",
         "name": name or f"mal-{graph.get('model_name', 'model')}",
@@ -106,6 +130,7 @@ def lower(graph: dict[str, Any], entry_points: list[str], goal: str, reachable: 
         "state": [
             {"name": "compromised", "type": {"kind": "bool"}, "index": ["steps"],
              "initial": table(set(entry) & modeled), "label": "已攻陷", "observable": True},
+            *extra_state,
         ],
         "actions": [
             {"name": "compromise", "label": "攻陷步骤", "cost": 1,
@@ -113,6 +138,7 @@ def lower(graph: dict[str, Any], entry_points: list[str], goal: str, reachable: 
              "precondition": precond,
              "effects": [{"kind": "assign", "target": {"var": "compromised", "index": [ref("n")]},
                           "value": {"op": "const", "value": True}}]},
+            *extra_actions,
         ],
         "properties": [
             {"id": "target_reached", "kind": "goal", "expr": v("compromised", {"op": "const", "value": ids[goal]}),
@@ -125,6 +151,7 @@ def lower(graph: dict[str, Any], entry_points: list[str], goal: str, reachable: 
     report = {
         "goal": goal, "goal_id": ids[goal], "entry_points": entry,
         "modeled_steps": len(members), "edges": len(edges),
+        "modeled_edges": [[p, c] for p, c in edges],
         "and_steps": len(is_and), "or_steps": len(members) - len(is_and), "seed_steps": sorted(seed),
         "ancestors_total": len(anc), "native_reachable_total": len(R),
         "excluded_unreached_ancestors": sorted(fn for fn in anc
@@ -132,6 +159,8 @@ def lower(graph: dict[str, Any], entry_points: list[str], goal: str, reachable: 
         "folded_non_step_parents": sorted({p for c in members for p in nodes[c]["parents"]
                                            if nodes[p]["type"] not in STEP_TYPES}),
         "goal_native_reachable": goal in R,
+        "defense_enabled": include_defense,
+        "initial_hardened": sorted(hardened0),
         "scope": {
             "kind": "deterministic reachability of one target step over the or/and attack graph",
             "oracle": "native mal-simulator reachable set (ttc disabled, no Bernoulli draws)",

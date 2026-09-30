@@ -105,6 +105,13 @@ CHECKS = [
     Check("p3-broker-evidence", "d2-broker",
           "准入分类（正常 + 8 类零副作用拒绝）；Broker 门控真实运行：有凭据全部放行且到达目标，无凭据全部拒绝且零副作用；标记数据泄漏检查",
           f"{PY} scripts/d2_broker_evidence.py", ["P3B-D2"], [f"{EV}/d2-broker.json"]),
+    # ------------------------------------------------------------ D3 red/blue strategies and model revision
+    Check("p3-strategies-unit", "d3-strategies",
+          "红方规则/符号/混合三基线到达目标；蓝方最小代价割阻断全部红方；检查点恢复保持计划进度；真实偏差修订成功、旧观测差异不入回归库",
+          f"{PYTEST} packages/domain-mal/tests/test_strategies.py", ["P3B-D3"]),
+    Check("p3-strategies-evidence", "d3-strategies",
+          "固定场景/种子/预算下红蓝基线完成实验（裁判以环境状态判定）；检查点恢复；真实模型条件项如实报告；一次修订 + 一次陈旧不污染",
+          f"{PY} scripts/d3_strategies_evidence.py", ["P3B-D3"], [f"{EV}/d3-strategies.json"]),
     # ------------------------------------------------------------ regression
     Check("p3-unit-all", "regression", "全部单元 / 契约 / 架构 / 示例测试（含阶段一哨兵）",
           f"{PYTEST} -m 'not integration and not llm and not ui'"),
@@ -119,7 +126,7 @@ CHECKS = [
 SUITE = Suite(
     name="phase3",
     groups=["g1-contracts", "g2-operations", "g3-release", "g4-batch", "g5-product", "g6-release", "d1-mal",
-            "d2-broker", "regression"],
+            "d2-broker", "d3-strategies", "regression"],
     checks=CHECKS,
     out=ROOT / "docs" / "execution" / "evidence" / "phase3" / "checks",
     # what the checks and the handoff write themselves: never part of what is being checked

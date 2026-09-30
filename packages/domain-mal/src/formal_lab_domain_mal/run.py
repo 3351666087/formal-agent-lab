@@ -16,23 +16,36 @@ IR_WORLD = {"plugin_id": "formal-lab.env.ir-world", "version": "1.0.0"}
 Z3_PLANNER = {"plugin_id": "formal-lab.planner.z3-bounded", "version": "1.1.0"}
 
 
+RED_STRATEGIES = {
+    "symbolic": lambda horizon, gp: {"plugin": Z3_PLANNER,
+                                     "config": {"goal_property": gp, "horizon": horizon,
+                                                "fallback_order": ["compromise"]}},
+    "rule": lambda horizon, gp: {"plugin": {"plugin_id": "formal-lab.domain.mal.red-rule", "version": "1.0.0"},
+                                 "config": {}},
+    "hybrid": lambda horizon, gp: {"plugin": {"plugin_id": "formal-lab.domain.mal.red-hybrid", "version": "1.0.0"},
+                                   "config": {"client": "stub"}},
+}
+
+
 def red_team_scenario(package: ModelPackage, *, goal_property: str = "target_reached", horizon: int = 60,
                       seed: int = 0, scenario_id: str | None = None, name: str = "MAL red-team",
-                      description: str = "", execution_gates: list[dict] | None = None) -> ScenarioManifest:
-    """A single-attacker scenario: the Z3 bounded planner plans `compromise` actions toward `goal_property` in the
-    ir-world environment. `execution_gates` (D2) wires pre-send gates such as the MAL admission Broker."""
+                      description: str = "", execution_gates: list[dict] | None = None,
+                      strategy: str = "symbolic", max_model_calls: int = 0,
+                      env_config: dict | None = None) -> ScenarioManifest:
+    """A single-attacker scenario in the ir-world environment. `strategy` picks the red planner (symbolic = Z3
+    bounded, rule = greedy, hybrid = model-assisted). `execution_gates` (D2) wires pre-send gates like the Broker.
+    `env_config` passes ir-world options such as `truth_constant_overrides` (D3 model-deviation) or `observation`."""
+    strat = RED_STRATEGIES[strategy](horizon, goal_property)
     return ScenarioManifest(
         scenario_id=scenario_id or f"mal-{package.package_id}",
         name=name,
         description=description or f"A red-team attacker plans its way to {goal_property} on {package.package_id}.",
         model=package.ref(),
-        environment={"plugin": IR_WORLD, "config": {}},
-        participants=[{"actor_id": "red", "role": "attacker",
-                       "strategy": {"plugin": Z3_PLANNER,
-                                    "config": {"goal_property": goal_property, "horizon": horizon,
-                                               "fallback_order": ["compromise"]}}}],
+        environment={"plugin": IR_WORLD, "config": env_config or {}},
+        participants=[{"actor_id": "red", "role": "attacker", "strategy": strat}],
         objectives=[{"property_id": goal_property, "description": "the attacker reaches the target step"}],
-        budget={"max_steps": horizon, "max_wall_seconds": 300, "max_model_calls": 0, "max_tokens": 0},
+        budget={"max_steps": horizon, "max_wall_seconds": 300, "max_model_calls": max_model_calls,
+                "max_tokens": 200_000 if max_model_calls else 0},
         seed=seed,
         execution_gates=execution_gates or [],
         stop_conditions=[{"kind": "GOAL_REACHED", "property_id": goal_property}, {"kind": "NO_APPLICABLE_ACTION"}],
