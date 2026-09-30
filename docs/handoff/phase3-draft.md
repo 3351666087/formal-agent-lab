@@ -49,3 +49,52 @@
 - **SVG 动画与媒体**：`scripts/render_demo.py`：`svg`（标准库）→ `docs/assets/demo.svg`（可编辑源，134 KB，CSS keyframes 共用 20 s 时间线，减少动态时显示静态总结）、`demo-cover.svg`、`demo.html`（可暂停 / 拖动）、`architecture.svg`；`frames`（VM，Chromium 按 Web Animations API 逐帧定位 600 帧）→ `encode`（宿主 ffmpeg / rsvg-convert）→ `demo.mp4`（h264 1920×1080 30 fps 20.0 s，1.3 MB）、`demo-cover.png`。叙事：模型 → 计划 → 运行 → 偏差 → 证据，数值全部来自订单服务 deviation 案例的真实运行与 `g3-release.json`（`design/animation/demo-data.json` 记录来源与采集提交）。
 - **GitHub README**：首屏动画 SVG（GitHub 中实测播放）、实际 CI 徽章与许可证徽章、定位（是什么 / 不是什么）、真实界面截图 6 张、功能地图、快速开始（含 CLI 批次流程）、架构与运行流程图、文档索引；写明截图与动画的数据来源。渲染检查见下方证据。
 - **证据**：SDK / CLI：`scripts/product_flow_evidence.py` → `docs/execution/evidence/phase3/g5-flows.json` 6/6（仓储同步批次：`fal run start --wait` 成功、10 轮每轮一个环境步、导出回放包离线读取的轮次与在线一致；订单延迟响应：6 个结果未知的操作全部按 id 查询对账，离线回放包保留相同的对账）。Web：`scripts/capture_screens.py` → `g5-web.json` 8/8（在场景页点“运行实验”完成仓储批次与订单恢复两次运行、批次面板轮次与导出包一致、异常操作可见、矩阵复用标记、390 px 无横向滚动、跳转链接、减少动态、无页面错误与错误界面），同时生成 `docs/assets/screens/` 的 15 张基准截图。README 实际渲染：推送后用 Chromium 打开 github.com 仓库首页（未登录）截取 `docs/execution/evidence/phase3/g5-readme-rendered.png`，README 中 10 张图（动画、CI 与许可证徽章、6 张截图、架构图）全部加载，动画在 GitHub 的 `<img>` 中播放（内置浏览器中逐场景核对）。复用键：`tests/integration/test_matrix_v2_platform.py::test_reuse_key_covers_views_gates_and_extensions`（同配置复用并标来源；改视图 / 门控 / 扩展配置各产生新单元格）。回归：Playwright UI 14/14（`test_web_ui.py`、`test_web_product.py`，选择器随按钮去字形更新）；矩阵、SDK/CLI 回放、联合批次、操作一致性集成通过；单元 459。
+
+## G6 · 本地检查与发行工具
+
+- **检查引擎** `scripts/check_runner.py`（结果格式 `checks@2`）：套件是导出 `SUITE` 的模块（`--suite phase3` → `scripts/phase3_check.py`；`--suite phase2` 加载 `phase2_check.py` 的历史检查；也可给 .py 路径）；`--out` 独立输出目录，`--group` / `--only` / `--skip` 分组与单项，`--retries`，`--list`。每次尝试单独写日志 `logs/<id>/<时间>-attempt-<n>.log`；保留首次失败（`first_failure`）、重试后才通过的标记（`flaky`）、最终结果与每项的历史（最近 20 次调用）；记录源码提交、工作区摘要（检查自身输出除外）、配置摘要（检查定义 + `uv.lock` + `pnpm-lock.yaml` + Compose 文件）、工具版本与运行前后的资源读数（CPU、内存、宿主盘与 Docker 盘）；另一提交 / 工作区 / 配置上的结果标 `inherited`，不算当前通过。耗时分开：本次调用、每项总耗时与每次尝试、最近一次完整执行（`timing.last_full_run_s`）与单项重跑（`timing.partial_runs`，含选择条件）。检查逐个执行（并发 1）；`heavy_gib` 检查先经 `disk_guard`，须在写入量之外保留 `FAL_DISK_RESERVE_GIB`（默认 15）GiB，否则 BLOCKED 并写明读数；Docker / 服务检查后 `fstrim` 归还空间；回环地址不走代理（NO_PROXY），代理变量本身保留给真实模型端点。测试：`tests/tools/test_check_runner.py`。
+- **阶段三检查集** `scripts/phase3_check.py`：g1-contracts、g2-operations、g3-release、g4-batch、g5-product、g6-release、regression 共 25 项（`make phase3-check [ARGS=…]`，`make checks SUITE=phase2`，`make design-check`）；包括“矩阵测试在保留的数据库上连续两次通过”（`p3-matrix-kept-db`：同一进程先后两个独立 pytest 会话）。
+- **发行工具**：`release.py --skip-images --out --evidence`（不建镜像的发行：全部 wheel、Web 包、干净 venv 中的 SDK/CLI（含 `fal replay batches`）、许可证清单）；带镜像的发行与去重离线包作为扩展检查，按磁盘保留量自动 BLOCKED。新增包的接入位置：uv 工作区成员自动进入 `uv build --all-packages` 与 manifest，插件经 `formal_lab.plugins` entry point 注册，镜像来自 `deploy/compose/docker-compose.yaml`，Chart 在 `deploy/helm/formal-agent-lab`。
+- **历史证据保护**（本包发现并修复）：本轮的 UI 测试、概率扩展平台测试与许可证清单曾写入 `docs/execution/evidence/phase2/`（G3、G5 的提交中带入了改写后的阶段二截图与测量）。已把该目录恢复为阶段二交接 `0ae4571` 的内容，并让所有写证据的测试与工具使用同一个 `FAL_EVIDENCE_DIR`：默认本轮目录 `docs/execution/evidence/phase3`，只有 `phase2_check.py` 设为阶段二目录。
+- **磁盘事件**（记录在案）：第一次完整执行时，带镜像的发行检查在 `fstrim` 之后读到宿主可用 16 GiB（门槛为写入量 16 GiB，未计保留量）而开始构建；宿主降到 12 GiB 时我中止了异架构构建，删除了本次新建的项目镜像标签（`formal-agent-lab/*:{0.2.0,4e5fbb159ed5,local}`，保留阶段二的 `4e1f959e81f2` 镜像）并执行 `docker builder prune` 与 `fstrim`，宿主回到 16 GiB；随后在引擎中加入保留量。另删除了可重建的 `out/offline`（阶段二离线包输出，685 MB，`make offline-bundle` 重建）与 `var/it-artifacts`、`var/demo-frames`。未做任何宽泛的 prune。
+- **结果**（本轮最终执行，`docs/execution/evidence/phase3/checks/results.json`）：提交 `962bd37`、工作区干净、配置摘要 `21b564b0…`；7 组全部 PASS——22 PASS、0 FAIL、2 BLOCKED（扩展检查：带镜像的发行需 8 + 15 GiB、去重离线包需 12 + 15 GiB，宿主当时 16.2 GiB、Docker 盘 22.3 GiB），无一项需要重试；完整执行 2183.8 s（36.4 min），其后单项重跑 `p3-batch-evidence` 1.4 s 单独记在 `timing.partial_runs`，该项历史保留上一次结果。主要项：单元 462 通过（含阶段一哨兵）、平台集成 37 通过（与 CI 相同的集合）、Playwright 14 通过、矩阵测试在保留数据库上两个会话各通过、SDK/CLI 与 Web 流程证据 6/6、8/8、轻量发行 15 个 wheel + Web 包 + 干净 venv 中的 `fal`。阶段二证据目录执行前后 `git status` 为空。
+- **第一次完整执行**（提交 `4e5fbb1`，已被上面的结果取代；其日志在重新执行前删除）暴露并促成了本包的修复：`capture_screens.py --shots` 的 `global` 位置错误（FAIL）、新的持久批次测试在轮中暂停上有时间偏差（首次失败、重试通过被标为 flaky；集成全集两次均失败）、带镜像的发行检查未计保留量（见磁盘事件）。首次失败 / 重试 / 最终结果的保留由 `tests/tools/test_check_runner.py` 覆盖。
+- **CI**：`4e5fbb1` 的 GitHub Actions 全绿（G2 门控事件修复后集成通过）；本包的提交推送后再核对。
+
+## 阶段三 A 汇总（交给后续集成）
+
+### 接口与类型（契约 `formal-lab-contracts/v2`，摘要 `bc24e5e9…` → G2 `4539dd9b…` → G3 `db180892…` → G4 `adbe8269…`；v1 `0cbd6256…` 冻结）
+
+| 包 | 类型 / 接口 | 代码 |
+|---|---|---|
+| G1 | 协议 / 数据对象 / 枚举 / 记录的分类；`formal_lab_sdk.plugins` 导出驱动所需对象；阶段二 v2 回放样本 | `packages/contracts/src/formal_lab_contracts/interfaces.py`、`packages/sdk/src/formal_lab_sdk/plugins.py`、`tests/compat/` |
+| G2 | 插件接口 `EXECUTION_GATE` / 协议 `ExecutionGate`；`GateRequest` `GateResult` `ConditionCheck` `ExecutionDecision`；`ExecutionPhase` `GateVerdict` `OperationEffect`；`OperationRecord.request_digest` `.decisions`；`ScenarioManifest.execution_gates`；事件 `EXECUTION_DECIDED`；能力 `gate.pre_execution` `gate.fresh_values` | `formal_lab_runtime/coordination.py`、`engine.py`（`_gate_hook`）、`manifest.py` |
+| G3 | `CapabilityReport` `FeatureSupport` `SupportStatus` `ReleaseConfig`；`ReleaseCheck` / `ModelReleaseRecord` 新字段；能力 `driver.stats`；`capability_report()` `check_release(config=)` | `formal_lab_runtime/release.py`、API `GET /model-versions/{id}/capabilities`、`fal release capabilities` |
+| G4 | `TurnMode.JOINT_BATCH` `TurnPolicy.batch_timeout_s` `TurnRef.batch_id` `.env_step`；`BatchRecord` `BatchMember` `BatchMemberStatus`；`ParticipantView` / `Participant.view`；事件 `BATCH_OPENED` `BATCH_SUBMITTED` `BATCH_CANCELLED`；`OperationRecord.kind="batch"` `.batch_id` `.batch_outcomes`；能力 `env.batch_step` `driver.joint_predict`；协议 `BatchEnvironment.step_batch`；`ParticipantServices` `ParticipantInput` | `formal_lab_runtime/engine.py`（`_apply_joint` / `_submit_batch`）、`participants.py`、`turns.py`、`formal_lab_env/driver_world.py` |
+| G5 | `GET /runs/{id}/batches`（`bundle.summarize_batches`、`ReplayBundle.batches()`）；`Client.batches`；`fal run batches` / `fal replay batches`；操作 API `kind` `batch_id` `batch_outcomes`；矩阵复用键 v2（`key_parts`、`reused_from`）；设计 tokens 与组件 | `packages/platform-api/…/app.py`、`services/matrices.py`、`web/src/`、`design/` |
+| G6 | 检查引擎 `Check` / `Suite` / `checks@2` 结果；阶段三检查集；`release.py --skip-images --out --evidence`；`capture_screens.py --shots` | `scripts/check_runner.py`、`scripts/phase3_check.py` |
+
+### 命令
+
+```bash
+make phase3-check [ARGS="--group g4-batch | --only id | --out dir | --list"]   # 本轮全部检查
+make checks SUITE=phase2 ARGS="--list"                                          # 阶段二检查（同一引擎）
+make contracts && make contracts-check                                          # 契约生成与漂移
+python3 scripts/design_tokens.py [--check] ; make design-check                  # 样式源
+python3 scripts/render_demo.py svg ; scripts/in-vm.sh 'uv run --frozen python scripts/render_demo.py frames' ; python3 scripts/render_demo.py encode
+scripts/in-vm.sh 'uv run --frozen python scripts/capture_screens.py'            # 基准截图 + Web 流程证据（需开发栈）
+scripts/in-vm.sh 'uv run --frozen python scripts/{operation_consistency,model_revision,joint_batch}_evidence.py'
+```
+
+### 兼容策略
+
+- 契约只做增量：新对象与带默认值的可选字段，版本保持 v2，摘要变化记在各包；破坏性变化另发 v3 并提供 v2 读取。阶段二 v2 回放样本（`tests/compat/fixtures/phase2/`）与阶段一 v1 样本按当前代码原样可读。
+- 行为兼容：未声明门控、批次、视图的场景与阶段二轨迹一致（仓储轮流运行与 `0ae4571` 捕获逐动作一致；阶段一哨兵）；两处有意的行为改变写在决策里——结果未知且后端无记录时只有 `env.idempotent_step` 才重发（D-025），规则集需要 `driver.ir`（D-026）。
+- 矩阵复用键 v2 与 v1 摘要不同：旧矩阵中合并新单元格时按 v2 计算，不会误复用（最多重复运行一次）。
+- 阶段二验收（`docs/handoff/phase2-checks.json`，提交 `4e1f959`）是历史证据；本轮结果在 `docs/execution/evidence/phase3/`，完整产品验收在全部集成完成后统一收口。
+
+### 已完成 / 阻塞 / 下一步
+
+- **已完成**：P3A-G1 … G6（本文件各节）；证据 `docs/execution/evidence/phase3/`（doctor、g2-operations、g3-release、g4-batch、g5-flows、g5-web、g5-readme-rendered、release-manifest、licenses、checks/）；Figma 文件与 `design/figma.json`；README 与设计系统文档。
+- **阻塞 / 未执行**（原因明确，均非代码缺陷）：带 OCI 镜像的发行与去重离线包——本机宿主盘 16 GiB，低于写入量 + 15 GiB 保留量，检查记为 BLOCKED（在更空的磁盘上 `make phase3-check ARGS="--only p3-release-images,p3-offline-bundle"`）；真实 LLM 端点与 PRISM-games 不在阶段三检查集中（阶段二的条件 / 扩展检查结论保持，`make checks SUITE=phase2 ARGS="--only model-real,prism-games"` 可重跑）；Figma 视频导出未使用（视频由同一 SVG 在本地导出，理由见 G5）。
+- **下一步（后续领域集成文件）**：新插件用公开接口接入——语义驱动（`driver.*` 能力决定能力报告，联合语义用 `driver.joint_predict`）、环境（`env.batch_step`、会话 / 对账能力）、执行门控（`EXECUTION_GATE`）、评分器；标签与值写在描述符 `ui` 中，不改核心 UI；新增检查加入 `scripts/phase3_check.py` 或新套件模块（同一引擎），写证据的工具读取 `FAL_EVIDENCE_DIR`；视觉以 `docs/design-system.md` 与基准截图为基线；完整产品验收在全部集成完成后统一收口。

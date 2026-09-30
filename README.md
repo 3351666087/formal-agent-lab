@@ -77,7 +77,7 @@ fal replay verify wh.replay.zip && fal replay batches wh.replay.zip   # 离线�
 
 ## 文档
 
-- **阶段三交接（进行中）**：[docs/handoff/phase3-draft.md](docs/handoff/phase3-draft.md) · 任务书 [docs/execution/phase-3a.md](docs/execution/phase-3a.md) · 证据 [docs/execution/evidence/phase3/](docs/execution/evidence/phase3/)
+- **阶段三 A 交接**（通用平台与视觉交付已完成，领域集成待续）：[docs/handoff/phase3-draft.md](docs/handoff/phase3-draft.md) · 任务书 [docs/execution/phase-3a.md](docs/execution/phase-3a.md) · 检查 `make phase3-check` → [docs/execution/evidence/phase3/checks/](docs/execution/evidence/phase3/checks/results.json)
 - **设计系统**：[docs/design-system.md](docs/design-system.md)（tokens、组件、图表、页面、媒体生成命令、基准截图）· [Figma 设计文件](https://www.figma.com/design/uuV6JeilZQkhnIQcJYEUET)
 - **阶段二（历史验收）**：[docs/handoff/phase2.md](docs/handoff/phase2.md) · [验收](docs/acceptance-phase2.md) · 阶段一 [phase1.md](docs/handoff/phase1.md)
 - **使用与运维**：[入门](docs/getting-started.md) · [本地开发](docs/local-development.md) · [部署](docs/deployment.md)

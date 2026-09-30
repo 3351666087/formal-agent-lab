@@ -1,0 +1,1176 @@
+{
+  "format": "checks@2",
+  "suite": "phase3",
+  "generated_at": "2026-09-30T01:12:17Z",
+  "source_revision": {
+    "commit": "962bd37df0a44afcec318593f4358c0336f23aa3",
+    "worktree": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "clean": true,
+      "changed_bytes": 0,
+      "untracked_files": 0,
+      "excluded_outputs": [
+        "docs/execution/evidence/",
+        "docs/handoff/",
+        "docs/licenses.md",
+        "docs/api/openapi.json",
+        "out/",
+        "docs/execution/evidence/phase3/checks/"
+      ]
+    }
+  },
+  "config": {
+    "sha256": "21b564b02883d83ec219a033f215b8a307ec3e066759a46abfe0cacd18f8898f",
+    "parts": {
+      "checks": "a71d55e699923e34135393344076007d65a5c28255f4edd69c7b45a849b1b8ef",
+      "uv.lock": "6e0e974ebf84f63aea462feb9458f3ef781b4ea4a15f54ef82448069a697a9af",
+      "pnpm-lock.yaml": "02d23c074a75bccfaea1ed4ff51272ba3d6cbb724e8012366c8d18e9bb0a7c3a",
+      "deploy/compose/services.dev.yaml": "4c876045f15d5bd972c517e7de2d3626cd252d1842797f0152f596f7d8ea9ce0",
+      "deploy/compose/docker-compose.yaml": "ff4c34cae068cc6dacd4db7f4273887ff6c2bb0b3b84938a7b8969488bfb20ff"
+    }
+  },
+  "command": "python scripts/check_runner.py --suite phase3 --only p3-batch-evidence",
+  "environment": {
+    "os": "Ubuntu 24.04.4 LTS",
+    "arch": "aarch64",
+    "kernel": "6.8.0-117-generic",
+    "python": "3.12.3",
+    "uv": "uv 0.12.19 (aarch64-unknown-linux-gnu)",
+    "node": "v24.21.0",
+    "pnpm": "12.6.0",
+    "docker": "29.5.2",
+    "z3": "5.1.0",
+    "temporalio": "1.33.0"
+  },
+  "resources_before": {
+    "cpus": 4,
+    "memory_gib": {
+      "MemTotal": 5.77,
+      "MemAvailable": 4.01
+    },
+    "load_avg": [
+      0.21,
+      0.13,
+      0.1
+    ],
+    "disk_free_gib": {
+      "host (repository filesystem)": 16.7,
+      "docker (/var/lib/docker)": 22.2
+    },
+    "concurrency": 1,
+    "note": "checks run one at a time; heavy checks ask disk_guard first"
+  },
+  "resources_after": {
+    "cpus": 4,
+    "memory_gib": {
+      "MemTotal": 5.77,
+      "MemAvailable": 3.96
+    },
+    "load_avg": [
+      0.21,
+      0.13,
+      0.1
+    ],
+    "disk_free_gib": {
+      "host (repository filesystem)": 16.7,
+      "docker (/var/lib/docker)": 22.2
+    },
+    "concurrency": 1,
+    "note": "checks run one at a time; heavy checks ask disk_guard first"
+  },
+  "summary": {
+    "PASS": 22,
+    "FAIL": 0,
+    "NOT_RUN": 0,
+    "NOT_SELECTED": 0,
+    "BLOCKED": 2
+  },
+  "groups": {
+    "g1-contracts": "PASS",
+    "g2-operations": "PASS",
+    "g3-release": "PASS",
+    "g4-batch": "PASS",
+    "g5-product": "PASS",
+    "g6-release": "PASS",
+    "regression": "PASS"
+  },
+  "mandatory_passed": true,
+  "timing": {
+    "this_run_s": 1.4,
+    "last_full_run_s": 2183.8,
+    "last_full_run_at": "2026-09-29T22:54:13Z",
+    "partial_runs": [
+      {
+        "started_at": "2026-09-30T01:12:16Z",
+        "duration_s": 1.4,
+        "selection": {
+          "group": [],
+          "only": [
+            "p3-batch-evidence"
+          ],
+          "skip": []
+        },
+        "results": {
+          "p3-batch-evidence": "PASS"
+        }
+      }
+    ]
+  },
+  "runs": [
+    {
+      "started_at": "2026-09-29T22:54:13Z",
+      "finished_at": "2026-09-29T23:30:37Z",
+      "duration_s": 2183.8,
+      "full": true,
+      "selection": {
+        "group": [],
+        "only": [],
+        "skip": []
+      },
+      "checks": [
+        "p3-contracts",
+        "p3-compat",
+        "p3-ops-unit",
+        "p3-ops-evidence",
+        "p3-ops-platform",
+        "p3-release-unit",
+        "p3-release-evidence",
+        "p3-governance-platform",
+        "p3-batch-unit",
+        "p3-batch-evidence",
+        "p3-batch-platform",
+        "p3-design-sources",
+        "p3-web-build",
+        "p3-web-ui",
+        "p3-product-flows",
+        "p3-web-flows",
+        "p3-matrix-kept-db",
+        "p3-resources",
+        "p3-release-light",
+        "p3-release-images",
+        "p3-offline-bundle",
+        "p3-unit-all",
+        "p3-phase1-parity",
+        "p3-integration-all"
+      ],
+      "commit": "962bd37df0a44afcec318593f4358c0336f23aa3",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "results": {
+        "p3-contracts": "PASS",
+        "p3-compat": "PASS",
+        "p3-ops-unit": "PASS",
+        "p3-ops-evidence": "PASS",
+        "p3-ops-platform": "PASS",
+        "p3-release-unit": "PASS",
+        "p3-release-evidence": "PASS",
+        "p3-governance-platform": "PASS",
+        "p3-batch-unit": "PASS",
+        "p3-batch-evidence": "PASS",
+        "p3-batch-platform": "PASS",
+        "p3-design-sources": "PASS",
+        "p3-web-build": "PASS",
+        "p3-web-ui": "PASS",
+        "p3-product-flows": "PASS",
+        "p3-web-flows": "PASS",
+        "p3-matrix-kept-db": "PASS",
+        "p3-resources": "PASS",
+        "p3-release-light": "PASS",
+        "p3-release-images": "BLOCKED",
+        "p3-offline-bundle": "BLOCKED",
+        "p3-unit-all": "PASS",
+        "p3-phase1-parity": "PASS",
+        "p3-integration-all": "PASS"
+      }
+    },
+    {
+      "started_at": "2026-09-30T01:12:16Z",
+      "finished_at": "2026-09-30T01:12:17Z",
+      "duration_s": 1.4,
+      "full": false,
+      "selection": {
+        "group": [],
+        "only": [
+          "p3-batch-evidence"
+        ],
+        "skip": []
+      },
+      "checks": [
+        "p3-batch-evidence"
+      ],
+      "commit": "962bd37df0a44afcec318593f4358c0336f23aa3",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "results": {
+        "p3-batch-evidence": "PASS"
+      }
+    }
+  ],
+  "checks": [
+    {
+      "id": "p3-contracts",
+      "group": "g1-contracts",
+      "title": "契约 v2 增量无漂移（v1 冻结），Python / JSON Schema / TypeScript 样例往返",
+      "command": "make contracts-check && uv run --frozen pytest -p no:cacheprovider -q tests/contracts packages/contracts && pnpm --filter @formal-lab/contracts run test",
+      "tasks": [
+        "P3A-G1"
+      ],
+      "evidence": [
+        "contracts/v2/DIGEST.json",
+        "docs/contracts/v2.md"
+      ],
+      "requires": null,
+      "profile": "local-lite",
+      "kind": "mandatory",
+      "retries": 0,
+      "heavy_gib": 0.0,
+      "result": "PASS",
+      "summary": "ℹ duration_ms 416.892083",
+      "checked_commit": "962bd37df0a44afcec318593f4358c0336f23aa3",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "worktree_clean": true,
+      "config_sha256": "21b564b02883d83ec219a033f215b8a307ec3e066759a46abfe0cacd18f8898f",
+      "started_at": "2026-09-29T22:54:13Z",
+      "finished_at": "2026-09-29T22:54:18Z",
+      "duration_s": 4.9,
+      "attempts": [
+        {
+          "attempt": 1,
+          "started_at": "2026-09-29T22:54:13Z",
+          "finished_at": "2026-09-29T22:54:18Z",
+          "duration_s": 4.9,
+          "exit_code": 0,
+          "result": "PASS",
+          "log": "docs/execution/evidence/phase3/checks/logs/p3-contracts/20260929T225413Z-attempt-1.log",
+          "summary": "ℹ duration_ms 416.892083"
+        }
+      ],
+      "first_failure": null,
+      "flaky": false,
+      "inherited": false,
+      "history": []
+    },
+    {
+      "id": "p3-compat",
+      "group": "g1-contracts",
+      "title": "阶段二 v2 回放样本可读、包外插件合同检查、架构约束、SDK",
+      "command": "uv run --frozen pytest -p no:cacheprovider -q tests/compat examples/external-plugin tests/architecture packages/sdk",
+      "tasks": [
+        "P3A-G1"
+      ],
+      "evidence": [
+        "tests/compat/fixtures/phase2/CAPTURE.json"
+      ],
+      "requires": null,
+      "profile": "local-lite",
+      "kind": "mandatory",
+      "retries": 0,
+      "heavy_gib": 0.0,
+      "result": "PASS",
+      "summary": "54 passed in 1.59s",
+      "checked_commit": "962bd37df0a44afcec318593f4358c0336f23aa3",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "worktree_clean": true,
+      "config_sha256": "21b564b02883d83ec219a033f215b8a307ec3e066759a46abfe0cacd18f8898f",
+      "started_at": "2026-09-29T22:54:18Z",
+      "finished_at": "2026-09-29T22:54:20Z",
+      "duration_s": 1.8,
+      "attempts": [
+        {
+          "attempt": 1,
+          "started_at": "2026-09-29T22:54:18Z",
+          "finished_at": "2026-09-29T22:54:20Z",
+          "duration_s": 1.8,
+          "exit_code": 0,
+          "result": "PASS",
+          "log": "docs/execution/evidence/phase3/checks/logs/p3-compat/20260929T225418Z-attempt-1.log",
+          "summary": "54 passed in 1.59s"
+        }
+      ],
+      "first_failure": null,
+      "flaky": false,
+      "inherited": false,
+      "history": []
+    },
+    {
+      "id": "p3-ops-unit",
+      "group": "g2-operations",
+      "title": "执行门控、请求摘要、复用 / 冲突 / 安全重发（单元与订单示例）",
+      "command": "uv run --frozen pytest -p no:cacheprovider -q packages/runtime/tests/test_operation_consistency.py examples/warehouse-allocation/tests/test_capacity_gate.py examples/local-order-service",
+      "tasks": [
+        "P3A-G2"
+      ],
+      "evidence": [],
+      "requires": null,
+      "profile": "local-lite",
+      "kind": "mandatory",
+      "retries": 0,
+      "heavy_gib": 0.0,
+      "result": "PASS",
+      "summary": "25 passed in 20.00s",
+      "checked_commit": "962bd37df0a44afcec318593f4358c0336f23aa3",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "worktree_clean": true,
+      "config_sha256": "21b564b02883d83ec219a033f215b8a307ec3e066759a46abfe0cacd18f8898f",
+      "started_at": "2026-09-29T22:54:20Z",
+      "finished_at": "2026-09-29T22:54:40Z",
+      "duration_s": 20.2,
+      "attempts": [
+        {
+          "attempt": 1,
+          "started_at": "2026-09-29T22:54:20Z",
+          "finished_at": "2026-09-29T22:54:40Z",
+          "duration_s": 20.2,
+          "exit_code": 0,
+          "result": "PASS",
+          "log": "docs/execution/evidence/phase3/checks/logs/p3-ops-unit/20260929T225420Z-attempt-1.log",
+          "summary": "25 passed in 20.00s"
+        }
+      ],
+      "first_failure": null,
+      "flaky": false,
+      "inherited": false,
+      "history": []
+    },
+    {
+      "id": "p3-ops-evidence",
+      "group": "g2-operations",
+      "title": "真实订单服务进程：9 种一致性场景（逐项统计服务的操作表）",
+      "command": "uv run --frozen python scripts/operation_consistency_evidence.py",
+      "tasks": [
+        "P3A-G2"
+      ],
+      "evidence": [
+        "docs/execution/evidence/phase3/g2-operations.json"
+      ],
+      "requires": null,
+      "profile": "local-lite",
+      "kind": "mandatory",
+      "retries": 0,
+      "heavy_gib": 0.0,
+      "result": "PASS",
+      "summary": "}",
+      "checked_commit": "962bd37df0a44afcec318593f4358c0336f23aa3",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "worktree_clean": true,
+      "config_sha256": "21b564b02883d83ec219a033f215b8a307ec3e066759a46abfe0cacd18f8898f",
+      "started_at": "2026-09-29T22:54:40Z",
+      "finished_at": "2026-09-29T22:54:42Z",
+      "duration_s": 2.5,
+      "attempts": [
+        {
+          "attempt": 1,
+          "started_at": "2026-09-29T22:54:40Z",
+          "finished_at": "2026-09-29T22:54:42Z",
+          "duration_s": 2.5,
+          "exit_code": 0,
+          "result": "PASS",
+          "log": "docs/execution/evidence/phase3/checks/logs/p3-ops-evidence/20260929T225440Z-attempt-1.log",
+          "summary": "}"
+        }
+      ],
+      "first_failure": null,
+      "flaky": false,
+      "inherited": false,
+      "history": []
+    },
+    {
+      "id": "p3-ops-platform",
+      "group": "g2-operations",
+      "title": "持久路径：门控运行中杀 Worker、订单服务丢失应答与对账",
+      "command": "uv run --frozen pytest -p no:cacheprovider -q -m integration tests/integration/test_operation_consistency_platform.py tests/integration/test_order_service_platform.py",
+      "tasks": [
+        "P3A-G2"
+      ],
+      "evidence": [],
+      "requires": "services",
+      "profile": "local-services",
+      "kind": "mandatory",
+      "retries": 1,
+      "heavy_gib": 0.0,
+      "result": "PASS",
+      "summary": "4 passed in 82.58s (0:01:22)",
+      "checked_commit": "962bd37df0a44afcec318593f4358c0336f23aa3",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "worktree_clean": true,
+      "config_sha256": "21b564b02883d83ec219a033f215b8a307ec3e066759a46abfe0cacd18f8898f",
+      "started_at": "2026-09-29T22:54:43Z",
+      "finished_at": "2026-09-29T22:56:06Z",
+      "duration_s": 82.6,
+      "attempts": [
+        {
+          "attempt": 1,
+          "started_at": "2026-09-29T22:54:43Z",
+          "finished_at": "2026-09-29T22:56:06Z",
+          "duration_s": 82.6,
+          "exit_code": 0,
+          "result": "PASS",
+          "log": "docs/execution/evidence/phase3/checks/logs/p3-ops-platform/20260929T225443Z-attempt-1.log",
+          "summary": "4 passed in 82.58s (0:01:22)"
+        }
+      ],
+      "first_failure": null,
+      "flaky": false,
+      "inherited": false,
+      "history": []
+    },
+    {
+      "id": "p3-release-unit",
+      "group": "g3-release",
+      "title": "能力报告、发布配置、流程完成与性质成立分开、最小驱动",
+      "command": "uv run --frozen pytest -p no:cacheprovider -q packages/runtime/tests/test_release.py",
+      "tasks": [
+        "P3A-G3"
+      ],
+      "evidence": [],
+      "requires": null,
+      "profile": "local-lite",
+      "kind": "mandatory",
+      "retries": 0,
+      "heavy_gib": 0.0,
+      "result": "PASS",
+      "summary": "6 passed in 5.05s",
+      "checked_commit": "962bd37df0a44afcec318593f4358c0336f23aa3",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "worktree_clean": true,
+      "config_sha256": "21b564b02883d83ec219a033f215b8a307ec3e066759a46abfe0cacd18f8898f",
+      "started_at": "2026-09-29T22:56:06Z",
+      "finished_at": "2026-09-29T22:56:11Z",
+      "duration_s": 5.3,
+      "attempts": [
+        {
+          "attempt": 1,
+          "started_at": "2026-09-29T22:56:06Z",
+          "finished_at": "2026-09-29T22:56:11Z",
+          "duration_s": 5.3,
+          "exit_code": 0,
+          "result": "PASS",
+          "log": "docs/execution/evidence/phase3/checks/logs/p3-release-unit/20260929T225606Z-attempt-1.log",
+          "summary": "6 passed in 5.05s"
+        }
+      ],
+      "first_failure": null,
+      "flaky": false,
+      "inherited": false,
+      "history": []
+    },
+    {
+      "id": "p3-release-evidence",
+      "group": "g3-release",
+      "title": "真实修订：差异 → 回归案例 → 旧版拒绝、修订版发布；陈旧依据分类",
+      "command": "uv run --frozen python scripts/model_revision_evidence.py",
+      "tasks": [
+        "P3A-G3"
+      ],
+      "evidence": [
+        "docs/execution/evidence/phase3/g3-release.json"
+      ],
+      "requires": null,
+      "profile": "local-lite",
+      "kind": "mandatory",
+      "retries": 0,
+      "heavy_gib": 0.0,
+      "result": "PASS",
+      "summary": "}",
+      "checked_commit": "962bd37df0a44afcec318593f4358c0336f23aa3",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "worktree_clean": true,
+      "config_sha256": "21b564b02883d83ec219a033f215b8a307ec3e066759a46abfe0cacd18f8898f",
+      "started_at": "2026-09-29T22:56:11Z",
+      "finished_at": "2026-09-29T22:56:16Z",
+      "duration_s": 4.1,
+      "attempts": [
+        {
+          "attempt": 1,
+          "started_at": "2026-09-29T22:56:11Z",
+          "finished_at": "2026-09-29T22:56:16Z",
+          "duration_s": 4.1,
+          "exit_code": 0,
+          "result": "PASS",
+          "log": "docs/execution/evidence/phase3/checks/logs/p3-release-evidence/20260929T225611Z-attempt-1.log",
+          "summary": "}"
+        }
+      ],
+      "first_failure": null,
+      "flaky": false,
+      "inherited": false,
+      "history": []
+    },
+    {
+      "id": "p3-governance-platform",
+      "group": "g3-release",
+      "title": "API 能力报告、必需检查、差异 → 修订 → 新实验",
+      "command": "uv run --frozen pytest -p no:cacheprovider -q -m integration tests/integration/test_governance_platform.py",
+      "tasks": [
+        "P3A-G3"
+      ],
+      "evidence": [],
+      "requires": "services",
+      "profile": "local-services",
+      "kind": "mandatory",
+      "retries": 0,
+      "heavy_gib": 0.0,
+      "result": "PASS",
+      "summary": "3 passed in 11.25s",
+      "checked_commit": "962bd37df0a44afcec318593f4358c0336f23aa3",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "worktree_clean": true,
+      "config_sha256": "21b564b02883d83ec219a033f215b8a307ec3e066759a46abfe0cacd18f8898f",
+      "started_at": "2026-09-29T22:56:16Z",
+      "finished_at": "2026-09-29T22:56:27Z",
+      "duration_s": 11.5,
+      "attempts": [
+        {
+          "attempt": 1,
+          "started_at": "2026-09-29T22:56:16Z",
+          "finished_at": "2026-09-29T22:56:27Z",
+          "duration_s": 11.5,
+          "exit_code": 0,
+          "result": "PASS",
+          "log": "docs/execution/evidence/phase3/checks/logs/p3-governance-platform/20260929T225616Z-attempt-1.log",
+          "summary": "3 passed in 11.25s"
+        }
+      ],
+      "first_failure": null,
+      "flaky": false,
+      "inherited": false,
+      "history": []
+    },
+    {
+      "id": "p3-batch-unit",
+      "group": "g4-batch",
+      "title": "同步批次、成员状态、参与者视图与设置、顺序模式不变",
+      "command": "uv run --frozen pytest -p no:cacheprovider -q examples/warehouse-allocation/tests packages/runtime/tests/test_participants.py packages/runtime/tests/test_multi_actor.py",
+      "tasks": [
+        "P3A-G4"
+      ],
+      "evidence": [],
+      "requires": null,
+      "profile": "local-lite",
+      "kind": "mandatory",
+      "retries": 0,
+      "heavy_gib": 0.0,
+      "result": "PASS",
+      "summary": "23 passed in 131.15s (0:02:11)",
+      "checked_commit": "962bd37df0a44afcec318593f4358c0336f23aa3",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "worktree_clean": true,
+      "config_sha256": "21b564b02883d83ec219a033f215b8a307ec3e066759a46abfe0cacd18f8898f",
+      "started_at": "2026-09-29T22:56:27Z",
+      "finished_at": "2026-09-29T22:58:38Z",
+      "duration_s": 131.0,
+      "attempts": [
+        {
+          "attempt": 1,
+          "started_at": "2026-09-29T22:56:27Z",
+          "finished_at": "2026-09-29T22:58:38Z",
+          "duration_s": 131.0,
+          "exit_code": 0,
+          "result": "PASS",
+          "log": "docs/execution/evidence/phase3/checks/logs/p3-batch-unit/20260929T225627Z-attempt-1.log",
+          "summary": "23 passed in 131.15s (0:02:11)"
+        }
+      ],
+      "first_failure": null,
+      "flaky": false,
+      "inherited": false,
+      "history": []
+    },
+    {
+      "id": "p3-batch-evidence",
+      "group": "g4-batch",
+      "title": "仓储批次：一轮一个环境步、轮中重启、各看各的字段、阶段二轨迹不变",
+      "command": "uv run --frozen python scripts/joint_batch_evidence.py",
+      "tasks": [
+        "P3A-G4"
+      ],
+      "evidence": [
+        "docs/execution/evidence/phase3/g4-batch.json"
+      ],
+      "requires": null,
+      "profile": "local-lite",
+      "kind": "mandatory",
+      "retries": 0,
+      "heavy_gib": 0.0,
+      "result": "PASS",
+      "summary": "}",
+      "checked_commit": "962bd37df0a44afcec318593f4358c0336f23aa3",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "worktree_clean": true,
+      "config_sha256": "21b564b02883d83ec219a033f215b8a307ec3e066759a46abfe0cacd18f8898f",
+      "started_at": "2026-09-30T01:12:16Z",
+      "finished_at": "2026-09-30T01:12:17Z",
+      "duration_s": 1.4,
+      "attempts": [
+        {
+          "attempt": 1,
+          "started_at": "2026-09-30T01:12:16Z",
+          "finished_at": "2026-09-30T01:12:17Z",
+          "duration_s": 1.4,
+          "exit_code": 0,
+          "result": "PASS",
+          "log": "docs/execution/evidence/phase3/checks/logs/p3-batch-evidence/20260930T011216Z-attempt-1.log",
+          "summary": "}"
+        }
+      ],
+      "first_failure": null,
+      "flaky": false,
+      "inherited": false,
+      "history": [
+        {
+          "result": "PASS",
+          "checked_commit": "962bd37df0a44afcec318593f4358c0336f23aa3",
+          "finished_at": "2026-09-29T22:58:40Z",
+          "duration_s": 1.3,
+          "attempts": 1
+        }
+      ]
+    },
+    {
+      "id": "p3-batch-platform",
+      "group": "g4-batch",
+      "title": "持久路径：轮中暂停 + 杀 Worker 继续批次、轮中取消、视图校验；多参与者回归",
+      "command": "uv run --frozen pytest -p no:cacheprovider -q -m integration tests/integration/test_joint_batch_platform.py tests/integration/test_multi_actor_platform.py",
+      "tasks": [
+        "P3A-G4"
+      ],
+      "evidence": [],
+      "requires": "services",
+      "profile": "local-services",
+      "kind": "mandatory",
+      "retries": 1,
+      "heavy_gib": 0.0,
+      "result": "PASS",
+      "summary": "5 passed in 55.12s",
+      "checked_commit": "962bd37df0a44afcec318593f4358c0336f23aa3",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "worktree_clean": true,
+      "config_sha256": "21b564b02883d83ec219a033f215b8a307ec3e066759a46abfe0cacd18f8898f",
+      "started_at": "2026-09-29T22:58:40Z",
+      "finished_at": "2026-09-29T22:59:35Z",
+      "duration_s": 55.2,
+      "attempts": [
+        {
+          "attempt": 1,
+          "started_at": "2026-09-29T22:58:40Z",
+          "finished_at": "2026-09-29T22:59:35Z",
+          "duration_s": 55.2,
+          "exit_code": 0,
+          "result": "PASS",
+          "log": "docs/execution/evidence/phase3/checks/logs/p3-batch-platform/20260929T225840Z-attempt-1.log",
+          "summary": "5 passed in 55.12s"
+        }
+      ],
+      "first_failure": null,
+      "flaky": false,
+      "inherited": false,
+      "history": []
+    },
+    {
+      "id": "p3-design-sources",
+      "group": "g5-product",
+      "title": "tokens.css 与 design/tokens.json 一致；演示 SVG / 封面 / 预览 / 架构图与源一致",
+      "command": "python3 scripts/design_tokens.py --check && python3 scripts/render_demo.py svg && git diff --exit-code -- docs/assets/demo.svg docs/assets/demo-cover.svg docs/assets/demo.html docs/assets/architecture.svg",
+      "tasks": [
+        "P3A-G5"
+      ],
+      "evidence": [
+        "web/src/tokens.css",
+        "docs/assets/demo.svg"
+      ],
+      "requires": null,
+      "profile": "local-lite",
+      "kind": "mandatory",
+      "retries": 0,
+      "heavy_gib": 0.0,
+      "result": "PASS",
+      "summary": "wrote demo.svg (134187 B), demo-cover.svg, demo.html, architecture.svg",
+      "checked_commit": "962bd37df0a44afcec318593f4358c0336f23aa3",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "worktree_clean": true,
+      "config_sha256": "21b564b02883d83ec219a033f215b8a307ec3e066759a46abfe0cacd18f8898f",
+      "started_at": "2026-09-29T22:59:35Z",
+      "finished_at": "2026-09-29T22:59:35Z",
+      "duration_s": 0.1,
+      "attempts": [
+        {
+          "attempt": 1,
+          "started_at": "2026-09-29T22:59:35Z",
+          "finished_at": "2026-09-29T22:59:35Z",
+          "duration_s": 0.1,
+          "exit_code": 0,
+          "result": "PASS",
+          "log": "docs/execution/evidence/phase3/checks/logs/p3-design-sources/20260929T225935Z-attempt-1.log",
+          "summary": "wrote demo.svg (134187 B), demo-cover.svg, demo.html, architecture.svg"
+        }
+      ],
+      "first_failure": null,
+      "flaky": false,
+      "inherited": false,
+      "history": []
+    },
+    {
+      "id": "p3-web-build",
+      "group": "g5-product",
+      "title": "Web 类型检查与生产构建",
+      "command": "pnpm --dir web exec tsc --noEmit -p tsconfig.json && pnpm --dir web exec vite build",
+      "tasks": [
+        "P3A-G5"
+      ],
+      "evidence": [],
+      "requires": null,
+      "profile": "local-lite",
+      "kind": "mandatory",
+      "retries": 0,
+      "heavy_gib": 0.0,
+      "result": "PASS",
+      "summary": "✓ built in 402ms",
+      "checked_commit": "962bd37df0a44afcec318593f4358c0336f23aa3",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "worktree_clean": true,
+      "config_sha256": "21b564b02883d83ec219a033f215b8a307ec3e066759a46abfe0cacd18f8898f",
+      "started_at": "2026-09-29T22:59:35Z",
+      "finished_at": "2026-09-29T22:59:36Z",
+      "duration_s": 0.9,
+      "attempts": [
+        {
+          "attempt": 1,
+          "started_at": "2026-09-29T22:59:35Z",
+          "finished_at": "2026-09-29T22:59:36Z",
+          "duration_s": 0.9,
+          "exit_code": 0,
+          "result": "PASS",
+          "log": "docs/execution/evidence/phase3/checks/logs/p3-web-build/20260929T225935Z-attempt-1.log",
+          "summary": "✓ built in 402ms"
+        }
+      ],
+      "first_failure": null,
+      "flaky": false,
+      "inherited": false,
+      "history": []
+    },
+    {
+      "id": "p3-web-ui",
+      "group": "g5-product",
+      "title": "Playwright：六个区域、新项目到两参与者成本对比、离线回放",
+      "command": "uv run --frozen pytest -p no:cacheprovider -q -m 'integration and ui' tests/integration/test_web_ui.py tests/integration/test_web_product.py",
+      "tasks": [
+        "P3A-G5"
+      ],
+      "evidence": [],
+      "requires": "services",
+      "profile": "local-services",
+      "kind": "mandatory",
+      "retries": 0,
+      "heavy_gib": 0.0,
+      "result": "PASS",
+      "summary": "14 passed in 343.31s (0:05:43)",
+      "checked_commit": "962bd37df0a44afcec318593f4358c0336f23aa3",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "worktree_clean": true,
+      "config_sha256": "21b564b02883d83ec219a033f215b8a307ec3e066759a46abfe0cacd18f8898f",
+      "started_at": "2026-09-29T22:59:36Z",
+      "finished_at": "2026-09-29T23:05:19Z",
+      "duration_s": 342.5,
+      "attempts": [
+        {
+          "attempt": 1,
+          "started_at": "2026-09-29T22:59:36Z",
+          "finished_at": "2026-09-29T23:05:18Z",
+          "duration_s": 342.5,
+          "exit_code": 0,
+          "result": "PASS",
+          "log": "docs/execution/evidence/phase3/checks/logs/p3-web-ui/20260929T225936Z-attempt-1.log",
+          "summary": "14 passed in 343.31s (0:05:43)"
+        }
+      ],
+      "first_failure": null,
+      "flaky": false,
+      "inherited": false,
+      "history": []
+    },
+    {
+      "id": "p3-product-flows",
+      "group": "g5-product",
+      "title": "SDK / CLI：仓储批次与订单恢复的运行、查询、导出、离线读取",
+      "command": "uv run --frozen python scripts/product_flow_evidence.py",
+      "tasks": [
+        "P3A-G5"
+      ],
+      "evidence": [
+        "docs/execution/evidence/phase3/g5-flows.json"
+      ],
+      "requires": "devstack",
+      "profile": "local-services",
+      "kind": "mandatory",
+      "retries": 0,
+      "heavy_gib": 0.0,
+      "result": "PASS",
+      "summary": "}",
+      "checked_commit": "962bd37df0a44afcec318593f4358c0336f23aa3",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "worktree_clean": true,
+      "config_sha256": "21b564b02883d83ec219a033f215b8a307ec3e066759a46abfe0cacd18f8898f",
+      "started_at": "2026-09-29T23:05:19Z",
+      "finished_at": "2026-09-29T23:05:32Z",
+      "duration_s": 13.1,
+      "attempts": [
+        {
+          "attempt": 1,
+          "started_at": "2026-09-29T23:05:19Z",
+          "finished_at": "2026-09-29T23:05:32Z",
+          "duration_s": 13.1,
+          "exit_code": 0,
+          "result": "PASS",
+          "log": "docs/execution/evidence/phase3/checks/logs/p3-product-flows/20260929T230519Z-attempt-1.log",
+          "summary": "}"
+        }
+      ],
+      "first_failure": null,
+      "flaky": false,
+      "inherited": false,
+      "history": []
+    },
+    {
+      "id": "p3-web-flows",
+      "group": "g5-product",
+      "title": "Web：同样两个流程 + 复用标记、窄屏、键盘、减少动态（截图写到检查目录）",
+      "command": "uv run --frozen python scripts/capture_screens.py --shots out/checks/phase3-screens",
+      "tasks": [
+        "P3A-G5"
+      ],
+      "evidence": [
+        "docs/execution/evidence/phase3/g5-web.json"
+      ],
+      "requires": "devstack",
+      "profile": "local-services",
+      "kind": "mandatory",
+      "retries": 0,
+      "heavy_gib": 0.0,
+      "result": "PASS",
+      "summary": "}",
+      "checked_commit": "962bd37df0a44afcec318593f4358c0336f23aa3",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "worktree_clean": true,
+      "config_sha256": "21b564b02883d83ec219a033f215b8a307ec3e066759a46abfe0cacd18f8898f",
+      "started_at": "2026-09-29T23:05:32Z",
+      "finished_at": "2026-09-29T23:06:16Z",
+      "duration_s": 43.6,
+      "attempts": [
+        {
+          "attempt": 1,
+          "started_at": "2026-09-29T23:05:32Z",
+          "finished_at": "2026-09-29T23:06:16Z",
+          "duration_s": 43.6,
+          "exit_code": 0,
+          "result": "PASS",
+          "log": "docs/execution/evidence/phase3/checks/logs/p3-web-flows/20260929T230532Z-attempt-1.log",
+          "summary": "}"
+        }
+      ],
+      "first_failure": null,
+      "flaky": false,
+      "inherited": false,
+      "history": []
+    },
+    {
+      "id": "p3-matrix-kept-db",
+      "group": "g6-release",
+      "title": "矩阵测试在保留的数据库上连续两次通过（两个独立会话）",
+      "command": "uv run --frozen pytest -p no:cacheprovider -q -m integration tests/integration/test_matrix_v2_platform.py && uv run --frozen pytest -p no:cacheprovider -q -m integration tests/integration/test_matrix_v2_platform.py",
+      "tasks": [
+        "P3A-G6"
+      ],
+      "evidence": [],
+      "requires": "services",
+      "profile": "local-services",
+      "kind": "mandatory",
+      "retries": 0,
+      "heavy_gib": 0.0,
+      "result": "PASS",
+      "summary": "2 passed in 142.59s (0:02:22)",
+      "checked_commit": "962bd37df0a44afcec318593f4358c0336f23aa3",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "worktree_clean": true,
+      "config_sha256": "21b564b02883d83ec219a033f215b8a307ec3e066759a46abfe0cacd18f8898f",
+      "started_at": "2026-09-29T23:06:16Z",
+      "finished_at": "2026-09-29T23:11:01Z",
+      "duration_s": 284.9,
+      "attempts": [
+        {
+          "attempt": 1,
+          "started_at": "2026-09-29T23:06:16Z",
+          "finished_at": "2026-09-29T23:11:01Z",
+          "duration_s": 284.9,
+          "exit_code": 0,
+          "result": "PASS",
+          "log": "docs/execution/evidence/phase3/checks/logs/p3-matrix-kept-db/20260929T230616Z-attempt-1.log",
+          "summary": "2 passed in 142.59s (0:02:22)"
+        }
+      ],
+      "first_failure": null,
+      "flaky": false,
+      "inherited": false,
+      "history": []
+    },
+    {
+      "id": "p3-resources",
+      "group": "g6-release",
+      "title": "资源探测：宿主共享盘与 VM / Docker 盘（disk_guard）、profile 可用性",
+      "command": "python3 scripts/disk_guard.py --need 12 --label phase3-check && python3 scripts/doctor.py --record docs/execution/evidence/phase3/doctor.json",
+      "tasks": [
+        "P3A-G6"
+      ],
+      "evidence": [
+        "docs/execution/evidence/phase3/doctor.json"
+      ],
+      "requires": null,
+      "profile": "local-lite",
+      "kind": "mandatory",
+      "retries": 0,
+      "heavy_gib": 0.0,
+      "result": "PASS",
+      "summary": "profile   local-kind      AVAILABLE    ~3000 MiB 2 CPU 5 GiB",
+      "checked_commit": "962bd37df0a44afcec318593f4358c0336f23aa3",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "worktree_clean": true,
+      "config_sha256": "21b564b02883d83ec219a033f215b8a307ec3e066759a46abfe0cacd18f8898f",
+      "started_at": "2026-09-29T23:11:01Z",
+      "finished_at": "2026-09-29T23:11:03Z",
+      "duration_s": 1.4,
+      "attempts": [
+        {
+          "attempt": 1,
+          "started_at": "2026-09-29T23:11:01Z",
+          "finished_at": "2026-09-29T23:11:03Z",
+          "duration_s": 1.4,
+          "exit_code": 0,
+          "result": "PASS",
+          "log": "docs/execution/evidence/phase3/checks/logs/p3-resources/20260929T231101Z-attempt-1.log",
+          "summary": "profile   local-kind      AVAILABLE    ~3000 MiB 2 CPU 5 GiB"
+        }
+      ],
+      "first_failure": null,
+      "flaky": false,
+      "inherited": false,
+      "history": []
+    },
+    {
+      "id": "p3-release-light",
+      "group": "g6-release",
+      "title": "发行（不建镜像）：全部 wheel、Web 包、干净 venv 中的 SDK/CLI、许可证清单",
+      "command": "uv run --frozen python scripts/release.py --skip-images --out out/release-p3 --evidence docs/execution/evidence/phase3/release-manifest.json",
+      "tasks": [
+        "P3A-G6"
+      ],
+      "evidence": [
+        "docs/execution/evidence/phase3/release-manifest.json",
+        "docs/licenses.md"
+      ],
+      "requires": null,
+      "profile": "local-lite",
+      "kind": "mandatory",
+      "retries": 0,
+      "heavy_gib": 1,
+      "result": "PASS",
+      "summary": "==> /Users/null3351/Code/formal-agent-lab/out/release-p3/manifest.json (15 wheels, 0 images) in 8.1 s",
+      "checked_commit": "962bd37df0a44afcec318593f4358c0336f23aa3",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "worktree_clean": true,
+      "config_sha256": "21b564b02883d83ec219a033f215b8a307ec3e066759a46abfe0cacd18f8898f",
+      "started_at": "2026-09-29T23:11:03Z",
+      "finished_at": "2026-09-29T23:11:11Z",
+      "duration_s": 8.2,
+      "attempts": [
+        {
+          "attempt": 1,
+          "started_at": "2026-09-29T23:11:03Z",
+          "finished_at": "2026-09-29T23:11:11Z",
+          "duration_s": 8.2,
+          "exit_code": 0,
+          "result": "PASS",
+          "log": "docs/execution/evidence/phase3/checks/logs/p3-release-light/20260929T231103Z-attempt-1.log",
+          "summary": "==> /Users/null3351/Code/formal-agent-lab/out/release-p3/manifest.json (15 wheels, 0 images) in 8.1 s"
+        }
+      ],
+      "first_failure": null,
+      "flaky": false,
+      "inherited": false,
+      "history": []
+    },
+    {
+      "id": "p3-release-images",
+      "group": "g6-release",
+      "title": "发行（含 OCI 镜像与异架构构建）",
+      "command": "uv run --frozen python scripts/release.py --out out/release-p3-images --evidence docs/execution/evidence/phase3/release-manifest-images.json",
+      "tasks": [
+        "P3A-G6"
+      ],
+      "evidence": [
+        "docs/execution/evidence/phase3/release-manifest-images.json"
+      ],
+      "requires": "docker",
+      "profile": "local-lite",
+      "kind": "extension",
+      "retries": 0,
+      "heavy_gib": 8,
+      "result": "BLOCKED",
+      "summary": "BLOCKED: disk-guard: refusing p3-release-images (8 GiB + 15.0 GiB reserve): needs 23.0 GiB; host (repository filesystem) 16.2 GiB free, docker data (/var/lib/docker) 22.3 GiB free. Free space on the host (and run `sudo fstrim -av` in the VM) first.",
+      "checked_commit": "962bd37df0a44afcec318593f4358c0336f23aa3",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "worktree_clean": true,
+      "config_sha256": "21b564b02883d83ec219a033f215b8a307ec3e066759a46abfe0cacd18f8898f",
+      "started_at": "2026-09-29T23:11:11Z",
+      "finished_at": "2026-09-29T23:11:11Z",
+      "duration_s": 0,
+      "attempts": [],
+      "first_failure": null,
+      "flaky": false,
+      "inherited": false,
+      "history": []
+    },
+    {
+      "id": "p3-offline-bundle",
+      "group": "g6-release",
+      "title": "去重离线包：空目录无包仓库安装与整栈实验",
+      "command": "uv run --frozen python scripts/offline_bundle.py --verify",
+      "tasks": [
+        "P3A-G6"
+      ],
+      "evidence": [
+        "docs/execution/evidence/phase3/offline-manifest.json"
+      ],
+      "requires": "docker",
+      "profile": "local-lite",
+      "kind": "extension",
+      "retries": 0,
+      "heavy_gib": 12,
+      "result": "BLOCKED",
+      "summary": "BLOCKED: disk-guard: refusing p3-offline-bundle (12 GiB + 15.0 GiB reserve): needs 27.0 GiB; host (repository filesystem) 16.2 GiB free, docker data (/var/lib/docker) 22.3 GiB free. Free space on the host (and run `sudo fstrim -av` in the VM) first.",
+      "checked_commit": "962bd37df0a44afcec318593f4358c0336f23aa3",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "worktree_clean": true,
+      "config_sha256": "21b564b02883d83ec219a033f215b8a307ec3e066759a46abfe0cacd18f8898f",
+      "started_at": "2026-09-29T23:11:11Z",
+      "finished_at": "2026-09-29T23:11:11Z",
+      "duration_s": 0,
+      "attempts": [],
+      "first_failure": null,
+      "flaky": false,
+      "inherited": false,
+      "history": []
+    },
+    {
+      "id": "p3-unit-all",
+      "group": "regression",
+      "title": "全部单元 / 契约 / 架构 / 示例测试（含阶段一哨兵）",
+      "command": "uv run --frozen pytest -p no:cacheprovider -q -m 'not integration and not llm and not ui'",
+      "tasks": [],
+      "evidence": [],
+      "requires": null,
+      "profile": "local-lite",
+      "kind": "mandatory",
+      "retries": 0,
+      "heavy_gib": 0.0,
+      "result": "PASS",
+      "summary": "462 passed, 54 deselected in 434.20s (0:07:14)",
+      "checked_commit": "962bd37df0a44afcec318593f4358c0336f23aa3",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "worktree_clean": true,
+      "config_sha256": "21b564b02883d83ec219a033f215b8a307ec3e066759a46abfe0cacd18f8898f",
+      "started_at": "2026-09-29T23:11:11Z",
+      "finished_at": "2026-09-29T23:18:24Z",
+      "duration_s": 432.8,
+      "attempts": [
+        {
+          "attempt": 1,
+          "started_at": "2026-09-29T23:11:11Z",
+          "finished_at": "2026-09-29T23:18:24Z",
+          "duration_s": 432.8,
+          "exit_code": 0,
+          "result": "PASS",
+          "log": "docs/execution/evidence/phase3/checks/logs/p3-unit-all/20260929T231111Z-attempt-1.log",
+          "summary": "462 passed, 54 deselected in 434.20s (0:07:14)"
+        }
+      ],
+      "first_failure": null,
+      "flaky": false,
+      "inherited": false,
+      "history": []
+    },
+    {
+      "id": "p3-phase1-parity",
+      "group": "regression",
+      "title": "阶段一单参与者轨迹与哨兵",
+      "command": "uv run --frozen pytest -p no:cacheprovider -q examples/neutral-scheduling/tests/test_sentinel.py packages/runtime/tests/test_kernel.py::test_single_participant_run_reproduces_the_phase1_trajectory",
+      "tasks": [],
+      "evidence": [],
+      "requires": null,
+      "profile": "local-lite",
+      "kind": "mandatory",
+      "retries": 0,
+      "heavy_gib": 0.0,
+      "result": "PASS",
+      "summary": "7 passed in 61.05s (0:01:01)",
+      "checked_commit": "962bd37df0a44afcec318593f4358c0336f23aa3",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "worktree_clean": true,
+      "config_sha256": "21b564b02883d83ec219a033f215b8a307ec3e066759a46abfe0cacd18f8898f",
+      "started_at": "2026-09-29T23:18:24Z",
+      "finished_at": "2026-09-29T23:19:25Z",
+      "duration_s": 61.1,
+      "attempts": [
+        {
+          "attempt": 1,
+          "started_at": "2026-09-29T23:18:24Z",
+          "finished_at": "2026-09-29T23:19:25Z",
+          "duration_s": 61.1,
+          "exit_code": 0,
+          "result": "PASS",
+          "log": "docs/execution/evidence/phase3/checks/logs/p3-phase1-parity/20260929T231824Z-attempt-1.log",
+          "summary": "7 passed in 61.05s (0:01:01)"
+        }
+      ],
+      "first_failure": null,
+      "flaky": false,
+      "inherited": false,
+      "history": []
+    },
+    {
+      "id": "p3-integration-all",
+      "group": "regression",
+      "title": "与 CI 相同的平台集成测试（API、Worker、Temporal、SDK/CLI、回放）",
+      "command": "uv run --frozen pytest -p no:cacheprovider -q tests/integration -m 'integration and not ui and not llm'",
+      "tasks": [],
+      "evidence": [],
+      "requires": "services",
+      "profile": "local-services",
+      "kind": "mandatory",
+      "retries": 1,
+      "heavy_gib": 0.0,
+      "result": "PASS",
+      "summary": "37 passed, 16 deselected in 672.60s (0:11:12)",
+      "checked_commit": "962bd37df0a44afcec318593f4358c0336f23aa3",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "worktree_clean": true,
+      "config_sha256": "21b564b02883d83ec219a033f215b8a307ec3e066759a46abfe0cacd18f8898f",
+      "started_at": "2026-09-29T23:19:25Z",
+      "finished_at": "2026-09-29T23:30:37Z",
+      "duration_s": 671.7,
+      "attempts": [
+        {
+          "attempt": 1,
+          "started_at": "2026-09-29T23:19:25Z",
+          "finished_at": "2026-09-29T23:30:36Z",
+          "duration_s": 671.7,
+          "exit_code": 0,
+          "result": "PASS",
+          "log": "docs/execution/evidence/phase3/checks/logs/p3-integration-all/20260929T231925Z-attempt-1.log",
+          "summary": "37 passed, 16 deselected in 672.60s (0:11:12)"
+        }
+      ],
+      "first_failure": null,
+      "flaky": false,
+      "inherited": false,
+      "history": []
+    }
+  ]
+}

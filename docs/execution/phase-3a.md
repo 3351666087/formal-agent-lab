@@ -102,7 +102,9 @@
 
 ## G6 · 本地检查与发行工具收口
 
-- [ ] **P3A-G6** 将本轮通用增量交接为可直接接入后续插件的代码、检查命令和本地发行入口。
+- [x] **P3A-G6** 将本轮通用增量交接为可直接接入后续插件的代码、检查命令和本地发行入口。
+  - 证据：check engine (checks@2: per-attempt logs, first failure/flaky, commit/tree/config digests, resources, full vs partial timing, disk reserve) + phase-3 suite; final full run at 962bd37: 7 groups PASS, 22 PASS / 0 FAIL / 2 BLOCKED (image release, offline bundle: disk reserve), 2183.8 s; matrix twice on kept DB; phase-2 evidence restored and protected (FAL_EVIDENCE_DIR)
+  - 实现：`scripts/check_runner.py`、`scripts/phase3_check.py`、`docs/execution/evidence/phase3/checks/results.json`、`docs/handoff/phase3-draft.md`
 
 复用 `scripts/phase2_check.py` 和既有发行工具，支持独立输出目录、分组/单项选择、每次 attempt 独立日志、源码提交/工作区摘要/配置摘要。首次失败、重试和最终结果均保留；完整执行耗时与单项重跑耗时分别统计。矩阵测试在保留数据库上连续通过两次。
 

@@ -1,0 +1,17 @@
+$ python3 scripts/disk_guard.py --need 12 --label phase3-check && python3 scripts/doctor.py --record docs/execution/evidence/phase3/doctor.json
+# phase3/p3-resources at 962bd37df0a4 (tree e3b0c44298fc, profile local-lite) · attempt 1 · started 2026-09-29T23:11:01Z
+
+disk-guard: phase3-check: host (repository filesystem) 16.2 GiB free, docker data (/var/lib/docker) 22.3 GiB free (needs 12.0 GiB)
+os        Ubuntu 24.04.4 LTS aarch64 (virt: apple)
+cpu/mem   4 usable CPU(s), 5910 MiB usable, 4033 MiB available now
+disk      repo 16.2 GiB free, docker 22.3 GiB free
+docker    29.5.2 (aarch64), compose 5.1.4
+tools     python3=ok, uv=ok, node=ok, pnpm=ok, docker=ok, compose=ok, helm=ok, kind=ok, kubeconform=ok, temporal=ok, java=missing, git=ok
+deps      venv_present=True, node_modules_present=True, python_lock_in_sync=True, python_imports=True, z3=5.1.0, playwright_chromium=True, llm_configured=True
+services  postgres=up, temporal=up, s3=up, api=up, web_dev=up, compose_web=down, order_service=up
+ports     in use: 5173, 5432, 7233, 8000, 8233, 8333, 8765
+proxy     http://192.168.5.2:7897 (loopback excluded)
+policy    1 experiment, 1 solver thread, matrix queued (4 usable CPU(s), 5910 MiB usable memory)
+profile   local-lite      AVAILABLE    ~600 MiB 1 CPU 1.5 GiB
+profile   local-services  DEGRADED     ~2600 MiB 2 CPU 6 GiB  (port 8765 used by pid 720717 (python))
+profile   local-kind      AVAILABLE    ~3000 MiB 2 CPU 5 GiB
