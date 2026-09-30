@@ -59,7 +59,8 @@
 - **磁盘事件**（记录在案）：第一次完整执行时，带镜像的发行检查在 `fstrim` 之后读到宿主可用 16 GiB（门槛为写入量 16 GiB，未计保留量）而开始构建；宿主降到 12 GiB 时我中止了异架构构建，删除了本次新建的项目镜像标签（`formal-agent-lab/*:{0.2.0,4e5fbb159ed5,local}`，保留阶段二的 `4e1f959e81f2` 镜像）并执行 `docker builder prune` 与 `fstrim`，宿主回到 16 GiB；随后在引擎中加入保留量。另删除了可重建的 `out/offline`（阶段二离线包输出，685 MB，`make offline-bundle` 重建）与 `var/it-artifacts`、`var/demo-frames`。未做任何宽泛的 prune。
 - **结果**（本轮最终执行，`docs/execution/evidence/phase3/checks/results.json`）：提交 `962bd37`、工作区干净、配置摘要 `21b564b0…`；7 组全部 PASS——22 PASS、0 FAIL、2 BLOCKED（扩展检查：带镜像的发行需 8 + 15 GiB、去重离线包需 12 + 15 GiB，宿主当时 16.2 GiB、Docker 盘 22.3 GiB），无一项需要重试；完整执行 2183.8 s（36.4 min），其后单项重跑 `p3-batch-evidence` 1.4 s 单独记在 `timing.partial_runs`，该项历史保留上一次结果。主要项：单元 462 通过（含阶段一哨兵）、平台集成 37 通过（与 CI 相同的集合）、Playwright 14 通过、矩阵测试在保留数据库上两个会话各通过、SDK/CLI 与 Web 流程证据 6/6、8/8、轻量发行 15 个 wheel + Web 包 + 干净 venv 中的 `fal`。阶段二证据目录执行前后 `git status` 为空。
 - **第一次完整执行**（提交 `4e5fbb1`，已被上面的结果取代；其日志在重新执行前删除）暴露并促成了本包的修复：`capture_screens.py --shots` 的 `global` 位置错误（FAIL）、新的持久批次测试在轮中暂停上有时间偏差（首次失败、重试通过被标为 flaky；集成全集两次均失败）、带镜像的发行检查未计保留量（见磁盘事件）。首次失败 / 重试 / 最终结果的保留由 `tests/tools/test_check_runner.py` 覆盖。
-- **CI**：`4e5fbb1` 的 GitHub Actions 全绿（G2 门控事件修复后集成通过）；本包的提交推送后再核对。
+- **CI 中暴露的阶段二竞态**（本包修复）：`4e05298` 的集成作业中 `test_cancel_while_operations_are_held_is_an_explained_termination` 失败——取消在活动进行中到达 Temporal 时，工作流以通用原因 “cancelled by user” 收尾，覆盖了操作员在 CANCELLING 时记录的原因（在步边界先看到 CANCELLING 时原因能保留，所以只是偶发）。`finalize_run` 现在对 CANCELLING 的运行保留 “terminated by operator: …”；新测试 `test_operator_reason_survives_a_generic_workflow_cancellation` 直接走这条路径（无修复时失败、有修复时通过）。
+- **CI**：`4e5fbb1`、`962bd37` 全绿；修复提交后再核对（见文末）。
 
 ## 阶段三 A 汇总（交给后续集成）
 

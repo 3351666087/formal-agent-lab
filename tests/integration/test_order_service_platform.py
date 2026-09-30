@@ -155,3 +155,19 @@ def test_cancel_while_operations_are_held_is_an_explained_termination(stack, ord
     service = orders.service_ops(run["id"])
     assert {o["operation_id"] for o in service} <= {o["operation_id"] for o in ops}
     assert len(service) <= done["last_step"] + 1
+
+
+def test_operator_reason_survives_a_generic_workflow_cancellation(stack, orders):
+    """The cancellation can reach the workflow mid-activity, and then it finalizes with a generic reason: the
+    operator's explained termination recorded at CANCELLING must still be the run's reason (race seen in CI)."""
+    from formal_lab_api.services.execution import finalize_run
+
+    sid = orders.scenario("normal", conditions={"hold_after_commit_ms": 1500, "hold_every": 1}, timeout_s=0.4)
+    run = orders.start(sid)
+    stack.wait_step(run["id"], 1, timeout=120)
+    stack.post(f"/runs/{run['id']}/cancel", {"reason": "operator reason kept", "operations": []})
+    finalize_run(run["id"], "CANCELLED", "cancelled by user", None)  # what the workflow's CancelledError path does
+    done = stack.wait_status(run["id"], {"CANCELLED"}, timeout=120)
+    assert done["status_reason"] == "terminated by operator: operator reason kept"
+    terminal = [e for e in stack.events(run["id"]) if e["event_type"] == "RUN_CANCELLED"]
+    assert terminal and terminal[-1]["payload"]["reason"] == "terminated by operator: operator reason kept"

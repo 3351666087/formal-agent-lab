@@ -425,6 +425,11 @@ def finalize_run(run_id: str, status: str, reason: str | None = None, error: dic
         target = RunStatus(status)
         if current == RunStatus.CANCELLING and target not in TERMINAL_RUN_STATUSES:
             target = RunStatus.CANCELLED
+        if (target == RunStatus.CANCELLED and current == RunStatus.CANCELLING
+                and (run.status_reason or "").startswith("terminated by operator")):
+            # an operator's explained termination (P2-058) survives however the cancellation reached the workflow:
+            # at a step boundary (run_step sees CANCELLING) or mid-activity (the workflow finalizes generically)
+            reason = run.status_reason
         term = TerminationReason(run.termination_reason) if run.termination_reason else None
         if target == RunStatus.CANCELLED:
             term = TerminationReason.CANCELLED
