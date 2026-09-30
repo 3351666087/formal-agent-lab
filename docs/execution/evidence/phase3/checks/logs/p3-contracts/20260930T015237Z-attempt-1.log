@@ -1,0 +1,128 @@
+$ make contracts-check && uv run --frozen pytest -p no:cacheprovider -q tests/contracts packages/contracts && pnpm --filter @formal-lab/contracts run test
+# phase3/p3-contracts at 83294acf2ca4 (tree e3b0c44298fc, profile local-lite) · attempt 1 · started 2026-09-30T01:52:37Z
+
+uv run --frozen python -m formal_lab_contracts.schema_export --out contracts/v2 --v1-out contracts/v1
+/etc/bash.bashrc: line 7: PS1: unbound variable
+formal-lab-contracts/v1 digest sha256:0cbd6256c21eead867cdd3bcf8ea7f1011207d4dacd6d09996b543575e21312b (28 files, frozen)
+formal-lab-contracts/v2 digest sha256:adbe82694bd8fd77d293d50ba863c9b87c45b5b4877b65aa9da8b8425684d56d (64 files)
+pnpm --filter @formal-lab/contracts run generate
+/etc/bash.bashrc: line 7: PS1: unbound variable
+$ node scripts/generate.mjs
+generated TypeScript for formal-lab-contracts/v2 (adbe82694bd8) and v1 (0cbd6256c21e)
+uv run --frozen python -m formal_lab_contracts.docs --out docs/contracts/v2.md --v1-out docs/contracts/v1.md
+/etc/bash.bashrc: line 7: PS1: unbound variable
+wrote docs/contracts/v2.md
+wrote docs/contracts/v1.md
+git diff --exit-code -- contracts packages/contracts-ts/src docs/contracts
+/etc/bash.bashrc: line 7: PS1: unbound variable
+test -z "$(git status --porcelain --untracked-files=all -- contracts packages/contracts-ts/src docs/contracts)"
+/etc/bash.bashrc: line 7: PS1: unbound variable
+........................................................................ [ 54%]
+.............................................................            [100%]
+133 passed in 2.33s
+$ tsc --noEmit -p tsconfig.json && node --test test/*.test.mjs
+✔ v1 valid fixture ActionOutcome accepted (67.542416ms)
+✔ v1 valid fixture ActionProposal accepted (1.830946ms)
+✔ v1 valid fixture ActionSpec accepted (4.10374ms)
+✔ v1 valid fixture ArtifactRef accepted (1.006713ms)
+✔ v1 valid fixture BoundedCheckResult accepted (4.38661ms)
+✔ v1 valid fixture BoundedCheckResult.unsupported accepted (0.07601ms)
+✔ v1 valid fixture MetricDefinition accepted (0.753973ms)
+✔ v1 valid fixture MetricResult accepted (1.53995ms)
+✔ v1 valid fixture MetricResult.missing accepted (0.07101ms)
+✔ v1 valid fixture ModelPackage accepted (4.394361ms)
+✔ v1 valid fixture Observation accepted (1.219699ms)
+✔ v1 valid fixture PluginDescriptor accepted (2.621923ms)
+✔ v1 valid fixture RunManifest accepted (3.772406ms)
+✔ v1 valid fixture ScenarioManifest accepted (2.908543ms)
+✔ v1 valid fixture TraceEvent accepted (1.031217ms)
+✔ v1 invalid fixture bad-contract-version rejected (contract_version is fixed) (0.210819ms)
+✔ v1 invalid fixture bad-digest rejected (digest must be 64 lowercase hex chars) (0.042381ms)
+✔ v1 invalid fixture bad-extension-namespace rejected (extension keys are reverse-DNS namespaces) (0.246282ms)
+✔ v1 invalid fixture bad-plugin-id rejected (plugin ids are lowercase dotted) (0.049173ms)
+✔ v1 invalid fixture bad-query-kind rejected (query kind is a closed enum) (0.054507ms)
+✔ v1 invalid fixture empty-int-range-missing-max rejected (int type needs min and max) (0.144019ms)
+✔ v1 invalid fixture metric-direction rejected (direction is a closed enum) (0.038463ms)
+✔ v1 invalid fixture negative-seq rejected (seq is >= 1) (0.025378ms)
+✔ v1 invalid fixture outcome-status-enum rejected (outcome status is a closed enum) (0.030212ms)
+✔ v1 invalid fixture unknown-core-field rejected (core objects reject unknown fields) (0.070676ms)
+✔ v1 invalid fixture unknown-expr-op rejected (expression ops are a closed set) (0.16923ms)
+✔ v2 valid fixture ActionOutcome.conflict accepted (107.93515ms)
+✔ v2 valid fixture ActionOutcome accepted (0.072635ms)
+✔ v2 valid fixture ActionProposal accepted (3.11082ms)
+✔ v2 valid fixture ActionSpec accepted (2.490031ms)
+✔ v2 valid fixture ArtifactRef accepted (0.628998ms)
+✔ v2 valid fixture AssumptionSet accepted (0.677838ms)
+✔ v2 valid fixture BatchRecord accepted (1.7989ms)
+✔ v2 valid fixture BeliefState accepted (0.845901ms)
+✔ v2 valid fixture BoundedCheckResult accepted (4.932347ms)
+✔ v2 valid fixture BoundedCheckResult.optimize accepted (0.159021ms)
+✔ v2 valid fixture BoundedCheckResult.robust accepted (0.050382ms)
+✔ v2 valid fixture BoundedCheckResult.unknown-precondition accepted (0.046256ms)
+✔ v2 valid fixture BoundedCheckResult.unsupported accepted (0.03663ms)
+✔ v2 valid fixture CapabilityReport accepted (0.788893ms)
+✔ v2 valid fixture EnvironmentSession accepted (1.2227ms)
+✔ v2 valid fixture ExecutionDecision accepted (1.391722ms)
+✔ v2 valid fixture MatrixCellSpec accepted (0.857611ms)
+✔ v2 valid fixture MetricDefinition accepted (0.538653ms)
+✔ v2 valid fixture MetricResult accepted (1.274081ms)
+✔ v2 valid fixture MetricResult.missing accepted (0.025128ms)
+✔ v2 valid fixture ModelPackage accepted (3.991309ms)
+✔ v2 valid fixture ModelPackage.namespaced accepted (0.040922ms)
+✔ v2 valid fixture ModelReleaseRecord accepted (3.307678ms)
+✔ v2 valid fixture ObjectiveSpec accepted (0.73372ms)
+✔ v2 valid fixture Observation accepted (1.631836ms)
+✔ v2 valid fixture OperationRecord.gated accepted (2.587336ms)
+✔ v2 valid fixture OperationRecord accepted (0.071092ms)
+✔ v2 valid fixture PlannerCheckpoint accepted (1.944877ms)
+✔ v2 valid fixture PluginDescriptor.driver accepted (2.36989ms)
+✔ v2 valid fixture PluginDescriptor accepted (0.033462ms)
+✔ v2 valid fixture PluginDescriptor.v1-plugin accepted (0.024586ms)
+✔ v2 valid fixture ProbeResult accepted (1.171944ms)
+✔ v2 valid fixture QueryBundle accepted (2.553623ms)
+✔ v2 valid fixture RegressionCase accepted (1.85849ms)
+✔ v2 valid fixture ReleaseConfig accepted (0.5159ms)
+✔ v2 valid fixture RuleDecision accepted (0.675588ms)
+✔ v2 valid fixture RuleEvaluation accepted (0.568782ms)
+✔ v2 valid fixture RuleSet accepted (1.278541ms)
+✔ v2 valid fixture RunManifest accepted (5.591099ms)
+✔ v2 valid fixture ScenarioManifest accepted (2.85612ms)
+✔ v2 valid fixture ScenarioManifest.v1-style accepted (0.136143ms)
+✔ v2 valid fixture StageRecord accepted (0.866612ms)
+✔ v2 valid fixture TaskPlan accepted (1.011756ms)
+✔ v2 valid fixture TerminationPolicy accepted (0.653959ms)
+✔ v2 valid fixture TraceEvent accepted (1.546908ms)
+✔ v2 valid fixture TurnPolicy.joint-batch accepted (0.533986ms)
+✔ v2 valid fixture TurnPolicy accepted (0.035712ms)
+✔ v2 valid fixture TurnState accepted (0.664003ms)
+✔ v2 invalid fixture bad-contract-version rejected (v2 objects declare formal-lab-contracts/v2) (0.66692ms)
+✔ v2 invalid fixture bad-digest rejected (digest must be 64 lowercase hex chars) (0.038922ms)
+✔ v2 invalid fixture bad-extension-namespace rejected (extension keys are reverse-DNS namespaces) (0.28362ms)
+✔ v2 invalid fixture bad-interface rejected (interface is a closed enum) (0.040214ms)
+✔ v2 invalid fixture bad-payload-kind rejected (payload kind is fal-ir or namespaced) (0.233656ms)
+✔ v2 invalid fixture bad-plugin-id rejected (plugin ids are lowercase dotted) (0.051299ms)
+✔ v2 invalid fixture bad-query-kind rejected (query kind is a closed enum) (0.112389ms)
+✔ v2 invalid fixture empty-int-range-missing-max rejected (int type needs min and max) (0.289621ms)
+✔ v2 invalid fixture evidence-status-enum rejected (effect evidence is observed/verified-within-scope/predicted/unknown) (0.073843ms)
+✔ v2 invalid fixture horizon-zero rejected (horizon is at least 1) (0.028796ms)
+✔ v2 invalid fixture metric-direction rejected (direction is a closed enum) (0.02717ms)
+✔ v2 invalid fixture negative-seq rejected (seq is >= 1) (0.041047ms)
+✔ v2 invalid fixture operation-state rejected (operation state is a closed enum) (0.068592ms)
+✔ v2 invalid fixture outcome-status-enum rejected (outcome status is a closed enum) (0.070592ms)
+✔ v2 invalid fixture probe-window rejected (window kind is logical steps or wall seconds) (0.042131ms)
+✔ v2 invalid fixture provenance-enum rejected (provenance is KNOWN/STALE/UNKNOWN/ASSUMED_INITIAL) (0.040338ms)
+✔ v2 invalid fixture rule-outcome rejected (rule outcomes are CONTINUE/OBSERVE_MORE/REPLAN/PAUSE) (0.094512ms)
+✔ v2 invalid fixture turn-mode rejected (turn mode is a closed enum) (0.072801ms)
+✔ v2 invalid fixture unknown-core-field rejected (core objects reject unknown fields) (0.135268ms)
+✔ v2 invalid fixture unknown-expr-op rejected (expression ops are a closed set) (0.231154ms)
+✔ v2 invalid fixture v1-contract-on-v2-object rejected (a v1 object must be upgraded, not relabelled) (0.106389ms)
+✔ v2 invalid fixture v1-ir-field rejected (v2 packages carry `payload`, not `ir`) (0.03788ms)
+✔ generated meta.ts matches DIGEST.json of v2 and v1 (3.151908ms)
+ℹ tests 97
+ℹ suites 0
+ℹ pass 97
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 413.312836

@@ -1,9 +1,9 @@
 {
   "format": "checks@2",
   "suite": "phase3",
-  "generated_at": "2026-09-30T01:12:17Z",
+  "generated_at": "2026-09-30T02:31:22Z",
   "source_revision": {
-    "commit": "962bd37df0a44afcec318593f4358c0336f23aa3",
+    "commit": "83294acf2ca458cae3df1c138c3b037d2f40bbb5",
     "worktree": {
       "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "clean": true,
@@ -29,7 +29,7 @@
       "deploy/compose/docker-compose.yaml": "ff4c34cae068cc6dacd4db7f4273887ff6c2bb0b3b84938a7b8969488bfb20ff"
     }
   },
-  "command": "python scripts/check_runner.py --suite phase3 --only p3-batch-evidence",
+  "command": "python scripts/check_runner.py --suite phase3",
   "environment": {
     "os": "Ubuntu 24.04.4 LTS",
     "arch": "aarch64",
@@ -46,12 +46,12 @@
     "cpus": 4,
     "memory_gib": {
       "MemTotal": 5.77,
-      "MemAvailable": 4.01
+      "MemAvailable": 4.26
     },
     "load_avg": [
-      0.21,
-      0.13,
-      0.1
+      0.62,
+      0.31,
+      0.17
     ],
     "disk_free_gib": {
       "host (repository filesystem)": 16.7,
@@ -64,16 +64,16 @@
     "cpus": 4,
     "memory_gib": {
       "MemTotal": 5.77,
-      "MemAvailable": 3.96
+      "MemAvailable": 4.02
     },
     "load_avg": [
-      0.21,
-      0.13,
-      0.1
+      1.45,
+      1.41,
+      1.18
     ],
     "disk_free_gib": {
-      "host (repository filesystem)": 16.7,
-      "docker (/var/lib/docker)": 22.2
+      "host (repository filesystem)": 16.2,
+      "docker (/var/lib/docker)": 22.1
     },
     "concurrency": 1,
     "note": "checks run one at a time; heavy checks ask disk_guard first"
@@ -96,9 +96,9 @@
   },
   "mandatory_passed": true,
   "timing": {
-    "this_run_s": 1.4,
-    "last_full_run_s": 2183.8,
-    "last_full_run_at": "2026-09-29T22:54:13Z",
+    "this_run_s": 2324.8,
+    "last_full_run_s": 2324.8,
+    "last_full_run_at": "2026-09-30T01:52:37Z",
     "partial_runs": [
       {
         "started_at": "2026-09-30T01:12:16Z",
@@ -202,6 +202,71 @@
       "results": {
         "p3-batch-evidence": "PASS"
       }
+    },
+    {
+      "started_at": "2026-09-30T01:52:37Z",
+      "finished_at": "2026-09-30T02:31:22Z",
+      "duration_s": 2324.8,
+      "full": true,
+      "selection": {
+        "group": [],
+        "only": [],
+        "skip": []
+      },
+      "checks": [
+        "p3-contracts",
+        "p3-compat",
+        "p3-ops-unit",
+        "p3-ops-evidence",
+        "p3-ops-platform",
+        "p3-release-unit",
+        "p3-release-evidence",
+        "p3-governance-platform",
+        "p3-batch-unit",
+        "p3-batch-evidence",
+        "p3-batch-platform",
+        "p3-design-sources",
+        "p3-web-build",
+        "p3-web-ui",
+        "p3-product-flows",
+        "p3-web-flows",
+        "p3-matrix-kept-db",
+        "p3-resources",
+        "p3-release-light",
+        "p3-release-images",
+        "p3-offline-bundle",
+        "p3-unit-all",
+        "p3-phase1-parity",
+        "p3-integration-all"
+      ],
+      "commit": "83294acf2ca458cae3df1c138c3b037d2f40bbb5",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "results": {
+        "p3-contracts": "PASS",
+        "p3-compat": "PASS",
+        "p3-ops-unit": "PASS",
+        "p3-ops-evidence": "PASS",
+        "p3-ops-platform": "PASS",
+        "p3-release-unit": "PASS",
+        "p3-release-evidence": "PASS",
+        "p3-governance-platform": "PASS",
+        "p3-batch-unit": "PASS",
+        "p3-batch-evidence": "PASS",
+        "p3-batch-platform": "PASS",
+        "p3-design-sources": "PASS",
+        "p3-web-build": "PASS",
+        "p3-web-ui": "PASS",
+        "p3-product-flows": "PASS",
+        "p3-web-flows": "PASS",
+        "p3-matrix-kept-db": "PASS",
+        "p3-resources": "PASS",
+        "p3-release-light": "PASS",
+        "p3-release-images": "BLOCKED",
+        "p3-offline-bundle": "BLOCKED",
+        "p3-unit-all": "PASS",
+        "p3-phase1-parity": "PASS",
+        "p3-integration-all": "PASS"
+      }
     }
   ],
   "checks": [
@@ -223,30 +288,38 @@
       "retries": 0,
       "heavy_gib": 0.0,
       "result": "PASS",
-      "summary": "ℹ duration_ms 416.892083",
-      "checked_commit": "962bd37df0a44afcec318593f4358c0336f23aa3",
+      "summary": "ℹ duration_ms 413.312836",
+      "checked_commit": "83294acf2ca458cae3df1c138c3b037d2f40bbb5",
       "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "worktree_clean": true,
       "config_sha256": "21b564b02883d83ec219a033f215b8a307ec3e066759a46abfe0cacd18f8898f",
-      "started_at": "2026-09-29T22:54:13Z",
-      "finished_at": "2026-09-29T22:54:18Z",
+      "started_at": "2026-09-30T01:52:37Z",
+      "finished_at": "2026-09-30T01:52:42Z",
       "duration_s": 4.9,
       "attempts": [
         {
           "attempt": 1,
-          "started_at": "2026-09-29T22:54:13Z",
-          "finished_at": "2026-09-29T22:54:18Z",
+          "started_at": "2026-09-30T01:52:37Z",
+          "finished_at": "2026-09-30T01:52:42Z",
           "duration_s": 4.9,
           "exit_code": 0,
           "result": "PASS",
-          "log": "docs/execution/evidence/phase3/checks/logs/p3-contracts/20260929T225413Z-attempt-1.log",
-          "summary": "ℹ duration_ms 416.892083"
+          "log": "docs/execution/evidence/phase3/checks/logs/p3-contracts/20260930T015237Z-attempt-1.log",
+          "summary": "ℹ duration_ms 413.312836"
         }
       ],
       "first_failure": null,
       "flaky": false,
       "inherited": false,
-      "history": []
+      "history": [
+        {
+          "result": "PASS",
+          "checked_commit": "962bd37df0a44afcec318593f4358c0336f23aa3",
+          "finished_at": "2026-09-29T22:54:18Z",
+          "duration_s": 4.9,
+          "attempts": 1
+        }
+      ]
     },
     {
       "id": "p3-compat",
@@ -265,30 +338,38 @@
       "retries": 0,
       "heavy_gib": 0.0,
       "result": "PASS",
-      "summary": "54 passed in 1.59s",
-      "checked_commit": "962bd37df0a44afcec318593f4358c0336f23aa3",
+      "summary": "54 passed in 1.82s",
+      "checked_commit": "83294acf2ca458cae3df1c138c3b037d2f40bbb5",
       "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "worktree_clean": true,
       "config_sha256": "21b564b02883d83ec219a033f215b8a307ec3e066759a46abfe0cacd18f8898f",
-      "started_at": "2026-09-29T22:54:18Z",
-      "finished_at": "2026-09-29T22:54:20Z",
-      "duration_s": 1.8,
+      "started_at": "2026-09-30T01:52:42Z",
+      "finished_at": "2026-09-30T01:52:44Z",
+      "duration_s": 2.0,
       "attempts": [
         {
           "attempt": 1,
-          "started_at": "2026-09-29T22:54:18Z",
-          "finished_at": "2026-09-29T22:54:20Z",
-          "duration_s": 1.8,
+          "started_at": "2026-09-30T01:52:42Z",
+          "finished_at": "2026-09-30T01:52:44Z",
+          "duration_s": 2.0,
           "exit_code": 0,
           "result": "PASS",
-          "log": "docs/execution/evidence/phase3/checks/logs/p3-compat/20260929T225418Z-attempt-1.log",
-          "summary": "54 passed in 1.59s"
+          "log": "docs/execution/evidence/phase3/checks/logs/p3-compat/20260930T015242Z-attempt-1.log",
+          "summary": "54 passed in 1.82s"
         }
       ],
       "first_failure": null,
       "flaky": false,
       "inherited": false,
-      "history": []
+      "history": [
+        {
+          "result": "PASS",
+          "checked_commit": "962bd37df0a44afcec318593f4358c0336f23aa3",
+          "finished_at": "2026-09-29T22:54:20Z",
+          "duration_s": 1.8,
+          "attempts": 1
+        }
+      ]
     },
     {
       "id": "p3-ops-unit",
@@ -305,30 +386,38 @@
       "retries": 0,
       "heavy_gib": 0.0,
       "result": "PASS",
-      "summary": "25 passed in 20.00s",
-      "checked_commit": "962bd37df0a44afcec318593f4358c0336f23aa3",
+      "summary": "25 passed in 21.03s",
+      "checked_commit": "83294acf2ca458cae3df1c138c3b037d2f40bbb5",
       "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "worktree_clean": true,
       "config_sha256": "21b564b02883d83ec219a033f215b8a307ec3e066759a46abfe0cacd18f8898f",
-      "started_at": "2026-09-29T22:54:20Z",
-      "finished_at": "2026-09-29T22:54:40Z",
-      "duration_s": 20.2,
+      "started_at": "2026-09-30T01:52:44Z",
+      "finished_at": "2026-09-30T01:53:05Z",
+      "duration_s": 21.3,
       "attempts": [
         {
           "attempt": 1,
-          "started_at": "2026-09-29T22:54:20Z",
-          "finished_at": "2026-09-29T22:54:40Z",
-          "duration_s": 20.2,
+          "started_at": "2026-09-30T01:52:44Z",
+          "finished_at": "2026-09-30T01:53:05Z",
+          "duration_s": 21.3,
           "exit_code": 0,
           "result": "PASS",
-          "log": "docs/execution/evidence/phase3/checks/logs/p3-ops-unit/20260929T225420Z-attempt-1.log",
-          "summary": "25 passed in 20.00s"
+          "log": "docs/execution/evidence/phase3/checks/logs/p3-ops-unit/20260930T015244Z-attempt-1.log",
+          "summary": "25 passed in 21.03s"
         }
       ],
       "first_failure": null,
       "flaky": false,
       "inherited": false,
-      "history": []
+      "history": [
+        {
+          "result": "PASS",
+          "checked_commit": "962bd37df0a44afcec318593f4358c0336f23aa3",
+          "finished_at": "2026-09-29T22:54:40Z",
+          "duration_s": 20.2,
+          "attempts": 1
+        }
+      ]
     },
     {
       "id": "p3-ops-evidence",
@@ -348,29 +437,37 @@
       "heavy_gib": 0.0,
       "result": "PASS",
       "summary": "}",
-      "checked_commit": "962bd37df0a44afcec318593f4358c0336f23aa3",
+      "checked_commit": "83294acf2ca458cae3df1c138c3b037d2f40bbb5",
       "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "worktree_clean": true,
       "config_sha256": "21b564b02883d83ec219a033f215b8a307ec3e066759a46abfe0cacd18f8898f",
-      "started_at": "2026-09-29T22:54:40Z",
-      "finished_at": "2026-09-29T22:54:42Z",
-      "duration_s": 2.5,
+      "started_at": "2026-09-30T01:53:05Z",
+      "finished_at": "2026-09-30T01:53:08Z",
+      "duration_s": 2.8,
       "attempts": [
         {
           "attempt": 1,
-          "started_at": "2026-09-29T22:54:40Z",
-          "finished_at": "2026-09-29T22:54:42Z",
-          "duration_s": 2.5,
+          "started_at": "2026-09-30T01:53:05Z",
+          "finished_at": "2026-09-30T01:53:08Z",
+          "duration_s": 2.8,
           "exit_code": 0,
           "result": "PASS",
-          "log": "docs/execution/evidence/phase3/checks/logs/p3-ops-evidence/20260929T225440Z-attempt-1.log",
+          "log": "docs/execution/evidence/phase3/checks/logs/p3-ops-evidence/20260930T015305Z-attempt-1.log",
           "summary": "}"
         }
       ],
       "first_failure": null,
       "flaky": false,
       "inherited": false,
-      "history": []
+      "history": [
+        {
+          "result": "PASS",
+          "checked_commit": "962bd37df0a44afcec318593f4358c0336f23aa3",
+          "finished_at": "2026-09-29T22:54:42Z",
+          "duration_s": 2.5,
+          "attempts": 1
+        }
+      ]
     },
     {
       "id": "p3-ops-platform",
@@ -387,30 +484,38 @@
       "retries": 1,
       "heavy_gib": 0.0,
       "result": "PASS",
-      "summary": "4 passed in 82.58s (0:01:22)",
-      "checked_commit": "962bd37df0a44afcec318593f4358c0336f23aa3",
+      "summary": "5 passed in 84.91s (0:01:24)",
+      "checked_commit": "83294acf2ca458cae3df1c138c3b037d2f40bbb5",
       "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "worktree_clean": true,
       "config_sha256": "21b564b02883d83ec219a033f215b8a307ec3e066759a46abfe0cacd18f8898f",
-      "started_at": "2026-09-29T22:54:43Z",
-      "finished_at": "2026-09-29T22:56:06Z",
-      "duration_s": 82.6,
+      "started_at": "2026-09-30T01:53:09Z",
+      "finished_at": "2026-09-30T01:54:35Z",
+      "duration_s": 85.3,
       "attempts": [
         {
           "attempt": 1,
-          "started_at": "2026-09-29T22:54:43Z",
-          "finished_at": "2026-09-29T22:56:06Z",
-          "duration_s": 82.6,
+          "started_at": "2026-09-30T01:53:09Z",
+          "finished_at": "2026-09-30T01:54:34Z",
+          "duration_s": 85.3,
           "exit_code": 0,
           "result": "PASS",
-          "log": "docs/execution/evidence/phase3/checks/logs/p3-ops-platform/20260929T225443Z-attempt-1.log",
-          "summary": "4 passed in 82.58s (0:01:22)"
+          "log": "docs/execution/evidence/phase3/checks/logs/p3-ops-platform/20260930T015309Z-attempt-1.log",
+          "summary": "5 passed in 84.91s (0:01:24)"
         }
       ],
       "first_failure": null,
       "flaky": false,
       "inherited": false,
-      "history": []
+      "history": [
+        {
+          "result": "PASS",
+          "checked_commit": "962bd37df0a44afcec318593f4358c0336f23aa3",
+          "finished_at": "2026-09-29T22:56:06Z",
+          "duration_s": 82.6,
+          "attempts": 1
+        }
+      ]
     },
     {
       "id": "p3-release-unit",
@@ -427,30 +532,38 @@
       "retries": 0,
       "heavy_gib": 0.0,
       "result": "PASS",
-      "summary": "6 passed in 5.05s",
-      "checked_commit": "962bd37df0a44afcec318593f4358c0336f23aa3",
+      "summary": "6 passed in 5.18s",
+      "checked_commit": "83294acf2ca458cae3df1c138c3b037d2f40bbb5",
       "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "worktree_clean": true,
       "config_sha256": "21b564b02883d83ec219a033f215b8a307ec3e066759a46abfe0cacd18f8898f",
-      "started_at": "2026-09-29T22:56:06Z",
-      "finished_at": "2026-09-29T22:56:11Z",
-      "duration_s": 5.3,
+      "started_at": "2026-09-30T01:54:35Z",
+      "finished_at": "2026-09-30T01:54:40Z",
+      "duration_s": 5.4,
       "attempts": [
         {
           "attempt": 1,
-          "started_at": "2026-09-29T22:56:06Z",
-          "finished_at": "2026-09-29T22:56:11Z",
-          "duration_s": 5.3,
+          "started_at": "2026-09-30T01:54:35Z",
+          "finished_at": "2026-09-30T01:54:40Z",
+          "duration_s": 5.4,
           "exit_code": 0,
           "result": "PASS",
-          "log": "docs/execution/evidence/phase3/checks/logs/p3-release-unit/20260929T225606Z-attempt-1.log",
-          "summary": "6 passed in 5.05s"
+          "log": "docs/execution/evidence/phase3/checks/logs/p3-release-unit/20260930T015435Z-attempt-1.log",
+          "summary": "6 passed in 5.18s"
         }
       ],
       "first_failure": null,
       "flaky": false,
       "inherited": false,
-      "history": []
+      "history": [
+        {
+          "result": "PASS",
+          "checked_commit": "962bd37df0a44afcec318593f4358c0336f23aa3",
+          "finished_at": "2026-09-29T22:56:11Z",
+          "duration_s": 5.3,
+          "attempts": 1
+        }
+      ]
     },
     {
       "id": "p3-release-evidence",
@@ -470,29 +583,37 @@
       "heavy_gib": 0.0,
       "result": "PASS",
       "summary": "}",
-      "checked_commit": "962bd37df0a44afcec318593f4358c0336f23aa3",
+      "checked_commit": "83294acf2ca458cae3df1c138c3b037d2f40bbb5",
       "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "worktree_clean": true,
       "config_sha256": "21b564b02883d83ec219a033f215b8a307ec3e066759a46abfe0cacd18f8898f",
-      "started_at": "2026-09-29T22:56:11Z",
-      "finished_at": "2026-09-29T22:56:16Z",
-      "duration_s": 4.1,
+      "started_at": "2026-09-30T01:54:40Z",
+      "finished_at": "2026-09-30T01:54:44Z",
+      "duration_s": 4.2,
       "attempts": [
         {
           "attempt": 1,
-          "started_at": "2026-09-29T22:56:11Z",
-          "finished_at": "2026-09-29T22:56:16Z",
-          "duration_s": 4.1,
+          "started_at": "2026-09-30T01:54:40Z",
+          "finished_at": "2026-09-30T01:54:44Z",
+          "duration_s": 4.2,
           "exit_code": 0,
           "result": "PASS",
-          "log": "docs/execution/evidence/phase3/checks/logs/p3-release-evidence/20260929T225611Z-attempt-1.log",
+          "log": "docs/execution/evidence/phase3/checks/logs/p3-release-evidence/20260930T015440Z-attempt-1.log",
           "summary": "}"
         }
       ],
       "first_failure": null,
       "flaky": false,
       "inherited": false,
-      "history": []
+      "history": [
+        {
+          "result": "PASS",
+          "checked_commit": "962bd37df0a44afcec318593f4358c0336f23aa3",
+          "finished_at": "2026-09-29T22:56:16Z",
+          "duration_s": 4.1,
+          "attempts": 1
+        }
+      ]
     },
     {
       "id": "p3-governance-platform",
@@ -509,30 +630,38 @@
       "retries": 0,
       "heavy_gib": 0.0,
       "result": "PASS",
-      "summary": "3 passed in 11.25s",
-      "checked_commit": "962bd37df0a44afcec318593f4358c0336f23aa3",
+      "summary": "3 passed in 11.82s",
+      "checked_commit": "83294acf2ca458cae3df1c138c3b037d2f40bbb5",
       "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "worktree_clean": true,
       "config_sha256": "21b564b02883d83ec219a033f215b8a307ec3e066759a46abfe0cacd18f8898f",
-      "started_at": "2026-09-29T22:56:16Z",
-      "finished_at": "2026-09-29T22:56:27Z",
-      "duration_s": 11.5,
+      "started_at": "2026-09-30T01:54:44Z",
+      "finished_at": "2026-09-30T01:54:57Z",
+      "duration_s": 12.2,
       "attempts": [
         {
           "attempt": 1,
-          "started_at": "2026-09-29T22:56:16Z",
-          "finished_at": "2026-09-29T22:56:27Z",
-          "duration_s": 11.5,
+          "started_at": "2026-09-30T01:54:44Z",
+          "finished_at": "2026-09-30T01:54:56Z",
+          "duration_s": 12.2,
           "exit_code": 0,
           "result": "PASS",
-          "log": "docs/execution/evidence/phase3/checks/logs/p3-governance-platform/20260929T225616Z-attempt-1.log",
-          "summary": "3 passed in 11.25s"
+          "log": "docs/execution/evidence/phase3/checks/logs/p3-governance-platform/20260930T015444Z-attempt-1.log",
+          "summary": "3 passed in 11.82s"
         }
       ],
       "first_failure": null,
       "flaky": false,
       "inherited": false,
-      "history": []
+      "history": [
+        {
+          "result": "PASS",
+          "checked_commit": "962bd37df0a44afcec318593f4358c0336f23aa3",
+          "finished_at": "2026-09-29T22:56:27Z",
+          "duration_s": 11.5,
+          "attempts": 1
+        }
+      ]
     },
     {
       "id": "p3-batch-unit",
@@ -549,30 +678,38 @@
       "retries": 0,
       "heavy_gib": 0.0,
       "result": "PASS",
-      "summary": "23 passed in 131.15s (0:02:11)",
-      "checked_commit": "962bd37df0a44afcec318593f4358c0336f23aa3",
+      "summary": "23 passed in 269.27s (0:04:29)",
+      "checked_commit": "83294acf2ca458cae3df1c138c3b037d2f40bbb5",
       "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "worktree_clean": true,
       "config_sha256": "21b564b02883d83ec219a033f215b8a307ec3e066759a46abfe0cacd18f8898f",
-      "started_at": "2026-09-29T22:56:27Z",
-      "finished_at": "2026-09-29T22:58:38Z",
-      "duration_s": 131.0,
+      "started_at": "2026-09-30T01:54:57Z",
+      "finished_at": "2026-09-30T01:59:26Z",
+      "duration_s": 269.6,
       "attempts": [
         {
           "attempt": 1,
-          "started_at": "2026-09-29T22:56:27Z",
-          "finished_at": "2026-09-29T22:58:38Z",
-          "duration_s": 131.0,
+          "started_at": "2026-09-30T01:54:57Z",
+          "finished_at": "2026-09-30T01:59:26Z",
+          "duration_s": 269.6,
           "exit_code": 0,
           "result": "PASS",
-          "log": "docs/execution/evidence/phase3/checks/logs/p3-batch-unit/20260929T225627Z-attempt-1.log",
-          "summary": "23 passed in 131.15s (0:02:11)"
+          "log": "docs/execution/evidence/phase3/checks/logs/p3-batch-unit/20260930T015457Z-attempt-1.log",
+          "summary": "23 passed in 269.27s (0:04:29)"
         }
       ],
       "first_failure": null,
       "flaky": false,
       "inherited": false,
-      "history": []
+      "history": [
+        {
+          "result": "PASS",
+          "checked_commit": "962bd37df0a44afcec318593f4358c0336f23aa3",
+          "finished_at": "2026-09-29T22:58:38Z",
+          "duration_s": 131.0,
+          "attempts": 1
+        }
+      ]
     },
     {
       "id": "p3-batch-evidence",
@@ -592,22 +729,22 @@
       "heavy_gib": 0.0,
       "result": "PASS",
       "summary": "}",
-      "checked_commit": "962bd37df0a44afcec318593f4358c0336f23aa3",
+      "checked_commit": "83294acf2ca458cae3df1c138c3b037d2f40bbb5",
       "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "worktree_clean": true,
       "config_sha256": "21b564b02883d83ec219a033f215b8a307ec3e066759a46abfe0cacd18f8898f",
-      "started_at": "2026-09-30T01:12:16Z",
-      "finished_at": "2026-09-30T01:12:17Z",
+      "started_at": "2026-09-30T01:59:26Z",
+      "finished_at": "2026-09-30T01:59:28Z",
       "duration_s": 1.4,
       "attempts": [
         {
           "attempt": 1,
-          "started_at": "2026-09-30T01:12:16Z",
-          "finished_at": "2026-09-30T01:12:17Z",
+          "started_at": "2026-09-30T01:59:26Z",
+          "finished_at": "2026-09-30T01:59:28Z",
           "duration_s": 1.4,
           "exit_code": 0,
           "result": "PASS",
-          "log": "docs/execution/evidence/phase3/checks/logs/p3-batch-evidence/20260930T011216Z-attempt-1.log",
+          "log": "docs/execution/evidence/phase3/checks/logs/p3-batch-evidence/20260930T015926Z-attempt-1.log",
           "summary": "}"
         }
       ],
@@ -615,6 +752,13 @@
       "flaky": false,
       "inherited": false,
       "history": [
+        {
+          "result": "PASS",
+          "checked_commit": "962bd37df0a44afcec318593f4358c0336f23aa3",
+          "finished_at": "2026-09-30T01:12:17Z",
+          "duration_s": 1.4,
+          "attempts": 1
+        },
         {
           "result": "PASS",
           "checked_commit": "962bd37df0a44afcec318593f4358c0336f23aa3",
@@ -639,30 +783,38 @@
       "retries": 1,
       "heavy_gib": 0.0,
       "result": "PASS",
-      "summary": "5 passed in 55.12s",
-      "checked_commit": "962bd37df0a44afcec318593f4358c0336f23aa3",
+      "summary": "5 passed in 45.43s",
+      "checked_commit": "83294acf2ca458cae3df1c138c3b037d2f40bbb5",
       "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "worktree_clean": true,
       "config_sha256": "21b564b02883d83ec219a033f215b8a307ec3e066759a46abfe0cacd18f8898f",
-      "started_at": "2026-09-29T22:58:40Z",
-      "finished_at": "2026-09-29T22:59:35Z",
-      "duration_s": 55.2,
+      "started_at": "2026-09-30T01:59:28Z",
+      "finished_at": "2026-09-30T02:00:14Z",
+      "duration_s": 45.8,
       "attempts": [
         {
           "attempt": 1,
-          "started_at": "2026-09-29T22:58:40Z",
-          "finished_at": "2026-09-29T22:59:35Z",
-          "duration_s": 55.2,
+          "started_at": "2026-09-30T01:59:28Z",
+          "finished_at": "2026-09-30T02:00:14Z",
+          "duration_s": 45.8,
           "exit_code": 0,
           "result": "PASS",
-          "log": "docs/execution/evidence/phase3/checks/logs/p3-batch-platform/20260929T225840Z-attempt-1.log",
-          "summary": "5 passed in 55.12s"
+          "log": "docs/execution/evidence/phase3/checks/logs/p3-batch-platform/20260930T015928Z-attempt-1.log",
+          "summary": "5 passed in 45.43s"
         }
       ],
       "first_failure": null,
       "flaky": false,
       "inherited": false,
-      "history": []
+      "history": [
+        {
+          "result": "PASS",
+          "checked_commit": "962bd37df0a44afcec318593f4358c0336f23aa3",
+          "finished_at": "2026-09-29T22:59:35Z",
+          "duration_s": 55.2,
+          "attempts": 1
+        }
+      ]
     },
     {
       "id": "p3-design-sources",
@@ -683,29 +835,37 @@
       "heavy_gib": 0.0,
       "result": "PASS",
       "summary": "wrote demo.svg (134187 B), demo-cover.svg, demo.html, architecture.svg",
-      "checked_commit": "962bd37df0a44afcec318593f4358c0336f23aa3",
+      "checked_commit": "83294acf2ca458cae3df1c138c3b037d2f40bbb5",
       "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "worktree_clean": true,
       "config_sha256": "21b564b02883d83ec219a033f215b8a307ec3e066759a46abfe0cacd18f8898f",
-      "started_at": "2026-09-29T22:59:35Z",
-      "finished_at": "2026-09-29T22:59:35Z",
+      "started_at": "2026-09-30T02:00:14Z",
+      "finished_at": "2026-09-30T02:00:14Z",
       "duration_s": 0.1,
       "attempts": [
         {
           "attempt": 1,
-          "started_at": "2026-09-29T22:59:35Z",
-          "finished_at": "2026-09-29T22:59:35Z",
+          "started_at": "2026-09-30T02:00:14Z",
+          "finished_at": "2026-09-30T02:00:14Z",
           "duration_s": 0.1,
           "exit_code": 0,
           "result": "PASS",
-          "log": "docs/execution/evidence/phase3/checks/logs/p3-design-sources/20260929T225935Z-attempt-1.log",
+          "log": "docs/execution/evidence/phase3/checks/logs/p3-design-sources/20260930T020014Z-attempt-1.log",
           "summary": "wrote demo.svg (134187 B), demo-cover.svg, demo.html, architecture.svg"
         }
       ],
       "first_failure": null,
       "flaky": false,
       "inherited": false,
-      "history": []
+      "history": [
+        {
+          "result": "PASS",
+          "checked_commit": "962bd37df0a44afcec318593f4358c0336f23aa3",
+          "finished_at": "2026-09-29T22:59:35Z",
+          "duration_s": 0.1,
+          "attempts": 1
+        }
+      ]
     },
     {
       "id": "p3-web-build",
@@ -722,30 +882,38 @@
       "retries": 0,
       "heavy_gib": 0.0,
       "result": "PASS",
-      "summary": "✓ built in 402ms",
-      "checked_commit": "962bd37df0a44afcec318593f4358c0336f23aa3",
+      "summary": "✓ built in 387ms",
+      "checked_commit": "83294acf2ca458cae3df1c138c3b037d2f40bbb5",
       "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "worktree_clean": true,
       "config_sha256": "21b564b02883d83ec219a033f215b8a307ec3e066759a46abfe0cacd18f8898f",
-      "started_at": "2026-09-29T22:59:35Z",
-      "finished_at": "2026-09-29T22:59:36Z",
+      "started_at": "2026-09-30T02:00:14Z",
+      "finished_at": "2026-09-30T02:00:15Z",
       "duration_s": 0.9,
       "attempts": [
         {
           "attempt": 1,
-          "started_at": "2026-09-29T22:59:35Z",
-          "finished_at": "2026-09-29T22:59:36Z",
+          "started_at": "2026-09-30T02:00:14Z",
+          "finished_at": "2026-09-30T02:00:15Z",
           "duration_s": 0.9,
           "exit_code": 0,
           "result": "PASS",
-          "log": "docs/execution/evidence/phase3/checks/logs/p3-web-build/20260929T225935Z-attempt-1.log",
-          "summary": "✓ built in 402ms"
+          "log": "docs/execution/evidence/phase3/checks/logs/p3-web-build/20260930T020014Z-attempt-1.log",
+          "summary": "✓ built in 387ms"
         }
       ],
       "first_failure": null,
       "flaky": false,
       "inherited": false,
-      "history": []
+      "history": [
+        {
+          "result": "PASS",
+          "checked_commit": "962bd37df0a44afcec318593f4358c0336f23aa3",
+          "finished_at": "2026-09-29T22:59:36Z",
+          "duration_s": 0.9,
+          "attempts": 1
+        }
+      ]
     },
     {
       "id": "p3-web-ui",
@@ -762,30 +930,38 @@
       "retries": 0,
       "heavy_gib": 0.0,
       "result": "PASS",
-      "summary": "14 passed in 343.31s (0:05:43)",
-      "checked_commit": "962bd37df0a44afcec318593f4358c0336f23aa3",
+      "summary": "14 passed in 360.21s (0:06:00)",
+      "checked_commit": "83294acf2ca458cae3df1c138c3b037d2f40bbb5",
       "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "worktree_clean": true,
       "config_sha256": "21b564b02883d83ec219a033f215b8a307ec3e066759a46abfe0cacd18f8898f",
-      "started_at": "2026-09-29T22:59:36Z",
-      "finished_at": "2026-09-29T23:05:19Z",
-      "duration_s": 342.5,
+      "started_at": "2026-09-30T02:00:15Z",
+      "finished_at": "2026-09-30T02:06:16Z",
+      "duration_s": 360.5,
       "attempts": [
         {
           "attempt": 1,
-          "started_at": "2026-09-29T22:59:36Z",
-          "finished_at": "2026-09-29T23:05:18Z",
-          "duration_s": 342.5,
+          "started_at": "2026-09-30T02:00:15Z",
+          "finished_at": "2026-09-30T02:06:15Z",
+          "duration_s": 360.5,
           "exit_code": 0,
           "result": "PASS",
-          "log": "docs/execution/evidence/phase3/checks/logs/p3-web-ui/20260929T225936Z-attempt-1.log",
-          "summary": "14 passed in 343.31s (0:05:43)"
+          "log": "docs/execution/evidence/phase3/checks/logs/p3-web-ui/20260930T020015Z-attempt-1.log",
+          "summary": "14 passed in 360.21s (0:06:00)"
         }
       ],
       "first_failure": null,
       "flaky": false,
       "inherited": false,
-      "history": []
+      "history": [
+        {
+          "result": "PASS",
+          "checked_commit": "962bd37df0a44afcec318593f4358c0336f23aa3",
+          "finished_at": "2026-09-29T23:05:19Z",
+          "duration_s": 342.5,
+          "attempts": 1
+        }
+      ]
     },
     {
       "id": "p3-product-flows",
@@ -805,29 +981,37 @@
       "heavy_gib": 0.0,
       "result": "PASS",
       "summary": "}",
-      "checked_commit": "962bd37df0a44afcec318593f4358c0336f23aa3",
+      "checked_commit": "83294acf2ca458cae3df1c138c3b037d2f40bbb5",
       "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "worktree_clean": true,
       "config_sha256": "21b564b02883d83ec219a033f215b8a307ec3e066759a46abfe0cacd18f8898f",
-      "started_at": "2026-09-29T23:05:19Z",
-      "finished_at": "2026-09-29T23:05:32Z",
-      "duration_s": 13.1,
+      "started_at": "2026-09-30T02:06:16Z",
+      "finished_at": "2026-09-30T02:06:29Z",
+      "duration_s": 13.3,
       "attempts": [
         {
           "attempt": 1,
-          "started_at": "2026-09-29T23:05:19Z",
-          "finished_at": "2026-09-29T23:05:32Z",
-          "duration_s": 13.1,
+          "started_at": "2026-09-30T02:06:16Z",
+          "finished_at": "2026-09-30T02:06:29Z",
+          "duration_s": 13.3,
           "exit_code": 0,
           "result": "PASS",
-          "log": "docs/execution/evidence/phase3/checks/logs/p3-product-flows/20260929T230519Z-attempt-1.log",
+          "log": "docs/execution/evidence/phase3/checks/logs/p3-product-flows/20260930T020616Z-attempt-1.log",
           "summary": "}"
         }
       ],
       "first_failure": null,
       "flaky": false,
       "inherited": false,
-      "history": []
+      "history": [
+        {
+          "result": "PASS",
+          "checked_commit": "962bd37df0a44afcec318593f4358c0336f23aa3",
+          "finished_at": "2026-09-29T23:05:32Z",
+          "duration_s": 13.1,
+          "attempts": 1
+        }
+      ]
     },
     {
       "id": "p3-web-flows",
@@ -847,29 +1031,37 @@
       "heavy_gib": 0.0,
       "result": "PASS",
       "summary": "}",
-      "checked_commit": "962bd37df0a44afcec318593f4358c0336f23aa3",
+      "checked_commit": "83294acf2ca458cae3df1c138c3b037d2f40bbb5",
       "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "worktree_clean": true,
       "config_sha256": "21b564b02883d83ec219a033f215b8a307ec3e066759a46abfe0cacd18f8898f",
-      "started_at": "2026-09-29T23:05:32Z",
-      "finished_at": "2026-09-29T23:06:16Z",
-      "duration_s": 43.6,
+      "started_at": "2026-09-30T02:06:29Z",
+      "finished_at": "2026-09-30T02:07:14Z",
+      "duration_s": 44.8,
       "attempts": [
         {
           "attempt": 1,
-          "started_at": "2026-09-29T23:05:32Z",
-          "finished_at": "2026-09-29T23:06:16Z",
-          "duration_s": 43.6,
+          "started_at": "2026-09-30T02:06:29Z",
+          "finished_at": "2026-09-30T02:07:14Z",
+          "duration_s": 44.8,
           "exit_code": 0,
           "result": "PASS",
-          "log": "docs/execution/evidence/phase3/checks/logs/p3-web-flows/20260929T230532Z-attempt-1.log",
+          "log": "docs/execution/evidence/phase3/checks/logs/p3-web-flows/20260930T020629Z-attempt-1.log",
           "summary": "}"
         }
       ],
       "first_failure": null,
       "flaky": false,
       "inherited": false,
-      "history": []
+      "history": [
+        {
+          "result": "PASS",
+          "checked_commit": "962bd37df0a44afcec318593f4358c0336f23aa3",
+          "finished_at": "2026-09-29T23:06:16Z",
+          "duration_s": 43.6,
+          "attempts": 1
+        }
+      ]
     },
     {
       "id": "p3-matrix-kept-db",
@@ -886,30 +1078,38 @@
       "retries": 0,
       "heavy_gib": 0.0,
       "result": "PASS",
-      "summary": "2 passed in 142.59s (0:02:22)",
-      "checked_commit": "962bd37df0a44afcec318593f4358c0336f23aa3",
+      "summary": "2 passed in 140.35s (0:02:20)",
+      "checked_commit": "83294acf2ca458cae3df1c138c3b037d2f40bbb5",
       "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "worktree_clean": true,
       "config_sha256": "21b564b02883d83ec219a033f215b8a307ec3e066759a46abfe0cacd18f8898f",
-      "started_at": "2026-09-29T23:06:16Z",
-      "finished_at": "2026-09-29T23:11:01Z",
-      "duration_s": 284.9,
+      "started_at": "2026-09-30T02:07:14Z",
+      "finished_at": "2026-09-30T02:11:56Z",
+      "duration_s": 281.9,
       "attempts": [
         {
           "attempt": 1,
-          "started_at": "2026-09-29T23:06:16Z",
-          "finished_at": "2026-09-29T23:11:01Z",
-          "duration_s": 284.9,
+          "started_at": "2026-09-30T02:07:14Z",
+          "finished_at": "2026-09-30T02:11:56Z",
+          "duration_s": 281.9,
           "exit_code": 0,
           "result": "PASS",
-          "log": "docs/execution/evidence/phase3/checks/logs/p3-matrix-kept-db/20260929T230616Z-attempt-1.log",
-          "summary": "2 passed in 142.59s (0:02:22)"
+          "log": "docs/execution/evidence/phase3/checks/logs/p3-matrix-kept-db/20260930T020714Z-attempt-1.log",
+          "summary": "2 passed in 140.35s (0:02:20)"
         }
       ],
       "first_failure": null,
       "flaky": false,
       "inherited": false,
-      "history": []
+      "history": [
+        {
+          "result": "PASS",
+          "checked_commit": "962bd37df0a44afcec318593f4358c0336f23aa3",
+          "finished_at": "2026-09-29T23:11:01Z",
+          "duration_s": 284.9,
+          "attempts": 1
+        }
+      ]
     },
     {
       "id": "p3-resources",
@@ -929,29 +1129,37 @@
       "heavy_gib": 0.0,
       "result": "PASS",
       "summary": "profile   local-kind      AVAILABLE    ~3000 MiB 2 CPU 5 GiB",
-      "checked_commit": "962bd37df0a44afcec318593f4358c0336f23aa3",
+      "checked_commit": "83294acf2ca458cae3df1c138c3b037d2f40bbb5",
       "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "worktree_clean": true,
       "config_sha256": "21b564b02883d83ec219a033f215b8a307ec3e066759a46abfe0cacd18f8898f",
-      "started_at": "2026-09-29T23:11:01Z",
-      "finished_at": "2026-09-29T23:11:03Z",
-      "duration_s": 1.4,
+      "started_at": "2026-09-30T02:11:56Z",
+      "finished_at": "2026-09-30T02:11:58Z",
+      "duration_s": 1.5,
       "attempts": [
         {
           "attempt": 1,
-          "started_at": "2026-09-29T23:11:01Z",
-          "finished_at": "2026-09-29T23:11:03Z",
-          "duration_s": 1.4,
+          "started_at": "2026-09-30T02:11:56Z",
+          "finished_at": "2026-09-30T02:11:58Z",
+          "duration_s": 1.5,
           "exit_code": 0,
           "result": "PASS",
-          "log": "docs/execution/evidence/phase3/checks/logs/p3-resources/20260929T231101Z-attempt-1.log",
+          "log": "docs/execution/evidence/phase3/checks/logs/p3-resources/20260930T021156Z-attempt-1.log",
           "summary": "profile   local-kind      AVAILABLE    ~3000 MiB 2 CPU 5 GiB"
         }
       ],
       "first_failure": null,
       "flaky": false,
       "inherited": false,
-      "history": []
+      "history": [
+        {
+          "result": "PASS",
+          "checked_commit": "962bd37df0a44afcec318593f4358c0336f23aa3",
+          "finished_at": "2026-09-29T23:11:03Z",
+          "duration_s": 1.4,
+          "attempts": 1
+        }
+      ]
     },
     {
       "id": "p3-release-light",
@@ -971,30 +1179,38 @@
       "retries": 0,
       "heavy_gib": 1,
       "result": "PASS",
-      "summary": "==> /Users/null3351/Code/formal-agent-lab/out/release-p3/manifest.json (15 wheels, 0 images) in 8.1 s",
-      "checked_commit": "962bd37df0a44afcec318593f4358c0336f23aa3",
+      "summary": "==> /Users/null3351/Code/formal-agent-lab/out/release-p3/manifest.json (15 wheels, 0 images) in 8.0 s",
+      "checked_commit": "83294acf2ca458cae3df1c138c3b037d2f40bbb5",
       "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "worktree_clean": true,
       "config_sha256": "21b564b02883d83ec219a033f215b8a307ec3e066759a46abfe0cacd18f8898f",
-      "started_at": "2026-09-29T23:11:03Z",
-      "finished_at": "2026-09-29T23:11:11Z",
-      "duration_s": 8.2,
+      "started_at": "2026-09-30T02:11:58Z",
+      "finished_at": "2026-09-30T02:12:06Z",
+      "duration_s": 8.1,
       "attempts": [
         {
           "attempt": 1,
-          "started_at": "2026-09-29T23:11:03Z",
-          "finished_at": "2026-09-29T23:11:11Z",
-          "duration_s": 8.2,
+          "started_at": "2026-09-30T02:11:58Z",
+          "finished_at": "2026-09-30T02:12:06Z",
+          "duration_s": 8.1,
           "exit_code": 0,
           "result": "PASS",
-          "log": "docs/execution/evidence/phase3/checks/logs/p3-release-light/20260929T231103Z-attempt-1.log",
-          "summary": "==> /Users/null3351/Code/formal-agent-lab/out/release-p3/manifest.json (15 wheels, 0 images) in 8.1 s"
+          "log": "docs/execution/evidence/phase3/checks/logs/p3-release-light/20260930T021158Z-attempt-1.log",
+          "summary": "==> /Users/null3351/Code/formal-agent-lab/out/release-p3/manifest.json (15 wheels, 0 images) in 8.0 s"
         }
       ],
       "first_failure": null,
       "flaky": false,
       "inherited": false,
-      "history": []
+      "history": [
+        {
+          "result": "PASS",
+          "checked_commit": "962bd37df0a44afcec318593f4358c0336f23aa3",
+          "finished_at": "2026-09-29T23:11:11Z",
+          "duration_s": 8.2,
+          "attempts": 1
+        }
+      ]
     },
     {
       "id": "p3-release-images",
@@ -1013,19 +1229,27 @@
       "retries": 0,
       "heavy_gib": 8,
       "result": "BLOCKED",
-      "summary": "BLOCKED: disk-guard: refusing p3-release-images (8 GiB + 15.0 GiB reserve): needs 23.0 GiB; host (repository filesystem) 16.2 GiB free, docker data (/var/lib/docker) 22.3 GiB free. Free space on the host (and run `sudo fstrim -av` in the VM) first.",
-      "checked_commit": "962bd37df0a44afcec318593f4358c0336f23aa3",
+      "summary": "BLOCKED: disk-guard: refusing p3-release-images (8 GiB + 15.0 GiB reserve): needs 23.0 GiB; host (repository filesystem) 16.3 GiB free, docker data (/var/lib/docker) 22.2 GiB free. Free space on the host (and run `sudo fstrim -av` in the VM) first.",
+      "checked_commit": "83294acf2ca458cae3df1c138c3b037d2f40bbb5",
       "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "worktree_clean": true,
       "config_sha256": "21b564b02883d83ec219a033f215b8a307ec3e066759a46abfe0cacd18f8898f",
-      "started_at": "2026-09-29T23:11:11Z",
-      "finished_at": "2026-09-29T23:11:11Z",
+      "started_at": "2026-09-30T02:12:06Z",
+      "finished_at": "2026-09-30T02:12:06Z",
       "duration_s": 0,
       "attempts": [],
       "first_failure": null,
       "flaky": false,
       "inherited": false,
-      "history": []
+      "history": [
+        {
+          "result": "BLOCKED",
+          "checked_commit": "962bd37df0a44afcec318593f4358c0336f23aa3",
+          "finished_at": "2026-09-29T23:11:11Z",
+          "duration_s": 0,
+          "attempts": 0
+        }
+      ]
     },
     {
       "id": "p3-offline-bundle",
@@ -1044,19 +1268,27 @@
       "retries": 0,
       "heavy_gib": 12,
       "result": "BLOCKED",
-      "summary": "BLOCKED: disk-guard: refusing p3-offline-bundle (12 GiB + 15.0 GiB reserve): needs 27.0 GiB; host (repository filesystem) 16.2 GiB free, docker data (/var/lib/docker) 22.3 GiB free. Free space on the host (and run `sudo fstrim -av` in the VM) first.",
-      "checked_commit": "962bd37df0a44afcec318593f4358c0336f23aa3",
+      "summary": "BLOCKED: disk-guard: refusing p3-offline-bundle (12 GiB + 15.0 GiB reserve): needs 27.0 GiB; host (repository filesystem) 16.3 GiB free, docker data (/var/lib/docker) 22.2 GiB free. Free space on the host (and run `sudo fstrim -av` in the VM) first.",
+      "checked_commit": "83294acf2ca458cae3df1c138c3b037d2f40bbb5",
       "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "worktree_clean": true,
       "config_sha256": "21b564b02883d83ec219a033f215b8a307ec3e066759a46abfe0cacd18f8898f",
-      "started_at": "2026-09-29T23:11:11Z",
-      "finished_at": "2026-09-29T23:11:11Z",
+      "started_at": "2026-09-30T02:12:06Z",
+      "finished_at": "2026-09-30T02:12:06Z",
       "duration_s": 0,
       "attempts": [],
       "first_failure": null,
       "flaky": false,
       "inherited": false,
-      "history": []
+      "history": [
+        {
+          "result": "BLOCKED",
+          "checked_commit": "962bd37df0a44afcec318593f4358c0336f23aa3",
+          "finished_at": "2026-09-29T23:11:11Z",
+          "duration_s": 0,
+          "attempts": 0
+        }
+      ]
     },
     {
       "id": "p3-unit-all",
@@ -1071,30 +1303,38 @@
       "retries": 0,
       "heavy_gib": 0.0,
       "result": "PASS",
-      "summary": "462 passed, 54 deselected in 434.20s (0:07:14)",
-      "checked_commit": "962bd37df0a44afcec318593f4358c0336f23aa3",
+      "summary": "462 passed, 55 deselected in 431.31s (0:07:11)",
+      "checked_commit": "83294acf2ca458cae3df1c138c3b037d2f40bbb5",
       "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "worktree_clean": true,
       "config_sha256": "21b564b02883d83ec219a033f215b8a307ec3e066759a46abfe0cacd18f8898f",
-      "started_at": "2026-09-29T23:11:11Z",
-      "finished_at": "2026-09-29T23:18:24Z",
-      "duration_s": 432.8,
+      "started_at": "2026-09-30T02:12:06Z",
+      "finished_at": "2026-09-30T02:19:18Z",
+      "duration_s": 431.9,
       "attempts": [
         {
           "attempt": 1,
-          "started_at": "2026-09-29T23:11:11Z",
-          "finished_at": "2026-09-29T23:18:24Z",
-          "duration_s": 432.8,
+          "started_at": "2026-09-30T02:12:06Z",
+          "finished_at": "2026-09-30T02:19:18Z",
+          "duration_s": 431.9,
           "exit_code": 0,
           "result": "PASS",
-          "log": "docs/execution/evidence/phase3/checks/logs/p3-unit-all/20260929T231111Z-attempt-1.log",
-          "summary": "462 passed, 54 deselected in 434.20s (0:07:14)"
+          "log": "docs/execution/evidence/phase3/checks/logs/p3-unit-all/20260930T021206Z-attempt-1.log",
+          "summary": "462 passed, 55 deselected in 431.31s (0:07:11)"
         }
       ],
       "first_failure": null,
       "flaky": false,
       "inherited": false,
-      "history": []
+      "history": [
+        {
+          "result": "PASS",
+          "checked_commit": "962bd37df0a44afcec318593f4358c0336f23aa3",
+          "finished_at": "2026-09-29T23:18:24Z",
+          "duration_s": 432.8,
+          "attempts": 1
+        }
+      ]
     },
     {
       "id": "p3-phase1-parity",
@@ -1109,30 +1349,38 @@
       "retries": 0,
       "heavy_gib": 0.0,
       "result": "PASS",
-      "summary": "7 passed in 61.05s (0:01:01)",
-      "checked_commit": "962bd37df0a44afcec318593f4358c0336f23aa3",
+      "summary": "7 passed in 58.24s",
+      "checked_commit": "83294acf2ca458cae3df1c138c3b037d2f40bbb5",
       "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "worktree_clean": true,
       "config_sha256": "21b564b02883d83ec219a033f215b8a307ec3e066759a46abfe0cacd18f8898f",
-      "started_at": "2026-09-29T23:18:24Z",
-      "finished_at": "2026-09-29T23:19:25Z",
-      "duration_s": 61.1,
+      "started_at": "2026-09-30T02:19:18Z",
+      "finished_at": "2026-09-30T02:20:16Z",
+      "duration_s": 58.5,
       "attempts": [
         {
           "attempt": 1,
-          "started_at": "2026-09-29T23:18:24Z",
-          "finished_at": "2026-09-29T23:19:25Z",
-          "duration_s": 61.1,
+          "started_at": "2026-09-30T02:19:18Z",
+          "finished_at": "2026-09-30T02:20:16Z",
+          "duration_s": 58.5,
           "exit_code": 0,
           "result": "PASS",
-          "log": "docs/execution/evidence/phase3/checks/logs/p3-phase1-parity/20260929T231824Z-attempt-1.log",
-          "summary": "7 passed in 61.05s (0:01:01)"
+          "log": "docs/execution/evidence/phase3/checks/logs/p3-phase1-parity/20260930T021918Z-attempt-1.log",
+          "summary": "7 passed in 58.24s"
         }
       ],
       "first_failure": null,
       "flaky": false,
       "inherited": false,
-      "history": []
+      "history": [
+        {
+          "result": "PASS",
+          "checked_commit": "962bd37df0a44afcec318593f4358c0336f23aa3",
+          "finished_at": "2026-09-29T23:19:25Z",
+          "duration_s": 61.1,
+          "attempts": 1
+        }
+      ]
     },
     {
       "id": "p3-integration-all",
@@ -1147,30 +1395,38 @@
       "retries": 1,
       "heavy_gib": 0.0,
       "result": "PASS",
-      "summary": "37 passed, 16 deselected in 672.60s (0:11:12)",
-      "checked_commit": "962bd37df0a44afcec318593f4358c0336f23aa3",
+      "summary": "38 passed, 16 deselected in 664.53s (0:11:04)",
+      "checked_commit": "83294acf2ca458cae3df1c138c3b037d2f40bbb5",
       "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "worktree_clean": true,
       "config_sha256": "21b564b02883d83ec219a033f215b8a307ec3e066759a46abfe0cacd18f8898f",
-      "started_at": "2026-09-29T23:19:25Z",
-      "finished_at": "2026-09-29T23:30:37Z",
-      "duration_s": 671.7,
+      "started_at": "2026-09-30T02:20:16Z",
+      "finished_at": "2026-09-30T02:31:22Z",
+      "duration_s": 664.9,
       "attempts": [
         {
           "attempt": 1,
-          "started_at": "2026-09-29T23:19:25Z",
-          "finished_at": "2026-09-29T23:30:36Z",
-          "duration_s": 671.7,
+          "started_at": "2026-09-30T02:20:16Z",
+          "finished_at": "2026-09-30T02:31:21Z",
+          "duration_s": 664.9,
           "exit_code": 0,
           "result": "PASS",
-          "log": "docs/execution/evidence/phase3/checks/logs/p3-integration-all/20260929T231925Z-attempt-1.log",
-          "summary": "37 passed, 16 deselected in 672.60s (0:11:12)"
+          "log": "docs/execution/evidence/phase3/checks/logs/p3-integration-all/20260930T022016Z-attempt-1.log",
+          "summary": "38 passed, 16 deselected in 664.53s (0:11:04)"
         }
       ],
       "first_failure": null,
       "flaky": false,
       "inherited": false,
-      "history": []
+      "history": [
+        {
+          "result": "PASS",
+          "checked_commit": "962bd37df0a44afcec318593f4358c0336f23aa3",
+          "finished_at": "2026-09-29T23:30:37Z",
+          "duration_s": 671.7,
+          "attempts": 1
+        }
+      ]
     }
   ]
 }
