@@ -1,11 +1,11 @@
 {
   "format": "formal-agent-lab/release-manifest@1",
-  "version": "0.2.0",
-  "generated_at": "2026-09-30T02:12:06Z",
+  "version": "0.3.0",
+  "generated_at": "2026-10-01T01:56:36Z",
   "source": {
     "repository": "https://github.com/3351666087/formal-agent-lab",
-    "revision": "83294acf2ca458cae3df1c138c3b037d2f40bbb5",
-    "dirty": true
+    "revision": "92036918f6eb96f310e8b3f38a2b1a5e26c8a14d",
+    "dirty": false
   },
   "contract": {
     "version": "formal-lab-contracts/v2",
@@ -56,8 +56,21 @@
       "run": "PASS (this host)"
     },
     "other": {
-      "build": "NOT_RUN",
-      "reason": "--skip-images: OCI images not built by this run (make release builds them)"
+      "arch": "amd64",
+      "image": "formal-agent-lab/api:92036918f6eb-amd64",
+      "builder_platforms": [
+        "linux/386",
+        "linux/arm64,"
+      ],
+      "build": "PASS",
+      "build_seconds": 174.2,
+      "run_emulated": "PASS",
+      "run_emulated_output": "x86_64",
+      "image_id": "sha256:ca22d8e07db4b5fe48cb1b9e8bf2d26c5e18421d0a935579b7863e556ad24a96",
+      "size_bytes": 226805417,
+      "architecture": "amd64",
+      "image_removed_after_check": true,
+      "run_native": "NOT_RUN: no amd64 host available locally (release built on aarch64)"
     }
   },
   "resources": {
@@ -66,25 +79,25 @@
       "cgroup_cpu_quota": null,
       "cpus_usable": 4,
       "memory_total_mib": 5910,
-      "memory_available_mib": 3974,
+      "memory_available_mib": 4513,
       "cgroup_memory_limit_mib": null,
       "memory_usable_mib": 5910,
       "loadavg": [
-        1.48,
-        1.32,
-        0.95
+        0.72,
+        0.66,
+        0.62
       ]
     },
     "disk": {
       "path": "/Users/null3351/Code/formal-agent-lab",
       "total_gib": 228.3,
-      "free_gib": 16.3
+      "free_gib": 10.8
     }
   },
   "dependencies": {
     "python": {
       "lock": "uv.lock",
-      "sha256": "6e0e974ebf84f63aea462feb9458f3ef781b4ea4a15f54ef82448069a697a9af",
+      "sha256": "be6278cfce6c4fe9ae55400b436f00cf3dd1d34a34811d402eac2c811890287a",
       "python": "3.12.3"
     },
     "node": {
@@ -94,8 +107,8 @@
   },
   "wheels": [
     {
-      "file": "fal_example_external_plugin-0.2.0-py3-none-any.whl",
-      "sha256": "90fa4253dd5b12255881e47f11f33cc715d68afdb5590b721803d31be1b38bed",
+      "file": "fal_example_external_plugin-0.3.0-py3-none-any.whl",
+      "sha256": "322796d2d42a82017ac09ae12ee465f3c29d6eb77a9c79a235848bc8d06d6c95",
       "bytes": 12845
     },
     {
@@ -104,69 +117,89 @@
       "bytes": 81440
     },
     {
-      "file": "formal_lab_evaluation-0.2.0-py3-none-any.whl",
-      "sha256": "a0729dfba1a7cf00d75e6251302cb5001aa83cdbb598e17dd5214db7605fd4cc",
+      "file": "formal_lab_domain_broker-0.3.0-py3-none-any.whl",
+      "sha256": "13f8f1c2901b66b42dab15dbcc7feb32796d93f9f898f7351ccc045afe6ce520",
+      "bytes": 17985
+    },
+    {
+      "file": "formal_lab_domain_mal-0.3.0-py3-none-any.whl",
+      "sha256": "3266133454d8f0d5528752734ad29dfbc3c1a6436a00b00f142d247efeecdf25",
+      "bytes": 29333
+    },
+    {
+      "file": "formal_lab_env_cage-0.3.0-py3-none-any.whl",
+      "sha256": "55570ffd1d4c40c68b544eb7f651051ba3c152e931fc70f83c0fb26a3613813f",
+      "bytes": 9959
+    },
+    {
+      "file": "formal_lab_env_mal-0.3.0-py3-none-any.whl",
+      "sha256": "a00518b28fdf762035728361b5428334a3a61f1e1d28e21e591022dd941e9005",
+      "bytes": 12388
+    },
+    {
+      "file": "formal_lab_evaluation-0.3.0-py3-none-any.whl",
+      "sha256": "371b49f680b93d0a3a627fdda6b8cc90d1c383ecc374940761d5ea37984ca581",
       "bytes": 25846
     },
     {
-      "file": "formal_lab_example_orders-0.2.0-py3-none-any.whl",
-      "sha256": "941d2983ac314dfcb478b4f640d1234c3dc4c1d00521dcd26cdef062fdd9d21f",
-      "bytes": 46484
+      "file": "formal_lab_example_orders-0.3.0-py3-none-any.whl",
+      "sha256": "4173adebf5648ae8ee3feffc3f60a641faa422aa39b5b019328329f99ec22e5b",
+      "bytes": 49287
     },
     {
-      "file": "formal_lab_example_scheduling-0.2.0-py3-none-any.whl",
-      "sha256": "883592c0a014b84ceebb9ca767dafb75a0969ffe5de8dbd5cfc67d7002902e8a",
-      "bytes": 29872
+      "file": "formal_lab_example_scheduling-0.3.0-py3-none-any.whl",
+      "sha256": "eabd1d82a15a805e8fb23e08e8b99f1f4673bc1e9a49900796263573e9ea117e",
+      "bytes": 29875
     },
     {
-      "file": "formal_lab_example_warehouse-0.2.0-py3-none-any.whl",
-      "sha256": "704a3c4b05a0a0cfd26bd6f16bd470455d4bf36c233e0c34a35f97d7fbdb2af0",
+      "file": "formal_lab_example_warehouse-0.3.0-py3-none-any.whl",
+      "sha256": "99835575f96e259e13e3e9949f38dbe2030df5972aad858a0b7318faa3304b07",
       "bytes": 21825
     },
     {
-      "file": "formal_lab_model_core-0.2.0-py3-none-any.whl",
-      "sha256": "1c259a0ec80341882c51151e2e001195b554d358011672eba0c5cfaea70d0a16",
-      "bytes": 41101
+      "file": "formal_lab_model_core-0.3.0-py3-none-any.whl",
+      "sha256": "4590ad85991fc2b7f0c2a05944f25f2d29946246046df6105d9ed3a681416f70",
+      "bytes": 41102
     },
     {
-      "file": "formal_lab_neutral_env-0.2.0-py3-none-any.whl",
-      "sha256": "7c14b6782b03a7cfaf2516ab3f7664cd74d4dbee0720698bffbbcfc2faa8506f",
-      "bytes": 17207
+      "file": "formal_lab_neutral_env-0.3.0-py3-none-any.whl",
+      "sha256": "5da15e11736973e4ab81ee020f9296b0a3cc1af00732de65553c9e0425893d4b",
+      "bytes": 17206
     },
     {
-      "file": "formal_lab_orchestrator-0.2.0-py3-none-any.whl",
-      "sha256": "473f647467c0a3eb1b8aa070fef7d22b68c5ee1997a671697537fa995f623650",
-      "bytes": 10430
+      "file": "formal_lab_orchestrator-0.3.0-py3-none-any.whl",
+      "sha256": "fe6a16fd10fd716c6eed2b02b5cdde3216108339e9e4f643e8b707a1fff74dbd",
+      "bytes": 10429
     },
     {
-      "file": "formal_lab_platform_api-0.2.0-py3-none-any.whl",
-      "sha256": "36251c0844f0d4332781979fe6b343b24835332e988b85e2f2f4b7082a027274",
+      "file": "formal_lab_platform_api-0.3.0-py3-none-any.whl",
+      "sha256": "84fa47e1f3378e7807f4e3f37f1af4cc8b5a9dd65908a9675deaef67c456deea",
       "bytes": 70696
     },
     {
-      "file": "formal_lab_runtime-0.2.0-py3-none-any.whl",
-      "sha256": "13fd7645aadef36bb020c0acf503b461cd400bff87e0fd82008fdd6dce537a5f",
-      "bytes": 62257
+      "file": "formal_lab_runtime-0.3.0-py3-none-any.whl",
+      "sha256": "a2dd6c98b4c0153accb8f23a1ca6d3a556c9dd3d3541a5ad5f066158d83f9d45",
+      "bytes": 62260
     },
     {
-      "file": "formal_lab_sdk-0.2.0-py3-none-any.whl",
-      "sha256": "b5a7cea2f02f8b6dc4c6663f0379ffc3bf303ff5a00cf22c970fb98ebbd98611",
-      "bytes": 27087
+      "file": "formal_lab_sdk-0.3.0-py3-none-any.whl",
+      "sha256": "e2db28317d5dbb74a7b3cd034d0e367d6a76c573ae6d609768b771103d705b92",
+      "bytes": 27089
     },
     {
-      "file": "formal_lab_solver_prism_games-0.2.0-py3-none-any.whl",
-      "sha256": "8f7c467f6668b5049db3a3175e95ec0b0322a4bcae7283e0c0e208d8f2a240a0",
-      "bytes": 14462
+      "file": "formal_lab_solver_prism_games-0.3.0-py3-none-any.whl",
+      "sha256": "eba2d1ce3b57b377b34a83bdc1c617b72a859d970a4ee9f7b4a986205beb6b1c",
+      "bytes": 14463
     },
     {
-      "file": "formal_lab_solver_z3-0.2.0-py3-none-any.whl",
-      "sha256": "fbc8768915186757fdb39e3027ce645d9622e55e34d608fabca92eec06a94929",
-      "bytes": 27918
+      "file": "formal_lab_solver_z3-0.3.0-py3-none-any.whl",
+      "sha256": "bdd2e2138648f67a87b50b5a0c1a7a43ea72d3100b445e86e3797998f1ebaebc",
+      "bytes": 27919
     },
     {
-      "file": "formal_lab_strategies-0.2.0-py3-none-any.whl",
-      "sha256": "04d617ae597b29f414790f3f28cccf941564432709dacb33c35606340a4175f2",
-      "bytes": 14303
+      "file": "formal_lab_strategies-0.3.0-py3-none-any.whl",
+      "sha256": "e949f19e1de4415d4ac4533ac8b88d49b4c9993ff353ed493389e535a7587be9",
+      "bytes": 14301
     }
   ],
   "sdk_cli": {
@@ -182,8 +215,8 @@
       "third_party_from": "package index / uv cache",
       "installed": {
         "formal-lab-contracts": "2.0.0",
-        "formal-lab-model-core": "0.2.0",
-        "formal-lab-sdk": "0.2.0"
+        "formal-lab-model-core": "0.3.0",
+        "formal-lab-sdk": "0.3.0"
       },
       "commands": [
         {
@@ -194,12 +227,12 @@
         {
           "command": "fal replay verify <bundle>",
           "exit_code": 0,
-          "first_line": "OK formal-lab/replay-bundle@2 run=run_ac6a29b305654e70a097 events=128 artifacts=1 operations=15 participants=1 contract="
+          "first_line": "OK formal-lab/replay-bundle@2 run=run_094a82735351430e821b events=128 artifacts=1 operations=15 participants=1 contract="
         },
         {
           "command": "fal replay view <bundle>",
           "exit_code": 0,
-          "first_line": "run run_ac6a29b305654e70a097  status SUCCEEDED (goal 'all_done' reached)  termination=JOINT_GOAL_REACHED"
+          "first_line": "run run_094a82735351430e821b  status SUCCEEDED (goal 'all_done' reached)  termination=JOINT_GOAL_REACHED"
         },
         {
           "command": "fal replay batches <bundle>",
@@ -211,12 +244,68 @@
     }
   },
   "web": {
-    "file": "formal-agent-lab-web-0.2.0.tar.gz",
-    "sha256": "fc8267da3bea31096f5d0625671ad42228a0c3472ac0f032f44be0af36331126",
-    "bytes": 716893
+    "file": "formal-agent-lab-web-0.3.0.tar.gz",
+    "sha256": "d067917853de57d72cf46d2b621598c6800c3f082d9b6de934b2a95ff2fa80f3",
+    "bytes": 716888
   },
-  "images": [],
-  "images_skipped": "--skip-images: OCI images not built by this run (make release builds them)",
+  "images": [
+    {
+      "name": "api",
+      "refs": [
+        "formal-agent-lab/api:0.3.0",
+        "formal-agent-lab/api:92036918f6eb"
+      ],
+      "image_id": "sha256:2cbb4d543273d3473b307bfbda35d60c658a37481ad3a4d9298d4057e221b620",
+      "architecture": "arm64",
+      "os": "linux",
+      "size_bytes": 224395385,
+      "created": "2026-10-01T09:53:10.909586413+08:00",
+      "revision_label": "92036918f6eb96f310e8b3f38a2b1a5e26c8a14d",
+      "licenses_label": "Apache-2.0"
+    },
+    {
+      "name": "worker",
+      "refs": [
+        "formal-agent-lab/worker:0.3.0",
+        "formal-agent-lab/worker:92036918f6eb"
+      ],
+      "image_id": "sha256:88b3d5420f1e928b73b22a1faeb955d909f7599abec96f73d03a99d8eb2aa351",
+      "architecture": "arm64",
+      "os": "linux",
+      "size_bytes": 224394692,
+      "created": "2026-10-01T09:53:10.909586413+08:00",
+      "revision_label": "92036918f6eb96f310e8b3f38a2b1a5e26c8a14d",
+      "licenses_label": "Apache-2.0"
+    },
+    {
+      "name": "web",
+      "refs": [
+        "formal-agent-lab/web:0.3.0",
+        "formal-agent-lab/web:92036918f6eb"
+      ],
+      "image_id": "sha256:df9d9fcbdcd523273551f47d3f4aa8b1df0ff595fb4112dddd7d46aba915ab1a",
+      "architecture": "arm64",
+      "os": "linux",
+      "size_bytes": 23491291,
+      "created": "2026-10-01T09:53:07.795027409+08:00",
+      "revision_label": "92036918f6eb96f310e8b3f38a2b1a5e26c8a14d",
+      "licenses_label": "Apache-2.0"
+    },
+    {
+      "name": "orders",
+      "refs": [
+        "formal-agent-lab/orders:0.3.0",
+        "formal-agent-lab/orders:92036918f6eb"
+      ],
+      "image_id": "sha256:8f0f5e5c33e569d0b2a1ff37e4e6fc16c0d28af8790edf6f0b7000c13433c8cb",
+      "architecture": "arm64",
+      "os": "linux",
+      "size_bytes": 224396526,
+      "created": "2026-10-01T09:53:11.040226091+08:00",
+      "revision_label": "92036918f6eb96f310e8b3f38a2b1a5e26c8a14d",
+      "licenses_label": "Apache-2.0"
+    }
+  ],
   "scenarios": {
     "model": {
       "package_id": "neutral-scheduling",
@@ -277,5 +366,5 @@
     "compose": "deploy/compose/docker-compose.yaml",
     "helm_chart": "deploy/helm/formal-agent-lab"
   },
-  "duration_s": 8.0
+  "duration_s": 488.1
 }
