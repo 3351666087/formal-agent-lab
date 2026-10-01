@@ -1,0 +1,3847 @@
+{
+  "format": "formal-lab/query-bundle@1",
+  "bundle_id": "qb_228ba1e9a9834b9f9231",
+  "created_at": "2026-10-01T01:02:40.834909Z",
+  "model": {
+    "package_id": "mal-net-app-data",
+    "version": 1,
+    "digest": {
+      "algorithm": "sha256",
+      "value": "fcb756fe7baf2d1e78059844935f28b4b4f5740687699629d792711ac1f153f4"
+    }
+  },
+  "driver": {
+    "plugin_id": "formal-lab.driver.ir-finite",
+    "version": "1.0.0"
+  },
+  "verifier": {
+    "plugin_id": "formal-lab.verifier.z3-bmc",
+    "version": "1.1.0"
+  },
+  "query": {
+    "kind": "GOAL_REACHABILITY",
+    "property_id": "target_reached",
+    "action": null,
+    "bound": {
+      "max_steps": 60,
+      "timeout_ms": 30000
+    },
+    "initial_state": "MODEL_INITIAL",
+    "objective": null,
+    "sequence": []
+  },
+  "state": null,
+  "unknown_paths": [],
+  "assumptions": null,
+  "result": {
+    "extensions": {},
+    "contract_version": "formal-lab-contracts/v2",
+    "check_id": "chk_13dca7be9e0a4255",
+    "query": {
+      "kind": "GOAL_REACHABILITY",
+      "property_id": "target_reached",
+      "action": null,
+      "bound": {
+        "max_steps": 60,
+        "timeout_ms": 30000
+      },
+      "initial_state": "MODEL_INITIAL",
+      "objective": null,
+      "sequence": []
+    },
+    "semantics": "EXISTS_PATH",
+    "verdict": "WITNESS",
+    "bound": {
+      "max_steps": 60,
+      "timeout_ms": 30000
+    },
+    "scope": "MODEL_INTERNAL",
+    "assumptions": [
+      "paths start in the model initial state",
+      "one ground action per logical step; deterministic effects as specified by deterministic_finite_v1",
+      "only paths of at most 60 step(s) are considered"
+    ],
+    "model_digest": {
+      "algorithm": "sha256",
+      "value": "fcb756fe7baf2d1e78059844935f28b4b4f5740687699629d792711ac1f153f4"
+    },
+    "state_digest": {
+      "algorithm": "sha256",
+      "value": "a58ffece2ac69c7428bbd096b7c4a9bf6ab4f11ddb313be9025f5cf9979772b3"
+    },
+    "action_digest": null,
+    "witness": {
+      "steps": [
+        {
+          "step": 0,
+          "action": null,
+          "state": {
+            "compromised[app__accessNetworkAndConnections]": false,
+            "compromised[app__attemptModify]": false,
+            "compromised[app__attemptRead]": false,
+            "compromised[app__attemptReverseReach]": false,
+            "compromised[app__attemptSoftwareProductAbuse]": false,
+            "compromised[app__attemptUseVulnerability]": false,
+            "compromised[app__fullAccess]": true,
+            "compromised[app__modify]": false,
+            "compromised[app__networkConnect]": false,
+            "compromised[app__networkConnectInspected]": false,
+            "compromised[app__networkConnectUninspected]": false,
+            "compromised[app__read]": false,
+            "compromised[app__softwareProductVulnerabilityNetworkAccessAchieved]": false,
+            "compromised[app__specificAccess]": false,
+            "compromised[app__specificAccessNetworkConnect]": false,
+            "compromised[app__specificAccessRead]": false,
+            "compromised[app__successfulModify]": false,
+            "compromised[app__successfulRead]": false,
+            "compromised[app__successfulReverseReach]": false,
+            "compromised[app__successfulUseVulnerability]": false,
+            "compromised[app__useVulnerability]": false,
+            "compromised[net__accessInspected]": false,
+            "compromised[net__accessUninspected]": false,
+            "compromised[net__attemptReverseReach]": false,
+            "compromised[net__reverseReach]": false,
+            "compromised[secret__attemptRead]": false,
+            "compromised[secret__authorizedReadFromApplication]": false,
+            "compromised[secret__read]": false,
+            "compromised[secret__successfulRead]": false
+          }
+        },
+        {
+          "step": 1,
+          "action": {
+            "action_type": "compromise",
+            "params": {
+              "n": "app__attemptRead"
+            }
+          },
+          "state": {
+            "compromised[app__accessNetworkAndConnections]": false,
+            "compromised[app__attemptModify]": false,
+            "compromised[app__attemptRead]": true,
+            "compromised[app__attemptReverseReach]": false,
+            "compromised[app__attemptSoftwareProductAbuse]": false,
+            "compromised[app__attemptUseVulnerability]": false,
+            "compromised[app__fullAccess]": true,
+            "compromised[app__modify]": false,
+            "compromised[app__networkConnect]": false,
+            "compromised[app__networkConnectInspected]": false,
+            "compromised[app__networkConnectUninspected]": false,
+            "compromised[app__read]": false,
+            "compromised[app__softwareProductVulnerabilityNetworkAccessAchieved]": false,
+            "compromised[app__specificAccess]": false,
+            "compromised[app__specificAccessNetworkConnect]": false,
+            "compromised[app__specificAccessRead]": false,
+            "compromised[app__successfulModify]": false,
+            "compromised[app__successfulRead]": false,
+            "compromised[app__successfulReverseReach]": false,
+            "compromised[app__successfulUseVulnerability]": false,
+            "compromised[app__useVulnerability]": false,
+            "compromised[net__accessInspected]": false,
+            "compromised[net__accessUninspected]": false,
+            "compromised[net__attemptReverseReach]": false,
+            "compromised[net__reverseReach]": false,
+            "compromised[secret__attemptRead]": false,
+            "compromised[secret__authorizedReadFromApplication]": false,
+            "compromised[secret__read]": false,
+            "compromised[secret__successfulRead]": false
+          }
+        },
+        {
+          "step": 2,
+          "action": {
+            "action_type": "compromise",
+            "params": {
+              "n": "app__successfulRead"
+            }
+          },
+          "state": {
+            "compromised[app__accessNetworkAndConnections]": false,
+            "compromised[app__attemptModify]": false,
+            "compromised[app__attemptRead]": true,
+            "compromised[app__attemptReverseReach]": false,
+            "compromised[app__attemptSoftwareProductAbuse]": false,
+            "compromised[app__attemptUseVulnerability]": false,
+            "compromised[app__fullAccess]": true,
+            "compromised[app__modify]": false,
+            "compromised[app__networkConnect]": false,
+            "compromised[app__networkConnectInspected]": false,
+            "compromised[app__networkConnectUninspected]": false,
+            "compromised[app__read]": false,
+            "compromised[app__softwareProductVulnerabilityNetworkAccessAchieved]": false,
+            "compromised[app__specificAccess]": false,
+            "compromised[app__specificAccessNetworkConnect]": false,
+            "compromised[app__specificAccessRead]": false,
+            "compromised[app__successfulModify]": false,
+            "compromised[app__successfulRead]": true,
+            "compromised[app__successfulReverseReach]": false,
+            "compromised[app__successfulUseVulnerability]": false,
+            "compromised[app__useVulnerability]": false,
+            "compromised[net__accessInspected]": false,
+            "compromised[net__accessUninspected]": false,
+            "compromised[net__attemptReverseReach]": false,
+            "compromised[net__reverseReach]": false,
+            "compromised[secret__attemptRead]": false,
+            "compromised[secret__authorizedReadFromApplication]": false,
+            "compromised[secret__read]": false,
+            "compromised[secret__successfulRead]": false
+          }
+        },
+        {
+          "step": 3,
+          "action": {
+            "action_type": "compromise",
+            "params": {
+              "n": "app__read"
+            }
+          },
+          "state": {
+            "compromised[app__accessNetworkAndConnections]": false,
+            "compromised[app__attemptModify]": false,
+            "compromised[app__attemptRead]": true,
+            "compromised[app__attemptReverseReach]": false,
+            "compromised[app__attemptSoftwareProductAbuse]": false,
+            "compromised[app__attemptUseVulnerability]": false,
+            "compromised[app__fullAccess]": true,
+            "compromised[app__modify]": false,
+            "compromised[app__networkConnect]": false,
+            "compromised[app__networkConnectInspected]": false,
+            "compromised[app__networkConnectUninspected]": false,
+            "compromised[app__read]": true,
+            "compromised[app__softwareProductVulnerabilityNetworkAccessAchieved]": false,
+            "compromised[app__specificAccess]": false,
+            "compromised[app__specificAccessNetworkConnect]": false,
+            "compromised[app__specificAccessRead]": false,
+            "compromised[app__successfulModify]": false,
+            "compromised[app__successfulRead]": true,
+            "compromised[app__successfulReverseReach]": false,
+            "compromised[app__successfulUseVulnerability]": false,
+            "compromised[app__useVulnerability]": false,
+            "compromised[net__accessInspected]": false,
+            "compromised[net__accessUninspected]": false,
+            "compromised[net__attemptReverseReach]": false,
+            "compromised[net__reverseReach]": false,
+            "compromised[secret__attemptRead]": false,
+            "compromised[secret__authorizedReadFromApplication]": false,
+            "compromised[secret__read]": false,
+            "compromised[secret__successfulRead]": false
+          }
+        },
+        {
+          "step": 4,
+          "action": {
+            "action_type": "compromise",
+            "params": {
+              "n": "secret__attemptRead"
+            }
+          },
+          "state": {
+            "compromised[app__accessNetworkAndConnections]": false,
+            "compromised[app__attemptModify]": false,
+            "compromised[app__attemptRead]": true,
+            "compromised[app__attemptReverseReach]": false,
+            "compromised[app__attemptSoftwareProductAbuse]": false,
+            "compromised[app__attemptUseVulnerability]": false,
+            "compromised[app__fullAccess]": true,
+            "compromised[app__modify]": false,
+            "compromised[app__networkConnect]": false,
+            "compromised[app__networkConnectInspected]": false,
+            "compromised[app__networkConnectUninspected]": false,
+            "compromised[app__read]": true,
+            "compromised[app__softwareProductVulnerabilityNetworkAccessAchieved]": false,
+            "compromised[app__specificAccess]": false,
+            "compromised[app__specificAccessNetworkConnect]": false,
+            "compromised[app__specificAccessRead]": false,
+            "compromised[app__successfulModify]": false,
+            "compromised[app__successfulRead]": true,
+            "compromised[app__successfulReverseReach]": false,
+            "compromised[app__successfulUseVulnerability]": false,
+            "compromised[app__useVulnerability]": false,
+            "compromised[net__accessInspected]": false,
+            "compromised[net__accessUninspected]": false,
+            "compromised[net__attemptReverseReach]": false,
+            "compromised[net__reverseReach]": false,
+            "compromised[secret__attemptRead]": true,
+            "compromised[secret__authorizedReadFromApplication]": false,
+            "compromised[secret__read]": false,
+            "compromised[secret__successfulRead]": false
+          }
+        },
+        {
+          "step": 5,
+          "action": {
+            "action_type": "compromise",
+            "params": {
+              "n": "secret__successfulRead"
+            }
+          },
+          "state": {
+            "compromised[app__accessNetworkAndConnections]": false,
+            "compromised[app__attemptModify]": false,
+            "compromised[app__attemptRead]": true,
+            "compromised[app__attemptReverseReach]": false,
+            "compromised[app__attemptSoftwareProductAbuse]": false,
+            "compromised[app__attemptUseVulnerability]": false,
+            "compromised[app__fullAccess]": true,
+            "compromised[app__modify]": false,
+            "compromised[app__networkConnect]": false,
+            "compromised[app__networkConnectInspected]": false,
+            "compromised[app__networkConnectUninspected]": false,
+            "compromised[app__read]": true,
+            "compromised[app__softwareProductVulnerabilityNetworkAccessAchieved]": false,
+            "compromised[app__specificAccess]": false,
+            "compromised[app__specificAccessNetworkConnect]": false,
+            "compromised[app__specificAccessRead]": false,
+            "compromised[app__successfulModify]": false,
+            "compromised[app__successfulRead]": true,
+            "compromised[app__successfulReverseReach]": false,
+            "compromised[app__successfulUseVulnerability]": false,
+            "compromised[app__useVulnerability]": false,
+            "compromised[net__accessInspected]": false,
+            "compromised[net__accessUninspected]": false,
+            "compromised[net__attemptReverseReach]": false,
+            "compromised[net__reverseReach]": false,
+            "compromised[secret__attemptRead]": true,
+            "compromised[secret__authorizedReadFromApplication]": false,
+            "compromised[secret__read]": false,
+            "compromised[secret__successfulRead]": true
+          }
+        },
+        {
+          "step": 6,
+          "action": {
+            "action_type": "compromise",
+            "params": {
+              "n": "secret__read"
+            }
+          },
+          "state": {
+            "compromised[app__accessNetworkAndConnections]": false,
+            "compromised[app__attemptModify]": false,
+            "compromised[app__attemptRead]": true,
+            "compromised[app__attemptReverseReach]": false,
+            "compromised[app__attemptSoftwareProductAbuse]": false,
+            "compromised[app__attemptUseVulnerability]": false,
+            "compromised[app__fullAccess]": true,
+            "compromised[app__modify]": false,
+            "compromised[app__networkConnect]": false,
+            "compromised[app__networkConnectInspected]": false,
+            "compromised[app__networkConnectUninspected]": false,
+            "compromised[app__read]": true,
+            "compromised[app__softwareProductVulnerabilityNetworkAccessAchieved]": false,
+            "compromised[app__specificAccess]": false,
+            "compromised[app__specificAccessNetworkConnect]": false,
+            "compromised[app__specificAccessRead]": false,
+            "compromised[app__successfulModify]": false,
+            "compromised[app__successfulRead]": true,
+            "compromised[app__successfulReverseReach]": false,
+            "compromised[app__successfulUseVulnerability]": false,
+            "compromised[app__useVulnerability]": false,
+            "compromised[net__accessInspected]": false,
+            "compromised[net__accessUninspected]": false,
+            "compromised[net__attemptReverseReach]": false,
+            "compromised[net__reverseReach]": false,
+            "compromised[secret__attemptRead]": true,
+            "compromised[secret__authorizedReadFromApplication]": false,
+            "compromised[secret__read]": true,
+            "compromised[secret__successfulRead]": true
+          }
+        }
+      ],
+      "replay": "CONFIRMED",
+      "replay_note": "replayed by the reference interpreter"
+    },
+    "variable_mapping": {
+      "compromised[app__accessNetworkAndConnections]@t": "compromised[app__accessNetworkAndConnections]",
+      "compromised[app__attemptModify]@t": "compromised[app__attemptModify]",
+      "compromised[app__attemptRead]@t": "compromised[app__attemptRead]",
+      "compromised[app__attemptReverseReach]@t": "compromised[app__attemptReverseReach]",
+      "compromised[app__attemptSoftwareProductAbuse]@t": "compromised[app__attemptSoftwareProductAbuse]",
+      "compromised[app__attemptUseVulnerability]@t": "compromised[app__attemptUseVulnerability]",
+      "compromised[app__fullAccess]@t": "compromised[app__fullAccess]",
+      "compromised[app__modify]@t": "compromised[app__modify]",
+      "compromised[app__networkConnect]@t": "compromised[app__networkConnect]",
+      "compromised[app__networkConnectInspected]@t": "compromised[app__networkConnectInspected]",
+      "compromised[app__networkConnectUninspected]@t": "compromised[app__networkConnectUninspected]",
+      "compromised[app__read]@t": "compromised[app__read]",
+      "compromised[app__softwareProductVulnerabilityNetworkAccessAchieved]@t": "compromised[app__softwareProductVulnerabilityNetworkAccessAchieved]",
+      "compromised[app__specificAccess]@t": "compromised[app__specificAccess]",
+      "compromised[app__specificAccessNetworkConnect]@t": "compromised[app__specificAccessNetworkConnect]",
+      "compromised[app__specificAccessRead]@t": "compromised[app__specificAccessRead]",
+      "compromised[app__successfulModify]@t": "compromised[app__successfulModify]",
+      "compromised[app__successfulRead]@t": "compromised[app__successfulRead]",
+      "compromised[app__successfulReverseReach]@t": "compromised[app__successfulReverseReach]",
+      "compromised[app__successfulUseVulnerability]@t": "compromised[app__successfulUseVulnerability]",
+      "compromised[app__useVulnerability]@t": "compromised[app__useVulnerability]",
+      "compromised[net__accessInspected]@t": "compromised[net__accessInspected]",
+      "compromised[net__accessUninspected]@t": "compromised[net__accessUninspected]",
+      "compromised[net__attemptReverseReach]@t": "compromised[net__attemptReverseReach]",
+      "compromised[net__reverseReach]@t": "compromised[net__reverseReach]",
+      "compromised[secret__attemptRead]@t": "compromised[secret__attemptRead]",
+      "compromised[secret__authorizedReadFromApplication]@t": "compromised[secret__authorizedReadFromApplication]",
+      "compromised[secret__read]@t": "compromised[secret__read]",
+      "compromised[secret__successfulRead]@t": "compromised[secret__successfulRead]",
+      "act@t": "index into ground actions: compromise(n=app__accessNetworkAndConnections), compromise(n=app__attemptModify), compromise(n=app__attemptRead), compromise(n=app__attemptReverseReach), compromise(n=app__attemptSoftwareProductAbuse), compromise(n=app__attemptUseVulnerability), compromise(n=app__fullAccess), compromise(n=app__modify), compromise(n=app__networkConnect), compromise(n=app__networkConnectInspected), compromise(n=app__networkConnectUninspected), compromise(n=app__read), compromise(n=app__softwareProductVulnerabilityNetworkAccessAchieved), compromise(n=app__specificAccess), compromise(n=app__specificAccessNetworkConnect), compromise(n=app__specificAccessRead), compromise(n=app__successfulModify), compromise(n=app__successfulRead), compromise(n=app__successfulReverseReach), compromise(n=app__successfulUseVulnerability), compromise(n=app__useVulnerability), compromise(n=net__accessInspected), compromise(n=net__accessUninspected), compromise(n=net__attemptReverseReach), compromise(n=net__reverseReach), compromise(n=secret__attemptRead), compromise(n=secret__authorizedReadFromApplication), compromise(n=secret__read), compromise(n=secret__successfulRead)"
+    },
+    "backend": {
+      "name": "z3",
+      "version": "5.1.0"
+    },
+    "stats": {
+      "solver_status": "sat",
+      "steps_explored": 6,
+      "elapsed_ms": 51.81761299900245,
+      "timeout_ms": 30000,
+      "reason_unknown": null
+    },
+    "unsupported": null,
+    "explanation": "shortest path to goal 'target_reached' has 6 step(s)",
+    "assumption_set": null,
+    "optimization": null,
+    "robustness": null,
+    "observation_request": null,
+    "query_bundle": null
+  },
+  "explanation": [
+    "question (EXISTS_PATH): is there a path of at most 60 step(s) from the start state to a state where 'target_reached' holds?",
+    "answer: WITNESS — a path exists; it was replayed by the reference interpreter (CONFIRMED)",
+    "detail: shortest path to goal 'target_reached' has 6 step(s)",
+    "witness: 6 step(s): compromise → compromise → compromise → compromise → compromise → compromise",
+    "assumed: paths start in the model initial state",
+    "assumed: one ground action per logical step; deterministic effects as specified by deterministic_finite_v1",
+    "assumed: only paths of at most 60 step(s) are considered",
+    "scope: MODEL_INTERNAL (a conclusion about the model, not the real system); bound 60 step(s), timeout 30000 ms",
+    "backend: z3 5.1.0, 52 ms, status sat"
+  ],
+  "replay": {
+    "witness": "CONFIRMED",
+    "note": "6 step(s) replayed by the semantic driver"
+  },
+  "package": {
+    "extensions": {
+      "org.mal-lang.attack-graph": {
+        "version": "1.0.0",
+        "schema_id": "org.mal-lang.attack-graph/v1",
+        "data": {
+          "language": {
+            "name": "coreLang",
+            "version": "1.0.0"
+          },
+          "model": {
+            "name": "corelang-net-app-data",
+            "description": "Minimal coreLang model: an application on a network holds a secret data object. An attacker with full access to the application can read the data (a confidentiality target).",
+            "language": "coreLang",
+            "language_version": "1.0.0",
+            "assets": [
+              {
+                "type": "Network",
+                "name": "net"
+              },
+              {
+                "type": "Application",
+                "name": "app"
+              },
+              {
+                "type": "Data",
+                "name": "secret"
+              }
+            ],
+            "associations": [
+              {
+                "asset": "app",
+                "field": "networks",
+                "targets": [
+                  "net"
+                ]
+              },
+              {
+                "asset": "app",
+                "field": "containedData",
+                "targets": [
+                  "secret"
+                ]
+              }
+            ]
+          },
+          "entry_points": [
+            "app:fullAccess"
+          ],
+          "goal": "secret:read",
+          "graph_sha256": "e121dbd41c8fb5c107cc86deb30676ddd12dd675c13856b0985c3d59b0b8d9a6",
+          "graph": {
+            "nodes": [
+              {
+                "full_name": "net:physicalAccess",
+                "asset": "net",
+                "step": "physicalAccess",
+                "type": "or",
+                "existence_status": false,
+                "parents": [],
+                "children": [
+                  "net:attemptAccessInspectedFromPhysicalAccess",
+                  "net:attemptAccessUninspectedFromPhysicalAccess",
+                  "net:bypassAdversaryInTheMiddleDefenseFromPhysicalAccess",
+                  "net:bypassEavesdropDefenseFromPhysicalAccess",
+                  "net:deny"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": true
+              },
+              {
+                "full_name": "net:bypassEavesdropDefenseFromPhysicalAccess",
+                "asset": "net",
+                "step": "bypassEavesdropDefenseFromPhysicalAccess",
+                "type": "or",
+                "existence_status": false,
+                "parents": [
+                  "net:physicalAccess"
+                ],
+                "children": [
+                  "net:eavesdropDefenseBypassed"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "net:bypassAdversaryInTheMiddleDefenseFromPhysicalAccess",
+                "asset": "net",
+                "step": "bypassAdversaryInTheMiddleDefenseFromPhysicalAccess",
+                "type": "or",
+                "existence_status": false,
+                "parents": [
+                  "net:physicalAccess"
+                ],
+                "children": [
+                  "net:adversaryInTheMiddleDefenseBypassed"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "net:networkAccessControl",
+                "asset": "net",
+                "step": "networkAccessControl",
+                "type": "defense",
+                "existence_status": false,
+                "parents": [],
+                "children": [
+                  "net:accessControlBypassed"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "net:bypassAccessControl",
+                "asset": "net",
+                "step": "bypassAccessControl",
+                "type": "or",
+                "existence_status": false,
+                "parents": [
+                  "net:attemptAccessInspectedFromPhysicalAccess",
+                  "net:attemptAccessUninspectedFromPhysicalAccess"
+                ],
+                "children": [
+                  "net:accessControlBypassed"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "net:accessControlBypassed",
+                "asset": "net",
+                "step": "accessControlBypassed",
+                "type": "or",
+                "existence_status": false,
+                "parents": [
+                  "net:bypassAccessControl",
+                  "net:networkAccessControl"
+                ],
+                "children": [
+                  "net:successfulAccessInspectedFromPhysicalAccess",
+                  "net:successfulAccessUninspectedFromPhysicalAccess"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "net:attemptAccessUninspectedFromPhysicalAccess",
+                "asset": "net",
+                "step": "attemptAccessUninspectedFromPhysicalAccess",
+                "type": "or",
+                "existence_status": false,
+                "parents": [
+                  "net:physicalAccess"
+                ],
+                "children": [
+                  "net:bypassAccessControl",
+                  "net:successfulAccessUninspectedFromPhysicalAccess"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "net:attemptAccessInspectedFromPhysicalAccess",
+                "asset": "net",
+                "step": "attemptAccessInspectedFromPhysicalAccess",
+                "type": "or",
+                "existence_status": false,
+                "parents": [
+                  "net:physicalAccess"
+                ],
+                "children": [
+                  "net:bypassAccessControl",
+                  "net:successfulAccessInspectedFromPhysicalAccess"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "net:successfulAccessUninspectedFromPhysicalAccess",
+                "asset": "net",
+                "step": "successfulAccessUninspectedFromPhysicalAccess",
+                "type": "and",
+                "existence_status": false,
+                "parents": [
+                  "net:accessControlBypassed",
+                  "net:attemptAccessUninspectedFromPhysicalAccess"
+                ],
+                "children": [
+                  "net:accessUninspected"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "net:successfulAccessInspectedFromPhysicalAccess",
+                "asset": "net",
+                "step": "successfulAccessInspectedFromPhysicalAccess",
+                "type": "and",
+                "existence_status": false,
+                "parents": [
+                  "net:accessControlBypassed",
+                  "net:attemptAccessInspectedFromPhysicalAccess"
+                ],
+                "children": [
+                  "net:accessInspected"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "net:accessUninspected",
+                "asset": "net",
+                "step": "accessUninspected",
+                "type": "or",
+                "existence_status": false,
+                "parents": [
+                  "app:accessNetworkAndConnections",
+                  "net:successfulAccessUninspectedFromPhysicalAccess"
+                ],
+                "children": [
+                  "app:networkConnectUninspected",
+                  "net:accessNetworkData",
+                  "net:attemptReverseReach",
+                  "net:deny",
+                  "net:networkForwardingUninspected"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "net:accessInspected",
+                "asset": "net",
+                "step": "accessInspected",
+                "type": "or",
+                "existence_status": false,
+                "parents": [
+                  "app:accessNetworkAndConnections",
+                  "net:successfulAccessInspectedFromPhysicalAccess"
+                ],
+                "children": [
+                  "app:networkConnectInspected",
+                  "net:accessNetworkData",
+                  "net:deny",
+                  "net:networkForwardingInspected"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "net:attemptReverseReach",
+                "asset": "net",
+                "step": "attemptReverseReach",
+                "type": "or",
+                "existence_status": false,
+                "parents": [
+                  "app:reverseReach",
+                  "net:accessUninspected"
+                ],
+                "children": [
+                  "net:reverseReach"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "net:reverseReach",
+                "asset": "net",
+                "step": "reverseReach",
+                "type": "and",
+                "existence_status": false,
+                "parents": [
+                  "net:attemptReverseReach"
+                ],
+                "children": [
+                  "app:attemptReverseReach"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "net:networkForwardingUninspected",
+                "asset": "net",
+                "step": "networkForwardingUninspected",
+                "type": "or",
+                "existence_status": false,
+                "parents": [
+                  "net:accessUninspected"
+                ],
+                "children": [
+                  "net:networkForwardingInspected"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "net:networkForwardingInspected",
+                "asset": "net",
+                "step": "networkForwardingInspected",
+                "type": "or",
+                "existence_status": false,
+                "parents": [
+                  "net:accessInspected",
+                  "net:networkForwardingUninspected"
+                ],
+                "children": [],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "net:deny",
+                "asset": "net",
+                "step": "deny",
+                "type": "or",
+                "existence_status": false,
+                "parents": [
+                  "net:accessInspected",
+                  "net:accessUninspected",
+                  "net:physicalAccess"
+                ],
+                "children": [
+                  "app:denyFromNetworkingAsset"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "net:accessNetworkData",
+                "asset": "net",
+                "step": "accessNetworkData",
+                "type": "or",
+                "existence_status": false,
+                "parents": [
+                  "net:accessInspected",
+                  "net:accessUninspected"
+                ],
+                "children": [
+                  "net:attemptAdversaryInTheMiddle",
+                  "net:attemptEavesdrop"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "net:eavesdropDefense",
+                "asset": "net",
+                "step": "eavesdropDefense",
+                "type": "defense",
+                "existence_status": false,
+                "parents": [],
+                "children": [
+                  "net:eavesdropDefenseBypassed"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "net:bypassEavesdropDefense",
+                "asset": "net",
+                "step": "bypassEavesdropDefense",
+                "type": "or",
+                "existence_status": false,
+                "parents": [
+                  "net:attemptEavesdrop"
+                ],
+                "children": [
+                  "net:eavesdropDefenseBypassed"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "net:eavesdropDefenseBypassed",
+                "asset": "net",
+                "step": "eavesdropDefenseBypassed",
+                "type": "or",
+                "existence_status": false,
+                "parents": [
+                  "net:bypassEavesdropDefense",
+                  "net:bypassEavesdropDefenseFromPhysicalAccess",
+                  "net:eavesdropDefense"
+                ],
+                "children": [
+                  "net:successfulEavesdrop"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "net:attemptEavesdrop",
+                "asset": "net",
+                "step": "attemptEavesdrop",
+                "type": "or",
+                "existence_status": false,
+                "parents": [
+                  "net:accessNetworkData"
+                ],
+                "children": [
+                  "net:bypassEavesdropDefense",
+                  "net:successfulEavesdrop"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "net:successfulEavesdrop",
+                "asset": "net",
+                "step": "successfulEavesdrop",
+                "type": "and",
+                "existence_status": false,
+                "parents": [
+                  "net:attemptEavesdrop",
+                  "net:eavesdropDefenseBypassed"
+                ],
+                "children": [
+                  "net:eavesdrop"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "net:eavesdrop",
+                "asset": "net",
+                "step": "eavesdrop",
+                "type": "or",
+                "existence_status": false,
+                "parents": [
+                  "net:adversaryInTheMiddle",
+                  "net:successfulEavesdrop"
+                ],
+                "children": [],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "net:adversaryInTheMiddleDefense",
+                "asset": "net",
+                "step": "adversaryInTheMiddleDefense",
+                "type": "defense",
+                "existence_status": false,
+                "parents": [],
+                "children": [
+                  "net:adversaryInTheMiddleDefenseBypassed"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "net:bypassAdversaryInTheMiddleDefense",
+                "asset": "net",
+                "step": "bypassAdversaryInTheMiddleDefense",
+                "type": "or",
+                "existence_status": false,
+                "parents": [
+                  "net:attemptAdversaryInTheMiddle"
+                ],
+                "children": [
+                  "net:adversaryInTheMiddleDefenseBypassed"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "net:adversaryInTheMiddleDefenseBypassed",
+                "asset": "net",
+                "step": "adversaryInTheMiddleDefenseBypassed",
+                "type": "or",
+                "existence_status": false,
+                "parents": [
+                  "net:adversaryInTheMiddleDefense",
+                  "net:bypassAdversaryInTheMiddleDefense",
+                  "net:bypassAdversaryInTheMiddleDefenseFromPhysicalAccess"
+                ],
+                "children": [
+                  "net:successfulAdversaryInTheMiddle"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "net:attemptAdversaryInTheMiddle",
+                "asset": "net",
+                "step": "attemptAdversaryInTheMiddle",
+                "type": "or",
+                "existence_status": false,
+                "parents": [
+                  "net:accessNetworkData"
+                ],
+                "children": [
+                  "net:bypassAdversaryInTheMiddleDefense",
+                  "net:successfulAdversaryInTheMiddle"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "net:successfulAdversaryInTheMiddle",
+                "asset": "net",
+                "step": "successfulAdversaryInTheMiddle",
+                "type": "and",
+                "existence_status": false,
+                "parents": [
+                  "net:adversaryInTheMiddleDefenseBypassed",
+                  "net:attemptAdversaryInTheMiddle"
+                ],
+                "children": [
+                  "net:adversaryInTheMiddle"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "net:adversaryInTheMiddle",
+                "asset": "net",
+                "step": "adversaryInTheMiddle",
+                "type": "or",
+                "existence_status": false,
+                "parents": [
+                  "net:successfulAdversaryInTheMiddle"
+                ],
+                "children": [
+                  "net:eavesdrop"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "app:notPresent",
+                "asset": "app",
+                "step": "notPresent",
+                "type": "defense",
+                "existence_status": false,
+                "parents": [],
+                "children": [
+                  "app:denyFromSoftProdVulnerability",
+                  "app:fullAccessFromSupplyChainCompromise",
+                  "app:localAccess",
+                  "app:modifyFromSoftProdVulnerability",
+                  "app:networkAccess",
+                  "app:networkConnectFromResponse",
+                  "app:readFromSoftProdVulnerability",
+                  "app:specificAccessFromLocalConnection",
+                  "app:specificAccessFromNetworkConnection",
+                  "app:successfulApplicationRespondConnectThroughData",
+                  "app:successfulAuthorizedApplicationRespondConnectThroughData",
+                  "app:successfulDeny",
+                  "app:successfulModify",
+                  "app:successfulRead",
+                  "app:successfulReverseReach",
+                  "app:successfulUnsafeUserActivity",
+                  "app:successfulUseVulnerability"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "app:attemptUseVulnerability",
+                "asset": "app",
+                "step": "attemptUseVulnerability",
+                "type": "or",
+                "existence_status": false,
+                "parents": [
+                  "app:localConnect",
+                  "app:networkConnectUninspected",
+                  "app:specificAccess"
+                ],
+                "children": [
+                  "app:successfulUseVulnerability"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "app:successfulUseVulnerability",
+                "asset": "app",
+                "step": "successfulUseVulnerability",
+                "type": "and",
+                "existence_status": false,
+                "parents": [
+                  "app:attemptUseVulnerability",
+                  "app:notPresent"
+                ],
+                "children": [
+                  "app:useVulnerability"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "app:useVulnerability",
+                "asset": "app",
+                "step": "useVulnerability",
+                "type": "or",
+                "existence_status": false,
+                "parents": [
+                  "app:successfulUseVulnerability"
+                ],
+                "children": [
+                  "app:attemptSoftwareProductAbuse",
+                  "app:denyFromSoftProdVulnerability",
+                  "app:modifyFromSoftProdVulnerability",
+                  "app:readFromSoftProdVulnerability"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "app:attemptReverseReach",
+                "asset": "app",
+                "step": "attemptReverseReach",
+                "type": "or",
+                "existence_status": false,
+                "parents": [
+                  "net:reverseReach"
+                ],
+                "children": [
+                  "app:successfulReverseReach"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "app:successfulReverseReach",
+                "asset": "app",
+                "step": "successfulReverseReach",
+                "type": "and",
+                "existence_status": false,
+                "parents": [
+                  "app:attemptReverseReach",
+                  "app:notPresent"
+                ],
+                "children": [
+                  "app:reverseReach"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "app:reverseReach",
+                "asset": "app",
+                "step": "reverseReach",
+                "type": "or",
+                "existence_status": false,
+                "parents": [
+                  "app:successfulReverseReach"
+                ],
+                "children": [
+                  "app:attackerUnsafeUserActivityCapabilityWithReverseReach",
+                  "app:networkConnectFromResponse",
+                  "net:attemptReverseReach",
+                  "secret:attemptReverseReach"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "app:localConnect",
+                "asset": "app",
+                "step": "localConnect",
+                "type": "or",
+                "existence_status": false,
+                "parents": [
+                  "app:unsafeUserActivity"
+                ],
+                "children": [
+                  "app:attemptUseVulnerability",
+                  "app:localAccess",
+                  "app:softwareProductVulnerabilityLocalAccessAchieved",
+                  "app:specificAccessFromLocalConnection"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "app:networkConnectUninspected",
+                "asset": "app",
+                "step": "networkConnectUninspected",
+                "type": "or",
+                "existence_status": false,
+                "parents": [
+                  "app:networkConnectFromResponse",
+                  "app:unsafeUserActivity",
+                  "net:accessUninspected"
+                ],
+                "children": [
+                  "app:attemptUseVulnerability",
+                  "app:networkConnect",
+                  "app:softwareProductVulnerabilityNetworkAccessAchieved",
+                  "app:specificAccessNetworkConnect"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "app:networkConnectInspected",
+                "asset": "app",
+                "step": "networkConnectInspected",
+                "type": "or",
+                "existence_status": false,
+                "parents": [
+                  "net:accessInspected"
+                ],
+                "children": [
+                  "app:networkConnect",
+                  "app:specificAccessNetworkConnect"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "app:networkConnect",
+                "asset": "app",
+                "step": "networkConnect",
+                "type": "or",
+                "existence_status": false,
+                "parents": [
+                  "app:networkConnectInspected",
+                  "app:networkConnectUninspected"
+                ],
+                "children": [
+                  "app:networkAccess"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "app:specificAccessNetworkConnect",
+                "asset": "app",
+                "step": "specificAccessNetworkConnect",
+                "type": "or",
+                "existence_status": false,
+                "parents": [
+                  "app:networkConnectInspected",
+                  "app:networkConnectUninspected"
+                ],
+                "children": [
+                  "app:specificAccessFromNetworkConnection"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "app:accessNetworkAndConnections",
+                "asset": "app",
+                "step": "accessNetworkAndConnections",
+                "type": "or",
+                "existence_status": false,
+                "parents": [
+                  "app:fullAccess",
+                  "app:specificAccess"
+                ],
+                "children": [
+                  "net:accessInspected",
+                  "net:accessUninspected"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "app:attemptNetworkConnectFromResponse",
+                "asset": "app",
+                "step": "attemptNetworkConnectFromResponse",
+                "type": "or",
+                "existence_status": false,
+                "parents": [],
+                "children": [
+                  "app:networkConnectFromResponse"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": true
+              },
+              {
+                "full_name": "app:networkConnectFromResponse",
+                "asset": "app",
+                "step": "networkConnectFromResponse",
+                "type": "and",
+                "existence_status": false,
+                "parents": [
+                  "app:attemptNetworkConnectFromResponse",
+                  "app:notPresent",
+                  "app:reverseReach"
+                ],
+                "children": [
+                  "app:networkConnectUninspected"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "app:specificAccessFromLocalConnection",
+                "asset": "app",
+                "step": "specificAccessFromLocalConnection",
+                "type": "and",
+                "existence_status": false,
+                "parents": [
+                  "app:localConnect",
+                  "app:notPresent",
+                  "app:specificAccessAuthenticate"
+                ],
+                "children": [
+                  "app:specificAccess"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "app:specificAccessFromNetworkConnection",
+                "asset": "app",
+                "step": "specificAccessFromNetworkConnection",
+                "type": "and",
+                "existence_status": false,
+                "parents": [
+                  "app:notPresent",
+                  "app:specificAccessAuthenticate",
+                  "app:specificAccessNetworkConnect"
+                ],
+                "children": [
+                  "app:specificAccess"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "app:specificAccess",
+                "asset": "app",
+                "step": "specificAccess",
+                "type": "or",
+                "existence_status": false,
+                "parents": [
+                  "app:fullAccess",
+                  "app:specificAccessFromLocalConnection",
+                  "app:specificAccessFromNetworkConnection"
+                ],
+                "children": [
+                  "app:accessNetworkAndConnections",
+                  "app:attemptAuthorizedApplicationRespondConnectThroughData",
+                  "app:attemptUseVulnerability",
+                  "app:bypassContainerization",
+                  "app:specificAccessDelete",
+                  "app:specificAccessModify",
+                  "app:specificAccessRead"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "app:bypassContainerization",
+                "asset": "app",
+                "step": "bypassContainerization",
+                "type": "or",
+                "existence_status": false,
+                "parents": [
+                  "app:specificAccess"
+                ],
+                "children": [],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "app:authenticate",
+                "asset": "app",
+                "step": "authenticate",
+                "type": "or",
+                "existence_status": false,
+                "parents": [],
+                "children": [
+                  "app:localAccess",
+                  "app:networkAccess",
+                  "app:softwareProductVulnerabilityHighPrivilegesAchieved"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": true
+              },
+              {
+                "full_name": "app:specificAccessAuthenticate",
+                "asset": "app",
+                "step": "specificAccessAuthenticate",
+                "type": "or",
+                "existence_status": false,
+                "parents": [],
+                "children": [
+                  "app:softwareProductVulnerabilityLowPrivilegesAchieved",
+                  "app:specificAccessFromLocalConnection",
+                  "app:specificAccessFromNetworkConnection"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": true
+              },
+              {
+                "full_name": "app:localAccess",
+                "asset": "app",
+                "step": "localAccess",
+                "type": "and",
+                "existence_status": false,
+                "parents": [
+                  "app:authenticate",
+                  "app:localConnect",
+                  "app:notPresent"
+                ],
+                "children": [
+                  "app:fullAccess"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "app:networkAccess",
+                "asset": "app",
+                "step": "networkAccess",
+                "type": "and",
+                "existence_status": false,
+                "parents": [
+                  "app:authenticate",
+                  "app:networkConnect",
+                  "app:notPresent"
+                ],
+                "children": [
+                  "app:fullAccess"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "app:fullAccess",
+                "asset": "app",
+                "step": "fullAccess",
+                "type": "or",
+                "existence_status": false,
+                "parents": [
+                  "app:fullAccessFromSupplyChainCompromise",
+                  "app:localAccess",
+                  "app:modify",
+                  "app:networkAccess"
+                ],
+                "children": [
+                  "app:accessNetworkAndConnections",
+                  "app:attemptApplicationRespondConnectThroughData",
+                  "app:attemptDeny",
+                  "app:attemptModify",
+                  "app:attemptRead",
+                  "app:specificAccess"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "app:physicalAccessAchieved",
+                "asset": "app",
+                "step": "physicalAccessAchieved",
+                "type": "or",
+                "existence_status": false,
+                "parents": [],
+                "children": [
+                  "app:softwareProductVulnerabilityPhysicalAccessAchieved"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": true
+              },
+              {
+                "full_name": "app:attemptUnsafeUserActivity",
+                "asset": "app",
+                "step": "attemptUnsafeUserActivity",
+                "type": "or",
+                "existence_status": false,
+                "parents": [],
+                "children": [
+                  "app:attackerUnsafeUserActivityCapabilityWithReverseReach",
+                  "app:attackerUnsafeUserActivityCapabilityWithoutReverseReach",
+                  "app:successfulUnsafeUserActivity"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": true
+              },
+              {
+                "full_name": "app:successfulUnsafeUserActivity",
+                "asset": "app",
+                "step": "successfulUnsafeUserActivity",
+                "type": "and",
+                "existence_status": false,
+                "parents": [
+                  "app:attackerUnsafeUserActivityCapability",
+                  "app:attemptUnsafeUserActivity",
+                  "app:notPresent"
+                ],
+                "children": [
+                  "app:unsafeUserActivity"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "app:unsafeUserActivity",
+                "asset": "app",
+                "step": "unsafeUserActivity",
+                "type": "or",
+                "existence_status": false,
+                "parents": [
+                  "app:successfulUnsafeUserActivity"
+                ],
+                "children": [
+                  "app:localConnect",
+                  "app:networkConnectUninspected"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "app:attackerUnsafeUserActivityCapability",
+                "asset": "app",
+                "step": "attackerUnsafeUserActivityCapability",
+                "type": "or",
+                "existence_status": false,
+                "parents": [
+                  "app:attackerUnsafeUserActivityCapabilityWithReverseReach",
+                  "app:attackerUnsafeUserActivityCapabilityWithoutReverseReach"
+                ],
+                "children": [
+                  "app:successfulUnsafeUserActivity"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "app:attackerUnsafeUserActivityCapabilityWithReverseReach",
+                "asset": "app",
+                "step": "attackerUnsafeUserActivityCapabilityWithReverseReach",
+                "type": "and",
+                "existence_status": false,
+                "parents": [
+                  "app:attemptUnsafeUserActivity",
+                  "app:reverseReach"
+                ],
+                "children": [
+                  "app:attackerUnsafeUserActivityCapability"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "app:attackerUnsafeUserActivityCapabilityWithoutReverseReach",
+                "asset": "app",
+                "step": "attackerUnsafeUserActivityCapabilityWithoutReverseReach",
+                "type": "or",
+                "existence_status": false,
+                "parents": [
+                  "app:attemptUnsafeUserActivity"
+                ],
+                "children": [
+                  "app:attackerUnsafeUserActivityCapability"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "app:supplyChainAuditing",
+                "asset": "app",
+                "step": "supplyChainAuditing",
+                "type": "defense",
+                "existence_status": false,
+                "parents": [],
+                "children": [
+                  "app:supplyChainAuditingBypassed"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "app:bypassSupplyChainAuditing",
+                "asset": "app",
+                "step": "bypassSupplyChainAuditing",
+                "type": "or",
+                "existence_status": false,
+                "parents": [
+                  "app:attemptFullAccessFromSupplyChainCompromise"
+                ],
+                "children": [
+                  "app:supplyChainAuditingBypassed"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "app:supplyChainAuditingBypassed",
+                "asset": "app",
+                "step": "supplyChainAuditingBypassed",
+                "type": "or",
+                "existence_status": false,
+                "parents": [
+                  "app:bypassSupplyChainAuditing",
+                  "app:supplyChainAuditing"
+                ],
+                "children": [
+                  "app:fullAccessFromSupplyChainCompromise"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "app:attemptFullAccessFromSupplyChainCompromise",
+                "asset": "app",
+                "step": "attemptFullAccessFromSupplyChainCompromise",
+                "type": "or",
+                "existence_status": false,
+                "parents": [],
+                "children": [
+                  "app:bypassSupplyChainAuditing",
+                  "app:fullAccessFromSupplyChainCompromise"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": true
+              },
+              {
+                "full_name": "app:fullAccessFromSupplyChainCompromise",
+                "asset": "app",
+                "step": "fullAccessFromSupplyChainCompromise",
+                "type": "and",
+                "existence_status": false,
+                "parents": [
+                  "app:attemptFullAccessFromSupplyChainCompromise",
+                  "app:notPresent",
+                  "app:supplyChainAuditingBypassed"
+                ],
+                "children": [
+                  "app:fullAccess"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "app:attemptReadFromSoftProdVulnerability",
+                "asset": "app",
+                "step": "attemptReadFromSoftProdVulnerability",
+                "type": "or",
+                "existence_status": false,
+                "parents": [],
+                "children": [
+                  "app:readFromSoftProdVulnerability"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": true
+              },
+              {
+                "full_name": "app:attemptModifyFromSoftProdVulnerability",
+                "asset": "app",
+                "step": "attemptModifyFromSoftProdVulnerability",
+                "type": "or",
+                "existence_status": false,
+                "parents": [],
+                "children": [
+                  "app:modifyFromSoftProdVulnerability"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": true
+              },
+              {
+                "full_name": "app:attemptDenyFromSoftProdVulnerability",
+                "asset": "app",
+                "step": "attemptDenyFromSoftProdVulnerability",
+                "type": "or",
+                "existence_status": false,
+                "parents": [],
+                "children": [
+                  "app:denyFromSoftProdVulnerability"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": true
+              },
+              {
+                "full_name": "app:softwareCheck",
+                "asset": "app",
+                "step": "softwareCheck",
+                "type": "exist",
+                "existence_status": false,
+                "parents": [],
+                "children": [
+                  "app:denyFromSoftProdVulnerability",
+                  "app:modifyFromSoftProdVulnerability",
+                  "app:readFromSoftProdVulnerability"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "app:softwareProductVulnerabilityLocalAccessAchieved",
+                "asset": "app",
+                "step": "softwareProductVulnerabilityLocalAccessAchieved",
+                "type": "or",
+                "existence_status": false,
+                "parents": [
+                  "app:localConnect"
+                ],
+                "children": [
+                  "app:softwareProductAbuse"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "app:softwareProductVulnerabilityNetworkAccessAchieved",
+                "asset": "app",
+                "step": "softwareProductVulnerabilityNetworkAccessAchieved",
+                "type": "or",
+                "existence_status": false,
+                "parents": [
+                  "app:networkConnectUninspected"
+                ],
+                "children": [
+                  "app:softwareProductAbuse"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "app:softwareProductVulnerabilityPhysicalAccessAchieved",
+                "asset": "app",
+                "step": "softwareProductVulnerabilityPhysicalAccessAchieved",
+                "type": "or",
+                "existence_status": false,
+                "parents": [
+                  "app:physicalAccessAchieved"
+                ],
+                "children": [
+                  "app:softwareProductAbuse"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "app:softwareProductVulnerabilityLowPrivilegesAchieved",
+                "asset": "app",
+                "step": "softwareProductVulnerabilityLowPrivilegesAchieved",
+                "type": "or",
+                "existence_status": false,
+                "parents": [
+                  "app:specificAccessAuthenticate"
+                ],
+                "children": [
+                  "app:softwareProductAbuse"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "app:softwareProductVulnerabilityHighPrivilegesAchieved",
+                "asset": "app",
+                "step": "softwareProductVulnerabilityHighPrivilegesAchieved",
+                "type": "or",
+                "existence_status": false,
+                "parents": [
+                  "app:authenticate"
+                ],
+                "children": [
+                  "app:softwareProductAbuse"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "app:softwareProductVulnerabilityUserInteractionAchieved",
+                "asset": "app",
+                "step": "softwareProductVulnerabilityUserInteractionAchieved",
+                "type": "or",
+                "existence_status": false,
+                "parents": [],
+                "children": [
+                  "app:softwareProductAbuse"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": true
+              },
+              {
+                "full_name": "app:attemptSoftwareProductAbuse",
+                "asset": "app",
+                "step": "attemptSoftwareProductAbuse",
+                "type": "or",
+                "existence_status": false,
+                "parents": [
+                  "app:useVulnerability"
+                ],
+                "children": [
+                  "app:softwareProductAbuse"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "app:softwareProductAbuse",
+                "asset": "app",
+                "step": "softwareProductAbuse",
+                "type": "and",
+                "existence_status": false,
+                "parents": [
+                  "app:attemptSoftwareProductAbuse",
+                  "app:softwareProductVulnerabilityHighPrivilegesAchieved",
+                  "app:softwareProductVulnerabilityLocalAccessAchieved",
+                  "app:softwareProductVulnerabilityLowPrivilegesAchieved",
+                  "app:softwareProductVulnerabilityNetworkAccessAchieved",
+                  "app:softwareProductVulnerabilityPhysicalAccessAchieved",
+                  "app:softwareProductVulnerabilityUserInteractionAchieved"
+                ],
+                "children": [
+                  "app:denyFromSoftProdVulnerability",
+                  "app:modifyFromSoftProdVulnerability",
+                  "app:readFromSoftProdVulnerability"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "app:readFromSoftProdVulnerability",
+                "asset": "app",
+                "step": "readFromSoftProdVulnerability",
+                "type": "and",
+                "existence_status": false,
+                "parents": [
+                  "app:attemptReadFromSoftProdVulnerability",
+                  "app:notPresent",
+                  "app:softwareCheck",
+                  "app:softwareProductAbuse",
+                  "app:useVulnerability"
+                ],
+                "children": [
+                  "app:attemptRead"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": true
+              },
+              {
+                "full_name": "app:modifyFromSoftProdVulnerability",
+                "asset": "app",
+                "step": "modifyFromSoftProdVulnerability",
+                "type": "and",
+                "existence_status": false,
+                "parents": [
+                  "app:attemptModifyFromSoftProdVulnerability",
+                  "app:notPresent",
+                  "app:softwareCheck",
+                  "app:softwareProductAbuse",
+                  "app:useVulnerability"
+                ],
+                "children": [
+                  "app:attemptModify"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": true
+              },
+              {
+                "full_name": "app:denyFromSoftProdVulnerability",
+                "asset": "app",
+                "step": "denyFromSoftProdVulnerability",
+                "type": "and",
+                "existence_status": false,
+                "parents": [
+                  "app:attemptDenyFromSoftProdVulnerability",
+                  "app:notPresent",
+                  "app:softwareCheck",
+                  "app:softwareProductAbuse",
+                  "app:useVulnerability"
+                ],
+                "children": [
+                  "app:attemptDeny"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": true
+              },
+              {
+                "full_name": "app:attemptApplicationRespondConnectThroughData",
+                "asset": "app",
+                "step": "attemptApplicationRespondConnectThroughData",
+                "type": "or",
+                "existence_status": false,
+                "parents": [
+                  "app:fullAccess"
+                ],
+                "children": [
+                  "app:successfulApplicationRespondConnectThroughData"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "app:successfulApplicationRespondConnectThroughData",
+                "asset": "app",
+                "step": "successfulApplicationRespondConnectThroughData",
+                "type": "and",
+                "existence_status": false,
+                "parents": [
+                  "app:attemptApplicationRespondConnectThroughData",
+                  "app:notPresent"
+                ],
+                "children": [
+                  "app:applicationRespondConnectThroughData"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "app:applicationRespondConnectThroughData",
+                "asset": "app",
+                "step": "applicationRespondConnectThroughData",
+                "type": "or",
+                "existence_status": false,
+                "parents": [
+                  "app:successfulApplicationRespondConnectThroughData"
+                ],
+                "children": [],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "app:attemptAuthorizedApplicationRespondConnectThroughData",
+                "asset": "app",
+                "step": "attemptAuthorizedApplicationRespondConnectThroughData",
+                "type": "or",
+                "existence_status": false,
+                "parents": [
+                  "app:specificAccess"
+                ],
+                "children": [
+                  "app:successfulAuthorizedApplicationRespondConnectThroughData"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "app:successfulAuthorizedApplicationRespondConnectThroughData",
+                "asset": "app",
+                "step": "successfulAuthorizedApplicationRespondConnectThroughData",
+                "type": "and",
+                "existence_status": false,
+                "parents": [
+                  "app:attemptAuthorizedApplicationRespondConnectThroughData",
+                  "app:notPresent"
+                ],
+                "children": [
+                  "app:authorizedApplicationRespondConnectThroughData"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "app:authorizedApplicationRespondConnectThroughData",
+                "asset": "app",
+                "step": "authorizedApplicationRespondConnectThroughData",
+                "type": "or",
+                "existence_status": false,
+                "parents": [
+                  "app:successfulAuthorizedApplicationRespondConnectThroughData"
+                ],
+                "children": [],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "app:attemptRead",
+                "asset": "app",
+                "step": "attemptRead",
+                "type": "or",
+                "existence_status": false,
+                "parents": [
+                  "app:fullAccess",
+                  "app:readFromSoftProdVulnerability"
+                ],
+                "children": [
+                  "app:successfulRead"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "app:successfulRead",
+                "asset": "app",
+                "step": "successfulRead",
+                "type": "and",
+                "existence_status": false,
+                "parents": [
+                  "app:attemptRead",
+                  "app:notPresent"
+                ],
+                "children": [
+                  "app:read"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "app:read",
+                "asset": "app",
+                "step": "read",
+                "type": "or",
+                "existence_status": false,
+                "parents": [
+                  "app:successfulRead"
+                ],
+                "children": [
+                  "secret:attemptRead"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "app:specificAccessRead",
+                "asset": "app",
+                "step": "specificAccessRead",
+                "type": "or",
+                "existence_status": false,
+                "parents": [
+                  "app:specificAccess"
+                ],
+                "children": [
+                  "secret:authorizedReadFromApplication"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "app:attemptModify",
+                "asset": "app",
+                "step": "attemptModify",
+                "type": "or",
+                "existence_status": false,
+                "parents": [
+                  "app:fullAccess",
+                  "app:modifyFromSoftProdVulnerability"
+                ],
+                "children": [
+                  "app:successfulModify"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "app:successfulModify",
+                "asset": "app",
+                "step": "successfulModify",
+                "type": "and",
+                "existence_status": false,
+                "parents": [
+                  "app:attemptModify",
+                  "app:notPresent"
+                ],
+                "children": [
+                  "app:modify"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "app:modify",
+                "asset": "app",
+                "step": "modify",
+                "type": "or",
+                "existence_status": false,
+                "parents": [
+                  "app:successfulModify"
+                ],
+                "children": [
+                  "app:fullAccess",
+                  "secret:attemptWrite"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "app:specificAccessModify",
+                "asset": "app",
+                "step": "specificAccessModify",
+                "type": "or",
+                "existence_status": false,
+                "parents": [
+                  "app:specificAccess"
+                ],
+                "children": [
+                  "secret:authorizedWriteFromApplication"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "app:attemptDeny",
+                "asset": "app",
+                "step": "attemptDeny",
+                "type": "or",
+                "existence_status": false,
+                "parents": [
+                  "app:denyFromLockout",
+                  "app:denyFromNetworkingAsset",
+                  "app:denyFromSoftProdVulnerability",
+                  "app:fullAccess"
+                ],
+                "children": [
+                  "app:successfulDeny"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "app:successfulDeny",
+                "asset": "app",
+                "step": "successfulDeny",
+                "type": "and",
+                "existence_status": false,
+                "parents": [
+                  "app:attemptDeny",
+                  "app:notPresent"
+                ],
+                "children": [
+                  "app:deny"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "app:deny",
+                "asset": "app",
+                "step": "deny",
+                "type": "or",
+                "existence_status": false,
+                "parents": [
+                  "app:successfulDeny"
+                ],
+                "children": [
+                  "secret:attemptDeny"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "app:specificAccessDelete",
+                "asset": "app",
+                "step": "specificAccessDelete",
+                "type": "or",
+                "existence_status": false,
+                "parents": [
+                  "app:specificAccess"
+                ],
+                "children": [
+                  "secret:authorizedDeleteFromApplication"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "app:denyFromNetworkingAsset",
+                "asset": "app",
+                "step": "denyFromNetworkingAsset",
+                "type": "and",
+                "existence_status": false,
+                "parents": [
+                  "net:deny"
+                ],
+                "children": [
+                  "app:attemptDeny"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "app:denyFromLockout",
+                "asset": "app",
+                "step": "denyFromLockout",
+                "type": "and",
+                "existence_status": false,
+                "parents": [],
+                "children": [
+                  "app:attemptDeny"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "secret:notPresent",
+                "asset": "secret",
+                "step": "notPresent",
+                "type": "defense",
+                "existence_status": false,
+                "parents": [],
+                "children": [
+                  "secret:applicationRespondConnect",
+                  "secret:extract",
+                  "secret:reverseReach",
+                  "secret:successfulDelete",
+                  "secret:successfulDeny",
+                  "secret:successfulRead",
+                  "secret:successfulWrite"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "secret:authorizedAccessFromApplication",
+                "asset": "secret",
+                "step": "authorizedAccessFromApplication",
+                "type": "or",
+                "existence_status": false,
+                "parents": [],
+                "children": [
+                  "secret:authorizedDeleteFromApplication",
+                  "secret:authorizedReadFromApplication",
+                  "secret:authorizedWriteFromApplication"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": true
+              },
+              {
+                "full_name": "secret:dataEncrypted",
+                "asset": "secret",
+                "step": "dataEncrypted",
+                "type": "notExist",
+                "existence_status": false,
+                "parents": [],
+                "children": [
+                  "secret:accessUnencryptedData"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "secret:dataSigned",
+                "asset": "secret",
+                "step": "dataSigned",
+                "type": "notExist",
+                "existence_status": false,
+                "parents": [],
+                "children": [
+                  "secret:accessUnsignedData"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "secret:payloadInspectionBypassFromEncryptedData",
+                "asset": "secret",
+                "step": "payloadInspectionBypassFromEncryptedData",
+                "type": "exist",
+                "existence_status": false,
+                "parents": [],
+                "children": [
+                  "secret:bypassPayloadInspectionFromEncryptedData"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "secret:bypassPayloadInspectionFromEncryptedData",
+                "asset": "secret",
+                "step": "bypassPayloadInspectionFromEncryptedData",
+                "type": "or",
+                "existence_status": false,
+                "parents": [
+                  "secret:payloadInspectionBypassFromEncryptedData"
+                ],
+                "children": [],
+                "ttc": null,
+                "auto": false,
+                "blocked": true
+              },
+              {
+                "full_name": "secret:accessUnencryptedData",
+                "asset": "secret",
+                "step": "accessUnencryptedData",
+                "type": "and",
+                "existence_status": false,
+                "parents": [
+                  "secret:dataEncrypted"
+                ],
+                "children": [
+                  "secret:accessDecryptedData"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "secret:accessUnsignedData",
+                "asset": "secret",
+                "step": "accessUnsignedData",
+                "type": "and",
+                "existence_status": false,
+                "parents": [
+                  "secret:dataSigned"
+                ],
+                "children": [
+                  "secret:accessSpoofedData"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "secret:accessSpoofedData",
+                "asset": "secret",
+                "step": "accessSpoofedData",
+                "type": "or",
+                "existence_status": false,
+                "parents": [
+                  "secret:accessUnsignedData"
+                ],
+                "children": [
+                  "secret:applicationRespondConnect",
+                  "secret:successfulWrite"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "secret:accessDecryptedData",
+                "asset": "secret",
+                "step": "accessDecryptedData",
+                "type": "or",
+                "existence_status": false,
+                "parents": [
+                  "secret:accessUnencryptedData"
+                ],
+                "children": [
+                  "secret:applicationRespondConnect",
+                  "secret:successfulDelete",
+                  "secret:successfulRead",
+                  "secret:successfulWrite"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "secret:attemptApplicationRespondConnect",
+                "asset": "secret",
+                "step": "attemptApplicationRespondConnect",
+                "type": "or",
+                "existence_status": false,
+                "parents": [
+                  "secret:authorizedApplicationRespondConnect"
+                ],
+                "children": [
+                  "secret:applicationRespondConnect"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "secret:applicationRespondConnect",
+                "asset": "secret",
+                "step": "applicationRespondConnect",
+                "type": "and",
+                "existence_status": false,
+                "parents": [
+                  "secret:accessDecryptedData",
+                  "secret:accessSpoofedData",
+                  "secret:attemptApplicationRespondConnect",
+                  "secret:notPresent"
+                ],
+                "children": [],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "secret:authorizedApplicationRespondConnectFromApplication",
+                "asset": "secret",
+                "step": "authorizedApplicationRespondConnectFromApplication",
+                "type": "or",
+                "existence_status": false,
+                "parents": [],
+                "children": [
+                  "secret:authorizedApplicationRespondConnect"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": true
+              },
+              {
+                "full_name": "secret:authorizedApplicationRespondConnectFromIAM",
+                "asset": "secret",
+                "step": "authorizedApplicationRespondConnectFromIAM",
+                "type": "or",
+                "existence_status": false,
+                "parents": [],
+                "children": [
+                  "secret:authorizedApplicationRespondConnect"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": true
+              },
+              {
+                "full_name": "secret:authorizedApplicationRespondConnect",
+                "asset": "secret",
+                "step": "authorizedApplicationRespondConnect",
+                "type": "and",
+                "existence_status": false,
+                "parents": [
+                  "secret:authorizedApplicationRespondConnectFromApplication",
+                  "secret:authorizedApplicationRespondConnectFromIAM"
+                ],
+                "children": [
+                  "secret:attemptApplicationRespondConnect"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "secret:attemptRead",
+                "asset": "secret",
+                "step": "attemptRead",
+                "type": "or",
+                "existence_status": false,
+                "parents": [
+                  "app:read",
+                  "secret:authorizedRead"
+                ],
+                "children": [
+                  "secret:successfulRead"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "secret:successfulRead",
+                "asset": "secret",
+                "step": "successfulRead",
+                "type": "and",
+                "existence_status": false,
+                "parents": [
+                  "secret:accessDecryptedData",
+                  "secret:attemptRead",
+                  "secret:notPresent"
+                ],
+                "children": [
+                  "secret:read"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "secret:read",
+                "asset": "secret",
+                "step": "read",
+                "type": "or",
+                "existence_status": false,
+                "parents": [
+                  "secret:successfulRead"
+                ],
+                "children": [
+                  "secret:extract"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "secret:authorizedReadFromIAM",
+                "asset": "secret",
+                "step": "authorizedReadFromIAM",
+                "type": "or",
+                "existence_status": false,
+                "parents": [],
+                "children": [
+                  "secret:authorizedRead"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": true
+              },
+              {
+                "full_name": "secret:authorizedReadFromApplication",
+                "asset": "secret",
+                "step": "authorizedReadFromApplication",
+                "type": "or",
+                "existence_status": false,
+                "parents": [
+                  "app:specificAccessRead",
+                  "secret:authorizedAccessFromApplication"
+                ],
+                "children": [
+                  "secret:authorizedRead"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "secret:authorizedRead",
+                "asset": "secret",
+                "step": "authorizedRead",
+                "type": "and",
+                "existence_status": false,
+                "parents": [
+                  "secret:authorizedReadFromApplication",
+                  "secret:authorizedReadFromIAM"
+                ],
+                "children": [
+                  "secret:attemptRead"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "secret:attemptWrite",
+                "asset": "secret",
+                "step": "attemptWrite",
+                "type": "or",
+                "existence_status": false,
+                "parents": [
+                  "app:modify",
+                  "secret:authorizedWrite"
+                ],
+                "children": [
+                  "secret:successfulWrite"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "secret:successfulWrite",
+                "asset": "secret",
+                "step": "successfulWrite",
+                "type": "and",
+                "existence_status": false,
+                "parents": [
+                  "secret:accessDecryptedData",
+                  "secret:accessSpoofedData",
+                  "secret:attemptWrite",
+                  "secret:notPresent"
+                ],
+                "children": [
+                  "secret:write"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "secret:write",
+                "asset": "secret",
+                "step": "write",
+                "type": "or",
+                "existence_status": false,
+                "parents": [
+                  "secret:successfulWrite"
+                ],
+                "children": [
+                  "secret:attemptDelete"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "secret:authorizedWriteFromIAM",
+                "asset": "secret",
+                "step": "authorizedWriteFromIAM",
+                "type": "or",
+                "existence_status": false,
+                "parents": [],
+                "children": [
+                  "secret:authorizedWrite"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": true
+              },
+              {
+                "full_name": "secret:authorizedWriteFromApplication",
+                "asset": "secret",
+                "step": "authorizedWriteFromApplication",
+                "type": "or",
+                "existence_status": false,
+                "parents": [
+                  "app:specificAccessModify",
+                  "secret:authorizedAccessFromApplication"
+                ],
+                "children": [
+                  "secret:authorizedWrite"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "secret:authorizedWrite",
+                "asset": "secret",
+                "step": "authorizedWrite",
+                "type": "and",
+                "existence_status": false,
+                "parents": [
+                  "secret:authorizedWriteFromApplication",
+                  "secret:authorizedWriteFromIAM"
+                ],
+                "children": [
+                  "secret:attemptWrite"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "secret:attemptDelete",
+                "asset": "secret",
+                "step": "attemptDelete",
+                "type": "or",
+                "existence_status": false,
+                "parents": [
+                  "secret:authorizedDelete",
+                  "secret:write"
+                ],
+                "children": [
+                  "secret:successfulDelete"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "secret:successfulDelete",
+                "asset": "secret",
+                "step": "successfulDelete",
+                "type": "and",
+                "existence_status": false,
+                "parents": [
+                  "secret:accessDecryptedData",
+                  "secret:attemptDelete",
+                  "secret:notPresent"
+                ],
+                "children": [
+                  "secret:delete"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "secret:delete",
+                "asset": "secret",
+                "step": "delete",
+                "type": "or",
+                "existence_status": false,
+                "parents": [
+                  "secret:successfulDelete"
+                ],
+                "children": [
+                  "secret:attemptDeny"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "secret:authorizedDeleteFromIAM",
+                "asset": "secret",
+                "step": "authorizedDeleteFromIAM",
+                "type": "or",
+                "existence_status": false,
+                "parents": [],
+                "children": [
+                  "secret:authorizedDelete"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": true
+              },
+              {
+                "full_name": "secret:authorizedDeleteFromApplication",
+                "asset": "secret",
+                "step": "authorizedDeleteFromApplication",
+                "type": "or",
+                "existence_status": false,
+                "parents": [
+                  "app:specificAccessDelete",
+                  "secret:authorizedAccessFromApplication"
+                ],
+                "children": [
+                  "secret:authorizedDelete"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "secret:authorizedDelete",
+                "asset": "secret",
+                "step": "authorizedDelete",
+                "type": "and",
+                "existence_status": false,
+                "parents": [
+                  "secret:authorizedDeleteFromApplication",
+                  "secret:authorizedDeleteFromIAM"
+                ],
+                "children": [
+                  "secret:attemptDelete"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "secret:attemptDeny",
+                "asset": "secret",
+                "step": "attemptDeny",
+                "type": "or",
+                "existence_status": false,
+                "parents": [
+                  "app:deny",
+                  "secret:delete",
+                  "secret:denyFromLockout"
+                ],
+                "children": [
+                  "secret:successfulDeny"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "secret:successfulDeny",
+                "asset": "secret",
+                "step": "successfulDeny",
+                "type": "and",
+                "existence_status": false,
+                "parents": [
+                  "secret:attemptDeny",
+                  "secret:notPresent"
+                ],
+                "children": [
+                  "secret:deny"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "secret:deny",
+                "asset": "secret",
+                "step": "deny",
+                "type": "or",
+                "existence_status": false,
+                "parents": [
+                  "secret:successfulDeny"
+                ],
+                "children": [],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "secret:denyFromLockout",
+                "asset": "secret",
+                "step": "denyFromLockout",
+                "type": "and",
+                "existence_status": false,
+                "parents": [],
+                "children": [
+                  "secret:attemptDeny"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "secret:attemptReverseReach",
+                "asset": "secret",
+                "step": "attemptReverseReach",
+                "type": "or",
+                "existence_status": false,
+                "parents": [
+                  "app:reverseReach"
+                ],
+                "children": [
+                  "secret:reverseReach"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "secret:reverseReach",
+                "asset": "secret",
+                "step": "reverseReach",
+                "type": "and",
+                "existence_status": false,
+                "parents": [
+                  "secret:attemptReverseReach",
+                  "secret:notPresent"
+                ],
+                "children": [
+                  "secret:extract"
+                ],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              },
+              {
+                "full_name": "secret:extract",
+                "asset": "secret",
+                "step": "extract",
+                "type": "and",
+                "existence_status": false,
+                "parents": [
+                  "secret:notPresent",
+                  "secret:read",
+                  "secret:reverseReach"
+                ],
+                "children": [],
+                "ttc": null,
+                "auto": false,
+                "blocked": false
+              }
+            ],
+            "assets": [
+              {
+                "name": "net",
+                "type": "Network"
+              },
+              {
+                "name": "app",
+                "type": "Application"
+              },
+              {
+                "name": "secret",
+                "type": "Data"
+              }
+            ],
+            "associations": [
+              {
+                "asset": "net",
+                "field": "applications",
+                "targets": [
+                  "app"
+                ]
+              },
+              {
+                "asset": "app",
+                "field": "networks",
+                "targets": [
+                  "net"
+                ]
+              },
+              {
+                "asset": "app",
+                "field": "containedData",
+                "targets": [
+                  "secret"
+                ]
+              },
+              {
+                "asset": "secret",
+                "field": "containingApp",
+                "targets": [
+                  "app"
+                ]
+              }
+            ],
+            "counts": {
+              "or": 91,
+              "defense": 6,
+              "and": 40,
+              "exist": 2,
+              "notExist": 2
+            },
+            "defenses_enabled": [],
+            "model_name": "corelang-net-app-data"
+          },
+          "native_reachable": [
+            "app:accessNetworkAndConnections",
+            "app:applicationRespondConnectThroughData",
+            "app:attemptApplicationRespondConnectThroughData",
+            "app:attemptAuthorizedApplicationRespondConnectThroughData",
+            "app:attemptDeny",
+            "app:attemptModify",
+            "app:attemptRead",
+            "app:attemptReverseReach",
+            "app:attemptSoftwareProductAbuse",
+            "app:attemptUseVulnerability",
+            "app:authorizedApplicationRespondConnectThroughData",
+            "app:bypassContainerization",
+            "app:deny",
+            "app:denyFromNetworkingAsset",
+            "app:fullAccess",
+            "app:modify",
+            "app:networkConnect",
+            "app:networkConnectInspected",
+            "app:networkConnectUninspected",
+            "app:read",
+            "app:softwareProductVulnerabilityNetworkAccessAchieved",
+            "app:specificAccess",
+            "app:specificAccessDelete",
+            "app:specificAccessModify",
+            "app:specificAccessNetworkConnect",
+            "app:specificAccessRead",
+            "app:successfulApplicationRespondConnectThroughData",
+            "app:successfulAuthorizedApplicationRespondConnectThroughData",
+            "app:successfulDeny",
+            "app:successfulModify",
+            "app:successfulRead",
+            "app:successfulReverseReach",
+            "app:successfulUseVulnerability",
+            "app:useVulnerability",
+            "net:accessInspected",
+            "net:accessNetworkData",
+            "net:accessUninspected",
+            "net:adversaryInTheMiddle",
+            "net:adversaryInTheMiddleDefenseBypassed",
+            "net:attemptAdversaryInTheMiddle",
+            "net:attemptEavesdrop",
+            "net:attemptReverseReach",
+            "net:bypassAdversaryInTheMiddleDefense",
+            "net:bypassEavesdropDefense",
+            "net:deny",
+            "net:eavesdrop",
+            "net:eavesdropDefenseBypassed",
+            "net:networkForwardingInspected",
+            "net:networkForwardingUninspected",
+            "net:reverseReach",
+            "net:successfulAdversaryInTheMiddle",
+            "net:successfulEavesdrop",
+            "secret:attemptDeny",
+            "secret:attemptRead",
+            "secret:attemptWrite",
+            "secret:authorizedDeleteFromApplication",
+            "secret:authorizedReadFromApplication",
+            "secret:authorizedWriteFromApplication",
+            "secret:deny",
+            "secret:read",
+            "secret:successfulDeny",
+            "secret:successfulRead",
+            "secret:successfulWrite",
+            "secret:write"
+          ],
+          "lowering": {
+            "goal": "secret:read",
+            "goal_id": "secret__read",
+            "entry_points": [
+              "app:fullAccess"
+            ],
+            "modeled_steps": 29,
+            "edges": 33,
+            "modeled_edges": [
+              [
+                "app:fullAccess",
+                "app:accessNetworkAndConnections"
+              ],
+              [
+                "app:specificAccess",
+                "app:accessNetworkAndConnections"
+              ],
+              [
+                "app:fullAccess",
+                "app:attemptModify"
+              ],
+              [
+                "app:fullAccess",
+                "app:attemptRead"
+              ],
+              [
+                "net:reverseReach",
+                "app:attemptReverseReach"
+              ],
+              [
+                "app:useVulnerability",
+                "app:attemptSoftwareProductAbuse"
+              ],
+              [
+                "app:networkConnectUninspected",
+                "app:attemptUseVulnerability"
+              ],
+              [
+                "app:specificAccess",
+                "app:attemptUseVulnerability"
+              ],
+              [
+                "app:modify",
+                "app:fullAccess"
+              ],
+              [
+                "app:successfulModify",
+                "app:modify"
+              ],
+              [
+                "app:networkConnectInspected",
+                "app:networkConnect"
+              ],
+              [
+                "app:networkConnectUninspected",
+                "app:networkConnect"
+              ],
+              [
+                "net:accessInspected",
+                "app:networkConnectInspected"
+              ],
+              [
+                "net:accessUninspected",
+                "app:networkConnectUninspected"
+              ],
+              [
+                "app:successfulRead",
+                "app:read"
+              ],
+              [
+                "app:networkConnectUninspected",
+                "app:softwareProductVulnerabilityNetworkAccessAchieved"
+              ],
+              [
+                "app:fullAccess",
+                "app:specificAccess"
+              ],
+              [
+                "app:networkConnectInspected",
+                "app:specificAccessNetworkConnect"
+              ],
+              [
+                "app:networkConnectUninspected",
+                "app:specificAccessNetworkConnect"
+              ],
+              [
+                "app:specificAccess",
+                "app:specificAccessRead"
+              ],
+              [
+                "app:attemptModify",
+                "app:successfulModify"
+              ],
+              [
+                "app:attemptRead",
+                "app:successfulRead"
+              ],
+              [
+                "app:attemptReverseReach",
+                "app:successfulReverseReach"
+              ],
+              [
+                "app:attemptUseVulnerability",
+                "app:successfulUseVulnerability"
+              ],
+              [
+                "app:successfulUseVulnerability",
+                "app:useVulnerability"
+              ],
+              [
+                "app:accessNetworkAndConnections",
+                "net:accessInspected"
+              ],
+              [
+                "app:accessNetworkAndConnections",
+                "net:accessUninspected"
+              ],
+              [
+                "net:accessUninspected",
+                "net:attemptReverseReach"
+              ],
+              [
+                "net:attemptReverseReach",
+                "net:reverseReach"
+              ],
+              [
+                "app:read",
+                "secret:attemptRead"
+              ],
+              [
+                "app:specificAccessRead",
+                "secret:authorizedReadFromApplication"
+              ],
+              [
+                "secret:successfulRead",
+                "secret:read"
+              ],
+              [
+                "secret:attemptRead",
+                "secret:successfulRead"
+              ]
+            ],
+            "and_steps": 6,
+            "or_steps": 23,
+            "seed_steps": [],
+            "ancestors_total": 78,
+            "native_reachable_total": 64,
+            "excluded_unreached_ancestors": [
+              "app:attackerUnsafeUserActivityCapability",
+              "app:attackerUnsafeUserActivityCapabilityWithReverseReach",
+              "app:attackerUnsafeUserActivityCapabilityWithoutReverseReach",
+              "app:attemptFullAccessFromSupplyChainCompromise",
+              "app:attemptModifyFromSoftProdVulnerability",
+              "app:attemptNetworkConnectFromResponse",
+              "app:attemptReadFromSoftProdVulnerability",
+              "app:attemptUnsafeUserActivity",
+              "app:authenticate",
+              "app:bypassSupplyChainAuditing",
+              "app:fullAccessFromSupplyChainCompromise",
+              "app:localAccess",
+              "app:localConnect",
+              "app:modifyFromSoftProdVulnerability",
+              "app:networkAccess",
+              "app:networkConnectFromResponse",
+              "app:physicalAccessAchieved",
+              "app:readFromSoftProdVulnerability",
+              "app:reverseReach",
+              "app:softwareProductAbuse",
+              "app:softwareProductVulnerabilityHighPrivilegesAchieved",
+              "app:softwareProductVulnerabilityLocalAccessAchieved",
+              "app:softwareProductVulnerabilityLowPrivilegesAchieved",
+              "app:softwareProductVulnerabilityPhysicalAccessAchieved",
+              "app:softwareProductVulnerabilityUserInteractionAchieved",
+              "app:specificAccessAuthenticate",
+              "app:specificAccessFromLocalConnection",
+              "app:specificAccessFromNetworkConnection",
+              "app:successfulUnsafeUserActivity",
+              "app:supplyChainAuditingBypassed",
+              "app:unsafeUserActivity",
+              "net:accessControlBypassed",
+              "net:attemptAccessInspectedFromPhysicalAccess",
+              "net:attemptAccessUninspectedFromPhysicalAccess",
+              "net:bypassAccessControl",
+              "net:physicalAccess",
+              "net:successfulAccessInspectedFromPhysicalAccess",
+              "net:successfulAccessUninspectedFromPhysicalAccess",
+              "secret:accessDecryptedData",
+              "secret:accessUnencryptedData",
+              "secret:authorizedAccessFromApplication",
+              "secret:authorizedRead",
+              "secret:authorizedReadFromIAM"
+            ],
+            "folded_non_step_parents": [
+              "app:notPresent",
+              "secret:notPresent"
+            ],
+            "goal_native_reachable": true,
+            "defense_enabled": false,
+            "initial_hardened": [],
+            "scope": {
+              "kind": "deterministic reachability of one target step over the or/and attack graph",
+              "oracle": "native mal-simulator reachable set (ttc disabled, no Bernoulli draws)",
+              "in_scope": [
+                "or/and attack-step compromise",
+                "entry points",
+                "existence steps and disabled defenses folded to their native truth",
+                "per-step unit cost"
+              ],
+              "out_of_scope": [
+                "time-to-compromise (TTC) and any randomness",
+                "partial observation of the graph",
+                "asset/association changes during the attack",
+                "quantitative rewards"
+              ],
+              "cross_check": "the IR reproduces the native goal reachability; the reference interpreter and the Z3 bounded verifier confirm it independently"
+            },
+            "id_map": {
+              "app:accessNetworkAndConnections": "app__accessNetworkAndConnections",
+              "app:attemptModify": "app__attemptModify",
+              "app:attemptRead": "app__attemptRead",
+              "app:attemptReverseReach": "app__attemptReverseReach",
+              "app:attemptSoftwareProductAbuse": "app__attemptSoftwareProductAbuse",
+              "app:attemptUseVulnerability": "app__attemptUseVulnerability",
+              "app:fullAccess": "app__fullAccess",
+              "app:modify": "app__modify",
+              "app:networkConnect": "app__networkConnect",
+              "app:networkConnectInspected": "app__networkConnectInspected",
+              "app:networkConnectUninspected": "app__networkConnectUninspected",
+              "app:read": "app__read",
+              "app:softwareProductVulnerabilityNetworkAccessAchieved": "app__softwareProductVulnerabilityNetworkAccessAchieved",
+              "app:specificAccess": "app__specificAccess",
+              "app:specificAccessNetworkConnect": "app__specificAccessNetworkConnect",
+              "app:specificAccessRead": "app__specificAccessRead",
+              "app:successfulModify": "app__successfulModify",
+              "app:successfulRead": "app__successfulRead",
+              "app:successfulReverseReach": "app__successfulReverseReach",
+              "app:successfulUseVulnerability": "app__successfulUseVulnerability",
+              "app:useVulnerability": "app__useVulnerability",
+              "net:accessInspected": "net__accessInspected",
+              "net:accessUninspected": "net__accessUninspected",
+              "net:attemptReverseReach": "net__attemptReverseReach",
+              "net:reverseReach": "net__reverseReach",
+              "secret:attemptRead": "secret__attemptRead",
+              "secret:authorizedReadFromApplication": "secret__authorizedReadFromApplication",
+              "secret:read": "secret__read",
+              "secret:successfulRead": "secret__successfulRead"
+            }
+          }
+        }
+      }
+    },
+    "contract_version": "formal-lab-contracts/v2",
+    "package_id": "mal-net-app-data",
+    "version": 1,
+    "frontend": {
+      "plugin_id": "formal-lab.frontend.ir-json",
+      "version": "1.0.0"
+    },
+    "semantic_profile": "deterministic_finite_v1",
+    "digest": {
+      "algorithm": "sha256",
+      "value": "fcb756fe7baf2d1e78059844935f28b4b4f5740687699629d792711ac1f153f4"
+    },
+    "payload": {
+      "kind": "fal-ir",
+      "ir": {
+        "semantic_profile": "deterministic_finite_v1",
+        "name": "mal-net-app-data",
+        "description": "Deterministic lowering of a MAL attack graph: reachability of secret:read.",
+        "enums": [],
+        "entity_sets": [
+          {
+            "name": "steps",
+            "members": [
+              "app__accessNetworkAndConnections",
+              "app__attemptModify",
+              "app__attemptRead",
+              "app__attemptReverseReach",
+              "app__attemptSoftwareProductAbuse",
+              "app__attemptUseVulnerability",
+              "app__fullAccess",
+              "app__modify",
+              "app__networkConnect",
+              "app__networkConnectInspected",
+              "app__networkConnectUninspected",
+              "app__read",
+              "app__softwareProductVulnerabilityNetworkAccessAchieved",
+              "app__specificAccess",
+              "app__specificAccessNetworkConnect",
+              "app__specificAccessRead",
+              "app__successfulModify",
+              "app__successfulRead",
+              "app__successfulReverseReach",
+              "app__successfulUseVulnerability",
+              "app__useVulnerability",
+              "net__accessInspected",
+              "net__accessUninspected",
+              "net__attemptReverseReach",
+              "net__reverseReach",
+              "secret__attemptRead",
+              "secret__authorizedReadFromApplication",
+              "secret__read",
+              "secret__successfulRead"
+            ],
+            "label": "攻击步骤",
+            "description": null
+          }
+        ],
+        "constants": [
+          {
+            "name": "is_and",
+            "type": {
+              "kind": "bool"
+            },
+            "index": [
+              "steps"
+            ],
+            "value": {
+              "default": false,
+              "cells": [
+                {
+                  "index": [
+                    "app__successfulModify"
+                  ],
+                  "value": true
+                },
+                {
+                  "index": [
+                    "app__successfulRead"
+                  ],
+                  "value": true
+                },
+                {
+                  "index": [
+                    "app__successfulReverseReach"
+                  ],
+                  "value": true
+                },
+                {
+                  "index": [
+                    "app__successfulUseVulnerability"
+                  ],
+                  "value": true
+                },
+                {
+                  "index": [
+                    "net__reverseReach"
+                  ],
+                  "value": true
+                },
+                {
+                  "index": [
+                    "secret__successfulRead"
+                  ],
+                  "value": true
+                }
+              ]
+            },
+            "description": "AND step (needs all parents); else OR (needs any)"
+          },
+          {
+            "name": "seed",
+            "type": {
+              "kind": "bool"
+            },
+            "index": [
+              "steps"
+            ],
+            "value": {
+              "default": false,
+              "cells": []
+            },
+            "description": "reachable with no modeled parent: entry points and steps first reached via folded conditions or pruned out-of-cone ancestors"
+          },
+          {
+            "name": "edge",
+            "type": {
+              "kind": "bool"
+            },
+            "index": [
+              "steps",
+              "steps"
+            ],
+            "value": {
+              "default": false,
+              "cells": [
+                {
+                  "index": [
+                    "app__fullAccess",
+                    "app__accessNetworkAndConnections"
+                  ],
+                  "value": true
+                },
+                {
+                  "index": [
+                    "app__specificAccess",
+                    "app__accessNetworkAndConnections"
+                  ],
+                  "value": true
+                },
+                {
+                  "index": [
+                    "app__fullAccess",
+                    "app__attemptModify"
+                  ],
+                  "value": true
+                },
+                {
+                  "index": [
+                    "app__fullAccess",
+                    "app__attemptRead"
+                  ],
+                  "value": true
+                },
+                {
+                  "index": [
+                    "net__reverseReach",
+                    "app__attemptReverseReach"
+                  ],
+                  "value": true
+                },
+                {
+                  "index": [
+                    "app__useVulnerability",
+                    "app__attemptSoftwareProductAbuse"
+                  ],
+                  "value": true
+                },
+                {
+                  "index": [
+                    "app__networkConnectUninspected",
+                    "app__attemptUseVulnerability"
+                  ],
+                  "value": true
+                },
+                {
+                  "index": [
+                    "app__specificAccess",
+                    "app__attemptUseVulnerability"
+                  ],
+                  "value": true
+                },
+                {
+                  "index": [
+                    "app__modify",
+                    "app__fullAccess"
+                  ],
+                  "value": true
+                },
+                {
+                  "index": [
+                    "app__successfulModify",
+                    "app__modify"
+                  ],
+                  "value": true
+                },
+                {
+                  "index": [
+                    "app__networkConnectInspected",
+                    "app__networkConnect"
+                  ],
+                  "value": true
+                },
+                {
+                  "index": [
+                    "app__networkConnectUninspected",
+                    "app__networkConnect"
+                  ],
+                  "value": true
+                },
+                {
+                  "index": [
+                    "net__accessInspected",
+                    "app__networkConnectInspected"
+                  ],
+                  "value": true
+                },
+                {
+                  "index": [
+                    "net__accessUninspected",
+                    "app__networkConnectUninspected"
+                  ],
+                  "value": true
+                },
+                {
+                  "index": [
+                    "app__successfulRead",
+                    "app__read"
+                  ],
+                  "value": true
+                },
+                {
+                  "index": [
+                    "app__networkConnectUninspected",
+                    "app__softwareProductVulnerabilityNetworkAccessAchieved"
+                  ],
+                  "value": true
+                },
+                {
+                  "index": [
+                    "app__fullAccess",
+                    "app__specificAccess"
+                  ],
+                  "value": true
+                },
+                {
+                  "index": [
+                    "app__networkConnectInspected",
+                    "app__specificAccessNetworkConnect"
+                  ],
+                  "value": true
+                },
+                {
+                  "index": [
+                    "app__networkConnectUninspected",
+                    "app__specificAccessNetworkConnect"
+                  ],
+                  "value": true
+                },
+                {
+                  "index": [
+                    "app__specificAccess",
+                    "app__specificAccessRead"
+                  ],
+                  "value": true
+                },
+                {
+                  "index": [
+                    "app__attemptModify",
+                    "app__successfulModify"
+                  ],
+                  "value": true
+                },
+                {
+                  "index": [
+                    "app__attemptRead",
+                    "app__successfulRead"
+                  ],
+                  "value": true
+                },
+                {
+                  "index": [
+                    "app__attemptReverseReach",
+                    "app__successfulReverseReach"
+                  ],
+                  "value": true
+                },
+                {
+                  "index": [
+                    "app__attemptUseVulnerability",
+                    "app__successfulUseVulnerability"
+                  ],
+                  "value": true
+                },
+                {
+                  "index": [
+                    "app__successfulUseVulnerability",
+                    "app__useVulnerability"
+                  ],
+                  "value": true
+                },
+                {
+                  "index": [
+                    "app__accessNetworkAndConnections",
+                    "net__accessInspected"
+                  ],
+                  "value": true
+                },
+                {
+                  "index": [
+                    "app__accessNetworkAndConnections",
+                    "net__accessUninspected"
+                  ],
+                  "value": true
+                },
+                {
+                  "index": [
+                    "net__accessUninspected",
+                    "net__attemptReverseReach"
+                  ],
+                  "value": true
+                },
+                {
+                  "index": [
+                    "net__attemptReverseReach",
+                    "net__reverseReach"
+                  ],
+                  "value": true
+                },
+                {
+                  "index": [
+                    "app__read",
+                    "secret__attemptRead"
+                  ],
+                  "value": true
+                },
+                {
+                  "index": [
+                    "app__specificAccessRead",
+                    "secret__authorizedReadFromApplication"
+                  ],
+                  "value": true
+                },
+                {
+                  "index": [
+                    "secret__successfulRead",
+                    "secret__read"
+                  ],
+                  "value": true
+                },
+                {
+                  "index": [
+                    "secret__attemptRead",
+                    "secret__successfulRead"
+                  ],
+                  "value": true
+                }
+              ]
+            },
+            "description": "parent → child among modeled steps"
+          }
+        ],
+        "state": [
+          {
+            "name": "compromised",
+            "type": {
+              "kind": "bool"
+            },
+            "index": [
+              "steps"
+            ],
+            "initial": {
+              "default": false,
+              "cells": [
+                {
+                  "index": [
+                    "app__fullAccess"
+                  ],
+                  "value": true
+                }
+              ]
+            },
+            "label": "已攻陷",
+            "description": null,
+            "observable": true
+          }
+        ],
+        "actions": [
+          {
+            "name": "compromise",
+            "params": [
+              {
+                "name": "n",
+                "type": {
+                  "kind": "entity",
+                  "set": "steps"
+                }
+              }
+            ],
+            "precondition": {
+              "op": "and",
+              "args": [
+                {
+                  "op": "not",
+                  "args": [
+                    {
+                      "op": "var",
+                      "name": "compromised",
+                      "index": [
+                        {
+                          "op": "ref",
+                          "name": "n"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "op": "or",
+                  "args": [
+                    {
+                      "op": "and",
+                      "args": [
+                        {
+                          "op": "not",
+                          "args": [
+                            {
+                              "op": "var",
+                              "name": "is_and",
+                              "index": [
+                                {
+                                  "op": "ref",
+                                  "name": "n"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "op": "or",
+                          "args": [
+                            {
+                              "op": "var",
+                              "name": "seed",
+                              "index": [
+                                {
+                                  "op": "ref",
+                                  "name": "n"
+                                }
+                              ]
+                            },
+                            {
+                              "op": "exists",
+                              "var": "p",
+                              "domain": "steps",
+                              "where": null,
+                              "body": {
+                                "op": "and",
+                                "args": [
+                                  {
+                                    "op": "var",
+                                    "name": "edge",
+                                    "index": [
+                                      {
+                                        "op": "ref",
+                                        "name": "p"
+                                      },
+                                      {
+                                        "op": "ref",
+                                        "name": "n"
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "op": "var",
+                                    "name": "compromised",
+                                    "index": [
+                                      {
+                                        "op": "ref",
+                                        "name": "p"
+                                      }
+                                    ]
+                                  }
+                                ]
+                              },
+                              "default": null
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "op": "and",
+                      "args": [
+                        {
+                          "op": "var",
+                          "name": "is_and",
+                          "index": [
+                            {
+                              "op": "ref",
+                              "name": "n"
+                            }
+                          ]
+                        },
+                        {
+                          "op": "forall",
+                          "var": "p",
+                          "domain": "steps",
+                          "where": null,
+                          "body": {
+                            "op": "or",
+                            "args": [
+                              {
+                                "op": "not",
+                                "args": [
+                                  {
+                                    "op": "var",
+                                    "name": "edge",
+                                    "index": [
+                                      {
+                                        "op": "ref",
+                                        "name": "p"
+                                      },
+                                      {
+                                        "op": "ref",
+                                        "name": "n"
+                                      }
+                                    ]
+                                  }
+                                ]
+                              },
+                              {
+                                "op": "var",
+                                "name": "compromised",
+                                "index": [
+                                  {
+                                    "op": "ref",
+                                    "name": "p"
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          "default": null
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            "effects": [
+              {
+                "kind": "assign",
+                "target": {
+                  "var": "compromised",
+                  "index": [
+                    {
+                      "op": "ref",
+                      "name": "n"
+                    }
+                  ]
+                },
+                "value": {
+                  "op": "const",
+                  "value": true,
+                  "domain": null
+                }
+              }
+            ],
+            "cost": 1,
+            "label": "攻陷步骤",
+            "description": null,
+            "timeout_seconds": 30.0,
+            "retry": "RECONCILE_THEN_RETRY"
+          }
+        ],
+        "properties": [
+          {
+            "id": "target_reached",
+            "kind": "goal",
+            "expr": {
+              "op": "var",
+              "name": "compromised",
+              "index": [
+                {
+                  "op": "const",
+                  "value": "secret__read",
+                  "domain": null
+                }
+              ]
+            },
+            "label": "到达 secret:read",
+            "description": "TargetSecurity: the attacker compromises the target step"
+          }
+        ],
+        "features": [],
+        "objectives": [
+          {
+            "id": "attack_cost",
+            "label": "攻击代价",
+            "unit": "steps",
+            "direction": "minimize",
+            "terms": [
+              {
+                "kind": "action_cost",
+                "expr": null,
+                "weight": 1,
+                "label": null
+              }
+            ],
+            "description": null
+          }
+        ]
+      }
+    },
+    "source": {
+      "format": "mal-attack-graph/v1",
+      "text": "{\"language\": {\"name\": \"coreLang\", \"version\": \"1.0.0\"}, \"model\": {\"name\": \"corelang-net-app-data\", \"description\": \"Minimal coreLang model: an application on a network holds a secret data object. An attacker with full access to the application can read the data (a confidentiality target).\", \"language\": \"coreLang\", \"language_version\": \"1.0.0\", \"assets\": [{\"type\": \"Network\", \"name\": \"net\"}, {\"type\": \"Application\", \"name\": \"app\"}, {\"type\": \"Data\", \"name\": \"secret\"}], \"associations\": [{\"asset\": \"app\", \"field\": \"networks\", \"targets\": [\"net\"]}, {\"asset\": \"app\", \"field\": \"containedData\", \"targets\": [\"secret\"]}]}, \"entry_points\": [\"app:fullAccess\"], \"goal\": \"secret:read\", \"graph_sha256\": \"e121dbd41c8fb5c107cc86deb30676ddd12dd675c13856b0985c3d59b0b8d9a6\"}",
+      "artifact": null,
+      "origin": "MAL coreLang 1.0.0 attack graph (sha256 e121dbd41c8f)",
+      "author": null,
+      "parent_version": null
+    },
+    "compiled": [],
+    "created_at": "2026-10-01T01:02:40.561004Z"
+  }
+}

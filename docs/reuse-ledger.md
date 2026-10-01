@@ -124,3 +124,33 @@
 ## 3. 本仓库许可与兼容性
 
 本仓库代码以 [Apache-2.0](../LICENSE) 发布（决策 D-014）。上表依赖的许可均与之兼容：MIT、BSD-3、Apache-2.0、PostgreSQL License 为宽松许可；psycopg（LGPL-3.0-only）以未修改的官方 wheel 作为库动态导入，镜像中随包保留其许可文件，本仓库不分发其修改版。发行的 wheel、sdist、镜像（`/usr/share/doc/formal-agent-lab/`）、发行目录与离线包均附带 `LICENSE` 与 `NOTICE`。
+
+## 4. 阶段三（Phase 3B）领域集成复用
+
+领域集成引入的上游与方法。沿用 D-023 的原则：有依赖冲突或非宽松分发的第三方运行时**不进入** wheel / 镜像 / 离线包，而是作为外部前提装在独立虚拟环境，经类型化子进程调用（只写输入、读输出，不链接、不导入冻结平台环境）。
+
+### 直接接入的上游工具（外部前提，不分发）
+
+| 组件 | 版本 / 固定点 | 许可 | 用途 | 隔离与位置 |
+|---|---|---|---|---|
+| coreLang | v1.0.0 | Apache-2.0 | MAL 攻击语言，编译为 `corelang-1.0.0.mar`（sha256 `9aabc828…`，19 资产） | 独立 venv `~/.venvs/fal-mal`；经 `packages/environment-mal` 子进程调用（D-028） |
+| mal-toolbox | 2.11.0 | Apache-2.0 | 加载模型、构建攻击图 | 同上 |
+| mal-simulator | 3.2.1 | Apache-2.0 | 原生攻击步骤模拟（TTC 禁用、无 Bernoulli）作为降低的 fold 预言 | 同上 |
+| CAGE Challenge 4 / CybORG | 4.0（git `8c3c50ca`） | MIT（Commonwealth of Australia 2019；未修改、不分发） | 官方 Scenario4 脚本基线（蓝/绿/红） | 独立 venv `~/.venvs/fal-cage`，仅装核心依赖（无 torch/ray）；经 `packages/environment-cage` 子进程调用（D-032） |
+
+### 方法参考（仅概念，未采用其代码）
+
+下列工作在任务书中列为方法复用来源；本轮**只借鉴其概念并自行实现**，未 vendoring 或链接其代码，因此不涉及其许可分发。实现位置见各决策。
+
+| 方法 | 概念 | 本轮自实现位置 |
+|---|---|---|
+| Shielding（AAAI'18） | 执行前筛选（动作在生效前被屏蔽器裁决） | Broker 作为 G2 `EXECUTION_GATE`（D-029） |
+| AgentSpec | 事件—条件—处理规则 | `formal_lab_domain_broker.rules`（类型化 ECA，审查→发布）（D-029） |
+| Progent | 动作参数约束 | 凭据绑定动作参数摘要 + 角色/LabPolicy 条件（D-029） |
+| VeriGuard | 发布检查与在线监测分离 | G3 发布能力（RELEASED）与 Broker 在线准入分离；凭据只保证已检查范围（D-029） |
+| ARTEMIS | 任务监督与独立复核 | 裁判以环境状态/探针判定，Agent 自述仅解释（D-030/D-031） |
+| Dynamic Cyber Ranges | 动态对手、持续业务、恢复指标 | D4 探针（成功率/恢复）、D5 成对评测与 LabPolicy 消融保留（D-031/D-032） |
+
+### 平台内部复用
+
+领域包只经 G1—G6 的公开接口接入：`MODEL_FRONTEND`（MAL 攻击图→确定性 IR）、`SEMANTIC_DRIVER`/`PLANNER`/`VERIFIER`（复用 IRFiniteDriver、z3-bounded、z3-bmc）、`EXECUTION_GATE`（Broker）、`PROBE`、`SessionEnvironment`（订单服务生命周期）、`ScenarioManifest`/`run_local`/`QueryBundle`。签名用 stdlib `hmac`（HMAC-SHA256，FIPS-198），未给冻结锁新增编译依赖。

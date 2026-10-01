@@ -49,6 +49,7 @@
 | 实验运行台 | Temporal 持久运行：暂停 / 继续 / 取消 / 重跑，Worker 被杀后按步恢复；操作账本、对账与人工复核；批次轮次 | Web · `fal run` · `fal ops` |
 | 证据与回放 | 事件因果链、按步回放、效果差异与修订建议、回归案例、导出回放包并离线阅读 | Web · `fal export` · `fal replay` |
 | 基准对比 | 矩阵队列（失败可重跑、增量合并）、配对比较与区间、消融；复用键覆盖模型、插件、规则、视图、场景、种子、预算与扩展配置 | Web · `fal matrix` |
+| 安全领域（MAL / CAGE） | 导入 coreLang 攻击图→确定性可达性（原生模拟器/参考解释器/Z3 三引擎一致）；红蓝策略（规则/符号/混合、最小代价割）；准入 Broker（验证凭据、拒绝零副作用、LabPolicy/TargetSecurity/BusinessSLO 分离）；受控订单服务领域实验；CAGE 4 官方基线与配对评测 | `packages/domain-mal` · `packages/domain-broker` · `packages/environment-{mal,cage}` |
 
 ## 快速开始（Ubuntu 24.04，或 macOS 上的 Colima 虚拟机）
 
@@ -77,7 +78,7 @@ fal replay verify wh.replay.zip && fal replay batches wh.replay.zip   # 离线�
 
 ## 文档
 
-- **阶段三 A 交接**（通用平台与视觉交付已完成，领域集成待续）：[docs/handoff/phase3-draft.md](docs/handoff/phase3-draft.md) · 任务书 [docs/execution/phase-3a.md](docs/execution/phase-3a.md) · 检查 `make phase3-check` → [docs/execution/evidence/phase3/checks/](docs/execution/evidence/phase3/checks/results.json)
+- **阶段三交接**：通用平台与视觉（G1–G6）[docs/execution/phase-3a.md](docs/execution/phase-3a.md) · 领域集成（D1–D6）[docs/execution/phase-3b.md](docs/execution/phase-3b.md) · 交接 [docs/handoff/phase3.md](docs/handoff/phase3.md) · 保证范围 [docs/assurance-scope.md](docs/assurance-scope.md) · 验收 [docs/acceptance-phase3.md](docs/acceptance-phase3.md) · 研究读数 [docs/research-readout.md](docs/research-readout.md) · 检查 `make phase3-check` / `make acceptance-local` → [docs/execution/evidence/phase3/checks/](docs/execution/evidence/phase3/checks/results.json)
 - **设计系统**：[docs/design-system.md](docs/design-system.md)（tokens、组件、图表、页面、媒体生成命令、基准截图）· [Figma 设计文件](https://www.figma.com/design/uuV6JeilZQkhnIQcJYEUET)
 - **阶段二（历史验收）**：[docs/handoff/phase2.md](docs/handoff/phase2.md) · [验收](docs/acceptance-phase2.md) · 阶段一 [phase1.md](docs/handoff/phase1.md)
 - **使用与运维**：[入门](docs/getting-started.md) · [本地开发](docs/local-development.md) · [部署](docs/deployment.md)

@@ -126,6 +126,10 @@ CHECKS = [
     Check("p3-cage-evidence", "d5-cage",
           "固定 CAGE 4(CybORG 4.0) 官方脚本基线：原生轮次/分数与平台指标分开保留、不可比项说明；成对 dev/holdout 种子含不确定性；可重跑；MAL/CAGE/本地探针分域交叉检查；RL 智能体为条件项。工具链缺失记 BLOCKED",
           f"{PY} scripts/d5_cage_evidence.py", ["P3B-D5"], [f"{EV}/d5-cage.json"]),
+    # ------------------------------------------------------------ D6 domain integration and final acceptance
+    Check("p3-domain-acceptance", "d6-domain",
+          "MAL 领域端到端经平台公开接口：导入→配置→运行→解释→导出→离线回放；领域插件可被 Web/CLI 发现；六个交付包证据齐备",
+          f"{PY} scripts/d6_domain_acceptance_evidence.py", ["P3B-D6"], [f"{EV}/d6-domain-acceptance.json"]),
     # ------------------------------------------------------------ regression
     Check("p3-unit-all", "regression", "全部单元 / 契约 / 架构 / 示例测试（含阶段一哨兵）",
           f"{PYTEST} -m 'not integration and not llm and not ui'"),
@@ -140,7 +144,7 @@ CHECKS = [
 SUITE = Suite(
     name="phase3",
     groups=["g1-contracts", "g2-operations", "g3-release", "g4-batch", "g5-product", "g6-release", "d1-mal",
-            "d2-broker", "d3-strategies", "d4-service", "d5-cage", "regression"],
+            "d2-broker", "d3-strategies", "d4-service", "d5-cage", "d6-domain", "regression"],
     checks=CHECKS,
     out=ROOT / "docs" / "execution" / "evidence" / "phase3" / "checks",
     # what the checks and the handoff write themselves: never part of what is being checked

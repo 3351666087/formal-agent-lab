@@ -178,3 +178,12 @@ scripts/in-vm.sh 'uv run --frozen python scripts/{operation_consistency,model_re
   ```bash
   scripts/in-vm.sh 'export UV_PROJECT_ENVIRONMENT=$HOME/.venvs/formal-agent-lab; export FAL_CAGE_HOME=$HOME/.venvs/fal-cage; cd <repo>; uv run --no-sync python scripts/d5_cage_evidence.py'
   ```
+
+## D6 · 领域内容接入与最终本地交付
+
+- **领域端到端经平台公开接口**（证据 `d6-domain-acceptance.json`）：MAL 攻击图源信封经注册的 `MODEL_FRONTEND` 插件**导入**→**配置**红队场景→在 ir-world **运行**到达目标→`run_query` **解释**（见证 + 渲染说明 + 语义驱动独立回放 CONFIRMED）→**导出** QueryBundle（内嵌模型包）到磁盘→**离线回放** `replay_query` 判定一致。领域 5 个插件（frontend / broker-gate / red-rule / red-hybrid + broker.receipt-gate）经 registry 发现无错误，Web 模型工作台与 CLI 因此可见。六个交付包证据齐备。
+- **视觉接入级微调**：README 功能地图新增“安全领域（MAL/CAGE）”一行，文档区指向 phase3 最终交接与保证范围/验收/研究读数；复用 G5 既有结构与设计系统，未另做视觉。
+- **发行**：`uv build --all-packages` 已自动把领域 wheel（domain-mal / domain-broker / env-mal / env-cage）纳入发行；MAL/CAGE 工具链为外部前提（独立 venv，不进 wheel/镜像/离线包，沿用 D-023）。领域检查注册进 `scripts/phase3_check.py`（组 `d1-mal`…`d6-domain`）。
+- **验收**：`make phase3-check`（全部组）与 `make acceptance-local`（阶段二必做 + 阶段三 D1–D6）。结果见 [acceptance-phase3.md](../acceptance-phase3.md)；带 OCI 镜像的发行与去重离线包在宿主盘低于 15 GiB 保留量时记 BLOCKED（非代码缺陷）。真实 LLM 端点、CAGE RL 智能体、PRISM 领域概率绑定为条件项/备选，独立列明。
+- **最终交接产物**：[phase3.md](phase3.md)、[phase3.manifest.json](phase3.manifest.json)、[phase3-checks.json](phase3-checks.json)；同步 [assurance-scope.md](../assurance-scope.md)、[acceptance-phase3.md](../acceptance-phase3.md)、[research-readout.md](../research-readout.md)、[reuse-ledger.md](../reuse-ledger.md)。
+- **证据**：`docs/execution/evidence/phase3/d6-domain-acceptance.json`；检查组 `d6-domain`。

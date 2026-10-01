@@ -1,0 +1,77 @@
+{
+  "format": "phase-handoff/v1",
+  "phase": "3",
+  "generated_at": "2026-10-01T01:23:06.435486+00:00",
+  "source_revision": "6cbda09fda2246766ad93c8fcf89f1c5ad493bac",
+  "contract_version": "formal-lab-contracts/v2",
+  "contract_digest": "adbe82694bd8fd77d293d50ba863c9b87c45b5b4877b65aa9da8b8425684d56d",
+  "workspace_packages": [
+    "packages/contracts",
+    "packages/model-core",
+    "packages/solver-adapters/z3",
+    "packages/solver-adapters/prism-games",
+    "packages/domain-broker",
+    "packages/domain-mal",
+    "packages/environment-mal",
+    "packages/environment-cage",
+    "packages/neutral-environment",
+    "packages/strategies",
+    "packages/evaluation",
+    "packages/runtime",
+    "packages/platform-api",
+    "packages/orchestrator",
+    "packages/sdk",
+    "examples/neutral-scheduling",
+    "examples/external-plugin",
+    "examples/warehouse-allocation",
+    "examples/local-order-service"
+  ],
+  "domain_packages": [
+    "packages/domain-mal",
+    "packages/domain-broker",
+    "packages/environment-mal",
+    "packages/environment-cage"
+  ],
+  "external_prerequisites": {
+    "mal_toolchain": "~/.venvs/fal-mal (mal-toolbox 2.11.0, mal-simulator 3.2.1, coreLang v1.0.0)",
+    "cage_toolchain": "~/.venvs/fal-cage (CybORG 4.0, git 8c3c50ca; core deps only)",
+    "prism_games": "~/.local/opt (GPL-2.0; not distributed, D-023)"
+  },
+  "check_groups": {
+    "g1-contracts": "PASS",
+    "g2-operations": "PASS",
+    "g3-release": "PASS",
+    "g4-batch": "PASS",
+    "g5-product": "INCOMPLETE",
+    "g6-release": "INCOMPLETE",
+    "d1-mal": "PASS",
+    "d2-broker": "PASS",
+    "d3-strategies": "PASS",
+    "d4-service": "PASS",
+    "d5-cage": "PASS",
+    "d6-domain": "PASS",
+    "regression": "PASS"
+  },
+  "check_summary": {
+    "PASS": 30,
+    "FAIL": 0,
+    "NOT_RUN": 2,
+    "NOT_SELECTED": 0,
+    "BLOCKED": 3
+  },
+  "mandatory_passed": false,
+  "conditional_items": [
+    "真实 LLM 端点（D3 混合策略；未配置则以标注替身运行，不冒充交付）",
+    "CAGE RL 训练智能体（需 torch/ray，本环境未安装；交付的是官方脚本基线）",
+    "PRISM-games 领域概率绑定（备选清单；通用任务分配扩展已完成，不作为领域绑定）",
+    "带 OCI 镜像的发行与去重离线包（宿主盘低于 15 GiB 保留量时 BLOCKED，非代码缺陷）"
+  ],
+  "handoff_docs": [
+    "docs/handoff/phase3.md",
+    "docs/handoff/phase3-draft.md",
+    "docs/assurance-scope.md",
+    "docs/acceptance-phase3.md",
+    "docs/research-readout.md",
+    "docs/reuse-ledger.md"
+  ]
+}

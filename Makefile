@@ -153,9 +153,12 @@ phase1-check: ## run every phase-1 acceptance check and write docs/handoff/phase
 handoff: ## regenerate docs/handoff/phase1.manifest.json from the repository and check results
 	uv run --frozen python scripts/handoff.py
 
-.PHONY: phase3-check checks design-check
-phase3-check: ## phase-3A local checks (engine: scripts/check_runner.py) → docs/execution/evidence/phase3/checks/ (ARGS="--group g" / "--only id" / "--out dir")
+.PHONY: phase3-check acceptance-local checks design-check
+phase3-check: ## phase-3 local checks (engine: scripts/check_runner.py) → docs/execution/evidence/phase3/checks/ (ARGS="--group g" / "--only id" / "--out dir")
 	$(UV_RUN) python scripts/phase3_check.py $(ARGS)
+
+acceptance-local: ## final local acceptance: phase-2 mandatory + phase-3 D1–D6 checks → docs/execution/evidence/phase3/acceptance-local.json (ARGS="--phase3-only")
+	$(UV_RUN) python scripts/acceptance_local.py $(ARGS)
 
 design-check: ## design sources in sync: tokens.css ← design/tokens.json, demo / architecture SVG ← design/animation
 	python3 scripts/design_tokens.py --check && python3 scripts/render_demo.py svg && git diff --exit-code -- docs/assets/demo.svg docs/assets/demo-cover.svg docs/assets/demo.html docs/assets/architecture.svg

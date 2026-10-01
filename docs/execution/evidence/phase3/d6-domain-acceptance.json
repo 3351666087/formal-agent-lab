@@ -1,0 +1,104 @@
+{
+  "deliverable": "phase3B-D6",
+  "domain_end_to_end": {
+    "import": {
+      "frontend": "formal-lab.domain.mal.frontend",
+      "package_id": "mal-net-app-data",
+      "semantic_profile": "deterministic_finite_v1",
+      "digest": "fcb756fe7baf2d1e"
+    },
+    "config": {
+      "strategy": "symbolic",
+      "goal": "target_reached"
+    },
+    "run": {
+      "status": "SUCCEEDED",
+      "goal_reached": true,
+      "attack_path_len": 6
+    },
+    "explain": {
+      "verdict": "WITNESS",
+      "explanation": [
+        "question (EXISTS_PATH): is there a path of at most 60 step(s) from the start state to a state where 'target_reached' holds?",
+        "answer: WITNESS — a path exists; it was replayed by the reference interpreter (CONFIRMED)",
+        "detail: shortest path to goal 'target_reached' has 6 step(s)",
+        "witness: 6 step(s): compromise → compromise → compromise → compromise → compromise → compromise",
+        "assumed: paths start in the model initial state",
+        "assumed: one ground action per logical step; deterministic effects as specified by deterministic_finite_v1",
+        "assumed: only paths of at most 60 step(s) are considered",
+        "scope: MODEL_INTERNAL (a conclusion about the model, not the real system); bound 60 step(s), timeout 30000 ms",
+        "backend: z3 5.1.0, 52 ms, status sat"
+      ],
+      "witness_replay": {
+        "witness": "CONFIRMED",
+        "note": "6 step(s) replayed by the semantic driver"
+      }
+    },
+    "export": {
+      "bundle_file": "docs/execution/evidence/phase3/d6-mal-query-bundle.json",
+      "embedded_package": true,
+      "bytes": 139519
+    },
+    "offline_replay": {
+      "same": true,
+      "verdict_before": "WITNESS",
+      "verdict_after": "WITNESS",
+      "values_before": null,
+      "values_after": null,
+      "witness_replay": {
+        "witness": "CONFIRMED",
+        "note": "6 step(s) replayed by the semantic driver"
+      },
+      "verifier": {
+        "plugin_id": "formal-lab.verifier.z3-bmc",
+        "version": "1.1.0"
+      },
+      "note": "a FEASIBLE (timed-out) optimisation may improve on replay; OPTIMAL values must be equal"
+    }
+  },
+  "surfaces": {
+    "sdk_api_runtime": "import/run/query/export/replay exercised above through the public runtime that the SDK Client and the platform API wrap",
+    "cli": "the CLI replay/query commands wrap run_query/replay_query (same QueryBundle)",
+    "web": "the model-workbench discovers MODEL_FRONTEND plugins; the domain frontend is in the registry",
+    "domain_plugins_discoverable": [
+      "formal-lab.broker.receipt-gate",
+      "formal-lab.domain.mal.broker-gate",
+      "formal-lab.domain.mal.frontend",
+      "formal-lab.domain.mal.red-hybrid",
+      "formal-lab.domain.mal.red-rule"
+    ],
+    "load_errors": []
+  },
+  "deliverables": {
+    "D1": {
+      "evidence": "d1-mal.json",
+      "present": true
+    },
+    "D2": {
+      "evidence": "d2-broker.json",
+      "present": true
+    },
+    "D3": {
+      "evidence": "d3-strategies.json",
+      "present": true
+    },
+    "D4": {
+      "evidence": "d4-service-lab.json",
+      "present": true
+    },
+    "D5": {
+      "evidence": "d5-cage.json",
+      "present": true
+    },
+    "D6": {
+      "evidence": "d6-domain-acceptance.json",
+      "present": true
+    }
+  },
+  "conclusion": {
+    "import_run_explain_export_offline_replay": true,
+    "all_six_evidence_present": true,
+    "plugins_discoverable_no_errors": true,
+    "offline_readable": true
+  }
+}

@@ -73,7 +73,9 @@
 
 ## D6 · 领域内容接入与最终本地交付
 
-- [ ] **P3B-D6** 在已定稿的产品视觉和发行工具上完成领域接入，并统一完成本地主线验收。
+- [x] **P3B-D6** 在已定稿的产品视觉和发行工具上完成领域接入，并统一完成本地主线验收。
+  - 证据：领域经平台公开接口端到端（导入→配置→运行→解释→导出→离线回放，见证 CONFIRMED、离线回放一致）；领域 5 插件可被 Web/CLI 发现；视觉接入级微调（README 功能地图+文档区，复用 G5）；发行自动纳入领域 wheel，MAL/CAGE 为外部前提；新增 make acceptance-local 与 handoff_phase3.py。最终验收 make phase3-check 全组 30 PASS/0 FAIL/2 NOT_RUN(开发栈)/3 BLOCKED(磁盘<15GiB)，D1–D6 与回归全 PASS，mandatory_passed=False 如实记录。交接 phase3.md/manifest/checks + assurance-scope/acceptance-phase3/research-readout/reuse-ledger。详见 docs/handoff/phase3.md
+  - 实现：`scripts/d6_domain_acceptance_evidence.py`、`scripts/acceptance_local.py`、`scripts/handoff_phase3.py`、`docs/handoff/phase3.md`、`docs/handoff/phase3.manifest.json`、`docs/assurance-scope.md`、`docs/acceptance-phase3.md`、`docs/research-readout.md`、`Makefile`
 
 视觉只作接入级微调（复用 G5 的 `docs/design-system.md`、tokens、组件、Figma 与基准截图，只增加领域字段/标签/资产关系图/角色视图/动作解释/Broker 状态/偏差内容）。README 与 SVG 动画保持 G5 结构，将已实现领域能力与真实截图/轨迹补入现有槽位。发行在既有 OCI/Compose/Helm、wheel 与离线包中增加领域依赖，交付 local-simulation、local-service-lab、local-offline 三种配置；领域检查注册进 G6 工具。最终提供 `make phase3-check` 与 `make acceptance-local`，运行阶段二 26 项必做回归与 D1—D6 适用检查。最终补齐 `docs/handoff/phase3.md`、`phase3.manifest.json`、`phase3-checks.json`，同步 `docs/assurance-scope.md`、`docs/acceptance-phase3.md`、`docs/research-readout.md`、`docs/reuse-ledger.md`。
 
