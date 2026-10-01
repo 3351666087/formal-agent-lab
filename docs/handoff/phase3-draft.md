@@ -164,3 +164,17 @@ scripts/in-vm.sh 'uv run --frozen python scripts/{operation_consistency,model_re
   scripts/in-vm.sh 'export UV_PROJECT_ENVIRONMENT=$HOME/.venvs/formal-agent-lab; cd <repo>; uv run --no-sync python scripts/d4_service_lab_evidence.py'
   scripts/in-vm.sh 'export UV_PROJECT_ENVIRONMENT=$HOME/.venvs/formal-agent-lab; cd <repo>; uv run --frozen python scripts/check_runner.py --suite phase3 --group d4-service'
   ```
+
+## D5 · CAGE 与配对评测
+
+- **固定 CAGE 4 = CybORG 4.0**（git `8c3c50ca`，Scenario4）于独立 venv `~/.venvs/fal-cage`，仅装核心依赖（无 torch/ray），经类型化子进程接入（决策 D-032）：`packages/environment-cage`（`_worker.py` 跑官方脚本基线，`bridge.py` 平台侧）。安装见 [local-development.md 第 11 节](../local-development.md)。
+- **官方基线**：蓝 SleepAgent、绿 EnterpriseGreenAgent（自动参与者）、红 FiniteStateRedAgent；`cyborg.step()` 一次推进一个原生世界步、内部智能体联合行动；记录每步联合动作/各队奖励/活跃计数/终止与每局原生总分（58 智能体：5 蓝 / ~52 绿 / 1 红）。
+- **原生 vs 平台指标分开**：原生 CAGE 轮次/分数单独保留；平台投影任务效果（蓝方奖励）、业务存活（蓝方在场数）、代价/时间；不可比项显式说明（CAGE 奖励量纲 ≠ 平台可达性 ≠ 服务成功率，不合并）。
+- **成对评测**：dev 种子 [1,2,3,4] 防御奖励均值 -7.75 / 方差 7.8，holdout [101,102] 均值 -25.5；含不确定性与样本量说明，保留全部运行；同种子可重跑（原生总分一致）。LabPolicy 在纯仿真消融中保留。
+- **分域交叉检查**：MAL（确定性可达性）/ CAGE（各队奖励与攻陷动态）/ 本地探针 D4（服务成功率）各自语义范围内方向一致（红方存在恶化防御目标），量纲不同不合并。
+- **条件项**：RL 训练智能体（需 torch/ray，EnterpriseMAE/ray 包装）未安装，如实记为 NOT_RUN 条件项，不冒充交付；交付的是官方脚本基线。
+- **证据**：`docs/execution/evidence/phase3/d5-cage.json`；`packages/environment-cage/tests`（3，`cage` 标记）；检查组 `d5-cage` 两项 PASS。工具链缺失时证据记 `status=BLOCKED`。
+- **命令**：
+  ```bash
+  scripts/in-vm.sh 'export UV_PROJECT_ENVIRONMENT=$HOME/.venvs/formal-agent-lab; export FAL_CAGE_HOME=$HOME/.venvs/fal-cage; cd <repo>; uv run --no-sync python scripts/d5_cage_evidence.py'
+  ```

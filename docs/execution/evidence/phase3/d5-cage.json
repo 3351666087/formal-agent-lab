@@ -1,0 +1,278 @@
+{
+  "deliverable": "phase3B-D5",
+  "status": "OK",
+  "toolchain": {
+    "cage_version": "4.0",
+    "scenario": "Scenario4",
+    "cage_src_revision": "8c3c50ca54b176c2de199847944e8dcc035497e3",
+    "agents": {
+      "blue": "SleepAgent",
+      "green": "EnterpriseGreenAgent",
+      "red": "FiniteStateRedAgent"
+    },
+    "packages": {
+      "numpy": "1.26.4",
+      "networkx": "3.2.1",
+      "gymnasium": "0.28.1",
+      "pettingzoo": "1.24.3",
+      "PyYAML": "6.0.1"
+    },
+    "isolated_venv": "~/.venvs/fal-cage (typed subprocess, D-023 pattern)",
+    "not_installed": "torch / ray[rllib] / tensorboard / torch_geometric — needed only for RL-trained agents"
+  },
+  "native_baseline": {
+    "requested_steps": 50,
+    "official_episode_length": 500,
+    "example_run": {
+      "seed": 1,
+      "steps_run": 49,
+      "terminated_at": 49,
+      "agent_counts": {
+        "blue": 5,
+        "green": 55,
+        "red": 1
+      },
+      "team_reward_totals": {
+        "Blue": -3.0,
+        "Red": 0.0,
+        "Green": 0.0
+      },
+      "first_steps": [
+        {
+          "world_step": 1,
+          "active": {
+            "blue": 5,
+            "green": 55,
+            "red": 1
+          },
+          "team_rewards": {
+            "Blue": 0,
+            "Red": 0.0,
+            "Green": 0.0
+          },
+          "sample_joint_action": {
+            "blue_agent_0": "[Sleep]",
+            "red_agent_0": "[DiscoverRemoteSystems 10.0.8.0/24]"
+          },
+          "done": false
+        },
+        {
+          "world_step": 2,
+          "active": {
+            "blue": 5,
+            "green": 55,
+            "red": 1
+          },
+          "team_rewards": {
+            "Blue": 0,
+            "Red": 0.0,
+            "Green": 0.0
+          },
+          "sample_joint_action": {
+            "blue_agent_0": "[Sleep]",
+            "red_agent_0": "[DiscoverRemoteSystems 10.0.8.0/24]"
+          },
+          "done": false
+        },
+        {
+          "world_step": 3,
+          "active": {
+            "blue": 5,
+            "green": 55,
+            "red": 1
+          },
+          "team_rewards": {
+            "Blue": 0,
+            "Red": 0.0,
+            "Green": 0.0
+          },
+          "sample_joint_action": {
+            "blue_agent_0": "[Sleep]",
+            "red_agent_0": "[AggressiveServiceDiscovery 10.0.8.249]"
+          },
+          "done": false
+        }
+      ],
+      "reward_steps": [
+        {
+          "world_step": 45,
+          "active": {
+            "blue": 5,
+            "green": 55,
+            "red": 4
+          },
+          "team_rewards": {
+            "Blue": -1,
+            "Red": 0.0,
+            "Green": 0.0
+          },
+          "sample_joint_action": {
+            "blue_agent_0": "[Sleep]",
+            "red_agent_0": "[Sleep]"
+          },
+          "done": false
+        },
+        {
+          "world_step": 49,
+          "active": {
+            "blue": 5,
+            "green": 55,
+            "red": 4
+          },
+          "team_rewards": {
+            "Blue": -2,
+            "Red": 0.0,
+            "Green": 0.0
+          },
+          "sample_joint_action": {
+            "blue_agent_0": "[Sleep]",
+            "red_agent_0": "[StealthServiceDiscovery 10.0.8.254]"
+          },
+          "done": true
+        }
+      ]
+    },
+    "one_world_step_advances_once": true,
+    "joint_actions_per_step": "every internal scripted agent acts in one native world step",
+    "auto_participants": "green agents (EnterpriseGreenAgent) act automatically"
+  },
+  "platform_metrics": {
+    "dev": [
+      {
+        "seed": 1,
+        "world_steps": 49,
+        "terminated_at": 49,
+        "task_effect_defender_reward": -3.0,
+        "business_survival_blue_agents": 5,
+        "cost_model_fees": 0.0,
+        "rejections": null,
+        "unknowns": null,
+        "model_deviation": null
+      },
+      {
+        "seed": 2,
+        "world_steps": 49,
+        "terminated_at": 49,
+        "task_effect_defender_reward": -7.0,
+        "business_survival_blue_agents": 5,
+        "cost_model_fees": 0.0,
+        "rejections": null,
+        "unknowns": null,
+        "model_deviation": null
+      },
+      {
+        "seed": 3,
+        "world_steps": 49,
+        "terminated_at": 49,
+        "task_effect_defender_reward": -2.0,
+        "business_survival_blue_agents": 5,
+        "cost_model_fees": 0.0,
+        "rejections": null,
+        "unknowns": null,
+        "model_deviation": null
+      },
+      {
+        "seed": 4,
+        "world_steps": 49,
+        "terminated_at": 49,
+        "task_effect_defender_reward": -19.0,
+        "business_survival_blue_agents": 5,
+        "cost_model_fees": 0.0,
+        "rejections": null,
+        "unknowns": null,
+        "model_deviation": null
+      }
+    ],
+    "holdout": [
+      {
+        "seed": 101,
+        "world_steps": 49,
+        "terminated_at": 49,
+        "task_effect_defender_reward": -15.0,
+        "business_survival_blue_agents": 5,
+        "cost_model_fees": 0.0,
+        "rejections": null,
+        "unknowns": null,
+        "model_deviation": null
+      },
+      {
+        "seed": 102,
+        "world_steps": 49,
+        "terminated_at": 49,
+        "task_effect_defender_reward": -36.0,
+        "business_survival_blue_agents": 5,
+        "cost_model_fees": 0.0,
+        "rejections": null,
+        "unknowns": null,
+        "model_deviation": null
+      }
+    ],
+    "kept_separate_from_native_scores": true,
+    "incomparable_items": [
+      "CAGE per-team reward is on CybORG's own scale; it is not the platform's reachability verdict or the order service's success rate — magnitudes are not comparable across the three",
+      "the native scripted baseline has no admission gate, so rejections / unknowns / model-deviation do not apply to it (they belong to the broker-gated platform runs of D2–D4)"
+    ]
+  },
+  "paired_comparison": {
+    "dev_seeds": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "holdout_seeds": [
+      101,
+      102
+    ],
+    "dev_defender_reward": {
+      "mean": -7.75,
+      "stdev": 7.805,
+      "values": [
+        -3.0,
+        -7.0,
+        -2.0,
+        -19.0
+      ]
+    },
+    "holdout_defender_reward": {
+      "mean": -25.5,
+      "stdev": 14.849,
+      "values": [
+        -15.0,
+        -36.0
+      ]
+    },
+    "all_runs_kept": 6,
+    "uncertainty_note": "a small engineering-acceptance sample; the reward mean/stdev are reported with the sample size, not presented as a converged result"
+  },
+  "reproducibility": {
+    "seed": 1,
+    "same_seed_reproduces_totals": true,
+    "wall_seconds": 4.11
+  },
+  "lab_policy": "the CAGE run is a pure simulation ablation inside CybORG; no real network — the LabPolicy boundary is preserved (the experiment never leaves the simulator)",
+  "cross_check": {
+    "scopes": {
+      "MAL": "deterministic reachability of a target attack step (boolean, model-internal)",
+      "CAGE": "per-team reward and compromise dynamics over the CybORG enterprise simulation (native scores)",
+      "local_probe_D4": "business success rate and service state on the real order service (observed)"
+    },
+    "consistent_direction": "in each scope an unmitigated red presence worsens the defender's objective — MAL: the target becomes reachable (property false); CAGE: Blue reward is negative under red activity; D4: the privileged action is prevented only by the broker — but the magnitudes are on different scales and are not merged",
+    "comparable": false
+  },
+  "conditional_items": [
+    {
+      "item": "RL-trained agent baselines (e.g. Masked PPO) and the EnterpriseMAE/ray wrapper",
+      "status": "NOT_RUN",
+      "reason": "torch / ray[rllib] are not installed in this environment (disk / weight); the scripted official baseline is what is delivered here, RL baselines remain a conditional item"
+    }
+  ],
+  "conclusion": {
+    "official_baseline_ran": true,
+    "native_and_platform_kept_separate": true,
+    "reproducible": true,
+    "cross_checked_within_scopes": true,
+    "traceable": true,
+    "offline_readable": true
+  }
+}

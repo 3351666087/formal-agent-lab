@@ -63,7 +63,9 @@
 
 ## D5 · CAGE 与配对评测
 
-- [ ] **P3B-D5** 完成 CAGE 4 的一个明确官方场景/公开基线往返，以及平台上的可复现配对比较。
+- [x] **P3B-D5** 完成 CAGE 4 的一个明确官方场景/公开基线往返，以及平台上的可复现配对比较。
+  - 证据：固定 CAGE 4(CybORG 4.0, git 8c3c50ca, Scenario4) 于独立 venv 仅装核心依赖经类型化子进程接入；跑通官方脚本基线(蓝Sleep/绿EnterpriseGreen自动/红FiniteStateRed，一次原生世界步联合动作，记录观测/动作/奖励/终止)；原生分数与平台指标分开保留并说明不可比项；成对 dev/holdout 种子含不确定性、可重跑；MAL/CAGE/本地探针分域交叉检查；RL 智能体(torch/ray)未装作为条件项如实报告。详见 docs/handoff/phase3-draft.md · D5
+  - 实现：`packages/environment-cage/src/formal_lab_env_cage/_worker.py`、`packages/environment-cage/src/formal_lab_env_cage/bridge.py`、`scripts/d5_cage_evidence.py`、`packages/environment-cage/tests/test_bridge.py`
 
 固定 CAGE 4 版本，先跑公开基线记录原生观测/动作/world_step/联合动作/自动参与者/奖励与终止；再薄适配平台，需要联合步时用 G4 的批次能力，一次原生世界步只推进一次；Python 依赖冲突用独立 venv/容器与类型化进程接口。复用矩阵、数据划分、配对种子、聚类统计与离线报告。
 

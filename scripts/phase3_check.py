@@ -119,6 +119,13 @@ CHECKS = [
     Check("p3-service-evidence", "d4-service",
           "真实订单服务进程全生命周期：创建→就绪→正常业务+领域实验→探针→导出→复位→二次运行→异常终止资源核对→清理；合同动作只经 Broker",
           f"{PY} scripts/d4_service_lab_evidence.py", ["P3B-D4"], [f"{EV}/d4-service-lab.json"]),
+    # ------------------------------------------------------------ D5 CAGE 4 baseline and paired evaluation
+    Check("p3-cage-unit", "d5-cage",
+          "CAGE 4 桥版本报告与脚本基线（联合世界步、成对种子确定性）；无工具链时按 cage 标记跳过",
+          f"{PYTEST} packages/environment-cage/tests", ["P3B-D5"]),
+    Check("p3-cage-evidence", "d5-cage",
+          "固定 CAGE 4(CybORG 4.0) 官方脚本基线：原生轮次/分数与平台指标分开保留、不可比项说明；成对 dev/holdout 种子含不确定性；可重跑；MAL/CAGE/本地探针分域交叉检查；RL 智能体为条件项。工具链缺失记 BLOCKED",
+          f"{PY} scripts/d5_cage_evidence.py", ["P3B-D5"], [f"{EV}/d5-cage.json"]),
     # ------------------------------------------------------------ regression
     Check("p3-unit-all", "regression", "全部单元 / 契约 / 架构 / 示例测试（含阶段一哨兵）",
           f"{PYTEST} -m 'not integration and not llm and not ui'"),
@@ -133,7 +140,7 @@ CHECKS = [
 SUITE = Suite(
     name="phase3",
     groups=["g1-contracts", "g2-operations", "g3-release", "g4-batch", "g5-product", "g6-release", "d1-mal",
-            "d2-broker", "d3-strategies", "d4-service", "regression"],
+            "d2-broker", "d3-strategies", "d4-service", "d5-cage", "regression"],
     checks=CHECKS,
     out=ROOT / "docs" / "execution" / "evidence" / "phase3" / "checks",
     # what the checks and the handoff write themselves: never part of what is being checked

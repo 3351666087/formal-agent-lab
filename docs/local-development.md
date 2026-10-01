@@ -146,3 +146,22 @@ sha256sum ~/.venvs/fal-mal/corelang/corelang-1.0.0.mar
 桥默认在 `~/.venvs/fal-mal` 找 venv、在其 `corelang/*.mar` 找语言归档，也可设置 `FAL_MAL_HOME`、`FAL_MAL_MAR`。安装后：`packages/environment-mal/tests` 的桥往返测试实际运行（否则按 `mal` 标记自动跳过），`scripts/d1_mal_evidence.py` 从原生工具链实时导入（证据 `import.source="live"` 且与提交的夹具摘要一致）。未安装时领域包仍可离线运行——降低、参考解释器、Z3 验证与 ir-world 平台运行都只用平台环境和提交的 `packages/domain-mal/tests/fixtures/`，证据脚本回退为 `import.source="fixture"`。
 
 **结果解读**：场景包 `packages/domain-mal/scenarios/*.scenario.json` 固定语言/工具链版本与摘要、模型、入口点、目标，以及 LabPolicy（实验边界）/ TargetSecurity（目标性质）/ BusinessSLO（业务目标）。首个闭环把目标相关子集降低到 `deterministic_finite_v1` IR：原生模拟器的可达集是 fold 预言，参考解释器与 Z3 有界验证器独立复核，三者必须一致。见证=攻击路径；无见证=目标在界内成立；未知=求解器超时；概率 / 到达时间查询超出该 profile（UNSUPPORTED）；原生 TTC 已禁用，与 IR 单位步数不可比。这些结论与 CAGE、本地探针在各自语义范围内交叉检查，不能互换。
+
+## 11. 可选：CAGE Challenge 4（领域轨道 D5）
+
+CAGE 4（CybORG 4.0）用于领域评测对照。它的完整依赖很重（torch、ray[rllib]、tensorboard、torch_geometric 等，数 GB），但**官方脚本基线**（蓝 SleepAgent、绿 EnterpriseGreenAgent 自动、红 FiniteStateRedAgent）只需 CybORG 核心模拟器依赖，不需要 torch/ray。与 PRISM/MAL 一样放在独立虚拟环境，经类型化子进程（`packages/environment-cage/.../_worker.py`）调用，绝不进入冻结平台环境（决策 D-023 / D-032）。固定版本：CybORG 4.0（cage-challenge-4，git `8c3c50ca`）。
+
+在虚拟机中安装（仅核心依赖，跳过 torch/ray）：
+
+```bash
+git clone --depth 1 https://github.com/cage-challenge/cage-challenge-4 ~/cage-src
+python3 -m venv ~/.venvs/fal-cage
+~/.venvs/fal-cage/bin/pip install "numpy==1.26.4" "networkx==3.2.1" "PyYAML==6.0.1" "gym==0.26.2" \
+  "gymnasium==0.28.1" "pettingzoo==1.24.3" "prettytable==3.9.0" rich "typing_extensions==4.9.0" "pygame==2.5.2"
+~/.venvs/fal-cage/bin/pip install -e ~/cage-src --no-deps
+~/.venvs/fal-cage/bin/python -c "import CybORG; print(CybORG.CYBORG_VERSION)"   # 4.0
+```
+
+桥默认在 `~/.venvs/fal-cage` 找 venv、在 `~/cage-src` 找源（记录 git 版本），也可设 `FAL_CAGE_HOME`、`FAL_CAGE_SRC`。安装后：`packages/environment-cage/tests` 的桥往返测试实际运行（否则按 `cage` 标记跳过），`scripts/d5_cage_evidence.py` 跑官方脚本基线并记录原生轮次/分数与平台指标（分开保留，说明不可比项）。未安装时证据脚本记 `status=BLOCKED`，不冒充分数。
+
+**结果解读**：CAGE 的每队奖励是 CybORG 自己的量纲，不能与平台的可达性判定或订单服务成功率互换；本脚本只在各自语义范围内交叉检查方向，不合并量纲。RL 训练智能体（需 torch/ray）未安装，作为条件项如实报告，不计入已交付。
