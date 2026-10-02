@@ -10,25 +10,29 @@ Transport failures, format failures (not the requested JSON) and business reject
 recorded separately in the call records. When the model stays unavailable, `on_model_failure: fallback` (default)
 proposes the first applicable candidate by `fallback_preference`, labelled as a RULE fallback with the failed
 call ids, so the attempted usage is still committed with the step; `fail` raises instead.
+
+Phase 4A (A3): the call itself goes through the reusable `decision.ModelDecider` — the source is taken from what
+answered (LLM / LLM_PROTOCOL_TEST / LLM_STUB, `decided_by=MODEL_RESPONSE`), a fallback is `RULE` with
+`decided_by=RULE_FALLBACK`, and the run's and the participant's model-call / model-attempt budget is checked before
+every request.
 """
 
 from __future__ import annotations
 
-import json
 from typing import Any
 
 from formal_lab_contracts import (
     ActionProposal,
     ModelPackage,
-    ModelUsage,
     PlanningContext,
     PluginDescriptor,
-    ProposalSource,
 )
 from formal_lab_contracts import capabilities as caps
-from formal_lab_contracts.errors import FormalLabError, InvalidInput, NonRetryableFailure, RetryableFailure
+from formal_lab_contracts.errors import InvalidInput, NonRetryableFailure, RetryableFailure
 
-from .model_clients import FormatError, ModelCall, ModelClient, OpenAICompatibleClient, StubModelClient
+from .decision import DecisionRequest, ModelDecider
+from .decision import usage_of as usage_of
+from .model_clients import ModelClient, OpenAICompatibleClient, StubModelClient
 
 PLANNER_ID = "formal-lab.planner.llm"
 PLANNER_VERSION = "1.1.0"
@@ -89,14 +93,6 @@ SYSTEM_PROMPT = (
 )
 
 
-def usage_of(calls: list[ModelCall]) -> ModelUsage:
-    ok = [c for c in calls if c.outcome == "OK"]
-    return ModelUsage(model_calls=len(ok), attempts=sum(c.attempts for c in calls),
-                      input_tokens=sum(c.input_tokens for c in calls), output_tokens=sum(c.output_tokens for c in calls),
-                      unreported_calls=sum(1 for c in ok if not c.usage_reported),
-                      unconfirmed_calls=sum(1 for c in calls if c.unconfirmed))
-
-
 class LLMPlanner:
     descriptor = DESCRIPTOR
 
@@ -125,6 +121,7 @@ class LLMPlanner:
         self.kinds = loaded.property_kinds() if loaded is not None else {}
         self.last_calls: list[Any] = []
         self.call_records: list[dict[str, Any]] = []
+        self.last_decision: Any = None
 
     def _goal(self, ctx: PlanningContext) -> str | None:
         return self.goal_override or ctx.goal or next((p for p, k in self.kinds.items() if k == "goal"), None)
@@ -160,41 +157,28 @@ class LLMPlanner:
         if not context.candidates:
             raise InvalidInput("LLM planner needs at least one candidate")
         payload = self._payload(context)
-        user = "Decision input (JSON):\n" + json.dumps(payload, ensure_ascii=False, sort_keys=True)
-        start = len(self.client.calls)
+        n = len(payload["candidates"])
+
+        def valid(content: dict[str, Any]) -> str | None:
+            i = content.get("index")
+            return None if isinstance(i, int) and 0 <= i < n else \
+                f"index {i!r} out of range 0..{n - 1} (business rejection of a schema-valid answer)"
+
+        request = DecisionRequest("choose", SYSTEM_PROMPT, payload, RESPONSE_SCHEMA, "choose_candidate", valid,
+                                  max_calls=MAX_ATTEMPTS, prompt_version=PLANNER_VERSION)
+        decision = ModelDecider(self.client).decide(request, context=context)
+        self.call_records = decision.calls
         self.last_calls = []
-        last_error = ""
-        failure: FormalLabError | None = None
-        for attempt in range(MAX_ATTEMPTS):
-            prompt = user if attempt == 0 else user + f"\n\nYour previous answer was invalid ({last_error}). " \
-                                                      f"Return an index between 0 and {len(payload['candidates']) - 1}."
-            try:
-                resp = self.client.complete_json(system=SYSTEM_PROMPT, user=prompt, schema=RESPONSE_SCHEMA,
-                                                 schema_name="choose_candidate", payload=payload)
-            except FormatError as exc:
-                last_error, failure = exc.message, exc
-                continue
-            except (RetryableFailure, NonRetryableFailure) as exc:  # transport: no point asking again now
-                failure = exc
-                break
-            self.last_calls.append(resp)
-            index = resp.content.get("index")
-            if isinstance(index, int) and 0 <= index < len(payload["candidates"]):
-                calls = self.client.calls[start:]
-                self.call_records = [c.as_record() for c in calls]
-                chosen = context.candidates[index]
-                return self._proposal(context, chosen.action, ProposalSource(
-                    kind="LLM_STUB" if self.client.is_stub else "LLM", strategy=self.descriptor.ref(),
-                    model=resp.model, model_call_ids=[c.call_id for c in calls]),
-                    str(resp.content.get("rationale", ""))[:2000], usage_of(calls))
-            last_error = f"index {index!r} out of range (business rejection of a schema-valid answer)"
-        calls = self.client.calls[start:]
-        self.call_records = [c.as_record() for c in calls]
-        usage = usage_of(calls)
-        reason = failure.message if failure is not None else last_error
+        self.last_decision = decision
+        considered = min(len(context.candidates), self.max_candidates)
+        if decision.decided_by_model:
+            chosen = context.candidates[decision.content["index"]]
+            return decision.proposal(context, chosen.action, self.descriptor.ref(), candidates_considered=considered)
+        reason = f"{decision.failure}: {decision.failure_detail}"
         if self.on_failure == "fail":
-            raise RetryableFailure(f"model did not return a usable choice after {len(calls)} call(s): {reason}",
-                                   details={"usage": usage.model_dump(), "calls": self.call_records})
+            raise RetryableFailure(f"model did not return a usable choice after {len(decision.calls)} call(s) "
+                                   f"({reason})", details={"usage": decision.usage.model_dump(),
+                                                           "calls": decision.calls})
         pref = {t: i for i, t in enumerate(self.fallback_preference)}
         applicable = [c for c in context.candidates if str(c.belief_applicability) == "APPLICABLE"] or \
             [c for c in context.candidates if str(c.belief_applicability) == "UNKNOWN"]
@@ -202,17 +186,9 @@ class LLMPlanner:
             raise NonRetryableFailure("model unavailable and no applicable candidate for the fallback")
         chosen = min(applicable, key=lambda c: (pref.get(c.action.action_type, len(pref)),
                                                 context.candidates.index(c)))
-        return self._proposal(context, chosen.action, ProposalSource(
-            kind="RULE", strategy=self.descriptor.ref(), model=None, model_call_ids=[c.call_id for c in calls]),
-            f"model unavailable ({reason[:300]}); fallback to the first applicable candidate by preference", usage)
-
-    def _proposal(self, context: PlanningContext, action, source: ProposalSource, rationale: str,
-                  usage: ModelUsage) -> ActionProposal:
-        return ActionProposal(proposal_id=f"{context.step_id}:proposal", run_id=context.run_id,
-                              step_id=context.step_id, step=context.step, actor_id=context.actor_id, action=action,
-                              based_on_revision=context.observation.state_revision, source=source,
-                              rationale=rationale, candidates_considered=min(len(context.candidates),
-                                                                            self.max_candidates), usage=usage)
+        return decision.proposal(context, chosen.action, self.descriptor.ref(), candidates_considered=considered,
+                                 rationale=f"model unavailable ({reason[:300]}); fallback to the first applicable "
+                                           "candidate by preference")
 
 
 def client_from_settings(config: dict[str, Any], services: Any) -> ModelClient:

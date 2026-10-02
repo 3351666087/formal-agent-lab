@@ -57,12 +57,13 @@ from formal_lab_contracts import (
     digest_of,
 )
 from formal_lab_contracts import capabilities as caps
-from formal_lab_contracts.errors import FormalLabError, InvalidInput, NonRetryableFailure
+from formal_lab_contracts.errors import InvalidInput, NonRetryableFailure
 from formal_lab_model import check_model
 from formal_lab_model.belief import belief_from_observation
 from formal_lab_model.interpreter import Interpreter
 
 PLANNER_ID = "formal-lab.example.scheduling.task-planner"
+MODEL_KINDS = {"LLM", "LLM_STUB", "LLM_PROTOCOL_TEST"}
 LEVEL_RANK = {"high": 0, "normal": 1, "low": 2}
 
 CONFIG_SCHEMA = {
@@ -134,6 +135,7 @@ class TaskPlanner:
         self.last_calls: list[Any] = []
         self.call_records: list[dict[str, Any]] = []
         self._client = None
+        self.decision: Any = None  # the last model decision (phase 4A)
         self.rejected: dict[str, str] = {}  # action key → digest of the facts it depended on when it was rejected
         self.budget_mode = False  # entered once the budget is short (BUDGET trigger fires on entering it)
         self.pending: list[Any] = []  # [action key, predicted writes, step] of the last proposal
@@ -227,7 +229,10 @@ class TaskPlanner:
 
     def _model_order(self, open_ops: list[str], state: dict[str, Any], context: PlanningContext) -> tuple[list[str],
                                                                                                     ModelUsage]:
-        from formal_lab_strategies.llm_planner import usage_of
+        """The model generator through the reusable decision (phase 4A, A3): the answer must be a
+        dependency-respecting permutation of the open tasks, otherwise (or when no answer arrives, or the budget is
+        spent) the rule order is used and the plan is labelled RULE with the failed call ids."""
+        from formal_lab_strategies.decision import DecisionRequest, ModelDecider
         from formal_lab_strategies.model_clients import StubModelClient
 
         if self._client is None:
@@ -238,29 +243,35 @@ class TaskPlanner:
 
                 self._client = client_from_settings({"client": "openai_compatible", "model": self.cfg.get("model")},
                                                     self.services)
-        start = len(self._client.calls)
         rule = self._rule_order(open_ops, state)
         tasks = [{"id": op, "order": self.order_of[op], "due": self.due[self.order_of[op]],
                   "priority": state.get(f"priority[{self.order_of[op]}]", "normal"),
                   "processing_time": state.get(f"proc_time[{op}]"), "depends_on": self.preds[op]} for op in rule]
-        order: list[str] = rule
-        try:
-            resp = self._client.complete_json(system=ORDER_PROMPT, user="Tasks (JSON):\n" + str(tasks),
-                                              schema=ORDER_SCHEMA, schema_name="order_tasks",
-                                              payload={"tasks": tasks})
-            proposed = [str(x) for x in resp.content.get("order", [])]
-            if sorted(proposed) == sorted(open_ops) and all(
-                    proposed.index(p) < proposed.index(op) for op in proposed for p in self.preds[op] if p in proposed):
-                order = proposed
-                self.generator_note = f"model order: {resp.content.get('rationale', '')}"[:300]
-            else:
-                self.generator_note = ("model answer rejected (not a dependency-respecting permutation of the open "
-                                       "tasks); rule order used")
-        except FormalLabError as exc:
-            self.generator_note = f"model unavailable ({exc.message[:200]}); rule order used"
-        calls = self._client.calls[start:]
-        self.call_records = [c.as_record() for c in calls]
-        return order, usage_of(calls)
+
+        def valid(content: dict[str, Any]) -> str | None:
+            proposed = [str(x) for x in content.get("order", [])]
+            if sorted(proposed) != sorted(open_ops):
+                return "not a permutation of the open tasks"
+            if not all(proposed.index(p) < proposed.index(op) for op in proposed for p in self.preds[op]
+                       if p in proposed):
+                return "not dependency-respecting"
+            return None
+
+        request = DecisionRequest("order", ORDER_PROMPT, {"tasks": tasks}, ORDER_SCHEMA, "order_tasks", valid,
+                                  max_calls=1, prompt_version=self.descriptor.version)
+        decision = ModelDecider(self._client).decide(request, context=context)
+        self.decision = decision
+        self.call_records = decision.calls
+        if decision.decided_by_model:
+            self.generator_note = f"model order: {decision.content.get('rationale', '')}"[:300]
+            return [str(x) for x in decision.content["order"]], decision.usage
+        if decision.failure == "BUSINESS_INVALID":
+            self.generator_note = ("model answer rejected (not a dependency-respecting permutation of the open "
+                                   "tasks); rule order used")
+        else:
+            self.generator_note = f"model unavailable ({decision.failure}: {decision.failure_detail[:200]}); " \
+                                  "rule order used"
+        return rule, decision.usage
 
     # ------------------------------------------------------------------ planning
     def _statuses(self, state: dict[str, Any]) -> dict[str, TaskStatus]:
@@ -322,13 +333,17 @@ class TaskPlanner:
                                                            "index": [{"op": "const", "value": op}]},
                                                           {"op": "const", "value": "done"}]})
                  for op in order + done]
-        kind = {"rule": "RULE", "symbolic": "SYMBOLIC", "model": "LLM_STUB" if self.cfg.get("client") == "stub"
-                else "LLM"}[gen]
+        # phase 4A (A3): the label comes from what produced the order — a model answer (its source as recorded by
+        # the client), or the rule order when the model gave none — never from the `client` configuration string
+        decision = self.decision if gen == "model" else None
+        kind = {"rule": "RULE", "symbolic": "SYMBOLIC"}.get(gen) or (
+            decision.source if decision is not None and decision.decided_by_model else "RULE")
         self.plan = TaskPlan(
             plan_id=f"{context.run_id}:{context.actor_id}:tasks", actor_id=context.actor_id,
             version=(self.plan.version + 1) if self.plan else 1,
             generator=PlanGenerator(kind=kind, strategy=self.descriptor.ref(), method=gen,
-                                    model=self._client.model if self._client is not None else None),
+                                    model=decision.model if decision is not None else None,
+                                    model_call_ids=decision.call_ids if decision is not None else []),
             created_at_step=context.step, nodes=nodes, cursor=None,
             revision=PlanRevision(trigger=trigger, detail=f"{detail}; {self.generator_note}"[:500],
                                   at_step=context.step),
@@ -459,13 +474,20 @@ class TaskPlanner:
         self.plan = self.plan.model_copy(update={"nodes": nodes, "cursor": node_id,
                                                  "status": "COMPLETED" if len(done) == len(nodes) else "ACTIVE"})
         progress = self.plan.progress()
+        gen = self.plan.generator
+        here = [r["call_id"] for r in self.call_records]  # calls made in this step (counted in this step's usage)
+        if str(gen.kind) in MODEL_KINDS:  # the order is a model answer: of this step, or inherited from an earlier one
+            decided_by = "MODEL_RESPONSE" if self.plan.created_at_step == context.step else "INHERITED_PLAN"
+        else:
+            decided_by = "RULE_FALLBACK" if self.cfg["generator"] == "model" else None
+        source = ProposalSource(kind=gen.kind, strategy=self.descriptor.ref(), model=gen.model,
+                                model_call_ids=list(dict.fromkeys([*gen.model_call_ids, *here])),
+                                decided_by=decided_by)
         return ActionProposal(
             proposal_id=f"{context.step_id}:proposal", run_id=context.run_id, step_id=context.step_id,
             step=context.step, actor_id=context.actor_id, action=choice.action,
             based_on_revision=context.observation.state_revision,
-            source=ProposalSource(kind=self.plan.generator.kind, strategy=self.descriptor.ref(),
-                                  model=self.plan.generator.model,
-                                  model_call_ids=[r["call_id"] for r in self.call_records]),
+            source=source,
             rationale=f"{reason}; tasks {progress}" + (f"; {len(blocked)} rejected action(s) not retried until newer "
                                                         "observations of what they depend on differ" if blocked
                                                         else ""),

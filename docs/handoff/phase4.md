@@ -66,3 +66,48 @@
 **验证**：`p4-a2-kernel`（运行时执行依据 13、投影 4、原参与者 / 一致性测试、Broker 含新增执行准入 18、契约）、`p4-a2-order-service`（真实服务进程 5 + 原订单服务测试）、`p4-a2-evidence`（22/22 必需断言）、`p4-a2-participant-api`（真实 API + worker：签发、whoami、401 / 403、投影下载离线可读）。受影响套件：运行时 / 领域 / 策略 / 评测 / 契约 / 兼容 / 架构 / 工具 / 示例 456 项通过；集成（订单服务、一致性、治理、多参与者、参与者通道、SDK/CLI/回放，真实 PostgreSQL + Temporal + API / worker 子进程）18 项通过。
 
 **留给后续执行者**：订单服务之外的实时环境若要关闭检查—写入窗口，需实现 `env.current_revision` + `env.conditional_step`；其它门控若需要版本，应读 `GateRequest.execution` 并在 UNKNOWN 时拒绝。多用户登录（SSO）仍属部署范围，参与者令牌是本地单用户运营方签发的读取凭据。
+
+## A3 · 模型调用与可恢复决策
+
+**复现的缺口**（按基线代码路径核对）：
+- 来源由配置字符串决定：任务规划器 `kind = "LLM_STUB" if client == "stub" else "LLM"`——模型不可达、采用规则顺序时计划仍标 LLM；协议测试服务、真实提供方无从区分；
+- 继承已生成计划的后续步 `model_call_ids` 为空，无法追溯到生成计划的调用；
+- 预算只计可用应答（`model_calls`）：端点不可达时每一步都会再发请求并回退，预算永远不耗尽；重试次数不受预算约束；
+- 4xx 拒绝记为传输错误；未报告用量的调用记 0 token（看起来免费）；调用记录无提示/配置摘要、无应答端点类型；
+- 每个策略各写一套客户端调用、失败处理与记账，没有复用点；替身调用 ID 随机，带调用 ID 的计划检查点在续跑后不一致。
+
+**修复**：
+- 复用接口 `formal_lab_strategies.decision`：`DecisionRequest`（任务、系统提示、载荷、响应 schema、业务校验、提示版本）→ `ModelDecider.decide(request, context=PlanningContext)` → `Decision`（内容、来源、模型、调用记录、用量、失败分类）→ `decision.proposal(...)` / `decision.source_of(...)`；内置 `choose_request`（选一个候选）与 `order_request`（依赖一致的任务排列）。LLM 策略与调度任务规划器都改走它。
+- 来源取自应答：客户端记录应答端点类型 PROVIDER / PROTOCOL_TEST（协议测试服务以 `x-formal-lab-endpoint: protocol-test` 自报）/ STUB，对应来源 `LLM` / `LLM_PROTOCOL_TEST` / `LLM_STUB`；`ProposalSource.decided_by` = MODEL_RESPONSE（本步应答）/ INHERITED_PLAN（引用生成计划的调用）/ RULE_FALLBACK（失败调用 ID 保留）；`PlanGenerator.model_call_ids` 记录生成该计划版本的调用。契约 v2 增量：`ProposalSourceKind.LLM_PROTOCOL_TEST`、`ProposalSource.decided_by`、`PlanGenerator.model_call_ids`、`Budget.max_model_attempts`（v1 不变）。
+- 调用记录：call ID、请求 / 返回模型、`model_switched`、尝试次数、`sent`、状态、端点类型、去凭据端点（无 user-info / query）、提示摘要、配置摘要、业务校验结果、用量是否提供（未提供 → token 为 null）、耗时、HTTP 状态。失败分类 TRANSPORT_ERROR / FORMAT_ERROR / BUSINESS_INVALID / PROVIDER_REJECTED / CANCELLED / BUDGET_EXHAUSTED 分开。
+- 预算：每次调用前按运行与参与者两级的 `max_model_calls` 与 `max_model_attempts`（含重试、失败与回退前的尝试）检查，耗尽则不发送、记 BUDGET_EXHAUSTED；单次调用的重试数截到剩余尝试数；内核在 `model_attempts` 达上限时结束运行。替身调用 ID 由提示摘要决定（确定性）。
+- 评测：发生过模型尝试（即使全部失败回退）的运行，`model_calls` / `tokens` 指标不再标“不调用模型”。Web 来源徽标与基准页提示加入“协议测试服务”。
+
+**领域策略需要传入的字段及其来源**：
+
+| 字段 | 来源 |
+|---|---|
+| `options`（候选 / 任务） | 内核给出的 `PlanningContext.candidates`（已在参与者投影后的信念上计算），或策略自己的任务分解；只提供允许的项 |
+| `goal` / 目标说明 | `PlanningContext.goal`、`objective`，由策略渲染 |
+| `explanation`（需要模型考虑的事实） | `PlanningContext.observation`（已按视图投影）中策略选取的部分 |
+| 响应 schema 与 `validate` | 策略：`choose` / `order` 内置，其它任务自带 JSON Schema 与业务校验 |
+| 提示版本 | 策略版本（进入 `prompt_digest`） |
+| 客户端 | `client_from_settings(config, services)`：`FAL_LLM_BASE_URL` / `FAL_LLM_API_KEY` / `FAL_LLM_MODEL`（参与者设置优先，再平台设置 / `.env`）；`client: stub` 为替身 |
+| 预算 | 内核：`PlanningContext.budget` / `usage`、`actor_budget` / `actor_usage` |
+
+**必须复现**（`scripts/a3_model_decision_evidence.py` → `a3-model-decision.json`；真实提供方单独 `--real` → `a3-real-endpoint.json`）：
+
+| 情形 | 结果 |
+|---|---|
+| 测试服务返回不同合法候选 | 同一场景 `pick:0` → `assign(o1_cut, m1)`，`pick:1` → `assign(o1_cut, m2)`；来源 LLM_PROTOCOL_TEST / MODEL_RESPONSE，引用的调用 ID 都是服务实际应答 |
+| 无效选择 | 越界两次 → 规则回退（RULE / RULE_FALLBACK，保留 2 个失败调用 ID）；`on_model_failure: fail` → 运行 FAILED，原因 `BUSINESS_INVALID: index 10000 out of range 0..36` |
+| 不可达端点 | 关闭端口：TRANSPORT_ERROR 记录（2 次尝试、“Connection refused”、token 为 null），`model_calls` 0、`model_attempts` > 0，所有步骤 RULE_FALLBACK，无一标为模型决策 |
+| 替身 | 所有步骤 LLM_STUB，端点类型 STUB |
+| 暂停 / 恢复 | 本地：第 4 步停、经 JSON 在新组件中续跑，12 个请求 = 12 个已提交调用 ID，无重复；平台（Temporal + PostgreSQL）：暂停期间无请求，恢复后 SIGKILL worker，已提交调用 ID 无重复且都是服务实际应答，在途丢失 ≤ 1（`tests/integration/test_llm_decision_platform.py`） |
+| 预算 | `max_model_calls=3` → 服务恰好收到 3 个请求，运行 BUDGET_EXHAUSTED；全部 500 且 `max_model_attempts=4` → 恰好 4 个请求 |
+| 复用 | 调度任务规划器（generator=model）走同一决策：15 步只需 1 次调用，继承步骤引用生成计划的调用 ID（INHERITED_PLAN） |
+| 真实端点最小例子 | 已配置的 OpenAI 兼容中转（`https://api.uheapi.com/v1`，`gpt-5.6-sol`）：正常调度场景任务规划器 SUCCEEDED，15 步、1 次真实调用（PROVIDER，返回模型 `gpt-5.6-sol`，提供方报告 429 / 528 token，约 38 s），来源 LLM（MODEL_RESPONSE + INHERITED_PLAN）；订单正常场景 LLM 策略 6 次真实调用（逐调用 OK / VALID，HTTP 200，用量已报告）后按 6 次预算 BUDGET_EXHAUSTED。同日较早一次运行中订单场景有 1 次调用未得到可用应答，当时证据未记录其分类，此后证据逐调用记录结果。证据文件不含任何凭据（已逐文件核对） |
+
+**真实调用状态**：本环境端点可用，`p4-a3-real-endpoint` 为真实提供方运行；端点不可用时该检查记 BLOCKED，协议测试服务不充当真实模型。研究比较是否可完成由 B3 依据真实模型运行证据判断。
+
+**验证**：`p4-a3-unit`（策略 / 决策 / 调度任务规划器 / 评测 37 项）、`p4-a3-decision`（9/9 必需断言）、`p4-a3-platform`（Temporal + PostgreSQL 暂停 / 恢复 / SIGKILL worker）、`p4-a3-real-endpoint`（真实提供方 3/3）全部 PASS；受影响套件 403 项、集成（平台运行、矩阵 v2、模型决策）15 项通过；web `tsc --noEmit` 通过。

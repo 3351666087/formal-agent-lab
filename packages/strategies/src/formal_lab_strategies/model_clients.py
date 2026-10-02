@@ -16,13 +16,22 @@ and the usage exactly as reported (`usage_reported=False` when the provider sent
 
 `StubModelClient` is a deterministic stand-in: proposals made with it are labelled LLM_STUB and must be reported
 separately from real-model results.
+
+Phase 4A (A3): every call records what kind of endpoint *answered* — PROVIDER, PROTOCOL_TEST (the loopback test
+service identifies itself with `x-formal-lab-endpoint: protocol-test`) or STUB — so provenance is taken from the
+answer, not from configuration; the endpoint without credentials (no user-info, no query); a prompt digest and a
+configuration digest; whether the provider answered with another model than requested (`model_switched`). A 4xx
+other than 408 / 409 / 429 is PROVIDER_REJECTED, a cancellation CANCELLED. Tokens of a call without reported usage are
+unknown (None in the record), never zero. `complete_json(max_attempts=…)` caps the retries of one call (budget).
 """
 
 from __future__ import annotations
 
+import hashlib
 import json
 import threading
 import time
+import urllib.parse
 import uuid
 from dataclasses import dataclass, field
 from typing import Any, Protocol
@@ -30,6 +39,21 @@ from typing import Any, Protocol
 import httpx
 import jsonschema
 from formal_lab_contracts.errors import InvalidInput, NonRetryableFailure, RetryableFailure, Timeout
+
+ENDPOINT_HEADER = "x-formal-lab-endpoint"
+
+
+def public_endpoint(url: str) -> str:
+    """An endpoint as it may be recorded: no user-info, query or fragment (where credentials could hide)."""
+    parts = urllib.parse.urlsplit(url)
+    host = parts.hostname or ""
+    if parts.port:
+        host = f"{host}:{parts.port}"
+    return urllib.parse.urlunsplit((parts.scheme, host, parts.path.rstrip("/"), "", ""))
+
+
+def _digest(obj: Any) -> str:
+    return hashlib.sha256(json.dumps(obj, sort_keys=True, default=str).encode()).hexdigest()[:16]
 
 
 @dataclass
@@ -45,6 +69,7 @@ class ModelResponse:
     usage_reported: bool = True
     model_requested: str | None = None
     attempts: int = 1
+    endpoint_kind: str = "PROVIDER"
 
 
 @dataclass
@@ -65,13 +90,25 @@ class ModelCall:
     unconfirmed: bool = False  # sent, but no answer arrived (it may still be billed)
     latency_ms: float = 0.0
     http_status: int | None = None
+    # phase 4A (A3)
+    endpoint_kind: str = "PROVIDER"  # what answered: PROVIDER / PROTOCOL_TEST / STUB
+    endpoint: str | None = None  # without credentials
+    prompt_digest: str | None = None
+    config_digest: str | None = None
+    business: str | None = None  # set by the decision: VALID / INVALID: reason
+    model_switched: bool = False
+    sent: bool = True
 
     def as_record(self) -> dict[str, Any]:
+        unknown = not self.usage_reported  # missing usage stays unknown: never recorded as free
         return {"call_id": self.call_id, "model": self.model_returned or self.model_requested,
                 "model_requested": self.model_requested, "model_returned": self.model_returned,
-                "outcome": self.outcome, "attempts": self.attempts, "request": self.request,
-                "response": self.raw_text, "error": self.error, "input_tokens": self.input_tokens,
-                "output_tokens": self.output_tokens, "usage_reported": self.usage_reported,
+                "model_switched": self.model_switched, "outcome": self.outcome, "attempts": self.attempts,
+                "sent": self.sent, "endpoint_kind": self.endpoint_kind, "endpoint": self.endpoint,
+                "prompt_digest": self.prompt_digest, "config_digest": self.config_digest, "business": self.business,
+                "request": self.request, "response": self.raw_text, "error": self.error,
+                "input_tokens": None if unknown else self.input_tokens,
+                "output_tokens": None if unknown else self.output_tokens, "usage_reported": self.usage_reported,
                 "unconfirmed": self.unconfirmed, "latency_ms": self.latency_ms, "http_status": self.http_status}
 
 
@@ -85,7 +122,8 @@ class ModelClient(Protocol):
     calls: list[ModelCall]
 
     def complete_json(self, *, system: str, user: str, schema: dict[str, Any], schema_name: str,
-                      payload: dict[str, Any]) -> ModelResponse: ...
+                      payload: dict[str, Any], max_attempts: int | None = None,
+                      prompt_digest: str | None = None) -> ModelResponse: ...
 
 
 class OpenAICompatibleClient:
@@ -113,7 +151,9 @@ class OpenAICompatibleClient:
             raise Timeout("model call cancelled")
 
     def complete_json(self, *, system: str, user: str, schema: dict[str, Any], schema_name: str,
-                      payload: dict[str, Any]) -> ModelResponse:
+                      payload: dict[str, Any], max_attempts: int | None = None,
+                      prompt_digest: str | None = None) -> ModelResponse:
+        limit = self.max_attempts if max_attempts is None else max(1, min(self.max_attempts, int(max_attempts)))
         body: dict[str, Any] = {
             "model": self.model,
             "messages": [{"role": "system", "content": system}, {"role": "user", "content": user}],
@@ -123,18 +163,23 @@ class OpenAICompatibleClient:
         if self.temperature is not None:
             body["temperature"] = self.temperature
         request_record = {"model": self.model, "messages": body["messages"], "schema_name": schema_name,
-                          "temperature": self.temperature, "timeout_s": self.timeout_s,
-                          "max_attempts": self.max_attempts}
+                          "temperature": self.temperature, "timeout_s": self.timeout_s, "max_attempts": limit}
+        endpoint = public_endpoint(self.base_url)
         call = ModelCall(call_id=f"call_{uuid.uuid4().hex[:12]}", model_requested=self.model,
-                         outcome="TRANSPORT_ERROR", attempts=0, request=request_record)
+                         outcome="TRANSPORT_ERROR", attempts=0, request=request_record, endpoint=endpoint,
+                         prompt_digest=prompt_digest or _digest({"system": system, "schema": schema}),
+                         config_digest=_digest({"model": self.model, "temperature": self.temperature,
+                                                "timeout_s": self.timeout_s, "max_attempts": limit,
+                                                "endpoint": endpoint}))
         self.calls.append(call)
-        deadline = time.perf_counter() + self.timeout_s * self.max_attempts
+        deadline = time.perf_counter() + self.timeout_s * limit
         t0 = time.perf_counter()
         delay = self.backoff_s
         resp = None
         while True:
             if self.cancel.is_set():
-                call.error = "cancelled before sending"
+                call.error, call.outcome = "cancelled before sending", "CANCELLED"
+                call.sent = call.attempts > 0
                 raise Timeout("model call cancelled")
             call.attempts += 1
             try:
@@ -153,9 +198,10 @@ class OpenAICompatibleClient:
                 call.error = f"HTTP {resp.status_code}: {resp.text[:300]}"
                 if resp.status_code not in (408, 409, 429) and resp.status_code < 500:
                     call.latency_ms = (time.perf_counter() - t0) * 1000
+                    call.outcome = "PROVIDER_REJECTED"
                     raise NonRetryableFailure(f"model endpoint rejected the request ({resp.status_code}): "
                                               f"{resp.text[:300]}", details={"call": call.as_record()})
-            if call.attempts >= self.max_attempts or time.perf_counter() + delay > deadline:
+            if call.attempts >= limit or time.perf_counter() + delay > deadline:
                 call.latency_ms = (time.perf_counter() - t0) * 1000
                 if resp is None and "timeout" in (call.error or ""):
                     raise Timeout(f"model call timed out after {call.attempts} attempt(s): {call.error}",
@@ -164,12 +210,20 @@ class OpenAICompatibleClient:
                                        details={"call": call.as_record()})
             retry_after = resp.headers.get("retry-after") if resp is not None else None
             wait = float(retry_after) if retry_after and retry_after.replace(".", "", 1).isdigit() else delay
-            self._sleep(min(wait, self.max_backoff_s))
+            try:
+                self._sleep(min(wait, self.max_backoff_s))
+            except Timeout:
+                call.outcome, call.error = "CANCELLED", f"cancelled after {call.attempts} attempt(s): {call.error}"
+                raise
             delay = min(delay * 2, self.max_backoff_s)
         call.latency_ms = (time.perf_counter() - t0) * 1000
+        if resp.headers.get(ENDPOINT_HEADER) == "protocol-test":
+            call.endpoint_kind = "PROTOCOL_TEST"
         data = resp.json()
         usage = data.get("usage") or {}
         call.model_returned = data.get("model")
+        call.model_switched = bool(call.model_returned) and call.model_returned != self.model \
+            and not str(call.model_returned).startswith(f"{self.model}-")  # a dated variant is the same model
         call.usage_reported = bool(usage)
         call.input_tokens = int(usage.get("prompt_tokens") or 0)
         call.output_tokens = int(usage.get("completion_tokens") or 0)
@@ -192,7 +246,7 @@ class OpenAICompatibleClient:
         return ModelResponse(content=content, raw_text=text, model=call.model_returned or self.model,
                              call_id=call.call_id, input_tokens=call.input_tokens, output_tokens=call.output_tokens,
                              latency_ms=call.latency_ms, request=request_record, usage_reported=call.usage_reported,
-                             model_requested=self.model, attempts=call.attempts)
+                             model_requested=self.model, attempts=call.attempts, endpoint_kind=call.endpoint_kind)
 
 
 class StubModelClient:
@@ -206,6 +260,7 @@ class StubModelClient:
         self.model = model
         self.preference = list(preference or [])
         self.calls: list[ModelCall] = []
+        self._seen: dict[str, int] = {}
 
     def _rank(self, cand: dict[str, Any]) -> tuple[int, int, int]:
         t = cand["action_type"]
@@ -213,7 +268,8 @@ class StubModelClient:
         return (pref, 0 if cand["applicability"] == "APPLICABLE" else 1, cand["index"])
 
     def complete_json(self, *, system: str, user: str, schema: dict[str, Any], schema_name: str,
-                      payload: dict[str, Any]) -> ModelResponse:
+                      payload: dict[str, Any], max_attempts: int | None = None,
+                      prompt_digest: str | None = None) -> ModelResponse:
         if "tasks" in payload:
             content: dict[str, Any] = {"order": [t["id"] for t in payload["tasks"]],
                                        "rationale": "stub: tasks in the given order (deterministic stand-in)"}
@@ -222,9 +278,15 @@ class StubModelClient:
                           key=self._rank)
             content = {"index": pool[0]["index"] if pool else 0,
                        "rationale": "stub: first candidate by declared preference (deterministic stand-in)"}
-        call = ModelCall(call_id=f"stub_{uuid.uuid4().hex[:12]}", model_requested=self.model, outcome="OK",
+        # deterministic ids too (phase 4A): the same prompt gives the same id, so a resumed run equals the
+        # uninterrupted one even where a plan carries the ids of the calls that generated it
+        key = _digest({"model": self.model, "system": system, "user": user, "schema": schema_name})
+        self._seen[key] = self._seen.get(key, 0) + 1
+        call = ModelCall(call_id=f"stub_{key[:12]}_{self._seen[key]}", model_requested=self.model, outcome="OK",
                          attempts=1, model_returned=self.model, raw_text=json.dumps(content),
-                         request={"schema_name": schema_name}, usage_reported=False)
+                         request={"schema_name": schema_name}, usage_reported=False, endpoint_kind="STUB",
+                         endpoint="stub:", prompt_digest=prompt_digest or _digest({"system": system, "schema": schema}),
+                         config_digest=_digest({"model": self.model, "preference": self.preference}))
         self.calls.append(call)
         return ModelResponse(content=content, raw_text=call.raw_text or "", model=self.model, call_id=call.call_id,
-                             usage_reported=False, model_requested=self.model)
+                             usage_reported=False, model_requested=self.model, endpoint_kind="STUB")

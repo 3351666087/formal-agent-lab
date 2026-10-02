@@ -164,10 +164,12 @@ class PlanRevision(ContractModel):
 
 
 class PlanGenerator(ContractModel):
-    kind: ProposalSourceKind = Field(description="RULE / SYMBOLIC / LLM / LLM_STUB / EXTERNAL")
+    kind: ProposalSourceKind = Field(description="RULE / SYMBOLIC / LLM / LLM_STUB / LLM_PROTOCOL_TEST / EXTERNAL")
     strategy: PluginRef
     model: str | None = None
     method: str | None = None
+    model_call_ids: list[str] = Field(default_factory=list, description="phase 4A: the model calls that produced "
+                                      "this plan version (failed ones included when the rule order was used)")
 
 
 class TaskPlan(ContractModel):

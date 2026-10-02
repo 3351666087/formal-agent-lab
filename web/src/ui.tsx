@@ -160,11 +160,15 @@ export function ComparisonBadge({ verdict }: { verdict?: string | null }) {
 
 const SOURCE: Record<string, [string, string]> = {
   RULE: ["", "规则"], SYMBOLIC: ["info", "符号/Z3"], LLM: ["accent", "LLM"], LLM_STUB: ["warn", "LLM 替身"],
-  HUMAN: ["", "人工"], EXTERNAL: ["", "外部插件"],
+  LLM_PROTOCOL_TEST: ["warn", "协议测试服务"], HUMAN: ["", "人工"], EXTERNAL: ["", "外部插件"],
+};
+const SOURCE_TITLE: Record<string, string> = {
+  LLM_STUB: "deterministic stand-in, not a real model",
+  LLM_PROTOCOL_TEST: "answered by the loopback protocol test service, not a model",
 };
 export function SourceBadge({ kind }: { kind: string }) {
   const [tone, label] = SOURCE[kind] ?? ["", kind];
-  return <span className={`badge ${tone}`} title={kind === "LLM_STUB" ? "deterministic stand-in, not a real model" : kind}>{label}</span>;
+  return <span className={`badge ${tone}`} title={SOURCE_TITLE[kind] ?? kind}>{label}</span>;
 }
 
 // ------------------------------------------------------------------ tabs (roving focus, ← → keys)

@@ -211,6 +211,8 @@ class Budget(ContractModel):
     max_wall_seconds: float | None = Field(default=None, gt=0)
     max_model_calls: int | None = Field(default=None, ge=0)
     max_tokens: int | None = Field(default=None, ge=0)
+    max_model_attempts: int | None = Field(default=None, ge=0, description="phase 4A: requests sent to a model "
+                                           "endpoint, retries and failed calls included")
 
 
 class BudgetUsage(ContractModel):
@@ -406,6 +408,7 @@ class ProposalSourceKind(StrEnum):
     SYMBOLIC = "SYMBOLIC"
     LLM = "LLM"
     LLM_STUB = "LLM_STUB"
+    LLM_PROTOCOL_TEST = "LLM_PROTOCOL_TEST"  # phase 4A: answered by the protocol test service, not a model
     HUMAN = "HUMAN"
     EXTERNAL = "EXTERNAL"
 
@@ -426,6 +429,10 @@ class ProposalSource(ContractModel):
     strategy: PluginRef
     model: str | None = Field(default=None, description="model identifier for LLM / LLM_STUB sources")
     model_call_ids: list[str] = Field(default_factory=list)
+    decided_by: Literal["MODEL_RESPONSE", "INHERITED_PLAN", "RULE_FALLBACK"] | None = Field(
+        default=None, description="phase 4A: a model answer of this step (its call ids), a step of a plan a model "
+                                  "generated earlier (the generating call ids), or a rule chosen after the model "
+                                  "calls failed (the failed call ids); None for rule / symbolic strategies")
 
 
 class ActionProposal(ContractModel):

@@ -274,6 +274,24 @@
     "ProposalSource": {
       "additionalProperties": false,
       "properties": {
+        "decided_by": {
+          "anyOf": [
+            {
+              "enum": [
+                "MODEL_RESPONSE",
+                "INHERITED_PLAN",
+                "RULE_FALLBACK"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "phase 4A: a model answer of this step (its call ids), a step of a plan a model generated earlier (the generating call ids), or a rule chosen after the model calls failed (the failed call ids); None for rule / symbolic strategies",
+          "title": "Decided By"
+        },
         "kind": {
           "$ref": "#/$defs/ProposalSourceKind"
         },
@@ -314,6 +332,7 @@
         "SYMBOLIC",
         "LLM",
         "LLM_STUB",
+        "LLM_PROTOCOL_TEST",
         "HUMAN",
         "EXTERNAL"
       ],

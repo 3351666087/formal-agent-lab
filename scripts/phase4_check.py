@@ -52,6 +52,22 @@ PLATFORM_CHECKS = [
     Check("p4-a2-participant-api", "a2",
           "平台参与者通道：令牌绑定 run/actor、actor 参数越权 403、无/伪造/过期令牌 401、下载为投影且可离线读取（真实 API + worker）",
           f"{IT} tests/integration/test_participant_access_platform.py", ["P4A-A2"]),
+    # ------------------------------------------------------------ A3 model calls and recoverable decisions
+    Check("p4-a3-unit", "a3",
+          "可复用模型决策（单元）：决策随应答改变、无效应答重问/回退/失败、失败分类、来源取自应答端点、预算在发送前拦截、调用记录摘要与去凭据、任务规划器复用与续跑一致",
+          f"{PYTEST} packages/strategies/tests examples/neutral-scheduling/tests/test_task_planner.py "
+          "packages/evaluation/tests", ["P4A-A3"]),
+    Check("p4-a3-decision", "a3",
+          "真实策略工厂 + 本地运行器（协议测试服务 / 关闭端口 / 替身）：不同合法应答改变决策、无效应答回退或失败、不可达端点为失败记录、替身标签、续跑不重复已提交调用、调用与尝试预算拦截请求、任务规划器继承计划引用原调用",
+          f"{PY} scripts/a3_model_decision_evidence.py", ["P4A-A3"], protocol=True,
+          produces=[f"{EV}/a3-model-decision.json"]),
+    Check("p4-a3-platform", "a3",
+          "持久路径（Temporal + PostgreSQL）：暂停/恢复/SIGKILL worker 不重复已提交的模型调用，提交的调用 ID 均为服务实际应答，来源取自应答端点",
+          f"{IT} tests/integration/test_llm_decision_platform.py", ["P4A-A3"]),
+    Check("p4-a3-real-endpoint", "a3",
+          "已配置真实端点的最小例子（普通调度场景任务规划器 + 订单场景 LLM 策略，小额调用预算）；未配置或不可达记 BLOCKED，协议测试服务不充当真实模型",
+          f"{PY} scripts/a3_model_decision_evidence.py --real", ["P4A-A3"], protocol=True,
+          produces=[f"{EV}/a3-real-endpoint.json"]),
 ]
 
 for c in DOMAIN_CHECKS:

@@ -101,7 +101,9 @@ def test_http_errors_are_classified_and_retried(pkg):
         with pytest.raises(exc):
             client.complete_json(system="s", user="u", schema={}, schema_name="n", payload={})
         assert len(hits) == (1 if status == 400 else 3)  # 4xx is not retried; 429 / 5xx are
-        assert client.calls[-1].outcome == "TRANSPORT_ERROR" and client.calls[-1].http_status == status
+        # phase 4A: a provider's refusal (4xx) is kept apart from transport failures
+        want = "PROVIDER_REJECTED" if status == 400 else "TRANSPORT_ERROR"
+        assert client.calls[-1].outcome == want and client.calls[-1].http_status == status
 
 
 def test_rate_limit_then_success_honours_retry_after():

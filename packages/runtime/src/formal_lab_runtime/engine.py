@@ -401,6 +401,9 @@ def budget_exhausted(budget: Budget, usage: BudgetUsage, dims: list[str]) -> str
         return f"wall-clock budget exhausted ({usage.wall_seconds:.1f}s/{budget.max_wall_seconds}s)"
     if "model_calls" in dims and budget.max_model_calls is not None and usage.model_calls >= budget.max_model_calls:
         return f"model-call budget exhausted ({usage.model_calls}/{budget.max_model_calls})"
+    if "model_calls" in dims and budget.max_model_attempts is not None \
+            and usage.model_attempts >= budget.max_model_attempts:  # phase 4A: retries and failures count too
+        return f"model-attempt budget exhausted ({usage.model_attempts}/{budget.max_model_attempts})"
     if "tokens" in dims and budget.max_tokens is not None and usage.tokens >= budget.max_tokens:
         return f"token budget exhausted ({usage.tokens}/{budget.max_tokens})"
     return None

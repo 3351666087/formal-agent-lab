@@ -155,10 +155,15 @@ export type ProposalId1 = string;
 export type Rationale = string | null;
 export type RunId1 = string;
 /**
+ * phase 4A: a model answer of this step (its call ids), a step of a plan a model generated earlier (the generating call ids), or a rule chosen after the model calls failed (the failed call ids); None for rule / symbolic strategies
+ */
+export type DecidedBy = ("MODEL_RESPONSE" | "INHERITED_PLAN" | "RULE_FALLBACK") | null;
+/**
  * This interface was referenced by `FormalLabContractsV2`'s JSON-Schema
  * via the `definition` "ProposalSourceKind".
  */
-export type ProposalSourceKind = "RULE" | "SYMBOLIC" | "LLM" | "LLM_STUB" | "HUMAN" | "EXTERNAL";
+export type ProposalSourceKind =
+  "RULE" | "SYMBOLIC" | "LLM" | "LLM_STUB" | "LLM_PROTOCOL_TEST" | "HUMAN" | "EXTERNAL";
 /**
  * model identifier for LLM / LLM_STUB sources
  */
@@ -576,6 +581,10 @@ export type Size = number;
 export type Start = number;
 export type Probes = ProbeResult[];
 export type RunId3 = string;
+/**
+ * phase 4A: requests sent to a model endpoint, retries and failed calls included
+ */
+export type MaxModelAttempts = number | null;
 export type MaxModelCalls = number | null;
 export type MaxSteps1 = number | null;
 export type MaxTokens = number | null;
@@ -1102,11 +1111,16 @@ export type CreatedAtStep = number;
  */
 export type Cursor = string | null;
 /**
- * RULE / SYMBOLIC / LLM / LLM_STUB / EXTERNAL
+ * RULE / SYMBOLIC / LLM / LLM_STUB / LLM_PROTOCOL_TEST / EXTERNAL
  */
-export type ProposalSourceKind1 = "RULE" | "SYMBOLIC" | "LLM" | "LLM_STUB" | "HUMAN" | "EXTERNAL";
+export type ProposalSourceKind1 =
+  "RULE" | "SYMBOLIC" | "LLM" | "LLM_STUB" | "LLM_PROTOCOL_TEST" | "HUMAN" | "EXTERNAL";
 export type Method3 = string | null;
 export type Model1 = string | null;
+/**
+ * phase 4A: the model calls that produced this plan version (failed ones included when the rule order was used)
+ */
+export type ModelCallIds1 = string[];
 export type Attempts2 = number;
 export type CompletedAtStep = number | null;
 export type DependsOn = string[];
@@ -1714,6 +1728,7 @@ export interface PlanRef {
  * via the `definition` "ProposalSource".
  */
 export interface ProposalSource {
+  decided_by: DecidedBy;
   kind: ProposalSourceKind;
   model: Model;
   model_call_ids: ModelCallIds;
@@ -2466,6 +2481,7 @@ export interface ScenarioManifest {
  * via the `definition` "Budget".
  */
 export interface Budget {
+  max_model_attempts: MaxModelAttempts;
   max_model_calls: MaxModelCalls;
   max_steps: MaxSteps1;
   max_tokens: MaxTokens;
@@ -3329,6 +3345,7 @@ export interface PlanGenerator {
   kind: ProposalSourceKind1;
   method: Method3;
   model: Model1;
+  model_call_ids: ModelCallIds1;
   strategy: PluginRef;
 }
 /**

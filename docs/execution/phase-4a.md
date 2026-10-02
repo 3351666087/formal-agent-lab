@@ -35,7 +35,9 @@ Phase 4 是对现有产品的修复与验收收口，共 **8 个交付包**：�
 
 ## A3 · 模型调用与可恢复决策
 
-- [ ] **P4A-A3** 完成可供其他策略复用的真实模型决策路径，覆盖调用记录、预算、来源与计划恢复。
+- [x] **P4A-A3** 完成可供其他策略复用的真实模型决策路径，覆盖调用记录、预算、来源与计划恢复。
+  - 证据：可复用模型决策 formal_lab_strategies.decision（DecisionRequest→ModelDecider→Decision→ActionProposal/TaskPlan），LLM 策略与调度任务规划器共用；来源取自应答端点（PROVIDER/PROTOCOL_TEST/STUB → LLM/LLM_PROTOCOL_TEST/LLM_STUB），decided_by 区分本步应答/继承计划/规则回退；调用记录含请求与返回模型、尝试、状态、端点类型、去凭据端点、提示与配置摘要、业务校验、用量未报告记 null；失败六类分开；运行与参与者两级调用 / 尝试预算发送前拦截。复现：不同合法应答改变决策、无效应答回退或失败、不可达端点为失败记录、替身标签、本地续跑与平台暂停/恢复/SIGKILL 不重复已提交调用、预算恰好拦截、任务规划器 15 步 1 次调用；真实中转端点最小例子（调度任务规划器 SUCCEEDED、订单 LLM 6 次真实调用）。phase4 a3 组 4/4 PASS。详见 docs/handoff/phase4.md#a3
+  - 实现：`packages/strategies/src/formal_lab_strategies/decision.py`、`packages/strategies/src/formal_lab_strategies/model_clients.py`、`packages/strategies/src/formal_lab_strategies/llm_planner.py`、`examples/neutral-scheduling/src/formal_lab_example_scheduling/task_planner.py`、`scripts/a3_model_decision_evidence.py`、`tests/integration/test_llm_decision_platform.py`
 
 最小复用接口（领域策略只给允许的任务/候选、响应约束、目标与解释即得标准 ActionProposal / TaskPlan）；真实提供方、协议测试服务与确定性替身分开标记，`client` 字符串不能单独决定来源；调用记录（call ID、请求/返回模型 ID、尝试次数、状态、用量是否提供、耗时、配置/提示摘要，凭据移除）；失败分类；预算覆盖恢复/重试/回退。
 

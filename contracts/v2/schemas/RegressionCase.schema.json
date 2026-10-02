@@ -141,6 +141,20 @@
     "Budget": {
       "additionalProperties": false,
       "properties": {
+        "max_model_attempts": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "phase 4A: requests sent to a model endpoint, retries and failed calls included",
+          "title": "Max Model Attempts"
+        },
         "max_model_calls": {
           "anyOf": [
             {

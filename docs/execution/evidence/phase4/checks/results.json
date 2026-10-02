@@ -2,14 +2,14 @@
   "format": "checks@3",
   "compatible_with": "checks@2",
   "suite": "phase4",
-  "generated_at": "2026-10-02T05:48:53Z",
+  "generated_at": "2026-10-02T10:33:54Z",
   "source_revision": {
-    "commit": "ee305fec2d599da4c22d443aa32236fd93b87d60",
+    "commit": "b9fc7c40312eff713f44bb97817a15f65aea1de4",
     "worktree": {
-      "sha256": "294b1ab836d5b022177e98301b44eaef552abd58e694663f69cc5eb9c4f04089",
+      "sha256": "09742611be2fe6877f2129e2ec54e9459ebfdd8786e1db34bcd38745f523294c",
       "clean": false,
-      "changed_bytes": 165010,
-      "untracked_files": 10,
+      "changed_bytes": 84572,
+      "untracked_files": 4,
       "excluded_outputs": [
         "docs/execution/evidence/",
         "docs/handoff/",
@@ -21,16 +21,16 @@
     }
   },
   "config": {
-    "sha256": "91cbdf5d1e34f38f49334bcba70e08e6d4a610e7762e29f75d7e0db7303dd341",
+    "sha256": "3b2b68d8e84e9488d63c31851b6006ab230d9627b0369d11cf6e2f64c841b7d1",
     "parts": {
-      "checks": "6947f512a7c06f939fb968b9bac3b67cfc672f051a4222109bdd86c696db62af",
+      "checks": "6038478721e3d3d4c63fe84609cc9cdabd4b27ef86a07d38614b85642cfafb83",
       "uv.lock": "be6278cfce6c4fe9ae55400b436f00cf3dd1d34a34811d402eac2c811890287a",
       "pnpm-lock.yaml": "02d23c074a75bccfaea1ed4ff51272ba3d6cbb724e8012366c8d18e9bb0a7c3a",
       "deploy/compose/services.dev.yaml": "4c876045f15d5bd972c517e7de2d3626cd252d1842797f0152f596f7d8ea9ce0",
       "deploy/compose/docker-compose.yaml": "ff4c34cae068cc6dacd4db7f4273887ff6c2bb0b3b84938a7b8969488bfb20ff"
     }
   },
-  "command": "python scripts/check_runner.py --suite phase4 --group a2",
+  "command": "python scripts/check_runner.py --suite phase4 --group a3",
   "environment": {
     "os": "Ubuntu 24.04.4 LTS",
     "arch": "aarch64",
@@ -50,12 +50,12 @@
       "MemAvailable": 4.52
     },
     "load_avg": [
-      0.74,
-      1.03,
-      0.76
+      0.1,
+      0.26,
+      0.19
     ],
     "disk_free_gib": {
-      "host (repository filesystem)": 17.9,
+      "host (repository filesystem)": 18.7,
       "docker (/var/lib/docker)": 21.9
     },
     "concurrency": 1,
@@ -65,47 +65,47 @@
     "cpus": 4,
     "memory_gib": {
       "MemTotal": 5.77,
-      "MemAvailable": 4.47
+      "MemAvailable": 4.48
     },
     "load_avg": [
-      0.83,
-      1.01,
-      0.77
+      0.16,
+      0.38,
+      0.29
     ],
     "disk_free_gib": {
-      "host (repository filesystem)": 17.9,
+      "host (repository filesystem)": 18.7,
       "docker (/var/lib/docker)": 21.9
     },
     "concurrency": 1,
     "note": "checks run one at a time; heavy checks ask disk_guard first"
   },
   "run": {
-    "started_at": "2026-10-02T05:48:09Z",
-    "finished_at": "2026-10-02T05:48:53Z",
-    "duration_s": 43.4,
+    "started_at": "2026-10-02T10:28:37Z",
+    "finished_at": "2026-10-02T10:33:54Z",
+    "duration_s": 316.6,
     "full": false,
     "selection": {
       "group": [
-        "a2"
+        "a3"
       ],
       "only": [],
       "skip": []
     },
     "checks": [
-      "p4-a2-kernel",
-      "p4-a2-order-service",
-      "p4-a2-evidence",
-      "p4-a2-participant-api"
+      "p4-a3-unit",
+      "p4-a3-decision",
+      "p4-a3-platform",
+      "p4-a3-real-endpoint"
     ],
-    "commit": "ee305fec2d599da4c22d443aa32236fd93b87d60",
-    "worktree_sha256": "294b1ab836d5b022177e98301b44eaef552abd58e694663f69cc5eb9c4f04089",
-    "nonce": "a2fac63f6b10408db16a25df973682fd",
+    "commit": "b9fc7c40312eff713f44bb97817a15f65aea1de4",
+    "worktree_sha256": "09742611be2fe6877f2129e2ec54e9459ebfdd8786e1db34bcd38745f523294c",
+    "nonce": "0b4cfcc6b0484cb397e8f96b7e6b3728",
     "acceptance_nonce": null,
     "results": {
-      "p4-a2-kernel": "PASS",
-      "p4-a2-order-service": "PASS",
-      "p4-a2-evidence": "PASS",
-      "p4-a2-participant-api": "PASS"
+      "p4-a3-unit": "PASS",
+      "p4-a3-decision": "PASS",
+      "p4-a3-platform": "PASS",
+      "p4-a3-real-endpoint": "PASS"
     }
   },
   "summary": {
@@ -118,8 +118,8 @@
   },
   "groups": {
     "a1": "NOT_SELECTED",
-    "a2": "PASS",
-    "a3": "NO_CHECKS",
+    "a2": "NOT_SELECTED",
+    "a3": "PASS",
     "a4": "NO_CHECKS",
     "a5": "NO_CHECKS",
     "b1": "NO_CHECKS",
@@ -141,7 +141,7 @@
   "mandatory_passed": false,
   "unmet": [
     "a1=NOT_SELECTED",
-    "a3=NO_CHECKS",
+    "a2=NOT_SELECTED",
     "a4=NO_CHECKS",
     "a5=NO_CHECKS",
     "b1=NO_CHECKS",
@@ -150,7 +150,7 @@
   ],
   "aggregation": "only results produced and verified by this invocation count; a partial selection is never complete; results from another commit, work tree or configuration are inherited and ignored",
   "timing": {
-    "this_run_s": 43.4,
+    "this_run_s": 316.6,
     "last_full_run_s": null,
     "last_full_run_at": null,
     "partial_runs": [
@@ -184,6 +184,40 @@
           "p4-a2-order-service": "PASS",
           "p4-a2-evidence": "PASS",
           "p4-a2-participant-api": "PASS"
+        }
+      },
+      {
+        "started_at": "2026-10-02T10:22:16Z",
+        "duration_s": 353.3,
+        "selection": {
+          "group": [
+            "a3"
+          ],
+          "only": [],
+          "skip": []
+        },
+        "results": {
+          "p4-a3-unit": "PASS",
+          "p4-a3-decision": "PASS",
+          "p4-a3-platform": "PASS",
+          "p4-a3-real-endpoint": "PASS"
+        }
+      },
+      {
+        "started_at": "2026-10-02T10:28:37Z",
+        "duration_s": 316.6,
+        "selection": {
+          "group": [
+            "a3"
+          ],
+          "only": [],
+          "skip": []
+        },
+        "results": {
+          "p4-a3-unit": "PASS",
+          "p4-a3-decision": "PASS",
+          "p4-a3-platform": "PASS",
+          "p4-a3-real-endpoint": "PASS"
         }
       }
     ]
@@ -241,6 +275,64 @@
         "p4-a2-order-service": "PASS",
         "p4-a2-evidence": "PASS",
         "p4-a2-participant-api": "PASS"
+      }
+    },
+    {
+      "started_at": "2026-10-02T10:22:16Z",
+      "finished_at": "2026-10-02T10:28:09Z",
+      "duration_s": 353.3,
+      "full": false,
+      "selection": {
+        "group": [
+          "a3"
+        ],
+        "only": [],
+        "skip": []
+      },
+      "checks": [
+        "p4-a3-unit",
+        "p4-a3-decision",
+        "p4-a3-platform",
+        "p4-a3-real-endpoint"
+      ],
+      "commit": "b9fc7c40312eff713f44bb97817a15f65aea1de4",
+      "worktree_sha256": "3ada4377d1af441e4e4d31763d4c1f0ac86e5597efa510a2024b89755a101b0a",
+      "nonce": "c229b0d6e4ac4dbda21334b7557a7553",
+      "acceptance_nonce": null,
+      "results": {
+        "p4-a3-unit": "PASS",
+        "p4-a3-decision": "PASS",
+        "p4-a3-platform": "PASS",
+        "p4-a3-real-endpoint": "PASS"
+      }
+    },
+    {
+      "started_at": "2026-10-02T10:28:37Z",
+      "finished_at": "2026-10-02T10:33:54Z",
+      "duration_s": 316.6,
+      "full": false,
+      "selection": {
+        "group": [
+          "a3"
+        ],
+        "only": [],
+        "skip": []
+      },
+      "checks": [
+        "p4-a3-unit",
+        "p4-a3-decision",
+        "p4-a3-platform",
+        "p4-a3-real-endpoint"
+      ],
+      "commit": "b9fc7c40312eff713f44bb97817a15f65aea1de4",
+      "worktree_sha256": "09742611be2fe6877f2129e2ec54e9459ebfdd8786e1db34bcd38745f523294c",
+      "nonce": "0b4cfcc6b0484cb397e8f96b7e6b3728",
+      "acceptance_nonce": null,
+      "results": {
+        "p4-a3-unit": "PASS",
+        "p4-a3-decision": "PASS",
+        "p4-a3-platform": "PASS",
+        "p4-a3-real-endpoint": "PASS"
       }
     }
   ],
@@ -487,8 +579,8 @@
       "evidence_files": [],
       "first_failure": null,
       "flaky": false,
-      "inherited": false,
-      "this_run": true,
+      "inherited": true,
+      "this_run": false,
       "history": []
     },
     {
@@ -550,8 +642,8 @@
       "evidence_files": [],
       "first_failure": null,
       "flaky": false,
-      "inherited": false,
-      "this_run": true,
+      "inherited": true,
+      "this_run": false,
       "history": []
     },
     {
@@ -754,8 +846,8 @@
       ],
       "first_failure": null,
       "flaky": false,
-      "inherited": false,
-      "this_run": true,
+      "inherited": true,
+      "this_run": false,
       "history": []
     },
     {
@@ -817,9 +909,383 @@
       "evidence_files": [],
       "first_failure": null,
       "flaky": false,
+      "inherited": true,
+      "this_run": false,
+      "history": []
+    },
+    {
+      "id": "p4-a3-unit",
+      "group": "a3",
+      "title": "可复用模型决策（单元）：决策随应答改变、无效应答重问/回退/失败、失败分类、来源取自应答端点、预算在发送前拦截、调用记录摘要与去凭据、任务规划器复用与续跑一致",
+      "command": "uv run --frozen pytest -p no:cacheprovider -q packages/strategies/tests examples/neutral-scheduling/tests/test_task_planner.py packages/evaluation/tests",
+      "tasks": [
+        "P4A-A3"
+      ],
+      "evidence": [],
+      "requires": null,
+      "profile": "local-lite",
+      "kind": "mandatory",
+      "retries": 0,
+      "heavy_gib": 0.0,
+      "produces": [],
+      "protocol": false,
+      "assertions_from": null,
+      "trigger": null,
+      "result": "PASS",
+      "reason": "37 passed in 120.28s (0:02:00)",
+      "summary": "37 passed in 120.28s (0:02:00)",
+      "condition": null,
+      "checked_commit": "b9fc7c40312eff713f44bb97817a15f65aea1de4",
+      "worktree_sha256": "09742611be2fe6877f2129e2ec54e9459ebfdd8786e1db34bcd38745f523294c",
+      "worktree_clean": false,
+      "config_sha256": "3b2b68d8e84e9488d63c31851b6006ab230d9627b0369d11cf6e2f64c841b7d1",
+      "run_nonce": "0b4cfcc6b0484cb397e8f96b7e6b3728",
+      "started_at": "2026-10-02T10:28:37Z",
+      "finished_at": "2026-10-02T10:30:37Z",
+      "duration_s": 120.2,
+      "attempts": [
+        {
+          "attempt": 1,
+          "started_at": "2026-10-02T10:28:37Z",
+          "finished_at": "2026-10-02T10:30:37Z",
+          "duration_s": 120.2,
+          "exit_code": 0,
+          "result": "PASS",
+          "reason": "37 passed in 120.28s (0:02:00)",
+          "log": "docs/execution/evidence/phase4/checks/logs/p4-a3-unit/20261002T102837Z-attempt-1.log",
+          "summary": "37 passed in 120.28s (0:02:00)",
+          "nonce": "e8f3e3e60e75451bb46170930e3138c7",
+          "structured_result": null,
+          "assertions": [],
+          "produced": [],
+          "pytest": {
+            "passed": 37,
+            "failed": 0,
+            "skipped": 0,
+            "deselected": 0,
+            "errors": 0,
+            "skip_reasons": [],
+            "line": "37 passed in 120.28s (0:02:00)"
+          }
+        }
+      ],
+      "evidence_files": [],
+      "first_failure": null,
+      "flaky": false,
       "inherited": false,
       "this_run": true,
-      "history": []
+      "history": [
+        {
+          "result": "PASS",
+          "checked_commit": "b9fc7c40312eff713f44bb97817a15f65aea1de4",
+          "finished_at": "2026-10-02T10:24:09Z",
+          "duration_s": 112.9,
+          "attempts": 1
+        }
+      ]
+    },
+    {
+      "id": "p4-a3-decision",
+      "group": "a3",
+      "title": "真实策略工厂 + 本地运行器（协议测试服务 / 关闭端口 / 替身）：不同合法应答改变决策、无效应答回退或失败、不可达端点为失败记录、替身标签、续跑不重复已提交调用、调用与尝试预算拦截请求、任务规划器继承计划引用原调用",
+      "command": "uv run --frozen python scripts/a3_model_decision_evidence.py",
+      "tasks": [
+        "P4A-A3"
+      ],
+      "evidence": [],
+      "requires": null,
+      "profile": "local-lite",
+      "kind": "mandatory",
+      "retries": 0,
+      "heavy_gib": 0.0,
+      "produces": [
+        "docs/execution/evidence/phase4/a3-model-decision.json"
+      ],
+      "protocol": true,
+      "assertions_from": null,
+      "trigger": null,
+      "result": "PASS",
+      "reason": "[p4-a3-decision] PASS: 9 required assertion(s) hold",
+      "summary": "[p4-a3-decision] PASS: 9 required assertion(s) hold",
+      "condition": null,
+      "checked_commit": "b9fc7c40312eff713f44bb97817a15f65aea1de4",
+      "worktree_sha256": "09742611be2fe6877f2129e2ec54e9459ebfdd8786e1db34bcd38745f523294c",
+      "worktree_clean": false,
+      "config_sha256": "3b2b68d8e84e9488d63c31851b6006ab230d9627b0369d11cf6e2f64c841b7d1",
+      "run_nonce": "0b4cfcc6b0484cb397e8f96b7e6b3728",
+      "started_at": "2026-10-02T10:30:37Z",
+      "finished_at": "2026-10-02T10:31:23Z",
+      "duration_s": 45.9,
+      "attempts": [
+        {
+          "attempt": 1,
+          "started_at": "2026-10-02T10:30:37Z",
+          "finished_at": "2026-10-02T10:31:23Z",
+          "duration_s": 45.9,
+          "exit_code": 0,
+          "result": "PASS",
+          "reason": "[p4-a3-decision] PASS: 9 required assertion(s) hold",
+          "log": "docs/execution/evidence/phase4/checks/logs/p4-a3-decision/20261002T103037Z-attempt-1.log",
+          "summary": "[p4-a3-decision] PASS: 9 required assertion(s) hold",
+          "nonce": "f975ed80d35747628b7d1e1873b8e7d0",
+          "structured_result": "docs/execution/evidence/phase4/checks/logs/p4-a3-decision/20261002T103037Z-attempt-1.result.json",
+          "assertions": [
+            {
+              "id": "decision_follows_answer",
+              "required": true,
+              "holds": true,
+              "detail": "pick:0 → {'action_type': 'assign', 'params': {'op': 'o1_cut', 'm': 'm1'}}; pick:1 → {'action_type': 'assign', 'params': {'op': 'o1_cut', 'm': 'm2'}}"
+            },
+            {
+              "id": "invalid_answer_fallback",
+              "required": true,
+              "holds": true,
+              "detail": "['RULE', 'RULE_FALLBACK'] with failed calls ['ptest_00001', 'ptest_00002']"
+            },
+            {
+              "id": "invalid_answer_fail",
+              "required": true,
+              "holds": true,
+              "detail": "RETRYABLE_FAILURE: model did not return a usable choice after 2 call(s) (BUSINESS_INVALID: index 10000 out of range 0..36 (business rejection of a schema-valid "
+            },
+            {
+              "id": "unreachable_is_recorded_failure",
+              "required": true,
+              "holds": true,
+              "detail": "{'outcome': 'TRANSPORT_ERROR', 'attempts': 2, 'error': 'unreachable: [Errno 111] Connection refused', 'input_tokens': None, 'usage_reported': False}"
+            },
+            {
+              "id": "stub_stays_stub",
+              "required": true,
+              "holds": true,
+              "detail": "{'sources': [('LLM_STUB', 'MODEL_RESPONSE')], 'endpoint_kinds': ['STUB']}"
+            },
+            {
+              "id": "resume_never_repeats_committed_calls",
+              "required": true,
+              "holds": true,
+              "detail": "{'requests_before_stop': 4, 'requests_total': 12, 'committed_call_ids': 12, 'unique': 12, 'steps': 12, 'status': 'BUDGET_EXHAUSTED'}"
+            },
+            {
+              "id": "budget_stops_calls",
+              "required": true,
+              "holds": true,
+              "detail": "{'requests': 3, 'status': 'BUDGET_EXHAUSTED', 'reason': 'model-call budget exhausted (3/3)', 'model_calls': 3}"
+            },
+            {
+              "id": "budget_stops_attempts",
+              "required": true,
+              "holds": true,
+              "detail": "{'requests': 4, 'status': 'BUDGET_EXHAUSTED', 'reason': 'model-attempt budget exhausted (4/4)', 'attempts': 4, 'budget_records': 0}"
+            },
+            {
+              "id": "reusable_by_task_planner",
+              "required": true,
+              "holds": true,
+              "detail": "15 steps from 1 request(s): ['INHERITED_PLAN', 'MODEL_RESPONSE']"
+            }
+          ],
+          "produced": [
+            {
+              "path": "docs/execution/evidence/phase4/a3-model-decision.json",
+              "exists": true,
+              "sha256": "3bdb3508f00391916d692d011ca981ae14d5481d3b14fa3ef7d7bb224efb1d67",
+              "fresh": true
+            }
+          ],
+          "pytest": null
+        }
+      ],
+      "evidence_files": [
+        {
+          "path": "docs/execution/evidence/phase4/a3-model-decision.json",
+          "exists": true,
+          "sha256": "3bdb3508f00391916d692d011ca981ae14d5481d3b14fa3ef7d7bb224efb1d67",
+          "fresh": true
+        }
+      ],
+      "first_failure": null,
+      "flaky": false,
+      "inherited": false,
+      "this_run": true,
+      "history": [
+        {
+          "result": "PASS",
+          "checked_commit": "b9fc7c40312eff713f44bb97817a15f65aea1de4",
+          "finished_at": "2026-10-02T10:24:53Z",
+          "duration_s": 44.3,
+          "attempts": 1
+        }
+      ]
+    },
+    {
+      "id": "p4-a3-platform",
+      "group": "a3",
+      "title": "持久路径（Temporal + PostgreSQL）：暂停/恢复/SIGKILL worker 不重复已提交的模型调用，提交的调用 ID 均为服务实际应答，来源取自应答端点",
+      "command": "uv run --frozen pytest -p no:cacheprovider -q -m integration tests/integration/test_llm_decision_platform.py",
+      "tasks": [
+        "P4A-A3"
+      ],
+      "evidence": [],
+      "requires": null,
+      "profile": "local-lite",
+      "kind": "mandatory",
+      "retries": 0,
+      "heavy_gib": 0.0,
+      "produces": [],
+      "protocol": false,
+      "assertions_from": null,
+      "trigger": null,
+      "result": "PASS",
+      "reason": "1 passed in 32.86s",
+      "summary": "1 passed in 32.86s",
+      "condition": null,
+      "checked_commit": "b9fc7c40312eff713f44bb97817a15f65aea1de4",
+      "worktree_sha256": "09742611be2fe6877f2129e2ec54e9459ebfdd8786e1db34bcd38745f523294c",
+      "worktree_clean": false,
+      "config_sha256": "3b2b68d8e84e9488d63c31851b6006ab230d9627b0369d11cf6e2f64c841b7d1",
+      "run_nonce": "0b4cfcc6b0484cb397e8f96b7e6b3728",
+      "started_at": "2026-10-02T10:31:23Z",
+      "finished_at": "2026-10-02T10:31:56Z",
+      "duration_s": 33.1,
+      "attempts": [
+        {
+          "attempt": 1,
+          "started_at": "2026-10-02T10:31:23Z",
+          "finished_at": "2026-10-02T10:31:56Z",
+          "duration_s": 33.1,
+          "exit_code": 0,
+          "result": "PASS",
+          "reason": "1 passed in 32.86s",
+          "log": "docs/execution/evidence/phase4/checks/logs/p4-a3-platform/20261002T103123Z-attempt-1.log",
+          "summary": "1 passed in 32.86s",
+          "nonce": "529bb64e5e0843d1a3a8ef903cc3697b",
+          "structured_result": null,
+          "assertions": [],
+          "produced": [],
+          "pytest": {
+            "passed": 1,
+            "failed": 0,
+            "skipped": 0,
+            "deselected": 0,
+            "errors": 0,
+            "skip_reasons": [],
+            "line": "1 passed in 32.86s"
+          }
+        }
+      ],
+      "evidence_files": [],
+      "first_failure": null,
+      "flaky": false,
+      "inherited": false,
+      "this_run": true,
+      "history": [
+        {
+          "result": "PASS",
+          "checked_commit": "b9fc7c40312eff713f44bb97817a15f65aea1de4",
+          "finished_at": "2026-10-02T10:25:26Z",
+          "duration_s": 33.1,
+          "attempts": 1
+        }
+      ]
+    },
+    {
+      "id": "p4-a3-real-endpoint",
+      "group": "a3",
+      "title": "已配置真实端点的最小例子（普通调度场景任务规划器 + 订单场景 LLM 策略，小额调用预算）；未配置或不可达记 BLOCKED，协议测试服务不充当真实模型",
+      "command": "uv run --frozen python scripts/a3_model_decision_evidence.py --real",
+      "tasks": [
+        "P4A-A3"
+      ],
+      "evidence": [],
+      "requires": null,
+      "profile": "local-lite",
+      "kind": "mandatory",
+      "retries": 0,
+      "heavy_gib": 0.0,
+      "produces": [
+        "docs/execution/evidence/phase4/a3-real-endpoint.json"
+      ],
+      "protocol": true,
+      "assertions_from": null,
+      "trigger": null,
+      "result": "PASS",
+      "reason": "[p4-a3-real-endpoint] PASS: 3 required assertion(s) hold",
+      "summary": "[p4-a3-real-endpoint] PASS: 3 required assertion(s) hold",
+      "condition": null,
+      "checked_commit": "b9fc7c40312eff713f44bb97817a15f65aea1de4",
+      "worktree_sha256": "09742611be2fe6877f2129e2ec54e9459ebfdd8786e1db34bcd38745f523294c",
+      "worktree_clean": false,
+      "config_sha256": "3b2b68d8e84e9488d63c31851b6006ab230d9627b0369d11cf6e2f64c841b7d1",
+      "run_nonce": "0b4cfcc6b0484cb397e8f96b7e6b3728",
+      "started_at": "2026-10-02T10:31:56Z",
+      "finished_at": "2026-10-02T10:33:54Z",
+      "duration_s": 117.3,
+      "attempts": [
+        {
+          "attempt": 1,
+          "started_at": "2026-10-02T10:31:56Z",
+          "finished_at": "2026-10-02T10:33:54Z",
+          "duration_s": 117.3,
+          "exit_code": 0,
+          "result": "PASS",
+          "reason": "[p4-a3-real-endpoint] PASS: 3 required assertion(s) hold",
+          "log": "docs/execution/evidence/phase4/checks/logs/p4-a3-real-endpoint/20261002T103156Z-attempt-1.log",
+          "summary": "[p4-a3-real-endpoint] PASS: 3 required assertion(s) hold",
+          "nonce": "95bce70eace74ff58f38c1105888921c",
+          "structured_result": "docs/execution/evidence/phase4/checks/logs/p4-a3-real-endpoint/20261002T103156Z-attempt-1.result.json",
+          "assertions": [
+            {
+              "id": "real_provider_answered",
+              "required": true,
+              "holds": true,
+              "detail": "1 answered call(s) from https://api.uheapi.com/v1 model gpt-5.6-sol"
+            },
+            {
+              "id": "task_planner_real_run",
+              "required": true,
+              "holds": true,
+              "detail": "['LLM']"
+            },
+            {
+              "id": "llm_planner_real_steps",
+              "required": true,
+              "holds": true,
+              "detail": "6 answered call(s), status BUDGET_EXHAUSTED"
+            }
+          ],
+          "produced": [
+            {
+              "path": "docs/execution/evidence/phase4/a3-real-endpoint.json",
+              "exists": true,
+              "sha256": "0fe9717c7c247badd7d794487793d505bf3de4a0e2d52aae700324172674b402",
+              "fresh": true
+            }
+          ],
+          "pytest": null
+        }
+      ],
+      "evidence_files": [
+        {
+          "path": "docs/execution/evidence/phase4/a3-real-endpoint.json",
+          "exists": true,
+          "sha256": "0fe9717c7c247badd7d794487793d505bf3de4a0e2d52aae700324172674b402",
+          "fresh": true
+        }
+      ],
+      "first_failure": null,
+      "flaky": false,
+      "inherited": false,
+      "this_run": true,
+      "history": [
+        {
+          "result": "PASS",
+          "checked_commit": "b9fc7c40312eff713f44bb97817a15f65aea1de4",
+          "finished_at": "2026-10-02T10:28:09Z",
+          "duration_s": 163.0,
+          "attempts": 1
+        }
+      ]
     }
   ]
 }

@@ -1573,6 +1573,20 @@
     "Budget": {
       "additionalProperties": false,
       "properties": {
+        "max_model_attempts": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "phase 4A: requests sent to a model endpoint, retries and failed calls included",
+          "title": "Max Model Attempts"
+        },
         "max_model_calls": {
           "anyOf": [
             {
@@ -5771,7 +5785,7 @@
       "properties": {
         "kind": {
           "$ref": "#/$defs/ProposalSourceKind",
-          "description": "RULE / SYMBOLIC / LLM / LLM_STUB / EXTERNAL"
+          "description": "RULE / SYMBOLIC / LLM / LLM_STUB / LLM_PROTOCOL_TEST / EXTERNAL"
         },
         "method": {
           "anyOf": [
@@ -5796,6 +5810,14 @@
           ],
           "default": null,
           "title": "Model"
+        },
+        "model_call_ids": {
+          "description": "phase 4A: the model calls that produced this plan version (failed ones included when the rule order was used)",
+          "items": {
+            "type": "string"
+          },
+          "title": "Model Call Ids",
+          "type": "array"
         },
         "strategy": {
           "$ref": "#/$defs/PluginRef"
@@ -6738,6 +6760,24 @@
     "ProposalSource": {
       "additionalProperties": false,
       "properties": {
+        "decided_by": {
+          "anyOf": [
+            {
+              "enum": [
+                "MODEL_RESPONSE",
+                "INHERITED_PLAN",
+                "RULE_FALLBACK"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "phase 4A: a model answer of this step (its call ids), a step of a plan a model generated earlier (the generating call ids), or a rule chosen after the model calls failed (the failed call ids); None for rule / symbolic strategies",
+          "title": "Decided By"
+        },
         "kind": {
           "$ref": "#/$defs/ProposalSourceKind"
         },
@@ -6778,6 +6818,7 @@
         "SYMBOLIC",
         "LLM",
         "LLM_STUB",
+        "LLM_PROTOCOL_TEST",
         "HUMAN",
         "EXTERNAL"
       ],

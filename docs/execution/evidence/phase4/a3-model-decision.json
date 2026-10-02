@@ -1,0 +1,171 @@
+{
+  "deliverable": "phase4A-A3",
+  "endpoint": "protocol test service (loopback; NOT a model) / closed port / stub",
+  "sections": {
+    "follows_answer": [
+      {
+        "script": "pick:0",
+        "action": {
+          "action_type": "assign",
+          "params": {
+            "op": "o1_cut",
+            "m": "m1"
+          }
+        },
+        "source": [
+          "LLM_PROTOCOL_TEST",
+          "MODEL_RESPONSE"
+        ],
+        "call_ids": [
+          "ptest_00001"
+        ],
+        "answered": [
+          "ptest_00001",
+          "ptest_00002",
+          "ptest_00003"
+        ]
+      },
+      {
+        "script": "pick:1",
+        "action": {
+          "action_type": "assign",
+          "params": {
+            "op": "o1_cut",
+            "m": "m2"
+          }
+        },
+        "source": [
+          "LLM_PROTOCOL_TEST",
+          "MODEL_RESPONSE"
+        ],
+        "call_ids": [
+          "ptest_00001"
+        ],
+        "answered": [
+          "ptest_00001",
+          "ptest_00002",
+          "ptest_00003"
+        ]
+      }
+    ],
+    "invalid_fallback": {
+      "source": [
+        "RULE",
+        "RULE_FALLBACK"
+      ],
+      "call_ids": [
+        "ptest_00001",
+        "ptest_00002"
+      ],
+      "outcomes": [
+        "INVALID: index 10000 out of range 0..36 (business rejection of a schema-valid answer)",
+        "INVALID: index 10000 out of range 0..36 (business rejection of a schema-valid answer)"
+      ],
+      "rationale": "model unavailable (BUSINESS_INVALID: index 10000 out of range 0..36 (business rejection of a schema-valid answer)); fallback to the first applicable candidate by preference"
+    },
+    "invalid_fail": {
+      "status": "FAILED",
+      "reason": "RETRYABLE_FAILURE: model did not return a usable choice after 2 call(s) (BUSINESS_INVALID: index 10000 out of range 0..36 (business rejection of a schema-valid answer))"
+    },
+    "unreachable": {
+      "status": "BUDGET_EXHAUSTED",
+      "sources": [
+        [
+          "RULE",
+          "RULE_FALLBACK"
+        ]
+      ],
+      "records": [
+        {
+          "outcome": "TRANSPORT_ERROR",
+          "attempts": 2,
+          "error": "unreachable: [Errno 111] Connection refused",
+          "input_tokens": null,
+          "usage_reported": false
+        },
+        {
+          "outcome": "TRANSPORT_ERROR",
+          "attempts": 2,
+          "error": "unreachable: [Errno 111] Connection refused",
+          "input_tokens": null,
+          "usage_reported": false
+        },
+        {
+          "outcome": "TRANSPORT_ERROR",
+          "attempts": 2,
+          "error": "unreachable: [Errno 111] Connection refused",
+          "input_tokens": null,
+          "usage_reported": false
+        }
+      ],
+      "usage": {
+        "steps": 3,
+        "wall_seconds": 3.124363736002124,
+        "model_calls": 0,
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "model_attempts": 6,
+        "unreported_calls": 0,
+        "unconfirmed_calls": 0,
+        "observation_requests": 0
+      }
+    },
+    "stub": {
+      "sources": [
+        [
+          "LLM_STUB",
+          "MODEL_RESPONSE"
+        ]
+      ],
+      "endpoint_kinds": [
+        "STUB"
+      ]
+    },
+    "resume": {
+      "requests_before_stop": 4,
+      "requests_total": 12,
+      "committed_call_ids": 12,
+      "unique": 12,
+      "steps": 12,
+      "status": "BUDGET_EXHAUSTED"
+    },
+    "budget_calls": {
+      "requests": 3,
+      "status": "BUDGET_EXHAUSTED",
+      "reason": "model-call budget exhausted (3/3)",
+      "model_calls": 3
+    },
+    "budget_attempts": {
+      "requests": 4,
+      "status": "BUDGET_EXHAUSTED",
+      "reason": "model-attempt budget exhausted (4/4)",
+      "attempts": 4,
+      "budget_records": 0
+    },
+    "reuse_task_planner": {
+      "status": "SUCCEEDED",
+      "steps": 15,
+      "requests": 1,
+      "decided_by": [
+        "INHERITED_PLAN",
+        "MODEL_RESPONSE"
+      ],
+      "kinds": [
+        "LLM_PROTOCOL_TEST"
+      ],
+      "inherited_cite_generating_calls": true,
+      "cited_ids_answered": true
+    }
+  },
+  "conclusion": {
+    "decision_follows_answer": true,
+    "invalid_answer_fallback": true,
+    "invalid_answer_fail": true,
+    "unreachable_is_recorded_failure": true,
+    "stub_stays_stub": true,
+    "resume_never_repeats_committed_calls": true,
+    "budget_stops_calls": true,
+    "budget_stops_attempts": true,
+    "reusable_by_task_planner": true
+  }
+}

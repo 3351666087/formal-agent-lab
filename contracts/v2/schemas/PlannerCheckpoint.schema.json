@@ -244,7 +244,7 @@
       "properties": {
         "kind": {
           "$ref": "#/$defs/ProposalSourceKind",
-          "description": "RULE / SYMBOLIC / LLM / LLM_STUB / EXTERNAL"
+          "description": "RULE / SYMBOLIC / LLM / LLM_STUB / LLM_PROTOCOL_TEST / EXTERNAL"
         },
         "method": {
           "anyOf": [
@@ -269,6 +269,14 @@
           ],
           "default": null,
           "title": "Model"
+        },
+        "model_call_ids": {
+          "description": "phase 4A: the model calls that produced this plan version (failed ones included when the rule order was used)",
+          "items": {
+            "type": "string"
+          },
+          "title": "Model Call Ids",
+          "type": "array"
         },
         "strategy": {
           "$ref": "#/$defs/PluginRef"
@@ -346,6 +354,7 @@
         "SYMBOLIC",
         "LLM",
         "LLM_STUB",
+        "LLM_PROTOCOL_TEST",
         "HUMAN",
         "EXTERNAL"
       ],

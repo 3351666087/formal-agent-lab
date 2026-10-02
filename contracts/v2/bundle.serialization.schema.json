@@ -1650,6 +1650,20 @@
     "Budget": {
       "additionalProperties": false,
       "properties": {
+        "max_model_attempts": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "phase 4A: requests sent to a model endpoint, retries and failed calls included",
+          "title": "Max Model Attempts"
+        },
         "max_model_calls": {
           "anyOf": [
             {
@@ -1707,7 +1721,8 @@
         "max_steps",
         "max_wall_seconds",
         "max_model_calls",
-        "max_tokens"
+        "max_tokens",
+        "max_model_attempts"
       ],
       "title": "Budget",
       "type": "object"
@@ -6077,7 +6092,7 @@
       "properties": {
         "kind": {
           "$ref": "#/$defs/ProposalSourceKind",
-          "description": "RULE / SYMBOLIC / LLM / LLM_STUB / EXTERNAL"
+          "description": "RULE / SYMBOLIC / LLM / LLM_STUB / LLM_PROTOCOL_TEST / EXTERNAL"
         },
         "method": {
           "anyOf": [
@@ -6103,6 +6118,14 @@
           "default": null,
           "title": "Model"
         },
+        "model_call_ids": {
+          "description": "phase 4A: the model calls that produced this plan version (failed ones included when the rule order was used)",
+          "items": {
+            "type": "string"
+          },
+          "title": "Model Call Ids",
+          "type": "array"
+        },
         "strategy": {
           "$ref": "#/$defs/PluginRef"
         }
@@ -6111,7 +6134,8 @@
         "kind",
         "strategy",
         "model",
-        "method"
+        "method",
+        "model_call_ids"
       ],
       "title": "PlanGenerator",
       "type": "object"
@@ -7091,6 +7115,24 @@
     "ProposalSource": {
       "additionalProperties": false,
       "properties": {
+        "decided_by": {
+          "anyOf": [
+            {
+              "enum": [
+                "MODEL_RESPONSE",
+                "INHERITED_PLAN",
+                "RULE_FALLBACK"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "phase 4A: a model answer of this step (its call ids), a step of a plan a model generated earlier (the generating call ids), or a rule chosen after the model calls failed (the failed call ids); None for rule / symbolic strategies",
+          "title": "Decided By"
+        },
         "kind": {
           "$ref": "#/$defs/ProposalSourceKind"
         },
@@ -7122,7 +7164,8 @@
         "kind",
         "strategy",
         "model",
-        "model_call_ids"
+        "model_call_ids",
+        "decided_by"
       ],
       "title": "ProposalSource",
       "type": "object"
@@ -7133,6 +7176,7 @@
         "SYMBOLIC",
         "LLM",
         "LLM_STUB",
+        "LLM_PROTOCOL_TEST",
         "HUMAN",
         "EXTERNAL"
       ],

@@ -76,7 +76,10 @@ class GenericEvaluator:
         out.append(ok("effect_mismatches", sum(o.effect_comparison is not None and o.effect_comparison.verdict ==
                                                "DIFFERENT" for o in outcomes)))
         out.append(ok("wall_seconds", round(episode.usage.wall_seconds, 3)))
-        llm = any(s.proposal and s.proposal.source.kind in ("LLM", "LLM_STUB") for s in episode.steps)
+        # phase 4A: a strategy that asked a model counts, also when every call failed and a rule fallback acted
+        llm = episode.usage.model_attempts > 0 or any(
+            s.proposal and (s.proposal.source.kind in ("LLM", "LLM_STUB", "LLM_PROTOCOL_TEST")
+                            or s.proposal.source.model_call_ids) for s in episode.steps)
         for mid, value in (("model_calls", episode.usage.model_calls), ("tokens", episode.usage.tokens)):
             if llm:
                 out.append(ok(mid, value))

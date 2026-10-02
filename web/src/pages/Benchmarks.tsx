@@ -108,7 +108,7 @@ function Report({ mid, pid }: { mid: string; pid: string }) {
   const chosen = metric || (defs.find((d) => d.metric_id === "delay_cost") ?? defs[0])?.metric_id;
   const def = defs.find((d) => d.metric_id === chosen);
   const inspect = r.matrix.spec.inspect as Record<string, unknown> | undefined;
-  const stub = r.aggregates.some((a) => a.source_kinds.includes("LLM_STUB"));
+  const stub = r.aggregates.some((a) => a.source_kinds.includes("LLM_STUB") || a.source_kinds.includes("LLM_PROTOCOL_TEST"));
   return (
     <div className="stack">
       <div className="card">
@@ -119,7 +119,7 @@ function Report({ mid, pid }: { mid: string; pid: string }) {
           <KV items={[["来源", r.matrix.spec.source === "inspect" ? "Inspect 评测导入" : "平台矩阵"], ["创建", fmtTime(r.matrix.created_at)],
             ["实验数", String(r.cells.length)],
             ...(inspect ? [["Inspect", `${String(inspect.task)} · model ${String(inspect.model)}（${String(inspect.note ?? "")}）`] as [string, string]] : [])]} />
-          {stub && <div className="callout warn small">包含 LLM 替身（LLM_STUB）结果：它们不是真实模型输出，请与真实模型结果分开解读。</div>}
+          {stub && <div className="callout warn small">包含 LLM 替身（LLM_STUB）或协议测试服务（LLM_PROTOCOL_TEST）结果：它们不是真实模型输出，请与真实模型结果分开解读。</div>}
           <label className="row small">指标<select value={chosen} onChange={(e) => setMetric(e.target.value)}>
             {defs.map((d) => <option key={d.metric_id} value={d.metric_id}>{d.label}（{d.unit}，{d.direction === "LOWER_IS_BETTER" ? "越低越好" : d.direction === "HIGHER_IS_BETTER" ? "越高越好" : "无方向"}）</option>)}</select></label>
         </div>
@@ -136,7 +136,7 @@ function Report({ mid, pid }: { mid: string; pid: string }) {
                 <td className="num">{m?.result.value !== null && m?.result.value !== undefined ? fmtNum(m.result.value, 3) : <span className="badge" title={m?.result.missing_reason ?? ""}>缺失</span>}</td>
                 <td className="small tight">{m?.result.ci ? `[${fmtNum(m.result.ci.low)}, ${fmtNum(m.result.ci.high)}]` : <span className="muted" title={m?.notes.ci_note}>—</span>}</td>
                 <td className="num">{m?.result.sample_size ?? 0}</td><td className="num">{m?.notes.missing ?? 0}</td><td className="num">{m?.notes.not_applicable ?? 0}</td>
-                <td>{a.source_kinds.map((k) => <span key={k} className={`badge ${k === "LLM_STUB" ? "warn" : ""}`}>{k}</span>)}</td></tr>;
+                <td>{a.source_kinds.map((k) => <span key={k} className={`badge ${k === "LLM_STUB" || k === "LLM_PROTOCOL_TEST" ? "warn" : ""}`}>{k}</span>)}</td></tr>;
             })}</tbody>
           </table>
         </div>
