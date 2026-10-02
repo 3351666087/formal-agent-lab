@@ -59,7 +59,7 @@
   "info": {
     "description": "Contracts: formal-lab-contracts/v2. Deployment profile: local-single-user.",
     "title": "formal-agent-lab platform API",
-    "version": "0.2.0"
+    "version": "0.3.0"
   },
   "openapi": "3.1.0",
   "paths": {
@@ -432,6 +432,43 @@
           }
         },
         "summary": "Meta"
+      }
+    },
+    "/api/v1/model-versions/{version_id}/capabilities": {
+      "get": {
+        "operationId": "model_capabilities_api_v1_model_versions__version_id__capabilities_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "version_id",
+            "required": true,
+            "schema": {
+              "title": "Version Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Model Capabilities"
       }
     },
     "/api/v1/model-versions/{version_id}/checks": {
@@ -966,6 +1003,126 @@
           }
         },
         "summary": "Operation Review"
+      }
+    },
+    "/api/v1/participant/export": {
+      "get": {
+        "operationId": "participant_export_api_v1_participant_export_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "actor",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Actor"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Participant Export"
+      }
+    },
+    "/api/v1/participant/whoami": {
+      "get": {
+        "operationId": "participant_whoami_api_v1_participant_whoami_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "actor",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Actor"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Participant Whoami"
       }
     },
     "/api/v1/plugins": {
@@ -2317,6 +2474,44 @@
         "summary": "Run Artifacts"
       }
     },
+    "/api/v1/runs/{run_id}/batches": {
+      "get": {
+        "description": "JOINT_BATCH rounds of a run (phase 3A): members, statuses, environment step, outcomes.",
+        "operationId": "run_batches_api_v1_runs__run_id__batches_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "run_id",
+            "required": true,
+            "schema": {
+              "title": "Run Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Run Batches"
+      }
+    },
     "/api/v1/runs/{run_id}/cancel": {
       "post": {
         "description": "Cancel at the next step boundary; with {\"reason\", \"operations\"} it is an explained termination.",
@@ -2680,6 +2875,63 @@
           }
         },
         "summary": "Run Operations"
+      }
+    },
+    "/api/v1/runs/{run_id}/participants/{actor_id}/access": {
+      "post": {
+        "description": "Operator side: issue a read token bound to one run and one actor.",
+        "operationId": "participant_access_api_v1_runs__run_id__participants__actor_id__access_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "run_id",
+            "required": true,
+            "schema": {
+              "title": "Run Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "actor_id",
+            "required": true,
+            "schema": {
+              "title": "Actor Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "ttl_s",
+            "required": false,
+            "schema": {
+              "default": 3600,
+              "title": "Ttl S",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Participant Access"
       }
     },
     "/api/v1/runs/{run_id}/pause": {

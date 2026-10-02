@@ -1,0 +1,211 @@
+{
+  "format": "phase-handoff/v1",
+  "phase": "4",
+  "part": "4A (A1–A5, platform closure)",
+  "generated_at": "2026-10-02T20:06:09.159032+00:00",
+  "source_revision": {
+    "commit": "28ba986646d385ea7fc95831d33cda0f14ffcf0b",
+    "worktree": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "clean": true,
+      "changed_bytes": 0,
+      "untracked_files": 0,
+      "excluded_outputs": [
+        "docs/execution/evidence/",
+        "docs/handoff/",
+        "docs/licenses.md",
+        "docs/api/openapi.json",
+        "out/",
+        "docs/execution/evidence/phase4/checks/"
+      ]
+    }
+  },
+  "handoff_revision_parent": "28ba986646d385ea7fc95831d33cda0f14ffcf0b",
+  "contracts": {
+    "formal-lab-contracts/v1": "0cbd6256c21eead867cdd3bcf8ea7f1011207d4dacd6d09996b543575e21312b",
+    "formal-lab-contracts/v2": "07cf6c6fbe419bf6ada825397f107f0caaf1fee6e9494ea05f2cbc45bbd30de8"
+  },
+  "workspace_packages": [
+    "packages/contracts",
+    "packages/model-core",
+    "packages/solver-adapters/z3",
+    "packages/solver-adapters/prism-games",
+    "packages/domain-broker",
+    "packages/domain-mal",
+    "packages/environment-mal",
+    "packages/environment-cage",
+    "packages/neutral-environment",
+    "packages/strategies",
+    "packages/evaluation",
+    "packages/runtime",
+    "packages/platform-api",
+    "packages/orchestrator",
+    "packages/sdk",
+    "examples/neutral-scheduling",
+    "examples/external-plugin",
+    "examples/warehouse-allocation",
+    "examples/local-order-service",
+    "examples/subprocess-env"
+  ],
+  "plugins": [
+    "formal-lab.broker.receipt-gate@1.0.0",
+    "formal-lab.broker.receipt-issuer@1.0.0",
+    "formal-lab.domain.mal.broker-gate@1.0.0",
+    "formal-lab.domain.mal.frontend@1.0.0",
+    "formal-lab.domain.mal.red-hybrid@1.0.0",
+    "formal-lab.domain.mal.red-rule@1.0.0",
+    "formal-lab.driver.ir-finite@1.0.0",
+    "formal-lab.env.driver-world@1.0.0",
+    "formal-lab.env.ir-world@1.1.0",
+    "formal-lab.eval.generic@1.0.0",
+    "formal-lab.example.orders.inventory-gate@1.0.0",
+    "formal-lab.example.orders.probe@1.0.0",
+    "formal-lab.example.orders.rules@1.0.0",
+    "formal-lab.example.orders.scorer@1.0.0",
+    "formal-lab.example.orders.service-env@1.0.0",
+    "formal-lab.example.scheduling.edd-dispatch@1.0.0",
+    "formal-lab.example.scheduling.scorer@1.0.0",
+    "formal-lab.example.scheduling.task-planner@1.0.0",
+    "formal-lab.example.subprocess-world@1.0.0",
+    "formal-lab.example.warehouse.capacity-gate@1.0.0",
+    "formal-lab.example.warehouse.driver@1.0.0",
+    "formal-lab.example.warehouse.frontend@1.0.0",
+    "formal-lab.example.warehouse.rules@1.0.0",
+    "formal-lab.example.warehouse.scorer@1.0.0",
+    "formal-lab.frontend.ir-json@1.0.0",
+    "formal-lab.planner.llm@1.1.0",
+    "formal-lab.planner.z3-bounded@1.1.0",
+    "formal-lab.verifier.z3-bmc@1.1.0",
+    "org.example.checklist-planner@0.2.0",
+    "org.example.counter-driver@0.1.0",
+    "org.example.preference-planner@0.1.0"
+  ],
+  "check_command": "python scripts/check_runner.py --suite phase4 --group a1,a2,a3,a4,a5",
+  "check_groups": {
+    "a1": "PASS",
+    "a2": "PASS",
+    "a3": "PASS",
+    "a4": "PASS",
+    "a5": "PASS",
+    "b1": "NO_CHECKS",
+    "b2": "NO_CHECKS",
+    "b3": "NO_CHECKS"
+  },
+  "check_summary": {
+    "PASS": 16,
+    "FAIL": 0,
+    "BLOCKED": 0,
+    "NOT_RUN": 0,
+    "NOT_SELECTED": 0,
+    "NOT_APPLICABLE": 0
+  },
+  "platform_4a_complete": true,
+  "phase4_complete": false,
+  "phase4_complete_note": "left to B3: groups b1–b3 have no checks until 04B registers them in scripts/phase4_domain_checks.py (strict acceptance stays INCOMPLETE until then)",
+  "acceptance_local": {
+    "source_revision": "e3b28e9dba6491c9d4320fdc768ac2eb87f41645",
+    "complete": false,
+    "started_at": "2026-10-02T18:04:42Z",
+    "finished_at": "2026-10-02T19:53:18Z",
+    "suites": {
+      "phase2": {
+        "verdict": "INCOMPLETE",
+        "summary": {
+          "PASS": 23,
+          "FAIL": 0,
+          "BLOCKED": 5,
+          "NOT_RUN": 0,
+          "NOT_SELECTED": 0,
+          "NOT_APPLICABLE": 0
+        },
+        "unmet": [
+          "local-release=INCOMPLETE"
+        ]
+      },
+      "phase3": {
+        "verdict": "COMPLETE",
+        "summary": {
+          "PASS": 33,
+          "FAIL": 0,
+          "BLOCKED": 2,
+          "NOT_RUN": 0,
+          "NOT_SELECTED": 0,
+          "NOT_APPLICABLE": 0
+        },
+        "unmet": []
+      },
+      "phase4": {
+        "verdict": "INCOMPLETE",
+        "summary": {
+          "PASS": 16,
+          "FAIL": 0,
+          "BLOCKED": 0,
+          "NOT_RUN": 0,
+          "NOT_SELECTED": 0,
+          "NOT_APPLICABLE": 0
+        },
+        "unmet": [
+          "b1=NO_CHECKS",
+          "b2=NO_CHECKS",
+          "b3=NO_CHECKS"
+        ]
+      }
+    },
+    "report": "docs/execution/evidence/phase4/acceptance-local.json"
+  },
+  "model_endpoints": {
+    "real_provider": {
+      "endpoint": "https://api.uheapi.com/v1",
+      "model": "gpt-5.6-sol",
+      "evidence": "docs/execution/evidence/phase4/a3-real-endpoint.json",
+      "label": "LLM (endpoint_kind PROVIDER)"
+    },
+    "protocol_test_service": {
+      "module": "formal_lab_strategies.protocol_server",
+      "model": "protocol-test-v1",
+      "label": "LLM_PROTOCOL_TEST — not a model"
+    },
+    "stub": {
+      "label": "LLM_STUB — deterministic stand-in"
+    }
+  },
+  "remaining_blockers": [
+    {
+      "item": "disk-heavy release items: image-based offline bundle (scripts/offline_bundle.py --verify), image release, Compose stacks, kind install / upgrade (phase-2 local-release, phase-3 extensions)",
+      "status": "BLOCKED",
+      "cause": "host disk: needs 8 GiB plus the 15 GiB reserve; see a5-release.json offline_stack",
+      "unblock": "free ≥ 23 GiB on the host (then `uv run --frozen python scripts/offline_bundle.py --verify`)"
+    },
+    {
+      "item": "multi-user sign-in (SSO) for the participant channel",
+      "status": "OUT_OF_SCOPE",
+      "cause": "deployment scope: participant tokens are issued by the local single-user operator API",
+      "unblock": "an identity provider / gateway"
+    },
+    {
+      "item": "order service read routes on loopback are unauthenticated",
+      "status": "DEPLOYMENT_CONDITION",
+      "cause": "a participant's view is kept from a process on the same host only if it cannot reach the service port",
+      "unblock": "run the service on another host / container network for untrusted participants"
+    }
+  ],
+  "for_04b": {
+    "register_checks": "scripts/phase4_domain_checks.py (groups b1–b3 only)",
+    "reuse": [
+      "formal_lab_strategies.decision (model decisions)",
+      "ExecutionContext / env.conditional_step (execution basis)",
+      "examples/subprocess-env (process-backed environments)",
+      "formal_lab_eval.experiments (paired reports)",
+      "scripts/check_result.py (evidence scripts)"
+    ]
+  },
+  "openapi": "docs/api/openapi.json",
+  "handoff_docs": [
+    "docs/handoff/phase4.md",
+    "docs/handoff/phase4.manifest.json",
+    "docs/handoff/phase4-checks.json",
+    "docs/execution/phase-4a.md",
+    "docs/execution/check-protocol.md",
+    "docs/assurance-scope.md"
+  ]
+}

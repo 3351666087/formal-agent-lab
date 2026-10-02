@@ -55,7 +55,9 @@ Phase 4 是对现有产品的修复与验收收口，共 **8 个交付包**：�
 
 ## A5 · 产品入口、视觉修复与交接
 
-- [ ] **P4A-A5** 完成普通业务场景的真实产品流程、窄屏修复和可供 B1—B3 复用的本地交付。
+- [x] **P4A-A5** 完成普通业务场景的真实产品流程、窄屏修复和可供 B1—B3 复用的本地交付。
+  - 证据：普通业务场景（订单处理）经 CLI 导入、SDK 配置、CLI 运行、API/CLI/Web 解释、Web/CLI 导出，API 停止后空目录离线回放；390 px 批次面板 70→328 px（≤640 px 逐轮堆叠、全文 title、键盘可聚焦），390/768/1440 × 明暗、键盘、减少动态实测，修复前后证据与截图；Figma 只同步 6:106、6:112、6:114、7:61；截图链重新生成 4 张事实变化的基线；发行 wheel（20）、Web 包、本地运行配置与清单，在线安装与 --no-index 完全离线安装各自回放通过；镜像离线包按磁盘保留量 BLOCKED。A1—A5 当前修订 28ba986 16/16 PASS；严格总验收 e3b28e9：阶段二 23 PASS/5 BLOCKED/0 FAIL、阶段三 COMPLETE、阶段四 16/16（b1—b3 待 04B）。详见 docs/handoff/phase4.md#a5
+  - 实现：`tests/integration/test_product_flow_a5.py`、`web/src/styles.css`、`web/src/components/RunKernel.tsx`、`scripts/a5_release_evidence.py`、`scripts/handoff_phase4.py`、`design/figma.json`
 
 Web/API/CLI/SDK 实际调用完成导入、配置、运行、解释、导出与离线回放（回放在服务停止时读取导出包）；修复 390px `.batch-row/.members/.batch-cell` 挤压与标签溢出（390px / 平板 / 桌面、明暗、键盘、减少动态）；Figma 只同步实际变化的节点，连接不可用则记待办；发行工具输出 wheel、Web 包、本地运行配置与清单，干净目录安装与离线回放（在线 / 完全离线分别记录）。
 

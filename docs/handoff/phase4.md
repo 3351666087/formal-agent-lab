@@ -18,9 +18,9 @@
 | A2 当前状态、执行绑定与参与者输入 | 完成 | `b9fc7c4` | a2：4/4 PASS | `a2-execution-basis.json`（22/22） |
 | A3 模型调用与可恢复决策 | 完成（真实端点可用并已调用） | `773f934` | a3：4/4 PASS | `a3-model-decision.json`（9/9）、`a3-real-endpoint.json`（3/3） |
 | A4 联合轮次与配对评测 | 完成 | `9d3e3c6` | a4：3/3 PASS | `a4-rounds.json`（9/9）、`a4-paired-report.md` |
-| A5 产品入口、视觉修复与交接 | 完成；镜像离线包 BLOCKED（磁盘） | `d27c829`、`fb50c55` | a5：3/3 PASS | `a5-product-flow.json`、`a5-narrow.json`、`a5-release.json`、`screens/` |
+| A5 产品入口、视觉修复与交接 | 完成；镜像离线包 BLOCKED（磁盘） | `d27c829`（验收修复 `fb50c55` `a743ab2` `995ed3d` `e3b28e9` `28ba986`） | a5：3/3 PASS | `a5-product-flow.json`、`a5-narrow.json`、`a5-release.json`、`screens/` |
 
-同一修订上的 A1—A5 检查：`d27c829`（干净工作树）16/16 PASS，b1—b3 为 `NO_CHECKS`（`complete=false`，按设计）。严格总验收：ACCEPTANCE_SUMMARY
+同一修订上的 A1—A5 检查：`28ba986`（最终代码修订，干净工作树）16/16 PASS，b1—b3 为 `NO_CHECKS`（`complete=false`，按设计；`docs/handoff/phase4-checks.json`）。严格总验收（`make acceptance-local`，`e3b28e9`，2026-10-02 18:04—19:53 UTC）：阶段二 23 PASS / 5 BLOCKED / 0 FAIL（未满足组只有 `local-release`：五个写盘重型项按 15 GiB 保留量被拒）；阶段三 **COMPLETE**（33 PASS / 2 BLOCKED，均为扩展项：含镜像发行与镜像离线包）；阶段四 16/16 PASS，b1—b3 `NO_CHECKS`；整体 `complete=false`。`e3b28e9` → `28ba986` 只改了 PRISM-games 回归写文档的位置与交接生成脚本（见“最终验收”）。
 
 **命令**
 
@@ -47,6 +47,18 @@ uv run --frozen python scripts/handoff_phase4.py  # 由本次检查结果生成 
 | B1—B3 待注册位置 | `scripts/phase4_domain_checks.py`（只允许 b1—b3 组；未登记时为 `NO_CHECKS`，整体保持未完成）；证据脚本用 `scripts/check_result.py` 上报 |
 
 整体 Phase 4 的完成标记留给 B3。
+
+
+## 最终验收（严格总验收的三次运行）
+
+失败与重试均保留在 `out/acceptance/<suite>/`（日志）与 `docs/execution/evidence/phase4/acceptance-local.json`（最终报告）。
+
+| 运行 | 修订 | 发现 | 处理 |
+|---|---|---|---|
+| 1 | `fb50c55` | 阶段二套件根本无法加载（真实模型与 PRISM-games 检查所在组未声明）；阶段二 / 三脚本与 `capture_screens.py` 写入历史证据目录（已改写 `phase3/g2-operations.json`） | 中止；`a743ab2`：适配器声明附加组，回归脚本改写到 `FAL_EVIDENCE_DIR`，历史文件从 git 恢复，`tests/tools` 增加两项守卫 |
+| 2 | `a743ab2` | 阶段二 / 三的 Web 检查失败：A4 平台测试留下的场景副本名与旧测试的非精确选择器冲突；阶段二真实模型条件项被标 NOT_APPLICABLE（无触发条件）；`p3-release-light` 遇 PyPI TLS 瞬断；G5 产品 / Web 流程需开发平台运行 | `995ed3d`：精确选择器、副本改名、条件项以其前提为触发条件、wheel 构建重试一次；验收前启动开发平台与订单服务 |
+| 3 | `995ed3d` | 阶段二：实时流重载测试以页面上任意“成功”判断结束（资源行“模型成功/尝试”一开始就匹配），读到运行中途的事件数；确定性策略检查中混入调用真实中转的 llm 用例（300 s 超时）；订单服务探针报告恢复时间 −0.012 s（跨进程墙钟的回拨）。阶段三只剩同一 Web 测试；阶段二、三其余检查全部通过；真实模型条件项 PASS（17 分钟，真实中转） | `e3b28e9`：等待流的结束状态并与 API 事件数比对，确定性检查排除 llm 用例，停机时长下限为 0，阶段二端到端检查失败后再试一次（全部尝试保留） |
+| 4（最终） | `e3b28e9` | 阶段二 23 PASS / 5 BLOCKED / 0 FAIL；阶段三 COMPLETE；阶段四 16/16；未发生重试。PRISM-games 回归改写了阶段二的架构文档（工作树因此在阶段四开始时为脏，2396 字节，仅该生成文档） | `28ba986`：文档恢复为阶段二交接版本，回归时写到自身证据旁；随后在 `28ba986` 干净工作树上重跑 A1—A5：16/16 PASS |
 
 ## A1 · 检查器与验收状态
 
@@ -149,7 +161,7 @@ uv run --frozen python scripts/handoff_phase4.py  # 由本次检查结果生成 
 | 暂停 / 恢复 | 本地：第 4 步停、经 JSON 在新组件中续跑，12 个请求 = 12 个已提交调用 ID，无重复；平台（Temporal + PostgreSQL）：暂停期间无请求，恢复后 SIGKILL worker，已提交调用 ID 无重复且都是服务实际应答，在途丢失 ≤ 1（`tests/integration/test_llm_decision_platform.py`） |
 | 预算 | `max_model_calls=3` → 服务恰好收到 3 个请求，运行 BUDGET_EXHAUSTED；全部 500 且 `max_model_attempts=4` → 恰好 4 个请求 |
 | 复用 | 调度任务规划器（generator=model）走同一决策：15 步只需 1 次调用，继承步骤引用生成计划的调用 ID（INHERITED_PLAN） |
-| 真实端点最小例子 | 已配置的 OpenAI 兼容中转（`https://api.uheapi.com/v1`，`gpt-5.6-sol`）：正常调度场景任务规划器 SUCCEEDED，15 步、1 次真实调用（PROVIDER，返回模型 `gpt-5.6-sol`，提供方报告 429 / 528 token，约 38 s），来源 LLM（MODEL_RESPONSE + INHERITED_PLAN）；订单正常场景 LLM 策略 6 次真实调用（逐调用 OK / VALID，HTTP 200，用量已报告）后按 6 次预算 BUDGET_EXHAUSTED。同日较早一次运行中订单场景有 1 次调用未得到可用应答，当时证据未记录其分类，此后证据逐调用记录结果。证据文件不含任何凭据（已逐文件核对） |
+| 真实端点最小例子 | 已配置的 OpenAI 兼容中转（`https://api.uheapi.com/v1`，`gpt-5.6-sol`）：正常调度场景任务规划器 SUCCEEDED，15 步、1 次真实调用（PROVIDER，返回模型 `gpt-5.6-sol`，提供方报告 725 / 499 token，约 19 s），来源 LLM（MODEL_RESPONSE + INHERITED_PLAN）；订单正常场景 LLM 策略 6 次真实调用（逐调用 OK / VALID）后按 6 次预算 BUDGET_EXHAUSTED。该检查每次运行都真实调用（今日共运行 6 次，token 与耗时逐次不同，以最新证据为准）；同日较早一次运行中订单场景有 1 次调用未得到可用应答，当时证据未记录其分类，此后证据逐调用记录结果。证据文件不含任何凭据（已逐文件核对） |
 
 **真实调用状态**：本环境端点可用，`p4-a3-real-endpoint` 为真实提供方运行；端点不可用时该检查记 BLOCKED，协议测试服务不充当真实模型。研究比较是否可完成由 B3 依据真实模型运行证据判断。
 
