@@ -4,9 +4,18 @@ from __future__ import annotations
 
 from typing import Any
 
-from formal_lab_contracts import MetricDefinition, MetricResult, PluginRef, RunManifest, compat, digest_of
+from formal_lab_contracts import (
+    CONTRACT_VERSION,
+    MetricDefinition,
+    MetricResult,
+    PluginRef,
+    RunManifest,
+    compat,
+    digest_of,
+)
 from formal_lab_contracts.errors import FormalLabError, InvalidInput
 from formal_lab_eval.matrix import Cell, CellRun, build_report, expand
+from formal_lab_runtime.manifest import PLATFORM_VERSION
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -148,6 +157,51 @@ def _label(value: Any, default: str = "scenario") -> str:
     return "custom"
 
 
+def _public_endpoint(url: str) -> str:
+    """An endpoint as it may enter a reuse key: no user-info, query or fragment (where credentials could hide)."""
+    import urllib.parse
+
+    parts = urllib.parse.urlsplit(url)
+    host = (parts.hostname or "") + (f":{parts.port}" if parts.port else "")
+    return urllib.parse.urlunsplit((parts.scheme, host, parts.path.rstrip("/"), "", ""))
+
+
+def _provider(manifest: Any, actor: str, plugin: dict[str, Any], config: dict[str, Any]) -> dict[str, Any] | None:
+    """The model endpoint a participant's strategy would call (phase 4A): part of the reuse key, credentials never.
+    None for strategies that do not call a model."""
+    from formal_lab_contracts import capabilities as caps
+    from formal_lab_runtime.settings import get_setting
+
+    entry = registry().resolve(PluginRef.model_validate(plugin))
+    if not entry.descriptor.has_capability(caps.PLAN_LLM):
+        return None
+    if config.get("client") == "stub" or (config.get("generator") not in (None, "model") and "client" not in config):
+        return {"client": "stub" if config.get("client") == "stub" else "none"}
+    own = next((p.view.settings for p in manifest.participants if p.actor_id == actor and p.view), {}) or {}
+
+    def setting(key: str) -> str | None:
+        return own.get(key) if key in own else get_setting(key)
+
+    return {"client": "openai_compatible", "endpoint": _public_endpoint(setting("FAL_LLM_BASE_URL") or ""),
+            "model": config.get("model") or setting("FAL_LLM_MODEL")}
+
+
+def _reuse_blockers(manifest: Any, env: dict[str, Any], providers: dict[str, Any]) -> list[str]:
+    """Key parts whose version is not pinned: such a cell is always run again (conservative), never reused."""
+    from formal_lab_contracts import capabilities as caps
+
+    out = []
+    for actor, prov in sorted(providers.items()):
+        if prov and prov.get("client") == "openai_compatible":
+            out.append(f"{actor}: model decisions are resampled — the provider's model behind {prov.get('model')!r} "
+                       "is not pinned to a version")
+    entry = registry().resolve(PluginRef.model_validate(env["plugin"]))
+    if entry.descriptor.has_capability(caps.ENV_PERSISTENT_SESSION):
+        out.append(f"environment {entry.descriptor.plugin_id}: a live service whose version the descriptor does not "
+                   "pin")
+    return out
+
+
 def expand_v2(s: Session, project_id: str, spec: dict[str, Any]) -> list[dict[str, Any]]:
     """Cells of a v2 spec, each with its full configuration, digest and cell_id (the same configuration → the same
     cell id in any matrix)."""
@@ -189,7 +243,11 @@ def expand_v2(s: Session, project_id: str, spec: dict[str, Any]) -> list[dict[st
         # phase 3A reuse key: everything that can change a cell's result — the resolved plugins (descriptor
         # digests: an upgraded plugin is another cell), what each participant's planner receives, the scenario
         # manifest itself and the declared extension configurations
+        providers = {a: _provider(manifest, a, c["plugin"], c["config"]) for a, c in chosen.items()}
+        blockers = _reuse_blockers(manifest, env, providers)
         shared = {"plugins": _plugin_pins(manifest, package, env, chosen),
+                  # phase 4A (key v3): the model endpoint each participant calls, the kernel that runs the cell
+                  "providers": providers, "runtime": {"platform": PLATFORM_VERSION, "contract": CONTRACT_VERSION},
                   "views": {p.actor_id: p.view.model_dump(mode="json") if p.view else None
                             for p in manifest.participants},
                   "scenario_digest": digest_of(sc.manifest).value,
@@ -198,7 +256,7 @@ def expand_v2(s: Session, project_id: str, spec: dict[str, Any]) -> list[dict[st
                                            for k, v in package.extensions.items()}}}
         for split, seeds in sorted(splits.items()):
             for seed in seeds:
-                config = {"key_version": 2, "scenario_id": sid, "scenario_revision": sc.revision,
+                config = {"key_version": 3, "split": split, "scenario_id": sid, "scenario_revision": sc.revision,
                           "participants": {a: {k: v for k, v in c.items() if k != "label"} for a, c in chosen.items()},
                           "environment": env, "rules": rule if rule not in (None,) else "scenario",
                           "model": model_ref, "seed": int(seed), "budget": budget,
@@ -210,6 +268,7 @@ def expand_v2(s: Session, project_id: str, spec: dict[str, Any]) -> list[dict[st
                     "cell_id": cell_id_of(digest), "config_digest": digest, "split": split, "seed": int(seed),
                     "key_parts": {k: config_digest(v)[:12] for k, v in config.items() if k != "key_version"},
                     "scenario_id": sid, "scenario_revision": sc.revision, "config": config,
+                    "reuse_blockers": blockers,
                     "labels": {"scenario": manifest.name, "participants": label, "backend": _label(backend),
                                "rules": _label(rule), "model": model_ref["package_id"] + f"@{model_ref['version']}",
                                "ablation": _label(abl, "none") if abl else "none",
@@ -263,18 +322,29 @@ def add_cells(s: Session, mx: Matrix, cells: list[dict[str, Any]]) -> dict[str, 
     """Queue new cells (incremental merge, P2-081): a cell already in this matrix is skipped; one completed with the
     same full configuration elsewhere in the project is linked to that run instead of being run again."""
     have = {c.cell_id for c in s.scalars(select(MatrixCellRow).where(MatrixCellRow.matrix_id == mx.id))}
-    counts = {"queued": 0, "reused": 0, "skipped": 0}
+    counts = {"queued": 0, "reused": 0, "skipped": 0, "rerun_conservative": 0}
     for c in cells:
         if c["cell_id"] in have:
             counts["skipped"] += 1
             continue
-        done = _done_elsewhere(s, mx.project_id, c["config_digest"])
+        blockers = c.get("reuse_blockers") or []
+        done = None if blockers else _done_elsewhere(s, mx.project_id, c["config_digest"])
         if done:  # same full configuration already run: linked, and marked as reused (phase 3A)
-            c = {**c, "reused_from": {"matrix_id": done.matrix_id, "cell_id": done.cell_id, "run_id": done.run_id}}
+            c = {**c, "reused_from": {"matrix_id": done.matrix_id, "cell_id": done.cell_id, "run_id": done.run_id},
+                 "reuse": {"decision": "REUSED", "reason": f"the same full configuration (reuse key "
+                                                           f"{c['config_digest'][:12]}) completed in matrix "
+                                                           f"{done.matrix_id}, cell {done.cell_id}"}}
+        elif blockers:  # phase 4A: a key version is not pinned — run again rather than reuse
+            c = {**c, "reuse": {"decision": "RERUN", "reason": "not reused: " + "; ".join(blockers)}}
+        else:
+            c = {**c, "reuse": {"decision": "NEW", "reason": "no completed cell with this configuration in the "
+                                                             "project"}}
         s.add(MatrixCellRow(matrix_id=mx.id, cell_id=c["cell_id"], config_digest=c["config_digest"], spec=c,
                             status="DONE" if done else "QUEUED", run_id=done.run_id if done else None,
                             attempts=0, error=None if not done else f"reused from matrix {done.matrix_id}"))
         counts["reused" if done else "queued"] += 1
+        counts["rerun_conservative"] += 1 if (blockers and _done_elsewhere(s, mx.project_id, c["config_digest"])) \
+            else 0
     s.flush()
     return counts
 
@@ -312,7 +382,7 @@ def cells_dict(s: Session, matrix_id: str) -> list[dict[str, Any]]:
     return [{"cell_id": c.cell_id, "status": c.status, "run_id": c.run_id, "attempts": c.attempts, "error": c.error,
              "split": c.spec["split"], "seed": c.spec["seed"], "labels": c.spec["labels"],
              "config_digest": c.config_digest, "reused_from": c.spec.get("reused_from"),
-             "key_parts": c.spec.get("key_parts"),
+             "key_parts": c.spec.get("key_parts"), "reuse": c.spec.get("reuse"),
              "run_status": runs[c.run_id].status if c.run_id in runs else None} for c in cell_rows(s, matrix_id)]
 
 
@@ -408,9 +478,18 @@ def report_v2(s: Session, matrix_id: str) -> dict[str, Any]:
             metrics.update(_probe_metrics(s, run.id, definitions, sources))
         status = run.status if run is not None else ("NOT_RUN" if c.status in ("QUEUED", "CANCELLED", "FAILED")
                                                      else c.status)
+        model_calls = any(p and p.get("client") == "openai_compatible"
+                          for p in (spec["config"].get("providers") or {}).values())
         results.append(CellResult(cell_id=c.cell_id, key=key, run_id=c.run_id, status=status,
                                   termination_reason=run.termination_reason if run is not None else None,
-                                  metrics=metrics, labels=lab))
+                                  metrics=metrics, labels=lab,
+                                  status_reason=(run.status_reason if run is not None else c.error),
+                                  reused_from=spec.get("reused_from"), reuse_note=(spec.get("reuse") or {}).get("reason"),
+                                  participants_digest=digest_of({  # the effective strategy, not its name / row
+                                      a: {"plugin": v["plugin"], "config": v["config"]}
+                                      for a, v in spec["config"]["participants"].items()}).value,
+                                  sampling=("RECORDED" if spec.get("reused_from") else "RESAMPLED") if model_calls
+                                  else "DETERMINISTIC"))
     out = build_report(list(definitions.values()), sources, results)
     out["conclusions"] = conclusions(out, list(definitions.values()))
     out["matrix"] = matrix_dict(mx, s)

@@ -69,6 +69,12 @@ class CellResult:
     termination_reason: str | None = None
     metrics: dict[str, MetricResult] = field(default_factory=dict)
     labels: dict[str, str] = field(default_factory=dict)  # dimension → human label
+    # phase 4A
+    status_reason: str | None = None
+    reused_from: dict[str, Any] | None = None  # the completed cell whose run this cell reuses
+    reuse_note: str | None = None  # why it was (not) reused
+    participants_digest: str | None = None  # the effective strategies, to refuse comparing a strategy with itself
+    sampling: str | None = None  # DETERMINISTIC / RECORDED (reused model decisions) / RESAMPLED (new model run)
 
     @property
     def goal_reached(self) -> bool | None:
@@ -169,12 +175,47 @@ def build_report(definitions: list[MetricDefinition], sources: dict[str, str], c
     return out
 
 
+def _timed_out(c: CellResult) -> bool:
+    text = (c.status_reason or "").lower()
+    return c.status == "TIMED_OUT" or "wall-clock" in text or "timed out" in text or "timeout" in text
+
+
 def _outcomes(cells: list[CellResult], defs: dict[str, MetricDefinition]) -> dict[str, Any]:
     statuses: dict[str, int] = {}
     for c in cells:
         statuses[c.status] = statuses.get(c.status, 0) + 1
     finished = [c for c in cells if c.status in FINISHED]
+    reached = sum(1 for c in finished if c.goal_reached)
+    missing_reasons: dict[str, dict[str, int]] = {}
+    for c in finished:
+        for mid in defs:
+            r = c.metrics.get(mid)
+            if r is not None and not _ok(r):
+                why = f"{r.status.value}: {r.missing_reason or 'no value'}"
+                missing_reasons.setdefault(mid, {})[why] = missing_reasons.setdefault(mid, {}).get(why, 0) + 1
+    sampling: dict[str, int] = {}
+    for c in cells:
+        sampling[c.sampling or "UNKNOWN"] = sampling.get(c.sampling or "UNKNOWN", 0) + 1
     return {
+        # phase 4A: the success rate's denominator is fixed by the experiment definition before any run — every
+        # planned cell of the split; a failed, cancelled, timed-out or never-run cell counts as not reached
+        "success": {"definition": "goal reached / every planned cell of this split (fixed before the runs; failed, "
+                                  "cancelled, timed-out and not-run cells count as not reached)",
+                    "numerator": reached, "denominator": len(cells),
+                    "rate": reached / len(cells) if cells else None,
+                    "finished_only": {"numerator": reached, "denominator": len(finished),
+                                      "rate": reached / len(finished) if finished else None,
+                                      "note": "for reference only: excludes cells whose run did not finish"}},
+        "timed_out": [{"cell_id": c.cell_id, "run_id": c.run_id, "status": c.status, "reason": c.status_reason}
+                      for c in cells if _timed_out(c)],
+        "reused": [{"cell_id": c.cell_id, "run_id": c.run_id, "reused_from": c.reused_from, "reason": c.reuse_note}
+                   for c in cells if c.reused_from],
+        "new_runs": sum(1 for c in cells if c.run_id and not c.reused_from),
+        "not_reused": [{"cell_id": c.cell_id, "reason": c.reuse_note} for c in cells
+                       if not c.reused_from and c.reuse_note],
+        "sampling": sampling,
+        "metric_missing_reasons": missing_reasons,
+
         "denominator_cells": len(cells),
         "run_status": statuses,
         "not_run": sum(1 for c in cells if c.status == "NOT_RUN"),
@@ -191,7 +232,7 @@ def _outcomes(cells: list[CellResult], defs: dict[str, MetricDefinition]) -> dic
         "metric_not_applicable": {mid: n for mid in defs
                                   if (n := sum(1 for c in finished if _not_applicable(c.metrics.get(mid))))},
         "failures": [{"cell_id": c.cell_id, "run_id": c.run_id, "status": c.status,
-                      "termination_reason": c.termination_reason}
+                      "termination_reason": c.termination_reason, "reason": c.status_reason}
                      for c in cells if c.status in ("FAILED", "CANCELLED", "NOT_RUN")],
     }
 
@@ -208,14 +249,28 @@ def _comparisons(cells: list[CellResult], defs: dict[str, MetricDefinition]) -> 
         # backend / rules), so every variant is compared against it rather than against another variant
         base = next((v for v in ("none", "scenario", "scenario-default") if v in values), values[0])
         for other in [v for v in values if v != base]:
+            if dim == "participants" and _same_strategy(cells, base, other):
+                out.append({"dimension": dim, "kind": kind, "a_key": base, "b_key": other, "skipped": True,
+                            "reason": "both sides run the same strategies (same effective configuration): not a "
+                                      "comparison of different methods"})
+                continue
             for mid, d in defs.items():
                 if mid not in applicable:  # the metric does not apply to these runs: nothing to compare
                     continue
                 side: dict[str, dict[tuple, MetricResult]] = {base: {}, other: {}}
                 for c in cells:
                     v = getattr(c.key, dim)
-                    if v in side and mid in c.metrics:
-                        side[v][c.key.without(dim)] = c.metrics[mid]
+                    if v not in side:
+                        continue
+                    r = c.metrics.get(mid)
+                    if r is None:
+                        if c.metrics and c.status not in ("FAILED", "CANCELLED", "NOT_RUN"):
+                            continue  # this run's evaluators do not produce the metric: not applicable to it
+                        # phase 4A: a run that failed or never ran stays visible as an incomplete pair, with why
+                        r = MetricResult(metric_id=mid, metric_version=d.version, subject=c.cell_id, value=None,
+                                         status="MISSING", missing_reason=f"run {c.status}"
+                                         + (f": {c.status_reason}" if c.status_reason else ""))
+                    side[v][c.key.without(dim)] = r
                 cmp = paired_compare(d, _dim_label(cells, dim, base), _dim_label(cells, dim, other), side[base],
                                      side[other])
                 row = cmp.as_dict()
@@ -224,6 +279,12 @@ def _comparisons(cells: list[CellResult], defs: dict[str, MetricDefinition]) -> 
                 row["pairs"] = row["pairs"][:20]
                 out.append(row)
     return out
+
+
+def _same_strategy(cells: list[CellResult], a: str, b: str) -> bool:
+    da = {c.participants_digest for c in cells if c.key.participants == a}
+    db = {c.participants_digest for c in cells if c.key.participants == b}
+    return bool(da) and None not in da and da == db
 
 
 def _dim_label(cells: list[CellResult], dim: str, value: str) -> str:
@@ -252,6 +313,8 @@ def to_csv(report: dict[str, Any]) -> str:
                             row["ablation"], row["budget"], mid, m["value"], ci.get("low"), ci.get("high"),
                             m.get("n"), "", m.get("source")])
         for c in sec["comparisons"]:
+            if c.get("skipped"):
+                continue
             ci = c.get("ci") or {}
             w.writerow(["comparison", split, "*", f"{c['a']} → {c['b']}", "", "", "", "", "", c["metric_id"],
                         c["mean_diff_b_minus_a"], ci.get("low"), ci.get("high"), c["n_pairs"], c["unpaired"],
@@ -268,18 +331,28 @@ def conclusions(report: dict[str, Any], defs: list[MetricDefinition]) -> list[st
                    f"cancelled, {o['not_run']} not run; goal reached in {o['goal_reached']} of {o['finished']}; "
                    f"missing metrics: " + (", ".join(f"{k} {v}" for k, v in o["metric_missing"].items() if v)
                                             or "none"))
-        empty = [c for c in sec["comparisons"] if c["n_pairs"] == 0]
+        sc = o.get("success") or {}
+        if sc:
+            rate = "—" if sc.get("rate") is None else f"{sc['rate']:.0%}"
+            out.append(f"[{split}] success {sc['numerator']}/{sc['denominator']} = {rate} (denominator: every planned "
+                       f"cell); timed out {len(o.get('timed_out', []))}, reused {len(o.get('reused', []))}, new runs "
+                       f"{o.get('new_runs', 0)}")
+        for c in sec["comparisons"]:
+            if c.get("skipped"):
+                out.append(f"[{split}] {c['kind']} {c['a_key']} vs {c['b_key']}: not compared — {c['reason']}")
+        empty = [c for c in sec["comparisons"] if not c.get("skipped") and c["n_pairs"] == 0]
         if empty:
             out.append(f"[{split}] {len(empty)} comparison(s) have no complete pairs (the metric is missing on one side "
                        "or the dimension varies only where the other does not) — no conclusion from them")
         for c in sec["comparisons"]:
             ci = c.get("ci")
-            if c["n_pairs"] == 0:
+            if c.get("skipped") or c["n_pairs"] == 0:
                 continue
             if ci and (ci["low"] > 0 or ci["high"] < 0) and c.get("better"):
+                reading = " — engineering reading (small sample)" if c.get("reading") == "ENGINEERING" else ""
                 out.append(f"[{split}] {c['kind']}: {c['better']} is better on {c['metric_id']} (mean paired "
                            f"difference {c['mean_diff_b_minus_a']:+.3g}, 95% CI [{ci['low']:+.3g}, {ci['high']:+.3g}], "
-                           f"{c['n_pairs']} pairs, {c['unpaired']} unpaired)")
+                           f"{c['n_pairs']} pairs, {c['unpaired']} unpaired){reading}")
     if not any("better" in line for line in out):
         out.append("no paired difference has an interval excluding zero at this sample size")
     return out
@@ -290,9 +363,15 @@ def to_markdown(report: dict[str, Any], title: str, defs: list[MetricDefinition]
     lines += [f"- {c}" for c in conclusions(report, defs)]
     for split, sec in report["splits"].items():
         o = sec["outcomes"]
+        sc = o.get("success") or {}
         lines += ["", f"## Split `{split}`", "",
                   f"Denominator: {o['denominator_cells']} cells — run status {o['run_status']}; goal not reached: "
                   f"{len(o['goal_not_reached'])}; missing metrics {o['metric_missing']}.", "",
+                  f"Success: {sc.get('numerator')}/{sc.get('denominator')} ({sc.get('definition')}); finished only "
+                  f"{(sc.get('finished_only') or {}).get('numerator')}/{(sc.get('finished_only') or {}).get('denominator')}"
+                  f". Timed out: {len(o.get('timed_out', []))}. Reused: {len(o.get('reused', []))} "
+                  f"({'; '.join(sorted({str(r['reason']) for r in o.get('reused', [])})) or '—'}); new runs "
+                  f"{o.get('new_runs', 0)}; sampling {o.get('sampling', {})}.", "",
                   "### Per scenario (unit: one seed of one scenario)", "",
                   "| scenario | participants | backend | rules | model | ablation | budget | metric | value | 95% CI | n "
                   "| missing | source |", "|" + "---|" * 13]
@@ -315,10 +394,17 @@ def to_markdown(report: dict[str, Any], title: str, defs: list[MetricDefinition]
                   "| kind | A | B | metric | mean B−A | 95% CI | pairs | unpaired | better | test |",
                   "|" + "---|" * 10]
         for c in sec["comparisons"]:
+            if c.get("skipped"):
+                lines.append(f"| {c['kind']} | {c['a_key']} | {c['b_key']} | — | — | — | — | — | — | {c['reason']} |")
+                continue
             test = c["test"]
             t = f"p={test['p_value']:.3g}" if test.get("reported") else (test.get("reason") or "")[:60]
             lines.append(f"| {c['kind']} | {c['a']} | {c['b']} | {c['metric_id']} | {_fmt(c['mean_diff_b_minus_a'])} | "
-                         f"{_ci(c.get('ci'))} | {c['n_pairs']} | {c['unpaired']} | {c.get('better') or '—'} | {t} |")
+                         f"{_ci(c.get('ci'))} | {c['n_pairs']} | {c['unpaired']} | {c.get('better') or '—'} | {t} "
+                         f"({c.get('reading', '').lower()}) |")
+            for u in c.get("unpaired_detail", [])[:10]:
+                lines.append(f"|  | incomplete pair {u['key']} | missing {u['missing']} | a: {u['a']} | b: {u['b']} "
+                             "| | | | | |")
     lines += ["", "## Metric sources", ""]
     lines += [f"- `{k}`: {v}" for k, v in sorted(report["metric_sources"].items())]
     return "\n".join(lines) + "\n"

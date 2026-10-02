@@ -1,5 +1,53 @@
 {
   "$defs": {
+    "AutomaticAction": {
+      "additionalProperties": false,
+      "description": "An action the environment's own automatic participant took inside a world step (phase 4A) — not a platform\nparticipant's proposal; recorded apart from the batch members.",
+      "properties": {
+        "action": {
+          "$ref": "#/$defs/GroundAction"
+        },
+        "actor_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:@/-]{0,254}$",
+          "title": "Actor Id",
+          "type": "string"
+        },
+        "note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Note"
+        },
+        "status": {
+          "enum": [
+            "APPLIED",
+            "REJECTED"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "written_paths": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Written Paths",
+          "type": "array"
+        }
+      },
+      "required": [
+        "actor_id",
+        "action",
+        "status"
+      ],
+      "title": "AutomaticAction",
+      "type": "object"
+    },
     "BatchMember": {
       "additionalProperties": false,
       "properties": {
@@ -80,6 +128,38 @@
       ],
       "title": "BatchMemberStatus",
       "type": "string"
+    },
+    "GroundAction": {
+      "additionalProperties": false,
+      "properties": {
+        "action_type": {
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*$",
+          "title": "Action Type",
+          "type": "string"
+        },
+        "params": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "title": "Params",
+          "type": "object"
+        }
+      },
+      "required": [
+        "action_type"
+      ],
+      "title": "GroundAction",
+      "type": "object"
     }
   },
   "$id": "https://formal-lab.dev/contracts/v2/BatchRecord.schema.json",
@@ -87,6 +167,22 @@
   "additionalProperties": false,
   "description": "One round of a JOINT_BATCH run: who proposed at which global step, and the single environment step the batch\nwas applied at. Kept in the run's carry state while open, so a restart continues the round.",
   "properties": {
+    "automatic": {
+      "anyOf": [
+        {
+          "items": {
+            "$ref": "#/$defs/AutomaticAction"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "phase 4A: automatic participants' actions in that world step; None = not reported",
+      "title": "Automatic"
+    },
     "batch_id": {
       "title": "Batch Id",
       "type": "string"
@@ -203,6 +299,20 @@
       ],
       "default": null,
       "title": "Submitted At Step"
+    },
+    "world_step": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "phase 4A: the environment's own world step index after the batch (env.world_step_report), else the snapshot step",
+      "title": "World Step"
     }
   },
   "required": [

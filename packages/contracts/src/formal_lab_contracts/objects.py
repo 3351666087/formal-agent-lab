@@ -735,6 +735,7 @@ class EventType(StrEnum):
     BATCH_OPENED = "BATCH_OPENED"  # phase 3A: a JOINT_BATCH round started collecting proposals
     BATCH_SUBMITTED = "BATCH_SUBMITTED"  # … the batch was applied in one environment step
     BATCH_CANCELLED = "BATCH_CANCELLED"  # … the run ended before the batch was submitted: nothing was sent
+    WORLD_STEPPED = "WORLD_STEPPED"  # phase 4A: the environment's world step of a batch, with its automatic actors
 
 
 class TraceEvent(ContractModel):
@@ -780,6 +781,10 @@ class MetricDefinition(ContractModel):
     aggregation: Aggregation
     value_type: Literal["float", "int", "bool"] = "float"
     description: str | None = None
+    observable: str | None = Field(default=None, description="phase 4A: what is observed (the quantity and where it "
+                                                             "comes from)")
+    window: str | None = Field(default=None, description="phase 4A: the time window it covers (whole run, last k "
+                                                         "world steps, at the end, …)")
 
 
 class MetricStatus(StrEnum):

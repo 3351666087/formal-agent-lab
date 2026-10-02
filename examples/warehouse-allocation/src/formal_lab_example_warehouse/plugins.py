@@ -157,16 +157,23 @@ def create_rules(config: dict[str, Any] | None, services: Any) -> WarehouseRules
 
 DEFINITIONS = [
     MetricDefinition(metric_id="orders_completed", label="完成订单数", unit="orders", direction="HIGHER_IS_BETTER",
-                     aggregation="MEAN", value_type="int"),
+                     aggregation="MEAN", value_type="int",
+                     observable="orders picked in the final truth state", window="whole run (read at the end)"),
     MetricDefinition(metric_id="late_orders", label="延期订单数", unit="orders", direction="LOWER_IS_BETTER",
-                     aggregation="MEAN", value_type="int"),
+                     aggregation="MEAN", value_type="int",
+                     observable="orders picked after their due time or not picked",
+                     window="whole run (read at the end)"),
     MetricDefinition(metric_id="total_lateness", label="总延误", unit="ticks", direction="LOWER_IS_BETTER",
                      aggregation="MEAN", value_type="int",
-                     description="Σ max(0, done_at − due); an open order counts as done at horizon + 1"),
+                     description="Σ max(0, done_at − due); an open order counts as done at horizon + 1",
+                     observable="Σ max(0, done_at − due) over all orders",
+                     window="whole run (read at the end); open orders at horizon + 1"),
     MetricDefinition(metric_id="station_changes", label="工位调整次数", unit="actions", direction="LOWER_IS_BETTER",
-                     aggregation="MEAN", value_type="int"),
+                     aggregation="MEAN", value_type="int",
+                     observable="assign / release actions applied", window="whole run (read at the end)"),
     MetricDefinition(metric_id="units_put_away", label="上架件数", unit="units", direction="HIGHER_IS_BETTER",
-                     aggregation="MEAN", value_type="int"),
+                     aggregation="MEAN", value_type="int",
+                     observable="units moved from docks to stock", window="whole run (read at the end)"),
 ]
 
 SCORER = PluginDescriptor(

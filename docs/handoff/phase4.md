@@ -111,3 +111,36 @@
 **真实调用状态**：本环境端点可用，`p4-a3-real-endpoint` 为真实提供方运行；端点不可用时该检查记 BLOCKED，协议测试服务不充当真实模型。研究比较是否可完成由 B3 依据真实模型运行证据判断。
 
 **验证**：`p4-a3-unit`（策略 / 决策 / 调度任务规划器 / 评测 37 项）、`p4-a3-decision`（9/9 必需断言）、`p4-a3-platform`（Temporal + PostgreSQL 暂停 / 恢复 / SIGKILL worker）、`p4-a3-real-endpoint`（真实提供方 3/3）全部 PASS；受影响套件 403 项、集成（平台运行、矩阵 v2、模型决策）15 项通过；web `tsc --noEmit` 通过。
+
+## A4 · 联合轮次与配对评测
+
+**复现的缺口**（按基线代码路径核对，并用仓储场景实测）：
+- 现有仓储场景两角色都能 `tick`，任何一轮都不会出现“某参与者暂时无动作”，空闲跳过从未被真实覆盖；
+- 联合批次只记录 `env_step`（快照步数），环境自己的世界步编号与环境内部自动参与者的动作没有记录位置；
+- 没有子进程环境的适配范例；SDK 环境合同检查不核对会话身份、同 ID 重发、批次 = 一个世界步、清理，也不区分声明与未声明的能力；
+- 报告的成功率分母为“已结束的单元”，失败 / 未运行单元被排除；失败的单元在配对比较中直接消失（不计为不完整配对）；复用、超时没有数量与原因；配对只给未配对数量；小样本没有“工程读数”标记；两侧若是同一策略（不同名称）仍会被当作方法比较；
+- 指标定义只有单位，没有观察量与时间窗；
+- 复用键不含数据划分、内核版本、实际调用的模型端点 / 模型名；真实模型单元与确定性单元一样会被复用，没有“关键版本未知则保守重跑”。
+
+**修复**：
+- 轮次：内核原有的三种结局保持并被实测区分——参与者无可行动作 = 本轮 PASSED / `TURN_SKIPPED(retired=false)`，其他参与者继续；参与者预算用尽 = 退场 `TURN_SKIPPED(retired=true)`，其他参与者继续；整个实验结束 = 终止原因（全部退场 `ACTOR_BUDGETS_EXHAUSTED`，FAIL 策略下无动作 `NO_APPLICABLE_ACTION`，联合目标达成等）。
+- 世界步单独记录：新事件 `WORLD_STEPPED`（批次 id、轮次、世界步、来源、本世界步中环境自动参与者的动作、实际发送的成员），`BatchRecord.world_step` / `automatic`；新能力 `env.world_step_report`（环境报告自己的世界步编号与自动参与者动作，未声明时世界步取快照步数并注明来源）。成员提案、自动参与者、批次提交、世界步四者分开。
+- 子进程环境适配范例 `formal-lab.example.subprocess-world`（示例包 `examples/subprocess-env`：`formal_lab_example_subprocess.adapter` + 子进程 `formal_lab_example_subprocess.world`，JSON lines 协议 `formal-lab/subprocess-env@1`，子进程中承载通用 driver world）：会话身份（`subproc-<pid>-<nonce>`，重启即新会话）、请求身份（回显 id，不符即协议错误）、超时（不应答即杀死子进程，步骤抛 `ResultUnknown`、其它抛 `Timeout`）、清理（close、终结器、stdin EOF 三重保证）、版本（描述符 / 协议 / 后端）与能力：只声明可核验的（FULL_STATE 快照、恢复后重执行、按 id 幂等与查询、批次 = 一个世界步、世界步报告），持久会话 / 按需观测 / 观测延迟 / 种子变异不声明；按后端能力选择恢复（加载快照）或重建（新子进程 reset + 按原 id 重放已记录操作，摘要必须一致否则失败）。子进程可按世界步写日志 `world_log`，并支持配置环境自动参与者。
+- SDK 合同检查 `check_environment` 增加：同 ID 重发只生效一次、一个批次 = 一个世界步且同批次 id 不重复生效、世界步报告与快照一致、会话身份稳定并指名插件、close 后无残留进程；未声明的能力只报告“未声明”，不去调用。
+- 报告（`formal_lab_eval`）：成功率按预先固定的实验定义计算——分母为本划分的全部计划单元（失败 / 取消 / 超时 / 未运行均计为未达成），另附仅已结束单元的参考值；超时、复用（含来源与原因）、新执行、未复用原因、采样类型（DETERMINISTIC / RECORDED / RESAMPLED）、按指标的缺失原因分别计数；配对比较中失败或未运行的单元以“run FAILED: 原因”出现在不完整配对里，`unpaired_detail` 逐条给出缺失的一侧与原因；`reading` = ENGINEERING（非零配对差 < 6）/ STATISTICAL；两侧有效策略相同则拒绝比较并说明。`MetricDefinition.observable` / `window`，内置与示例的全部业务指标已补齐观察量与时间窗。
+- 矩阵复用键 v3：在原有模型、插件（含描述符摘要）、规则、参与者视图、场景、种子、预算、扩展配置之外加入数据划分、内核 / 契约版本、每个参与者实际调用的模型端点与模型名（凭据不入键）。真实模型单元（模型名背后的版本未固定）与 live 服务环境（版本不由描述符固定）为“关键版本未知”，从不复用、保守重跑，原因写入单元；每个单元记录复用决策 REUSED / NEW / RERUN 及原因，创建响应增加 `rerun_conservative` 计数。
+
+**完成证据**（`scripts/a4_rounds_evidence.py` → `a4-rounds.json`、`a4-paired-report.md`；平台 `tests/integration/test_rounds_reuse_platform.py`）：
+
+| 情形 | 结果 |
+|---|---|
+| 轮流，收货员只能上架 | SUCCEEDED（JOINT_GOAL_REACHED），16 个全局步：收货员行动 3、空闲跳过 5，拣货员行动 8 |
+| 联合批次，收货员只能上架 | SUCCEEDED，10 个批次 = 10 个世界步：收货员 PROPOSED 3 / PASSED 7，拣货员 PROPOSED 10 |
+| 收货员预算 2 步 | 收货员行动 2 后退场（`TURN_SKIPPED retired=true` 1 次），拣货员继续并完成（SUCCEEDED） |
+| 整个实验结束 | 两人都退场 → BUDGET_EXHAUSTED / ACTOR_BUDGETS_EXHAUSTED；FAIL 策略下收货员无动作 → FAILED / NO_APPLICABLE_ACTION |
+| 轮中恢复（本地） | 第 5 步（第 3 轮收货员提案后、批次 OPEN）停止，经 JSON 在新组件中续跑：轨迹与批次与不中断运行完全一致 |
+| 子进程环境 | 合同检查全部阶段通过；10 个批次与子进程自己的世界步日志逐轮相同；环境自动参与者 `clock` 的动作只出现在 WORLD_STEPPED，不是批次成员；加载恢复（SNAPSHOT）与重建恢复（RESEED）都得到同一状态与摘要；0.5 s 超时：抛 Timeout、旧子进程被杀 |
+| 可手算配对报告 | 已知输入 rule = {10, 12, 8, 11, 9}、z3 = {7, 9, 8, 失败, 5}：4 对差值 [−3, −3, 0, −4]，均值 −2.5，1 个不完整配对（种子 3：z3 侧 “run FAILED: worker error”），成功 9/10，z3 更优、工程读数（4 对 < 6） |
+| 平台（Temporal + PostgreSQL） | 子进程环境上的联合批次（收货员只能上架）：轮中暂停 + SIGKILL worker 后 SUCCEEDED，无重复事件；每个已提交批次的 (world_step, operation) 与子进程自己的世界步日志逐轮相同，世界步 1..n 连续（重启后的重执行只重复已记录的对，不形成新世界步）；收货员 PASSED 次数 = 其非退场 `TURN_SKIPPED` 次数 = 运行的 turn 状态计数，拣货员每轮 PROPOSED。矩阵：同配置的确定性单元 REUSED（同一 run，原因“the same full configuration … completed in matrix …”），LLM 单元（协议测试服务）配置摘要相同但 RERUN（“model … is not pinned”）并产生新请求；改预算后两单元都是新执行（NEW / RERUN）；报告 reused 1、new_runs 1、sampling DETERMINISTIC 1 / RESAMPLED 1，成功率分母 2 |
+
+**验证**：`p4-a4-unit`（子进程环境 5、neutral-env、仓储、评测含可手算报告、多参与者，40 项）、`p4-a4-rounds`（9/9 必需断言）、`p4-a4-platform`（新增 2 + 原矩阵 v2 / 联合批次平台测试，7 项）全部 PASS；架构边界测试新增“只有子进程适配器控制进程”规则——最初把适配器放进 `formal_lab_env` 时被边界测试拦下（环境包不得启动进程、不得依赖 runtime；API 不得引用策略插件包），已移到示例包并改为 API 内部的去凭据 URL 函数；受影响单元套件 392 项通过（另 4 项即上述边界问题，修复后架构测试 58 项通过），web `tsc --noEmit` 通过。

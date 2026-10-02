@@ -14,6 +14,7 @@ members = [
     "formal-lab-evaluation",
     "formal-lab-example-orders",
     "formal-lab-example-scheduling",
+    "formal-lab-example-subprocess",
     "formal-lab-example-warehouse",
     "formal-lab-model-core",
     "formal-lab-neutral-env",
@@ -348,6 +349,7 @@ dependencies = [
     { name = "formal-lab-evaluation" },
     { name = "formal-lab-example-orders" },
     { name = "formal-lab-example-scheduling" },
+    { name = "formal-lab-example-subprocess" },
     { name = "formal-lab-example-warehouse" },
     { name = "formal-lab-model-core" },
     { name = "formal-lab-neutral-env" },
@@ -381,6 +383,7 @@ requires-dist = [
     { name = "formal-lab-evaluation", editable = "packages/evaluation" },
     { name = "formal-lab-example-orders", editable = "examples/local-order-service" },
     { name = "formal-lab-example-scheduling", editable = "examples/neutral-scheduling" },
+    { name = "formal-lab-example-subprocess", editable = "examples/subprocess-env" },
     { name = "formal-lab-example-warehouse", editable = "examples/warehouse-allocation" },
     { name = "formal-lab-model-core", editable = "packages/model-core" },
     { name = "formal-lab-neutral-env", editable = "packages/neutral-environment" },
@@ -530,6 +533,25 @@ requires-dist = [
     { name = "formal-lab-neutral-env", editable = "packages/neutral-environment" },
     { name = "formal-lab-solver-z3", editable = "packages/solver-adapters/z3" },
     { name = "formal-lab-strategies", editable = "packages/strategies" },
+]
+
+[[package]]
+name = "formal-lab-example-subprocess"
+version = "0.3.0"
+source = { editable = "examples/subprocess-env" }
+dependencies = [
+    { name = "formal-lab-contracts" },
+    { name = "formal-lab-model-core" },
+    { name = "formal-lab-neutral-env" },
+    { name = "formal-lab-runtime" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "formal-lab-contracts", editable = "packages/contracts" },
+    { name = "formal-lab-model-core", editable = "packages/model-core" },
+    { name = "formal-lab-neutral-env", editable = "packages/neutral-environment" },
+    { name = "formal-lab-runtime", editable = "packages/runtime" },
 ]
 
 [[package]]

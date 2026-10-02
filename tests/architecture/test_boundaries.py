@@ -32,6 +32,7 @@ PACKAGES = {
     "fal_example_external_plugin": "examples/external-plugin/src/fal_example_external_plugin",
     "formal_lab_example_warehouse": "examples/warehouse-allocation/src/formal_lab_example_warehouse",
     "formal_lab_example_orders": "examples/local-order-service/src/formal_lab_example_orders",
+    "formal_lab_example_subprocess": "examples/subprocess-env/src/formal_lab_example_subprocess",
 }
 
 # allowed internal imports (dependency direction); anything not listed is a violation
@@ -62,12 +63,16 @@ ALLOWED: dict[str, set[str]] = {
     # the business-service example: the service itself imports nothing of the platform (see below); the adapter,
     # probe and strategy use contracts + model; runtime only for its local run helper
     "formal_lab_example_orders": {"formal_lab_contracts", "formal_lab_model", "formal_lab_runtime"},
+    # the subprocess-environment example (phase 4A): the child hosts the neutral driver world, loaded through the
+    # runtime's registry; only the adapter controls a process (see below)
+    "formal_lab_example_subprocess": {"formal_lab_contracts", "formal_lab_model", "formal_lab_env",
+                                      "formal_lab_runtime"},
 }
 # demo tooling inside the API package that seeds the example project (not on any request/run path)
 EXEMPT_FILES = {"packages/platform-api/src/formal_lab_api/seed.py"}
 PLUGIN_PACKAGES = {"formal_lab_solver_z3", "formal_lab_env", "formal_lab_strategies",
                    "formal_lab_example_scheduling", "fal_example_external_plugin", "formal_lab_example_warehouse",
-                   "formal_lab_example_orders"}
+                   "formal_lab_example_orders", "formal_lab_example_subprocess"}
 CORE = {"formal_lab_contracts", "formal_lab_model", "formal_lab_runtime", "formal_lab_api",
         "formal_lab_orchestrator", "formal_lab_sdk"}
 
@@ -197,3 +202,12 @@ def test_prism_games_runs_only_as_a_separate_process():
     api = ROOT / PACKAGES["formal_lab_api"]
     users = [f.name for f in api.rglob("*.py") if "formal_lab_solver_prism" in _imports(f)]
     assert users == ["probabilistic.py"], users
+
+
+def test_only_the_subprocess_adapter_controls_a_process():
+    """Phase 4A (A4): the subprocess-environment example starts exactly one kind of process — its own world child —
+    from its adapter; the child imports no process, shell or network tooling."""
+    base = ROOT / PACKAGES["formal_lab_example_subprocess"]
+    assert "subprocess" in _imports(base / "adapter.py")
+    assert not _imports(base / "world.py") & {"subprocess", "socket", "pty", "shlex", "httpx", "paramiko"}
+    assert '"-m", "formal_lab_example_subprocess.world"' in (base / "adapter.py").read_text()

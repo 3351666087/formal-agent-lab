@@ -276,6 +276,10 @@ export type Reason2 = string | null;
 export type Value3 = boolean | number | string | null;
 export type Items = AssumptionItem[];
 export type ActorId2 = string;
+export type Note1 = string | null;
+export type Status1 = "APPLIED" | "REJECTED";
+export type WrittenPaths = string[];
+export type ActorId3 = string;
 export type ActorStep1 = number | null;
 /**
  * global step of its proposal
@@ -288,6 +292,10 @@ export type Reason3 = string | null;
  * via the `definition` "BatchMemberStatus".
  */
 export type BatchMemberStatus = "PROPOSED" | "PASSED" | "ABSENT" | "TIMED_OUT" | "CANCELLED";
+/**
+ * phase 4A: automatic participants' actions in that world step; None = not reported
+ */
+export type Automatic = AutomaticAction[] | null;
 export type BatchId1 = string;
 /**
  * environment step count after the batch
@@ -302,7 +310,7 @@ export type Expected1 = string[];
  */
 export type JointPrediction = boolean;
 export type Members = BatchMember[];
-export type Note1 = string | null;
+export type Note2 = string | null;
 export type OpenedAt = string;
 export type OpenedAtStep = number;
 export type OperationId1 = string | null;
@@ -312,9 +320,13 @@ export type RunId2 = string;
  * the environment's declared batch semantics
  */
 export type Semantics = string | null;
-export type Status1 = "OPEN" | "SUBMITTED" | "CANCELLED";
+export type Status2 = "OPEN" | "SUBMITTED" | "CANCELLED";
 export type SubmittedAtStep = number | null;
-export type ActorId3 = string;
+/**
+ * phase 4A: the environment's own world step index after the batch (env.world_step_report), else the snapshot step
+ */
+export type WorldStep = number | null;
+export type ActorId4 = string;
 /**
  * locations completion-based checks range over (the observation's unknown items); other non-KNOWN locations are assumed at their value
  */
@@ -537,7 +549,7 @@ export type CreatedAt = string;
  * base URL of a service backend (loopback / service name)
  */
 export type Endpoint = string | null;
-export type Note2 = string | null;
+export type Note3 = string | null;
 /**
  * ownership label on every resource this session creates
  */
@@ -571,7 +583,7 @@ export type ProbeId = string;
  * where the value was read, e.g. GET /metrics of the order service
  */
 export type Source = string;
-export type Status2 = "OK" | "MISSING" | "ERROR";
+export type Status3 = "OK" | "MISSING" | "ERROR";
 export type Unit1 = string;
 export type Value5 = number | null;
 export type WallTime = string;
@@ -604,7 +616,7 @@ export type Objectives = Objective[];
  * @minItems 1
  */
 export type Participants = [Participant, ...Participant[]];
-export type ActorId4 = string;
+export type ActorId5 = string;
 /**
  * the participant's own goal property (v2)
  */
@@ -683,9 +695,9 @@ export type RunStatus =
 /**
  * acting participant (v2)
  */
-export type ActorId5 = string | null;
+export type ActorId6 = string | null;
 export type Checks = BoundedCheckResult[];
-export type ActorId6 = string;
+export type ActorId7 = string;
 export type Evidence4 = EvidenceRef[];
 export type ObservedAtStep1 = number;
 /**
@@ -713,7 +725,7 @@ export type ObservationTiming1 = "TURN_START" | "ROUND_START";
 export type Path4 = string;
 export type Reason7 = "OBSERVATION_DELAY" | "NOT_OBSERVABLE" | "NOT_YET_OBSERVED";
 export type Unknowns = UnknownItem[];
-export type ActorId7 = string | null;
+export type ActorId8 = string | null;
 export type Attempts1 = number;
 export type BasedOnRevision2 = number | null;
 /**
@@ -724,7 +736,7 @@ export type BatchId2 = string | null;
  * JOINT_BATCH: one outcome per submitted proposal, in submission order
  */
 export type BatchOutcomes = ActionOutcome[];
-export type ActorId8 = string | null;
+export type ActorId9 = string | null;
 export type At = string;
 export type CheckedAtRevision = number | null;
 export type Conditions = ConditionCheck[];
@@ -737,7 +749,7 @@ export type ActionType2 = string;
 /**
  * the actor of the kernel's turn (authoritative identity)
  */
-export type ActorId9 = string;
+export type ActorId10 = string;
 /**
  * the environment's revision at the send
  */
@@ -788,15 +800,15 @@ export type ProposalId3 = string | null;
  */
 export type Found = boolean;
 export type Method1 = "QUERY_OPERATION" | "STATE_COMPARISON" | "SNAPSHOT_REPLAY" | "MANUAL";
-export type Note3 = string;
+export type Note4 = string;
 /**
  * sha256 of the canonical request (actor, kind, action); the same id with another request is a conflict (phase 3A)
  */
 export type RequestDigest2 = string | null;
 export type At1 = string;
 export type By = string;
-export type Note4 = string | null;
-export type Status3 = "NEEDS_REVIEW" | "CONFIRMED_APPLIED" | "CONFIRMED_NOT_APPLIED" | "TERMINATED";
+export type Note5 = string | null;
+export type Status4 = "NEEDS_REVIEW" | "CONFIRMED_APPLIED" | "CONFIRMED_NOT_APPLIED" | "TERMINATED";
 export type RunId7 = string;
 export type Step7 = number;
 export type At2 = string;
@@ -814,7 +826,7 @@ export type Probes1 = ProbeResult[];
 export type ElapsedMs1 = number;
 export type Evidence5 = EvidenceRef[];
 export type InputDigest = string | null;
-export type Note5 = string | null;
+export type Note6 = string | null;
 export type OutputDigest = string | null;
 /**
  * This interface was referenced by `FormalLabContractsV2`'s JSON-Schema
@@ -851,7 +863,7 @@ export type TerminationReason =
   | "CANCELLED"
   | "FAILED"
   | "OPERATION_UNRESOLVED";
-export type ActorId10 = string | null;
+export type ActorId11 = string | null;
 export type BasedOnRevision3 = number | null;
 export type OperationId5 = string;
 export type ProposalId4 = string | null;
@@ -978,9 +990,17 @@ export type Description12 = string | null;
 export type MetricDirection = "HIGHER_IS_BETTER" | "LOWER_IS_BETTER" | "NONE";
 export type Label11 = string;
 export type MetricId1 = string;
+/**
+ * phase 4A: what is observed (the quantity and where it comes from)
+ */
+export type Observable1 = string | null;
 export type Unit3 = string;
 export type ValueType = "float" | "int" | "bool";
 export type Version6 = string;
+/**
+ * phase 4A: the time window it covers (whole run, last k world steps, at the end, …)
+ */
+export type Window = string | null;
 export type High = number;
 export type Level1 = number;
 export type Low = number;
@@ -1092,18 +1112,18 @@ export type ProcessCompleted = boolean | null;
 export type Reasons1 = string[];
 export type CaseId = string;
 export type Detail2 = string;
-export type Status4 = "PASS" | "FAIL" | "ERROR";
+export type Status5 = "PASS" | "FAIL" | "ERROR";
 export type Regression = RegressionResult[];
 export type ReleaseId1 = string;
 export type Scope3 = "MODEL_INTERNAL";
 export type Stages1 = StageRecord[];
-export type Status5 = "RELEASED" | "REJECTED";
-export type ActorId11 = string;
+export type Status6 = "RELEASED" | "REJECTED";
+export type ActorId12 = string;
 /**
  * keys of reusable solver/plan cache entries
  */
 export type CacheRefs = string[];
-export type ActorId12 = string;
+export type ActorId13 = string;
 export type AssumptionsDigest = string | null;
 export type CreatedAtStep = number;
 /**
@@ -1130,7 +1150,7 @@ export type DependsOn = string[];
 export type DoneWhen = (ConstExpr | VarExpr | RefExpr | ApplyExpr | QuantExpr) | null;
 export type Label12 = string | null;
 export type NodeId1 = string;
-export type Note6 = string | null;
+export type Note7 = string | null;
 export type TaskStatus = "PENDING" | "READY" | "IN_PROGRESS" | "DONE" | "FAILED" | "SKIPPED";
 export type Nodes = TaskNode[];
 export type ObjectiveValue = number | null;
@@ -1151,7 +1171,7 @@ export type PlanTrigger =
   | "ACTION_REJECTED"
   | "RULE"
   | "RESTORED";
-export type Status6 = "ACTIVE" | "COMPLETED" | "INVALIDATED" | "ABANDONED";
+export type Status7 = "ACTIVE" | "COMPLETED" | "INVALIDATED" | "ABANDONED";
 export type Version8 = number;
 /**
  * random.getstate() as JSON
@@ -1166,7 +1186,7 @@ export type Step10 = number;
  */
 export type Summary = string | null;
 export type ActionSpecs = ActionSpec[];
-export type ActorId13 = string;
+export type ActorId14 = string;
 export type Candidates = CandidateAction[];
 /**
  * the actor's goal (participant goal, else joint goal)
@@ -1310,12 +1330,13 @@ export type EventType =
   | "EXECUTION_DECIDED"
   | "BATCH_OPENED"
   | "BATCH_SUBMITTED"
-  | "BATCH_CANCELLED";
+  | "BATCH_CANCELLED"
+  | "WORLD_STEPPED";
 export type PriorityExplanation = string;
 export type Winner = string | null;
 export type CreatedAt5 = string | null;
 export type Name14 = string;
-export type Note7 = string | null;
+export type Note8 = string | null;
 export type ParentVersion2 = number | null;
 export type Condition1 = ConstExpr | VarExpr | RefExpr | ApplyExpr | QuantExpr;
 export type Enabled = boolean;
@@ -1369,7 +1390,7 @@ export type Seed4 = number;
  */
 export type SourceRunId = string | null;
 export type StatusReason = string | null;
-export type ActorId14 = string | null;
+export type ActorId15 = string | null;
 /**
  * event ids this event was caused by
  */
@@ -1448,6 +1469,7 @@ export interface FormalLabContractsV2 {
   ActionSpec?: ActionSpec;
   ArtifactRef?: ArtifactRef;
   AssumptionSet?: AssumptionSet;
+  AutomaticAction?: AutomaticAction;
   BatchMember?: BatchMember;
   BatchRecord?: BatchRecord;
   BeliefState?: BeliefState;
@@ -1899,11 +1921,25 @@ export interface AssumptionItem {
   value: Value3;
 }
 /**
+ * An action the environment's own automatic participant took inside a world step (phase 4A) — not a platform
+ * participant's proposal; recorded apart from the batch members.
+ *
+ * This interface was referenced by `FormalLabContractsV2`'s JSON-Schema
+ * via the `definition` "AutomaticAction".
+ */
+export interface AutomaticAction {
+  action: GroundAction;
+  actor_id: ActorId2;
+  note: Note1;
+  status: Status1;
+  written_paths: WrittenPaths;
+}
+/**
  * This interface was referenced by `FormalLabContractsV2`'s JSON-Schema
  * via the `definition` "BatchMember".
  */
 export interface BatchMember {
-  actor_id: ActorId2;
+  actor_id: ActorId3;
   actor_step: ActorStep1;
   global_step: GlobalStep1;
   proposal_id: ProposalId2;
@@ -1918,20 +1954,22 @@ export interface BatchMember {
  * via the `definition` "BatchRecord".
  */
 export interface BatchRecord {
+  automatic: Automatic;
   batch_id: BatchId1;
   env_step: EnvStep1;
   expected: Expected1;
   joint_prediction: JointPrediction;
   members: Members;
-  note: Note1;
+  note: Note2;
   opened_at: OpenedAt;
   opened_at_step: OpenedAtStep;
   operation_id: OperationId1;
   round: Round1;
   run_id: RunId2;
   semantics: Semantics;
-  status: Status1;
+  status: Status2;
   submitted_at_step: SubmittedAtStep;
+  world_step: WorldStep;
 }
 /**
  * What one participant may plan with: every location has a value, each with its provenance (P2-025).
@@ -1940,7 +1978,7 @@ export interface BatchRecord {
  * via the `definition` "BeliefState".
  */
 export interface BeliefState {
-  actor_id: ActorId3;
+  actor_id: ActorId4;
   as_of_step: AsOfStep1;
   assumptions: AssumptionSet;
   free_paths: FreePaths;
@@ -2338,7 +2376,7 @@ export interface EnvironmentSession {
   endpoint: Endpoint;
   environment: PluginRef;
   health: Health;
-  note: Note2;
+  note: Note3;
   owner: Owner;
   project_label: ProjectLabel;
   recovery_modes: RecoveryModes;
@@ -2419,7 +2457,7 @@ export interface ProbeResult {
   probe: PluginRef;
   probe_id: ProbeId;
   source: Source;
-  status: Status2;
+  status: Status3;
   unit: Unit1;
   value: Value5;
   wall_time: WallTime;
@@ -2529,7 +2567,7 @@ export interface Objective {
  * via the `definition` "Participant".
  */
 export interface Participant {
-  actor_id: ActorId4;
+  actor_id: ActorId5;
   /**
    * per-participant budget, counted separately (v2)
    */
@@ -2641,7 +2679,7 @@ export interface TurnPolicy {
  * via the `definition` "StepRecord".
  */
 export interface StepRecord {
-  actor_id: ActorId5;
+  actor_id: ActorId6;
   checks: Checks;
   observation: Observation;
   operation: OperationRecord | null;
@@ -2657,7 +2695,7 @@ export interface StepRecord {
  * via the `definition` "Observation".
  */
 export interface Observation {
-  actor_id: ActorId6;
+  actor_id: ActorId7;
   evidence: Evidence4;
   facts: Facts;
   requested_paths: RequestedPaths;
@@ -2700,7 +2738,7 @@ export interface UnknownItem {
  */
 export interface OperationRecord {
   action: GroundAction | null;
-  actor_id: ActorId7;
+  actor_id: ActorId8;
   attempts: Attempts1;
   based_on_revision: BasedOnRevision2;
   batch_id: BatchId2;
@@ -2726,7 +2764,7 @@ export interface OperationRecord {
  * via the `definition` "ExecutionDecision".
  */
 export interface ExecutionDecision {
-  actor_id: ActorId8;
+  actor_id: ActorId9;
   at: At;
   checked_at_revision: CheckedAtRevision;
   conditions: Conditions;
@@ -2761,7 +2799,7 @@ export interface ExecutionDecision {
 export interface ExecutionContext {
   action_params_digest: ActionParamsDigest;
   action_type: ActionType2;
-  actor_id: ActorId9;
+  actor_id: ActorId10;
   current_revision: CurrentRevision1;
   environment: PluginRef;
   operation_id: OperationId2;
@@ -2791,7 +2829,7 @@ export interface Versions {
 export interface ReconciliationResult {
   found: Found;
   method: Method1;
-  note: Note3;
+  note: Note4;
   outcome: ActionOutcome | null;
 }
 /**
@@ -2801,8 +2839,8 @@ export interface ReconciliationResult {
 export interface ReviewMark {
   at: At1;
   by: By;
-  note: Note4;
-  status: Status3;
+  note: Note5;
+  status: Status4;
 }
 /**
  * This interface was referenced by `FormalLabContractsV2`'s JSON-Schema
@@ -2829,7 +2867,7 @@ export interface StageRecord {
   error: ErrorInfo | null;
   evidence: Evidence5;
   input_digest: InputDigest;
-  note: Note5;
+  note: Note6;
   output_digest: OutputDigest;
   retry: RetrySemantics1;
   stage: ExecutionStage;
@@ -2846,7 +2884,7 @@ export interface StageRecord {
  */
 export interface GateRequest {
   action: GroundAction;
-  actor_id: ActorId10;
+  actor_id: ActorId11;
   based_on_revision: BasedOnRevision3;
   config: Config2;
   /**
@@ -3107,9 +3145,11 @@ export interface MetricDefinition {
   direction: MetricDirection;
   label: Label11;
   metric_id: MetricId1;
+  observable: Observable1;
   unit: Unit3;
   value_type: ValueType;
   version: Version6;
+  window: Window;
 }
 /**
  * This interface was referenced by `FormalLabContractsV2`'s JSON-Schema
@@ -3249,7 +3289,7 @@ export interface ModelReleaseRecord {
   ruleset: RuleSetRef | null;
   scope: Scope3;
   stages: Stages1;
-  status: Status5;
+  status: Status6;
 }
 /**
  * This interface was referenced by `FormalLabContractsV2`'s JSON-Schema
@@ -3294,7 +3334,7 @@ export interface ReleaseConfig {
 export interface RegressionResult {
   case_id: CaseId;
   detail: Detail2;
-  status: Status4;
+  status: Status5;
 }
 /**
  * Recoverable planner state (P2-041): persisted with the step's proposal and restored in a fresh process.
@@ -3303,7 +3343,7 @@ export interface RegressionResult {
  * via the `definition` "PlannerCheckpoint".
  */
 export interface PlannerCheckpoint {
-  actor_id: ActorId11;
+  actor_id: ActorId12;
   cache_refs: CacheRefs;
   digest: Digest | null;
   plan: TaskPlan | null;
@@ -3321,7 +3361,7 @@ export interface PlannerCheckpoint {
  * via the `definition` "TaskPlan".
  */
 export interface TaskPlan {
-  actor_id: ActorId12;
+  actor_id: ActorId13;
   assumptions_digest: AssumptionsDigest;
   created_at_step: CreatedAtStep;
   cursor: Cursor;
@@ -3334,7 +3374,7 @@ export interface TaskPlan {
    * why this version replaced the previous one
    */
   revision: PlanRevision | null;
-  status: Status6;
+  status: Status7;
   version: Version8;
 }
 /**
@@ -3363,7 +3403,7 @@ export interface TaskNode {
   done_when: DoneWhen;
   label: Label12;
   node_id: NodeId1;
-  note: Note6;
+  note: Note7;
   status: TaskStatus;
 }
 /**
@@ -3388,7 +3428,7 @@ export interface Progress {
 export interface PlanningContext {
   action_specs: ActionSpecs;
   actor_budget: Budget | null;
-  actor_id: ActorId13;
+  actor_id: ActorId14;
   actor_usage: BudgetUsage | null;
   /**
    * provenance of the belief (v2)
@@ -3625,7 +3665,7 @@ export interface RuleSet {
   digest: Digest | null;
   model: ModelRef1;
   name: Name14;
-  note: Note7;
+  note: Note8;
   parent_version: ParentVersion2;
   rules: Rules;
   ruleset_id: RulesetId1;
@@ -3795,7 +3835,7 @@ export interface TurnPolicy1 {
  * via the `definition` "TraceEvent".
  */
 export interface TraceEvent {
-  actor_id: ActorId14;
+  actor_id: ActorId15;
   causal_parents: CausalParents;
   event_id: EventId;
   event_type: EventType;

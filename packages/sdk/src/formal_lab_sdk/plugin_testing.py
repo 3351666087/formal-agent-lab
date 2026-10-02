@@ -14,8 +14,12 @@ checkpoints, task plan versions increase) → recovered (a run stopped mid-way, 
 the uninterrupted run, including every planner checkpoint) → finished (terminal status, termination reason, metrics).
 
 Environment stages: registered → initialised → reset & observe → step (an applicable action is applied, the
-revision moves) → snapshot / restore (FULL_STATE: restored exactly; SESSION_MARKER: re-attached) → operation lookup
-(when env.query_operation is declared) → closed.
+revision moves) → idempotent re-send (env.idempotent_step: the same id is applied once) → batch step (env.batch_step:
+one batch = one world step, a batch id is not applied twice) → world step report (env.world_step_report: the reported
+index is the snapshot's) → snapshot / restore (FULL_STATE: restored exactly; SESSION_MARKER: re-attached) → operation
+lookup (when env.query_operation is declared) → session identity (stable id, names the plugin) → closed → cleanup (an
+adapter with a process of its own leaves none behind). Capabilities that are not declared are reported as such and
+never exercised (phase 4A).
 
 The reference model is the built-in `queue-costs` sample (profile deterministic_finite_v1) unless one is given.
 Needs the engine installed (`formal-lab-runtime`); the platform is not involved.
@@ -262,12 +266,76 @@ def check_environment(ref: tuple[str, str] | Any, config: dict[str, Any] | None 
         assert st["env"].query_operation("op-never-sent") is None, "an unknown operation id is reported as found"
         return "applied operation found by id; unknown id → None"
 
+    # ---- phase 4A (A4): what an adapter declares must hold; what it does not declare is not assumed
+    def resend() -> str:
+        if caps.ENV_IDEMPOTENT_STEP not in st["caps"]:
+            return "not declared (env.idempotent_step)"
+        before = st["env"].truth_state() if hasattr(st["env"], "truth_state") else None
+        again = st["env"].step(st["prop"], operation_id="op-contract-1")
+        assert str(again.status.value) == "APPLIED", f"re-send answered {again.status}"
+        if before is not None:
+            assert st["env"].truth_state() == before, "re-sending the same operation id changed the state again"
+        return "same operation id re-sent: the recorded outcome, applied once"
+
+    def batch() -> str:
+        if caps.ENV_BATCH_STEP not in st["caps"] or not hasattr(st["env"], "step_batch"):
+            return "not declared (env.batch_step)"
+        loaded = services.loaded_model()
+        obs = st["env"].observe("agent")
+        cands = [c for c in loaded.candidates(loaded.belief(obs)) if str(c.belief_applicability) == "APPLICABLE"]
+        assert cands, "no applicable action for the batch"
+        prop = st["prop"].model_copy(update={"proposal_id": "p2", "step_id": "s2", "step": 2,
+                                             "action": cands[0].action, "based_on_revision": obs.state_revision})
+        s0 = st["env"].snapshot().step
+        outs = st["env"].step_batch([prop], operation_id="op-contract-batch")
+        s1 = st["env"].snapshot().step
+        assert len(outs) == 1, f"{len(outs)} outcome(s) for 1 proposal"
+        assert s1 == s0 + 1, f"one batch advanced the world by {s1 - s0} step(s)"
+        st["env"].step_batch([prop], operation_id="op-contract-batch")
+        assert st["env"].snapshot().step == s1, "re-sending the batch id stepped the world again"
+        return f"one batch = one world step ({s0}→{s1}); the same batch id is not applied twice"
+
+    def world_report() -> str:
+        if caps.ENV_WORLD_STEP_REPORT not in st["caps"]:
+            return "not declared (env.world_step_report)"
+        rep = st["env"].world_step_report()
+        assert int(rep["world_step"]) == st["env"].snapshot().step, "reported world step ≠ snapshot step"
+        return f"world step {rep['world_step']}, automatic participants {len(rep.get('automatic') or [])}"
+
+    def session_identity() -> str:
+        if not hasattr(st["env"], "session"):
+            return "no session() (in-process world: the run is its session)"
+        a, b = st["env"].session(), st["env"].session()
+        assert a.session_id == b.session_id, "session id changed between two calls"
+        assert a.environment.plugin_id == pref.plugin_id, f"session names {a.environment.plugin_id}"
+        st["pid"] = getattr(st["env"], "pid", None)
+        return f"{a.session_id} ({a.backend}); health {sorted(a.health)}"
+
     def closed() -> str:
         st["env"].close()
         return "closed"
 
+    def cleanup() -> str:
+        import os
+
+        pid = st.get("pid") or getattr(st["env"], "pid", None)
+        if not pid:
+            return "no process of its own"
+        try:
+            os.kill(pid, 0)
+        except ProcessLookupError:
+            return f"process {pid} is gone after close"
+        try:  # may be a zombie the adapter has not reaped: it must at least have exited
+            done, _status = os.waitpid(pid, os.WNOHANG)
+        except ChildProcessError:
+            done = pid
+        assert done == pid, f"process {pid} still running after close"
+        return f"process {pid} exited after close"
+
     for name, fn in (("registered", registered), ("initialised", initialised), ("reset & observe", reset_observe),
-                     ("step", step), ("snapshot / restore", snapshot_restore), ("operation lookup", lookup),
-                     ("closed", closed)):
+                     ("step", step), ("idempotent re-send", resend), ("batch step", batch),
+                     ("world step report", world_report), ("snapshot / restore", snapshot_restore),
+                     ("operation lookup", lookup), ("session identity", session_identity), ("closed", closed),
+                     ("cleanup", cleanup)):
         report.run(name, fn)
     return report

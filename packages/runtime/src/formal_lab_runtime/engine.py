@@ -37,6 +37,7 @@ from typing import Any
 from formal_lab_contracts import (
     ActionOutcome,
     ActionProposal,
+    AutomaticAction,
     BatchMember,
     BatchMemberStatus,
     BatchRecord,
@@ -1393,9 +1394,20 @@ def _submit_batch(rc: RunComponents, plan: PlanPhase, new: CarryState, ex: StepE
     ex.stages.append(_stage(ExecutionStage.EXECUTE, StageStatus.OK, RetrySemantics.RECONCILE_THEN_RETRY, t0,
                             inp=[p.model_dump(mode="json") for p in send],
                             note=f"batch {record.batch_id}: {len(send)} sent, {len(denied)} denied by a gate"))
+    # phase 4A: the world step itself, apart from the members' proposals and the submission — the environment's own
+    # index and its automatic participants' actions when it reports them (env.world_step_report)
+    world: dict[str, Any] = {"world_step": env_step, "automatic": None, "source": "snapshot step"}
+    if send and caps.ENV_WORLD_STEP_REPORT in rc.env_caps and hasattr(rc.env, "world_step_report"):
+        rep = rc.env.world_step_report()
+        world = {"world_step": int(rep["world_step"]), "source": "environment report",
+                 "automatic": [AutomaticAction.model_validate(a).model_dump(mode="json")
+                               for a in rep.get("automatic") or []]}
     record = record.model_copy(update={
         "status": "SUBMITTED", "submitted_at_step": step, "env_step": env_step if send else None,
         "operation_id": op_id if send else None,
+        "world_step": world["world_step"] if send else None,
+        "automatic": [AutomaticAction.model_validate(a) for a in world["automatic"]]
+        if send and world["automatic"] is not None else None,
         "note": None if send else "nothing to submit: no member proposed an action that could be sent"})
     ex.batch = record
     ex.events.append(EventDraft(tkey("batch-submitted"), EventType.BATCH_SUBMITTED, step,
@@ -1403,6 +1415,12 @@ def _submit_batch(rc: RunComponents, plan: PlanPhase, new: CarryState, ex: StepE
                                  "operation": result.record.model_dump(mode="json") if result else None},
                                 [last_key], actor, turn, ExecutionStage.EXECUTE))
     last_key = tkey("batch-submitted")
+    if send:
+        ex.events.append(EventDraft(tkey("world-stepped"), EventType.WORLD_STEPPED, step,
+                                    {"batch_id": record.batch_id, "round": record.round, **world,
+                                     "members_sent": [p.actor_id for p in send]},
+                                    [last_key], actor, turn, ExecutionStage.EXECUTE))
+        last_key = tkey("world-stepped")
     for d in decisions:
         ex.events.append(EventDraft(tkey(f"decision-{d.actor_id}-{d.gate.plugin_id}"), EventType.EXECUTION_DECIDED,
                                     step, {"decision": d.model_dump(mode="json"), "batch_id": record.batch_id},

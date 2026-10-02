@@ -1,0 +1,18 @@
+[project]
+name = "formal-lab-example-subprocess"
+version = "0.3.0"
+description = "Subprocess environment adapter example: a world in its own process behind the Environment interface"
+requires-python = ">=3.12"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+dependencies = ["formal-lab-contracts", "formal-lab-model-core", "formal-lab-neutral-env", "formal-lab-runtime"]
+
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/formal_lab_example_subprocess"]
+
+[project.entry-points."formal_lab.plugins"]
+subprocess-env = "formal_lab_example_subprocess:registrations"

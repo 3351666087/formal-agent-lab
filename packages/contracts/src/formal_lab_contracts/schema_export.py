@@ -81,6 +81,7 @@ SUPPORTING: list[type[BaseModel]] = [
     kernel.ObservationRequest,
     execution.GateRequest,
     execution.ExecutionContext,
+    execution.AutomaticAction,
     execution.GateResult,
     execution.ConditionCheck,
     governance.FeatureSupport,

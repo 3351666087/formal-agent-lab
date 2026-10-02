@@ -100,6 +100,17 @@ class BatchMember(ContractModel):
     reason: str | None = None
 
 
+class AutomaticAction(ContractModel):
+    """An action the environment's own automatic participant took inside a world step (phase 4A) — not a platform
+    participant's proposal; recorded apart from the batch members."""
+
+    actor_id: Identifier
+    action: GroundAction
+    status: Literal["APPLIED", "REJECTED"]
+    written_paths: list[str] = Field(default_factory=list)
+    note: str | None = None
+
+
 class BatchRecord(ContractModel):
     """One round of a JOINT_BATCH run: who proposed at which global step, and the single environment step the batch
     was applied at. Kept in the run's carry state while open, so a restart continues the round."""
@@ -120,6 +131,10 @@ class BatchRecord(ContractModel):
     joint_prediction: bool = Field(default=False, description="the driver declares the same joint semantics, so "
                                                               "effects are compared against a joint prediction")
     note: str | None = None
+    world_step: int | None = Field(default=None, ge=0, description="phase 4A: the environment's own world step index "
+                                   "after the batch (env.world_step_report), else the snapshot step")
+    automatic: list[AutomaticAction] | None = Field(default=None, description="phase 4A: automatic participants' "
+                                                    "actions in that world step; None = not reported")
 
 
 # =========================================================================== task plans / checkpoints

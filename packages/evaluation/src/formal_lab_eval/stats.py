@@ -163,27 +163,51 @@ class PairedComparison:
     better: str | None = None
     test: dict[str, Any] = field(default_factory=dict)
     unpaired: int = 0
+    unpaired_detail: list[dict[str, Any]] = field(default_factory=list)  # phase 4A: which side is missing and why
+    reading: str = "ENGINEERING"  # ENGINEERING (small sample) / STATISTICAL
 
     def as_dict(self) -> dict[str, Any]:
         return {"metric_id": self.metric_id, "a": self.a, "b": self.b, "n_pairs": self.n_pairs,
                 "mean_diff_b_minus_a": self.mean_diff, "ci": self.ci.model_dump() if self.ci else None,
-                "better": self.better, "test": self.test, "unpaired": self.unpaired, "pairs": self.pairs}
+                "better": self.better, "test": self.test, "unpaired": self.unpaired, "pairs": self.pairs,
+                "unpaired_detail": self.unpaired_detail, "reading": self.reading,
+                "reading_note": READING_NOTE[self.reading]}
+
+
+READING_NOTE = {
+    "ENGINEERING": f"engineering reading: fewer than {MIN_NONZERO_FOR_TEST} complete pairs or non-zero differences — "
+                   "a direction, not a significance claim",
+    "STATISTICAL": "enough paired differences for the reported test",
+}
+
+
+def _why_missing(r: MetricResult | None) -> str:
+    if r is None:
+        return "no cell with this key on this side"
+    if r.status is not MetricStatus.OK or r.value is None:
+        return f"{r.status.value}: {r.missing_reason or 'no value'}"
+    return "present"
 
 
 def paired_compare(definition: MetricDefinition, a_label: str, b_label: str,
                    a: dict[Any, MetricResult], b: dict[Any, MetricResult], level: float = 0.95) -> PairedComparison:
     """Pair by key (scenario, seed, budget); pairs where either side has no value are counted as unpaired."""
     keys = sorted(set(a) | set(b), key=str)
-    pairs, unpaired = [], 0
+    pairs, unpaired, detail = [], 0, []
     for k in keys:
         ra, rb = a.get(k), b.get(k)
-        if ra is None or rb is None or ra.value is None or rb.value is None or \
-                ra.status is not MetricStatus.OK or rb.status is not MetricStatus.OK:
+        ok_a = ra is not None and ra.value is not None and ra.status is MetricStatus.OK
+        ok_b = rb is not None and rb.value is not None and rb.status is MetricStatus.OK
+        if not (ok_a and ok_b):
             unpaired += 1
+            detail.append({"key": list(k) if isinstance(k, tuple) else k,
+                           "missing": "both" if not (ok_a or ok_b) else ("a" if not ok_a else "b"),
+                           "a": _why_missing(ra), "b": _why_missing(rb)})
             continue
         pairs.append({"key": list(k) if isinstance(k, tuple) else k, "a": ra.value, "b": rb.value,
                       "diff": rb.value - ra.value})
-    cmp = PairedComparison(definition.metric_id, a_label, b_label, len(pairs), pairs, unpaired=unpaired)
+    cmp = PairedComparison(definition.metric_id, a_label, b_label, len(pairs), pairs, unpaired=unpaired,
+                           unpaired_detail=detail)
     if not pairs:
         cmp.test = {"reported": False, "reason": "no complete pairs"}
         return cmp
@@ -199,6 +223,7 @@ def paired_compare(definition: MetricDefinition, a_label: str, b_label: str,
         b_better = (cmp.mean_diff > 0) == (direction == "HIGHER_IS_BETTER")
         cmp.better = b_label if b_better else a_label
     result = wilcoxon_signed_rank(diffs)
+    cmp.reading = "STATISTICAL" if result["n_nonzero"] >= MIN_NONZERO_FOR_TEST else "ENGINEERING"
     if result["n_nonzero"] >= MIN_NONZERO_FOR_TEST:
         cmp.test = {"reported": True, **result, "alpha": 0.05, "significant": result["p_value"] < 0.05}
     else:

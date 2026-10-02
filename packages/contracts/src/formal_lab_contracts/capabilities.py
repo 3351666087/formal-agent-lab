@@ -120,3 +120,5 @@ BATCH_START_STATE_DISJOINT_WRITES = "START_STATE_DISJOINT_WRITES"  # every actio
 ENV_CURRENT_REVISION = "env.current_revision"  # current_revision(): the authoritative state revision, read fresh
 ENV_CONDITIONAL_STEP = "env.conditional_step"  # step(..., expected_revision=r): applied only if what the operation
 # depends on is unchanged since r — checked atomically where the side effect happens (transaction / conditional update)
+ENV_WORLD_STEP_REPORT = "env.world_step_report"  # world_step_report(): the world step just taken and the actions of the
+#   environment's own automatic participants in it (phase 4A)

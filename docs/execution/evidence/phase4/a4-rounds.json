@@ -1,0 +1,611 @@
+{
+  "deliverable": "phase4A-A4",
+  "turns": {
+    "round_robin_idle": {
+      "status": "SUCCEEDED",
+      "termination": "JOINT_GOAL_REACHED",
+      "reason": "goal 'all_picked' reached",
+      "global_steps": 16,
+      "acted": {
+        "receiver": 3,
+        "picker": 8
+      },
+      "skipped": {
+        "receiver": 5
+      },
+      "batch_members": {},
+      "batches": 0,
+      "world_steps": 0,
+      "turn_state": {
+        "skipped": {
+          "receiver": 5
+        },
+        "retired": [],
+        "actor_steps": {
+          "receiver": 3,
+          "picker": 8
+        }
+      }
+    },
+    "joint_idle": {
+      "status": "SUCCEEDED",
+      "termination": "JOINT_GOAL_REACHED",
+      "reason": "goal 'all_picked' reached",
+      "global_steps": 20,
+      "acted": {
+        "receiver": 3,
+        "picker": 10
+      },
+      "skipped": {
+        "receiver": 7
+      },
+      "batch_members": {
+        "receiver:PROPOSED": 3,
+        "picker:PROPOSED": 10,
+        "receiver:PASSED": 7
+      },
+      "batches": 10,
+      "world_steps": 10,
+      "turn_state": {
+        "skipped": {
+          "receiver": 7
+        },
+        "retired": [],
+        "actor_steps": {
+          "receiver": 3,
+          "picker": 10
+        }
+      }
+    },
+    "receiver_retired": {
+      "status": "SUCCEEDED",
+      "termination": "JOINT_GOAL_REACHED",
+      "reason": "goal 'all_picked' reached",
+      "global_steps": 10,
+      "acted": {
+        "receiver": 2,
+        "picker": 8
+      },
+      "skipped": {
+        "receiver (retired)": 1
+      },
+      "batch_members": {},
+      "batches": 0,
+      "world_steps": 0,
+      "turn_state": {
+        "skipped": {},
+        "retired": [
+          "receiver"
+        ],
+        "actor_steps": {
+          "receiver": 2,
+          "picker": 8
+        }
+      }
+    },
+    "all_retired_run_ends": {
+      "status": "BUDGET_EXHAUSTED",
+      "termination": "ACTOR_BUDGETS_EXHAUSTED",
+      "reason": "every participant exhausted its own budget",
+      "global_steps": 5,
+      "acted": {
+        "receiver": 2,
+        "picker": 3
+      },
+      "skipped": {
+        "receiver (retired)": 1,
+        "picker (retired)": 1
+      },
+      "batch_members": {},
+      "batches": 0,
+      "world_steps": 0,
+      "turn_state": {
+        "skipped": {},
+        "retired": [
+          "receiver",
+          "picker"
+        ],
+        "actor_steps": {
+          "receiver": 2,
+          "picker": 3
+        }
+      }
+    },
+    "no_action_fails_run": {
+      "status": "FAILED",
+      "termination": "NO_APPLICABLE_ACTION",
+      "reason": "no applicable action for receiver on its belief",
+      "global_steps": 7,
+      "acted": {
+        "receiver": 3,
+        "picker": 3
+      },
+      "skipped": {},
+      "batch_members": {},
+      "batches": 0,
+      "world_steps": 0,
+      "turn_state": {
+        "skipped": {},
+        "retired": [],
+        "actor_steps": {
+          "receiver": 3,
+          "picker": 3
+        }
+      }
+    }
+  },
+  "recovery": {
+    "stopped_after_step": 5,
+    "open_batch_at_stop": {
+      "round": 3,
+      "status": "OPEN",
+      "members": 1
+    },
+    "same_trajectory": true,
+    "same_batches": true,
+    "uninterrupted": {
+      "status": "SUCCEEDED",
+      "termination": "JOINT_GOAL_REACHED",
+      "reason": "goal 'all_picked' reached",
+      "global_steps": 20,
+      "acted": {
+        "receiver": 3,
+        "picker": 10
+      },
+      "skipped": {
+        "receiver": 7
+      },
+      "batch_members": {
+        "receiver:PROPOSED": 3,
+        "picker:PROPOSED": 10,
+        "receiver:PASSED": 7
+      },
+      "batches": 10,
+      "world_steps": 10,
+      "turn_state": {
+        "skipped": {
+          "receiver": 7
+        },
+        "retired": [],
+        "actor_steps": {
+          "receiver": 3,
+          "picker": 10
+        }
+      }
+    },
+    "resumed": {
+      "status": "SUCCEEDED",
+      "termination": "JOINT_GOAL_REACHED",
+      "reason": "goal 'all_picked' reached",
+      "global_steps": 20,
+      "acted": {
+        "receiver": 3,
+        "picker": 10
+      },
+      "skipped": {
+        "receiver": 7
+      },
+      "batch_members": {
+        "receiver:PROPOSED": 3,
+        "picker:PROPOSED": 10,
+        "receiver:PASSED": 7
+      },
+      "batches": 10,
+      "world_steps": 10,
+      "turn_state": {
+        "skipped": {
+          "receiver": 7
+        },
+        "retired": [],
+        "actor_steps": {
+          "receiver": 3,
+          "picker": 10
+        }
+      }
+    }
+  },
+  "subprocess_environment": {
+    "contract_check": {
+      "plugin": "formal-lab.example.subprocess-world@1.0.0",
+      "ok": true,
+      "stages": [
+        {
+          "name": "registered",
+          "ok": true,
+          "detail": "env.batch_step, env.driver_generic, env.idempotent_step, env.multi_actor, env.query_operation, env.restore, env.snapshot, env.snapshot_restore, env.world_step_report"
+        },
+        {
+          "name": "initialised",
+          "ok": true,
+          "detail": "SubprocessWorldEnvironment"
+        },
+        {
+          "name": "reset & observe",
+          "ok": true,
+          "detail": "3 fact(s), 0 unknown, revision 0"
+        },
+        {
+          "name": "step",
+          "ok": true,
+          "detail": "serve applied, revision 0→1"
+        },
+        {
+          "name": "idempotent re-send",
+          "ok": true,
+          "detail": "same operation id re-sent: the recorded outcome, applied once"
+        },
+        {
+          "name": "batch step",
+          "ok": true,
+          "detail": "one batch = one world step (1→2); the same batch id is not applied twice"
+        },
+        {
+          "name": "world step report",
+          "ok": true,
+          "detail": "world step 2, automatic participants 0"
+        },
+        {
+          "name": "snapshot / restore",
+          "ok": true,
+          "detail": "FULL_STATE snapshot restored exactly"
+        },
+        {
+          "name": "operation lookup",
+          "ok": true,
+          "detail": "applied operation found by id; unknown id → None"
+        },
+        {
+          "name": "session identity",
+          "ok": true,
+          "detail": "subproc-1436175-21f46a77 (PURE_DATA); health ['adapter', 'backend', 'protocol', 'sessions']"
+        },
+        {
+          "name": "closed",
+          "ok": true,
+          "detail": "closed"
+        },
+        {
+          "name": "cleanup",
+          "ok": true,
+          "detail": "process 1436175 is gone after close"
+        }
+      ]
+    },
+    "world_log": {
+      "run": {
+        "status": "SUCCEEDED",
+        "termination": "JOINT_GOAL_REACHED",
+        "reason": "goal 'all_picked' reached",
+        "global_steps": 20,
+        "acted": {
+          "receiver": 3,
+          "picker": 10
+        },
+        "skipped": {
+          "receiver": 7
+        },
+        "batch_members": {
+          "receiver:PROPOSED": 3,
+          "picker:PROPOSED": 10,
+          "receiver:PASSED": 7
+        },
+        "batches": 10,
+        "world_steps": 10,
+        "turn_state": {
+          "skipped": {
+            "receiver": 7
+          },
+          "retired": [],
+          "actor_steps": {
+            "receiver": 3,
+            "picker": 10
+          }
+        }
+      },
+      "batches": [
+        [
+          1,
+          1
+        ],
+        [
+          2,
+          2
+        ],
+        [
+          3,
+          3
+        ],
+        [
+          4,
+          4
+        ],
+        [
+          5,
+          5
+        ],
+        [
+          6,
+          6
+        ],
+        [
+          7,
+          7
+        ],
+        [
+          8,
+          8
+        ],
+        [
+          9,
+          9
+        ],
+        [
+          10,
+          10
+        ]
+      ],
+      "log": [
+        [
+          1,
+          [
+            "receiver",
+            "picker"
+          ],
+          [
+            "clock"
+          ]
+        ],
+        [
+          2,
+          [
+            "receiver",
+            "picker"
+          ],
+          [
+            "clock"
+          ]
+        ],
+        [
+          3,
+          [
+            "receiver",
+            "picker"
+          ],
+          [
+            "clock"
+          ]
+        ],
+        [
+          4,
+          [
+            "picker"
+          ],
+          [
+            "clock"
+          ]
+        ],
+        [
+          5,
+          [
+            "picker"
+          ],
+          [
+            "clock"
+          ]
+        ],
+        [
+          6,
+          [
+            "picker"
+          ],
+          [
+            "clock"
+          ]
+        ],
+        [
+          7,
+          [
+            "picker"
+          ],
+          [
+            "clock"
+          ]
+        ],
+        [
+          8,
+          [
+            "picker"
+          ],
+          [
+            "clock"
+          ]
+        ],
+        [
+          9,
+          [
+            "picker"
+          ],
+          [
+            "clock"
+          ]
+        ],
+        [
+          10,
+          [
+            "picker"
+          ],
+          [
+            "clock"
+          ]
+        ]
+      ],
+      "match": true,
+      "automatic_applied": 10,
+      "automatic_in_members": false
+    },
+    "restore_paths": {
+      "load": {
+        "recovery_mode": [
+          "SNAPSHOT"
+        ],
+        "same_state": true,
+        "same_digest": true
+      },
+      "rebuild": {
+        "recovery_mode": [
+          "RESEED"
+        ],
+        "same_state": true,
+        "same_digest": true
+      }
+    },
+    "timeout": {
+      "raised": "Timeout",
+      "waited_s": 0.51,
+      "old_child_alive": false
+    }
+  },
+  "paired_report": {
+    "inputs": {
+      "rule": {
+        "0": 10.0,
+        "1": 12.0,
+        "2": 8.0,
+        "3": 11.0,
+        "4": 9.0
+      },
+      "z3": {
+        "0": 7.0,
+        "1": 9.0,
+        "2": 8.0,
+        "3": null,
+        "4": 5.0
+      }
+    },
+    "hand": {
+      "pairs": 4,
+      "diffs": [
+        -3.0,
+        -3.0,
+        0.0,
+        -4.0
+      ],
+      "mean_diff": -2.5,
+      "unpaired": 1,
+      "success": "9/10",
+      "better": "z3 (lower cost; mean difference < 0)",
+      "reading": "ENGINEERING (4 pairs < 6)"
+    },
+    "report": {
+      "pairs": 4,
+      "diffs": [
+        -3.0,
+        -3.0,
+        0.0,
+        -4.0
+      ],
+      "mean_diff": -2.5,
+      "unpaired": 1,
+      "success": "9/10",
+      "better": "z3",
+      "reading": "ENGINEERING",
+      "unpaired_detail": [
+        {
+          "key": [
+            "acceptance",
+            "sc",
+            "scenario",
+            "scenario",
+            "m@1",
+            "none",
+            "scenario-default",
+            3
+          ],
+          "missing": "b",
+          "a": "present",
+          "b": "MISSING: run FAILED: worker error: solver crashed"
+        }
+      ]
+    },
+    "outcomes": {
+      "success": {
+        "definition": "goal reached / every planned cell of this split (fixed before the runs; failed, cancelled, timed-out and not-run cells count as not reached)",
+        "numerator": 9,
+        "denominator": 10,
+        "rate": 0.9,
+        "finished_only": {
+          "numerator": 9,
+          "denominator": 10,
+          "rate": 0.9,
+          "note": "for reference only: excludes cells whose run did not finish"
+        }
+      },
+      "timed_out": [],
+      "reused": [
+        {
+          "cell_id": "rule-0",
+          "run_id": "run_rule_0",
+          "reused_from": {
+            "matrix_id": "mx_a"
+          },
+          "reason": "same full configuration completed in mx_a"
+        },
+        {
+          "cell_id": "rule-1",
+          "run_id": "run_rule_1",
+          "reused_from": {
+            "matrix_id": "mx_a"
+          },
+          "reason": "same full configuration completed in mx_a"
+        }
+      ],
+      "new_runs": 8,
+      "not_reused": [],
+      "sampling": {
+        "DETERMINISTIC": 10
+      },
+      "metric_missing_reasons": {},
+      "denominator_cells": 10,
+      "run_status": {
+        "SUCCEEDED": 9,
+        "FAILED": 1
+      },
+      "not_run": 0,
+      "run_failed": 1,
+      "finished": 10,
+      "goal_reached": 9,
+      "goal_not_reached": [
+        {
+          "cell_id": "z3-3",
+          "run_id": "run_z3_3",
+          "status": "FAILED",
+          "termination_reason": "FAILED"
+        }
+      ],
+      "metric_missing": {
+        "delay_cost": 1
+      },
+      "metric_not_applicable": {},
+      "failures": [
+        {
+          "cell_id": "z3-3",
+          "run_id": "run_z3_3",
+          "status": "FAILED",
+          "termination_reason": "FAILED",
+          "reason": "worker error: solver crashed"
+        }
+      ]
+    }
+  },
+  "conclusion": {
+    "idle_participant_does_not_stop_the_other": true,
+    "retire_is_not_run_end": true,
+    "run_end_is_distinct": true,
+    "mid_round_recovery": true,
+    "subprocess_contract_check": true,
+    "one_world_step_per_batch": true,
+    "restore_load_or_rebuild": true,
+    "timeout_kills_the_child": true,
+    "paired_report_hand_check": true
+  }
+}

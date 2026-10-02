@@ -45,7 +45,9 @@ Phase 4 是对现有产品的修复与验收收口，共 **8 个交付包**：�
 
 ## A4 · 联合轮次与配对评测
 
-- [ ] **P4A-A4** 补齐会被后续环境复用的轮次、恢复、实验矩阵和指标真实性。
+- [x] **P4A-A4** 补齐会被后续环境复用的轮次、恢复、实验矩阵和指标真实性。
+  - 证据：轮次三种结局实测区分（空闲 PASSED/跳过、预算退场、整个实验结束）；WORLD_STEPPED 与 BatchRecord.world_step/automatic 分开记录成员提案、自动参与者、批次提交与世界步（env.world_step_report）；子进程环境适配范例 examples/subprocess-env（会话/请求身份、超时、清理、版本、只声明可核验能力、按后端能力加载或重建）与扩展的 SDK 环境合同检查；报告成功率固定分母、超时/复用/新执行/采样计数与原因、失败单元以不完整配对可见、工程读数、同策略拒比；指标观察量与时间窗；矩阵复用键 v3（划分、内核版本、模型端点）与关键版本未知保守重跑。证据：仓储真实计数、轮中恢复一致、子进程世界步逐轮对应（本地与平台 SIGKILL worker）、可手算配对报告、矩阵相同/变更/保守重跑三种复用决策。phase4 a4 组 3/3 PASS。详见 docs/handoff/phase4.md#a4
+  - 实现：`examples/subprocess-env/src/formal_lab_example_subprocess/adapter.py`、`packages/sdk/src/formal_lab_sdk/plugin_testing.py`、`packages/evaluation/src/formal_lab_eval/experiments.py`、`packages/platform-api/src/formal_lab_api/services/matrices.py`、`scripts/a4_rounds_evidence.py`、`tests/integration/test_rounds_reuse_platform.py`
 
 区分单个参与者无动作 / 跳过退场 / 整个实验结束；联合批次一次提交推进一次世界步；子进程环境适配范例与合同检查；配对键、失败/超时/缺失/不适用计数、成功率分母、指标观察量/单位/时间窗；复用键与真实复用验证。
 

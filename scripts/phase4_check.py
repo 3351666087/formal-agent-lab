@@ -68,6 +68,20 @@ PLATFORM_CHECKS = [
           "已配置真实端点的最小例子（普通调度场景任务规划器 + 订单场景 LLM 策略，小额调用预算）；未配置或不可达记 BLOCKED，协议测试服务不充当真实模型",
           f"{PY} scripts/a3_model_decision_evidence.py --real", ["P4A-A3"], protocol=True,
           produces=[f"{EV}/a3-real-endpoint.json"]),
+    # ------------------------------------------------------------ A4 joint rounds, recovery, matrix and paired metrics
+    Check("p4-a4-unit", "a4",
+          "轮次与评测（单元）：子进程环境适配与合同检查、恢复/重建、超时与清理、自动参与者、联合批次、可手算配对报告（失败与不完整配对）",
+          f"{PYTEST} examples/subprocess-env/tests packages/neutral-environment/tests examples/warehouse-allocation/tests "
+          "packages/evaluation/tests "
+          "packages/runtime/tests/test_multi_actor.py", ["P4A-A4"]),
+    Check("p4-a4-rounds", "a4",
+          "两参与者完整运行 / 空闲跳过 / 退场 / 整个实验结束的真实计数，轮中恢复，子进程环境世界步逐轮对应，可手算配对报告",
+          f"{PY} scripts/a4_rounds_evidence.py", ["P4A-A4"], protocol=True,
+          produces=[f"{EV}/a4-rounds.json", f"{EV}/a4-paired-report.md"]),
+    Check("p4-a4-platform", "a4",
+          "持久路径：子进程环境上联合批次轮中暂停 + SIGKILL worker 后批次与子进程世界步逐轮对应；矩阵相同配置复用、变更配置新执行、模型单元保守重跑，原因与计数可见",
+          f"{IT} tests/integration/test_rounds_reuse_platform.py tests/integration/test_matrix_v2_platform.py "
+          "tests/integration/test_joint_batch_platform.py", ["P4A-A4"]),
 ]
 
 for c in DOMAIN_CHECKS:

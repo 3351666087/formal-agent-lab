@@ -28,14 +28,21 @@ EVALUATOR_ID = "formal-lab.example.scheduling.scorer"
 
 DEFINITIONS = [
     MetricDefinition(metric_id="orders_completed", label="完工订单数", unit="orders", direction="HIGHER_IS_BETTER",
-                     aggregation="MEAN", value_type="int"),
+                     aggregation="MEAN", value_type="int",
+                     observable="orders whose operations are all done in the final truth state",
+                     window="whole run (read at the end)"),
     MetricDefinition(metric_id="delay_cost", label="模拟延期成本", unit="cost", direction="LOWER_IS_BETTER",
                      aggregation="MEAN", value_type="float",
-                     description="Σ late_cost × tardiness; unfinished orders count as finishing at horizon+1"),
+                     description="Σ late_cost × tardiness; unfinished orders count as finishing at horizon+1",
+                     observable="Σ late_cost × tardiness per order",
+                     window="whole run (read at the end); unfinished orders at horizon + 1"),
     MetricDefinition(metric_id="makespan", label="完工时间", unit="ticks", direction="LOWER_IS_BETTER",
-                     aggregation="MEAN", value_type="int", description="MISSING unless all operations finished"),
+                     aggregation="MEAN", value_type="int", description="MISSING unless all operations finished",
+                     observable="tick at which the last operation finished",
+                     window="whole run (read at the end); MISSING unless all finished"),
     MetricDefinition(metric_id="mean_tardiness", label="平均延误", unit="ticks", direction="LOWER_IS_BETTER",
-                     aggregation="MEAN", value_type="float"),
+                     aggregation="MEAN", value_type="float",
+                     observable="mean max(0, finish − due) per order", window="whole run (read at the end)"),
 ]
 
 DESCRIPTOR = PluginDescriptor(

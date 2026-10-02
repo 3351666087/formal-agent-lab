@@ -56,7 +56,7 @@ def test_matrix_v2_queue_recovery_merge_and_report(stack, demo):
             "seeds": {"dev": [1], "acceptance": [2, 3]}, "max_parallel": 2}
     res = stack.post(f"/projects/{pid}/matrices", spec)
     mid = res["matrix"]["id"]
-    assert res["cells"] == {"queued": 12, "reused": 0, "skipped": 0}
+    assert res["cells"] == {"queued": 12, "reused": 0, "skipped": 0, "rerun_conservative": 0}
     cells = stack.get(f"/matrices/{mid}/cells")
     assert len({c["cell_id"] for c in cells}) == 12 and {c["split"] for c in cells} == {"dev", "acceptance"}
     # at most max_parallel cells run at once; kill the worker mid-matrix
@@ -84,14 +84,14 @@ def test_matrix_v2_queue_recovery_merge_and_report(stack, demo):
     assert rerun["attempts"] == 2 and rerun["run_id"] != victim["run_id"]
     # incremental merge: one more acceptance seed → 4 new cells; merging it again adds nothing
     merged = stack.post(f"/matrices/{mid}/cells", {"seeds": {"dev": [1], "acceptance": [2, 3, 4]}})
-    assert merged["cells"] == {"queued": 4, "reused": 0, "skipped": 12}
+    assert merged["cells"] == {"queued": 4, "reused": 0, "skipped": 12, "rerun_conservative": 0}
     again = stack.post(f"/matrices/{mid}/cells", {"seeds": {"dev": [1], "acceptance": [2, 3, 4]}})
     assert again["cells"]["queued"] == 0 and again["cells"]["skipped"] == 16
     wait_cells(stack, mid, lambda cs: len(cs) == 16 and all(c["status"] == "DONE" for c in cs))
     # a new matrix sharing configurations reuses the completed cells (same cell ids, same runs)
     other = stack.post(f"/projects/{pid}/matrices", {**spec, "name": "reuse", "participants": [{"*": edd}],
                                                      "seeds": {"dev": [1], "acceptance": [2]}})
-    assert other["cells"] == {"queued": 0, "reused": 4, "skipped": 0}
+    assert other["cells"] == {"queued": 0, "reused": 4, "skipped": 0, "rerun_conservative": 0}
     ids = {c["cell_id"]: c["run_id"] for c in stack.get(f"/matrices/{mid}/cells")}
     assert all(ids[c["cell_id"]] == c["run_id"] for c in stack.get(f"/matrices/{other['matrix']['id']}/cells"))
     # the report: splits, one-dimension comparisons (method vs mechanism), sources, denominators, conclusions
@@ -121,14 +121,14 @@ def test_reuse_key_covers_views_gates_and_extensions(stack):
     spec = {"version": 2, "name": "reuse key", "scenarios": [sid], "seeds": [0],
             "participants": [{"receiver": strategies["仓储规则（收货）"], "picker": strategies["仓储规则（拣货）"]}]}
     first = stack.post(f"/projects/{wh['id']}/matrices", spec)
-    assert first["cells"] == {"queued": 1, "reused": 0, "skipped": 0}
+    assert first["cells"] == {"queued": 1, "reused": 0, "skipped": 0, "rerun_conservative": 0}
     done = wait_cells(stack, first["matrix"]["id"], finished, timeout=300)
     assert done[0]["status"] == "DONE" and done[0]["reused_from"] is None
     parts = done[0]["key_parts"]
     assert {"plugins", "views", "scenario_digest", "extensions", "model", "seed", "budget", "rules"} <= set(parts)
 
     again = stack.post(f"/projects/{wh['id']}/matrices", {**spec, "name": "same configuration"})
-    assert again["cells"] == {"queued": 0, "reused": 1, "skipped": 0}
+    assert again["cells"] == {"queued": 0, "reused": 1, "skipped": 0, "rerun_conservative": 0}
     reused = stack.get(f"/matrices/{again['matrix']['id']}/cells")[0]
     assert reused["cell_id"] == done[0]["cell_id"] and reused["run_id"] == done[0]["run_id"]
     assert reused["reused_from"] == {"matrix_id": first["matrix"]["id"], "cell_id": done[0]["cell_id"],
@@ -148,7 +148,7 @@ def test_reuse_key_covers_views_gates_and_extensions(stack):
         return res["cells"], cell
 
     counts, view_cell = changed(lambda b: b["participants"][1]["view"].update(exclude=["dock", "done_at"]), "view")
-    assert counts == {"queued": 1, "reused": 0, "skipped": 0} and view_cell["cell_id"] != done[0]["cell_id"]
+    assert counts == {"queued": 1, "reused": 0, "skipped": 0, "rerun_conservative": 0} and view_cell["cell_id"] != done[0]["cell_id"]
     assert view_cell["key_parts"]["views"] != parts["views"] and view_cell["key_parts"]["plugins"] == parts["plugins"]
     counts, gate_cell = changed(lambda b: b.update(execution_gates=[{
         "plugin": {"plugin_id": "formal-lab.example.warehouse.capacity-gate", "version": "1.0.0"},
