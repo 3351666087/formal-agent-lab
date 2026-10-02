@@ -31,3 +31,9 @@ def test_phase2_suite_loads_through_the_runner_with_its_extra_groups():
     assert extra == {"conditional", "extension"} and extra <= set(suite.groups)
     assert not extra & set(suite.required_groups)
     assert check_runner.main(["--suite", "phase2", "--list"]) == 0
+
+
+def test_phase2_conditional_checks_are_triggered_by_their_prerequisite():
+    suite = load_suite("phase2")
+    real = next(c for c in suite.checks if c.id == "model-real")
+    assert real.kind == "conditional" and real.trigger == "llm"

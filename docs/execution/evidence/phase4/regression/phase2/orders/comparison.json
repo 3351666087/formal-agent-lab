@@ -1,0 +1,1007 @@
+{
+  "seed": 2,
+  "strategy": "rule",
+  "cases": {
+    "normal": {
+      "aligned_steps": 25,
+      "compared_fields": 1225,
+      "differences": [],
+      "by_kind": {},
+      "evidence_kinds": {
+        "pure": [],
+        "service": [
+          "operation"
+        ]
+      },
+      "pure": {
+        "run_id": "run_rep_normal_pure",
+        "status": "SUCCEEDED",
+        "steps": 25
+      },
+      "service": {
+        "run_id": "run_rep_normal_svc",
+        "status": "SUCCEEDED",
+        "steps": 25
+      },
+      "service_operations": {
+        "COMPLETED": 25
+      }
+    },
+    "shortage": {
+      "aligned_steps": 27,
+      "compared_fields": 1323,
+      "differences": [],
+      "by_kind": {},
+      "evidence_kinds": {
+        "pure": [],
+        "service": [
+          "operation"
+        ]
+      },
+      "pure": {
+        "run_id": "run_rep_shortage_pure",
+        "status": "SUCCEEDED",
+        "steps": 27
+      },
+      "service": {
+        "run_id": "run_rep_shortage_svc",
+        "status": "SUCCEEDED",
+        "steps": 27
+      },
+      "service_operations": {
+        "COMPLETED": 27
+      }
+    },
+    "delayed": {
+      "aligned_steps": 25,
+      "compared_fields": 1225,
+      "differences": [],
+      "by_kind": {},
+      "evidence_kinds": {
+        "pure": [],
+        "service": [
+          "operation"
+        ]
+      },
+      "pure": {
+        "run_id": "run_rep_delayed_pure",
+        "status": "SUCCEEDED",
+        "steps": 25
+      },
+      "service": {
+        "run_id": "run_rep_delayed_svc",
+        "status": "SUCCEEDED",
+        "steps": 25
+      },
+      "service_operations": {
+        "COMPLETED": 19,
+        "RECONCILED": 6
+      }
+    },
+    "restart": {
+      "aligned_steps": 25,
+      "compared_fields": 1225,
+      "differences": [],
+      "by_kind": {},
+      "evidence_kinds": {
+        "pure": [],
+        "service": [
+          "operation"
+        ]
+      },
+      "pure": {
+        "run_id": "run_rep_restart_pure",
+        "status": "SUCCEEDED",
+        "steps": 25
+      },
+      "service": {
+        "run_id": "run_rep_restart_svc",
+        "status": "SUCCEEDED",
+        "steps": 25
+      },
+      "service_operations": {
+        "COMPLETED": 24,
+        "RECONCILED": 1
+      }
+    },
+    "deviation": {
+      "aligned_steps": 28,
+      "compared_fields": 1372,
+      "differences": [],
+      "by_kind": {},
+      "evidence_kinds": {
+        "pure": [],
+        "service": [
+          "operation"
+        ]
+      },
+      "pure": {
+        "run_id": "run_rep_deviation_pure",
+        "status": "SUCCEEDED",
+        "steps": 28
+      },
+      "service": {
+        "run_id": "run_rep_deviation_svc",
+        "status": "SUCCEEDED",
+        "steps": 28
+      },
+      "service_operations": {
+        "COMPLETED": 28
+      }
+    }
+  },
+  "contrasts": {
+    "nominal-model-vs-slow-service": {
+      "aligned_steps": 17,
+      "compared_fields": 833,
+      "differences": [
+        {
+          "step": 9,
+          "pure_operation": "run_rep_nominal:s9:handler:apply",
+          "service_operation": "run_rep_slow:s9:handler:apply",
+          "kind": "effect",
+          "field": "remaining[o2]",
+          "pure": 1,
+          "service": 2
+        },
+        {
+          "step": 10,
+          "pure_operation": "run_rep_nominal:s10:handler:apply",
+          "service_operation": "run_rep_slow:s10:handler:apply",
+          "kind": "effect",
+          "field": "remaining[o2]",
+          "pure": 1,
+          "service": 2
+        },
+        {
+          "step": 11,
+          "pure_operation": "run_rep_nominal:s11:handler:apply",
+          "service_operation": "run_rep_slow:s11:handler:apply",
+          "kind": "effect",
+          "field": "done_at[o2]",
+          "pure": 2,
+          "service": 0
+        },
+        {
+          "step": 11,
+          "pure_operation": "run_rep_nominal:s11:handler:apply",
+          "service_operation": "run_rep_slow:s11:handler:apply",
+          "kind": "effect",
+          "field": "on[o2,p2]",
+          "pure": false,
+          "service": true
+        },
+        {
+          "step": 11,
+          "pure_operation": "run_rep_nominal:s11:handler:apply",
+          "service_operation": "run_rep_slow:s11:handler:apply",
+          "kind": "effect",
+          "field": "remaining[o2]",
+          "pure": 0,
+          "service": 1
+        },
+        {
+          "step": 11,
+          "pure_operation": "run_rep_nominal:s11:handler:apply",
+          "service_operation": "run_rep_slow:s11:handler:apply",
+          "kind": "effect",
+          "field": "status[o2]",
+          "pure": "completed",
+          "service": "processing"
+        },
+        {
+          "step": 12,
+          "pure_operation": "run_rep_nominal:s12:handler:apply",
+          "service_operation": "run_rep_slow:s12:handler:apply",
+          "kind": "effect",
+          "field": "done_at[o2]",
+          "pure": 2,
+          "service": 0
+        },
+        {
+          "step": 12,
+          "pure_operation": "run_rep_nominal:s12:handler:apply",
+          "service_operation": "run_rep_slow:s12:handler:apply",
+          "kind": "effect",
+          "field": "on[o2,p2]",
+          "pure": false,
+          "service": true
+        },
+        {
+          "step": 12,
+          "pure_operation": "run_rep_nominal:s12:handler:apply",
+          "service_operation": "run_rep_slow:s12:handler:apply",
+          "kind": "effect",
+          "field": "remaining[o2]",
+          "pure": 0,
+          "service": 1
+        },
+        {
+          "step": 12,
+          "pure_operation": "run_rep_nominal:s12:handler:apply",
+          "service_operation": "run_rep_slow:s12:handler:apply",
+          "kind": "effect",
+          "field": "status[o2]",
+          "pure": "completed",
+          "service": "processing"
+        },
+        {
+          "step": 13,
+          "pure_operation": "run_rep_nominal:s13:handler:apply",
+          "service_operation": "run_rep_slow:s13:handler:apply",
+          "kind": "effect",
+          "field": "done_at[o2]",
+          "pure": 2,
+          "service": 0
+        },
+        {
+          "step": 13,
+          "pure_operation": "run_rep_nominal:s13:handler:apply",
+          "service_operation": "run_rep_slow:s13:handler:apply",
+          "kind": "effect",
+          "field": "on[o2,p2]",
+          "pure": false,
+          "service": true
+        },
+        {
+          "step": 13,
+          "pure_operation": "run_rep_nominal:s13:handler:apply",
+          "service_operation": "run_rep_slow:s13:handler:apply",
+          "kind": "effect",
+          "field": "remaining[o2]",
+          "pure": 0,
+          "service": 1
+        },
+        {
+          "step": 13,
+          "pure_operation": "run_rep_nominal:s13:handler:apply",
+          "service_operation": "run_rep_slow:s13:handler:apply",
+          "kind": "effect",
+          "field": "status[o2]",
+          "pure": "completed",
+          "service": "processing"
+        },
+        {
+          "step": 14,
+          "pure_operation": "run_rep_nominal:s14:handler:apply",
+          "service_operation": "run_rep_slow:s14:handler:apply",
+          "kind": "precondition",
+          "field": "{\"action_type\": \"start\", \"params\": {\"o\": \"o4\", \"st\": \"p2\"}}",
+          "pure": "APPLICABLE",
+          "service": "INAPPLICABLE"
+        },
+        {
+          "step": 14,
+          "pure_operation": "run_rep_nominal:s14:handler:apply",
+          "service_operation": "run_rep_slow:s14:handler:apply",
+          "kind": "effect",
+          "field": "done_at[o2]",
+          "pure": 2,
+          "service": 0
+        },
+        {
+          "step": 14,
+          "pure_operation": "run_rep_nominal:s14:handler:apply",
+          "service_operation": "run_rep_slow:s14:handler:apply",
+          "kind": "effect",
+          "field": "on[o2,p2]",
+          "pure": false,
+          "service": true
+        },
+        {
+          "step": 14,
+          "pure_operation": "run_rep_nominal:s14:handler:apply",
+          "service_operation": "run_rep_slow:s14:handler:apply",
+          "kind": "effect",
+          "field": "remaining[o2]",
+          "pure": 0,
+          "service": 1
+        },
+        {
+          "step": 14,
+          "pure_operation": "run_rep_nominal:s14:handler:apply",
+          "service_operation": "run_rep_slow:s14:handler:apply",
+          "kind": "effect",
+          "field": "status[o2]",
+          "pure": "completed",
+          "service": "processing"
+        },
+        {
+          "step": 15,
+          "pure_operation": "run_rep_nominal:s15:handler:apply",
+          "service_operation": "run_rep_slow:s15:handler:apply",
+          "kind": "effect",
+          "field": "done_at[o2]",
+          "pure": 2,
+          "service": 0
+        },
+        {
+          "step": 15,
+          "pure_operation": "run_rep_nominal:s15:handler:apply",
+          "service_operation": "run_rep_slow:s15:handler:apply",
+          "kind": "effect",
+          "field": "on[o2,p2]",
+          "pure": false,
+          "service": true
+        },
+        {
+          "step": 15,
+          "pure_operation": "run_rep_nominal:s15:handler:apply",
+          "service_operation": "run_rep_slow:s15:handler:apply",
+          "kind": "effect",
+          "field": "remaining[o2]",
+          "pure": 0,
+          "service": 1
+        },
+        {
+          "step": 15,
+          "pure_operation": "run_rep_nominal:s15:handler:apply",
+          "service_operation": "run_rep_slow:s15:handler:apply",
+          "kind": "effect",
+          "field": "status[o2]",
+          "pure": "completed",
+          "service": "processing"
+        },
+        {
+          "step": 16,
+          "pure_operation": "run_rep_nominal:s16:handler:apply",
+          "service_operation": "run_rep_slow:s16:handler:apply",
+          "kind": "effect",
+          "field": "done_at[o2]",
+          "pure": 2,
+          "service": 0
+        },
+        {
+          "step": 16,
+          "pure_operation": "run_rep_nominal:s16:handler:apply",
+          "service_operation": "run_rep_slow:s16:handler:apply",
+          "kind": "effect",
+          "field": "on[o2,p2]",
+          "pure": false,
+          "service": true
+        },
+        {
+          "step": 16,
+          "pure_operation": "run_rep_nominal:s16:handler:apply",
+          "service_operation": "run_rep_slow:s16:handler:apply",
+          "kind": "effect",
+          "field": "remaining[o2]",
+          "pure": 0,
+          "service": 1
+        },
+        {
+          "step": 16,
+          "pure_operation": "run_rep_nominal:s16:handler:apply",
+          "service_operation": "run_rep_slow:s16:handler:apply",
+          "kind": "effect",
+          "field": "status[o2]",
+          "pure": "completed",
+          "service": "processing"
+        },
+        {
+          "step": 17,
+          "pure_operation": "run_rep_nominal:s17:handler:apply",
+          "service_operation": "run_rep_slow:s17:handler:apply",
+          "kind": "effect",
+          "field": "done_at[o2]",
+          "pure": 2,
+          "service": 0
+        },
+        {
+          "step": 17,
+          "pure_operation": "run_rep_nominal:s17:handler:apply",
+          "service_operation": "run_rep_slow:s17:handler:apply",
+          "kind": "effect",
+          "field": "on[o2,p2]",
+          "pure": false,
+          "service": true
+        },
+        {
+          "step": 17,
+          "pure_operation": "run_rep_nominal:s17:handler:apply",
+          "service_operation": "run_rep_slow:s17:handler:apply",
+          "kind": "effect",
+          "field": "remaining[o2]",
+          "pure": 0,
+          "service": 1
+        },
+        {
+          "step": 17,
+          "pure_operation": "run_rep_nominal:s17:handler:apply",
+          "service_operation": "run_rep_slow:s17:handler:apply",
+          "kind": "effect",
+          "field": "status[o2]",
+          "pure": "completed",
+          "service": "processing"
+        },
+        {
+          "step": 18,
+          "pure_operation": "run_rep_nominal:s18:handler:apply",
+          "service_operation": "run_rep_slow:s18:handler:apply",
+          "kind": "trajectory",
+          "field": "action",
+          "pure": {
+            "action_type": "start",
+            "params": {
+              "o": "o5",
+              "st": "p2"
+            }
+          },
+          "service": {
+            "action_type": "tick",
+            "params": {}
+          },
+          "note": "the strategies chose differently; alignment stops"
+        }
+      ],
+      "by_kind": {
+        "effect": 30,
+        "precondition": 1,
+        "trajectory": 1
+      },
+      "evidence_kinds": {
+        "pure": [],
+        "service": [
+          "operation"
+        ]
+      },
+      "pure": {
+        "run_id": "run_rep_nominal",
+        "status": "SUCCEEDED",
+        "steps": 25
+      },
+      "service": {
+        "run_id": "run_rep_slow",
+        "status": "SUCCEEDED",
+        "steps": 28
+      }
+    },
+    "stale-observations": {
+      "comparison": {
+        "aligned_steps": 49,
+        "compared_fields": 2401,
+        "differences": [],
+        "by_kind": {},
+        "evidence_kinds": {
+          "pure": [],
+          "service": [
+            "operation"
+          ]
+        },
+        "pure": {
+          "run_id": "run_rep_stale_pure",
+          "status": "SUCCEEDED",
+          "steps": 49
+        },
+        "service": {
+          "run_id": "run_rep_stale_svc",
+          "status": "SUCCEEDED",
+          "steps": 49
+        }
+      },
+      "conflicts": {
+        "pure": [
+          {
+            "step": 2,
+            "operation": "run_rep_stale_pure:s2:handler_b:apply",
+            "reason": "STALE_REVISION: observed at revision 0, world at 1; 2 location(s) it depends on changed since (written by handler_a)",
+            "changed_paths": [
+              "status[o1]",
+              "stock[a]"
+            ]
+          },
+          {
+            "step": 4,
+            "operation": "run_rep_stale_pure:s4:handler_b:apply",
+            "reason": "STALE_REVISION: observed at revision 1, world at 2; 2 location(s) it depends on changed since (written by handler_a)",
+            "changed_paths": [
+              "next_seq",
+              "status[o1]"
+            ]
+          },
+          {
+            "step": 6,
+            "operation": "run_rep_stale_pure:s6:handler_b:apply",
+            "reason": "STALE_REVISION: observed at revision 2, world at 3; 3 location(s) it depends on changed since (written by handler_a)",
+            "changed_paths": [
+              "on[o1,p1]",
+              "queued_seq[o1]",
+              "status[o1]"
+            ]
+          },
+          {
+            "step": 8,
+            "operation": "run_rep_stale_pure:s8:handler_b:apply",
+            "reason": "STALE_REVISION: observed at revision 3, world at 4; 2 location(s) it depends on changed since (written by handler_a)",
+            "changed_paths": [
+              "status[o2]",
+              "stock[b]"
+            ]
+          },
+          {
+            "step": 10,
+            "operation": "run_rep_stale_pure:s10:handler_b:apply",
+            "reason": "STALE_REVISION: observed at revision 4, world at 5; 2 location(s) it depends on changed since (written by handler_a)",
+            "changed_paths": [
+              "next_seq",
+              "status[o2]"
+            ]
+          },
+          {
+            "step": 12,
+            "operation": "run_rep_stale_pure:s12:handler_b:apply",
+            "reason": "STALE_REVISION: observed at revision 5, world at 6; 3 location(s) it depends on changed since (written by handler_a)",
+            "changed_paths": [
+              "on[o2,p2]",
+              "queued_seq[o2]",
+              "status[o2]"
+            ]
+          },
+          {
+            "step": 14,
+            "operation": "run_rep_stale_pure:s14:handler_b:apply",
+            "reason": "STALE_REVISION: observed at revision 6, world at 7; 2 location(s) it depends on changed since (written by handler_a)",
+            "changed_paths": [
+              "status[o3]",
+              "stock[a]"
+            ]
+          },
+          {
+            "step": 16,
+            "operation": "run_rep_stale_pure:s16:handler_b:apply",
+            "reason": "STALE_REVISION: observed at revision 7, world at 8; 2 location(s) it depends on changed since (written by handler_a)",
+            "changed_paths": [
+              "next_seq",
+              "status[o3]"
+            ]
+          },
+          {
+            "step": 18,
+            "operation": "run_rep_stale_pure:s18:handler_b:apply",
+            "reason": "STALE_REVISION: observed at revision 8, world at 9; 1 location(s) it depends on changed since (written by handler_a)",
+            "changed_paths": [
+              "clock"
+            ]
+          },
+          {
+            "step": 20,
+            "operation": "run_rep_stale_pure:s20:handler_b:apply",
+            "reason": "STALE_REVISION: observed at revision 9, world at 10; 3 location(s) it depends on changed since (written by handler_a)",
+            "changed_paths": [
+              "on[o3,p1]",
+              "queued_seq[o3]",
+              "status[o3]"
+            ]
+          },
+          {
+            "step": 22,
+            "operation": "run_rep_stale_pure:s22:handler_b:apply",
+            "reason": "STALE_REVISION: observed at revision 10, world at 11; 1 location(s) it depends on changed since (written by handler_a)",
+            "changed_paths": [
+              "clock"
+            ]
+          },
+          {
+            "step": 24,
+            "operation": "run_rep_stale_pure:s24:handler_b:apply",
+            "reason": "STALE_REVISION: observed at revision 11, world at 12; 2 location(s) it depends on changed since (written by handler_a)",
+            "changed_paths": [
+              "status[o4]",
+              "stock[b]"
+            ]
+          },
+          {
+            "step": 26,
+            "operation": "run_rep_stale_pure:s26:handler_b:apply",
+            "reason": "STALE_REVISION: observed at revision 12, world at 13; 2 location(s) it depends on changed since (written by handler_a)",
+            "changed_paths": [
+              "next_seq",
+              "status[o4]"
+            ]
+          },
+          {
+            "step": 28,
+            "operation": "run_rep_stale_pure:s28:handler_b:apply",
+            "reason": "STALE_REVISION: observed at revision 13, world at 14; 3 location(s) it depends on changed since (written by handler_a)",
+            "changed_paths": [
+              "on[o4,p1]",
+              "queued_seq[o4]",
+              "status[o4]"
+            ]
+          },
+          {
+            "step": 30,
+            "operation": "run_rep_stale_pure:s30:handler_b:apply",
+            "reason": "STALE_REVISION: observed at revision 14, world at 15; 1 location(s) it depends on changed since (written by handler_a)",
+            "changed_paths": [
+              "clock"
+            ]
+          },
+          {
+            "step": 32,
+            "operation": "run_rep_stale_pure:s32:handler_b:apply",
+            "reason": "STALE_REVISION: observed at revision 15, world at 16; 2 location(s) it depends on changed since (written by handler_a)",
+            "changed_paths": [
+              "status[o5]",
+              "stock[a]"
+            ]
+          },
+          {
+            "step": 34,
+            "operation": "run_rep_stale_pure:s34:handler_b:apply",
+            "reason": "STALE_REVISION: observed at revision 16, world at 17; 2 location(s) it depends on changed since (written by handler_a)",
+            "changed_paths": [
+              "next_seq",
+              "status[o5]"
+            ]
+          },
+          {
+            "step": 36,
+            "operation": "run_rep_stale_pure:s36:handler_b:apply",
+            "reason": "STALE_REVISION: observed at revision 17, world at 18; 3 location(s) it depends on changed since (written by handler_a)",
+            "changed_paths": [
+              "on[o5,p2]",
+              "queued_seq[o5]",
+              "status[o5]"
+            ]
+          },
+          {
+            "step": 38,
+            "operation": "run_rep_stale_pure:s38:handler_b:apply",
+            "reason": "STALE_REVISION: observed at revision 18, world at 19; 1 location(s) it depends on changed since (written by handler_a)",
+            "changed_paths": [
+              "clock"
+            ]
+          },
+          {
+            "step": 40,
+            "operation": "run_rep_stale_pure:s40:handler_b:apply",
+            "reason": "STALE_REVISION: observed at revision 19, world at 20; 2 location(s) it depends on changed since (written by handler_a)",
+            "changed_paths": [
+              "status[o6]",
+              "stock[b]"
+            ]
+          },
+          {
+            "step": 42,
+            "operation": "run_rep_stale_pure:s42:handler_b:apply",
+            "reason": "STALE_REVISION: observed at revision 20, world at 21; 2 location(s) it depends on changed since (written by handler_a)",
+            "changed_paths": [
+              "next_seq",
+              "status[o6]"
+            ]
+          },
+          {
+            "step": 44,
+            "operation": "run_rep_stale_pure:s44:handler_b:apply",
+            "reason": "STALE_REVISION: observed at revision 21, world at 22; 3 location(s) it depends on changed since (written by handler_a)",
+            "changed_paths": [
+              "on[o6,p1]",
+              "queued_seq[o6]",
+              "status[o6]"
+            ]
+          },
+          {
+            "step": 46,
+            "operation": "run_rep_stale_pure:s46:handler_b:apply",
+            "reason": "STALE_REVISION: observed at revision 22, world at 23; 1 location(s) it depends on changed since (written by handler_a)",
+            "changed_paths": [
+              "clock"
+            ]
+          },
+          {
+            "step": 48,
+            "operation": "run_rep_stale_pure:s48:handler_b:apply",
+            "reason": "STALE_REVISION: observed at revision 23, world at 24; 1 location(s) it depends on changed since (written by handler_a)",
+            "changed_paths": [
+              "clock"
+            ]
+          }
+        ],
+        "service": [
+          {
+            "step": 2,
+            "operation": "run_rep_stale_svc:s2:handler_b:apply",
+            "reason": "STALE_REVISION: 2 location(s) it depends on changed since revision 0",
+            "changed_paths": [
+              "status[o1]",
+              "stock[a]"
+            ]
+          },
+          {
+            "step": 4,
+            "operation": "run_rep_stale_svc:s4:handler_b:apply",
+            "reason": "STALE_REVISION: 2 location(s) it depends on changed since revision 1",
+            "changed_paths": [
+              "next_seq",
+              "status[o1]"
+            ]
+          },
+          {
+            "step": 6,
+            "operation": "run_rep_stale_svc:s6:handler_b:apply",
+            "reason": "STALE_REVISION: 3 location(s) it depends on changed since revision 2",
+            "changed_paths": [
+              "on[o1,p1]",
+              "queued_seq[o1]",
+              "status[o1]"
+            ]
+          },
+          {
+            "step": 8,
+            "operation": "run_rep_stale_svc:s8:handler_b:apply",
+            "reason": "STALE_REVISION: 2 location(s) it depends on changed since revision 3",
+            "changed_paths": [
+              "status[o2]",
+              "stock[b]"
+            ]
+          },
+          {
+            "step": 10,
+            "operation": "run_rep_stale_svc:s10:handler_b:apply",
+            "reason": "STALE_REVISION: 2 location(s) it depends on changed since revision 4",
+            "changed_paths": [
+              "next_seq",
+              "status[o2]"
+            ]
+          },
+          {
+            "step": 12,
+            "operation": "run_rep_stale_svc:s12:handler_b:apply",
+            "reason": "STALE_REVISION: 3 location(s) it depends on changed since revision 5",
+            "changed_paths": [
+              "on[o2,p2]",
+              "queued_seq[o2]",
+              "status[o2]"
+            ]
+          },
+          {
+            "step": 14,
+            "operation": "run_rep_stale_svc:s14:handler_b:apply",
+            "reason": "STALE_REVISION: 2 location(s) it depends on changed since revision 6",
+            "changed_paths": [
+              "status[o3]",
+              "stock[a]"
+            ]
+          },
+          {
+            "step": 16,
+            "operation": "run_rep_stale_svc:s16:handler_b:apply",
+            "reason": "STALE_REVISION: 2 location(s) it depends on changed since revision 7",
+            "changed_paths": [
+              "next_seq",
+              "status[o3]"
+            ]
+          },
+          {
+            "step": 18,
+            "operation": "run_rep_stale_svc:s18:handler_b:apply",
+            "reason": "STALE_REVISION: 1 location(s) it depends on changed since revision 8",
+            "changed_paths": [
+              "clock"
+            ]
+          },
+          {
+            "step": 20,
+            "operation": "run_rep_stale_svc:s20:handler_b:apply",
+            "reason": "STALE_REVISION: 3 location(s) it depends on changed since revision 9",
+            "changed_paths": [
+              "on[o3,p1]",
+              "queued_seq[o3]",
+              "status[o3]"
+            ]
+          },
+          {
+            "step": 22,
+            "operation": "run_rep_stale_svc:s22:handler_b:apply",
+            "reason": "STALE_REVISION: 1 location(s) it depends on changed since revision 10",
+            "changed_paths": [
+              "clock"
+            ]
+          },
+          {
+            "step": 24,
+            "operation": "run_rep_stale_svc:s24:handler_b:apply",
+            "reason": "STALE_REVISION: 2 location(s) it depends on changed since revision 11",
+            "changed_paths": [
+              "status[o4]",
+              "stock[b]"
+            ]
+          },
+          {
+            "step": 26,
+            "operation": "run_rep_stale_svc:s26:handler_b:apply",
+            "reason": "STALE_REVISION: 2 location(s) it depends on changed since revision 12",
+            "changed_paths": [
+              "next_seq",
+              "status[o4]"
+            ]
+          },
+          {
+            "step": 28,
+            "operation": "run_rep_stale_svc:s28:handler_b:apply",
+            "reason": "STALE_REVISION: 3 location(s) it depends on changed since revision 13",
+            "changed_paths": [
+              "on[o4,p1]",
+              "queued_seq[o4]",
+              "status[o4]"
+            ]
+          },
+          {
+            "step": 30,
+            "operation": "run_rep_stale_svc:s30:handler_b:apply",
+            "reason": "STALE_REVISION: 1 location(s) it depends on changed since revision 14",
+            "changed_paths": [
+              "clock"
+            ]
+          },
+          {
+            "step": 32,
+            "operation": "run_rep_stale_svc:s32:handler_b:apply",
+            "reason": "STALE_REVISION: 2 location(s) it depends on changed since revision 15",
+            "changed_paths": [
+              "status[o5]",
+              "stock[a]"
+            ]
+          },
+          {
+            "step": 34,
+            "operation": "run_rep_stale_svc:s34:handler_b:apply",
+            "reason": "STALE_REVISION: 2 location(s) it depends on changed since revision 16",
+            "changed_paths": [
+              "next_seq",
+              "status[o5]"
+            ]
+          },
+          {
+            "step": 36,
+            "operation": "run_rep_stale_svc:s36:handler_b:apply",
+            "reason": "STALE_REVISION: 3 location(s) it depends on changed since revision 17",
+            "changed_paths": [
+              "on[o5,p2]",
+              "queued_seq[o5]",
+              "status[o5]"
+            ]
+          },
+          {
+            "step": 38,
+            "operation": "run_rep_stale_svc:s38:handler_b:apply",
+            "reason": "STALE_REVISION: 1 location(s) it depends on changed since revision 18",
+            "changed_paths": [
+              "clock"
+            ]
+          },
+          {
+            "step": 40,
+            "operation": "run_rep_stale_svc:s40:handler_b:apply",
+            "reason": "STALE_REVISION: 2 location(s) it depends on changed since revision 19",
+            "changed_paths": [
+              "status[o6]",
+              "stock[b]"
+            ]
+          },
+          {
+            "step": 42,
+            "operation": "run_rep_stale_svc:s42:handler_b:apply",
+            "reason": "STALE_REVISION: 2 location(s) it depends on changed since revision 20",
+            "changed_paths": [
+              "next_seq",
+              "status[o6]"
+            ]
+          },
+          {
+            "step": 44,
+            "operation": "run_rep_stale_svc:s44:handler_b:apply",
+            "reason": "STALE_REVISION: 3 location(s) it depends on changed since revision 21",
+            "changed_paths": [
+              "on[o6,p1]",
+              "queued_seq[o6]",
+              "status[o6]"
+            ]
+          },
+          {
+            "step": 46,
+            "operation": "run_rep_stale_svc:s46:handler_b:apply",
+            "reason": "STALE_REVISION: 1 location(s) it depends on changed since revision 22",
+            "changed_paths": [
+              "clock"
+            ]
+          },
+          {
+            "step": 48,
+            "operation": "run_rep_stale_svc:s48:handler_b:apply",
+            "reason": "STALE_REVISION: 1 location(s) it depends on changed since revision 23",
+            "changed_paths": [
+              "clock"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "environments": {
+    "formal-lab.env.ir-world": {
+      "capabilities": [
+        "env.idempotent_step",
+        "env.multi_actor",
+        "env.observation_delay",
+        "env.observe_on_request",
+        "env.pure_replayable",
+        "env.restore",
+        "env.seeded_variation",
+        "env.snapshot",
+        "env.snapshot_restore",
+        "env.truth_overrides",
+        "profile.deterministic_finite_v1"
+      ],
+      "recovery_modes": [
+        "RESEED",
+        "SNAPSHOT"
+      ],
+      "deployment_profiles": {
+        "all": "in-process"
+      }
+    },
+    "formal-lab.example.orders.service-env": {
+      "capabilities": [
+        "env.conditional_step",
+        "env.current_revision",
+        "env.idempotent_step",
+        "env.multi_actor",
+        "env.observe_on_request",
+        "env.persistent_session",
+        "env.query_operation",
+        "env.reset_session",
+        "env.snapshot",
+        "env.state_import",
+        "profile.deterministic_finite_v1"
+      ],
+      "recovery_modes": [
+        "SERVICE_RESET",
+        "STATE_IMPORT"
+      ],
+      "deployment_profiles": {
+        "local-lite": "loopback port started by the dev script or lifecycle manager (127.0.0.1)",
+        "local-services": "Compose service `orders` (http://orders:8765 inside the stack)",
+        "local-kind": "not provided for this example"
+      }
+    }
+  },
+  "probe_metrics": [
+    {
+      "metric_id": "throughput",
+      "unit": "orders/tick",
+      "description": "orders completed in the last W logical ticks ÷ W (logical window)"
+    },
+    {
+      "metric_id": "completion_rate",
+      "unit": "ratio",
+      "description": "completed ÷ arrived orders (to date)"
+    },
+    {
+      "metric_id": "queue_length",
+      "unit": "orders",
+      "description": "orders waiting in the processing queue now"
+    },
+    {
+      "metric_id": "backlog",
+      "unit": "orders",
+      "description": "arrived orders not yet processing"
+    },
+    {
+      "metric_id": "latency_ticks",
+      "unit": "ticks",
+      "description": "mean done_at − arrive_at of orders completed in the window (logical ticks)"
+    },
+    {
+      "metric_id": "op_latency_ms",
+      "unit": "ms",
+      "description": "median service-side handling time of the last 4·W operations (wall clock)"
+    },
+    {
+      "metric_id": "recovery_seconds",
+      "unit": "s",
+      "description": "last restart: process start − last committed operation before it (wall clock)"
+    }
+  ]
+}

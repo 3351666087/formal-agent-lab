@@ -1,0 +1,595 @@
+{
+  "deliverable": "phase3B-D1",
+  "scenario": {
+    "id": "corelang-net-app-data",
+    "title": "coreLang: read secret data on a networked application",
+    "schema": "formal-lab.mal.scenario/v1",
+    "language": {
+      "name": "coreLang",
+      "version": "1.0.0",
+      "source": "https://github.com/mal-lang/coreLang",
+      "ref": "v1.0.0",
+      "license": "Apache-2.0",
+      "mar": "corelang-1.0.0.mar",
+      "mar_sha256": "9aabc828b5174ebe202cf8120a8e13a989c2f6e03d5908d8c65a4cc8adb3b150"
+    },
+    "toolchain": {
+      "mal_toolbox": "2.11.0",
+      "mal_simulator": "3.2.1",
+      "python": "3.12"
+    },
+    "entry_points": [
+      "app:fullAccess"
+    ],
+    "goal": "secret:read",
+    "semantic_profile": "deterministic_finite_v1"
+  },
+  "import": {
+    "source": "live",
+    "unavailable_reason": null,
+    "toolchain_versions": {
+      "ok": true,
+      "python": "3.12.3",
+      "mal_toolbox": "2.11.0",
+      "mal_simulator": "3.2.1",
+      "language_file": "/home/null3351.guest/.venvs/fal-mal/corelang/corelang-1.0.0.mar",
+      "language_sha256": "9aabc828b5174ebe202cf8120a8e13a989c2f6e03d5908d8c65a4cc8adb3b150",
+      "language_assets": [
+        "Application",
+        "ConnectionRule",
+        "Credentials",
+        "Data",
+        "Group",
+        "Hardware",
+        "HardwareVulnerability",
+        "IAMObject",
+        "IDPS",
+        "Identity",
+        "Information",
+        "Network",
+        "PhysicalZone",
+        "Privileges",
+        "RoutingFirewall",
+        "SoftwareProduct",
+        "SoftwareVulnerability",
+        "User",
+        "Vulnerability"
+      ]
+    },
+    "graph_sha256": "e121dbd41c8fb5c107cc86deb30676ddd12dd675c13856b0985c3d59b0b8d9a6",
+    "fixture_digest_match": true
+  },
+  "display": {
+    "assets": [
+      {
+        "name": "net",
+        "type": "Network"
+      },
+      {
+        "name": "app",
+        "type": "Application"
+      },
+      {
+        "name": "secret",
+        "type": "Data"
+      }
+    ],
+    "associations": [
+      {
+        "asset": "net",
+        "field": "applications",
+        "targets": [
+          "app"
+        ]
+      },
+      {
+        "asset": "app",
+        "field": "networks",
+        "targets": [
+          "net"
+        ]
+      },
+      {
+        "asset": "app",
+        "field": "containedData",
+        "targets": [
+          "secret"
+        ]
+      },
+      {
+        "asset": "secret",
+        "field": "containingApp",
+        "targets": [
+          "app"
+        ]
+      }
+    ],
+    "attack_step_counts": {
+      "or": 91,
+      "defense": 6,
+      "and": 40,
+      "exist": 2,
+      "notExist": 2
+    },
+    "total_nodes": 141,
+    "lab_policy": {
+      "allowed_assets": [
+        "app",
+        "secret",
+        "net"
+      ],
+      "allowed_steps": [],
+      "forbidden_steps": [],
+      "max_attack_steps": 40,
+      "note": "Experiment boundary: the red team may traverse any step of the three in-scope assets, up to 40 actions. This bounds the experiment; it says nothing about whether the target is secure."
+    },
+    "target_security": {
+      "property_id": "secret-confidentiality",
+      "reach_forbidden": "secret:read",
+      "kind": "confidentiality",
+      "label": "The secret data cannot be read by the attacker"
+    },
+    "business_slo": {
+      "metric": "modeled_attack_cost",
+      "direction": "HIGHER_IS_BETTER",
+      "threshold": 6,
+      "unit": "steps",
+      "label": "Reading the secret should cost the attacker at least 6 steps from full application access"
+    }
+  },
+  "run": {
+    "reachable_case": {
+      "driver_validate_problems": [],
+      "native_goal_reached": true,
+      "reference_interpreter": {
+        "reachable": true,
+        "plan_length": 6
+      },
+      "z3": {
+        "verdict": "WITNESS",
+        "semantics": "EXISTS_PATH",
+        "scope": "MODEL_INTERNAL",
+        "plan_length": 6,
+        "explanation": "shortest path to goal 'target_reached' has 6 step(s)"
+      },
+      "attack_plan": [
+        "app:attemptRead",
+        "app:successfulRead",
+        "app:read",
+        "secret:attemptRead",
+        "secret:successfulRead",
+        "secret:read"
+      ],
+      "three_engines_agree": true
+    },
+    "target_holds_case": {
+      "driver_validate_problems": [],
+      "native_goal_reached": false,
+      "reference_interpreter": {
+        "reachable": false,
+        "plan_length": null
+      },
+      "z3": {
+        "verdict": "NO_WITNESS_WITHIN_BOUND",
+        "semantics": "EXISTS_PATH",
+        "scope": "MODEL_INTERNAL",
+        "plan_length": null,
+        "explanation": "no path of ≤ 60 step(s) reaches 'target_reached' (bounded conclusion; nothing is claimed for longer paths)"
+      },
+      "attack_plan": [],
+      "three_engines_agree": true
+    },
+    "lowering_report": {
+      "goal": "secret:read",
+      "goal_id": "secret__read",
+      "entry_points": [
+        "app:fullAccess"
+      ],
+      "modeled_steps": 29,
+      "edges": 33,
+      "modeled_edges": [
+        [
+          "app:fullAccess",
+          "app:accessNetworkAndConnections"
+        ],
+        [
+          "app:specificAccess",
+          "app:accessNetworkAndConnections"
+        ],
+        [
+          "app:fullAccess",
+          "app:attemptModify"
+        ],
+        [
+          "app:fullAccess",
+          "app:attemptRead"
+        ],
+        [
+          "net:reverseReach",
+          "app:attemptReverseReach"
+        ],
+        [
+          "app:useVulnerability",
+          "app:attemptSoftwareProductAbuse"
+        ],
+        [
+          "app:networkConnectUninspected",
+          "app:attemptUseVulnerability"
+        ],
+        [
+          "app:specificAccess",
+          "app:attemptUseVulnerability"
+        ],
+        [
+          "app:modify",
+          "app:fullAccess"
+        ],
+        [
+          "app:successfulModify",
+          "app:modify"
+        ],
+        [
+          "app:networkConnectInspected",
+          "app:networkConnect"
+        ],
+        [
+          "app:networkConnectUninspected",
+          "app:networkConnect"
+        ],
+        [
+          "net:accessInspected",
+          "app:networkConnectInspected"
+        ],
+        [
+          "net:accessUninspected",
+          "app:networkConnectUninspected"
+        ],
+        [
+          "app:successfulRead",
+          "app:read"
+        ],
+        [
+          "app:networkConnectUninspected",
+          "app:softwareProductVulnerabilityNetworkAccessAchieved"
+        ],
+        [
+          "app:fullAccess",
+          "app:specificAccess"
+        ],
+        [
+          "app:networkConnectInspected",
+          "app:specificAccessNetworkConnect"
+        ],
+        [
+          "app:networkConnectUninspected",
+          "app:specificAccessNetworkConnect"
+        ],
+        [
+          "app:specificAccess",
+          "app:specificAccessRead"
+        ],
+        [
+          "app:attemptModify",
+          "app:successfulModify"
+        ],
+        [
+          "app:attemptRead",
+          "app:successfulRead"
+        ],
+        [
+          "app:attemptReverseReach",
+          "app:successfulReverseReach"
+        ],
+        [
+          "app:attemptUseVulnerability",
+          "app:successfulUseVulnerability"
+        ],
+        [
+          "app:successfulUseVulnerability",
+          "app:useVulnerability"
+        ],
+        [
+          "app:accessNetworkAndConnections",
+          "net:accessInspected"
+        ],
+        [
+          "app:accessNetworkAndConnections",
+          "net:accessUninspected"
+        ],
+        [
+          "net:accessUninspected",
+          "net:attemptReverseReach"
+        ],
+        [
+          "net:attemptReverseReach",
+          "net:reverseReach"
+        ],
+        [
+          "app:read",
+          "secret:attemptRead"
+        ],
+        [
+          "app:specificAccessRead",
+          "secret:authorizedReadFromApplication"
+        ],
+        [
+          "secret:successfulRead",
+          "secret:read"
+        ],
+        [
+          "secret:attemptRead",
+          "secret:successfulRead"
+        ]
+      ],
+      "and_steps": 6,
+      "or_steps": 23,
+      "seed_steps": [],
+      "ancestors_total": 78,
+      "native_reachable_total": 64,
+      "excluded_unreached_ancestors": [
+        "app:attackerUnsafeUserActivityCapability",
+        "app:attackerUnsafeUserActivityCapabilityWithReverseReach",
+        "app:attackerUnsafeUserActivityCapabilityWithoutReverseReach",
+        "app:attemptFullAccessFromSupplyChainCompromise",
+        "app:attemptModifyFromSoftProdVulnerability",
+        "app:attemptNetworkConnectFromResponse",
+        "app:attemptReadFromSoftProdVulnerability",
+        "app:attemptUnsafeUserActivity",
+        "app:authenticate",
+        "app:bypassSupplyChainAuditing",
+        "app:fullAccessFromSupplyChainCompromise",
+        "app:localAccess",
+        "app:localConnect",
+        "app:modifyFromSoftProdVulnerability",
+        "app:networkAccess",
+        "app:networkConnectFromResponse",
+        "app:physicalAccessAchieved",
+        "app:readFromSoftProdVulnerability",
+        "app:reverseReach",
+        "app:softwareProductAbuse",
+        "app:softwareProductVulnerabilityHighPrivilegesAchieved",
+        "app:softwareProductVulnerabilityLocalAccessAchieved",
+        "app:softwareProductVulnerabilityLowPrivilegesAchieved",
+        "app:softwareProductVulnerabilityPhysicalAccessAchieved",
+        "app:softwareProductVulnerabilityUserInteractionAchieved",
+        "app:specificAccessAuthenticate",
+        "app:specificAccessFromLocalConnection",
+        "app:specificAccessFromNetworkConnection",
+        "app:successfulUnsafeUserActivity",
+        "app:supplyChainAuditingBypassed",
+        "app:unsafeUserActivity",
+        "net:accessControlBypassed",
+        "net:attemptAccessInspectedFromPhysicalAccess",
+        "net:attemptAccessUninspectedFromPhysicalAccess",
+        "net:bypassAccessControl",
+        "net:physicalAccess",
+        "net:successfulAccessInspectedFromPhysicalAccess",
+        "net:successfulAccessUninspectedFromPhysicalAccess",
+        "secret:accessDecryptedData",
+        "secret:accessUnencryptedData",
+        "secret:authorizedAccessFromApplication",
+        "secret:authorizedRead",
+        "secret:authorizedReadFromIAM"
+      ],
+      "folded_non_step_parents": [
+        "app:notPresent",
+        "secret:notPresent"
+      ],
+      "goal_native_reachable": true,
+      "defense_enabled": false,
+      "initial_hardened": [],
+      "scope": {
+        "kind": "deterministic reachability of one target step over the or/and attack graph",
+        "oracle": "native mal-simulator reachable set (ttc disabled, no Bernoulli draws)",
+        "in_scope": [
+          "or/and attack-step compromise",
+          "entry points",
+          "existence steps and disabled defenses folded to their native truth",
+          "per-step unit cost"
+        ],
+        "out_of_scope": [
+          "time-to-compromise (TTC) and any randomness",
+          "partial observation of the graph",
+          "asset/association changes during the attack",
+          "quantitative rewards"
+        ],
+        "cross_check": "the IR reproduces the native goal reachability; the reference interpreter and the Z3 bounded verifier confirm it independently"
+      },
+      "id_map": {
+        "app:accessNetworkAndConnections": "app__accessNetworkAndConnections",
+        "app:attemptModify": "app__attemptModify",
+        "app:attemptRead": "app__attemptRead",
+        "app:attemptReverseReach": "app__attemptReverseReach",
+        "app:attemptSoftwareProductAbuse": "app__attemptSoftwareProductAbuse",
+        "app:attemptUseVulnerability": "app__attemptUseVulnerability",
+        "app:fullAccess": "app__fullAccess",
+        "app:modify": "app__modify",
+        "app:networkConnect": "app__networkConnect",
+        "app:networkConnectInspected": "app__networkConnectInspected",
+        "app:networkConnectUninspected": "app__networkConnectUninspected",
+        "app:read": "app__read",
+        "app:softwareProductVulnerabilityNetworkAccessAchieved": "app__softwareProductVulnerabilityNetworkAccessAchieved",
+        "app:specificAccess": "app__specificAccess",
+        "app:specificAccessNetworkConnect": "app__specificAccessNetworkConnect",
+        "app:specificAccessRead": "app__specificAccessRead",
+        "app:successfulModify": "app__successfulModify",
+        "app:successfulRead": "app__successfulRead",
+        "app:successfulReverseReach": "app__successfulReverseReach",
+        "app:successfulUseVulnerability": "app__successfulUseVulnerability",
+        "app:useVulnerability": "app__useVulnerability",
+        "net:accessInspected": "net__accessInspected",
+        "net:accessUninspected": "net__accessUninspected",
+        "net:attemptReverseReach": "net__attemptReverseReach",
+        "net:reverseReach": "net__reverseReach",
+        "secret:attemptRead": "secret__attemptRead",
+        "secret:authorizedReadFromApplication": "secret__authorizedReadFromApplication",
+        "secret:read": "secret__read",
+        "secret:successfulRead": "secret__successfulRead"
+      }
+    },
+    "platform_episode": {
+      "status": "SUCCEEDED",
+      "reason": "goal 'target_reached' reached",
+      "termination_reason": "JOINT_GOAL_REACHED",
+      "steps": 6,
+      "attack_path": [
+        {
+          "step": 1,
+          "action": "compromise",
+          "target": "app:attemptRead"
+        },
+        {
+          "step": 2,
+          "action": "compromise",
+          "target": "app:successfulRead"
+        },
+        {
+          "step": 3,
+          "action": "compromise",
+          "target": "app:read"
+        },
+        {
+          "step": 4,
+          "action": "compromise",
+          "target": "secret:attemptRead"
+        },
+        {
+          "step": 5,
+          "action": "compromise",
+          "target": "secret:successfulRead"
+        },
+        {
+          "step": 6,
+          "action": "compromise",
+          "target": "secret:read"
+        }
+      ]
+    }
+  },
+  "active_vs_automatic": {
+    "active_attacker_actions": {
+      "modeled_steps": 29,
+      "witness_plan": [
+        "app:attemptRead",
+        "app:successfulRead",
+        "app:read",
+        "secret:attemptRead",
+        "secret:successfulRead",
+        "secret:read"
+      ],
+      "note": "steps the red team must perform; each is an IR `compromise` action with unit cost"
+    },
+    "automatic_effects": {
+      "auto_active_steps": [],
+      "always_blocked_steps": [
+        "app:attemptDenyFromSoftProdVulnerability",
+        "app:attemptFullAccessFromSupplyChainCompromise",
+        "app:attemptModifyFromSoftProdVulnerability",
+        "app:attemptNetworkConnectFromResponse",
+        "app:attemptReadFromSoftProdVulnerability",
+        "app:attemptUnsafeUserActivity",
+        "app:authenticate",
+        "app:denyFromSoftProdVulnerability",
+        "app:modifyFromSoftProdVulnerability",
+        "app:physicalAccessAchieved",
+        "app:readFromSoftProdVulnerability",
+        "app:softwareProductVulnerabilityUserInteractionAchieved",
+        "app:specificAccessAuthenticate",
+        "net:physicalAccess",
+        "secret:authorizedAccessFromApplication",
+        "secret:authorizedApplicationRespondConnectFromApplication",
+        "secret:authorizedApplicationRespondConnectFromIAM",
+        "secret:authorizedDeleteFromIAM",
+        "secret:authorizedReadFromIAM",
+        "secret:authorizedWriteFromIAM",
+        "secret:bypassPayloadInspectionFromEncryptedData"
+      ],
+      "note": "auto-active steps fire with no attacker action; blocked steps can never fire given the model (missing prerequisites / defenses). Both are folded to their native truth during lowering, so the IR only ever asks the attacker to perform genuinely active steps."
+    }
+  },
+  "boundary_labpolicy_targetsecurity_businessslo": {
+    "target_security_property": {
+      "property_id": "secret-confidentiality",
+      "reach_forbidden": "secret:read",
+      "kind": "confidentiality",
+      "label": "The secret data cannot be read by the attacker"
+    },
+    "target_security_violated": true,
+    "interpretation": "secret:read is reachable, so the TargetSecurity property is FALSE — the red team found a counterexample. This is the experiment succeeding, NOT a LabPolicy violation.",
+    "lab_policy_respected": true,
+    "lab_policy_note": "the whole attack plan stays inside allowed assets ['app', 'secret'] and within the 40-step budget",
+    "target_security_holds_without_entry_point": true,
+    "business_slo": {
+      "verdict": "OPTIMAL",
+      "min_attack_cost": 6,
+      "unit": "steps",
+      "slo_threshold": 6,
+      "slo_met": true
+    }
+  },
+  "verdict_taxonomy": {
+    "unknown": {
+      "how": "GOAL_REACHABILITY with timeout_ms=1",
+      "verdict": "UNKNOWN",
+      "explanation": "solver returned unknown after exploring 0 step(s): timeout"
+    },
+    "unsupported": {
+      "profile": "deterministic_finite_v1",
+      "supported_query_kinds": [
+        "GOAL_REACHABILITY",
+        "INVARIANT_VIOLATION",
+        "ACTION_PRECONDITION",
+        "OPTIMIZE_OBJECTIVE",
+        "ROBUST_SEQUENCE"
+      ],
+      "out_of_profile_queries": [
+        {
+          "kind": "P_MAX_REACHABILITY",
+          "accepted": false,
+          "error": "ValidationError"
+        },
+        {
+          "kind": "EXPECTED_TIME_TO_COMPROMISE",
+          "accepted": false,
+          "error": "ValidationError"
+        },
+        {
+          "kind": "PROBABILISTIC_REACHABILITY",
+          "accepted": false,
+          "error": "ValidationError"
+        }
+      ],
+      "note": "probabilistic reachability and expected time-to-compromise are not expressible in the deterministic profile; they need a probabilistic backend (a separate, declared profile), not this closed loop."
+    },
+    "witness": {
+      "case": "attacker holds app:fullAccess",
+      "verdict": "WITNESS",
+      "plan": [
+        "app:attemptRead",
+        "app:successfulRead",
+        "app:read",
+        "secret:attemptRead",
+        "secret:successfulRead",
+        "secret:read"
+      ]
+    },
+    "no_witness_within_bound": {
+      "case": "no entry point",
+      "verdict": "NO_WITNESS_WITHIN_BOUND",
+      "bound_max_steps": 60,
+      "meaning": "no attack within the bound; the target property holds up to depth 60"
+    },
+    "incomparable": {
+      "what": "native time-to-compromise (TTC) vs. IR unit step cost",
+      "native_ttc_values_present": 0,
+      "reason": "the deterministic profile runs with TTCMode.DISABLED and no Bernoulli draws, so native TTC is not produced; a probabilistic time metric and a deterministic step count are not on the same scale."
+    }
+  },
+  "conclusion": {
+    "closed_loop": "native mal-simulator → deterministic IR → reference interpreter + Z3 verifier → platform episode (Z3 red-team planner in ir-world)",
+    "three_engines_agree_reachable": true,
+    "three_engines_agree_target_holds": true,
+    "platform_episode_status": "SUCCEEDED",
+    "offline_readable": true
+  }
+}

@@ -1,0 +1,273 @@
+{
+  "format": "formal-agent-lab/doctor@1",
+  "captured_at": "2026-10-02T13:54:22Z",
+  "hostname": "colima",
+  "os": {
+    "system": "Linux",
+    "release": "6.8.0-117-generic",
+    "machine": "aarch64",
+    "python": "3.12.3",
+    "distribution": "Ubuntu 24.04.4 LTS",
+    "virtualization": "apple",
+    "rosetta_binfmt": true,
+    "qemu_x86_64_binfmt": true
+  },
+  "cpu_memory": {
+    "cpus_online": 4,
+    "cgroup_cpu_quota": null,
+    "cpus_usable": 4,
+    "memory_total_mib": 5910,
+    "memory_available_mib": 4496,
+    "cgroup_memory_limit_mib": null,
+    "memory_usable_mib": 5910,
+    "loadavg": [
+      1.39,
+      1.18,
+      1.08
+    ]
+  },
+  "disk": {
+    "repository": {
+      "path": "/Users/null3351/Code/formal-agent-lab",
+      "total_gib": 228.3,
+      "free_gib": 16.9
+    },
+    "home": {
+      "path": "/home/null3351.guest",
+      "total_gib": 18.3,
+      "free_gib": 13.1
+    },
+    "tmp": {
+      "path": "/tmp",
+      "total_gib": 18.3,
+      "free_gib": 13.1
+    }
+  },
+  "docker": {
+    "available": true,
+    "server_version": "29.5.2",
+    "os": "Ubuntu 24.04.4 LTS",
+    "architecture": "aarch64",
+    "cpus": 4,
+    "memory_mib": 5910,
+    "root_dir": "/var/lib/docker",
+    "root_disk": {
+      "path": "/var/lib/docker",
+      "total_gib": 29.4,
+      "free_gib": 21.7
+    },
+    "cgroup_driver": "cgroupfs",
+    "cgroup_version": "2",
+    "containers_running": 3,
+    "images": 23,
+    "usage": [
+      {
+        "type": "Images",
+        "size": "5.06GB",
+        "reclaimable": "1.32GB (26%)"
+      },
+      {
+        "type": "Containers",
+        "size": "389.1kB",
+        "reclaimable": "0B (0%)"
+      },
+      {
+        "type": "Local Volumes",
+        "size": "1.295GB",
+        "reclaimable": "836.2kB (0%)"
+      },
+      {
+        "type": "Build Cache",
+        "size": "60.79MB",
+        "reclaimable": "34.3MB"
+      }
+    ],
+    "buildx": "github.com/docker/buildx v0.34.1 e0b0e77d18d3379bc1e0d55f3b37de288d36fe47"
+  },
+  "tools": {
+    "python3": {
+      "available": true,
+      "version": "Python 3.12.3"
+    },
+    "uv": {
+      "available": true,
+      "version": "uv 0.12.19 (aarch64-unknown-linux-gnu)"
+    },
+    "node": {
+      "available": true,
+      "version": "v24.21.0"
+    },
+    "pnpm": {
+      "available": true,
+      "version": "12.6.0"
+    },
+    "docker": {
+      "available": true,
+      "version": "29.5.2"
+    },
+    "compose": {
+      "available": true,
+      "version": "5.1.4"
+    },
+    "helm": {
+      "available": true,
+      "version": "v4.3.0+gbec5b06"
+    },
+    "kind": {
+      "available": true,
+      "version": "kind v0.33.0 go1.26.7 linux/arm64"
+    },
+    "kubeconform": {
+      "available": true,
+      "version": "v0.8.0"
+    },
+    "temporal": {
+      "available": true,
+      "version": "temporal version 1.9.1 (Server 1.32.0, UI 2.54.1)"
+    },
+    "java": {
+      "available": false,
+      "version": "not installed"
+    },
+    "git": {
+      "available": true,
+      "version": "git version 2.43.0"
+    }
+  },
+  "dependencies": {
+    "venv": "/home/null3351.guest/.venvs/formal-agent-lab",
+    "venv_present": true,
+    "node_modules_present": true,
+    "python_lock_in_sync": true,
+    "python_imports": true,
+    "z3": "5.1.0",
+    "playwright_chromium": true,
+    "llm_configured": true
+  },
+  "ports": {
+    "expected": {
+      "5432": "PostgreSQL (local-services)",
+      "7233": "Temporal frontend (local-services)",
+      "8233": "Temporal UI (local-services)",
+      "8333": "S3 store / SeaweedFS (local-services)",
+      "8000": "platform API (dev)",
+      "5173": "web dev server (dev)",
+      "8080": "full Compose stack web (local-services, compose profile)",
+      "8765": "local order service (make orders-up; local-lite and local-services)"
+    },
+    "owners": {
+      "5432": "project:fal-dev-postgres-1",
+      "7233": "project:fal-dev-temporal-1",
+      "8233": "project:fal-dev-temporal-1",
+      "8333": "project:fal-dev-s3-1"
+    },
+    "in_use": [
+      5432,
+      7233,
+      8233,
+      8333
+    ]
+  },
+  "project_resources": {
+    "containers": [
+      "fal-dev-postgres-1",
+      "fal-dev-s3-1",
+      "fal-dev-temporal-1"
+    ],
+    "volumes": [
+      "fal-dev_pgdata",
+      "fal-dev_s3data",
+      "fal-dev_temporaldata"
+    ],
+    "images": [
+      "formal-agent-lab/api:0.3.0",
+      "formal-agent-lab/api:92036918f6eb",
+      "formal-agent-lab/api:local",
+      "formal-agent-lab/orders:0.3.0",
+      "formal-agent-lab/orders:92036918f6eb",
+      "formal-agent-lab/orders:local",
+      "formal-agent-lab/web:0.3.0",
+      "formal-agent-lab/web:92036918f6eb",
+      "formal-agent-lab/web:local",
+      "formal-agent-lab/worker:0.3.0",
+      "formal-agent-lab/worker:92036918f6eb",
+      "formal-agent-lab/worker:local"
+    ],
+    "kind_clusters": []
+  },
+  "network": {
+    "proxy": "http://192.168.5.2:7897",
+    "no_proxy": "127.0.0.1,localhost,::1,127.0.0.1,localhost,::1,127.0.0.1,localhost,::1,127.0.0.1,localhost,::1,127.0.0.1,localhost,::1,127.0.0.1,localhost,::1",
+    "loopback_excluded": true
+  },
+  "services": {
+    "postgres": true,
+    "temporal": true,
+    "s3": true,
+    "api": false,
+    "web_dev": false,
+    "compose_web": false,
+    "order_service": false
+  },
+  "profiles": {
+    "local-lite": {
+      "status": "AVAILABLE",
+      "description": "pure-data examples, local runner, offline replay; no containers",
+      "estimate": {
+        "cpus": 1,
+        "memory_mib": 600,
+        "disk_gib": 1.5
+      },
+      "missing_tools": [],
+      "resource_problems": [],
+      "port_conflicts": [],
+      "ports": []
+    },
+    "local-services": {
+      "status": "AVAILABLE",
+      "description": "PostgreSQL + Temporal + S3 + API + worker + web + local order service",
+      "estimate": {
+        "cpus": 2,
+        "memory_mib": 2600,
+        "disk_gib": 6
+      },
+      "missing_tools": [],
+      "resource_problems": [],
+      "port_conflicts": [],
+      "ports": [
+        5432,
+        7233,
+        8233,
+        8333,
+        8000,
+        5173,
+        8765
+      ]
+    },
+    "local-kind": {
+      "status": "AVAILABLE",
+      "description": "single-node kind cluster for Helm install / upgrade / rollback checks",
+      "estimate": {
+        "cpus": 2,
+        "memory_mib": 3000,
+        "disk_gib": 5
+      },
+      "missing_tools": [],
+      "resource_problems": [],
+      "port_conflicts": [],
+      "ports": []
+    }
+  },
+  "concurrency": {
+    "experiments": 1,
+    "solver_threads": 1,
+    "matrix": "queued",
+    "second_experiment_allowed": true,
+    "basis": "4 usable CPU(s), 5910 MiB usable memory"
+  },
+  "repository": {
+    "revision": "a743ab21399d7035aa4195111d8e326af9d7ee36",
+    "dirty_files": 3
+  },
+  "duration_s": 1.38
+}

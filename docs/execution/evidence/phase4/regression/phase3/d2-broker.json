@@ -1,0 +1,442 @@
+{
+  "deliverable": "phase3B-D2",
+  "ruleset": {
+    "id": "mal-admission",
+    "version": 1,
+    "status": "RELEASED",
+    "digest": "8f69eedfca8d155161f2b0293fa9a8067d73cc6368e7caf9b5ca4df05c3269b4",
+    "rules": [
+      {
+        "rule_id": "mal.lab-policy",
+        "kind": "lab_policy",
+        "on": "side_effect_action",
+        "when": [
+          "lab_policy_permits"
+        ],
+        "then": "ADMIT",
+        "source": "实验边界：红方只能触碰 LabPolicy 允许的资产/步骤，未被禁止，且在预算内。"
+      },
+      {
+        "rule_id": "mal.receipt",
+        "kind": "action_precondition",
+        "on": "side_effect_action",
+        "when": [
+          "receipt_present",
+          "receipt_authorizes_action"
+        ],
+        "then": "REQUIRE_RECEIPT",
+        "source": "动作前提：每个副作用动作都要有一份检查基础可授权该动作的验证凭据。"
+      },
+      {
+        "rule_id": "mal.role",
+        "kind": "role_rule",
+        "on": "side_effect_action",
+        "when": [
+          "role_permits_action"
+        ],
+        "then": "ADMIT",
+        "source": "角色规则：只有攻击者角色可以执行 compromise 动作。"
+      },
+      {
+        "rule_id": "mal.target-security",
+        "kind": "target_security",
+        "on": "side_effect_action",
+        "when": [
+          "target_security_covered"
+        ],
+        "then": "ADMIT",
+        "source": "目标性质：凭据的检查基础必须针对本场景的 TargetSecurity 性质并给出真实判定。"
+      }
+    ]
+  },
+  "signing": {
+    "scheme": "HMAC-SHA256 (FIPS-198) behind Signer/Verifier; asymmetric backend can replace it",
+    "guarantee": "signature provides provenance + integrity only; the mathematical guarantee is the receipt's check_basis / scope, not the signature",
+    "history_provenance_survives_expiry": true
+  },
+  "admit_taxonomy": [
+    {
+      "case": "happy_path",
+      "verdict": "ALLOW",
+      "zero_side_effect": false,
+      "failing_reason_kind": null,
+      "explained_reasons": [
+        "provenance=True",
+        "binding=True",
+        "binding=True",
+        "binding=True",
+        "binding=True",
+        "binding=True",
+        "binding=True",
+        "binding=True",
+        "state_revision=True",
+        "expiry=True",
+        "lab_policy=True",
+        "action_precondition=True",
+        "role_rule=True",
+        "target_security=True"
+      ],
+      "failed": []
+    },
+    {
+      "case": "missing_receipt",
+      "verdict": "DENY",
+      "zero_side_effect": true,
+      "failing_reason_kind": "binding",
+      "explained_reasons": [
+        "binding=False"
+      ],
+      "failed": [
+        "binding: no receipt bound to this request"
+      ]
+    },
+    {
+      "case": "tampered_signature",
+      "verdict": "DENY",
+      "zero_side_effect": true,
+      "failing_reason_kind": "provenance",
+      "explained_reasons": [
+        "provenance=False",
+        "binding=True",
+        "binding=True",
+        "binding=True",
+        "binding=True",
+        "binding=True",
+        "binding=True",
+        "binding=True",
+        "state_revision=True",
+        "expiry=True",
+        "lab_policy=True",
+        "action_precondition=True",
+        "role_rule=True",
+        "target_security=True"
+      ],
+      "failed": [
+        "provenance: signature by 'issuer-1' INVALID"
+      ]
+    },
+    {
+      "case": "binding_mismatch_actor",
+      "verdict": "DENY",
+      "zero_side_effect": true,
+      "failing_reason_kind": "binding",
+      "explained_reasons": [
+        "provenance=True",
+        "binding=True",
+        "binding=True",
+        "binding=False",
+        "binding=True",
+        "binding=True",
+        "binding=True",
+        "binding=True",
+        "state_revision=True",
+        "expiry=True",
+        "lab_policy=True",
+        "action_precondition=True",
+        "role_rule=True",
+        "target_security=True"
+      ],
+      "failed": [
+        "binding: actor_id: receipt='red' request='blue' MISMATCH"
+      ]
+    },
+    {
+      "case": "stale_state_revision",
+      "verdict": "DENY",
+      "zero_side_effect": true,
+      "failing_reason_kind": "state_revision",
+      "explained_reasons": [
+        "provenance=True",
+        "binding=True",
+        "binding=True",
+        "binding=True",
+        "binding=True",
+        "binding=True",
+        "binding=True",
+        "binding=True",
+        "state_revision=False",
+        "expiry=True",
+        "lab_policy=True",
+        "action_precondition=True",
+        "role_rule=True",
+        "target_security=True"
+      ],
+      "failed": [
+        "state_revision: receipt at revision 5, current 7 (stale — re-check against current state)"
+      ]
+    },
+    {
+      "case": "expired_receipt",
+      "verdict": "DENY",
+      "zero_side_effect": true,
+      "failing_reason_kind": "expiry",
+      "explained_reasons": [
+        "provenance=True",
+        "binding=True",
+        "binding=True",
+        "binding=True",
+        "binding=True",
+        "binding=True",
+        "binding=True",
+        "binding=True",
+        "state_revision=True",
+        "expiry=False",
+        "lab_policy=True",
+        "action_precondition=True",
+        "role_rule=True",
+        "target_security=True"
+      ],
+      "failed": [
+        "expiry: expires_at 2026-10-02T13:55:29.289022+00:00 (EXPIRED)"
+      ]
+    },
+    {
+      "case": "wrong_role",
+      "verdict": "DENY",
+      "zero_side_effect": true,
+      "failing_reason_kind": "role_rule",
+      "explained_reasons": [
+        "provenance=True",
+        "binding=True",
+        "binding=True",
+        "binding=True",
+        "binding=True",
+        "binding=True",
+        "binding=True",
+        "binding=True",
+        "state_revision=True",
+        "expiry=True",
+        "lab_policy=True",
+        "action_precondition=True",
+        "role_rule=False",
+        "target_security=True"
+      ],
+      "failed": [
+        "role_rule: [ADMIT] the acting role may perform compromise"
+      ]
+    },
+    {
+      "case": "lab_policy_out_of_scope",
+      "verdict": "DENY",
+      "zero_side_effect": true,
+      "failing_reason_kind": "lab_policy",
+      "explained_reasons": [
+        "provenance=True",
+        "binding=True",
+        "binding=True",
+        "binding=True",
+        "binding=True",
+        "binding=True",
+        "binding=True",
+        "binding=True",
+        "state_revision=True",
+        "expiry=True",
+        "lab_policy=False",
+        "action_precondition=True",
+        "role_rule=True",
+        "target_security=True"
+      ],
+      "failed": [
+        "lab_policy: [ADMIT] target step is within the experiment's LabPolicy"
+      ]
+    },
+    {
+      "case": "target_security_mismatch",
+      "verdict": "DENY",
+      "zero_side_effect": true,
+      "failing_reason_kind": "target_security",
+      "explained_reasons": [
+        "provenance=True",
+        "binding=True",
+        "binding=True",
+        "binding=True",
+        "binding=True",
+        "binding=True",
+        "binding=True",
+        "binding=True",
+        "state_revision=True",
+        "expiry=True",
+        "lab_policy=True",
+        "action_precondition=True",
+        "role_rule=True",
+        "target_security=False"
+      ],
+      "failed": [
+        "target_security: [ADMIT] the receipt's check basis is about this scenario's TargetSecurity property"
+      ]
+    }
+  ],
+  "platform_run": {
+    "plan": [
+      {
+        "step": 1,
+        "revision": 0,
+        "action_type": "compromise",
+        "params": {
+          "n": "app__attemptRead"
+        }
+      },
+      {
+        "step": 2,
+        "revision": 1,
+        "action_type": "compromise",
+        "params": {
+          "n": "app__successfulRead"
+        }
+      },
+      {
+        "step": 3,
+        "revision": 2,
+        "action_type": "compromise",
+        "params": {
+          "n": "app__read"
+        }
+      },
+      {
+        "step": 4,
+        "revision": 3,
+        "action_type": "compromise",
+        "params": {
+          "n": "secret__attemptRead"
+        }
+      },
+      {
+        "step": 5,
+        "revision": 4,
+        "action_type": "compromise",
+        "params": {
+          "n": "secret__successfulRead"
+        }
+      },
+      {
+        "step": 6,
+        "revision": 5,
+        "action_type": "compromise",
+        "params": {
+          "n": "secret__read"
+        }
+      }
+    ],
+    "receipts_issued": 6,
+    "with_receipts": {
+      "status": "SUCCEEDED",
+      "reason": "goal 'target_reached' reached",
+      "steps": 6,
+      "goal_reached": true,
+      "gate_verdicts": [
+        "ALLOW",
+        "ALLOW",
+        "ALLOW",
+        "ALLOW",
+        "ALLOW",
+        "ALLOW",
+        "ALLOW",
+        "ALLOW",
+        "ALLOW",
+        "ALLOW",
+        "ALLOW",
+        "ALLOW"
+      ],
+      "denied_operations": 0
+    },
+    "without_receipts": {
+      "status": "BUDGET_EXHAUSTED",
+      "reason": "step budget exhausted (60/60)",
+      "steps": 60,
+      "goal_reached": false,
+      "gate_verdicts": [
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY"
+      ],
+      "denied_operations": 60
+    }
+  },
+  "role_boundary": {
+    "roles": [
+      "attacker",
+      "defender"
+    ],
+    "leaks_detected_in_marked_payload": [
+      "ground_truth",
+      "service_token",
+      "signing_key"
+    ],
+    "leaks_in_legitimate_payload": [],
+    "redacted_state_keys": [
+      "compromised[app:read]"
+    ],
+    "withheld": [
+      "defense[eavesdrop]",
+      "ground_truth[secret:read]"
+    ]
+  },
+  "isolation": {
+    "gate_path": "the Broker runs as an EXECUTION_GATE, so a DENY is never sent by the coordinator — rejection has zero side effects on the local runner, Temporal, re-send and pure-data re-execution (G2)",
+    "keys": "signing key held in a KeyStore separate from environment/service credentials; the receipt store carries only receipts, never secrets",
+    "strength": "in-process Python objects are NOT a security sandbox; isolation here is the gate boundary plus separate key storage and role views. Process/container/network isolation is D4's concern."
+  },
+  "conclusion": {
+    "normal_action_executable": true,
+    "rejection_zero_side_effect": true,
+    "every_rejection_class_explained": true,
+    "offline_readable": true
+  }
+}

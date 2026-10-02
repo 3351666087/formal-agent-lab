@@ -68,6 +68,11 @@ uv run --frozen python scripts/handoff_phase4.py  # 由本次检查结果生成 
 
 **留给后续执行者**：阶段三其余 G 组证据脚本仍以退出码 + 引用文件为准，未改为结构化上报；B1—B3 负责把所属领域脚本的真实业务断言接到 `CheckResult`。
 
+**最终验收时发现并修复（`fb50c55`、`a743ab2`）**：
+- 严格总验收经共享引擎运行阶段二历史套件时，引擎因真实模型与 PRISM-games 检查所在组（`conditional` / `extension`）不在阶段二组表中而拒绝加载——阶段二在 `acceptance-local` 下根本无法运行（A1 时只用 phase4 套件验证过汇总）。适配器现在声明这两组但不列为必需组；`tests/tools/test_historical_suite.py` 通过引擎自身的校验加载并列出该套件。
+- 阶段二的命令、七个阶段二脚本、`compose-smoke.sh`、四个阶段三 G 脚本与 `capture_screens.py` 不论 `FAL_EVIDENCE_DIR` 都写入 `evidence/phase2` / `evidence/phase3`：回归运行会覆盖历史证据（第一次中断的验收已改写 `phase3/g2-operations.json`，已从 git 恢复）。它们现在写到 `FAL_EVIDENCE_DIR`，单独运行时默认仍是各自的历史目录；`tests/tools/test_evidence_paths.py` 检查回归套件运行的每个脚本。
+- 阶段二的重型检查（Compose 整栈、订单 Compose、离线包、含镜像发行、kind 安装 / 升级）此前没有声明写盘量，在共享引擎下会绕过“写盘量 + 15 GiB 保留量”的守卫（离线包自身的守卫只要求 8 GiB）。现按阶段三的量级声明，验收时由引擎先判定。
+
 ## A2 · 当前状态、执行绑定与参与者输入
 
 **复现的缺口**（按基线 `bccda301` 的代码路径逐条核对；新的证据脚本依赖本包新增的接口，不能在基线上原样运行）：

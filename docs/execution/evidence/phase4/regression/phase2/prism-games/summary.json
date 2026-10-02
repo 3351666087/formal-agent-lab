@@ -1,0 +1,176 @@
+{
+  "checked_at": "2026-10-02T13:38:16Z",
+  "backend": {
+    "name": "prism-games",
+    "version": "3.2.4",
+    "home": "/home/null3351.guest/.local/opt/prism-games-3.2.4-linux64-arm",
+    "java": "openjdk version \"21.0.12.1\" 2026-08-18 LTS",
+    "arch": "aarch64",
+    "license": "GPL-2.0",
+    "source": "https://github.com/prismmodelchecker/prism-games/releases/tag/v3.2.4",
+    "artifacts": {
+      "linux64-arm": "prism-games-3.2.4-linux64-arm.tar.gz sha256 366f5fedf6d8be8b089372f64714edebda3fab26001bf38323905b8fcb62ce52",
+      "linux64-x86": "prism-games-3.2.4-linux64-x86.tar.gz (same release; not run here)"
+    },
+    "pinned_version": "3.2.4"
+  },
+  "pinned": {
+    "version": "3.2.4",
+    "license": "GPL-2.0",
+    "source": "https://github.com/prismmodelchecker/prism-games/releases/tag/v3.2.4",
+    "artifacts": {
+      "linux64-arm": "prism-games-3.2.4-linux64-arm.tar.gz sha256 366f5fedf6d8be8b089372f64714edebda3fab26001bf38323905b8fcb62ce52",
+      "linux64-x86": "prism-games-3.2.4-linux64-x86.tar.gz (same release; not run here)"
+    }
+  },
+  "profile": "prism_smg_turn_based_v1",
+  "game_schema": "org.formal-lab.prism-games/allocation-game@1",
+  "result_schema": "org.formal-lab.prism-games/result@1",
+  "assumptions": [
+    "finite state space: jobs ≤ 3, machines ≤ 3, rounds ≤ 8",
+    "turn-based: in every state exactly one player chooses (dispatcher, then environment, then the stochastic work step)",
+    "fully observed: both players see finished jobs, the round and the current assignment",
+    "stochastic transitions only in the work step, with the explicit per-machine success probabilities",
+    "the environment is adversarial for robust queries (<<dispatcher>>) and cooperative for <<dispatcher,environment>>"
+  ],
+  "distribution": "not redistributed: user-installed binary, separate process",
+  "games": [
+    {
+      "game_id": "two-jobs-two-machines",
+      "verified": true,
+      "size": {
+        "states": 91,
+        "transitions": 212,
+        "choices": 136
+      },
+      "reference_states": 91,
+      "properties": [
+        {
+          "property": "<<dispatcher>> Pmax=? [ F \"done\" ]",
+          "value": 0.7486830000000001,
+          "reference_value": 0.7486830000000001,
+          "agrees": true,
+          "method": "value iteration (Gauss-Seidel, maxmin)",
+          "iterations": 8,
+          "seconds": 0.007
+        },
+        {
+          "property": "<<dispatcher,environment>> Pmax=? [ F \"done\" ]",
+          "value": 0.985203,
+          "reference_value": 0.985203,
+          "agrees": true,
+          "method": "value iteration (Gauss-Seidel, maxmin)",
+          "iterations": 8,
+          "seconds": 0.007
+        }
+      ],
+      "strategy_value": 0.7486830000000001,
+      "strategy_decisions": 7,
+      "seconds": 2.371,
+      "files": [
+        "docs/execution/evidence/phase4/regression/phase2/prism-games/two-jobs-two-machines/model.lab",
+        "docs/execution/evidence/phase4/regression/phase2/prism-games/two-jobs-two-machines/model.prism",
+        "docs/execution/evidence/phase4/regression/phase2/prism-games/two-jobs-two-machines/model.sta",
+        "docs/execution/evidence/phase4/regression/phase2/prism-games/two-jobs-two-machines/model.tra",
+        "docs/execution/evidence/phase4/regression/phase2/prism-games/two-jobs-two-machines/prism-prop1.log",
+        "docs/execution/evidence/phase4/regression/phase2/prism-games/two-jobs-two-machines/prism-prop2.log",
+        "docs/execution/evidence/phase4/regression/phase2/prism-games/two-jobs-two-machines/props.props",
+        "docs/execution/evidence/phase4/regression/phase2/prism-games/two-jobs-two-machines/result.json",
+        "docs/execution/evidence/phase4/regression/phase2/prism-games/two-jobs-two-machines/strat.txt"
+      ]
+    },
+    {
+      "game_id": "three-jobs-three-machines",
+      "verified": true,
+      "size": {
+        "states": 1101,
+        "transitions": 3869,
+        "choices": 1880
+      },
+      "reference_states": 1101,
+      "properties": [
+        {
+          "property": "<<dispatcher>> Pmax=? [ F \"done\" ]",
+          "value": 0.733502287872,
+          "reference_value": 0.7335022878719999,
+          "agrees": true,
+          "method": "value iteration (Gauss-Seidel, maxmin)",
+          "iterations": 10,
+          "seconds": 0.012
+        },
+        {
+          "property": "<<dispatcher,environment>> Pmax=? [ F \"done\" ]",
+          "value": 0.9975642020640002,
+          "reference_value": 0.9975642020640002,
+          "agrees": true,
+          "method": "value iteration (Gauss-Seidel, maxmin)",
+          "iterations": 10,
+          "seconds": 0.031
+        }
+      ],
+      "strategy_value": 0.7335022878719999,
+      "strategy_decisions": 22,
+      "seconds": 2.403,
+      "files": [
+        "docs/execution/evidence/phase4/regression/phase2/prism-games/three-jobs-three-machines/model.lab",
+        "docs/execution/evidence/phase4/regression/phase2/prism-games/three-jobs-three-machines/model.prism",
+        "docs/execution/evidence/phase4/regression/phase2/prism-games/three-jobs-three-machines/model.sta",
+        "docs/execution/evidence/phase4/regression/phase2/prism-games/three-jobs-three-machines/model.tra",
+        "docs/execution/evidence/phase4/regression/phase2/prism-games/three-jobs-three-machines/prism-prop1.log",
+        "docs/execution/evidence/phase4/regression/phase2/prism-games/three-jobs-three-machines/prism-prop2.log",
+        "docs/execution/evidence/phase4/regression/phase2/prism-games/three-jobs-three-machines/props.props",
+        "docs/execution/evidence/phase4/regression/phase2/prism-games/three-jobs-three-machines/result.json",
+        "docs/execution/evidence/phase4/regression/phase2/prism-games/three-jobs-three-machines/strat.txt"
+      ]
+    }
+  ],
+  "capabilities": [
+    {
+      "feature": "turn-based SMG reachability",
+      "query": "<<C>> Pmax=? [ F \"done\" ]",
+      "status": "SUPPORTED",
+      "check": "value equals independent backward induction within 1e-6; state count equals the reference graph",
+      "measured": {
+        "two-jobs-two-machines": {
+          "states": 91,
+          "transitions": 212,
+          "choices": 136
+        },
+        "three-jobs-three-machines": {
+          "states": 1101,
+          "transitions": 3869,
+          "choices": 1880
+        }
+      }
+    },
+    {
+      "feature": "strategy export and in-model verification",
+      "query": "-exportstrat (actions)",
+      "status": "SUPPORTED",
+      "check": "exported dispatcher strategy achieves the reported value against the worst-case environment",
+      "measured": null
+    },
+    {
+      "feature": "cooperative coalition",
+      "query": "<<dispatcher,environment>> Pmax=? [ F \"done\" ]",
+      "status": "SUPPORTED",
+      "check": "value equals the cooperative backward induction",
+      "measured": null
+    },
+    {
+      "feature": "rewards, bounded / multi-objective, concurrent games (CSG)",
+      "query": "R{..}, F<=k, multi(...)",
+      "status": "UNSUPPORTED",
+      "check": "PRISM-games supports them; this adapter does not generate or verify them",
+      "measured": null
+    },
+    {
+      "feature": "partial observation",
+      "query": "—",
+      "status": "UNSUPPORTED",
+      "check": "the allocation game is fully observed by construction",
+      "measured": null
+    }
+  ],
+  "ok": true
+}

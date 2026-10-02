@@ -70,7 +70,12 @@ def main() -> None:
     wheels.mkdir(parents=True)
 
     print("==> wheels")
-    sh("uv", "build", "--all-packages", "--wheel", "--out-dir", str(wheels))
+    try:
+        sh("uv", "build", "--all-packages", "--wheel", "--out-dir", str(wheels))
+    except SystemExit as exc:  # the build backend comes from the package index: one retry after a network failure
+        print(f"wheel build failed, retrying once: {str(exc)[-300:]}", flush=True)
+        time.sleep(15)
+        sh("uv", "build", "--all-packages", "--wheel", "--out-dir", str(wheels))
     wheel_info = [{"file": p.name, "sha256": sha256(p), "bytes": p.stat().st_size} for p in sorted(wheels.glob("*.whl"))]
 
     for name in ("LICENSE", "NOTICE"):

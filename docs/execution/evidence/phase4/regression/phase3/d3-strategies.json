@@ -1,0 +1,141 @@
+{
+  "deliverable": "phase3B-D3",
+  "referee": "task success is judged by the environment state (compromised[target]) and would be cross-checked by independent probes; the agent's self-report is explanatory only",
+  "red_baselines": [
+    {
+      "strategy": "rule",
+      "status": "SUCCEEDED",
+      "steps": 6,
+      "goal_reached": true,
+      "reason": "goal 'target_reached' reached"
+    },
+    {
+      "strategy": "symbolic",
+      "status": "SUCCEEDED",
+      "steps": 6,
+      "goal_reached": true,
+      "reason": "goal 'target_reached' reached"
+    },
+    {
+      "strategy": "hybrid",
+      "status": "SUCCEEDED",
+      "steps": 6,
+      "goal_reached": true,
+      "reason": "goal 'target_reached' reached"
+    }
+  ],
+  "blue_defense": {
+    "min_cost_cut": [
+      "app:attemptRead"
+    ],
+    "business_cost": 1,
+    "runs_against_hardened": [
+      {
+        "strategy": "rule",
+        "status": "FAILED",
+        "steps": 22,
+        "goal_reached": false,
+        "reason": "NON_RETRYABLE_FAILURE: no compromise candidate for the red rule"
+      },
+      {
+        "strategy": "symbolic",
+        "status": "FAILED",
+        "steps": 28,
+        "goal_reached": false,
+        "reason": "no applicable action for red on its belief"
+      },
+      {
+        "strategy": "hybrid",
+        "status": "FAILED",
+        "steps": 22,
+        "goal_reached": false,
+        "reason": "NON_RETRYABLE_FAILURE: no compromise candidate for the red hybrid"
+      }
+    ],
+    "all_red_blocked": true
+  },
+  "checkpoint_recovery": {
+    "stopped_next_step": 6,
+    "full_steps": 6,
+    "resumed_steps": 6,
+    "full_status": "SUCCEEDED",
+    "resumed_status": "SUCCEEDED",
+    "same_outcome": true,
+    "plan_progress_preserved": true
+  },
+  "hybrid_model": {
+    "real_endpoint_configured": false,
+    "mode": "STUB",
+    "note": "no model endpoint configured — the hybrid strategy ran with a marked stub that defers ranking to the rule; the real-model result is a conditional item, not claimed as delivered",
+    "hybrid_reached_goal": true
+  },
+  "model_revision": {
+    "true_deviation": {
+      "comparable_state": true,
+      "belief_target_reachable": false,
+      "truth_target_reachable": true,
+      "is_model_error": true,
+      "regression_case": {
+        "case_id": "mal-goal-reachability-deviation",
+        "source": "COUNTEREXAMPLE",
+        "model": {
+          "package_id": "mal-belief",
+          "version": 1,
+          "digest": {
+            "algorithm": "sha256",
+            "value": "f0ca228274b86ffddfa98aa15dfa34386b053ca9c68b1f5cd0e173137cf4e4d7"
+          }
+        },
+        "scenario": null,
+        "seed": null,
+        "initial_state": {
+          "compromised[secret__read]": false
+        },
+        "actions": [
+          {
+            "action_type": "compromise",
+            "params": {
+              "n": "secret__read"
+            }
+          }
+        ],
+        "expected": {
+          "compromised[secret__read]": false
+        },
+        "observed": {
+          "compromised[secret__read]": true
+        },
+        "compared_paths": [
+          "compromised[secret__read]"
+        ],
+        "minimized": false,
+        "origin": {
+          "reason": "belief model built from an incomplete native capture (missing the goal's propagation)"
+        },
+        "created_at": "2026-10-02T13:56:10.144684Z"
+      },
+      "old_model_v1_rejected": true,
+      "revised_model_v2_released": true,
+      "revised_model_v2_passes_case": true
+    },
+    "stale_difference": {
+      "belief_revision": 0,
+      "observation_revision": 63,
+      "belief_target": false,
+      "observed_target": true,
+      "classification": "STALE",
+      "reason": "the difference is explained by the world advancing between the belief's revision and the observation's revision (D-022)",
+      "regression_case_produced": false,
+      "enters_regression_library": false
+    },
+    "regression_library_clean": true
+  },
+  "conclusion": {
+    "both_sides_complete_experiment": true,
+    "checkpoint_recovery_preserves_progress": true,
+    "real_model_reported_honestly": true,
+    "one_true_revision_succeeds": true,
+    "stale_not_polluting_regression": true,
+    "offline_readable": true
+  }
+}

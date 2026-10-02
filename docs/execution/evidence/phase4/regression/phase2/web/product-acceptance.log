@@ -1,0 +1,18 @@
+project 验收项目 4375e5 (prj_286ff8e1c7064cceb53c); run run_0ea3091e3c47484bb21e: SUCCEEDED JOINT_GOAL_REACHED, 24 steps
+matrix view (acceptance): {"success": {"definition": "goal reached / every planned cell of this split (fixed before the runs; failed, cancelled, timed-out and not-run cells count as not reached)", "numerator": 4, "denominator": 4, "rate": 1, "finished_only": {"numerator": 4, "denominator": 4, "rate": 1, "note": "for reference only: excludes cells whose run did not finish"}}, "timed_out": [], "reused": [], "new_runs": 4, "not_reused": [{"cell_id": "cell_df77fce42027c8f0", "reason": "no completed cell with this configuration in the project"}, {"cell_id": "cell_9a23d60f1bff6b9d", "reason": "no completed cell with this configuration in the project"}, {"cell_id": "cell_2771ea1667859c8f", "reason": "no completed cell with this configuration in the project"}, {"cell_id": "cell_5b5a8da730b08a1a", "reason": "no completed cell with this configuration in the project"}], "sampling": {"DETERMINISTIC": 4}, "metric_missing_reasons": {"model_calls": {"NOT_APPLICABLE: strategy makes no model calls": 4}, "tokens": {"NOT_APPLICABLE: strategy makes no model calls": 4}}, "denominator_cells": 4, "run_status": {"SUCCEEDED": 4}, "not_run": 0, "run_failed": 0, "finished": 4, "goal_reached": 4, "goal_not_reached": [], "metric_missing": {"goal_reached": 0, "steps_used": 0, "rejected_actions": 0, "effect_mismatches": 0, "model_calls": 0, "tokens": 0, "wall_seconds": 0}, "metric_not_applicable": {"model_calls": 4, "tokens": 4}, "failures": []}
+
+$ fal replay verify
+OK formal-lab/replay-bundle@2 run=run_0ea3091e3c47484bb21e events=218 artifacts=25 operations=24 participants=2 contract=formal-lab-contracts/v2 digest=07cf6c6fbe419bf6ada825397f107f0caaf1fee6e9494ea05f2cbc45bbd30de8 causality=ok
+
+$ fal replay turns (first 6)
+step   1  round   1  dispatcher_a   #1   assign(m=m1, op=o1_cut)                  APPLIED
+step   2  round   1  dispatcher_b   #1   assign(m=m2, op=o1_cut)                  REJECTED
+step   3  round   2  dispatcher_a   #2   assign(m=m2, op=o2_cut)                  APPLIED
+step   4  round   2  dispatcher_b   #2   assign(m=m2, op=o2_cut)                  REJECTED
+step   5  round   3  dispatcher_a   #3   advance()                                APPLIED
+step   6  round   3  dispatcher_b   #3   advance()                                APPLIED
+
+$ fal replay model
+model line-scheduling@1 digest 03595b998939082d (bundled package digest 03595b998939082d)
+rules —
+release — (not pinned)

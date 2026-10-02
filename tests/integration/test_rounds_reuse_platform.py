@@ -106,7 +106,7 @@ def test_matrix_reuse_identical_changed_and_conservative(stack, demo):
     server = ProtocolTestServer().start()
     try:
         sid = stack.post(f"/scenarios/{demo['scenarios']['正常调度']['id']}/copy",
-                         {"name": f"正常调度（复用验证 {uuid.uuid4().hex[:6]}）"})["id"]
+                         {"name": f"A4 复用验证 {uuid.uuid4().hex[:6]}"})["id"]  # no seeded name inside it
         sc = stack.get(f"/scenarios/{sid}")
         body = {k: v for k, v in sc["manifest"].items()
                 if k not in ("scenario_id", "revision", "model", "contract_version")}

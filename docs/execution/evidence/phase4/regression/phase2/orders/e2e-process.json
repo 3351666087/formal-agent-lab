@@ -1,0 +1,278 @@
+{
+  "mode": "process",
+  "project": "p2check",
+  "workdir": "/Users/null3351/Code/formal-agent-lab/var/orders-e2e-check",
+  "steps": {
+    "precheck": {
+      "cpus": 4,
+      "mem_available_mb": 4553,
+      "disk_free_mb": 18873,
+      "floor": {
+        "cpus": 1,
+        "mem_mb": 256,
+        "disk_mb": 200
+      },
+      "ok": true,
+      "problems": []
+    },
+    "create": {
+      "endpoint": "http://127.0.0.1:42679",
+      "health": {
+        "status": "ok",
+        "service": "local-order-service",
+        "version": "1.0.0",
+        "project": "p2check",
+        "pid": 1514683,
+        "started_at": 1790947115.058639,
+        "tenants": 0,
+        "write_auth": false
+      },
+      "seconds": 0.25,
+      "transitions": [
+        {
+          "status": "CREATED",
+          "at": "2026-10-02T13:18:34.925434+00:00",
+          "note": "work directory /Users/null3351/Code/formal-agent-lab/var/orders-e2e-check/.fal-orders/p2check"
+        },
+        {
+          "status": "STARTING",
+          "at": "2026-10-02T13:18:34.925711+00:00",
+          "note": ""
+        },
+        {
+          "status": "READY",
+          "at": "2026-10-02T13:18:35.175931+00:00",
+          "note": "health ok at http://127.0.0.1:42679"
+        }
+      ]
+    },
+    "experiment": {
+      "normal-rule-1": {
+        "status": "SUCCEEDED",
+        "steps": 24,
+        "metrics": {
+          "orders_completed": 6.0,
+          "late_orders": 0.0,
+          "mean_latency": 2.3333333333333335
+        },
+        "operations": {
+          "COMPLETED": 24
+        },
+        "bundle": "bundles/normal-rule-1.replay.zip",
+        "seconds": 1.31
+      },
+      "normal-rule-2": {
+        "status": "SUCCEEDED",
+        "steps": 25,
+        "metrics": {
+          "orders_completed": 6.0,
+          "late_orders": 0.0,
+          "mean_latency": 2.0
+        },
+        "operations": {
+          "COMPLETED": 25
+        },
+        "bundle": "bundles/normal-rule-2.replay.zip",
+        "seconds": 1.24
+      },
+      "normal-z3-1": {
+        "status": "SUCCEEDED",
+        "steps": 26,
+        "metrics": {
+          "orders_completed": 6.0,
+          "late_orders": 0.0,
+          "mean_latency": 2.3333333333333335
+        },
+        "operations": {
+          "COMPLETED": 26
+        },
+        "bundle": "bundles/normal-z3-1.replay.zip",
+        "seconds": 20.78
+      },
+      "normal-z3-2": {
+        "status": "SUCCEEDED",
+        "steps": 27,
+        "metrics": {
+          "orders_completed": 6.0,
+          "late_orders": 0.0,
+          "mean_latency": 2.1666666666666665
+        },
+        "operations": {
+          "COMPLETED": 27
+        },
+        "bundle": "bundles/normal-z3-2.replay.zip",
+        "seconds": 14.93
+      },
+      "delayed-rule-1": {
+        "status": "SUCCEEDED",
+        "steps": 24,
+        "metrics": {
+          "orders_completed": 6.0,
+          "late_orders": 0.0,
+          "mean_latency": 2.3333333333333335
+        },
+        "operations": {
+          "COMPLETED": 18,
+          "RECONCILED": 6
+        },
+        "bundle": "bundles/delayed-rule-1.replay.zip",
+        "seconds": 7.38
+      },
+      "delayed-rule-2": {
+        "status": "SUCCEEDED",
+        "steps": 25,
+        "metrics": {
+          "orders_completed": 6.0,
+          "late_orders": 0.0,
+          "mean_latency": 2.0
+        },
+        "operations": {
+          "COMPLETED": 19,
+          "RECONCILED": 6
+        },
+        "bundle": "bundles/delayed-rule-2.replay.zip",
+        "seconds": 7.34
+      },
+      "delayed-z3-1": {
+        "status": "SUCCEEDED",
+        "steps": 26,
+        "metrics": {
+          "orders_completed": 6.0,
+          "late_orders": 0.0,
+          "mean_latency": 2.3333333333333335
+        },
+        "operations": {
+          "COMPLETED": 20,
+          "RECONCILED": 6
+        },
+        "bundle": "bundles/delayed-z3-1.replay.zip",
+        "seconds": 7.58
+      },
+      "delayed-z3-2": {
+        "status": "SUCCEEDED",
+        "steps": 27,
+        "metrics": {
+          "orders_completed": 6.0,
+          "late_orders": 0.0,
+          "mean_latency": 2.1666666666666665
+        },
+        "operations": {
+          "COMPLETED": 21,
+          "RECONCILED": 6
+        },
+        "bundle": "bundles/delayed-z3-2.replay.zip",
+        "seconds": 7.62
+      },
+      "deviation-rule-1": {
+        "status": "SUCCEEDED",
+        "steps": 26,
+        "metrics": {
+          "orders_completed": 6.0,
+          "late_orders": 1.0,
+          "mean_latency": 3.3333333333333335
+        },
+        "operations": {
+          "COMPLETED": 26
+        },
+        "bundle": "bundles/deviation-rule-1.replay.zip",
+        "seconds": 1.29
+      },
+      "deviation-rule-2": {
+        "status": "SUCCEEDED",
+        "steps": 28,
+        "metrics": {
+          "orders_completed": 6.0,
+          "late_orders": 0.0,
+          "mean_latency": 3.0
+        },
+        "operations": {
+          "COMPLETED": 28
+        },
+        "bundle": "bundles/deviation-rule-2.replay.zip",
+        "seconds": 1.36
+      },
+      "deviation-z3-1": {
+        "status": "SUCCEEDED",
+        "steps": 30,
+        "metrics": {
+          "orders_completed": 6.0,
+          "late_orders": 1.0,
+          "mean_latency": 4.0
+        },
+        "operations": {
+          "COMPLETED": 30
+        },
+        "bundle": "bundles/deviation-z3-1.replay.zip",
+        "seconds": 13.7
+      },
+      "deviation-z3-2": {
+        "status": "SUCCEEDED",
+        "steps": 28,
+        "metrics": {
+          "orders_completed": 6.0,
+          "late_orders": 0.0,
+          "mean_latency": 2.8333333333333335
+        },
+        "operations": {
+          "COMPLETED": 28
+        },
+        "bundle": "bundles/deviation-z3-2.replay.zip",
+        "seconds": 8.49
+      }
+    },
+    "export": {
+      "bundles": 12,
+      "service_states": 12,
+      "bytes": 4749518
+    },
+    "reset": {
+      "tenants": 12,
+      "probe_after_reset": {
+        "clock": 0,
+        "backlog": 3,
+        "queue": 0
+      },
+      "probe_metrics": [
+        "throughput",
+        "completion_rate",
+        "queue_length",
+        "backlog",
+        "latency_ticks",
+        "op_latency_ms",
+        "recovery_seconds"
+      ]
+    },
+    "rerun": {
+      "identical_trajectories": 12,
+      "cells": 12,
+      "differing": []
+    },
+    "resources": {
+      "mode": "process",
+      "pid": 1514683,
+      "data_bytes": 1019904,
+      "restarts": 0,
+      "rss_kb": 51292,
+      "cpu_seconds": 5.78
+    },
+    "cleanup": {
+      "removed": {
+        "processes": [
+          1514683
+        ],
+        "containers": [],
+        "paths": [
+          "/Users/null3351/Code/formal-agent-lab/var/orders-e2e-check/.fal-orders/p2check"
+        ]
+      },
+      "leftover_after_close": {
+        "processes": [],
+        "containers": [],
+        "volumes": [],
+        "paths": []
+      },
+      "state_dir_gone": true
+    }
+  },
+  "ok": true
+}
