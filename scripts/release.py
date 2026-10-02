@@ -30,6 +30,7 @@ ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "out" / "release"
 VERSION = "0.3.0"
 IMAGES = ("api", "worker", "web", "orders")
+LOCAL_CONFIGS = ("deploy/compose/docker-compose.yaml", "deploy/compose/services.dev.yaml", ".env.example")
 
 
 def sh(*cmd: str, cwd: Path = ROOT, env: dict | None = None) -> str:
@@ -74,6 +75,14 @@ def main() -> None:
 
     for name in ("LICENSE", "NOTICE"):
         shutil.copyfile(ROOT / name, OUT / name)
+    # the local run configurations (phase 4A): what a clean directory needs to start the platform locally
+    configs = OUT / "config"
+    configs.mkdir()
+    config_info = []
+    for src in LOCAL_CONFIGS:
+        dst = configs / Path(src).name
+        shutil.copyfile(ROOT / src, dst)
+        config_info.append({"file": f"config/{dst.name}", "source": src, "sha256": sha256(dst), "bytes": dst.stat().st_size})
 
     print("==> web bundle")
     sh("pnpm", "--dir", "web", "exec", "tsc", "--noEmit", "-p", "tsconfig.json")
@@ -148,6 +157,7 @@ def main() -> None:
                  "docs/handoff/phase1.md", "docs/handoff/phase2.md"],
         "follow_up_deployment": FOLLOW_UP,
         "deployment": {"compose": "deploy/compose/docker-compose.yaml", "helm_chart": "deploy/helm/formal-agent-lab"},
+        "local_configs": config_info,
         "duration_s": round(time.time() - t0, 1),
     }
     (OUT / "manifest.json").write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\n")

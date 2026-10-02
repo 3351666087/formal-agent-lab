@@ -1,0 +1,172 @@
+{
+  "deliverable": "phase4A-A5 release",
+  "release": {
+    "stdout_tail": [
+      "==> /Users/null3351/Code/formal-agent-lab/out/release/manifest.json (20 wheels, 0 images) in 8.4 s"
+    ],
+    "wheels": 20,
+    "has_subprocess_example": true,
+    "web": {
+      "file": "formal-agent-lab-web-0.3.0.tar.gz",
+      "sha256": "5089d7361a421871bd134e2a2e194acf9c2c97f843dcf53ee6ea9da064f83b7f",
+      "bytes": 717694
+    },
+    "local_configs": [
+      {
+        "file": "config/docker-compose.yaml",
+        "source": "deploy/compose/docker-compose.yaml",
+        "sha256": "ff4c34cae068cc6dacd4db7f4273887ff6c2bb0b3b84938a7b8969488bfb20ff",
+        "bytes": 4102
+      },
+      {
+        "file": "config/services.dev.yaml",
+        "source": "deploy/compose/services.dev.yaml",
+        "sha256": "4c876045f15d5bd972c517e7de2d3626cd252d1842797f0152f596f7d8ea9ce0",
+        "bytes": 1140
+      },
+      {
+        "file": "config/.env.example",
+        "source": ".env.example",
+        "sha256": "77008d4ebbb7643a118736f5825d8cd05a2676ceca059e7975259214171523fd",
+        "bytes": 1010
+      }
+    ],
+    "images": "--skip-images: OCI images not built by this run (make release builds them)",
+    "online_install": {
+      "clean_venv": true,
+      "project_packages_from": "built wheels (--find-links)",
+      "third_party_from": "package index / uv cache",
+      "installed": {
+        "formal-lab-contracts": "2.0.0",
+        "formal-lab-model-core": "0.3.0",
+        "formal-lab-sdk": "0.3.0"
+      },
+      "commands": [
+        {
+          "command": "fal --help",
+          "exit_code": 0,
+          "first_line": "Usage: fal [OPTIONS] COMMAND [ARGS]...                                         "
+        },
+        {
+          "command": "fal replay verify <bundle>",
+          "exit_code": 0,
+          "first_line": "OK formal-lab/replay-bundle@2 run=run_96f71955bbb642239435 events=128 artifacts=1 operations=15 participants=1 contract="
+        },
+        {
+          "command": "fal replay view <bundle>",
+          "exit_code": 0,
+          "first_line": "run run_96f71955bbb642239435  status SUCCEEDED (goal 'all_done' reached)  termination=JOINT_GOAL_REACHED"
+        },
+        {
+          "command": "fal replay batches <bundle>",
+          "exit_code": 0,
+          "first_line": ""
+        }
+      ],
+      "server": "none (FAL_API_URL points to an unreachable port)"
+    },
+    "license_counts": {
+      "python_runtime": 97,
+      "python_development": 10,
+      "node": 8
+    },
+    "revision": {
+      "repository": "https://github.com/3351666087/formal-agent-lab",
+      "revision": "9d3e3c606c705ec42ff43caed8c45f5033e8a795",
+      "dirty": true
+    }
+  },
+  "offline_install": {
+    "wheelhouse": {
+      "files": 38,
+      "sha256": [
+        "annotated_doc-0.0.5-py3-none-any.whl 117bac03a25ede5d",
+        "annotated_types-0.8.0-py3-none-any.whl f072f4d804ea359e",
+        "anyio-4.15.1-py3-none-any.whl 6152fdbbf9a77fde",
+        "certifi-2026.7.22-py3-none-any.whl 62f22742b58a1a33",
+        "fal_example_external_plugin-0.3.0-py3-none-any.whl 322796d2d42a8201",
+        "formal_lab_contracts-2.0.0-py3-none-any.whl 3d5bf788e3b3396b",
+        "formal_lab_domain_broker-0.3.0-py3-none-any.whl 9aac844ea55daf96",
+        "formal_lab_domain_mal-0.3.0-py3-none-any.whl d6b426b46a5afd27",
+        "formal_lab_env_cage-0.3.0-py3-none-any.whl 55570ffd1d4c40c6",
+        "formal_lab_env_mal-0.3.0-py3-none-any.whl a00518b28fdf7620",
+        "formal_lab_evaluation-0.3.0-py3-none-any.whl 71f620d20b7a57c7",
+        "formal_lab_example_orders-0.3.0-py3-none-any.whl 71025dbab6a59d32",
+        "formal_lab_example_scheduling-0.3.0-py3-none-any.whl 51412b6a898aff22",
+        "formal_lab_example_subprocess-0.3.0-py3-none-any.whl 476daa864e3e8b4c",
+        "formal_lab_example_warehouse-0.3.0-py3-none-any.whl 7b713cc9cd8f3a78",
+        "formal_lab_model_core-0.3.0-py3-none-any.whl 4590ad85991fc2b7",
+        "formal_lab_neutral_env-0.3.0-py3-none-any.whl 5da15e11736973e4",
+        "formal_lab_orchestrator-0.3.0-py3-none-any.whl fe6a16fd10fd716c",
+        "formal_lab_platform_api-0.3.0-py3-none-any.whl 55f4e7c5eea0de05",
+        "formal_lab_runtime-0.3.0-py3-none-any.whl f86fd8a965ff62e1",
+        "formal_lab_sdk-0.3.0-py3-none-any.whl c46775d4bf5b5971",
+        "formal_lab_solver_prism_games-0.3.0-py3-none-any.whl eba2d1ce3b57b377",
+        "formal_lab_solver_z3-0.3.0-py3-none-any.whl bdd2e2138648f67a",
+        "formal_lab_strategies-0.3.0-py3-none-any.whl 6651bf3abfc01e93",
+        "h11-0.16.0-py3-none-any.whl 63cf8bbe7522de3b",
+        "httpcore-1.0.9-py3-none-any.whl 2d400746a40668fc",
+        "httpx-0.28.1-py3-none-any.whl d909fcccc110f8c7",
+        "idna-3.20-py3-none-any.whl ab7ae71229745533",
+        "markdown_it_py-4.2.0-py3-none-any.whl 9f7ebbcd14fe5949",
+        "mdurl-0.1.2-py3-none-any.whl 84008a41e51615a4",
+        "pydantic-2.13.5-py3-none-any.whl 346a034f080da375",
+        "pydantic_core-2.46.5-cp312-cp312-manylinux_2_17_aarch64.manylinux2014_aarch64.whl 4fdc8b93a4152198",
+        "pygments-2.21.0-py3-none-any.whl 2363c69b61c4a97c",
+        "rich-15.0.0-py3-none-any.whl 33bd4ef74232fb73",
+        "shellingham-1.5.4-py2.py3-none-any.whl 7ecfff8f2fd72616",
+        "typer-0.27.2-py3-none-any.whl b3a5fc4342d5fc8f",
+        "typing_extensions-4.16.0-py3-none-any.whl 481caa481374e813",
+        "typing_inspection-0.4.4-py3-none-any.whl 65b8397ba37ccbce"
+      ]
+    },
+    "network": "pip --no-index; HTTP(S)_PROXY points at a closed port during install and replay",
+    "install_exit": 0,
+    "install_tail": "mal-lab-contracts-2.0.0 formal-lab-model-core-0.3.0 formal-lab-sdk-0.3.0 h11-0.16.0 httpcore-1.0.9 httpx-0.28.1 idna-3.20 markdown-it-py-4.2.0 mdurl-0.1.2 pydantic-2.13.5 pydantic-core-2.46.5 pygments-2.21.0 rich-15.0.0 shellingham-1.5.4 typer-0.27.2 typing-inspection-0.4.4 typing_extensions-4.16.0\n",
+    "installed": {
+      "formal-lab-contracts": "2.0.0",
+      "formal-lab-model-core": "0.3.0",
+      "formal-lab-sdk": "0.3.0"
+    },
+    "scenario": {
+      "run_id": "run_a5_release_orders",
+      "status": "SUCCEEDED",
+      "steps": 25,
+      "events": 207,
+      "sha256": "c4696741a63dc005bb6a4d7fbbf9629a6ff6733c325dd14469ca3418480f3f11"
+    },
+    "replay": [
+      {
+        "command": "fal replay verify <bundle>",
+        "exit_code": 0,
+        "first_line": "OK formal-lab/replay-bundle@2 run=run_a5_release_orders events=207 artifacts=1 operations=25 participants=1 contract=formal-lab-contracts/v2"
+      },
+      {
+        "command": "fal replay view <bundle>",
+        "exit_code": 0,
+        "first_line": "run run_a5_release_orders  status SUCCEEDED (goal 'all_completed' reached)  termination=JOINT_GOAL_REACHED"
+      },
+      {
+        "command": "fal replay step <bundle> 1",
+        "exit_code": 0,
+        "first_line": "{"
+      }
+    ],
+    "prerequisites": [
+      "CPython 3.12.3 (the wheels are py3-none-any or cp312 builds)",
+      "pip (bootstrapped into the venv)"
+    ]
+  },
+  "offline_stack": {
+    "status": "BLOCKED",
+    "need_gib": 23.0,
+    "guard": "disk-guard: refusing offline bundle (OCI images: 8 GiB + 15 GiB reserve): needs 23.0 GiB; host (repository filesystem) 18.7 GiB free, docker data (/var/lib/docker) 21.9 GiB free. Free space on the host (and run `sudo fstrim -av` in the VM) first.",
+    "note": "scripts/offline_bundle.py --verify builds and saves the four OCI images and starts the stack from the bundle; it is run only when the host keeps the reserve after it"
+  },
+  "conclusion": {
+    "release_outputs": true,
+    "online_clean_install_and_replay": true,
+    "fully_offline_install_and_replay": true,
+    "ordinary_scenario_bundle": true
+  }
+}

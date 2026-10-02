@@ -82,6 +82,17 @@ PLATFORM_CHECKS = [
           "持久路径：子进程环境上联合批次轮中暂停 + SIGKILL worker 后批次与子进程世界步逐轮对应；矩阵相同配置复用、变更配置新执行、模型单元保守重跑，原因与计数可见",
           f"{IT} tests/integration/test_rounds_reuse_platform.py tests/integration/test_matrix_v2_platform.py "
           "tests/integration/test_joint_batch_platform.py", ["P4A-A4"]),
+    # ------------------------------------------------------------ A5 product entries, narrow screens, release
+    Check("p4-a5-web-types", "a5", "Web 类型检查（批次面板、来源徽标与报告的改动）",
+          "pnpm --dir web exec tsc --noEmit -p tsconfig.json", ["P4A-A5"]),
+    Check("p4-a5-product-web", "a5",
+          "普通业务场景经 CLI 导入、SDK 配置、CLI 运行、API/CLI/Web 解释、Web/CLI 导出，API 停止后离线回放；批次面板 390 px / 平板 / 桌面 × 明暗：宽度、无截断、全文 title、键盘可达、对比度、减少动态",
+          f"{IT} tests/integration/test_product_flow_a5.py", ["P4A-A5"],
+          produces=[f"{EV}/a5-product-flow.json", f"{EV}/a5-narrow.json"]),
+    Check("p4-a5-release", "a5",
+          "发行：wheel（全部工作区成员）、Web 包、本地运行配置与清单；干净目录在线安装 + 离线回放、完全离线（--no-index）安装 + 普通场景离线回放；镜像离线包按磁盘保留量判定",
+          f"{PY} scripts/a5_release_evidence.py", ["P4A-A5"], protocol=True,
+          produces=[f"{EV}/a5-release.json", f"{EV}/release-manifest.json"]),
 ]
 
 for c in DOMAIN_CHECKS:

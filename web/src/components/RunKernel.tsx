@@ -95,9 +95,9 @@ export function BatchPanel({ run, events, labels }: { run: RunDetail; events: Tr
     <div className="card pad stack" data-testid="batch-panel">
       <div className="row"><h3 className="grow panel-title"><Icon name="batch" />同步批次</h3>
         <span className="small muted">{rows.length} 轮 · 语义 {rows[0]?.semantics ?? "—"}{rows[0]?.joint_prediction ? " · 联合预测" : ""}</span></div>
-      <div className="small muted">每轮成员在轮初观测上各自提案（各占一个全局步），最后一名成员的那一步把整批一次提交给环境（一个环境步）。</div>
+      <div className="small muted">每轮成员在轮初观测上各自提案（各占一个全局步），最后一名成员的那一步把整批一次提交给环境（一个世界步；环境自身的自动参与者另行列出）。</div>
       {rows.length === 0 ? <div className="small muted">第一轮尚未开始</div> :
-        <div className="batch-grid" role="table" aria-label="批次" style={{ maxHeight: 420, overflowY: "auto" }}>
+        <div className="batch-grid" role="table" aria-label="批次" tabIndex={0} style={{ maxHeight: 420, overflowY: "auto" }}>
           {rows.map((b) => (
             <div key={b.batch_id} className="batch-row" role="row">
               <div className="round" role="cell"><strong>第 {b.round} 轮</strong><StatusBadge status={b.status === "SUBMITTED" ? "SUCCEEDED" : b.status === "OPEN" ? "RUNNING" : "CANCELLED"} /></div>
@@ -107,12 +107,17 @@ export function BatchPanel({ run, events, labels }: { run: RunDetail; events: Tr
                     title={m.reason ?? ""}>
                     <div className="row" style={{ gap: 6 }}><ParticipantChip actorId={m.actor_id} order={order} />
                       <span className="badge">{m.status}</span>{m.global_step ? <span className="muted">步 {m.global_step}</span> : null}</div>
-                    <div className="ellipsis">{m.action ? (labels ? labels.actionText(m.action) : `${m.action.action_type}(${Object.values(m.action.params ?? {}).join(", ")})`) : m.reason ?? "—"}</div>
+                    {(() => { const text = m.action ? (labels ? labels.actionText(m.action) : `${m.action.action_type}(${Object.values(m.action.params ?? {}).join(", ")})`) : m.reason ?? "—";
+                      return <div className="ellipsis" title={text}>{text}</div>; })()}
                     {m.outcome && <div className="row" style={{ gap: 4 }}><span className={`badge ${m.outcome === "APPLIED" ? "ok" : "err"}`}>{m.outcome}</span>
                       <ComparisonBadge verdict={m.comparison} /></div>}
                   </div>))}
               </div>
-              <div className="env" role="cell">{b.env_step !== null && b.env_step !== undefined ? `环境步 ${b.env_step}` : b.status === "OPEN" ? "收集中" : "未发送"}</div>
+              <div className="env" role="cell">
+                <span>{(b.world_step ?? b.env_step ?? null) !== null ? `世界步 ${b.world_step ?? b.env_step}` : b.status === "OPEN" ? "收集中" : "未发送"}</span>
+                {(b.automatic ?? []).length > 0 && <span className="muted" title="环境自身的自动参与者在这一世界步中的动作（不是批次成员）">
+                  自动：{(b.automatic as Payload[]).map((a) => `${a.actor_id} ${a.action?.action_type ?? ""}${a.status === "APPLIED" ? "" : "（未生效）"}`).join("；")}</span>}
+              </div>
             </div>))}
         </div>}
     </div>

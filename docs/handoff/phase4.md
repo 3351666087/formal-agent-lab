@@ -10,6 +10,36 @@
 | doctor | Ubuntu 24.04.4 aarch64，4 vCPU，5910 MiB；Postgres / Temporal / S3 已起，API / Web 开发栈未起；LLM 已配置；java 缺失（PRISM 不涉及）（`docs/execution/evidence/phase4/doctor-takeover.json`） |
 | 磁盘 | 接手时宿主盘仅 8.5 GiB（0.3.0 镜像构建撑大了 VM 稀疏盘）。经用户授权清理垃圾：VM 内 BuildKit 缓存 4.3 GB、未被引用的阶段二 `formal-agent-lab/*:4e1f959e81f2` 镜像、pip/uv 缓存，随后在 VM 内 fstrim 归还 13.7 GiB；宿主 uv 缓存 954 MB、npm 缓存、brew 旧版本、一个过期的 Codex 临时安装目录。宿主盘 8.5 → 18 GiB。保留：开发栈卷与服务镜像、当前项目镜像、kindest/node、VM 内 Playwright 浏览器、其它应用的活动运行时；废纸篓未动（本就为空）；未做任何宽泛 prune |
 
+## 4A 交接总览
+
+STATUS_TABLE
+
+**命令**
+
+```bash
+make phase4-check ARGS="--group a1,a2,a3,a4,a5"   # 4A 平台包（VM 内：scripts/in-vm.sh 'make …'）
+make phase4-check                                 # 全部组；b1—b3 未登记前整体保持未完成
+make acceptance-local                             # 严格总验收（阶段二必做回归 + 阶段三适用回归 + 阶段四），B3 最终汇总
+uv run --frozen python scripts/handoff_phase4.py  # 由本次检查结果生成 phase4.manifest.json / phase4-checks.json / openapi
+```
+
+**真实模型与测试服务**：`p4-a3-real-endpoint` 使用已配置的 OpenAI 兼容中转（`https://api.uheapi.com/v1`，`gpt-5.6-sol`；凭据只在 git 忽略的 `.env`，证据中不含），结果标 `LLM`（应答端点 PROVIDER）。`formal_lab_strategies.protocol_server` 是回环上的协议测试服务，**不是模型**，结果标 `LLM_PROTOCOL_TEST`；确定性替身标 `LLM_STUB`。A2 的参与者投影与 A3 的协议测试均使用协议测试服务；只有 `a3-real-endpoint.json` 是真实提供方运行。开发执行者是 Opus 5.5，与实验中被调用的模型无关。
+
+**接口位置（供 B1—B3 接入）**
+
+| 主题 | 位置 |
+|---|---|
+| 执行依据 / 绑定 / 原子性边界 | `formal_lab_contracts.ExecutionContext`、`execution_binding()`；内核 `engine._send_hook` + `execution_context.py`；条件写 = `env.current_revision` + `env.conditional_step`（订单服务在写入事务内核对）；门控读 `GateRequest.execution`；签发 `ReceiptIssuerGate`、准入 `admit_execution`；范围见 [assurance-scope.md §6](../assurance-scope.md) |
+| 参与者投影与凭据分配 | `formal_lab_runtime.participants`（`Projection`、`participant_bundle`、`ParticipantServices.get_setting` 拒绝凭据类键）；参与者 API `/participant/whoami`、`/participant/export`，令牌由 `POST /runs/{id}/participants/{actor}/access` 签发；环境写凭据只在 0600 文件中由适配器读取 |
+| 模型客户端与计划接口 | `formal_lab_strategies.decision`（`DecisionRequest` / `ModelDecider` / `Decision`，内置 `choose_request` / `order_request`）、`client_from_settings`；来源由应答端点决定，`ProposalSource.decided_by`、`PlanGenerator.model_call_ids`；预算 `max_model_calls` / `max_model_attempts` |
+| 联合轮次 / 环境适配入口 | 轮次结局（PASSED / 退场 / 运行结束）、`WORLD_STEPPED`、`BatchRecord.world_step` / `automatic`、`env.world_step_report`；子进程环境范例 `examples/subprocess-env`；SDK 合同检查 `formal_lab_sdk.plugin_testing.check_environment` |
+| 矩阵复用键与评分接口 | 复用键 v3（`services/matrices.py expand_v2`：划分、内核版本、模型端点；版本未知 → RERUN）；报告 `formal_lab_eval.experiments.build_report`（固定分母成功率、不完整配对原因、工程读数）；指标 `MetricDefinition.observable` / `window` |
+| 产品与发行入口 | Web / API / CLI `fal` / SDK `formal_lab_sdk.Client`；发行 `scripts/release.py`（wheel、Web、本地运行配置、清单）、`scripts/offline_bundle.py`（镜像离线包，磁盘允许时）；`scripts/a5_release_evidence.py` |
+| 阻塞 | 镜像离线包（宿主磁盘：需 8 GiB + 15 GiB 保留量）；参与者多用户登录属部署范围；订单服务读接口回环不鉴权（部署条件）。真实端点与 Figma 本次可用、已实际使用 |
+| B1—B3 待注册位置 | `scripts/phase4_domain_checks.py`（只允许 b1—b3 组；未登记时为 `NO_CHECKS`，整体保持未完成）；证据脚本用 `scripts/check_result.py` 上报 |
+
+整体 Phase 4 的完成标记留给 B3。
+
 ## A1 · 检查器与验收状态
 
 **复现的缺口**（基线 `bccda301`）：
@@ -144,3 +174,30 @@
 | 平台（Temporal + PostgreSQL） | 子进程环境上的联合批次（收货员只能上架）：轮中暂停 + SIGKILL worker 后 SUCCEEDED，无重复事件；每个已提交批次的 (world_step, operation) 与子进程自己的世界步日志逐轮相同，世界步 1..n 连续（重启后的重执行只重复已记录的对，不形成新世界步）；收货员 PASSED 次数 = 其非退场 `TURN_SKIPPED` 次数 = 运行的 turn 状态计数，拣货员每轮 PROPOSED。矩阵：同配置的确定性单元 REUSED（同一 run，原因“the same full configuration … completed in matrix …”），LLM 单元（协议测试服务）配置摘要相同但 RERUN（“model … is not pinned”）并产生新请求；改预算后两单元都是新执行（NEW / RERUN）；报告 reused 1、new_runs 1、sampling DETERMINISTIC 1 / RESAMPLED 1，成功率分母 2 |
 
 **验证**：`p4-a4-unit`（子进程环境 5、neutral-env、仓储、评测含可手算报告、多参与者，40 项）、`p4-a4-rounds`（9/9 必需断言）、`p4-a4-platform`（新增 2 + 原矩阵 v2 / 联合批次平台测试，7 项）全部 PASS；架构边界测试新增“只有子进程适配器控制进程”规则——最初把适配器放进 `formal_lab_env` 时被边界测试拦下（环境包不得启动进程、不得依赖 runtime；API 不得引用策略插件包），已移到示例包并改为 API 内部的去凭据 URL 函数；受影响单元套件 392 项通过（另 4 项即上述边界问题，修复后架构测试 58 项通过），web `tsc --noEmit` 通过。
+
+## A5 · 产品入口、视觉修复与交接
+
+**复现的缺口**：
+- 390 px 下同步批次一轮的两个成员并排挤在 76 px 轮次列与 90 px 环境列之间：实测每个成员单元格只有 **70 px**，参与者名（“receive…”）、状态徽标（PROPOSED / APPLIED）与动作（“上架 i…”）全部被截断；平板 / 桌面宽度正常（259 / 461 px）。原有窄屏检查只看整页是否横向滚动，因此没有发现（修复前：同一测试在基线代码上的测量与截图 `docs/execution/evidence/phase4/a5-before/`；修复后：`a5-narrow.json` 与 `screens/`）；
+- 动作文本省略时没有全文可读入口（无 `title`），可滚动的轮次列表没有显式 `tabindex`；
+- Figma 的“运行台（390 px 窄屏）”画面就是这个被挤压的版本；
+- 截图链 `scripts/capture_screens.py` 只在开发库没有任何矩阵时才建示例矩阵，开发库已有其他矩阵时直接中断，且证据只能写入阶段三目录。
+
+**修复**：
+- `web/src/styles.css`：`@media (max-width: 640px)` 时批次逐轮堆叠（轮次 → 每名成员整宽一格 → 世界步），轮次之间分隔线；单元格内的芯片 / 徽标换行；轮次列表的键盘焦点样式；桌面布局不变。
+- `RunKernel.tsx` BatchPanel：动作全文在 `title`，轮次列表 `tabIndex=0`（键盘可聚焦并用 PageDown 滚动），右侧显示 A4 的世界步与环境自动参与者，说明文字改为“一个世界步；环境自身的自动参与者另行列出”。
+- 截图链：`--out` 指定证据位置（默认仍是阶段三记录，历史不覆盖），开发库已有其他矩阵时也会建自己的示例矩阵。四张事实变化的基线截图（`run-batch` / `run-batch-dark` / `run-narrow` / `run-batch-step`）由这条链重新生成后替换，其余基线截图未动；README 与设计系统文档同步“世界步”与窄屏规则。
+- 发行：`scripts/release.py` 把本地运行配置（`docker-compose.yaml`、`services.dev.yaml`、`.env.example`）连同摘要放入发行目录与清单；`scripts/a5_release_evidence.py` 分别记录在线安装与完全离线安装。
+
+**完成证据**：
+
+| 项 | 结果 |
+|---|---|
+| 产品流程（普通业务场景：订单处理，纯数据后端） | CLI `fal model push` 导入模型 → SDK 建场景与策略 → CLI `fal run start --wait`：SUCCEEDED，25 步 → API `/runs/{id}/steps/1` 与 CLI `fal run step` 给出同一解释（`reserve(o1)`，理由 “reserve stock for the submitted order due first”，前提 APPLICABLE，效果 MATCH）→ Web 运行台步骤详情（截图 `screens/a5-flow-step-explanation.png`）→ Web 下载与 CLI `fal export` 两份导出（事件数一致）→ **停止 API 进程**后在空目录 `fal replay verify / view / step` 全部成功（`a5-product-flow.json`） |
+| 窄屏修复 | 390 px 明暗：成员单元格 70 → 328 px，无截断，动作全文 `title`；平板 259 px、桌面 461 px 不变；明 / 暗文字对比度 17.44 / 14.31；轮次列表 `tabindex=0`、聚焦后 PageDown 滚动；减少动态时过渡与动画为 0s；无整页横向滚动（截图 `screens/a5-batch-{phone-390,tablet-768,desktop-1440}-{light,dark}.png`，`a5-narrow.json`） |
+| 截图链 | `capture_screens.py` 8 项检查全部为真（仓储批次 10 轮、订单恢复 6 个已对账操作、复用标记、窄屏无横向滚动、跳转链接、减少动态、无页面错误、无错误画面；`a5-web-capture.json`） |
+| Figma（`uuV6JeilZQkhnIQcJYEUET`） | 只同步事实变化的节点：`6:106`（运行台 · 仓储批次）、`6:112`（运行台 · 深色）、`6:114`（运行台 · 390 px，画框 390×293 → 390×565，换为批次面板的新截图）、`7:61`（390 px 画面的代码说明加入 640 px 规则）；其余画面、组件、变量、故事板未动；记录在 `design/figma.json` 的 `syncs` |
+| 发行 | `release.py --skip-images`：20 个 wheel（全部工作区成员，含新示例 `formal-lab-example-subprocess`）、Web 包、3 个本地运行配置（含摘要）、清单与许可清单；**在线安装**：干净 venv 从刚构建的 wheel 安装项目包、第三方依赖取自索引 / uv 缓存，无服务器下 `fal --help / replay verify / view / batches` 全部 0；**完全离线安装**：38 个 wheel 的离线目录，空目录新 venv `pip --no-index`（代理指向关闭端口）安装 `formal-lab-sdk[offline]`，对订单场景导出包 `fal replay verify / view / step` 全部 0（`a5-release.json`、`release-manifest.json`） |
+| 镜像离线包 | **BLOCKED**：`offline_bundle.py` 构建并保存四个 OCI 镜像需 8 GiB，另需保持 15 GiB 宿主保留量，宿主仅 18.7 GiB 可用（磁盘守卫拒绝）；未构建，不写成已完成 |
+
+**验证**：A5_FINAL

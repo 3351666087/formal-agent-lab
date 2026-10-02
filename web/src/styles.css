@@ -275,7 +275,17 @@ svg text { font-family: var(--font-sans); }
 .batch-cell { border: 1px solid var(--color-border); border-left: 3px solid var(--pc, var(--color-border-strong)); border-radius: var(--radius-md);
   padding: 5px 8px; font-size: var(--text-sm); background: var(--color-surface); min-width: 0; }
 .batch-cell.muted { background: var(--color-surface-sunken); }
-.batch-row .env { font-size: var(--text-xs); color: var(--color-text-secondary); display: flex; align-items: center; justify-content: flex-end; font-variant-numeric: tabular-nums; }
+.batch-row .env { font-size: var(--text-xs); color: var(--color-text-secondary); display: flex; flex-direction: column; align-items: flex-end; justify-content: center; gap: 2px; font-variant-numeric: tabular-nums; }
+.batch-cell .row { flex-wrap: wrap; row-gap: 2px; min-width: 0; }
+.batch-grid:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+/* phase 4A: narrow screens stack each round — round, then one full-width cell per member, then the world step */
+@media (max-width: 640px) {
+  .batch-row { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+  .batch-row + .batch-row { border-top: 1px solid var(--color-border); padding-top: 6px; }
+  .batch-row .round { flex-direction: row; align-items: center; justify-content: flex-start; gap: 8px; }
+  .batch-row .members { grid-auto-flow: row; grid-template-columns: minmax(0, 1fr); }
+  .batch-row .env { flex-direction: row; align-items: center; justify-content: flex-start; gap: 8px; }
+}
 
 .card-head { flex-wrap: wrap; }
 .card-head label select { max-width: min(60vw, 420px); }

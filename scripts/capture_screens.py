@@ -92,6 +92,8 @@ def main() -> int:
     ap.add_argument("--web", default="http://127.0.0.1:5173")
     ap.add_argument("--api", default="http://127.0.0.1:8000")
     ap.add_argument("--shots", default=str(SHOTS), help="where the screenshots go (default: the baseline in docs/assets)")
+    ap.add_argument("--out", default=str(OUT), help="where the evidence JSON goes (default: the phase-3 G5 record; "
+                                                    "later phases pass their own evidence path)")
     args = ap.parse_args()
     SHOTS = Path(args.shots).resolve()
     web, base = args.web.rstrip("/"), args.api.rstrip("/")
@@ -137,7 +139,8 @@ def main() -> int:
 
         # ---- the areas (light)
         mx = api(base, f"/projects/{sch}/matrices")
-        if not mx:  # a small matrix so the benchmark area shows a real comparison (and a reused copy)
+        if not any(m["name"].startswith("EDD") for m in mx):  # a small matrix so the benchmark area shows a real
+            # comparison (and a reused copy); a development database may already hold other matrices
             strategies = {s["name"]: s["id"] for s in api(base, f"/projects/{sch}/strategies")}
             scen = by_name(api(base, f"/projects/{sch}/scenarios"), "状态延迟")["id"]
             spec = {"version": 2, "name": "EDD vs 任务计划（状态延迟）", "scenarios": [scen],
@@ -218,8 +221,9 @@ def main() -> int:
     }
     doc = {"generated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), "duration_s": round(time.time() - t0, 1),
            "checks": checks, "ok": all(checks.values()), **out}
-    OUT.parent.mkdir(parents=True, exist_ok=True)
-    OUT.write_text(json.dumps(doc, indent=2, ensure_ascii=False) + "\n")
+    out_path = Path(args.out).resolve()
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out_path.write_text(json.dumps(doc, indent=2, ensure_ascii=False) + "\n")
     print(json.dumps(checks, indent=1, ensure_ascii=False))
     return 0 if doc["ok"] else 1
 

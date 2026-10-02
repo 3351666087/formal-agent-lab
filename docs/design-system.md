@@ -62,7 +62,7 @@
 | 模态 `Modal` | `ui.tsx` · `.modal` | 打开时焦点进入第一个输入，Esc 关闭并把焦点还给触发者 |
 | 空态 / 错误 / 加载 | `Empty` `ErrorState` `Loading` `QueryState` `InlineError` · `.state` `.state-icon` | 空态说明下一步；错误显示错误码、信息与字段错误并可重试；路由级错误在外壳内显示（`RouteError`） |
 | 提示与横幅 | `.callout.{ok,warn,err,info}`、`ControlBanner`、toast | 说明性提示；运行控制状态；操作反馈（4.5 s） |
-| 批次行 `BatchPanel` | `components/RunKernel.tsx` · `.batch-row` `.batch-cell` | 同步批次：一轮一行，成员单元格左边框为参与者色，右侧是环境步 |
+| 批次行 `BatchPanel` | `components/RunKernel.tsx` · `.batch-row` `.batch-cell` | 同步批次：一轮一行，成员单元格左边框为参与者色，右侧是世界步与环境自动参与者；≤ 640 px 逐轮堆叠（轮次 → 每名成员整宽一格 → 世界步），单元格内容换行、动作全文在 `title`；轮次列表可键盘聚焦滚动（`tabIndex=0`） |
 | 图标 `Icon` / `BrandMark` | `icons.tsx` | 16 px 网格、1.6 描边、圆角端点；20 个图标与标志，Figma 组件使用同一路径 |
 
 ## 4. 图表与模型图
