@@ -87,7 +87,8 @@ CHECKS: list[Check] = [
     Check("task-plans-and-turns", "multi-actor-recovery", ["P2-112", "P2-030", "P2-040", "P2-041", "P2-046",
                                                           "P2-047"],
           "两种确定性策略的轮次运行、任务计划检查点与新进程恢复、无进展处理",
-          f"{PYTEST} examples/neutral-scheduling/tests/test_task_planner.py packages/runtime/tests/test_multi_actor.py "
+          f"{PYTEST} -m 'not llm' examples/neutral-scheduling/tests/test_task_planner.py "
+          f"packages/runtime/tests/test_multi_actor.py "  # real-model cases: the conditional model-real check
           f"&& {PY} scripts/state_delay_report.py", [f"{EV}/state-delay/report.md"]),
     Check("multi-actor-platform-recovery", "multi-actor-recovery", ["P2-112", "P2-037"],
           "暂停 / 继续 / 取消 / Worker 重启后的轮次、计数与计划进度",

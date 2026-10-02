@@ -12,6 +12,7 @@ import time
 from pathlib import Path
 
 import pytest
+from playwright.sync_api import expect
 
 pytestmark = [pytest.mark.integration, pytest.mark.ui]
 ROOT = Path(__file__).resolve().parents[2]
@@ -101,8 +102,8 @@ def test_scenario_edit_persists_and_starts_run(page, web, stack):
     shot(page, "06-scenario")
     page.get_by_role("button", name="运行实验").click()
     page.wait_for_url(re.compile(r"/runs/run_"))
-    page.get_by_text("成功").first.wait_for(timeout=120000)
-    assert page.get_by_role("button", name="暂停").is_disabled()  # disabled state once finished
+    page.get_by_text(re.compile(r"已结束 · \d+ 事件")).wait_for(timeout=120000)  # the run ended (stream end state)
+    expect(page.get_by_role("button", name="暂停")).to_be_disabled(timeout=15000)  # disabled once finished
     shot(page, "07-run-console")
 
 
@@ -117,9 +118,12 @@ def test_run_console_live_sse_resume_after_reload(page, web, stack):
     page.get_by_text("实时").first.wait_for(timeout=30000)
     page.wait_for_function("document.querySelectorAll('table[aria-label=步骤列表] tbody tr').length >= 4", timeout=60000)
     page.reload()  # disconnect mid-run: the page reloads history and resumes the stream after the last seq
-    page.get_by_text("成功").first.wait_for(timeout=180000)
+    # the stream's own end state ("已结束 · N 事件"), not any "成功" on the page: the resources line reads
+    # "模型成功/尝试 …" from the first second, which made this wait return mid-run
+    page.get_by_text(re.compile(r"已结束 · \d+ 事件")).wait_for(timeout=180000)
     final = stack.get(f"/runs/{run_id}")
-    page.get_by_text(f"{final['event_seq']} 事件").wait_for(timeout=15000)
+    assert final["status"] == "SUCCEEDED", final["status"]
+    page.get_by_text(f"已结束 · {final['event_seq']} 事件").wait_for(timeout=15000)
     page.locator("table[aria-label='步骤列表'] tbody tr").nth(3).click()
     page.get_by_role("heading", name="决策").wait_for()
     page.get_by_role("heading", name="前提检查（信念状态）").wait_for()

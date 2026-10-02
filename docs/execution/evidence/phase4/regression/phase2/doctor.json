@@ -1,6 +1,6 @@
 {
   "format": "formal-agent-lab/doctor@1",
-  "captured_at": "2026-10-02T13:36:36Z",
+  "captured_at": "2026-10-02T16:45:40Z",
   "hostname": "colima",
   "os": {
     "system": "Linux",
@@ -17,20 +17,20 @@
     "cgroup_cpu_quota": null,
     "cpus_usable": 4,
     "memory_total_mib": 5910,
-    "memory_available_mib": 4505,
+    "memory_available_mib": 3961,
     "cgroup_memory_limit_mib": null,
     "memory_usable_mib": 5910,
     "loadavg": [
-      1.28,
-      1.18,
-      1.07
+      1.74,
+      1.38,
+      1.04
     ]
   },
   "disk": {
     "repository": {
       "path": "/Users/null3351/Code/formal-agent-lab",
       "total_gib": 228.3,
-      "free_gib": 18.2
+      "free_gib": 17.4
     },
     "home": {
       "path": "/home/null3351.guest",
@@ -54,7 +54,7 @@
     "root_disk": {
       "path": "/var/lib/docker",
       "total_gib": 29.4,
-      "free_gib": 21.8
+      "free_gib": 21.6
     },
     "cgroup_driver": "cgroupfs",
     "cgroup_version": "2",
@@ -73,7 +73,7 @@
       },
       {
         "type": "Local Volumes",
-        "size": "1.217GB",
+        "size": "1.465GB",
         "reclaimable": "836.2kB (0%)"
       },
       {
@@ -156,16 +156,22 @@
       "8765": "local order service (make orders-up; local-lite and local-services)"
     },
     "owners": {
+      "5173": "project:web (scripts/dev.sh)",
       "5432": "project:fal-dev-postgres-1",
       "7233": "project:fal-dev-temporal-1",
+      "8000": "project:api (scripts/dev.sh)",
       "8233": "project:fal-dev-temporal-1",
-      "8333": "project:fal-dev-s3-1"
+      "8333": "project:fal-dev-s3-1",
+      "8765": "pid 1611539 (python)"
     },
     "in_use": [
+      5173,
       5432,
       7233,
+      8000,
       8233,
-      8333
+      8333,
+      8765
     ]
   },
   "project_resources": {
@@ -204,10 +210,10 @@
     "postgres": true,
     "temporal": true,
     "s3": true,
-    "api": false,
-    "web_dev": false,
+    "api": true,
+    "web_dev": true,
     "compose_web": false,
-    "order_service": false
+    "order_service": true
   },
   "profiles": {
     "local-lite": {
@@ -224,7 +230,7 @@
       "ports": []
     },
     "local-services": {
-      "status": "AVAILABLE",
+      "status": "DEGRADED",
       "description": "PostgreSQL + Temporal + S3 + API + worker + web + local order service",
       "estimate": {
         "cpus": 2,
@@ -233,7 +239,12 @@
       },
       "missing_tools": [],
       "resource_problems": [],
-      "port_conflicts": [],
+      "port_conflicts": [
+        {
+          "port": 8765,
+          "owner": "pid 1611539 (python)"
+        }
+      ],
       "ports": [
         5432,
         7233,
@@ -266,8 +277,8 @@
     "basis": "4 usable CPU(s), 5910 MiB usable memory"
   },
   "repository": {
-    "revision": "a743ab21399d7035aa4195111d8e326af9d7ee36",
-    "dirty_files": 2
+    "revision": "995ed3d4879a780c4a9b2ad31c4b4a6b6af6e61d",
+    "dirty_files": 35
   },
-  "duration_s": 1.39
+  "duration_s": 1.3
 }

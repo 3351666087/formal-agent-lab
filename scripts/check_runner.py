@@ -353,7 +353,10 @@ def load_suite(name: str) -> Suite:
     # a historical suite (scripts/phase2_check.py): same check fields, its own output file stays untouched
     checks = [Check(id=c.id, group=c.group, title=c.title, command=c.command, tasks=c.tasks, evidence=c.evidence,
                     requires=c.requires, profile=c.profile, kind=c.kind, heavy_gib=getattr(c, "heavy_gib", 0.0),
-                    trigger=c.requires if c.kind == "conditional" else None)  # its prerequisite is its condition
+                    trigger=c.requires if c.kind == "conditional" else None,  # its prerequisite is its condition
+                    # end-to-end checks (real processes, browsers, killed workers): one more attempt after a FAIL —
+                    # every attempt is kept in the report, so a first failure stays visible
+                    retries=1 if c.requires in ("services", "docker") else 0)
               for c in mod.CHECKS]
     # its conditional / extension checks (real model, PRISM-games) live in groups of their own: declared, but only
     # the historical mandatory groups are required

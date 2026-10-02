@@ -335,8 +335,10 @@ def create_app(data_dir: Path, *, project: str = "local", write_token: str | Non
                 conn.execute("BEGIN IMMEDIATE")
                 if not Store.meta(conn, "clean_shutdown", True):
                     last = conn.execute("SELECT MAX(committed_at) AS t FROM operations").fetchone()["t"]
+                    # wall clock across two processes: a small backward clock step (seen under VM load) can make
+                    # the raw difference negative; a downtime is never below zero
                     conn.execute("INSERT INTO restarts (started_at, downtime_s, last_commit_at) VALUES (?, ?, ?)",
-                                 (started, (started - last) if last else None, last))
+                                 (started, max(0.0, started - last) if last else None, last))
                 Store.set_meta(conn, "clean_shutdown", False)
                 conn.execute("COMMIT")
 

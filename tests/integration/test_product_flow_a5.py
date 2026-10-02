@@ -85,7 +85,7 @@ def test_ordinary_business_flow_through_every_entry(stack, web, browser, tmp_pat
     ctx = browser.new_context(viewport=VIEWPORTS["desktop-1440"], locale="zh-CN", accept_downloads=True)
     page = ctx.new_page()
     page.goto(f"{web}/p/{project['id']}/runs/{run_id}")
-    page.get_by_text("成功").first.wait_for(timeout=60000)
+    page.get_by_text(re.compile(r"已结束 · \d+ 事件")).wait_for(timeout=60000)
     row = page.locator("table[aria-label='步骤列表'] tbody tr").filter(
         has=page.locator("td.num", has_text=re.compile(r"^1$")))
     row.first.click()

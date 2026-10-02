@@ -37,3 +37,10 @@ def test_phase2_conditional_checks_are_triggered_by_their_prerequisite():
     suite = load_suite("phase2")
     real = next(c for c in suite.checks if c.id == "model-real")
     assert real.kind == "conditional" and real.trigger == "llm"
+
+
+def test_phase2_end_to_end_checks_get_one_recorded_retry():
+    suite = load_suite("phase2")
+    e2e = {c.id for c in suite.checks if c.retries}
+    assert {"web-product", "order-service-platform", "multi-actor-platform-recovery"} <= e2e
+    assert all(c.retries == 0 for c in suite.checks if c.requires not in ("services", "docker"))

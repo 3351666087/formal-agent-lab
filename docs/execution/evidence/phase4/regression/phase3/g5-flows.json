@@ -1,0 +1,88 @@
+{
+  "generated_at": "2026-10-02T17:15:42Z",
+  "duration_s": 12.6,
+  "checks": {
+    "warehouse batch: run succeeded via CLI": true,
+    "warehouse batch: one environment step per round (online)": true,
+    "warehouse batch: exported bundle reads offline with the same rounds": true,
+    "order recovery: run succeeded via CLI": true,
+    "order recovery: unknown outcomes settled by query": true,
+    "order recovery: offline bundle keeps the reconciliations": true
+  },
+  "ok": true,
+  "api": "http://127.0.0.1:8000/api/v1",
+  "warehouse_batch": {
+    "run_id": "run_6a93a3cb928041ff8477",
+    "status": "SUCCEEDED",
+    "steps": 20,
+    "cli_start": "477: SUCCEEDED (goal 'all_picked' reached) steps=20\n  effect_mismatches    0.0\n  goal_reached         1.0\n  late_orders          0.0\n  model_calls          NOT_APPLICABLE\n  orders_completed     3.0\n  rejected_actions     1.0\n  station_changes      4.0\n  steps_used           20.0\n  tokens               NOT_APPLICABLE\n  total_lateness       0.0\n  units_put_away       7.0\n  wall_seconds         0.481",
+    "export": "wrote <tmp>/warehouse_batch.replay.zip (296940 bytes)",
+    "bundle_bytes": 296940,
+    "offline_verify": "OK formal-lab/replay-bundle@2 run=run_6a93a3cb928041ff8477 events=187 artifacts=11 operations=10 participants=2 contract=formal-lab-contracts/v2 digest=07cf6c6fbe419bf6ada825397f107f0caaf1fee6e9494ea05f2cbc45bbd30de8 causality=ok",
+    "online_rounds": 10,
+    "offline_rounds": 10,
+    "same_online_offline": true,
+    "cli_batches": [
+      "run_6a93a3cb928041ff8477:b1  round 1  SUBMITTED  env step 1  [START_STATE_DISJOINT_WRITES, joint prediction]",
+      "    receiver       PROPOSED   step   1  putaway(zone=z1, inbound=in1)        APPLIED MATCH",
+      "    picker         PROPOSED   step   2  tick()                               APPLIED MATCH",
+      "run_6a93a3cb928041ff8477:b2  round 2  SUBMITTED  env step 2  [START_STATE_DISJOINT_WRITES, joint prediction]",
+      "    receiver       PROPOSED   step   3  putaway(zone=z2, inbound=in2)        APPLIED MATCH",
+      "    picker         PROPOSED   step   4  assign(zone=z1, station=p1)          APPLIED MATCH",
+      "run_6a93a3cb928041ff8477:b3  round 3  SUBMITTED  env step 3  [START_STATE_DISJOINT_WRITES, joint prediction]"
+    ],
+    "offline_batches": [
+      "run_6a93a3cb928041ff8477:b1  round 1  SUBMITTED  env step 1  [START_STATE_DISJOINT_WRITES, joint prediction]",
+      "    receiver       PROPOSED   step   1  putaway(inbound=in1, zone=z1)        APPLIED MATCH",
+      "    picker         PROPOSED   step   2  tick()                               APPLIED MATCH",
+      "run_6a93a3cb928041ff8477:b2  round 2  SUBMITTED  env step 2  [START_STATE_DISJOINT_WRITES, joint prediction]",
+      "    receiver       PROPOSED   step   3  putaway(inbound=in2, zone=z2)        APPLIED MATCH",
+      "    picker         PROPOSED   step   4  assign(station=p1, zone=z1)          APPLIED MATCH",
+      "run_6a93a3cb928041ff8477:b3  round 3  SUBMITTED  env step 3  [START_STATE_DISJOINT_WRITES, joint prediction]"
+    ],
+    "env_step_per_round": true,
+    "offline_view": [
+      "run run_6a93a3cb928041ff8477  status SUCCEEDED (goal 'all_picked' reached)  termination=JOINT_GOAL_REACHED",
+      "scenario 仓储：收货员 + 拣货员同步批次  seed 0  model warehouse@1  turns=JOINT_BATCH",
+      "participant receiver: formal-lab.example.warehouse.rules@1.0.0 {'role': 'receiver'}",
+      "participant picker: formal-lab.example.warehouse.rules@1.0.0 {'role': 'picker'}",
+      "  step   1 [receiver r1]  putaway(inbound=in1, zone=z1)  check=UNSUPPORTED outcome=APPLIED effect=MATCH"
+    ]
+  },
+  "order_recovery": {
+    "run_id": "run_4637b552ba62424eb372",
+    "status": "SUCCEEDED",
+    "steps": 25,
+    "cli_start": "n_4637b552ba62424eb372 QUEUED\nrun_4637b552ba62424eb372: SUCCEEDED (goal 'all_completed' reached) steps=25\n  effect_mismatches    0.0\n  goal_reached         1.0\n  late_orders          0.0\n  mean_latency         3.0\n  model_calls          NOT_APPLICABLE\n  orders_completed     6.0\n  rejected_actions     0.0\n  steps_used           25.0\n  tokens               NOT_APPLICABLE\n  wall_seconds         7.857",
+    "export": "wrote <tmp>/order_recovery.replay.zip (362300 bytes)",
+    "bundle_bytes": 362300,
+    "offline_verify": "OK formal-lab/replay-bundle@2 run=run_4637b552ba62424eb372 events=239 artifacts=26 operations=25 participants=1 contract=formal-lab-contracts/v2 digest=07cf6c6fbe419bf6ada825397f107f0caaf1fee6e9494ea05f2cbc45bbd30de8 causality=ok",
+    "operations": 25,
+    "reconciled": 6,
+    "outcome_unknown": 6,
+    "cli_ops": [
+      "run_4637b552ba62424eb372:s4:handler:apply  step 4  RECONCILED  PREPARED → DISPATCHED → OUTCOME_UNKNOWN → RECONCILED",
+      "run_4637b552ba62424eb372:s8:handler:apply  step 8  RECONCILED  PREPARED → DISPATCHED → OUTCOME_UNKNOWN → RECONCILED",
+      "run_4637b552ba62424eb372:s12:handler:apply  step 12  RECONCILED  PREPARED → DISPATCHED → OUTCOME_UNKNOWN → RECONCILED",
+      "run_4637b552ba62424eb372:s16:handler:apply  step 16  RECONCILED  PREPARED → DISPATCHED → OUTCOME_UNKNOWN → RECONCILED",
+      "run_4637b552ba62424eb372:s20:handler:apply  step 20  RECONCILED  PREPARED → DISPATCHED → OUTCOME_UNKNOWN → RECONCILED",
+      "run_4637b552ba62424eb372:s24:handler:apply  step 24  RECONCILED  PREPARED → DISPATCHED → OUTCOME_UNKNOWN → RECONCILED"
+    ],
+    "offline_ops": [
+      "run_4637b552ba62424eb372:s4:handler:apply  step 4  reserve  PREPARED → DISPATCHED → OUTCOME_UNKNOWN → RECONCILED",
+      "    PREPARED         intent recorded before dispatch",
+      "    DISPATCHED       sent to the environment",
+      "    OUTCOME_UNKNOWN  RESULT_UNKNOWN: no answer from the order service (ReadTimeout: timed out) (after 1.01s)",
+      "    RECONCILED       query_operation: the environment reports APPLIED (effect applied: True)",
+      "run_4637b552ba62424eb372:s8:handler:apply  step 8  enqueue  PREPARED → DISPATCHED → OUTCOME_UNKNOWN → RECONCILED"
+    ],
+    "offline_reconciled": 6,
+    "offline_view": [
+      "run run_4637b552ba62424eb372  status SUCCEEDED (goal 'all_completed' reached)  termination=JOINT_GOAL_REACHED",
+      "scenario 订单：延迟响应（业务服务）  seed 0  model local-order-service@1  turns=ROUND_ROBIN",
+      "participant handler: formal-lab.example.orders.rules@1.0.0 ",
+      "  step   1  reserve(o=o1)  check=APPLICABLE outcome=APPLIED effect=MATCH",
+      "  step   2  enqueue(o=o1)  check=APPLICABLE outcome=APPLIED effect=MATCH"
+    ]
+  }
+}

@@ -1,0 +1,557 @@
+{
+  "generated_at": "2026-10-02T16:47:06Z",
+  "config": {
+    "base_url_set": true,
+    "model_label": "gpt-5.6-sol",
+    "provider": "openai_compatible"
+  },
+  "checks": {
+    "requests": {
+      "status": "PASS",
+      "claim": "the first request (before any model answer) is identical for the same model, scenario and seed",
+      "first_request_digest": [
+        "4971d5c9c97065bf",
+        "4971d5c9c97065bf"
+      ],
+      "runs": [
+        {
+          "status": "SUCCEEDED",
+          "termination_reason": "JOINT_GOAL_REACHED",
+          "steps": 15,
+          "model_calls": 2,
+          "tokens": 7834,
+          "trajectory_digest": "96e0de961ae41798",
+          "metrics": {
+            "orders_completed": 3.0,
+            "delay_cost": 0.0
+          },
+          "calls": [
+            {
+              "call_id": "resp_0744464aa7c7ec78016abfe00e55f487d29ad853a6804a8198",
+              "outcome": "OK",
+              "attempts": 1,
+              "model_requested": "gpt-5.6-sol",
+              "model_returned": "gpt-5.6-sol",
+              "usage_reported": true,
+              "input_tokens": 725,
+              "output_tokens": 426,
+              "unconfirmed": false,
+              "latency_ms": 24840.2,
+              "request_digest": "4971d5c9c97065bf",
+              "response_digest": "c1687139b8e9188b",
+              "error": null
+            },
+            {
+              "call_id": "resp_060d15316b675ae1016abfe0a2796c87d0afb145a536c8ee36",
+              "outcome": "OK",
+              "attempts": 2,
+              "model_requested": "gpt-5.6-sol",
+              "model_returned": "gpt-5.6-sol",
+              "usage_reported": true,
+              "input_tokens": 4766,
+              "output_tokens": 1917,
+              "unconfirmed": false,
+              "latency_ms": 231055.1,
+              "request_digest": "295ef1f8fc6840f9",
+              "response_digest": "f7b00753a893aacf",
+              "error": null
+            }
+          ]
+        },
+        {
+          "status": "SUCCEEDED",
+          "termination_reason": "JOINT_GOAL_REACHED",
+          "steps": 15,
+          "model_calls": 2,
+          "tokens": 8415,
+          "trajectory_digest": "96e0de961ae41798",
+          "metrics": {
+            "orders_completed": 3.0,
+            "delay_cost": 0.0
+          },
+          "calls": [
+            {
+              "call_id": "resp_01a2671c1882fdb7016abfe113a32c87d18c283bd6a1bf0504",
+              "outcome": "OK",
+              "attempts": 1,
+              "model_requested": "gpt-5.6-sol",
+              "model_returned": "gpt-5.6-sol",
+              "usage_reported": true,
+              "input_tokens": 725,
+              "output_tokens": 758,
+              "unconfirmed": false,
+              "latency_ms": 44622.7,
+              "request_digest": "4971d5c9c97065bf",
+              "response_digest": "479d2eb7c2325cf1",
+              "error": null
+            },
+            {
+              "call_id": "resp_081e23f402b6dfce016abfe142a91487d1bf274dc83eb2356a",
+              "outcome": "OK",
+              "attempts": 1,
+              "model_requested": "gpt-5.6-sol",
+              "model_returned": "gpt-5.6-sol",
+              "usage_reported": true,
+              "input_tokens": 4766,
+              "output_tokens": 2166,
+              "unconfirmed": false,
+              "latency_ms": 111644.6,
+              "request_digest": "295ef1f8fc6840f9",
+              "response_digest": "001381a5d04dc7b9",
+              "error": null
+            }
+          ]
+        }
+      ],
+      "answers_identical": false,
+      "trajectories_identical": true,
+      "note": "answers and trajectories are reported, not claimed: a real model need not answer the same twice"
+    },
+    "resume": {
+      "status": "PASS",
+      "claim": "a fresh process restores the planner checkpoint at the boundary and every call keeps its evidence",
+      "boundary_checkpoint_digest": "651d15459fda810439b725efd34113539300b6547eccc9e3a49b0553d377e916",
+      "boundary_is_last_recorded_checkpoint": true,
+      "resumed_status": "SUCCEEDED",
+      "resumed_steps": 15,
+      "events_contiguous": true,
+      "calls_before_stop": 2,
+      "calls_total": 2,
+      "calls_complete": true,
+      "calls": [
+        {
+          "call_id": "resp_0965d5e35277446d016abfe1b55fd887d29655e8d5f7f130d4",
+          "outcome": "OK",
+          "attempts": 1,
+          "model_requested": "gpt-5.6-sol",
+          "model_returned": "gpt-5.6-sol",
+          "usage_reported": true,
+          "input_tokens": 725,
+          "output_tokens": 794,
+          "unconfirmed": false,
+          "latency_ms": 48924.4,
+          "request_digest": "4971d5c9c97065bf",
+          "response_digest": "63385de97d3c354e",
+          "error": null
+        },
+        {
+          "call_id": "resp_01fedb6e4944b889016abfe1e870f487d097559c08a4b75805",
+          "outcome": "OK",
+          "attempts": 1,
+          "model_requested": "gpt-5.6-sol",
+          "model_returned": "gpt-5.6-sol",
+          "usage_reported": true,
+          "input_tokens": 4766,
+          "output_tokens": 1630,
+          "unconfirmed": false,
+          "latency_ms": 87916.1,
+          "request_digest": "295ef1f8fc6840f9",
+          "response_digest": "f92b7093c6f492b0",
+          "error": null
+        }
+      ]
+    },
+    "per_step": {
+      "status": "PASS",
+      "claim": "every call records the configured label, the model the provider returned, request config, attempts, outcome and usage as reported",
+      "model_label": "gpt-5.6-sol",
+      "models_returned": [
+        "gpt-5.6-sol"
+      ],
+      "label_differs_from_returned": false,
+      "outcomes": {
+        "OK": 15,
+        "FORMAT_ERROR": 0,
+        "TRANSPORT_ERROR": 0
+      },
+      "usage_unreported_calls": 0,
+      "unconfirmed_calls": 0,
+      "run": {
+        "status": "SUCCEEDED",
+        "termination_reason": "JOINT_GOAL_REACHED",
+        "steps": 15,
+        "model_calls": 15,
+        "tokens": 88904,
+        "trajectory_digest": "96e0de961ae41798",
+        "metrics": {
+          "orders_completed": 3.0,
+          "delay_cost": 0.0
+        },
+        "calls": [
+          {
+            "call_id": "resp_07502e13d17e2b4d016abfe244491c87d08e62c3f5792310c3",
+            "outcome": "OK",
+            "attempts": 1,
+            "model_requested": "gpt-5.6-sol",
+            "model_returned": "gpt-5.6-sol",
+            "usage_reported": true,
+            "input_tokens": 3280,
+            "output_tokens": 187,
+            "unconfirmed": false,
+            "latency_ms": 13078.9,
+            "request_digest": "55ebd387f6053cfe",
+            "response_digest": "26e8e25cd8361031",
+            "error": null
+          },
+          {
+            "call_id": "resp_0bd2632df3e36640016abfe261ed3087d2997fe23151e3e49c",
+            "outcome": "OK",
+            "attempts": 1,
+            "model_requested": "gpt-5.6-sol",
+            "model_returned": "gpt-5.6-sol",
+            "usage_reported": true,
+            "input_tokens": 7363,
+            "output_tokens": 86,
+            "unconfirmed": false,
+            "latency_ms": 25155.1,
+            "request_digest": "5852c55855b66e5a",
+            "response_digest": "8d71fde6fdfd450d",
+            "error": null
+          },
+          {
+            "call_id": "resp_0323ea966ad0246d016abfe26981d487d296fab27d3c65dcb7",
+            "outcome": "OK",
+            "attempts": 1,
+            "model_requested": "gpt-5.6-sol",
+            "model_returned": "gpt-5.6-sol",
+            "usage_reported": true,
+            "input_tokens": 3282,
+            "output_tokens": 113,
+            "unconfirmed": false,
+            "latency_ms": 7559.1,
+            "request_digest": "8cc6492774e3c30e",
+            "response_digest": "5cc35231ac69c848",
+            "error": null
+          },
+          {
+            "call_id": "resp_0786228cee2b2c3f016abfe2735c4087d09ee18e1aa1d36ead",
+            "outcome": "OK",
+            "attempts": 1,
+            "model_requested": "gpt-5.6-sol",
+            "model_returned": "gpt-5.6-sol",
+            "usage_reported": true,
+            "input_tokens": 7360,
+            "output_tokens": 1028,
+            "unconfirmed": false,
+            "latency_ms": 61744.3,
+            "request_digest": "7539fe2e52eba018",
+            "response_digest": "42fa4dc008ccb79b",
+            "error": null
+          },
+          {
+            "call_id": "resp_0621e162e45e8850016abfe2ae49cc87d0b88581e0e56b91f9",
+            "outcome": "OK",
+            "attempts": 1,
+            "model_requested": "gpt-5.6-sol",
+            "model_returned": "gpt-5.6-sol",
+            "usage_reported": true,
+            "input_tokens": 7362,
+            "output_tokens": 121,
+            "unconfirmed": false,
+            "latency_ms": 9104.3,
+            "request_digest": "ce52db5403e92b0e",
+            "response_digest": "8b3d3c7b9650343b",
+            "error": null
+          },
+          {
+            "call_id": "resp_087847dcd80932ff016abfe2b716dc87d0a42b4dae0be5f5c4",
+            "outcome": "OK",
+            "attempts": 1,
+            "model_requested": "gpt-5.6-sol",
+            "model_returned": "gpt-5.6-sol",
+            "usage_reported": true,
+            "input_tokens": 3283,
+            "output_tokens": 95,
+            "unconfirmed": false,
+            "latency_ms": 7261.3,
+            "request_digest": "f168e12ee5d7fbe0",
+            "response_digest": "1971f1b67141026f",
+            "error": null
+          },
+          {
+            "call_id": "resp_0b94af668fa3b66e016abfe33998f887d0b4a15e796f17d1ee",
+            "outcome": "OK",
+            "attempts": 2,
+            "model_requested": "gpt-5.6-sol",
+            "model_returned": "gpt-5.6-sol",
+            "usage_reported": true,
+            "input_tokens": 7361,
+            "output_tokens": 568,
+            "unconfirmed": false,
+            "latency_ms": 156864.9,
+            "request_digest": "81b80e1b9377e366",
+            "response_digest": "14f5e1f7da1bf4b5",
+            "error": null
+          },
+          {
+            "call_id": "resp_0f953ea81890e29e016abfe35a794087d08795e88c3389de32",
+            "outcome": "OK",
+            "attempts": 1,
+            "model_requested": "gpt-5.6-sol",
+            "model_returned": "gpt-5.6-sol",
+            "usage_reported": true,
+            "input_tokens": 3283,
+            "output_tokens": 101,
+            "unconfirmed": false,
+            "latency_ms": 14402.8,
+            "request_digest": "c2e19605010c28fc",
+            "response_digest": "bd69fa210a126179",
+            "error": null
+          },
+          {
+            "call_id": "resp_0f3ed10022c06c65016abfe36928d887d2b469364169bb9f10",
+            "outcome": "OK",
+            "attempts": 1,
+            "model_requested": "gpt-5.6-sol",
+            "model_returned": "gpt-5.6-sol",
+            "usage_reported": true,
+            "input_tokens": 7363,
+            "output_tokens": 96,
+            "unconfirmed": false,
+            "latency_ms": 7081.4,
+            "request_digest": "7aa5890d8d1ede50",
+            "response_digest": "968cabf32804b78f",
+            "error": null
+          },
+          {
+            "call_id": "resp_0dbced08bc7cd298016abfe3701ec887d2926ce4afac2e664f",
+            "outcome": "OK",
+            "attempts": 1,
+            "model_requested": "gpt-5.6-sol",
+            "model_returned": "gpt-5.6-sol",
+            "usage_reported": true,
+            "input_tokens": 7362,
+            "output_tokens": 125,
+            "unconfirmed": false,
+            "latency_ms": 10919.3,
+            "request_digest": "5ef2f5d8d270c22e",
+            "response_digest": "fbd090021f9e97ef",
+            "error": null
+          },
+          {
+            "call_id": "resp_0809c27c2b4eeefa016abfe37b6bf487d082410c35b4f1aacf",
+            "outcome": "OK",
+            "attempts": 1,
+            "model_requested": "gpt-5.6-sol",
+            "model_returned": "gpt-5.6-sol",
+            "usage_reported": true,
+            "input_tokens": 3283,
+            "output_tokens": 107,
+            "unconfirmed": false,
+            "latency_ms": 7072.7,
+            "request_digest": "f4c6cd9404a480b3",
+            "response_digest": "2595a4e103029d3d",
+            "error": null
+          },
+          {
+            "call_id": "resp_05e5e87a7d3fd2a1016abfe3821db087d0a7ac9a69b4e8906d",
+            "outcome": "OK",
+            "attempts": 1,
+            "model_requested": "gpt-5.6-sol",
+            "model_returned": "gpt-5.6-sol",
+            "usage_reported": true,
+            "input_tokens": 3283,
+            "output_tokens": 97,
+            "unconfirmed": false,
+            "latency_ms": 16571.1,
+            "request_digest": "5c97f51d5bb5c489",
+            "response_digest": "e246517b802dc485",
+            "error": null
+          },
+          {
+            "call_id": "resp_00cbfa0debcf6e05016abfe392d9e087d096ab760cd6e090ef",
+            "outcome": "OK",
+            "attempts": 1,
+            "model_requested": "gpt-5.6-sol",
+            "model_returned": "gpt-5.6-sol",
+            "usage_reported": true,
+            "input_tokens": 7362,
+            "output_tokens": 86,
+            "unconfirmed": false,
+            "latency_ms": 4615.1,
+            "request_digest": "193706755a2f99dd",
+            "response_digest": "19c4d9e00171dc2d",
+            "error": null
+          },
+          {
+            "call_id": "resp_02b5a7c81b030eec016abfe39bb18c87d09d5477080e3e269b",
+            "outcome": "OK",
+            "attempts": 1,
+            "model_requested": "gpt-5.6-sol",
+            "model_returned": "gpt-5.6-sol",
+            "usage_reported": true,
+            "input_tokens": 7365,
+            "output_tokens": 66,
+            "unconfirmed": false,
+            "latency_ms": 7947.3,
+            "request_digest": "2bda51bafe80b379",
+            "response_digest": "c0da259cdbdad5be",
+            "error": null
+          },
+          {
+            "call_id": "resp_0f0ba92c837452c7016abfe3a3ff7887d1aacbe8fbe46f6eb9",
+            "outcome": "OK",
+            "attempts": 1,
+            "model_requested": "gpt-5.6-sol",
+            "model_returned": "gpt-5.6-sol",
+            "usage_reported": true,
+            "input_tokens": 7363,
+            "output_tokens": 73,
+            "unconfirmed": false,
+            "latency_ms": 11504.0,
+            "request_digest": "917c98db8a7adf4c",
+            "response_digest": "04800904c0d64de4",
+            "error": null
+          }
+        ]
+      }
+    },
+    "mixed": {
+      "status": "PASS",
+      "claim": "a real-model participant and a Z3 participant take turns on one run; per-actor usage is kept apart",
+      "run": {
+        "status": "SUCCEEDED",
+        "termination_reason": "JOINT_GOAL_REACHED",
+        "steps": 14,
+        "model_calls": 7,
+        "tokens": 53302,
+        "trajectory_digest": "05a714ee1cd2909d",
+        "metrics": {
+          "orders_completed": 3.0,
+          "delay_cost": 0.0
+        },
+        "calls": [
+          {
+            "call_id": "resp_019f31b61197c313016abfe3ae158487d0913eb4979305e841",
+            "outcome": "OK",
+            "attempts": 1,
+            "model_requested": "gpt-5.6-sol",
+            "model_returned": "gpt-5.6-sol",
+            "usage_reported": true,
+            "input_tokens": 7366,
+            "output_tokens": 233,
+            "unconfirmed": false,
+            "latency_ms": 8372.7,
+            "request_digest": "3138e43c3c4ed6f2",
+            "response_digest": "8094e73a3ab94c9b",
+            "error": null
+          },
+          {
+            "call_id": "resp_091077bb664117d9016abfe3b8974887d2aa1eb835e6dcb56c",
+            "outcome": "OK",
+            "attempts": 1,
+            "model_requested": "gpt-5.6-sol",
+            "model_returned": "gpt-5.6-sol",
+            "usage_reported": true,
+            "input_tokens": 7368,
+            "output_tokens": 139,
+            "unconfirmed": false,
+            "latency_ms": 6643.9,
+            "request_digest": "6594bb38473c5c56",
+            "response_digest": "b218d9e278c5a7b3",
+            "error": null
+          },
+          {
+            "call_id": "resp_0259687d3c873675016abfe3c0c49887d0a5319f254932d533",
+            "outcome": "OK",
+            "attempts": 1,
+            "model_requested": "gpt-5.6-sol",
+            "model_returned": "gpt-5.6-sol",
+            "usage_reported": true,
+            "input_tokens": 7365,
+            "output_tokens": 573,
+            "unconfirmed": false,
+            "latency_ms": 32260.3,
+            "request_digest": "cf61abedf1ae560b",
+            "response_digest": "c16a0a94a7b27c44",
+            "error": null
+          },
+          {
+            "call_id": "resp_094398643e78d0fb016abfe3e1260c87d0b2b5768d0030cdaf",
+            "outcome": "OK",
+            "attempts": 1,
+            "model_requested": "gpt-5.6-sol",
+            "model_returned": "gpt-5.6-sol",
+            "usage_reported": true,
+            "input_tokens": 7367,
+            "output_tokens": 195,
+            "unconfirmed": false,
+            "latency_ms": 15779.2,
+            "request_digest": "990b90f83acc4195",
+            "response_digest": "05b02a094139d047",
+            "error": null
+          },
+          {
+            "call_id": "resp_0a38ba4b04d430d3016abfe3f20f9487d0a3ccc9d19db45093",
+            "outcome": "OK",
+            "attempts": 1,
+            "model_requested": "gpt-5.6-sol",
+            "model_returned": "gpt-5.6-sol",
+            "usage_reported": true,
+            "input_tokens": 7369,
+            "output_tokens": 276,
+            "unconfirmed": false,
+            "latency_ms": 19089.7,
+            "request_digest": "e31e1c8a54d32f8d",
+            "response_digest": "d1b38bb48f3caaa5",
+            "error": null
+          },
+          {
+            "call_id": "resp_0bbade6cbae76670016abfe40900bc87d1a76c84d35421c10f",
+            "outcome": "OK",
+            "attempts": 1,
+            "model_requested": "gpt-5.6-sol",
+            "model_returned": "gpt-5.6-sol",
+            "usage_reported": true,
+            "input_tokens": 7369,
+            "output_tokens": 253,
+            "unconfirmed": false,
+            "latency_ms": 23113.6,
+            "request_digest": "bcf86cecb031095a",
+            "response_digest": "f440c2b67fb3826d",
+            "error": null
+          },
+          {
+            "call_id": "resp_0454d05337eece53016abfe419140087d29c1119d40ae760f0",
+            "outcome": "OK",
+            "attempts": 1,
+            "model_requested": "gpt-5.6-sol",
+            "model_returned": "gpt-5.6-sol",
+            "usage_reported": true,
+            "input_tokens": 7369,
+            "output_tokens": 60,
+            "unconfirmed": false,
+            "latency_ms": 3352.2,
+            "request_digest": "4ca991cb452f7d07",
+            "response_digest": "ececa7cc3392a4c9",
+            "error": null
+          }
+        ]
+      },
+      "actor_usage": {
+        "dispatcher_a": {
+          "steps": 7,
+          "wall_seconds": 0.0,
+          "model_calls": 7,
+          "input_tokens": 51573,
+          "output_tokens": 1729,
+          "model_attempts": 7,
+          "unreported_calls": 0,
+          "unconfirmed_calls": 0,
+          "observation_requests": 0
+        },
+        "dispatcher_b": {
+          "steps": 7,
+          "wall_seconds": 0.0,
+          "model_calls": 0,
+          "input_tokens": 0,
+          "output_tokens": 0,
+          "model_attempts": 0,
+          "unreported_calls": 0,
+          "unconfirmed_calls": 0,
+          "observation_requests": 0
+        }
+      }
+    }
+  }
+}
