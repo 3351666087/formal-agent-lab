@@ -32,7 +32,8 @@ PLATFORM = ["a1", "a2", "a3", "a4", "a5"]
 DOMAIN = ["b1", "b2", "b3"]
 
 BLOCKERS = [
-    {"item": "image-based offline bundle (scripts/offline_bundle.py --verify: four OCI images + compose)",
+    {"item": "disk-heavy release items: image-based offline bundle (scripts/offline_bundle.py --verify), image release, "
+             "Compose stacks, kind install / upgrade (phase-2 local-release, phase-3 extensions)",
      "status": "BLOCKED", "cause": "host disk: needs 8 GiB plus the 15 GiB reserve; see a5-release.json offline_stack",
      "unblock": "free ≥ 23 GiB on the host (then `uv run --frozen python scripts/offline_bundle.py --verify`)"},
     {"item": "multi-user sign-in (SSO) for the participant channel", "status": "OUT_OF_SCOPE",
@@ -91,7 +92,11 @@ def main() -> int:
         "phase4_complete": False,
         "phase4_complete_note": "left to B3: groups b1–b3 have no checks until 04B registers them in "
                                 "scripts/phase4_domain_checks.py (strict acceptance stays INCOMPLETE until then)",
-        "acceptance_local": {k: acceptance.get(k) for k in ("verdict", "complete", "suites", "revision")}
+        "acceptance_local": {"source_revision": acceptance.get("source_revision"), "complete": acceptance.get("complete"),
+                             "started_at": acceptance.get("started_at"), "finished_at": acceptance.get("finished_at"),
+                             "suites": {k: {"verdict": v.get("verdict"), "summary": v.get("summary"),
+                                            "unmet": v.get("unmet")} for k, v in (acceptance.get("suites") or {}).items()},
+                             "report": "docs/execution/evidence/phase4/acceptance-local.json"}
         if acceptance else None,
         "model_endpoints": {
             "real_provider": {"endpoint": real_doc.get("endpoint"), "model": real_doc.get("model_configured"),
@@ -110,8 +115,9 @@ def main() -> int:
                          "docs/execution/phase-4a.md", "docs/execution/check-protocol.md", "docs/assurance-scope.md"],
     }
     MANIFEST.write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\n")
-    print(f"phase4 handoff: platform 4A {'complete' if platform_ok else 'NOT complete'} {status}; "
-          f"acceptance {manifest['acceptance_local'] and manifest['acceptance_local'].get('verdict')}")
+    acc = manifest["acceptance_local"] or {}
+    print(f"phase4 handoff: platform 4A {'complete' if platform_ok else 'NOT complete'} {status}; acceptance "
+          f"{ {k: v['verdict'] for k, v in (acc.get('suites') or {}).items()} } at {str(acc.get('source_revision'))[:12]}")
     return 0
 
 

@@ -102,8 +102,12 @@ def write_doc(summary: dict) -> None:
                      f"{g['seconds']} | {'通过' if g['verified'] else '未通过'} |")
     worst = max(abs(p["value"] - p["reference_value"]) for g in summary["games"] for p in g["properties"])
     lines += ["", f"误差：判定容差 1e-6（PRISM 值迭代的默认终止容差）；实测 PRISM 数值与独立求解器（逐轮倒推）的最大差 "
-              f"{worst:.1e}（博弈无环）。原始模型、性质、日志、导出策略与显式模型：`docs/execution/evidence/phase2/prism-games/`。", ""]
-    (ROOT / "docs" / "architecture" / "probabilistic-extension.md").write_text("\n".join(lines))
+              f"{worst:.1e}（博弈无环）。原始模型、性质、日志、导出策略与显式模型：`{OUT.relative_to(ROOT)}/`。", ""]
+    # the architecture page is the phase-2 record: a regression run (FAL_EVIDENCE_DIR elsewhere) writes its own copy
+    # beside its evidence instead of rewriting it (phase 4A)
+    historical = OUT.resolve() == (ROOT / "docs" / "execution" / "evidence" / "phase2" / "prism-games").resolve()
+    target = ROOT / "docs" / "architecture" / "probabilistic-extension.md" if historical else OUT / "probabilistic-extension.md"
+    target.write_text("\n".join(lines))
 
 
 if __name__ == "__main__":
