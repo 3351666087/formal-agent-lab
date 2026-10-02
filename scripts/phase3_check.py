@@ -14,6 +14,7 @@ Docker, running dev stack) or BLOCKED (disk below the guard, optional backend ab
 
 from __future__ import annotations
 
+import os
 import sys
 from pathlib import Path
 
@@ -22,7 +23,8 @@ from check_runner import ROOT, Check, Suite, main
 
 PYTEST = "uv run --frozen pytest -p no:cacheprovider -q"
 PY = "uv run --frozen python"
-EV = "docs/execution/evidence/phase3"
+# acceptance re-runs redirect evidence (scripts/acceptance_local.py) so phase-3 records stay untouched
+EV = os.environ.get("FAL_EVIDENCE_DIR", "docs/execution/evidence/phase3")
 IT = f"{PYTEST} -m integration"
 
 CHECKS = [
@@ -97,39 +99,39 @@ CHECKS = [
           f"{PYTEST} packages/domain-mal/tests packages/environment-mal/tests", ["P3B-D1"]),
     Check("p3-mal-evidence", "d1-mal",
           "版本固定场景包导入 / 展示 / 运行；主动动作与自动效果对照；见证 / 未知 / 超时不支持 / 无法比较真实记录；原生工具链缺失时回退到固定夹具",
-          f"{PY} scripts/d1_mal_evidence.py", ["P3B-D1"], [f"{EV}/d1-mal.json"]),
+          f"{PY} scripts/d1_mal_evidence.py", ["P3B-D1"], produces=[f"{EV}/d1-mal.json"], assertions_from="conclusion"),
     # ------------------------------------------------------------ D2 broker, receipts and role boundaries
     Check("p3-broker-unit", "d2-broker",
           "验证凭据签名 / 绑定 / 状态修订 / 期限；准入规则集发布与未知条件；红蓝角色边界与凭据泄漏防护；MAL 领域准入",
           f"{PYTEST} packages/domain-broker/tests packages/domain-mal/tests/test_admission.py", ["P3B-D2"]),
     Check("p3-broker-evidence", "d2-broker",
           "准入分类（正常 + 8 类零副作用拒绝）；Broker 门控真实运行：有凭据全部放行且到达目标，无凭据全部拒绝且零副作用；标记数据泄漏检查",
-          f"{PY} scripts/d2_broker_evidence.py", ["P3B-D2"], [f"{EV}/d2-broker.json"]),
+          f"{PY} scripts/d2_broker_evidence.py", ["P3B-D2"], produces=[f"{EV}/d2-broker.json"], assertions_from="conclusion"),
     # ------------------------------------------------------------ D3 red/blue strategies and model revision
     Check("p3-strategies-unit", "d3-strategies",
           "红方规则/符号/混合三基线到达目标；蓝方最小代价割阻断全部红方；检查点恢复保持计划进度；真实偏差修订成功、旧观测差异不入回归库",
           f"{PYTEST} packages/domain-mal/tests/test_strategies.py", ["P3B-D3"]),
     Check("p3-strategies-evidence", "d3-strategies",
           "固定场景/种子/预算下红蓝基线完成实验（裁判以环境状态判定）；检查点恢复；真实模型条件项如实报告；一次修订 + 一次陈旧不污染",
-          f"{PY} scripts/d3_strategies_evidence.py", ["P3B-D3"], [f"{EV}/d3-strategies.json"]),
+          f"{PY} scripts/d3_strategies_evidence.py", ["P3B-D3"], produces=[f"{EV}/d3-strategies.json"], assertions_from="conclusion"),
     # ------------------------------------------------------------ D4 local service experiment loop
     Check("p3-service-unit", "d4-service",
           "领域准入规则集；Broker 门控特权动作（拒绝不触达服务）；服务/模型性质对照（一致/偏差/无法判断）",
           f"{PYTEST} examples/local-order-service/tests/test_domain_lab.py", ["P3B-D4"]),
     Check("p3-service-evidence", "d4-service",
           "真实订单服务进程全生命周期：创建→就绪→正常业务+领域实验→探针→导出→复位→二次运行→异常终止资源核对→清理；合同动作只经 Broker",
-          f"{PY} scripts/d4_service_lab_evidence.py", ["P3B-D4"], [f"{EV}/d4-service-lab.json"]),
+          f"{PY} scripts/d4_service_lab_evidence.py", ["P3B-D4"], produces=[f"{EV}/d4-service-lab.json"], assertions_from="conclusion"),
     # ------------------------------------------------------------ D5 CAGE 4 baseline and paired evaluation
     Check("p3-cage-unit", "d5-cage",
           "CAGE 4 桥版本报告与脚本基线（联合世界步、成对种子确定性）；无工具链时按 cage 标记跳过",
           f"{PYTEST} packages/environment-cage/tests", ["P3B-D5"]),
     Check("p3-cage-evidence", "d5-cage",
           "固定 CAGE 4(CybORG 4.0) 官方脚本基线：原生轮次/分数与平台指标分开保留、不可比项说明；成对 dev/holdout 种子含不确定性；可重跑；MAL/CAGE/本地探针分域交叉检查；RL 智能体为条件项。工具链缺失记 BLOCKED",
-          f"{PY} scripts/d5_cage_evidence.py", ["P3B-D5"], [f"{EV}/d5-cage.json"]),
+          f"{PY} scripts/d5_cage_evidence.py", ["P3B-D5"], produces=[f"{EV}/d5-cage.json"], assertions_from="conclusion"),
     # ------------------------------------------------------------ D6 domain integration and final acceptance
     Check("p3-domain-acceptance", "d6-domain",
           "MAL 领域端到端经平台公开接口：导入→配置→运行→解释→导出→离线回放；领域插件可被 Web/CLI 发现；六个交付包证据齐备",
-          f"{PY} scripts/d6_domain_acceptance_evidence.py", ["P3B-D6"], [f"{EV}/d6-domain-acceptance.json"]),
+          f"{PY} scripts/d6_domain_acceptance_evidence.py", ["P3B-D6"], produces=[f"{EV}/d6-domain-acceptance.json"], assertions_from="conclusion"),
     # ------------------------------------------------------------ regression
     Check("p3-unit-all", "regression", "全部单元 / 契约 / 架构 / 示例测试（含阶段一哨兵）",
           f"{PYTEST} -m 'not integration and not llm and not ui'"),

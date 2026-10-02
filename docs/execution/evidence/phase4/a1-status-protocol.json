@@ -1,0 +1,182 @@
+{
+  "deliverable": "phase4A-A1",
+  "engine": "scripts/check_runner.py (checks@3)",
+  "protocol": "docs/execution/check-protocol.md",
+  "cases": [
+    {
+      "case": "exit_zero_reports_blocked",
+      "risk": "脚本退出 0 但报告 BLOCKED",
+      "expected": {
+        "check_result": "BLOCKED",
+        "complete": false,
+        "strict_exit": 1
+      },
+      "observed": {
+        "strict_exit": 1,
+        "complete": false,
+        "groups": {
+          "a": "INCOMPLETE",
+          "b": "PASS"
+        },
+        "check_result": "BLOCKED",
+        "check_reason": "toolchain not installed",
+        "inherited": false
+      },
+      "holds": true
+    },
+    {
+      "case": "required_assertion_false",
+      "risk": "必需断言为 false（脚本自称 PASS）",
+      "expected": {
+        "check_result": "FAIL",
+        "complete": false,
+        "strict_exit": 1
+      },
+      "observed": {
+        "strict_exit": 1,
+        "complete": false,
+        "groups": {
+          "a": "FAIL",
+          "b": "PASS"
+        },
+        "check_result": "FAIL",
+        "check_reason": "required assertion writes_zero = False",
+        "inherited": false
+      },
+      "holds": true
+    },
+    {
+      "case": "report_missing",
+      "risk": "报告丢失（命令退出 0 但未写结构化结果）",
+      "expected": {
+        "check_result": "FAIL",
+        "complete": false,
+        "strict_exit": 1
+      },
+      "observed": {
+        "strict_exit": 1,
+        "complete": false,
+        "groups": {
+          "a": "FAIL",
+          "b": "PASS"
+        },
+        "check_result": "FAIL",
+        "check_reason": "structured result missing (the command did not report through FAL_CHECK_RESULT)",
+        "inherited": false
+      },
+      "holds": true
+    },
+    {
+      "case": "crash_with_old_pass_on_disk",
+      "risk": "子进程失败但磁盘上留着旧 PASS（另一检查退出 0 却未重写）",
+      "expected": {
+        "check_result": "FAIL",
+        "silent_rewrite_result": "FAIL",
+        "complete": false,
+        "strict_exit": 1
+      },
+      "observed": {
+        "strict_exit": 1,
+        "complete": false,
+        "groups": {
+          "a": "FAIL",
+          "b": "FAIL"
+        },
+        "check_result": "FAIL",
+        "check_reason": "exit 139: # case/x at bccda301e589 (tree 9516934b2a9f, profile local-lite) · attempt 1 · started 2026-10-02T04:46:38Z",
+        "inherited": false,
+        "silent_rewrite_result": "FAIL"
+      },
+      "holds": true
+    },
+    {
+      "case": "single_group_selected",
+      "risk": "只选一组",
+      "expected": {
+        "selection_status": "PASS",
+        "complete": false,
+        "strict_exit": 1
+      },
+      "observed": {
+        "strict_exit": 1,
+        "complete": false,
+        "groups": {
+          "a": "PASS",
+          "b": "NOT_SELECTED"
+        },
+        "check_result": null,
+        "check_reason": "",
+        "inherited": null,
+        "selection_status": "PASS"
+      },
+      "holds": true
+    },
+    {
+      "case": "reuse_after_config_change",
+      "risk": "代码/配置变化后复用旧证据",
+      "expected": {
+        "inherited": true,
+        "complete": false,
+        "strict_exit": 1
+      },
+      "observed": {
+        "strict_exit": 1,
+        "complete": false,
+        "groups": {
+          "a": "PASS",
+          "b": "NOT_SELECTED"
+        },
+        "check_result": "PASS",
+        "check_reason": "# case/y at bccda301e589 (tree 9516934b2a9f, profile local-lite) · attempt 1 · started 2026-10-02T04:46:38Z",
+        "inherited": true
+      },
+      "holds": true
+    },
+    {
+      "case": "acceptance_stale_report",
+      "risk": "汇总：子进程崩溃、旧报告残留",
+      "expected": {
+        "verdict": "STALE_REPORT",
+        "complete": false,
+        "strict_exit": 1
+      },
+      "observed": {
+        "verdict": "STALE_REPORT",
+        "complete": false,
+        "strict_exit": 1
+      },
+      "holds": true
+    },
+    {
+      "case": "full_mandatory_pass",
+      "risk": "完整必做全部通过（唯一允许的整体通过）",
+      "expected": {
+        "check_result": "PASS",
+        "complete": true,
+        "strict_exit": 0
+      },
+      "observed": {
+        "strict_exit": 0,
+        "complete": true,
+        "groups": {
+          "a": "PASS",
+          "b": "PASS"
+        },
+        "check_result": "PASS",
+        "check_reason": "[x] PASS: 1 required assertion(s) hold",
+        "inherited": false
+      },
+      "holds": true
+    }
+  ],
+  "conclusion": {
+    "exit_zero_reports_blocked": true,
+    "required_assertion_false": true,
+    "report_missing": true,
+    "crash_with_old_pass_on_disk": true,
+    "single_group_selected": true,
+    "reuse_after_config_change": true,
+    "acceptance_stale_report": true,
+    "full_mandatory_pass": true
+  }
+}

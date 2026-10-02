@@ -1,0 +1,382 @@
+{
+  "format": "checks@3",
+  "compatible_with": "checks@2",
+  "suite": "phase4",
+  "generated_at": "2026-10-02T04:46:21Z",
+  "source_revision": {
+    "commit": "bccda301e58905ee0b0f37b2be9ed2938064d726",
+    "worktree": {
+      "sha256": "a5686a47af85c44d6be82c2a82ffeea9d646fb478676fc32b2ea814a60f901ef",
+      "clean": false,
+      "changed_bytes": 50049,
+      "untracked_files": 7,
+      "excluded_outputs": [
+        "docs/execution/evidence/",
+        "docs/handoff/",
+        "docs/licenses.md",
+        "docs/api/openapi.json",
+        "out/",
+        "docs/execution/evidence/phase4/checks/"
+      ]
+    }
+  },
+  "config": {
+    "sha256": "735bfd42b321ee4cd2df41e3455a6cd287ec84da36f0bcf21661c9e1788f4d1c",
+    "parts": {
+      "checks": "f446fe3f4270b99b983602396acd48d9a3a0928613cb3919f06459fd9d66bbde",
+      "uv.lock": "be6278cfce6c4fe9ae55400b436f00cf3dd1d34a34811d402eac2c811890287a",
+      "pnpm-lock.yaml": "02d23c074a75bccfaea1ed4ff51272ba3d6cbb724e8012366c8d18e9bb0a7c3a",
+      "deploy/compose/services.dev.yaml": "4c876045f15d5bd972c517e7de2d3626cd252d1842797f0152f596f7d8ea9ce0",
+      "deploy/compose/docker-compose.yaml": "ff4c34cae068cc6dacd4db7f4273887ff6c2bb0b3b84938a7b8969488bfb20ff"
+    }
+  },
+  "command": "python scripts/check_runner.py --suite phase4 --group a1",
+  "environment": {
+    "os": "Ubuntu 24.04.4 LTS",
+    "arch": "aarch64",
+    "kernel": "6.8.0-117-generic",
+    "python": "3.12.3",
+    "uv": "uv 0.12.19 (aarch64-unknown-linux-gnu)",
+    "node": "v24.21.0",
+    "pnpm": "12.6.0",
+    "docker": "29.5.2",
+    "z3": "5.1.0",
+    "temporalio": "1.33.0"
+  },
+  "resources_before": {
+    "cpus": 4,
+    "memory_gib": {
+      "MemTotal": 5.77,
+      "MemAvailable": 4.52
+    },
+    "load_avg": [
+      0.06,
+      0.22,
+      0.23
+    ],
+    "disk_free_gib": {
+      "host (repository filesystem)": 17.9,
+      "docker (/var/lib/docker)": 22.0
+    },
+    "concurrency": 1,
+    "note": "checks run one at a time; heavy checks ask disk_guard first"
+  },
+  "resources_after": {
+    "cpus": 4,
+    "memory_gib": {
+      "MemTotal": 5.77,
+      "MemAvailable": 4.43
+    },
+    "load_avg": [
+      0.06,
+      0.21,
+      0.23
+    ],
+    "disk_free_gib": {
+      "host (repository filesystem)": 17.9,
+      "docker (/var/lib/docker)": 22.0
+    },
+    "concurrency": 1,
+    "note": "checks run one at a time; heavy checks ask disk_guard first"
+  },
+  "run": {
+    "started_at": "2026-10-02T04:46:14Z",
+    "finished_at": "2026-10-02T04:46:21Z",
+    "duration_s": 6.6,
+    "full": false,
+    "selection": {
+      "group": [
+        "a1"
+      ],
+      "only": [],
+      "skip": []
+    },
+    "checks": [
+      "p4-a1-engine",
+      "p4-a1-fault-injection"
+    ],
+    "commit": "bccda301e58905ee0b0f37b2be9ed2938064d726",
+    "worktree_sha256": "a5686a47af85c44d6be82c2a82ffeea9d646fb478676fc32b2ea814a60f901ef",
+    "nonce": "85abaa9e18e5485d844d582e52e3b829",
+    "acceptance_nonce": null,
+    "results": {
+      "p4-a1-engine": "PASS",
+      "p4-a1-fault-injection": "PASS"
+    }
+  },
+  "summary": {
+    "PASS": 2,
+    "FAIL": 0,
+    "BLOCKED": 0,
+    "NOT_RUN": 0,
+    "NOT_SELECTED": 0,
+    "NOT_APPLICABLE": 0
+  },
+  "groups": {
+    "a1": "PASS",
+    "a2": "NO_CHECKS",
+    "a3": "NO_CHECKS",
+    "a4": "NO_CHECKS",
+    "a5": "NO_CHECKS",
+    "b1": "NO_CHECKS",
+    "b2": "NO_CHECKS",
+    "b3": "NO_CHECKS"
+  },
+  "required_groups": [
+    "a1",
+    "a2",
+    "a3",
+    "a4",
+    "a5",
+    "b1",
+    "b2",
+    "b3"
+  ],
+  "selection_status": "PASS",
+  "complete": false,
+  "mandatory_passed": false,
+  "unmet": [
+    "a2=NO_CHECKS",
+    "a3=NO_CHECKS",
+    "a4=NO_CHECKS",
+    "a5=NO_CHECKS",
+    "b1=NO_CHECKS",
+    "b2=NO_CHECKS",
+    "b3=NO_CHECKS"
+  ],
+  "aggregation": "only results produced and verified by this invocation count; a partial selection is never complete; results from another commit, work tree or configuration are inherited and ignored",
+  "timing": {
+    "this_run_s": 6.6,
+    "last_full_run_s": null,
+    "last_full_run_at": null,
+    "partial_runs": [
+      {
+        "started_at": "2026-10-02T04:46:14Z",
+        "duration_s": 6.6,
+        "selection": {
+          "group": [
+            "a1"
+          ],
+          "only": [],
+          "skip": []
+        },
+        "results": {
+          "p4-a1-engine": "PASS",
+          "p4-a1-fault-injection": "PASS"
+        }
+      }
+    ]
+  },
+  "runs": [
+    {
+      "started_at": "2026-10-02T04:46:14Z",
+      "finished_at": "2026-10-02T04:46:21Z",
+      "duration_s": 6.6,
+      "full": false,
+      "selection": {
+        "group": [
+          "a1"
+        ],
+        "only": [],
+        "skip": []
+      },
+      "checks": [
+        "p4-a1-engine",
+        "p4-a1-fault-injection"
+      ],
+      "commit": "bccda301e58905ee0b0f37b2be9ed2938064d726",
+      "worktree_sha256": "a5686a47af85c44d6be82c2a82ffeea9d646fb478676fc32b2ea814a60f901ef",
+      "nonce": "85abaa9e18e5485d844d582e52e3b829",
+      "acceptance_nonce": null,
+      "results": {
+        "p4-a1-engine": "PASS",
+        "p4-a1-fault-injection": "PASS"
+      }
+    }
+  ],
+  "checks": [
+    {
+      "id": "p4-a1-engine",
+      "group": "a1",
+      "title": "状态协议：结构化结果 / 证据存在与新鲜 / pytest 全跳过 / 条件触发 / 本次调用聚合 / 严格总验收（单元）",
+      "command": "uv run --frozen pytest -p no:cacheprovider -q tests/tools",
+      "tasks": [
+        "P4A-A1"
+      ],
+      "evidence": [],
+      "requires": null,
+      "profile": "local-lite",
+      "kind": "mandatory",
+      "retries": 0,
+      "heavy_gib": 0.0,
+      "produces": [],
+      "protocol": false,
+      "assertions_from": null,
+      "trigger": null,
+      "result": "PASS",
+      "reason": "35 passed in 4.75s",
+      "summary": "35 passed in 4.75s",
+      "condition": null,
+      "checked_commit": "bccda301e58905ee0b0f37b2be9ed2938064d726",
+      "worktree_sha256": "a5686a47af85c44d6be82c2a82ffeea9d646fb478676fc32b2ea814a60f901ef",
+      "worktree_clean": false,
+      "config_sha256": "735bfd42b321ee4cd2df41e3455a6cd287ec84da36f0bcf21661c9e1788f4d1c",
+      "run_nonce": "85abaa9e18e5485d844d582e52e3b829",
+      "started_at": "2026-10-02T04:46:14Z",
+      "finished_at": "2026-10-02T04:46:19Z",
+      "duration_s": 4.9,
+      "attempts": [
+        {
+          "attempt": 1,
+          "started_at": "2026-10-02T04:46:14Z",
+          "finished_at": "2026-10-02T04:46:19Z",
+          "duration_s": 4.9,
+          "exit_code": 0,
+          "result": "PASS",
+          "reason": "35 passed in 4.75s",
+          "log": "docs/execution/evidence/phase4/checks/logs/p4-a1-engine/20261002T044614Z-attempt-1.log",
+          "summary": "35 passed in 4.75s",
+          "nonce": "4a47075f49ff4850995344b4b5e94552",
+          "structured_result": null,
+          "assertions": [],
+          "produced": [],
+          "pytest": {
+            "passed": 35,
+            "failed": 0,
+            "skipped": 0,
+            "deselected": 0,
+            "errors": 0,
+            "skip_reasons": [],
+            "line": "35 passed in 4.75s"
+          }
+        }
+      ],
+      "evidence_files": [],
+      "first_failure": null,
+      "flaky": false,
+      "inherited": false,
+      "this_run": true,
+      "history": []
+    },
+    {
+      "id": "p4-a1-fault-injection",
+      "group": "a1",
+      "title": "对真实引擎注入七种已知风险：退出 0 却 BLOCKED、必需断言 false、报告丢失、旧 PASS 残留、只选一组、配置变更后复用、完整通过",
+      "command": "uv run --frozen python scripts/a1_status_evidence.py",
+      "tasks": [
+        "P4A-A1"
+      ],
+      "evidence": [],
+      "requires": null,
+      "profile": "local-lite",
+      "kind": "mandatory",
+      "retries": 0,
+      "heavy_gib": 0.0,
+      "produces": [
+        "docs/execution/evidence/phase4/a1-status-protocol.json"
+      ],
+      "protocol": true,
+      "assertions_from": null,
+      "trigger": null,
+      "result": "PASS",
+      "reason": "[p4-a1-fault-injection] PASS: 8 required assertion(s) hold",
+      "summary": "[p4-a1-fault-injection] PASS: 8 required assertion(s) hold",
+      "condition": null,
+      "checked_commit": "bccda301e58905ee0b0f37b2be9ed2938064d726",
+      "worktree_sha256": "a5686a47af85c44d6be82c2a82ffeea9d646fb478676fc32b2ea814a60f901ef",
+      "worktree_clean": false,
+      "config_sha256": "735bfd42b321ee4cd2df41e3455a6cd287ec84da36f0bcf21661c9e1788f4d1c",
+      "run_nonce": "85abaa9e18e5485d844d582e52e3b829",
+      "started_at": "2026-10-02T04:46:19Z",
+      "finished_at": "2026-10-02T04:46:21Z",
+      "duration_s": 1.7,
+      "attempts": [
+        {
+          "attempt": 1,
+          "started_at": "2026-10-02T04:46:19Z",
+          "finished_at": "2026-10-02T04:46:21Z",
+          "duration_s": 1.7,
+          "exit_code": 0,
+          "result": "PASS",
+          "reason": "[p4-a1-fault-injection] PASS: 8 required assertion(s) hold",
+          "log": "docs/execution/evidence/phase4/checks/logs/p4-a1-fault-injection/20261002T044619Z-attempt-1.log",
+          "summary": "[p4-a1-fault-injection] PASS: 8 required assertion(s) hold",
+          "nonce": "ac89723f33d14c6394252a5f02f61ccd",
+          "structured_result": "docs/execution/evidence/phase4/checks/logs/p4-a1-fault-injection/20261002T044619Z-attempt-1.result.json",
+          "assertions": [
+            {
+              "id": "exit_zero_reports_blocked",
+              "required": true,
+              "holds": true,
+              "detail": "expected {'check_result': 'BLOCKED', 'complete': False, 'strict_exit': 1} observed {'strict_exit': 1, 'complete': False, 'groups': {'a': 'INCOMPLETE', 'b': 'PASS'}, 'check_result': 'BLOCKED', 'check_reason': 'toolchain not installed', 'inherited': False}"
+            },
+            {
+              "id": "required_assertion_false",
+              "required": true,
+              "holds": true,
+              "detail": "expected {'check_result': 'FAIL', 'complete': False, 'strict_exit': 1} observed {'strict_exit': 1, 'complete': False, 'groups': {'a': 'FAIL', 'b': 'PASS'}, 'check_result': 'FAIL', 'check_reason': 'required assertion writes_zero = False', 'inherited': False}"
+            },
+            {
+              "id": "report_missing",
+              "required": true,
+              "holds": true,
+              "detail": "expected {'check_result': 'FAIL', 'complete': False, 'strict_exit': 1} observed {'strict_exit': 1, 'complete': False, 'groups': {'a': 'FAIL', 'b': 'PASS'}, 'check_result': 'FAIL', 'check_reason': 'structured result missing (the command did not report through FAL_CHECK_RESULT)', 'inherited': False}"
+            },
+            {
+              "id": "crash_with_old_pass_on_disk",
+              "required": true,
+              "holds": true,
+              "detail": "expected {'check_result': 'FAIL', 'silent_rewrite_result': 'FAIL', 'complete': False, 'strict_exit': 1} observed {'strict_exit': 1, 'complete': False, 'groups': {'a': 'FAIL', 'b': 'FAIL'}, 'check_result': 'FAIL', 'check_reason': 'exit 139: # case/x at bccda301e589 (tree 73140cbd8082, profile local-lite) · attempt 1 · started 2026-10-02T04:46:20Z', 'inherited': False, 'silent_rewrite_result': 'FAIL'}"
+            },
+            {
+              "id": "single_group_selected",
+              "required": true,
+              "holds": true,
+              "detail": "expected {'selection_status': 'PASS', 'complete': False, 'strict_exit': 1} observed {'strict_exit': 1, 'complete': False, 'groups': {'a': 'PASS', 'b': 'NOT_SELECTED'}, 'check_result': None, 'check_reason': '', 'inherited': None, 'selection_status': 'PASS'}"
+            },
+            {
+              "id": "reuse_after_config_change",
+              "required": true,
+              "holds": true,
+              "detail": "expected {'inherited': True, 'complete': False, 'strict_exit': 1} observed {'strict_exit': 1, 'complete': False, 'groups': {'a': 'PASS', 'b': 'NOT_SELECTED'}, 'check_result': 'PASS', 'check_reason': '# case/y at bccda301e589 (tree 73140cbd8082, profile local-lite) · attempt 1 · started 2026-10-02T04:46:20Z', 'inherited': True}"
+            },
+            {
+              "id": "acceptance_stale_report",
+              "required": true,
+              "holds": true,
+              "detail": "expected {'verdict': 'STALE_REPORT', 'complete': False, 'strict_exit': 1} observed {'verdict': 'STALE_REPORT', 'complete': False, 'strict_exit': 1}"
+            },
+            {
+              "id": "full_mandatory_pass",
+              "required": true,
+              "holds": true,
+              "detail": "expected {'check_result': 'PASS', 'complete': True, 'strict_exit': 0} observed {'strict_exit': 0, 'complete': True, 'groups': {'a': 'PASS', 'b': 'PASS'}, 'check_result': 'PASS', 'check_reason': '[x] PASS: 1 required assertion(s) hold', 'inherited': False}"
+            }
+          ],
+          "produced": [
+            {
+              "path": "docs/execution/evidence/phase4/a1-status-protocol.json",
+              "exists": true,
+              "sha256": "7091df828ed7cf2adcff40a761b676752360fb28a40868bf8b3513e325ba6f10",
+              "fresh": true
+            }
+          ],
+          "pytest": null
+        }
+      ],
+      "evidence_files": [
+        {
+          "path": "docs/execution/evidence/phase4/a1-status-protocol.json",
+          "exists": true,
+          "sha256": "7091df828ed7cf2adcff40a761b676752360fb28a40868bf8b3513e325ba6f10",
+          "fresh": true
+        }
+      ],
+      "first_failure": null,
+      "flaky": false,
+      "inherited": false,
+      "this_run": true,
+      "history": []
+    }
+  ]
+}
