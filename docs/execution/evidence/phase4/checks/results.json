@@ -2,14 +2,14 @@
   "format": "checks@3",
   "compatible_with": "checks@2",
   "suite": "phase4",
-  "generated_at": "2026-10-02T12:07:19Z",
+  "generated_at": "2026-10-02T12:24:28Z",
   "source_revision": {
-    "commit": "9d3e3c606c705ec42ff43caed8c45f5033e8a795",
+    "commit": "d27c82918e8685d309526c792c239f6e35eb8fc1",
     "worktree": {
-      "sha256": "052e2b850db9e3e4c15d34a0abd1a7335a6a4c68c59bac5caf304236ec119286",
-      "clean": false,
-      "changed_bytes": 4871843,
-      "untracked_files": 2,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "clean": true,
+      "changed_bytes": 0,
+      "untracked_files": 0,
       "excluded_outputs": [
         "docs/execution/evidence/",
         "docs/handoff/",
@@ -30,7 +30,7 @@
       "deploy/compose/docker-compose.yaml": "ff4c34cae068cc6dacd4db7f4273887ff6c2bb0b3b84938a7b8969488bfb20ff"
     }
   },
-  "command": "python scripts/check_runner.py --suite phase4 --group a5",
+  "command": "python scripts/check_runner.py --suite phase4 --group a1,a2,a3,a4,a5",
   "environment": {
     "os": "Ubuntu 24.04.4 LTS",
     "arch": "aarch64",
@@ -47,15 +47,15 @@
     "cpus": 4,
     "memory_gib": {
       "MemTotal": 5.77,
-      "MemAvailable": 3.93
+      "MemAvailable": 4.51
     },
     "load_avg": [
-      0.09,
-      0.28,
-      0.48
+      0.07,
+      0.25,
+      0.42
     ],
     "disk_free_gib": {
-      "host (repository filesystem)": 18.7,
+      "host (repository filesystem)": 18.6,
       "docker (/var/lib/docker)": 21.9
     },
     "concurrency": 1,
@@ -65,49 +65,79 @@
     "cpus": 4,
     "memory_gib": {
       "MemTotal": 5.77,
-      "MemAvailable": 3.8
+      "MemAvailable": 4.36
     },
     "load_avg": [
-      0.78,
-      0.44,
-      0.52
+      1.02,
+      0.76,
+      0.58
     ],
     "disk_free_gib": {
-      "host (repository filesystem)": 18.7,
+      "host (repository filesystem)": 18.6,
       "docker (/var/lib/docker)": 21.9
     },
     "concurrency": 1,
     "note": "checks run one at a time; heavy checks ask disk_guard first"
   },
   "run": {
-    "started_at": "2026-10-02T12:06:18Z",
-    "finished_at": "2026-10-02T12:07:19Z",
-    "duration_s": 61.1,
+    "started_at": "2026-10-02T12:11:01Z",
+    "finished_at": "2026-10-02T12:24:28Z",
+    "duration_s": 807.2,
     "full": false,
     "selection": {
       "group": [
+        "a1",
+        "a2",
+        "a3",
+        "a4",
         "a5"
       ],
       "only": [],
       "skip": []
     },
     "checks": [
+      "p4-a1-engine",
+      "p4-a1-fault-injection",
+      "p4-a2-kernel",
+      "p4-a2-order-service",
+      "p4-a2-evidence",
+      "p4-a2-participant-api",
+      "p4-a3-unit",
+      "p4-a3-decision",
+      "p4-a3-platform",
+      "p4-a3-real-endpoint",
+      "p4-a4-unit",
+      "p4-a4-rounds",
+      "p4-a4-platform",
       "p4-a5-web-types",
       "p4-a5-product-web",
       "p4-a5-release"
     ],
-    "commit": "9d3e3c606c705ec42ff43caed8c45f5033e8a795",
-    "worktree_sha256": "052e2b850db9e3e4c15d34a0abd1a7335a6a4c68c59bac5caf304236ec119286",
-    "nonce": "5af86070317448179f6ab512bce2b37e",
+    "commit": "d27c82918e8685d309526c792c239f6e35eb8fc1",
+    "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "nonce": "3984b6c299c14677a4be14e0db086099",
     "acceptance_nonce": null,
     "results": {
+      "p4-a1-engine": "PASS",
+      "p4-a1-fault-injection": "PASS",
+      "p4-a2-kernel": "PASS",
+      "p4-a2-order-service": "PASS",
+      "p4-a2-evidence": "PASS",
+      "p4-a2-participant-api": "PASS",
+      "p4-a3-unit": "PASS",
+      "p4-a3-decision": "PASS",
+      "p4-a3-platform": "PASS",
+      "p4-a3-real-endpoint": "PASS",
+      "p4-a4-unit": "PASS",
+      "p4-a4-rounds": "PASS",
+      "p4-a4-platform": "PASS",
       "p4-a5-web-types": "PASS",
       "p4-a5-product-web": "PASS",
       "p4-a5-release": "PASS"
     }
   },
   "summary": {
-    "PASS": 3,
+    "PASS": 16,
     "FAIL": 0,
     "BLOCKED": 0,
     "NOT_RUN": 0,
@@ -115,10 +145,10 @@
     "NOT_APPLICABLE": 0
   },
   "groups": {
-    "a1": "NOT_SELECTED",
-    "a2": "NOT_SELECTED",
-    "a3": "NOT_SELECTED",
-    "a4": "NOT_SELECTED",
+    "a1": "PASS",
+    "a2": "PASS",
+    "a3": "PASS",
+    "a4": "PASS",
     "a5": "PASS",
     "b1": "NO_CHECKS",
     "b2": "NO_CHECKS",
@@ -138,17 +168,13 @@
   "complete": false,
   "mandatory_passed": false,
   "unmet": [
-    "a1=NOT_SELECTED",
-    "a2=NOT_SELECTED",
-    "a3=NOT_SELECTED",
-    "a4=NOT_SELECTED",
     "b1=NO_CHECKS",
     "b2=NO_CHECKS",
     "b3=NO_CHECKS"
   ],
   "aggregation": "only results produced and verified by this invocation count; a partial selection is never complete; results from another commit, work tree or configuration are inherited and ignored",
   "timing": {
-    "this_run_s": 61.1,
+    "this_run_s": 807.2,
     "last_full_run_s": null,
     "last_full_run_at": null,
     "partial_runs": [
@@ -245,6 +271,39 @@
           "skip": []
         },
         "results": {
+          "p4-a5-web-types": "PASS",
+          "p4-a5-product-web": "PASS",
+          "p4-a5-release": "PASS"
+        }
+      },
+      {
+        "started_at": "2026-10-02T12:11:01Z",
+        "duration_s": 807.2,
+        "selection": {
+          "group": [
+            "a1",
+            "a2",
+            "a3",
+            "a4",
+            "a5"
+          ],
+          "only": [],
+          "skip": []
+        },
+        "results": {
+          "p4-a1-engine": "PASS",
+          "p4-a1-fault-injection": "PASS",
+          "p4-a2-kernel": "PASS",
+          "p4-a2-order-service": "PASS",
+          "p4-a2-evidence": "PASS",
+          "p4-a2-participant-api": "PASS",
+          "p4-a3-unit": "PASS",
+          "p4-a3-decision": "PASS",
+          "p4-a3-platform": "PASS",
+          "p4-a3-real-endpoint": "PASS",
+          "p4-a4-unit": "PASS",
+          "p4-a4-rounds": "PASS",
+          "p4-a4-platform": "PASS",
           "p4-a5-web-types": "PASS",
           "p4-a5-product-web": "PASS",
           "p4-a5-release": "PASS"
@@ -418,6 +477,63 @@
         "p4-a5-product-web": "PASS",
         "p4-a5-release": "PASS"
       }
+    },
+    {
+      "started_at": "2026-10-02T12:11:01Z",
+      "finished_at": "2026-10-02T12:24:28Z",
+      "duration_s": 807.2,
+      "full": false,
+      "selection": {
+        "group": [
+          "a1",
+          "a2",
+          "a3",
+          "a4",
+          "a5"
+        ],
+        "only": [],
+        "skip": []
+      },
+      "checks": [
+        "p4-a1-engine",
+        "p4-a1-fault-injection",
+        "p4-a2-kernel",
+        "p4-a2-order-service",
+        "p4-a2-evidence",
+        "p4-a2-participant-api",
+        "p4-a3-unit",
+        "p4-a3-decision",
+        "p4-a3-platform",
+        "p4-a3-real-endpoint",
+        "p4-a4-unit",
+        "p4-a4-rounds",
+        "p4-a4-platform",
+        "p4-a5-web-types",
+        "p4-a5-product-web",
+        "p4-a5-release"
+      ],
+      "commit": "d27c82918e8685d309526c792c239f6e35eb8fc1",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "nonce": "3984b6c299c14677a4be14e0db086099",
+      "acceptance_nonce": null,
+      "results": {
+        "p4-a1-engine": "PASS",
+        "p4-a1-fault-injection": "PASS",
+        "p4-a2-kernel": "PASS",
+        "p4-a2-order-service": "PASS",
+        "p4-a2-evidence": "PASS",
+        "p4-a2-participant-api": "PASS",
+        "p4-a3-unit": "PASS",
+        "p4-a3-decision": "PASS",
+        "p4-a3-platform": "PASS",
+        "p4-a3-real-endpoint": "PASS",
+        "p4-a4-unit": "PASS",
+        "p4-a4-rounds": "PASS",
+        "p4-a4-platform": "PASS",
+        "p4-a5-web-types": "PASS",
+        "p4-a5-product-web": "PASS",
+        "p4-a5-release": "PASS"
+      }
     }
   ],
   "checks": [
@@ -440,29 +556,29 @@
       "assertions_from": null,
       "trigger": null,
       "result": "PASS",
-      "reason": "35 passed in 4.75s",
-      "summary": "35 passed in 4.75s",
+      "reason": "35 passed in 4.84s",
+      "summary": "35 passed in 4.84s",
       "condition": null,
-      "checked_commit": "bccda301e58905ee0b0f37b2be9ed2938064d726",
-      "worktree_sha256": "a5686a47af85c44d6be82c2a82ffeea9d646fb478676fc32b2ea814a60f901ef",
-      "worktree_clean": false,
-      "config_sha256": "735bfd42b321ee4cd2df41e3455a6cd287ec84da36f0bcf21661c9e1788f4d1c",
-      "run_nonce": "85abaa9e18e5485d844d582e52e3b829",
-      "started_at": "2026-10-02T04:46:14Z",
-      "finished_at": "2026-10-02T04:46:19Z",
-      "duration_s": 4.9,
+      "checked_commit": "d27c82918e8685d309526c792c239f6e35eb8fc1",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "worktree_clean": true,
+      "config_sha256": "c88301517e5dfd98ab03891c3ee52c70c3d3a11960e5256312816d95eb041348",
+      "run_nonce": "3984b6c299c14677a4be14e0db086099",
+      "started_at": "2026-10-02T12:11:01Z",
+      "finished_at": "2026-10-02T12:11:06Z",
+      "duration_s": 5.0,
       "attempts": [
         {
           "attempt": 1,
-          "started_at": "2026-10-02T04:46:14Z",
-          "finished_at": "2026-10-02T04:46:19Z",
-          "duration_s": 4.9,
+          "started_at": "2026-10-02T12:11:01Z",
+          "finished_at": "2026-10-02T12:11:06Z",
+          "duration_s": 5.0,
           "exit_code": 0,
           "result": "PASS",
-          "reason": "35 passed in 4.75s",
-          "log": "docs/execution/evidence/phase4/checks/logs/p4-a1-engine/20261002T044614Z-attempt-1.log",
-          "summary": "35 passed in 4.75s",
-          "nonce": "4a47075f49ff4850995344b4b5e94552",
+          "reason": "35 passed in 4.84s",
+          "log": "docs/execution/evidence/phase4/checks/logs/p4-a1-engine/20261002T121101Z-attempt-1.log",
+          "summary": "35 passed in 4.84s",
+          "nonce": "034f52b872d54cd1ba5ce31bda4d7af7",
           "structured_result": null,
           "assertions": [],
           "produced": [],
@@ -473,16 +589,24 @@
             "deselected": 0,
             "errors": 0,
             "skip_reasons": [],
-            "line": "35 passed in 4.75s"
+            "line": "35 passed in 4.84s"
           }
         }
       ],
       "evidence_files": [],
       "first_failure": null,
       "flaky": false,
-      "inherited": true,
-      "this_run": false,
-      "history": []
+      "inherited": false,
+      "this_run": true,
+      "history": [
+        {
+          "result": "PASS",
+          "checked_commit": "bccda301e58905ee0b0f37b2be9ed2938064d726",
+          "finished_at": "2026-10-02T04:46:19Z",
+          "duration_s": 4.9,
+          "attempts": 1
+        }
+      ]
     },
     {
       "id": "p4-a1-fault-injection",
@@ -508,27 +632,27 @@
       "reason": "[p4-a1-fault-injection] PASS: 8 required assertion(s) hold",
       "summary": "[p4-a1-fault-injection] PASS: 8 required assertion(s) hold",
       "condition": null,
-      "checked_commit": "bccda301e58905ee0b0f37b2be9ed2938064d726",
-      "worktree_sha256": "a5686a47af85c44d6be82c2a82ffeea9d646fb478676fc32b2ea814a60f901ef",
-      "worktree_clean": false,
-      "config_sha256": "735bfd42b321ee4cd2df41e3455a6cd287ec84da36f0bcf21661c9e1788f4d1c",
-      "run_nonce": "85abaa9e18e5485d844d582e52e3b829",
-      "started_at": "2026-10-02T04:46:19Z",
-      "finished_at": "2026-10-02T04:46:21Z",
-      "duration_s": 1.7,
+      "checked_commit": "d27c82918e8685d309526c792c239f6e35eb8fc1",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "worktree_clean": true,
+      "config_sha256": "c88301517e5dfd98ab03891c3ee52c70c3d3a11960e5256312816d95eb041348",
+      "run_nonce": "3984b6c299c14677a4be14e0db086099",
+      "started_at": "2026-10-02T12:11:06Z",
+      "finished_at": "2026-10-02T12:11:07Z",
+      "duration_s": 1.6,
       "attempts": [
         {
           "attempt": 1,
-          "started_at": "2026-10-02T04:46:19Z",
-          "finished_at": "2026-10-02T04:46:21Z",
-          "duration_s": 1.7,
+          "started_at": "2026-10-02T12:11:06Z",
+          "finished_at": "2026-10-02T12:11:07Z",
+          "duration_s": 1.6,
           "exit_code": 0,
           "result": "PASS",
           "reason": "[p4-a1-fault-injection] PASS: 8 required assertion(s) hold",
-          "log": "docs/execution/evidence/phase4/checks/logs/p4-a1-fault-injection/20261002T044619Z-attempt-1.log",
+          "log": "docs/execution/evidence/phase4/checks/logs/p4-a1-fault-injection/20261002T121106Z-attempt-1.log",
           "summary": "[p4-a1-fault-injection] PASS: 8 required assertion(s) hold",
-          "nonce": "ac89723f33d14c6394252a5f02f61ccd",
-          "structured_result": "docs/execution/evidence/phase4/checks/logs/p4-a1-fault-injection/20261002T044619Z-attempt-1.result.json",
+          "nonce": "30295bb9ebb543d1969c47aab2aa4300",
+          "structured_result": "docs/execution/evidence/phase4/checks/logs/p4-a1-fault-injection/20261002T121106Z-attempt-1.result.json",
           "assertions": [
             {
               "id": "exit_zero_reports_blocked",
@@ -552,7 +676,7 @@
               "id": "crash_with_old_pass_on_disk",
               "required": true,
               "holds": true,
-              "detail": "expected {'check_result': 'FAIL', 'silent_rewrite_result': 'FAIL', 'complete': False, 'strict_exit': 1} observed {'strict_exit': 1, 'complete': False, 'groups': {'a': 'FAIL', 'b': 'FAIL'}, 'check_result': 'FAIL', 'check_reason': 'exit 139: # case/x at bccda301e589 (tree 73140cbd8082, profile local-lite) · attempt 1 · started 2026-10-02T04:46:20Z', 'inherited': False, 'silent_rewrite_result': 'FAIL'}"
+              "detail": "expected {'check_result': 'FAIL', 'silent_rewrite_result': 'FAIL', 'complete': False, 'strict_exit': 1} observed {'strict_exit': 1, 'complete': False, 'groups': {'a': 'FAIL', 'b': 'FAIL'}, 'check_result': 'FAIL', 'check_reason': 'exit 139: # case/x at d27c82918e86 (tree e3b0c44298fc, profile local-lite) · attempt 1 · started 2026-10-02T12:11:06Z', 'inherited': False, 'silent_rewrite_result': 'FAIL'}"
             },
             {
               "id": "single_group_selected",
@@ -564,7 +688,7 @@
               "id": "reuse_after_config_change",
               "required": true,
               "holds": true,
-              "detail": "expected {'inherited': True, 'complete': False, 'strict_exit': 1} observed {'strict_exit': 1, 'complete': False, 'groups': {'a': 'PASS', 'b': 'NOT_SELECTED'}, 'check_result': 'PASS', 'check_reason': '# case/y at bccda301e589 (tree 73140cbd8082, profile local-lite) · attempt 1 · started 2026-10-02T04:46:20Z', 'inherited': True}"
+              "detail": "expected {'inherited': True, 'complete': False, 'strict_exit': 1} observed {'strict_exit': 1, 'complete': False, 'groups': {'a': 'PASS', 'b': 'NOT_SELECTED'}, 'check_result': 'PASS', 'check_reason': '# case/y at d27c82918e86 (tree e3b0c44298fc, profile local-lite) · attempt 1 · started 2026-10-02T12:11:07Z', 'inherited': True}"
             },
             {
               "id": "acceptance_stale_report",
@@ -583,7 +707,7 @@
             {
               "path": "docs/execution/evidence/phase4/a1-status-protocol.json",
               "exists": true,
-              "sha256": "7091df828ed7cf2adcff40a761b676752360fb28a40868bf8b3513e325ba6f10",
+              "sha256": "b4b239a1d77929bd6716d83a1840e0d4f28a3d32fe22c63921f33fa0e79b93fa",
               "fresh": true
             }
           ],
@@ -594,15 +718,23 @@
         {
           "path": "docs/execution/evidence/phase4/a1-status-protocol.json",
           "exists": true,
-          "sha256": "7091df828ed7cf2adcff40a761b676752360fb28a40868bf8b3513e325ba6f10",
+          "sha256": "b4b239a1d77929bd6716d83a1840e0d4f28a3d32fe22c63921f33fa0e79b93fa",
           "fresh": true
         }
       ],
       "first_failure": null,
       "flaky": false,
-      "inherited": true,
-      "this_run": false,
-      "history": []
+      "inherited": false,
+      "this_run": true,
+      "history": [
+        {
+          "result": "PASS",
+          "checked_commit": "bccda301e58905ee0b0f37b2be9ed2938064d726",
+          "finished_at": "2026-10-02T04:46:21Z",
+          "duration_s": 1.7,
+          "attempts": 1
+        }
+      ]
     },
     {
       "id": "p4-a2-kernel",
@@ -623,29 +755,29 @@
       "assertions_from": null,
       "trigger": null,
       "result": "PASS",
-      "reason": "195 passed in 2.52s",
-      "summary": "195 passed in 2.52s",
+      "reason": "195 passed in 2.78s",
+      "summary": "195 passed in 2.78s",
       "condition": null,
-      "checked_commit": "ee305fec2d599da4c22d443aa32236fd93b87d60",
-      "worktree_sha256": "294b1ab836d5b022177e98301b44eaef552abd58e694663f69cc5eb9c4f04089",
-      "worktree_clean": false,
-      "config_sha256": "91cbdf5d1e34f38f49334bcba70e08e6d4a610e7762e29f75d7e0db7303dd341",
-      "run_nonce": "a2fac63f6b10408db16a25df973682fd",
-      "started_at": "2026-10-02T05:48:09Z",
-      "finished_at": "2026-10-02T05:48:12Z",
-      "duration_s": 2.7,
+      "checked_commit": "d27c82918e8685d309526c792c239f6e35eb8fc1",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "worktree_clean": true,
+      "config_sha256": "c88301517e5dfd98ab03891c3ee52c70c3d3a11960e5256312816d95eb041348",
+      "run_nonce": "3984b6c299c14677a4be14e0db086099",
+      "started_at": "2026-10-02T12:11:07Z",
+      "finished_at": "2026-10-02T12:11:10Z",
+      "duration_s": 3.0,
       "attempts": [
         {
           "attempt": 1,
-          "started_at": "2026-10-02T05:48:09Z",
-          "finished_at": "2026-10-02T05:48:12Z",
-          "duration_s": 2.7,
+          "started_at": "2026-10-02T12:11:07Z",
+          "finished_at": "2026-10-02T12:11:10Z",
+          "duration_s": 3.0,
           "exit_code": 0,
           "result": "PASS",
-          "reason": "195 passed in 2.52s",
-          "log": "docs/execution/evidence/phase4/checks/logs/p4-a2-kernel/20261002T054809Z-attempt-1.log",
-          "summary": "195 passed in 2.52s",
-          "nonce": "3d4ded804ed54a65ab640c7d29bee5b1",
+          "reason": "195 passed in 2.78s",
+          "log": "docs/execution/evidence/phase4/checks/logs/p4-a2-kernel/20261002T121107Z-attempt-1.log",
+          "summary": "195 passed in 2.78s",
+          "nonce": "a6ddfa8c35684f8d9981805f24281e24",
           "structured_result": null,
           "assertions": [],
           "produced": [],
@@ -656,16 +788,24 @@
             "deselected": 0,
             "errors": 0,
             "skip_reasons": [],
-            "line": "195 passed in 2.52s"
+            "line": "195 passed in 2.78s"
           }
         }
       ],
       "evidence_files": [],
       "first_failure": null,
       "flaky": false,
-      "inherited": true,
-      "this_run": false,
-      "history": []
+      "inherited": false,
+      "this_run": true,
+      "history": [
+        {
+          "result": "PASS",
+          "checked_commit": "ee305fec2d599da4c22d443aa32236fd93b87d60",
+          "finished_at": "2026-10-02T05:48:12Z",
+          "duration_s": 2.7,
+          "attempts": 1
+        }
+      ]
     },
     {
       "id": "p4-a2-order-service",
@@ -686,29 +826,29 @@
       "assertions_from": null,
       "trigger": null,
       "result": "PASS",
-      "reason": "22 passed in 22.44s",
-      "summary": "22 passed in 22.44s",
+      "reason": "22 passed in 22.92s",
+      "summary": "22 passed in 22.92s",
       "condition": null,
-      "checked_commit": "ee305fec2d599da4c22d443aa32236fd93b87d60",
-      "worktree_sha256": "294b1ab836d5b022177e98301b44eaef552abd58e694663f69cc5eb9c4f04089",
-      "worktree_clean": false,
-      "config_sha256": "91cbdf5d1e34f38f49334bcba70e08e6d4a610e7762e29f75d7e0db7303dd341",
-      "run_nonce": "a2fac63f6b10408db16a25df973682fd",
-      "started_at": "2026-10-02T05:48:12Z",
-      "finished_at": "2026-10-02T05:48:35Z",
-      "duration_s": 22.5,
+      "checked_commit": "d27c82918e8685d309526c792c239f6e35eb8fc1",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "worktree_clean": true,
+      "config_sha256": "c88301517e5dfd98ab03891c3ee52c70c3d3a11960e5256312816d95eb041348",
+      "run_nonce": "3984b6c299c14677a4be14e0db086099",
+      "started_at": "2026-10-02T12:11:10Z",
+      "finished_at": "2026-10-02T12:11:33Z",
+      "duration_s": 22.8,
       "attempts": [
         {
           "attempt": 1,
-          "started_at": "2026-10-02T05:48:12Z",
-          "finished_at": "2026-10-02T05:48:35Z",
-          "duration_s": 22.5,
+          "started_at": "2026-10-02T12:11:10Z",
+          "finished_at": "2026-10-02T12:11:33Z",
+          "duration_s": 22.8,
           "exit_code": 0,
           "result": "PASS",
-          "reason": "22 passed in 22.44s",
-          "log": "docs/execution/evidence/phase4/checks/logs/p4-a2-order-service/20261002T054812Z-attempt-1.log",
-          "summary": "22 passed in 22.44s",
-          "nonce": "0d63d9c893ff406bb0f1a387dab18df4",
+          "reason": "22 passed in 22.92s",
+          "log": "docs/execution/evidence/phase4/checks/logs/p4-a2-order-service/20261002T121110Z-attempt-1.log",
+          "summary": "22 passed in 22.92s",
+          "nonce": "4aa448b79ba5493fbf98c42ef62cfac2",
           "structured_result": null,
           "assertions": [],
           "produced": [],
@@ -719,16 +859,24 @@
             "deselected": 0,
             "errors": 0,
             "skip_reasons": [],
-            "line": "22 passed in 22.44s"
+            "line": "22 passed in 22.92s"
           }
         }
       ],
       "evidence_files": [],
       "first_failure": null,
       "flaky": false,
-      "inherited": true,
-      "this_run": false,
-      "history": []
+      "inherited": false,
+      "this_run": true,
+      "history": [
+        {
+          "result": "PASS",
+          "checked_commit": "ee305fec2d599da4c22d443aa32236fd93b87d60",
+          "finished_at": "2026-10-02T05:48:35Z",
+          "duration_s": 22.5,
+          "attempts": 1
+        }
+      ]
     },
     {
       "id": "p4-a2-evidence",
@@ -754,27 +902,27 @@
       "reason": "[p4-a2-evidence] PASS: 22 required assertion(s) hold",
       "summary": "[p4-a2-evidence] PASS: 22 required assertion(s) hold",
       "condition": null,
-      "checked_commit": "ee305fec2d599da4c22d443aa32236fd93b87d60",
-      "worktree_sha256": "294b1ab836d5b022177e98301b44eaef552abd58e694663f69cc5eb9c4f04089",
-      "worktree_clean": false,
-      "config_sha256": "91cbdf5d1e34f38f49334bcba70e08e6d4a610e7762e29f75d7e0db7303dd341",
-      "run_nonce": "a2fac63f6b10408db16a25df973682fd",
-      "started_at": "2026-10-02T05:48:35Z",
-      "finished_at": "2026-10-02T05:48:41Z",
+      "checked_commit": "d27c82918e8685d309526c792c239f6e35eb8fc1",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "worktree_clean": true,
+      "config_sha256": "c88301517e5dfd98ab03891c3ee52c70c3d3a11960e5256312816d95eb041348",
+      "run_nonce": "3984b6c299c14677a4be14e0db086099",
+      "started_at": "2026-10-02T12:11:33Z",
+      "finished_at": "2026-10-02T12:11:39Z",
       "duration_s": 6.0,
       "attempts": [
         {
           "attempt": 1,
-          "started_at": "2026-10-02T05:48:35Z",
-          "finished_at": "2026-10-02T05:48:41Z",
+          "started_at": "2026-10-02T12:11:33Z",
+          "finished_at": "2026-10-02T12:11:39Z",
           "duration_s": 6.0,
           "exit_code": 0,
           "result": "PASS",
           "reason": "[p4-a2-evidence] PASS: 22 required assertion(s) hold",
-          "log": "docs/execution/evidence/phase4/checks/logs/p4-a2-evidence/20261002T054835Z-attempt-1.log",
+          "log": "docs/execution/evidence/phase4/checks/logs/p4-a2-evidence/20261002T121133Z-attempt-1.log",
           "summary": "[p4-a2-evidence] PASS: 22 required assertion(s) hold",
-          "nonce": "d81e1b0b43bb417a90c39a83f9f5811c",
-          "structured_result": "docs/execution/evidence/phase4/checks/logs/p4-a2-evidence/20261002T054835Z-attempt-1.result.json",
+          "nonce": "7ae04e8eafef4c4bb8524d4be697b254",
+          "structured_result": "docs/execution/evidence/phase4/checks/logs/p4-a2-evidence/20261002T121133Z-attempt-1.result.json",
           "assertions": [
             {
               "id": "credential_required",
@@ -888,7 +1036,7 @@
               "id": "participant_download_replays_offline",
               "required": true,
               "holds": true,
-              "detail": "OK formal-lab/replay-bundle@2 run=run_a2_projection events=151 artifacts=0 operations=13 participants=2 contract=formal-lab-contracts/v2 digest=b0a5836e913a4e4a"
+              "detail": "OK formal-lab/replay-bundle@2 run=run_a2_projection events=151 artifacts=0 operations=13 participants=2 contract=formal-lab-contracts/v2 digest=07cf6c6fbe419bf6"
             },
             {
               "id": "participant_settings_refused",
@@ -906,14 +1054,14 @@
               "id": "warehouse_picker_download_projected",
               "required": true,
               "holds": true,
-              "detail": "round_robin: 78 events, dock[…] absent; joint_batch: 116 events, dock[…] absent"
+              "detail": "round_robin: 78 events, dock[…] absent; joint_batch: 126 events, dock[…] absent"
             }
           ],
           "produced": [
             {
               "path": "docs/execution/evidence/phase4/a2-execution-basis.json",
               "exists": true,
-              "sha256": "d11bd2fa92880d0202badcd573f7731606248c5f9a6571f66132918c24643c0f",
+              "sha256": "f35d89cd4aa829c62a375ad6920d48d7e7f31de7290dd973393400d8e6cedef9",
               "fresh": true
             }
           ],
@@ -924,15 +1072,23 @@
         {
           "path": "docs/execution/evidence/phase4/a2-execution-basis.json",
           "exists": true,
-          "sha256": "d11bd2fa92880d0202badcd573f7731606248c5f9a6571f66132918c24643c0f",
+          "sha256": "f35d89cd4aa829c62a375ad6920d48d7e7f31de7290dd973393400d8e6cedef9",
           "fresh": true
         }
       ],
       "first_failure": null,
       "flaky": false,
-      "inherited": true,
-      "this_run": false,
-      "history": []
+      "inherited": false,
+      "this_run": true,
+      "history": [
+        {
+          "result": "PASS",
+          "checked_commit": "ee305fec2d599da4c22d443aa32236fd93b87d60",
+          "finished_at": "2026-10-02T05:48:41Z",
+          "duration_s": 6.0,
+          "attempts": 1
+        }
+      ]
     },
     {
       "id": "p4-a2-participant-api",
@@ -953,29 +1109,29 @@
       "assertions_from": null,
       "trigger": null,
       "result": "PASS",
-      "reason": "1 passed in 11.88s",
-      "summary": "1 passed in 11.88s",
+      "reason": "1 passed in 12.05s",
+      "summary": "1 passed in 12.05s",
       "condition": null,
-      "checked_commit": "ee305fec2d599da4c22d443aa32236fd93b87d60",
-      "worktree_sha256": "294b1ab836d5b022177e98301b44eaef552abd58e694663f69cc5eb9c4f04089",
-      "worktree_clean": false,
-      "config_sha256": "91cbdf5d1e34f38f49334bcba70e08e6d4a610e7762e29f75d7e0db7303dd341",
-      "run_nonce": "a2fac63f6b10408db16a25df973682fd",
-      "started_at": "2026-10-02T05:48:41Z",
-      "finished_at": "2026-10-02T05:48:53Z",
-      "duration_s": 12.1,
+      "checked_commit": "d27c82918e8685d309526c792c239f6e35eb8fc1",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "worktree_clean": true,
+      "config_sha256": "c88301517e5dfd98ab03891c3ee52c70c3d3a11960e5256312816d95eb041348",
+      "run_nonce": "3984b6c299c14677a4be14e0db086099",
+      "started_at": "2026-10-02T12:11:39Z",
+      "finished_at": "2026-10-02T12:11:51Z",
+      "duration_s": 12.2,
       "attempts": [
         {
           "attempt": 1,
-          "started_at": "2026-10-02T05:48:41Z",
-          "finished_at": "2026-10-02T05:48:53Z",
-          "duration_s": 12.1,
+          "started_at": "2026-10-02T12:11:39Z",
+          "finished_at": "2026-10-02T12:11:51Z",
+          "duration_s": 12.2,
           "exit_code": 0,
           "result": "PASS",
-          "reason": "1 passed in 11.88s",
-          "log": "docs/execution/evidence/phase4/checks/logs/p4-a2-participant-api/20261002T054841Z-attempt-1.log",
-          "summary": "1 passed in 11.88s",
-          "nonce": "bffd100da00b4cba94813879cd776ee8",
+          "reason": "1 passed in 12.05s",
+          "log": "docs/execution/evidence/phase4/checks/logs/p4-a2-participant-api/20261002T121139Z-attempt-1.log",
+          "summary": "1 passed in 12.05s",
+          "nonce": "698fdbb5871b4402bc42671cca1d1733",
           "structured_result": null,
           "assertions": [],
           "produced": [],
@@ -986,16 +1142,24 @@
             "deselected": 0,
             "errors": 0,
             "skip_reasons": [],
-            "line": "1 passed in 11.88s"
+            "line": "1 passed in 12.05s"
           }
         }
       ],
       "evidence_files": [],
       "first_failure": null,
       "flaky": false,
-      "inherited": true,
-      "this_run": false,
-      "history": []
+      "inherited": false,
+      "this_run": true,
+      "history": [
+        {
+          "result": "PASS",
+          "checked_commit": "ee305fec2d599da4c22d443aa32236fd93b87d60",
+          "finished_at": "2026-10-02T05:48:53Z",
+          "duration_s": 12.1,
+          "attempts": 1
+        }
+      ]
     },
     {
       "id": "p4-a3-unit",
@@ -1016,49 +1180,56 @@
       "assertions_from": null,
       "trigger": null,
       "result": "PASS",
-      "reason": "37 passed in 120.28s (0:02:00)",
-      "summary": "37 passed in 120.28s (0:02:00)",
+      "reason": "38 passed in 98.72s (0:01:38)",
+      "summary": "38 passed in 98.72s (0:01:38)",
       "condition": null,
-      "checked_commit": "b9fc7c40312eff713f44bb97817a15f65aea1de4",
-      "worktree_sha256": "09742611be2fe6877f2129e2ec54e9459ebfdd8786e1db34bcd38745f523294c",
-      "worktree_clean": false,
-      "config_sha256": "3b2b68d8e84e9488d63c31851b6006ab230d9627b0369d11cf6e2f64c841b7d1",
-      "run_nonce": "0b4cfcc6b0484cb397e8f96b7e6b3728",
-      "started_at": "2026-10-02T10:28:37Z",
-      "finished_at": "2026-10-02T10:30:37Z",
-      "duration_s": 120.2,
+      "checked_commit": "d27c82918e8685d309526c792c239f6e35eb8fc1",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "worktree_clean": true,
+      "config_sha256": "c88301517e5dfd98ab03891c3ee52c70c3d3a11960e5256312816d95eb041348",
+      "run_nonce": "3984b6c299c14677a4be14e0db086099",
+      "started_at": "2026-10-02T12:11:51Z",
+      "finished_at": "2026-10-02T12:13:29Z",
+      "duration_s": 97.5,
       "attempts": [
         {
           "attempt": 1,
-          "started_at": "2026-10-02T10:28:37Z",
-          "finished_at": "2026-10-02T10:30:37Z",
-          "duration_s": 120.2,
+          "started_at": "2026-10-02T12:11:51Z",
+          "finished_at": "2026-10-02T12:13:29Z",
+          "duration_s": 97.5,
           "exit_code": 0,
           "result": "PASS",
-          "reason": "37 passed in 120.28s (0:02:00)",
-          "log": "docs/execution/evidence/phase4/checks/logs/p4-a3-unit/20261002T102837Z-attempt-1.log",
-          "summary": "37 passed in 120.28s (0:02:00)",
-          "nonce": "e8f3e3e60e75451bb46170930e3138c7",
+          "reason": "38 passed in 98.72s (0:01:38)",
+          "log": "docs/execution/evidence/phase4/checks/logs/p4-a3-unit/20261002T121151Z-attempt-1.log",
+          "summary": "38 passed in 98.72s (0:01:38)",
+          "nonce": "e9183a6d198145d1bec35d2455ae7e15",
           "structured_result": null,
           "assertions": [],
           "produced": [],
           "pytest": {
-            "passed": 37,
+            "passed": 38,
             "failed": 0,
             "skipped": 0,
             "deselected": 0,
             "errors": 0,
             "skip_reasons": [],
-            "line": "37 passed in 120.28s (0:02:00)"
+            "line": "38 passed in 98.72s (0:01:38)"
           }
         }
       ],
       "evidence_files": [],
       "first_failure": null,
       "flaky": false,
-      "inherited": true,
-      "this_run": false,
+      "inherited": false,
+      "this_run": true,
       "history": [
+        {
+          "result": "PASS",
+          "checked_commit": "b9fc7c40312eff713f44bb97817a15f65aea1de4",
+          "finished_at": "2026-10-02T10:30:37Z",
+          "duration_s": 120.2,
+          "attempts": 1
+        },
         {
           "result": "PASS",
           "checked_commit": "b9fc7c40312eff713f44bb97817a15f65aea1de4",
@@ -1092,27 +1263,27 @@
       "reason": "[p4-a3-decision] PASS: 9 required assertion(s) hold",
       "summary": "[p4-a3-decision] PASS: 9 required assertion(s) hold",
       "condition": null,
-      "checked_commit": "b9fc7c40312eff713f44bb97817a15f65aea1de4",
-      "worktree_sha256": "09742611be2fe6877f2129e2ec54e9459ebfdd8786e1db34bcd38745f523294c",
-      "worktree_clean": false,
-      "config_sha256": "3b2b68d8e84e9488d63c31851b6006ab230d9627b0369d11cf6e2f64c841b7d1",
-      "run_nonce": "0b4cfcc6b0484cb397e8f96b7e6b3728",
-      "started_at": "2026-10-02T10:30:37Z",
-      "finished_at": "2026-10-02T10:31:23Z",
-      "duration_s": 45.9,
+      "checked_commit": "d27c82918e8685d309526c792c239f6e35eb8fc1",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "worktree_clean": true,
+      "config_sha256": "c88301517e5dfd98ab03891c3ee52c70c3d3a11960e5256312816d95eb041348",
+      "run_nonce": "3984b6c299c14677a4be14e0db086099",
+      "started_at": "2026-10-02T12:13:29Z",
+      "finished_at": "2026-10-02T12:14:09Z",
+      "duration_s": 40.2,
       "attempts": [
         {
           "attempt": 1,
-          "started_at": "2026-10-02T10:30:37Z",
-          "finished_at": "2026-10-02T10:31:23Z",
-          "duration_s": 45.9,
+          "started_at": "2026-10-02T12:13:29Z",
+          "finished_at": "2026-10-02T12:14:09Z",
+          "duration_s": 40.2,
           "exit_code": 0,
           "result": "PASS",
           "reason": "[p4-a3-decision] PASS: 9 required assertion(s) hold",
-          "log": "docs/execution/evidence/phase4/checks/logs/p4-a3-decision/20261002T103037Z-attempt-1.log",
+          "log": "docs/execution/evidence/phase4/checks/logs/p4-a3-decision/20261002T121329Z-attempt-1.log",
           "summary": "[p4-a3-decision] PASS: 9 required assertion(s) hold",
-          "nonce": "f975ed80d35747628b7d1e1873b8e7d0",
-          "structured_result": "docs/execution/evidence/phase4/checks/logs/p4-a3-decision/20261002T103037Z-attempt-1.result.json",
+          "nonce": "c36a9f8d584b4d5c8083d470995fcaf6",
+          "structured_result": "docs/execution/evidence/phase4/checks/logs/p4-a3-decision/20261002T121329Z-attempt-1.result.json",
           "assertions": [
             {
               "id": "decision_follows_answer",
@@ -1173,7 +1344,7 @@
             {
               "path": "docs/execution/evidence/phase4/a3-model-decision.json",
               "exists": true,
-              "sha256": "3bdb3508f00391916d692d011ca981ae14d5481d3b14fa3ef7d7bb224efb1d67",
+              "sha256": "9dd8dc1154dc83123ded9501df15ecde26c935998d3f649b49031a529669e7e2",
               "fresh": true
             }
           ],
@@ -1184,15 +1355,22 @@
         {
           "path": "docs/execution/evidence/phase4/a3-model-decision.json",
           "exists": true,
-          "sha256": "3bdb3508f00391916d692d011ca981ae14d5481d3b14fa3ef7d7bb224efb1d67",
+          "sha256": "9dd8dc1154dc83123ded9501df15ecde26c935998d3f649b49031a529669e7e2",
           "fresh": true
         }
       ],
       "first_failure": null,
       "flaky": false,
-      "inherited": true,
-      "this_run": false,
+      "inherited": false,
+      "this_run": true,
       "history": [
+        {
+          "result": "PASS",
+          "checked_commit": "b9fc7c40312eff713f44bb97817a15f65aea1de4",
+          "finished_at": "2026-10-02T10:31:23Z",
+          "duration_s": 45.9,
+          "attempts": 1
+        },
         {
           "result": "PASS",
           "checked_commit": "b9fc7c40312eff713f44bb97817a15f65aea1de4",
@@ -1221,29 +1399,29 @@
       "assertions_from": null,
       "trigger": null,
       "result": "PASS",
-      "reason": "1 passed in 32.86s",
-      "summary": "1 passed in 32.86s",
+      "reason": "1 passed in 33.25s",
+      "summary": "1 passed in 33.25s",
       "condition": null,
-      "checked_commit": "b9fc7c40312eff713f44bb97817a15f65aea1de4",
-      "worktree_sha256": "09742611be2fe6877f2129e2ec54e9459ebfdd8786e1db34bcd38745f523294c",
-      "worktree_clean": false,
-      "config_sha256": "3b2b68d8e84e9488d63c31851b6006ab230d9627b0369d11cf6e2f64c841b7d1",
-      "run_nonce": "0b4cfcc6b0484cb397e8f96b7e6b3728",
-      "started_at": "2026-10-02T10:31:23Z",
-      "finished_at": "2026-10-02T10:31:56Z",
-      "duration_s": 33.1,
+      "checked_commit": "d27c82918e8685d309526c792c239f6e35eb8fc1",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "worktree_clean": true,
+      "config_sha256": "c88301517e5dfd98ab03891c3ee52c70c3d3a11960e5256312816d95eb041348",
+      "run_nonce": "3984b6c299c14677a4be14e0db086099",
+      "started_at": "2026-10-02T12:14:09Z",
+      "finished_at": "2026-10-02T12:14:42Z",
+      "duration_s": 33.0,
       "attempts": [
         {
           "attempt": 1,
-          "started_at": "2026-10-02T10:31:23Z",
-          "finished_at": "2026-10-02T10:31:56Z",
-          "duration_s": 33.1,
+          "started_at": "2026-10-02T12:14:09Z",
+          "finished_at": "2026-10-02T12:14:42Z",
+          "duration_s": 33.0,
           "exit_code": 0,
           "result": "PASS",
-          "reason": "1 passed in 32.86s",
-          "log": "docs/execution/evidence/phase4/checks/logs/p4-a3-platform/20261002T103123Z-attempt-1.log",
-          "summary": "1 passed in 32.86s",
-          "nonce": "529bb64e5e0843d1a3a8ef903cc3697b",
+          "reason": "1 passed in 33.25s",
+          "log": "docs/execution/evidence/phase4/checks/logs/p4-a3-platform/20261002T121409Z-attempt-1.log",
+          "summary": "1 passed in 33.25s",
+          "nonce": "83dd019e17f44b8b9496cda6d6971383",
           "structured_result": null,
           "assertions": [],
           "produced": [],
@@ -1254,16 +1432,23 @@
             "deselected": 0,
             "errors": 0,
             "skip_reasons": [],
-            "line": "1 passed in 32.86s"
+            "line": "1 passed in 33.25s"
           }
         }
       ],
       "evidence_files": [],
       "first_failure": null,
       "flaky": false,
-      "inherited": true,
-      "this_run": false,
+      "inherited": false,
+      "this_run": true,
       "history": [
+        {
+          "result": "PASS",
+          "checked_commit": "b9fc7c40312eff713f44bb97817a15f65aea1de4",
+          "finished_at": "2026-10-02T10:31:56Z",
+          "duration_s": 33.1,
+          "attempts": 1
+        },
         {
           "result": "PASS",
           "checked_commit": "b9fc7c40312eff713f44bb97817a15f65aea1de4",
@@ -1297,27 +1482,27 @@
       "reason": "[p4-a3-real-endpoint] PASS: 3 required assertion(s) hold",
       "summary": "[p4-a3-real-endpoint] PASS: 3 required assertion(s) hold",
       "condition": null,
-      "checked_commit": "b9fc7c40312eff713f44bb97817a15f65aea1de4",
-      "worktree_sha256": "09742611be2fe6877f2129e2ec54e9459ebfdd8786e1db34bcd38745f523294c",
-      "worktree_clean": false,
-      "config_sha256": "3b2b68d8e84e9488d63c31851b6006ab230d9627b0369d11cf6e2f64c841b7d1",
-      "run_nonce": "0b4cfcc6b0484cb397e8f96b7e6b3728",
-      "started_at": "2026-10-02T10:31:56Z",
-      "finished_at": "2026-10-02T10:33:54Z",
-      "duration_s": 117.3,
+      "checked_commit": "d27c82918e8685d309526c792c239f6e35eb8fc1",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "worktree_clean": true,
+      "config_sha256": "c88301517e5dfd98ab03891c3ee52c70c3d3a11960e5256312816d95eb041348",
+      "run_nonce": "3984b6c299c14677a4be14e0db086099",
+      "started_at": "2026-10-02T12:14:42Z",
+      "finished_at": "2026-10-02T12:17:08Z",
+      "duration_s": 145.8,
       "attempts": [
         {
           "attempt": 1,
-          "started_at": "2026-10-02T10:31:56Z",
-          "finished_at": "2026-10-02T10:33:54Z",
-          "duration_s": 117.3,
+          "started_at": "2026-10-02T12:14:42Z",
+          "finished_at": "2026-10-02T12:17:08Z",
+          "duration_s": 145.8,
           "exit_code": 0,
           "result": "PASS",
           "reason": "[p4-a3-real-endpoint] PASS: 3 required assertion(s) hold",
-          "log": "docs/execution/evidence/phase4/checks/logs/p4-a3-real-endpoint/20261002T103156Z-attempt-1.log",
+          "log": "docs/execution/evidence/phase4/checks/logs/p4-a3-real-endpoint/20261002T121442Z-attempt-1.log",
           "summary": "[p4-a3-real-endpoint] PASS: 3 required assertion(s) hold",
-          "nonce": "95bce70eace74ff58f38c1105888921c",
-          "structured_result": "docs/execution/evidence/phase4/checks/logs/p4-a3-real-endpoint/20261002T103156Z-attempt-1.result.json",
+          "nonce": "633f96e4b8614777b3855f9265d37fca",
+          "structured_result": "docs/execution/evidence/phase4/checks/logs/p4-a3-real-endpoint/20261002T121442Z-attempt-1.result.json",
           "assertions": [
             {
               "id": "real_provider_answered",
@@ -1342,7 +1527,7 @@
             {
               "path": "docs/execution/evidence/phase4/a3-real-endpoint.json",
               "exists": true,
-              "sha256": "0fe9717c7c247badd7d794487793d505bf3de4a0e2d52aae700324172674b402",
+              "sha256": "122ff32d766167cee4c94ca3118ece63ad9c5e8b2588d5f1a0e58b50150c4aaa",
               "fresh": true
             }
           ],
@@ -1353,15 +1538,22 @@
         {
           "path": "docs/execution/evidence/phase4/a3-real-endpoint.json",
           "exists": true,
-          "sha256": "0fe9717c7c247badd7d794487793d505bf3de4a0e2d52aae700324172674b402",
+          "sha256": "122ff32d766167cee4c94ca3118ece63ad9c5e8b2588d5f1a0e58b50150c4aaa",
           "fresh": true
         }
       ],
       "first_failure": null,
       "flaky": false,
-      "inherited": true,
-      "this_run": false,
+      "inherited": false,
+      "this_run": true,
       "history": [
+        {
+          "result": "PASS",
+          "checked_commit": "b9fc7c40312eff713f44bb97817a15f65aea1de4",
+          "finished_at": "2026-10-02T10:33:54Z",
+          "duration_s": 117.3,
+          "attempts": 1
+        },
         {
           "result": "PASS",
           "checked_commit": "b9fc7c40312eff713f44bb97817a15f65aea1de4",
@@ -1390,29 +1582,29 @@
       "assertions_from": null,
       "trigger": null,
       "result": "PASS",
-      "reason": "40 passed in 131.38s (0:02:11)",
-      "summary": "40 passed in 131.38s (0:02:11)",
+      "reason": "40 passed in 190.81s (0:03:10)",
+      "summary": "40 passed in 190.81s (0:03:10)",
       "condition": null,
-      "checked_commit": "773f9345c654d3d9e6dd438980834169cebd1449",
-      "worktree_sha256": "282e7962b44f0e44fc83cd5d4e2e71773abc01106ea991ffbf17b32cb921e041",
-      "worktree_clean": false,
-      "config_sha256": "295bd4982cfc35ed000c6976ed6457dbc6099a5e1a23fd55943b4ab744f34b91",
-      "run_nonce": "7db218674e3944588ac43a378965f855",
-      "started_at": "2026-10-02T11:21:53Z",
-      "finished_at": "2026-10-02T11:24:03Z",
-      "duration_s": 130.4,
+      "checked_commit": "d27c82918e8685d309526c792c239f6e35eb8fc1",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "worktree_clean": true,
+      "config_sha256": "c88301517e5dfd98ab03891c3ee52c70c3d3a11960e5256312816d95eb041348",
+      "run_nonce": "3984b6c299c14677a4be14e0db086099",
+      "started_at": "2026-10-02T12:17:08Z",
+      "finished_at": "2026-10-02T12:20:16Z",
+      "duration_s": 188.1,
       "attempts": [
         {
           "attempt": 1,
-          "started_at": "2026-10-02T11:21:53Z",
-          "finished_at": "2026-10-02T11:24:03Z",
-          "duration_s": 130.4,
+          "started_at": "2026-10-02T12:17:08Z",
+          "finished_at": "2026-10-02T12:20:16Z",
+          "duration_s": 188.1,
           "exit_code": 0,
           "result": "PASS",
-          "reason": "40 passed in 131.38s (0:02:11)",
-          "log": "docs/execution/evidence/phase4/checks/logs/p4-a4-unit/20261002T112153Z-attempt-1.log",
-          "summary": "40 passed in 131.38s (0:02:11)",
-          "nonce": "b243b9ca22004dcfaaf13fcd785baff1",
+          "reason": "40 passed in 190.81s (0:03:10)",
+          "log": "docs/execution/evidence/phase4/checks/logs/p4-a4-unit/20261002T121708Z-attempt-1.log",
+          "summary": "40 passed in 190.81s (0:03:10)",
+          "nonce": "8ff33893213a4c29a53183183d1363b9",
           "structured_result": null,
           "assertions": [],
           "produced": [],
@@ -1423,16 +1615,24 @@
             "deselected": 0,
             "errors": 0,
             "skip_reasons": [],
-            "line": "40 passed in 131.38s (0:02:11)"
+            "line": "40 passed in 190.81s (0:03:10)"
           }
         }
       ],
       "evidence_files": [],
       "first_failure": null,
       "flaky": false,
-      "inherited": true,
-      "this_run": false,
-      "history": []
+      "inherited": false,
+      "this_run": true,
+      "history": [
+        {
+          "result": "PASS",
+          "checked_commit": "773f9345c654d3d9e6dd438980834169cebd1449",
+          "finished_at": "2026-10-02T11:24:03Z",
+          "duration_s": 130.4,
+          "attempts": 1
+        }
+      ]
     },
     {
       "id": "p4-a4-rounds",
@@ -1459,27 +1659,27 @@
       "reason": "[p4-a4-rounds] PASS: 9 required assertion(s) hold",
       "summary": "[p4-a4-rounds] PASS: 9 required assertion(s) hold",
       "condition": null,
-      "checked_commit": "773f9345c654d3d9e6dd438980834169cebd1449",
-      "worktree_sha256": "282e7962b44f0e44fc83cd5d4e2e71773abc01106ea991ffbf17b32cb921e041",
-      "worktree_clean": false,
-      "config_sha256": "295bd4982cfc35ed000c6976ed6457dbc6099a5e1a23fd55943b4ab744f34b91",
-      "run_nonce": "7db218674e3944588ac43a378965f855",
-      "started_at": "2026-10-02T11:24:03Z",
-      "finished_at": "2026-10-02T11:24:07Z",
-      "duration_s": 3.9,
+      "checked_commit": "d27c82918e8685d309526c792c239f6e35eb8fc1",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "worktree_clean": true,
+      "config_sha256": "c88301517e5dfd98ab03891c3ee52c70c3d3a11960e5256312816d95eb041348",
+      "run_nonce": "3984b6c299c14677a4be14e0db086099",
+      "started_at": "2026-10-02T12:20:16Z",
+      "finished_at": "2026-10-02T12:20:19Z",
+      "duration_s": 3.3,
       "attempts": [
         {
           "attempt": 1,
-          "started_at": "2026-10-02T11:24:03Z",
-          "finished_at": "2026-10-02T11:24:07Z",
-          "duration_s": 3.9,
+          "started_at": "2026-10-02T12:20:16Z",
+          "finished_at": "2026-10-02T12:20:19Z",
+          "duration_s": 3.3,
           "exit_code": 0,
           "result": "PASS",
           "reason": "[p4-a4-rounds] PASS: 9 required assertion(s) hold",
-          "log": "docs/execution/evidence/phase4/checks/logs/p4-a4-rounds/20261002T112403Z-attempt-1.log",
+          "log": "docs/execution/evidence/phase4/checks/logs/p4-a4-rounds/20261002T122016Z-attempt-1.log",
           "summary": "[p4-a4-rounds] PASS: 9 required assertion(s) hold",
-          "nonce": "a6ba9e7b115a4acab1e3f9f33ef54d8a",
-          "structured_result": "docs/execution/evidence/phase4/checks/logs/p4-a4-rounds/20261002T112403Z-attempt-1.result.json",
+          "nonce": "8461470e55cd4ada9ad10f0c0ee72629",
+          "structured_result": "docs/execution/evidence/phase4/checks/logs/p4-a4-rounds/20261002T122016Z-attempt-1.result.json",
           "assertions": [
             {
               "id": "idle_participant_does_not_stop_the_other",
@@ -1527,7 +1727,7 @@
               "id": "timeout_kills_the_child",
               "required": true,
               "holds": true,
-              "detail": "{'raised': 'Timeout', 'waited_s': 0.51, 'old_child_alive': False}"
+              "detail": "{'raised': 'Timeout', 'waited_s': 0.52, 'old_child_alive': False}"
             },
             {
               "id": "paired_report_hand_check",
@@ -1540,7 +1740,7 @@
             {
               "path": "docs/execution/evidence/phase4/a4-rounds.json",
               "exists": true,
-              "sha256": "00a40e61b56cdee327a033f43c567fc7703a3ebcf58314075cb729245bb2587c",
+              "sha256": "191e522867f2fe9a098caf46c3639493265ee9c5c56f74dc4099bc91a39ba3bd",
               "fresh": true
             },
             {
@@ -1557,7 +1757,7 @@
         {
           "path": "docs/execution/evidence/phase4/a4-rounds.json",
           "exists": true,
-          "sha256": "00a40e61b56cdee327a033f43c567fc7703a3ebcf58314075cb729245bb2587c",
+          "sha256": "191e522867f2fe9a098caf46c3639493265ee9c5c56f74dc4099bc91a39ba3bd",
           "fresh": true
         },
         {
@@ -1569,9 +1769,17 @@
       ],
       "first_failure": null,
       "flaky": false,
-      "inherited": true,
-      "this_run": false,
-      "history": []
+      "inherited": false,
+      "this_run": true,
+      "history": [
+        {
+          "result": "PASS",
+          "checked_commit": "773f9345c654d3d9e6dd438980834169cebd1449",
+          "finished_at": "2026-10-02T11:24:07Z",
+          "duration_s": 3.9,
+          "attempts": 1
+        }
+      ]
     },
     {
       "id": "p4-a4-platform",
@@ -1592,29 +1800,29 @@
       "assertions_from": null,
       "trigger": null,
       "result": "PASS",
-      "reason": "7 passed in 239.36s (0:03:59)",
-      "summary": "7 passed in 239.36s (0:03:59)",
+      "reason": "7 passed in 189.98s (0:03:09)",
+      "summary": "7 passed in 189.98s (0:03:09)",
       "condition": null,
-      "checked_commit": "773f9345c654d3d9e6dd438980834169cebd1449",
-      "worktree_sha256": "282e7962b44f0e44fc83cd5d4e2e71773abc01106ea991ffbf17b32cb921e041",
-      "worktree_clean": false,
-      "config_sha256": "295bd4982cfc35ed000c6976ed6457dbc6099a5e1a23fd55943b4ab744f34b91",
-      "run_nonce": "7db218674e3944588ac43a378965f855",
-      "started_at": "2026-10-02T11:24:07Z",
-      "finished_at": "2026-10-02T11:28:04Z",
-      "duration_s": 237.1,
+      "checked_commit": "d27c82918e8685d309526c792c239f6e35eb8fc1",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "worktree_clean": true,
+      "config_sha256": "c88301517e5dfd98ab03891c3ee52c70c3d3a11960e5256312816d95eb041348",
+      "run_nonce": "3984b6c299c14677a4be14e0db086099",
+      "started_at": "2026-10-02T12:20:19Z",
+      "finished_at": "2026-10-02T12:23:26Z",
+      "duration_s": 187.1,
       "attempts": [
         {
           "attempt": 1,
-          "started_at": "2026-10-02T11:24:07Z",
-          "finished_at": "2026-10-02T11:28:04Z",
-          "duration_s": 237.1,
+          "started_at": "2026-10-02T12:20:19Z",
+          "finished_at": "2026-10-02T12:23:26Z",
+          "duration_s": 187.1,
           "exit_code": 0,
           "result": "PASS",
-          "reason": "7 passed in 239.36s (0:03:59)",
-          "log": "docs/execution/evidence/phase4/checks/logs/p4-a4-platform/20261002T112407Z-attempt-1.log",
-          "summary": "7 passed in 239.36s (0:03:59)",
-          "nonce": "d51881dadc2e4c2280bf497e41dd2395",
+          "reason": "7 passed in 189.98s (0:03:09)",
+          "log": "docs/execution/evidence/phase4/checks/logs/p4-a4-platform/20261002T122019Z-attempt-1.log",
+          "summary": "7 passed in 189.98s (0:03:09)",
+          "nonce": "06c44e0bd509442a93d8b228c0f3a68c",
           "structured_result": null,
           "assertions": [],
           "produced": [],
@@ -1625,16 +1833,24 @@
             "deselected": 0,
             "errors": 0,
             "skip_reasons": [],
-            "line": "7 passed in 239.36s (0:03:59)"
+            "line": "7 passed in 189.98s (0:03:09)"
           }
         }
       ],
       "evidence_files": [],
       "first_failure": null,
       "flaky": false,
-      "inherited": true,
-      "this_run": false,
-      "history": []
+      "inherited": false,
+      "this_run": true,
+      "history": [
+        {
+          "result": "PASS",
+          "checked_commit": "773f9345c654d3d9e6dd438980834169cebd1449",
+          "finished_at": "2026-10-02T11:28:04Z",
+          "duration_s": 237.1,
+          "attempts": 1
+        }
+      ]
     },
     {
       "id": "p4-a5-web-types",
@@ -1655,29 +1871,29 @@
       "assertions_from": null,
       "trigger": null,
       "result": "PASS",
-      "reason": "# phase4/p4-a5-web-types at 9d3e3c606c70 (tree 052e2b850db9, profile local-lite) · attempt 1 · started 2026-10-02T12:06:18Z",
-      "summary": "# phase4/p4-a5-web-types at 9d3e3c606c70 (tree 052e2b850db9, profile local-lite) · attempt 1 · started 2026-10-02T12:06:18Z",
+      "reason": "# phase4/p4-a5-web-types at d27c82918e86 (tree e3b0c44298fc, profile local-lite) · attempt 1 · started 2026-10-02T12:23:26Z",
+      "summary": "# phase4/p4-a5-web-types at d27c82918e86 (tree e3b0c44298fc, profile local-lite) · attempt 1 · started 2026-10-02T12:23:26Z",
       "condition": null,
-      "checked_commit": "9d3e3c606c705ec42ff43caed8c45f5033e8a795",
-      "worktree_sha256": "052e2b850db9e3e4c15d34a0abd1a7335a6a4c68c59bac5caf304236ec119286",
-      "worktree_clean": false,
+      "checked_commit": "d27c82918e8685d309526c792c239f6e35eb8fc1",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "worktree_clean": true,
       "config_sha256": "c88301517e5dfd98ab03891c3ee52c70c3d3a11960e5256312816d95eb041348",
-      "run_nonce": "5af86070317448179f6ab512bce2b37e",
-      "started_at": "2026-10-02T12:06:18Z",
-      "finished_at": "2026-10-02T12:06:19Z",
-      "duration_s": 0.4,
+      "run_nonce": "3984b6c299c14677a4be14e0db086099",
+      "started_at": "2026-10-02T12:23:26Z",
+      "finished_at": "2026-10-02T12:23:26Z",
+      "duration_s": 0.3,
       "attempts": [
         {
           "attempt": 1,
-          "started_at": "2026-10-02T12:06:18Z",
-          "finished_at": "2026-10-02T12:06:19Z",
-          "duration_s": 0.4,
+          "started_at": "2026-10-02T12:23:26Z",
+          "finished_at": "2026-10-02T12:23:26Z",
+          "duration_s": 0.3,
           "exit_code": 0,
           "result": "PASS",
-          "reason": "# phase4/p4-a5-web-types at 9d3e3c606c70 (tree 052e2b850db9, profile local-lite) · attempt 1 · started 2026-10-02T12:06:18Z",
-          "log": "docs/execution/evidence/phase4/checks/logs/p4-a5-web-types/20261002T120618Z-attempt-1.log",
-          "summary": "# phase4/p4-a5-web-types at 9d3e3c606c70 (tree 052e2b850db9, profile local-lite) · attempt 1 · started 2026-10-02T12:06:18Z",
-          "nonce": "365f3e385ace4ae0b3fe110ea8389c32",
+          "reason": "# phase4/p4-a5-web-types at d27c82918e86 (tree e3b0c44298fc, profile local-lite) · attempt 1 · started 2026-10-02T12:23:26Z",
+          "log": "docs/execution/evidence/phase4/checks/logs/p4-a5-web-types/20261002T122326Z-attempt-1.log",
+          "summary": "# phase4/p4-a5-web-types at d27c82918e86 (tree e3b0c44298fc, profile local-lite) · attempt 1 · started 2026-10-02T12:23:26Z",
+          "nonce": "61cdc5729107476ea5fb44ed6d72b631",
           "structured_result": null,
           "assertions": [],
           "produced": [],
@@ -1689,7 +1905,15 @@
       "flaky": false,
       "inherited": false,
       "this_run": true,
-      "history": []
+      "history": [
+        {
+          "result": "PASS",
+          "checked_commit": "9d3e3c606c705ec42ff43caed8c45f5033e8a795",
+          "finished_at": "2026-10-02T12:06:19Z",
+          "duration_s": 0.4,
+          "attempts": 1
+        }
+      ]
     },
     {
       "id": "p4-a5-product-web",
@@ -1713,42 +1937,42 @@
       "assertions_from": null,
       "trigger": null,
       "result": "PASS",
-      "reason": "2 passed in 47.10s",
-      "summary": "2 passed in 47.10s",
+      "reason": "2 passed in 43.26s",
+      "summary": "2 passed in 43.26s",
       "condition": null,
-      "checked_commit": "9d3e3c606c705ec42ff43caed8c45f5033e8a795",
-      "worktree_sha256": "052e2b850db9e3e4c15d34a0abd1a7335a6a4c68c59bac5caf304236ec119286",
-      "worktree_clean": false,
+      "checked_commit": "d27c82918e8685d309526c792c239f6e35eb8fc1",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "worktree_clean": true,
       "config_sha256": "c88301517e5dfd98ab03891c3ee52c70c3d3a11960e5256312816d95eb041348",
-      "run_nonce": "5af86070317448179f6ab512bce2b37e",
-      "started_at": "2026-10-02T12:06:19Z",
-      "finished_at": "2026-10-02T12:07:05Z",
-      "duration_s": 46.8,
+      "run_nonce": "3984b6c299c14677a4be14e0db086099",
+      "started_at": "2026-10-02T12:23:26Z",
+      "finished_at": "2026-10-02T12:24:10Z",
+      "duration_s": 43.1,
       "attempts": [
         {
           "attempt": 1,
-          "started_at": "2026-10-02T12:06:19Z",
-          "finished_at": "2026-10-02T12:07:05Z",
-          "duration_s": 46.8,
+          "started_at": "2026-10-02T12:23:26Z",
+          "finished_at": "2026-10-02T12:24:10Z",
+          "duration_s": 43.1,
           "exit_code": 0,
           "result": "PASS",
-          "reason": "2 passed in 47.10s",
-          "log": "docs/execution/evidence/phase4/checks/logs/p4-a5-product-web/20261002T120619Z-attempt-1.log",
-          "summary": "2 passed in 47.10s",
-          "nonce": "875b03199ebc4402ae360dd1d8f3094d",
+          "reason": "2 passed in 43.26s",
+          "log": "docs/execution/evidence/phase4/checks/logs/p4-a5-product-web/20261002T122326Z-attempt-1.log",
+          "summary": "2 passed in 43.26s",
+          "nonce": "e6dc4d0b30e849d89b83bb86eb2da9d3",
           "structured_result": null,
           "assertions": [],
           "produced": [
             {
               "path": "docs/execution/evidence/phase4/a5-product-flow.json",
               "exists": true,
-              "sha256": "6658736f8b2dfe6110d8d6888f6819fb671099775de8de3be0a9b4c3f59c3fc5",
+              "sha256": "390510c3f14dbccf74fb77fbbf100344d2f34edcbd88bdfb619bec420b8db534",
               "fresh": true
             },
             {
               "path": "docs/execution/evidence/phase4/a5-narrow.json",
               "exists": true,
-              "sha256": "39eda6f8c9f3c40f8b6c1cbb292ccbf3d06adffe010e16a9b906081db3b06910",
+              "sha256": "ada9fb59906e3a16c8583039e48ed19ee17017f2f2fec2f279f9904e1d230988",
               "fresh": true
             }
           ],
@@ -1759,7 +1983,7 @@
             "deselected": 0,
             "errors": 0,
             "skip_reasons": [],
-            "line": "2 passed in 47.10s"
+            "line": "2 passed in 43.26s"
           }
         }
       ],
@@ -1767,13 +1991,13 @@
         {
           "path": "docs/execution/evidence/phase4/a5-product-flow.json",
           "exists": true,
-          "sha256": "6658736f8b2dfe6110d8d6888f6819fb671099775de8de3be0a9b4c3f59c3fc5",
+          "sha256": "390510c3f14dbccf74fb77fbbf100344d2f34edcbd88bdfb619bec420b8db534",
           "fresh": true
         },
         {
           "path": "docs/execution/evidence/phase4/a5-narrow.json",
           "exists": true,
-          "sha256": "39eda6f8c9f3c40f8b6c1cbb292ccbf3d06adffe010e16a9b906081db3b06910",
+          "sha256": "ada9fb59906e3a16c8583039e48ed19ee17017f2f2fec2f279f9904e1d230988",
           "fresh": true
         }
       ],
@@ -1781,7 +2005,15 @@
       "flaky": false,
       "inherited": false,
       "this_run": true,
-      "history": []
+      "history": [
+        {
+          "result": "PASS",
+          "checked_commit": "9d3e3c606c705ec42ff43caed8c45f5033e8a795",
+          "finished_at": "2026-10-02T12:07:05Z",
+          "duration_s": 46.8,
+          "attempts": 1
+        }
+      ]
     },
     {
       "id": "p4-a5-release",
@@ -1808,33 +2040,33 @@
       "reason": "[p4-a5-release] PASS: 4 required assertion(s) hold",
       "summary": "[p4-a5-release] PASS: 4 required assertion(s) hold",
       "condition": null,
-      "checked_commit": "9d3e3c606c705ec42ff43caed8c45f5033e8a795",
-      "worktree_sha256": "052e2b850db9e3e4c15d34a0abd1a7335a6a4c68c59bac5caf304236ec119286",
-      "worktree_clean": false,
+      "checked_commit": "d27c82918e8685d309526c792c239f6e35eb8fc1",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "worktree_clean": true,
       "config_sha256": "c88301517e5dfd98ab03891c3ee52c70c3d3a11960e5256312816d95eb041348",
-      "run_nonce": "5af86070317448179f6ab512bce2b37e",
-      "started_at": "2026-10-02T12:07:05Z",
-      "finished_at": "2026-10-02T12:07:19Z",
-      "duration_s": 13.9,
+      "run_nonce": "3984b6c299c14677a4be14e0db086099",
+      "started_at": "2026-10-02T12:24:10Z",
+      "finished_at": "2026-10-02T12:24:28Z",
+      "duration_s": 18.3,
       "attempts": [
         {
           "attempt": 1,
-          "started_at": "2026-10-02T12:07:05Z",
-          "finished_at": "2026-10-02T12:07:19Z",
-          "duration_s": 13.9,
+          "started_at": "2026-10-02T12:24:10Z",
+          "finished_at": "2026-10-02T12:24:28Z",
+          "duration_s": 18.3,
           "exit_code": 0,
           "result": "PASS",
           "reason": "[p4-a5-release] PASS: 4 required assertion(s) hold",
-          "log": "docs/execution/evidence/phase4/checks/logs/p4-a5-release/20261002T120705Z-attempt-1.log",
+          "log": "docs/execution/evidence/phase4/checks/logs/p4-a5-release/20261002T122410Z-attempt-1.log",
           "summary": "[p4-a5-release] PASS: 4 required assertion(s) hold",
-          "nonce": "920a6b15df684c99999c10897830c365",
-          "structured_result": "docs/execution/evidence/phase4/checks/logs/p4-a5-release/20261002T120705Z-attempt-1.result.json",
+          "nonce": "fb8e28db56044be9b598d50a9985c9a8",
+          "structured_result": "docs/execution/evidence/phase4/checks/logs/p4-a5-release/20261002T122410Z-attempt-1.result.json",
           "assertions": [
             {
               "id": "release_outputs",
               "required": true,
               "holds": true,
-              "detail": "20 wheels for 20 workspace members, web 717694 B, 3 local configs, manifest /Users/null3351/Code/formal-agent-lab/out/release/manifest.json"
+              "detail": "20 wheels for 20 workspace members, web 717724 B, 3 local configs, manifest /Users/null3351/Code/formal-agent-lab/out/release/manifest.json"
             },
             {
               "id": "online_clean_install_and_replay",
@@ -1852,20 +2084,20 @@
               "id": "ordinary_scenario_bundle",
               "required": true,
               "holds": true,
-              "detail": "{'run_id': 'run_a5_release_orders', 'status': 'SUCCEEDED', 'steps': 25, 'events': 207, 'sha256': 'c4696741a63dc005bb6a4d7fbbf9629a6ff6733c325dd14469ca3418480f3f11'}"
+              "detail": "{'run_id': 'run_a5_release_orders', 'status': 'SUCCEEDED', 'steps': 25, 'events': 207, 'sha256': 'afbe3a7be253c3ada3d67e7c7f0994a8c0a689dc86a8ddd1392b61c56753696b'}"
             }
           ],
           "produced": [
             {
               "path": "docs/execution/evidence/phase4/a5-release.json",
               "exists": true,
-              "sha256": "a26f85bb875eecf32606d046e81b1633b674e951c1d0ff9389419b8ed6259de5",
+              "sha256": "29fab1029df3140f576c35f01f0c66b49fef0aebb5973623d043cf45eeda4439",
               "fresh": true
             },
             {
               "path": "docs/execution/evidence/phase4/release-manifest.json",
               "exists": true,
-              "sha256": "0d8b4269f4a3a4328642daf24b843601e5f110cb9eb1973eb116a275cde0e38f",
+              "sha256": "d2e08a509979f6745e21bca5872aad975ff2a5f693958e3a8afb444befd31cfe",
               "fresh": true
             }
           ],
@@ -1876,13 +2108,13 @@
         {
           "path": "docs/execution/evidence/phase4/a5-release.json",
           "exists": true,
-          "sha256": "a26f85bb875eecf32606d046e81b1633b674e951c1d0ff9389419b8ed6259de5",
+          "sha256": "29fab1029df3140f576c35f01f0c66b49fef0aebb5973623d043cf45eeda4439",
           "fresh": true
         },
         {
           "path": "docs/execution/evidence/phase4/release-manifest.json",
           "exists": true,
-          "sha256": "0d8b4269f4a3a4328642daf24b843601e5f110cb9eb1973eb116a275cde0e38f",
+          "sha256": "d2e08a509979f6745e21bca5872aad975ff2a5f693958e3a8afb444befd31cfe",
           "fresh": true
         }
       ],
@@ -1890,7 +2122,15 @@
       "flaky": false,
       "inherited": false,
       "this_run": true,
-      "history": []
+      "history": [
+        {
+          "result": "PASS",
+          "checked_commit": "9d3e3c606c705ec42ff43caed8c45f5033e8a795",
+          "finished_at": "2026-10-02T12:07:19Z",
+          "duration_s": 13.9,
+          "attempts": 1
+        }
+      ]
     }
   ]
 }

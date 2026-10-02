@@ -48,6 +48,7 @@ class Check:
     requires: str | None = None
     profile: str = "local-lite"
     kind: str = "mandatory"  # mandatory | conditional | extension
+    heavy_gib: float = 0.0  # phase 4A: disk it may write; the shared runner keeps the host reserve free before it
 
 
 CHECKS: list[Check] = [
@@ -141,24 +142,25 @@ CHECKS: list[Check] = [
     Check("compose-smoke", "local-release", ["P2-116", "P2-101", "P2-103"],
           "原生本地 Compose 整栈：实验、矩阵、订单服务、两参与者、SSE、S3 产物",
           "bash scripts/compose-smoke.sh", [f"{EV}/compose-smoke.json"], requires="docker",
-          profile="local-services"),
+          profile="local-services", heavy_gib=8),
     Check("orders-compose", "local-release", ["P2-116", "P2-062", "P2-069"], "订单服务 Compose 生命周期（项目标签、清理）",
           f"rm -rf var/orders-e2e-compose && {PY} -m formal_lab_example_orders.e2e --workdir var/orders-e2e-compose "
           f"--mode compose --project p2compose --log {EV}/orders/e2e-compose.log "
           f"--summary {EV}/orders/e2e-compose.json", [f"{EV}/orders/e2e-compose.log"], requires="docker",
-          profile="local-services"),
+          profile="local-services", heavy_gib=4),
     Check("offline-install", "local-release", ["P2-116", "P2-106", "P2-107"],
           "离线包：镜像去重、空目录无包仓库安装、规则 / 符号演示、整栈实验",
           f"{PY} scripts/offline_bundle.py --verify", [f"{EV}/offline-manifest.json"], requires="docker",
-          profile="local-services"),
+          profile="local-services", heavy_gib=12),
     Check("release-manifest", "local-release", ["P2-105", "P2-109", "P2-006"],
           "发行 manifest：wheel / Web / 镜像摘要、异架构构建状态、许可证清单、资源读数",
-          f"{PY} scripts/release.py", [f"{EV}/release-manifest.json", "docs/licenses.md"], requires="docker"),
+          f"{PY} scripts/release.py", [f"{EV}/release-manifest.json", "docs/licenses.md"], requires="docker",
+          heavy_gib=8),
     Check("kind-install-upgrade", "local-release", ["P2-116", "P2-101", "P2-104"],
           "kind：Chart 安装、从阶段一版本升级（迁移）与回滚（仅单节点开发集群）",
           "bash scripts/helm-install-check.sh && bash scripts/helm-upgrade-check.sh",
           ["docs/execution/evidence/helm/install.json", "docs/execution/evidence/helm/upgrade.json"],
-          requires="docker", profile="local-kind"),
+          requires="docker", profile="local-kind", heavy_gib=12),
     Check("backup-restore", "local-release", ["P2-108"], "备份 → 重置 → 恢复，用一次实际实验验证",
           f"{PY} scripts/backup_restore_check.py", [f"{EV}/backup-restore.json"], requires="services",
           profile="local-services"),

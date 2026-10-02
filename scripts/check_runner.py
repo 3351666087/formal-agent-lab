@@ -352,7 +352,8 @@ def load_suite(name: str) -> Suite:
         return mod.SUITE
     # a historical suite (scripts/phase2_check.py): same check fields, its own output file stays untouched
     checks = [Check(id=c.id, group=c.group, title=c.title, command=c.command, tasks=c.tasks, evidence=c.evidence,
-                    requires=c.requires, profile=c.profile, kind=c.kind) for c in mod.CHECKS]
+                    requires=c.requires, profile=c.profile, kind=c.kind, heavy_gib=getattr(c, "heavy_gib", 0.0))
+              for c in mod.CHECKS]
     return Suite(name=name, groups=list(mod.GROUPS), checks=checks, out=ROOT / "out" / "checks" / name,
                  outputs=tuple(mod.OUTPUTS))
 
