@@ -32,7 +32,7 @@ LOGS = ROOT / "docs" / "execution" / "evidence" / "phase2" / "checks"
 OUT = ROOT / "docs" / "handoff" / "phase2-checks.json"
 PYTEST = "uv run --frozen pytest -p no:cacheprovider -q"
 PY = "uv run --frozen python"
-EV = "docs/execution/evidence/phase2"
+EV = os.environ.get("FAL_EVIDENCE_DIR", "docs/execution/evidence/phase2")  # phase 4A: regressions write elsewhere
 GROUPS = ["compatibility", "semantic-driver", "planning-objectives", "multi-actor-recovery", "service-operations",
           "model-release", "evaluation-replay", "product-path", "local-release", "resource-profile"]
 

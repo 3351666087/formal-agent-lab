@@ -21,6 +21,7 @@ Evidence: docs/execution/evidence/phase3/g4-batch.json.
 from __future__ import annotations
 
 import json
+import os
 import sys
 import time
 import zipfile
@@ -35,7 +36,7 @@ from formal_lab_example_warehouse.scenarios import JOINT, VIEWS, package, receiv
 from formal_lab_runtime import default_registry, make_manifest, resume_local, run_local
 
 ROOT = Path(__file__).resolve().parents[1]
-OUT = ROOT / "docs" / "execution" / "evidence" / "phase3" / "g4-batch.json"
+OUT = ROOT / os.environ.get("FAL_EVIDENCE_DIR", "docs/execution/evidence/phase3") / "g4-batch.json"
 CAPTURE = ROOT / "tests" / "compat" / "fixtures" / "phase2" / "warehouse.replay.zip"
 SPY = RULES.model_copy(update={
     "plugin_id": "evidence.warehouse.recording-rules",

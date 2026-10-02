@@ -25,7 +25,7 @@ from formal_lab_contracts.bundle import read_bundle
 from formal_lab_sdk.client import Client
 
 ROOT = Path(__file__).resolve().parents[1]
-OUT = ROOT / "docs" / "execution" / "evidence" / "phase3" / "g5-flows.json"
+OUT = ROOT / os.environ.get("FAL_EVIDENCE_DIR", "docs/execution/evidence/phase3") / "g5-flows.json"
 API = os.environ.get("FAL_API_URL", "http://127.0.0.1:8000/api/v1")
 FLOWS = {"warehouse_batch": ("仓储分配示例", "仓储：收货员 + 拣货员同步批次"),
          "order_recovery": ("订单服务示例", "订单：延迟响应（业务服务）")}

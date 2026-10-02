@@ -16,6 +16,7 @@ Writes docs/execution/evidence/phase2/orders/comparison.{json,md}.
 from __future__ import annotations
 
 import json
+import os
 import sys
 import tempfile
 from pathlib import Path
@@ -29,7 +30,7 @@ from formal_lab_example_orders.scenarios import run
 from formal_lab_runtime import default_registry
 
 ROOT = Path(__file__).resolve().parents[1]
-OUT = ROOT / "docs/execution/evidence/phase2/orders"
+OUT = ROOT / os.environ.get("FAL_EVIDENCE_DIR", "docs/execution/evidence/phase2") / "orders"
 SEED = 2
 
 

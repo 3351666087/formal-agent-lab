@@ -18,6 +18,7 @@ Evidence: docs/execution/evidence/phase3/g3-release.json.
 from __future__ import annotations
 
 import json
+import os
 import sys
 import tempfile
 import time
@@ -34,7 +35,7 @@ from formal_lab_runtime import default_registry, make_manifest, run_local
 from formal_lab_runtime.release import capability_report, check_release
 
 ROOT = Path(__file__).resolve().parents[1]
-OUT = ROOT / "docs" / "execution" / "evidence" / "phase3" / "g3-release.json"
+OUT = ROOT / os.environ.get("FAL_EVIDENCE_DIR", "docs/execution/evidence/phase3") / "g3-release.json"
 
 
 def run_on(pkg, sc, reg, run_id: str):

@@ -26,6 +26,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import subprocess
 import sys
 import tempfile
@@ -40,7 +41,7 @@ from formal_lab_runtime.local_runner import LocalRunState
 from formal_lab_runtime.settings import get_setting
 
 ROOT = Path(__file__).resolve().parents[1]
-OUT = ROOT / "docs/execution/evidence/phase2/model"
+OUT = ROOT / os.environ.get("FAL_EVIDENCE_DIR", "docs/execution/evidence/phase2") / "model"
 
 
 def sha(obj) -> str:

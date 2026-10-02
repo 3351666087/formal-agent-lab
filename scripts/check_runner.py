@@ -354,8 +354,11 @@ def load_suite(name: str) -> Suite:
     checks = [Check(id=c.id, group=c.group, title=c.title, command=c.command, tasks=c.tasks, evidence=c.evidence,
                     requires=c.requires, profile=c.profile, kind=c.kind, heavy_gib=getattr(c, "heavy_gib", 0.0))
               for c in mod.CHECKS]
-    return Suite(name=name, groups=list(mod.GROUPS), checks=checks, out=ROOT / "out" / "checks" / name,
-                 outputs=tuple(mod.OUTPUTS))
+    # its conditional / extension checks (real model, PRISM-games) live in groups of their own: declared, but only
+    # the historical mandatory groups are required
+    extra = [g for g in dict.fromkeys(c.group for c in checks) if g not in mod.GROUPS]
+    return Suite(name=name, groups=[*mod.GROUPS, *extra], checks=checks, out=ROOT / "out" / "checks" / name,
+                 outputs=tuple(mod.OUTPUTS), required_groups=list(mod.GROUPS))
 
 
 # ------------------------------------------------------------------ aggregation

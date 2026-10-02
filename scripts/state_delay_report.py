@@ -16,6 +16,7 @@ same numbers (the Z3 planner uses a fresh context per query, D-017).
 from __future__ import annotations
 
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -24,7 +25,7 @@ from formal_lab_example_scheduling.scenarios import STRATEGIES, model_package, s
 from formal_lab_runtime import default_registry, make_manifest, run_local
 
 ROOT = Path(__file__).resolve().parents[1]
-OUT = ROOT / "docs/execution/evidence/phase2/state-delay"
+OUT = ROOT / os.environ.get("FAL_EVIDENCE_DIR", "docs/execution/evidence/phase2") / "state-delay"
 STRATEGY_NAMES = ["rule", "z3", "llm-stub", "task-rule", "task-symbolic", "task-model-stub"]
 SEEDS = [1, 2, 3, 4, 5]
 NO_PROGRESS_LIMIT = 20  # above the longest stall of any strategy that still reaches the goal (rule: 18)

@@ -28,7 +28,7 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-OUT = ROOT / "docs/execution/evidence/phase2/concurrency.json"
+OUT = ROOT / os.environ.get("FAL_EVIDENCE_DIR", "docs/execution/evidence/phase2") / "concurrency.json"
 CELLS = [(sc, st, seed) for sc in ("normal", "state-delay") for st in ("rule", "z3") for seed in (1, 2)]
 
 

@@ -31,7 +31,7 @@ DB = "fal_backup_check"
 WORK = Path(tempfile.mkdtemp(prefix="fal-backup-"))
 os.environ["FAL_DATABASE_URL"] = f"postgresql+psycopg://fal:fal@127.0.0.1:5432/{DB}"
 os.environ["FAL_ARTIFACT_ROOT"] = str(WORK / "artifacts")
-OUT = ROOT / "docs/execution/evidence/phase2/backup-restore.json"
+OUT = ROOT / os.environ.get("FAL_EVIDENCE_DIR", "docs/execution/evidence/phase2") / "backup-restore.json"
 
 
 def sh(*args: str) -> dict:

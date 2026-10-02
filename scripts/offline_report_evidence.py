@@ -29,7 +29,7 @@ from formal_lab_runtime import default_registry, make_manifest, run_local
 from formal_lab_runtime.bundles import bundle_from_local
 
 ROOT = Path(__file__).resolve().parents[1]
-OUT = ROOT / "docs/execution/evidence/phase2/offline-report"
+OUT = ROOT / os.environ.get("FAL_EVIDENCE_DIR", "docs/execution/evidence/phase2") / "offline-report"
 SPLITS = {"dev": [1], "acceptance": [2, 3, 4]}
 LABELS = {"rule": "规则（EDD）", "z3": "最短路径（Z3）", "z3-cost": "成本优化（Z3）", "llm-stub": "模型辅助（替身）",
           "task-rule": "任务计划（规则生成）"}

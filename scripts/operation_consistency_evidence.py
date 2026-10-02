@@ -23,6 +23,7 @@ tests/integration/test_operation_consistency_platform.py. Evidence: docs/executi
 from __future__ import annotations
 
 import json
+import os
 import sys
 import tempfile
 import threading
@@ -49,7 +50,7 @@ from formal_lab_runtime import default_registry
 from formal_lab_runtime.coordination import Coordinator, InMemoryLedger, SendDecision
 
 ROOT = Path(__file__).resolve().parents[1]
-OUT = ROOT / "docs" / "execution" / "evidence" / "phase3" / "g2-operations.json"
+OUT = ROOT / os.environ.get("FAL_EVIDENCE_DIR", "docs/execution/evidence/phase3") / "g2-operations.json"
 CAPS = set(CAPABILITIES)
 PKG = model_package()
 

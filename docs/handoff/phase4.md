@@ -12,7 +12,15 @@
 
 ## 4A 交接总览
 
-STATUS_TABLE
+| 包 | 状态 | 提交 | 检查（`make phase4-check`） | 主要证据 |
+|---|---|---|---|---|
+| A1 检查器与验收状态 | 完成 | `ee305fe` | a1：2/2 PASS | `a1-status-protocol.json`（8 种注入 8/8） |
+| A2 当前状态、执行绑定与参与者输入 | 完成 | `b9fc7c4` | a2：4/4 PASS | `a2-execution-basis.json`（22/22） |
+| A3 模型调用与可恢复决策 | 完成（真实端点可用并已调用） | `773f934` | a3：4/4 PASS | `a3-model-decision.json`（9/9）、`a3-real-endpoint.json`（3/3） |
+| A4 联合轮次与配对评测 | 完成 | `9d3e3c6` | a4：3/3 PASS | `a4-rounds.json`（9/9）、`a4-paired-report.md` |
+| A5 产品入口、视觉修复与交接 | 完成；镜像离线包 BLOCKED（磁盘） | `d27c829`、`fb50c55` | a5：3/3 PASS | `a5-product-flow.json`、`a5-narrow.json`、`a5-release.json`、`screens/` |
+
+同一修订上的 A1—A5 检查：`d27c829`（干净工作树）16/16 PASS，b1—b3 为 `NO_CHECKS`（`complete=false`，按设计）。严格总验收：ACCEPTANCE_SUMMARY
 
 **命令**
 
@@ -200,4 +208,4 @@ uv run --frozen python scripts/handoff_phase4.py  # 由本次检查结果生成 
 | 发行 | `release.py --skip-images`：20 个 wheel（全部工作区成员，含新示例 `formal-lab-example-subprocess`）、Web 包、3 个本地运行配置（含摘要）、清单与许可清单；**在线安装**：干净 venv 从刚构建的 wheel 安装项目包、第三方依赖取自索引 / uv 缓存，无服务器下 `fal --help / replay verify / view / batches` 全部 0；**完全离线安装**：38 个 wheel 的离线目录，空目录新 venv `pip --no-index`（代理指向关闭端口）安装 `formal-lab-sdk[offline]`，对订单场景导出包 `fal replay verify / view / step` 全部 0（`a5-release.json`、`release-manifest.json`） |
 | 镜像离线包 | **BLOCKED**：`offline_bundle.py` 构建并保存四个 OCI 镜像需 8 GiB，另需保持 15 GiB 宿主保留量，宿主仅 18.7 GiB 可用（磁盘守卫拒绝）；未构建，不写成已完成 |
 
-**验证**：A5_FINAL
+**验证**：`p4-a5-web-types`、`p4-a5-product-web`（2 项，真实 API + worker + 构建后的 Web + Playwright）、`p4-a5-release` 全部 PASS；A1—A5 当前修订检查报告见总览。

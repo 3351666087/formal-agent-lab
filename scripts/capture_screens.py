@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 import tempfile
 import time
@@ -30,7 +31,7 @@ from playwright.sync_api import Page, sync_playwright
 
 ROOT = Path(__file__).resolve().parents[1]
 SHOTS = ROOT / "docs" / "assets" / "screens"
-OUT = ROOT / "docs" / "execution" / "evidence" / "phase3" / "g5-web.json"
+OUT = ROOT / os.environ.get("FAL_EVIDENCE_DIR", "docs/execution/evidence/phase3") / "g5-web.json"
 VIEW = {"width": 1440, "height": 900}
 
 

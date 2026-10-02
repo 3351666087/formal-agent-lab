@@ -12,6 +12,7 @@ independent solver. Evidence: docs/execution/evidence/phase2/prism-games/. Exit 
 from __future__ import annotations
 
 import json
+import os
 import shutil
 import sys
 import time
@@ -33,7 +34,7 @@ from formal_lab_solver_prism import (
 )
 
 ROOT = Path(__file__).resolve().parents[1]
-OUT = ROOT / "docs" / "execution" / "evidence" / "phase2" / "prism-games"
+OUT = ROOT / os.environ.get("FAL_EVIDENCE_DIR", "docs/execution/evidence/phase2") / "prism-games"
 LARGER = AllocationGame(game_id="three-jobs-three-machines", jobs=["a", "b", "c"],
                         machines=[Machine(id="m1", success=0.9), Machine(id="m2", success=0.7),
                                   Machine(id="m3", success=0.5)], rounds=4, slowdown=0.4,
