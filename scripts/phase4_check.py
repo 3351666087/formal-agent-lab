@@ -34,6 +34,24 @@ PLATFORM_CHECKS = [
     Check("p4-a1-fault-injection", "a1",
           "对真实引擎注入七种已知风险：退出 0 却 BLOCKED、必需断言 false、报告丢失、旧 PASS 残留、只选一组、配置变更后复用、完整通过",
           f"{PY} scripts/a1_status_evidence.py", ["P4A-A1"], protocol=True, produces=[f"{EV}/a1-status-protocol.json"]),
+    # ------------------------------------------------------------ A2 execution basis and participant boundary
+    Check("p4-a2-kernel", "a2",
+          "执行依据（单元）：身份取自内核、当前版本与提案版本分开、条件写、BASIS_UNKNOWN、重发/双 worker、统一绑定与逐字段拒绝、投影与凭据设置",
+          f"{PYTEST} packages/runtime/tests/test_execution_basis.py packages/runtime/tests/test_participant_projection.py "
+          "packages/runtime/tests/test_participants.py packages/runtime/tests/test_operation_consistency.py "
+          "packages/domain-broker/tests tests/contracts", ["P4A-A2"]),
+    Check("p4-a2-order-service", "a2",
+          "真实订单服务进程：写凭据、事务内 expected_revision（EXACT/LOCATIONS）、同 ID 复用/异参冲突、签发→准入→条件写的内核运行",
+          f"{PYTEST} examples/local-order-service/tests/test_execution_basis_orders.py "
+          "examples/local-order-service/tests/test_order_service.py", ["P4A-A2"]),
+    Check("p4-a2-evidence", "a2",
+          "必须复现：凭据 5/服务 7 写入 0、检查后变化被条件更新拒绝、同版本合法动作成功、ID 复用/冲突、环境/session/turn/版本错配、"
+          "恢复与重发同规则、真实策略工厂 + 实际序列化/下载路径中标记字段与测试凭据不外泄（写计数取自服务记录）",
+          f"{PY} scripts/a2_execution_evidence.py", ["P4A-A2"], protocol=True,
+          produces=[f"{EV}/a2-execution-basis.json"]),
+    Check("p4-a2-participant-api", "a2",
+          "平台参与者通道：令牌绑定 run/actor、actor 参数越权 403、无/伪造/过期令牌 401、下载为投影且可离线读取（真实 API + worker）",
+          f"{IT} tests/integration/test_participant_access_platform.py", ["P4A-A2"]),
 ]
 
 for c in DOMAIN_CHECKS:

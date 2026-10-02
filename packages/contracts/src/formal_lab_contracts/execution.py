@@ -3,6 +3,8 @@ environment sessions, probes, stage records, step / episode records and query bu
 
 from __future__ import annotations
 
+import hashlib as _hashlib
+import json as _json
 from datetime import datetime
 from enum import StrEnum
 from typing import Any, Literal
@@ -252,10 +254,74 @@ class ConditionCheck(ContractModel):
     detail: str | None = None
 
 
+def params_digest(params: dict[str, Any]) -> str:
+    """sha256 of an action's parameters in canonical JSON — the one definition every binding uses."""
+    body = _json.dumps(params, sort_keys=True, separators=(",", ":"), ensure_ascii=False, default=str)
+    return _hashlib.sha256(body.encode()).hexdigest()
+
+
+class ExecutionContext(ContractModel):
+    """The authoritative basis of one send, built by the kernel right before it (phase 4A, A2) — never by a strategy.
+
+    Identity comes from the kernel's turn (not the proposal's `actor_id` claim), the environment / session / service
+    identity from the run's environment, and `current_revision` from the environment's own authoritative read at the
+    side-effect boundary. `proposal_revision` is kept separately: the revision the plan was made on is not the
+    revision the write happens on. When the current revision cannot be read it is None with `revision_source`
+    UNKNOWN, and a gate that needs it must deny. Receipts bind to `execution_binding(context)` — the same canonical
+    form is used to issue and to verify."""
+
+    run_id: str
+    step: int = Field(ge=0)
+    turn: TurnRef | None = None
+    actor_id: Identifier = Field(description="the actor of the kernel's turn (authoritative identity)")
+    operation_id: str
+    phase: ExecutionPhase
+    action_type: str
+    action_params_digest: str = Field(description="params_digest(action.params)")
+    request_digest: str
+    environment: PluginRef
+    session_id: str | None = None
+    service_identity: str | None = None
+    proposal_revision: int | None = Field(default=None, description="the revision the proposal was planned on")
+    current_revision: int | None = Field(default=None, description="the environment's revision at the send")
+    revision_source: Literal["FRESH", "SERIALIZED", "UNKNOWN"] = Field(
+        description="FRESH: read from the environment right before the send (env.current_revision); SERIALIZED: a "
+                    "pure-data environment whose state lives in this serialized step; UNKNOWN: could not be read")
+    revision_note: str | None = None
+    versions: dict[str, str] = Field(default_factory=dict, description="model, driver/adapter, rules, participant "
+                                                                       "view, environment and gate versions")
+    read_at: datetime
+
+
+BINDING_FIELDS = ("run_id", "step", "turn", "actor_id", "operation_id", "action_type", "action_params_digest",
+                  "environment", "session_id", "service_identity", "current_revision", "versions")
+
+
+def execution_binding(context: ExecutionContext) -> dict[str, Any]:
+    """The canonical binding of a send: what a verification receipt must match field for field."""
+    data = context.model_dump(mode="json")
+    turn = data.get("turn") or {}
+    return {
+        "run_id": data["run_id"], "step": data["step"],
+        "turn": {k: turn.get(k) for k in ("global_step", "round", "actor_id", "actor_step")} if turn else None,
+        "actor_id": data["actor_id"], "operation_id": data["operation_id"], "action_type": data["action_type"],
+        "action_params_digest": data["action_params_digest"],
+        "environment": f"{data['environment']['plugin_id']}@{data['environment']['version']}",
+        "session_id": data["session_id"], "service_identity": data["service_identity"],
+        "current_revision": data["current_revision"], "versions": dict(sorted(data["versions"].items())),
+    }
+
+
+def execution_binding_digest(context: ExecutionContext) -> str:
+    body = _json.dumps(execution_binding(context), sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+    return _hashlib.sha256(body.encode()).hexdigest()
+
+
 class GateRequest(ContractModel):
     """What an execution gate sees for one send (phase 3A, G2). `values` are the locations the gate asked for, read
     by the kernel right before the send: fresh from the environment when it answers observation requests
-    (env.observe_on_request), else from the actor's current observation."""
+    (env.observe_on_request), else from the actor's current observation. `execution` (phase 4A) is the
+    authoritative basis of the send — gates read the current revision there instead of borrowing a location."""
 
     run_id: str
     step: int = Field(ge=0)
@@ -270,6 +336,7 @@ class GateRequest(ContractModel):
     values_revision: int | None = None
     request_digest: str
     config: dict[str, Any] = Field(default_factory=dict, description="the gate's scenario configuration")
+    execution: ExecutionContext | None = Field(default=None, description="authoritative basis of the send (phase 4A)")
 
 
 class GateResult(ContractModel):
@@ -298,6 +365,8 @@ class ExecutionDecision(ContractModel):
     checked_at_revision: int | None = None
     request_digest: str
     at: datetime
+    execution: ExecutionContext | None = Field(default=None, description="the basis the decision was made on "
+                                                                         "(phase 4A); absent in older records")
 
 
 class ReconciliationResult(ContractModel):

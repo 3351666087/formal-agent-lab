@@ -25,7 +25,9 @@ Phase 4 是对现有产品的修复与验收收口，共 **8 个交付包**：�
 
 ## A2 · 当前状态、执行绑定与参与者输入
 
-- [ ] **P4A-A2** 用真实订单服务和仓储场景补齐执行前验证、状态竞争处理及参与者数据边界。
+- [x] **P4A-A2** 用真实订单服务和仓储场景补齐执行前验证、状态竞争处理及参与者数据边界。
+  - 证据：执行依据：内核按 turn 取身份、环境权威读取当前版本（FRESH/SERIALIZED/UNKNOWN）、提案版本另存，IDENTITY_MISMATCH / BASIS_UNKNOWN 不发送；统一 execution_binding 签发与校验、逐字段拒绝原因、发送时签发；订单服务写凭据（401）与事务内 expected_revision（EXACT/LOCATIONS）；参与者投影覆盖规划器输入/模型请求/调用记录/检查点/下载，令牌绑定的参与者通道（401/403），下载可离线读取。真实服务进程复现：凭据 5/服务 7 写入 0、检查后变化被条件更新拒绝、合法同版本写 1 次、ID 复用/冲突、6 种绑定错配、重发与续跑同规则、真实工厂+实际序列化/下载无标记字段与凭据（22/22）；phase4 a2 组 4/4 PASS；集成 18 项通过。详见 docs/handoff/phase4.md#a2
+  - 实现：`packages/runtime/src/formal_lab_runtime/execution_context.py`、`packages/domain-broker/src/formal_lab_domain_broker/broker.py`、`examples/local-order-service/src/formal_lab_example_orders/service.py`、`packages/runtime/src/formal_lab_runtime/participants.py`、`packages/platform-api/src/formal_lab_api/services/participant_access.py`、`scripts/a2_execution_evidence.py`、`docs/assurance-scope.md`
 
 执行依据（提案版本与执行时权威版本分开；门控不借无关字段取版本；读不到当前状态则未知并阻止写入）、完整绑定（由内核/已登记 session/实际服务身份构造，签发与校验同一规范化定义，策略字符串不作权威身份）、检查与写入间的竞争（真实服务用条件更新在副作用边界核对预期版本；纯数据运行串行化区间）、参与者数据（同一投影覆盖工厂初始化、PluginServices、模型载荷、观测、候选、查询、last_outcome、计划/检查点、调用记录、异常与下载/回放）。
 

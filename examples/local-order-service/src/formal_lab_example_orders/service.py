@@ -33,6 +33,7 @@ service processes sharing one file over a network file system.
 from __future__ import annotations
 
 import argparse
+import hmac
 import json
 import os
 import re
@@ -298,9 +299,19 @@ def import_tenant(store: Store, state: dict[str, Any]) -> None:
 # ---------------------------------------------------------------------------------------------------- app
 
 
-def create_app(data_dir: Path, *, project: str = "local") -> Any:
-    from fastapi import Body, FastAPI, HTTPException, Query
+def create_app(data_dir: Path, *, project: str = "local", write_token: str | None = None) -> Any:
+    """`write_token` (phase 4A, A2): when set, every mutating route (operations, admin/*, tenant removal) needs
+    `Authorization: Bearer <token>`; reads stay open. The token is the environment adapter's write credential — a
+    participant's read / propose channel never holds it, so a direct write from that side is refused here, in a
+    separate process, whatever the caller's Python code does."""
+    from fastapi import Body, Depends, FastAPI, Header, HTTPException, Query
     from fastapi.responses import JSONResponse
+
+    def writer(authorization: str | None = Header(default=None)) -> None:
+        if write_token and not hmac.compare_digest((authorization or "").encode(), f"Bearer {write_token}".encode()):
+            raise HTTPException(401, "WRITE_CREDENTIAL_REQUIRED: mutating routes need the environment's write token")
+
+    write = [Depends(writer)]
 
     data_dir.mkdir(parents=True, exist_ok=True)
     started = time.time()
@@ -345,7 +356,8 @@ def create_app(data_dir: Path, *, project: str = "local") -> Any:
     @app.get("/health")
     def health() -> dict[str, Any]:
         return {"status": "ok", "service": "local-order-service", "version": SERVICE_VERSION, "project": project,
-                "pid": os.getpid(), "started_at": started, "tenants": len(tenants())}
+                "pid": os.getpid(), "started_at": started, "tenants": len(tenants()),
+                "write_auth": bool(write_token)}
 
     @app.get("/t/{tenant}/health")
     def tenant_health(tenant: str) -> dict[str, Any]:
@@ -378,7 +390,7 @@ def create_app(data_dir: Path, *, project: str = "local") -> Any:
                 raise HTTPException(404, f"operation {operation_id} was never received")
             return stored(row)
 
-    @app.post("/t/{tenant}/operations")
+    @app.post("/t/{tenant}/operations", dependencies=write)
     def post_operation(tenant: str, body: dict[str, Any] = Body(...)) -> JSONResponse:
         t0 = time.time()
         op_id = str(body.get("operation_id") or "")
@@ -417,6 +429,21 @@ def create_app(data_dir: Path, *, project: str = "local") -> Any:
                     if found is not None:
                         raise Rejected(f"STALE_REVISION: {len(found['changed_paths'])} location(s) it depends on "
                                        f"changed since revision {body['based_on_revision']}", conflict=found)
+                if body.get("expected_revision") is not None:  # phase 4A: the revision the send was verified on,
+                    expected = int(body["expected_revision"])  # checked here, inside the write's own transaction
+                    if body.get("version_policy", "EXACT") == "LOCATIONS":
+                        found = stale(conn, action, params, expected) if expected < revision else None
+                        if found is not None:
+                            raise Rejected(f"STALE_REVISION: {len(found['changed_paths'])} location(s) it depends on "
+                                           f"changed since the verified revision {expected}",
+                                           conflict={**found, "expected_revision": expected})
+                    elif revision != expected:
+                        changes = conn.execute("SELECT DISTINCT path, actor_id FROM changes WHERE revision > ?",
+                                               (expected,)).fetchall()
+                        raise Rejected(f"STALE_REVISION: verified at revision {expected}, the service is at {revision}",
+                                       conflict={"changed_paths": sorted({r["path"] for r in changes}),
+                                                 "writers": sorted({r["actor_id"] for r in changes if r["actor_id"]}),
+                                                 "expected_revision": expected})
                 writes = apply_operation(conn, action, params)
                 for path, new in writes.items():
                     conn.execute("INSERT INTO changes (revision, path, old, new, actor_id, operation_id) VALUES "
@@ -481,7 +508,7 @@ def create_app(data_dir: Path, *, project: str = "local") -> Any:
             "recovery_seconds": restarts[-1]["downtime_s"] if restarts else None,
         }
 
-    @app.post("/t/{tenant}/admin/reset")
+    @app.post("/t/{tenant}/admin/reset", dependencies=write)
     def reset(tenant: str, body: dict[str, Any] = Body(...)) -> dict[str, Any]:
         s = store(tenant, must_exist=False)
         inst = Instance.from_dict(body["instance"]) if body.get("instance") else \
@@ -498,7 +525,7 @@ def create_app(data_dir: Path, *, project: str = "local") -> Any:
             conn.execute("COMMIT")
             return out
 
-    @app.post("/t/{tenant}/admin/import")
+    @app.post("/t/{tenant}/admin/import", dependencies=write)
     def import_(tenant: str, body: dict[str, Any] = Body(...)) -> dict[str, Any]:
         with locks.setdefault(tenant, threading.Lock()):
             try:
@@ -507,7 +534,7 @@ def create_app(data_dir: Path, *, project: str = "local") -> Any:
                 raise HTTPException(400, str(exc)) from exc
         return state(tenant)
 
-    @app.post("/t/{tenant}/admin/conditions")
+    @app.post("/t/{tenant}/admin/conditions", dependencies=write)
     def conditions(tenant: str, body: dict[str, Any] = Body(...)) -> dict[str, Any]:
         with store(tenant).connect() as conn:
             conn.execute("BEGIN IMMEDIATE")
@@ -519,7 +546,7 @@ def create_app(data_dir: Path, *, project: str = "local") -> Any:
             conn.execute("COMMIT")
         return current
 
-    @app.delete("/t/{tenant}")
+    @app.delete("/t/{tenant}", dependencies=write)
     def close(tenant: str) -> dict[str, Any]:
         s = store(tenant, must_exist=False)
         for suffix in ("", "-wal", "-shm"):
@@ -537,8 +564,11 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--host", default=os.environ.get("ORDERS_HOST", "127.0.0.1"))
     ap.add_argument("--port", type=int, default=int(os.environ.get("ORDERS_PORT", "8765")))
     ap.add_argument("--project", default=os.environ.get("ORDERS_PROJECT", "local"))
+    ap.add_argument("--write-token-file", default=os.environ.get("ORDERS_WRITE_TOKEN_FILE"),
+                    help="file holding the environment adapter's write credential (mutating routes need it)")
     args = ap.parse_args(argv)
-    uvicorn.run(create_app(Path(args.data), project=args.project), host=args.host, port=args.port,
+    token = Path(args.write_token_file).read_text().strip() if args.write_token_file else None
+    uvicorn.run(create_app(Path(args.data), project=args.project, write_token=token), host=args.host, port=args.port,
                 log_level="warning", timeout_graceful_shutdown=5)
     return 0
 

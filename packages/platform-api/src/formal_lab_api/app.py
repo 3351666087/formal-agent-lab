@@ -9,7 +9,7 @@ import logging
 from contextlib import asynccontextmanager
 from typing import Any
 
-from fastapi import Body, FastAPI, Header, Query, Request
+from fastapi import Body, FastAPI, Header, HTTPException, Query, Request
 from fastapi.concurrency import run_in_threadpool
 from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
@@ -582,6 +582,48 @@ def _routes(app: FastAPI) -> None:
         def go():
             with session_scope() as s:
                 return bundles.export_run(s, run_id)
+
+        data, name = await run_in_threadpool(go)
+        return Response(content=data, media_type="application/zip",
+                        headers={"Content-Disposition": f'attachment; filename="{name}"'})
+
+    # ------------------------------------------------------------------ participant access (phase 4A, A2)
+    @app.post(f"{API}/runs/{{run_id}}/participants/{{actor_id}}/access", status_code=201)
+    async def participant_access(run_id: str, actor_id: str, ttl_s: int = 3600):
+        """Operator side: issue a read token bound to one run and one actor."""
+        from .services import bundles
+        from .services import participant_access as pa
+
+        actors = await db(lambda s: bundles.participant_ids(s, run_id))
+        if actor_id not in actors:
+            raise NotFound(f"{actor_id!r} is not a participant of run {run_id}")
+        return pa.issue(run_id, actor_id, ttl_s)
+
+    def _participant(authorization: str | None, actor: str | None) -> tuple[str, str]:
+        from .services import participant_access as pa
+
+        try:
+            run_id, actor_id = pa.resolve(authorization)
+        except pa.AccessDenied as exc:
+            raise HTTPException(exc.status, exc.reason) from exc
+        if actor is not None and actor != actor_id:  # a parameter only narrows within the token's scope
+            raise HTTPException(403, f"ACTOR_OUT_OF_SCOPE: the token is bound to {actor_id!r}, not {actor!r}")
+        return run_id, actor_id
+
+    @app.get(f"{API}/participant/whoami")
+    async def participant_whoami(authorization: str | None = Header(default=None), actor: str | None = None):
+        run_id, actor_id = _participant(authorization, actor)
+        return {"run_id": run_id, "actor_id": actor_id, "scope": "participant:read"}
+
+    @app.get(f"{API}/participant/export")
+    async def participant_export(authorization: str | None = Header(default=None), actor: str | None = None):
+        from .services import bundles
+
+        run_id, actor_id = _participant(authorization, actor)
+
+        def go():
+            with session_scope() as s:
+                return bundles.export_participant(s, run_id, actor_id)
 
         data, name = await run_in_threadpool(go)
         return Response(content=data, media_type="application/zip",

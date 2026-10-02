@@ -332,7 +332,16 @@ def build_valid() -> dict[str, dict]:
                                                    "stock of 2",
         conditions=[{"name": "safety_stock", "holds": False, "observed": 4, "required": ">= 5",
                      "paths": ["stock[a]"], "detail": "fresh value at revision 11"}],
-        values_source="FRESH", checked_at_revision=11, request_digest="0" * 64, at=T0)
+        values_source="FRESH", checked_at_revision=11, request_digest="0" * 64, at=T0,
+        execution={"run_id": "run_0002", "step": 3, "actor_id": "a", "operation_id": "run_0002:s3:a:apply",
+                   "phase": "FIRST_SEND", "action_type": ACTION["action_type"],
+                   "action_params_digest": "1" * 64, "request_digest": "0" * 64,
+                   "turn": {"global_step": 3, "round": 2, "actor_id": "a", "actor_step": 2},
+                   "environment": {"plugin_id": "formal-lab.example.orders.service-env", "version": "1.0.0"},
+                   "session_id": "orders-t1", "service_identity": "local-order-service@127.0.0.1:8765",
+                   "proposal_revision": 9, "current_revision": 11, "revision_source": "FRESH",
+                   "versions": {"model": "sha256:" + "2" * 12, "driver": "formal-lab.driver.ir-finite@1.0.0"},
+                   "read_at": T0})
     gated = OperationRecord(
         operation_id="run_0002:s3:a:apply", run_id="run_0002", step=3, actor_id="a", state="FAILED",
         transitions=[{"state": "PREPARED", "at": T0, "reason": "intent recorded", "effect": "NONE"},

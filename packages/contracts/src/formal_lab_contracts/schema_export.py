@@ -80,6 +80,7 @@ SUPPORTING: list[type[BaseModel]] = [
     kernel.RobustnessResult,
     kernel.ObservationRequest,
     execution.GateRequest,
+    execution.ExecutionContext,
     execution.GateResult,
     execution.ConditionCheck,
     governance.FeatureSupport,

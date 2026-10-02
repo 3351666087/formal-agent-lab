@@ -5,7 +5,17 @@ current state. Rejection has zero side effects (it rides on G2's send extension 
 
 from __future__ import annotations
 
-from .broker import DESCRIPTOR, BrokerDecision, BrokerGate, ReceiptStore, RequestBinding, admit
+from .broker import (
+    DESCRIPTOR,
+    ISSUER_DESCRIPTOR,
+    BrokerDecision,
+    BrokerGate,
+    ReceiptIssuerGate,
+    ReceiptStore,
+    RequestBinding,
+    admit,
+    admit_execution,
+)
 from .receipt import (
     CheckBasis,
     HmacSigner,
@@ -13,7 +23,9 @@ from .receipt import (
     KeyStore,
     ReceiptBindings,
     VerificationReceipt,
+    bindings_from_context,
     digest_params,
+    issue_for_context,
     sign_receipt,
     signature_ok,
 )
@@ -26,11 +38,13 @@ def registrations():
 
     from . import broker
 
-    return [PluginRegistration(broker.DESCRIPTOR, broker.create_gate)]
+    return [PluginRegistration(broker.DESCRIPTOR, broker.create_gate),
+            PluginRegistration(broker.ISSUER_DESCRIPTOR, broker.create_issuer)]
 
 
 __all__ = [
     "DESCRIPTOR",
+    "ISSUER_DESCRIPTOR",
     "BrokerDecision",
     "BrokerGate",
     "CheckBasis",
@@ -39,6 +53,7 @@ __all__ = [
     "HmacVerifier",
     "KeyStore",
     "ReceiptBindings",
+    "ReceiptIssuerGate",
     "ReceiptStore",
     "RequestBinding",
     "RoleBoundary",
@@ -47,9 +62,12 @@ __all__ = [
     "RuleStatus",
     "VerificationReceipt",
     "admit",
+    "admit_execution",
+    "bindings_from_context",
     "condition",
     "digest_params",
     "evaluate",
+    "issue_for_context",
     "red_blue_boundaries",
     "registrations",
     "sign_receipt",

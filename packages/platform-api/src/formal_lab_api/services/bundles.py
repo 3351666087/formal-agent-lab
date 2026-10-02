@@ -28,6 +28,28 @@ from .modeling import package_of
 
 
 def export_run(s: Session, run_id: str) -> tuple[bytes, str]:
+    bundle, provenance = _load_bundle(s, run_id)
+    return write_bundle(bundle, provenance=provenance), f"{run_id}.replay.zip"
+
+
+def export_participant(s: Session, run_id: str, actor_id: str) -> tuple[bytes, str]:
+    """The participant's download (phase 4A, A2): its own turns projected through its view; same format, so the
+    same offline replay reads it."""
+    from formal_lab_runtime.participants import participant_bundle
+
+    bundle, provenance = _load_bundle(s, run_id)
+    projected = participant_bundle(bundle, actor_id)
+    keep = {k: provenance[k] for k in ("exported_from", "status", "stored_contract_version", "termination_reason")}
+    return (write_bundle(projected, provenance={**keep, "participant": actor_id, "projected": True}),
+            f"{run_id}.{actor_id}.participant.replay.zip")
+
+
+def participant_ids(s: Session, run_id: str) -> list[str]:
+    run = get_or_404(s, Run, run_id, "run")
+    return [p.actor_id for p in compat.upgrade_run_manifest(run.manifest).participants]
+
+
+def _load_bundle(s: Session, run_id: str) -> tuple[ReplayBundle, dict[str, Any]]:
     run = get_or_404(s, Run, run_id, "run")
     manifest = compat.upgrade_run_manifest(run.manifest)
     version = s.scalar(select(ModelVersion).where(ModelVersion.digest == manifest.model.digest.value,
@@ -45,14 +67,10 @@ def export_run(s: Session, run_id: str) -> tuple[bytes, str]:
         artifacts[row.digest] = artifact_store().get(ArtifactRef.model_validate(row.ref))
     bundle = ReplayBundle(manifest=manifest, events=events, package=package, metrics=metrics, artifacts=artifacts,
                           operations=operations)
-    data = write_bundle(bundle, provenance={"exported_from": "formal-lab platform", "status": run.status,
-                                            "source_run_id": run.source_run_id,
-                                            "stored_contract_version": run.contract_version,
-                                            "termination_reason": run.termination_reason,
-                                            "turn_state": (run.carry or {}).get("turn"),
-                                            "snapshot_steps": [x.step for x in s.scalars(
-                                                select(Snapshot).where(Snapshot.run_id == run_id))]})
-    return data, f"{run_id}.replay.zip"
+    return bundle, {"exported_from": "formal-lab platform", "status": run.status, "source_run_id": run.source_run_id,
+                    "stored_contract_version": run.contract_version, "termination_reason": run.termination_reason,
+                    "turn_state": (run.carry or {}).get("turn"),
+                    "snapshot_steps": [x.step for x in s.scalars(select(Snapshot).where(Snapshot.run_id == run_id))]}
 
 
 def import_bundle(s: Session, project_id: str, data: bytes, *, matrix_id: str | None = None) -> Run:

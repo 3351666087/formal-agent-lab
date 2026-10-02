@@ -86,6 +86,7 @@ from formal_lab_contracts import capabilities as caps
 from formal_lab_contracts.errors import FormalLabError, NonRetryableFailure
 
 from .coordination import Coordinator, GateHook, InMemoryLedger, OperationLedger, SendDecision, request_digest
+from .execution_context import build_context, identity_problem
 from .participants import ParticipantInput, ParticipantServices
 from .registry import PluginRegistry
 from .settings import get_setting
@@ -215,6 +216,14 @@ class CarryState:
         return BudgetUsage.model_validate(self.actor_usage.get(actor, {}))
 
 
+def state_families(loaded: Any) -> set[str]:
+    """State location families of the loaded model (for projecting participant payloads); empty if unknown."""
+    try:
+        return {str(k).split("[", 1)[0] for k in loaded.initial_state()}
+    except Exception:
+        return set()
+
+
 @dataclass
 class RunComponents:
     manifest: RunManifest
@@ -237,7 +246,9 @@ class RunComponents:
 
     def __post_init__(self) -> None:
         self.participants: dict[str, Participant] = {p.actor_id: p for p in self.manifest.participants}
-        self.inputs: dict[str, ParticipantInput] = {a: ParticipantInput(p) for a, p in self.participants.items()}
+        families = state_families(self.loaded)
+        self.inputs: dict[str, ParticipantInput] = {a: ParticipantInput(p, families)
+                                                    for a, p in self.participants.items()}
         if self.scheduler is None:
             self.scheduler = scheduler_for(self.manifest.turns, list(self.participants))
         if self.termination is None:
@@ -860,15 +871,17 @@ def _propose(rc: RunComponents, plan: PlanPhase, step: int, turn: TurnRef, obs: 
     proposal = planner.propose(context)
     # model call records of this proposal (all attempts incl. transport / format failures when the strategy
     # keeps them; older strategies expose only the successful responses)
+    # (phase 4A: every record names the participant and step it was made for)
     records = getattr(planner, "call_records", None)
+    who = {"actor_id": actor, "step": step}
     if records is not None:
-        plan.model_calls.extend(records)
+        plan.model_calls.extend({**r, **who} for r in records)
     else:
         for call in getattr(planner, "last_calls", []) or []:
             plan.model_calls.append({"call_id": call.call_id, "model": call.model, "request": call.request,
                                      "response": call.raw_text, "input_tokens": call.input_tokens,
                                      "output_tokens": call.output_tokens, "latency_ms": call.latency_ms,
-                                     "usage_reported": getattr(call, "usage_reported", True), "outcome": "OK"})
+                                     "usage_reported": getattr(call, "usage_reported", True), "outcome": "OK", **who})
     ids = {"proposal_id": f"{turn_id(m.run_id, step, actor)}:proposal", "turn": turn}
     if proposal.assumptions is None:
         from formal_lab_contracts import AssumptionSetRef, PlanBasis
@@ -950,29 +963,57 @@ def _gate_values(rc: RunComponents, actor: str, paths: list[str]) -> tuple[dict[
     return {f.path: f.value for f in obs.facts if f.path in wanted}, source, obs.state_revision
 
 
-def _gate_hook(rc: RunComponents, step: int, actor: str) -> GateHook:
-    """The scenario's execution gates as the coordinator's pre-send hook (phase 3A, G2): consulted in order; the
-    first DENY stops the send. Every answer becomes an ExecutionDecision on the operation record."""
+KERNEL_BASIS = PluginRef(plugin_id="formal-lab.kernel.execution-basis", version="1.0.0")
+
+
+def _send_hook(rc: RunComponents, step: int, actor: str, turn: TurnRef | None = None) -> GateHook:
+    """The coordinator's pre-send hook (phase 3A G2, phase 4A A2), consulted before every send: builds the
+    authoritative execution context, refuses a proposal whose claimed identity is not the kernel's and a conditional
+    write whose current revision cannot be read, then asks the scenario's execution gates in order (the first DENY
+    stops the send). Every answer — the kernel's own refusals included — becomes an ExecutionDecision on the record."""
+
+    def kernel_denial(record: OperationRecord, phase: ExecutionPhase, context: Any, reason: str) -> SendDecision:
+        d = ExecutionDecision(
+            decision_id=f"{record.operation_id}:basis:{phase.value.lower()}:{record.attempts}", run_id=rc.run_id,
+            step=step, actor_id=actor, operation_id=record.operation_id, gate=KERNEL_BASIS, phase=phase,
+            verdict=GateVerdict.DENY, reason=reason, values_source="NONE",
+            checked_at_revision=context.current_revision, request_digest=record.request_digest or "", at=utcnow(),
+            execution=context)
+        return SendDecision(False, f"{KERNEL_BASIS.plugin_id}: {reason}", [d], execution=context)
 
     def hook(phase: ExecutionPhase, record: OperationRecord, proposal: ActionProposal) -> SendDecision:
+        context = build_context(rc, step=step, turn=turn or proposal.turn, actor=actor, record=record,
+                                proposal=proposal, phase=phase)
+        problem = identity_problem(context, proposal)
+        if problem:
+            return kernel_denial(record, phase, context, problem)
+        if caps.ENV_CONDITIONAL_STEP in rc.env_caps and context.current_revision is None:
+            return kernel_denial(record, phase, context, f"BASIS_UNKNOWN: the write is conditional but the current "
+                                                         f"revision is unknown ({context.revision_note}); nothing is sent")
         made: list[ExecutionDecision] = []
         for i, (ref, gate, cfg) in enumerate(rc.gates):
             values, source, revision = _gate_values(rc, actor, list(gate.paths(proposal.action)))
             request = GateRequest(run_id=rc.run_id, step=step, actor_id=actor, operation_id=record.operation_id,
                                   phase=phase, action=proposal.action, proposal_id=proposal.proposal_id,
                                   based_on_revision=proposal.based_on_revision, values=values, values_source=source,
-                                  values_revision=revision, request_digest=record.request_digest or "", config=cfg)
+                                  values_revision=revision, request_digest=record.request_digest or "", config=cfg,
+                                  execution=context)
             answer = gate.decide(request)
             made.append(ExecutionDecision(
                 decision_id=f"{record.operation_id}:gate{i}:{phase.value.lower()}:{record.attempts}",
                 run_id=rc.run_id, step=step, actor_id=actor, operation_id=record.operation_id, gate=ref, phase=phase,
                 verdict=answer.verdict, reason=answer.reason, conditions=answer.conditions, values_source=source,
-                checked_at_revision=revision, request_digest=request.request_digest, at=utcnow()))
+                checked_at_revision=revision if revision is not None else context.current_revision,
+                request_digest=request.request_digest, at=utcnow(), execution=context))
             if answer.verdict == GateVerdict.DENY:
-                return SendDecision(False, f"{ref.plugin_id}: {answer.reason}", made)
-        return SendDecision(True, "every execution gate allows the send", made)
+                return SendDecision(False, f"{ref.plugin_id}: {answer.reason}", made, execution=context)
+        why = "every execution gate allows the send" if rc.gates else "execution basis established (no gates)"
+        return SendDecision(True, why, made, execution=context)
 
     return hook
+
+
+_gate_hook = _send_hook  # phase-3A name, kept for callers outside the kernel
 
 
 def apply_step(rc: RunComponents, snapshot: EnvironmentSnapshot, plan: PlanPhase, carry: CarryState,
@@ -1036,8 +1077,7 @@ def apply_step(rc: RunComponents, snapshot: EnvironmentSnapshot, plan: PlanPhase
     # ---- EXECUTE (+ RECONCILE) through the coordinator
     t0 = time.perf_counter()
     op_id = f"{turn_id(run_id, step, actor)}:apply"
-    coordinator = Coordinator(rc.env, rc.env_caps, ledger or InMemoryLedger(),
-                              gate=_gate_hook(rc, step, actor) if rc.gates else None)
+    coordinator = Coordinator(rc.env, rc.env_caps, ledger or InMemoryLedger(), gate=_send_hook(rc, step, actor, turn))
     result = coordinator.execute(proposal, op_id, run_id=run_id, step=step)
     ex.operation = result.record
     # typed pre-execution decisions (phase 3A), keyed by gate / phase / attempt: every decision on the durable record,

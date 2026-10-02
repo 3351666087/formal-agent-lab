@@ -110,6 +110,7 @@ class SendDecision:
     allowed: bool
     reason: str
     decisions: list[ExecutionDecision] = field(default_factory=list)
+    execution: Any = None  # ExecutionContext of this send (phase 4A): its current revision is the expected revision
 
 
 GateHook = Callable[[ExecutionPhase, OperationRecord, ActionProposal], SendDecision]
@@ -320,7 +321,7 @@ class Coordinator:
                                 effect=OperationEffect.SEND)
             t0 = time.perf_counter()
             try:
-                outcome = self.env.step(proposal, operation_id=record.operation_id)
+                outcome = self._send(proposal, record, verdict)
             except (ResultUnknown, Timeout) as exc:
                 record = self._save(record, log, OperationState.OUTCOME_UNKNOWN,
                                     f"{exc.code.value}: {exc.message} (after {time.perf_counter() - t0:.2f}s)")
@@ -350,10 +351,20 @@ class Coordinator:
                                 f"environment answered {outcome.status.value}", outcome=outcome)
             return CoordinationResult(outcome, record, log, decisions=made)
 
+    def _send(self, proposal: ActionProposal, record: OperationRecord, verdict: SendDecision | None) -> ActionOutcome:
+        """One send. An environment that applies operations conditionally (env.conditional_step) gets the revision
+        the send was verified against; it refuses the write atomically if what the operation depends on changed."""
+        context = verdict.execution if verdict is not None else None
+        if caps.ENV_CONDITIONAL_STEP in self.caps and context is not None and context.current_revision is not None:
+            return self.env.step(proposal, operation_id=record.operation_id,
+                                 expected_revision=context.current_revision)
+        return self.env.step(proposal, operation_id=record.operation_id)
+
     def _reexecute(self, record: OperationRecord, proposal: ActionProposal, log: list) -> CoordinationResult:
         """Pure-data environment: the restored snapshot has not seen the operation — re-apply it and require the
         same gate verdict and the same result as recorded."""
         made: list[ExecutionDecision] = []
+        verdict: SendDecision | None = None
         if self.gate is not None:
             verdict = self.gate(ExecutionPhase.REEXECUTE, record, proposal)
             made = verdict.decisions
@@ -364,7 +375,7 @@ class Coordinator:
                                           f"{'ALLOW' if verdict.allowed else 'DENY'}, it answered the opposite")
             if not verdict.allowed:
                 return CoordinationResult(record.outcome, record, log, decisions=made, denied=True)
-        outcome = self.env.step(proposal, operation_id=record.operation_id)
+        outcome = self._send(proposal, record, verdict if self.gate is not None else None)
         if record.outcome is not None and _essence(outcome) != _essence(record.outcome):
             raise NonRetryableFailure(f"pure-data replay of {record.operation_id} differs from the recorded outcome")
         return CoordinationResult(outcome, record, log, decisions=made)

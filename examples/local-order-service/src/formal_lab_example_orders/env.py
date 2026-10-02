@@ -26,6 +26,7 @@ import copy
 import re
 import time
 from datetime import UTC, datetime
+from pathlib import Path
 from typing import Any
 
 import httpx
@@ -70,12 +71,19 @@ CONFIG_SCHEMA: dict[str, Any] = {
         "project": {"type": "string", "default": "formal-lab"},
         "profile": {"type": "string", "enum": ["local-lite", "local-services", "local-kind"],
                     "default": "local-lite"},
+        "write_token_file": {"type": "string", "description": "file holding the service's write credential "
+                             "(phase 4A): only this adapter reads it; the path, never the token, is in the manifest"},
+        "version_policy": {"type": "string", "enum": ["EXACT", "LOCATIONS"], "default": "EXACT",
+                           "description": "conditional write (phase 4A): EXACT refuses the write when the service "
+                                          "revision moved since the verified one; LOCATIONS only when a location "
+                                          "the operation reads was written since then"},
     },
     "additionalProperties": False,
 }
 
 CAPABILITIES = [caps.ENV_PERSISTENT_SESSION, caps.ENV_SNAPSHOT, caps.ENV_QUERY_OPERATION, caps.ENV_IDEMPOTENT_STEP,
-                caps.ENV_MULTI_ACTOR, caps.ENV_OBSERVE_ON_REQUEST, caps.ENV_RESET, caps.ENV_STATE_IMPORT]
+                caps.ENV_MULTI_ACTOR, caps.ENV_OBSERVE_ON_REQUEST, caps.ENV_RESET, caps.ENV_STATE_IMPORT,
+                caps.ENV_CURRENT_REVISION, caps.ENV_CONDITIONAL_STEP]
 
 DEPLOYMENT_PROFILES = {"local-lite": "loopback port started by the dev script or lifecycle manager (127.0.0.1)",
                        "local-services": "Compose service `orders` (http://orders:8765 inside the stack)",
@@ -121,8 +129,10 @@ class OrderServiceEnvironment:
 
     def _http(self) -> httpx.Client:
         if self._client is None:
+            token_file = self.config.get("write_token_file")
+            headers = {"Authorization": f"Bearer {Path(token_file).read_text().strip()}"} if token_file else {}
             self._client = httpx.Client(base_url=self.endpoint, timeout=float(self.config["timeout_s"]),
-                                         trust_env=trust_env(self.endpoint),
+                                         trust_env=trust_env(self.endpoint), headers=headers,
                                         transport=self._transport)
         return self._client
 
@@ -259,13 +269,24 @@ class OrderServiceEnvironment:
                                   note=f"service seq {answer.get('seq')}"
                                        + (" (stored answer re-sent)" if answer.get("replayed") else ""))])
 
-    def step(self, proposal: ActionProposal, *, operation_id: str) -> ActionOutcome:
+    def current_revision(self) -> int:
+        """The service's revision right now (env.current_revision, phase 4A): read fresh, never from the cache."""
+        resp = self._http().get(self._t("/health"))
+        resp.raise_for_status()
+        return int(resp.json()["revision"])
+
+    def step(self, proposal: ActionProposal, *, operation_id: str, expected_revision: int | None = None) -> ActionOutcome:
+        """`expected_revision` (env.conditional_step): the revision the send was verified on; the service checks it
+        inside the write's own transaction and refuses the write if the state moved (STALE_REVISION)."""
         data = self._require()
         body = {"operation_id": operation_id, "actor_id": proposal.actor_id,
                 "action": proposal.action.action_type, "params": dict(proposal.action.params),
                 "based_on_revision": proposal.based_on_revision, "conflict_policy": data.get("conflict_policy"),
                 "step_id": proposal.step_id, "proposal_id": proposal.proposal_id,
                 "turn": proposal.turn.model_dump(mode="json") if proposal.turn else None}
+        if expected_revision is not None:
+            body |= {"expected_revision": int(expected_revision), "version_policy": self.config.get("version_policy",
+                                                                                                     "EXACT")}
         resp = self._call("POST", self._t("/operations"), json=body, lost_ok=True)
         if resp.status_code == 409:
             detail = resp.json() if resp.headers.get("content-type", "").startswith("application/json") else {}

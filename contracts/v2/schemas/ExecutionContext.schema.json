@@ -1,0 +1,251 @@
+{
+  "$defs": {
+    "ExecutionPhase": {
+      "description": "Which kind of send a pre-execution decision is about (phase 3A, G2).",
+      "enum": [
+        "FIRST_SEND",
+        "RESEND",
+        "REEXECUTE"
+      ],
+      "title": "ExecutionPhase",
+      "type": "string"
+    },
+    "PluginRef": {
+      "additionalProperties": false,
+      "properties": {
+        "plugin_id": {
+          "pattern": "^[a-z0-9]+([.-][a-z0-9]+)*(/[a-z0-9]+([.-][a-z0-9]+)*)?$",
+          "title": "Plugin Id",
+          "type": "string"
+        },
+        "version": {
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+([-+][0-9A-Za-z.-]+)?$",
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "plugin_id",
+        "version"
+      ],
+      "title": "PluginRef",
+      "type": "object"
+    },
+    "TurnRef": {
+      "additionalProperties": false,
+      "description": "Position of one action in the interleaving: global step g, round r, and the actor's own step count.",
+      "properties": {
+        "actor_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:@/-]{0,254}$",
+          "title": "Actor Id",
+          "type": "string"
+        },
+        "actor_step": {
+          "minimum": 0,
+          "title": "Actor Step",
+          "type": "integer"
+        },
+        "batch_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "JOINT_BATCH: the round's batch (phase 3A)",
+          "title": "Batch Id"
+        },
+        "env_step": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "JOINT_BATCH: environment step the batch was applied at (one per batch, phase 3A)",
+          "title": "Env Step"
+        },
+        "global_step": {
+          "minimum": 0,
+          "title": "Global Step",
+          "type": "integer"
+        },
+        "round": {
+          "minimum": 0,
+          "title": "Round",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "global_step",
+        "round",
+        "actor_id",
+        "actor_step"
+      ],
+      "title": "TurnRef",
+      "type": "object"
+    }
+  },
+  "$id": "https://formal-lab.dev/contracts/v2/ExecutionContext.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The authoritative basis of one send, built by the kernel right before it (phase 4A, A2) — never by a strategy.\n\nIdentity comes from the kernel's turn (not the proposal's `actor_id` claim), the environment / session / service\nidentity from the run's environment, and `current_revision` from the environment's own authoritative read at the\nside-effect boundary. `proposal_revision` is kept separately: the revision the plan was made on is not the\nrevision the write happens on. When the current revision cannot be read it is None with `revision_source`\nUNKNOWN, and a gate that needs it must deny. Receipts bind to `execution_binding(context)` — the same canonical\nform is used to issue and to verify.",
+  "properties": {
+    "action_params_digest": {
+      "description": "params_digest(action.params)",
+      "title": "Action Params Digest",
+      "type": "string"
+    },
+    "action_type": {
+      "title": "Action Type",
+      "type": "string"
+    },
+    "actor_id": {
+      "description": "the actor of the kernel's turn (authoritative identity)",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:@/-]{0,254}$",
+      "title": "Actor Id",
+      "type": "string"
+    },
+    "current_revision": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "the environment's revision at the send",
+      "title": "Current Revision"
+    },
+    "environment": {
+      "$ref": "#/$defs/PluginRef"
+    },
+    "operation_id": {
+      "title": "Operation Id",
+      "type": "string"
+    },
+    "phase": {
+      "$ref": "#/$defs/ExecutionPhase"
+    },
+    "proposal_revision": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "the revision the proposal was planned on",
+      "title": "Proposal Revision"
+    },
+    "read_at": {
+      "format": "date-time",
+      "title": "Read At",
+      "type": "string"
+    },
+    "request_digest": {
+      "title": "Request Digest",
+      "type": "string"
+    },
+    "revision_note": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Revision Note"
+    },
+    "revision_source": {
+      "description": "FRESH: read from the environment right before the send (env.current_revision); SERIALIZED: a pure-data environment whose state lives in this serialized step; UNKNOWN: could not be read",
+      "enum": [
+        "FRESH",
+        "SERIALIZED",
+        "UNKNOWN"
+      ],
+      "title": "Revision Source",
+      "type": "string"
+    },
+    "run_id": {
+      "title": "Run Id",
+      "type": "string"
+    },
+    "service_identity": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Service Identity"
+    },
+    "session_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Session Id"
+    },
+    "step": {
+      "minimum": 0,
+      "title": "Step",
+      "type": "integer"
+    },
+    "turn": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/TurnRef"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "versions": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "description": "model, driver/adapter, rules, participant view, environment and gate versions",
+      "title": "Versions",
+      "type": "object"
+    }
+  },
+  "required": [
+    "run_id",
+    "step",
+    "actor_id",
+    "operation_id",
+    "phase",
+    "action_type",
+    "action_params_digest",
+    "request_digest",
+    "environment",
+    "revision_source",
+    "read_at"
+  ],
+  "title": "ExecutionContext",
+  "type": "object"
+}

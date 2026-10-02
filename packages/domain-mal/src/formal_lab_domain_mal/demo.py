@@ -18,14 +18,13 @@ import os
 from pathlib import Path
 from typing import Any
 
-from formal_lab_domain_broker import HmacSigner, KeyStore, ReceiptStore
-
-from .admission import issue_receipt, target_check_basis
+from .admission import target_check_basis
 from .config import LabPolicy, TargetSecurity
 from .frontend import attack_graph_of
 from .run import red_team_scenario, run_red_team
 
 GATE = {"plugin_id": "formal-lab.domain.mal.broker-gate", "version": "1.0.0"}
+ISSUER = {"plugin_id": "formal-lab.broker.receipt-issuer", "version": "1.0.0"}
 
 
 def _request_digest(actor: str, action: dict[str, Any]) -> str:
@@ -55,38 +54,36 @@ def gated_red_team(package: Any, *, workdir: str | Path, target_security: Target
     plan = [{"actor": st.proposal.actor_id, "action": st.proposal.action.model_dump(mode="json"),
              "revision": st.proposal.based_on_revision, "step": st.step} for st in plan_result.steps]
 
-    # issue receipts for the plan, bound to a fixed run id's deterministic operation ids
+    # receipts are issued at send time, bound to the kernel's authoritative ExecutionContext (phase 4A): an issuer
+    # gate signs for the verified basis, the MAL broker gate then admits only against that same context
     secret = os.urandom(24)
     ks_path = work / "keys.json"
     ks_path.write_text(json.dumps({"issuer-1": secret.hex()}))
-    signer = HmacSigner(KeyStore({"issuer-1": secret}), "issuer-1")
     rc_path = work / "receipts.json"
-    store = ReceiptStore(rc_path)
     basis = target_check_basis(property_id=target_security.property_id, verdict="WITNESS", scope="MODEL_INTERNAL",
                                backend="formal-lab.verifier.z3-bmc@1.1.0", bound={"max_steps": 60})
+    issuer = {"plugin": ISSUER, "config": {
+        "keystore_path": str(ks_path), "key_id": "issuer-1", "receipts_path": str(rc_path), "ttl_seconds": ttl_seconds,
+        "basis": {"query_kind": basis.query_kind, "property_id": basis.property_id, "verdict": basis.verdict,
+                  "scope": basis.scope, "backend": basis.backend, "bound": basis.bound},
+        "guarantee_scope": f"bounded reachability of {target_security.property_id}"}}
     run_id = "run_mal_d2_admit"
-    for x in plan:
-        op = f"{run_id}:s{x['step']}:red:apply"
-        receipt = issue_receipt(run_id=run_id, step=x["step"], actor_id="red", operation_id=op,
-                                action_params=x["action"]["params"], state_revision=x["revision"], check_basis=basis,
-                                guarantee_scope=f"bounded reachability of {target_security.property_id}",
-                                signer=signer, service_identity=service_identity, ttl_seconds=ttl_seconds)
-        store.put(_request_digest("red", x["action"]), receipt)
 
     base_cfg = {"keystore_path": str(ks_path), "service_identity": service_identity,
                 "target_security": target_security.to_dict(), "lab_policy": lab_policy.to_dict(),
                 "role_allowed_actions": ["compromise"]}
 
-    def run_with(receipts_path: str, run_id_used: str | None = None) -> Any:
+    def run_with(receipts_path: str, run_id_used: str | None = None, *, issue: bool = False) -> Any:
         from formal_lab_runtime import new_run_id
 
         cfg = {**base_cfg, "receipts_path": receipts_path}
-        scn = red_team_scenario(package, execution_gates=[{"plugin": GATE, "config": cfg}])
+        gates = ([issuer] if issue else []) + [{"plugin": GATE, "config": cfg}]
+        scn = red_team_scenario(package, execution_gates=gates)
         manifest = make_manifest(run_id=run_id_used or new_run_id(), project_id="phase3b-d2", scenario=scn,
                                  package=package, registry=reg)
         return run_local(manifest, package, reg)
 
-    with_receipts = run_with(str(rc_path), run_id)
+    with_receipts = run_with(str(rc_path), run_id, issue=True)
     empty_path = str(work / "empty.json")
     without_receipts = run_with(empty_path)
 

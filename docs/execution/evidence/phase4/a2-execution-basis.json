@@ -1,0 +1,318 @@
+{
+  "deliverable": "phase4A-A2",
+  "service": "formal_lab_example_orders (process, secure writes, SQLite)",
+  "write_counts_from": "the service's /admin/export operation records",
+  "model_endpoint": "protocol test service (loopback, OpenAI-compatible; NOT a model)",
+  "sections": {
+    "service": {
+      "tenant": "a2-auth",
+      "write_without_credential": 401,
+      "write_with_wrong_credential": 401,
+      "admin_reset_without_credential": 401,
+      "read_without_credential": 200,
+      "operations_recorded_for_refused_writes": 0,
+      "token_file_mode": "0o600",
+      "token_in_service_argv": false,
+      "token_file_path_in_service_argv": true,
+      "argv_inspected": true,
+      "listen_host": "127.0.0.1",
+      "non_loopback_reach": {
+        "192.168.5.1": "refused (ConnectionRefusedError)",
+        "172.17.0.1": "refused (ConnectionRefusedError)"
+      },
+      "manifest_has_token": false,
+      "manifest_has_token_path": true,
+      "health_write_auth": true
+    },
+    "stale_receipt": {
+      "proposal_revision": 5,
+      "receipt_revision": 5,
+      "service_revision_at_send": 7,
+      "context_current_revision": 7,
+      "verdict": "DENY",
+      "reasons": [
+        "formal-lab.broker.receipt-gate: receipt checked at revision 5, the environment is at 7 (FRESH) — the state changed since the check: re-check"
+      ],
+      "operation_state": "FAILED",
+      "service_writes_of_actor": 0,
+      "service_operations_of_actor": 0,
+      "service_revision_after": 7
+    },
+    "race": {
+      "checked_at_revision": 0,
+      "service_revision_when_write_arrived": 1,
+      "gate_verdicts": [
+        "ALLOW",
+        "ALLOW"
+      ],
+      "outcome": "REJECTED",
+      "effect_applied": false,
+      "reason": "STALE_REVISION: verified at revision 0, the service is at 1",
+      "service_record_status": "REJECTED",
+      "service_record_revision_before_after": [
+        1,
+        1
+      ],
+      "service_writes_of_actor": 0
+    },
+    "legal": {
+      "revision_before": 0,
+      "verdicts": [
+        "ALLOW",
+        "ALLOW"
+      ],
+      "context_current_revision": 0,
+      "outcome": "APPLIED",
+      "service_writes_of_actor": 1,
+      "service_write_revision_before": 0,
+      "service_revision_after": 1
+    },
+    "idempotency": {
+      "first": "APPLIED",
+      "again_replayed": true,
+      "other_params": "Conflict: operation id op-ids was received before with another request: {'actor_id': 'handler', 'action': 'reserve', 'params': {'o",
+      "kernel_same_id_other_request": true,
+      "service_operations_of_actor": [
+        "op-ids",
+        "op-ids-kernel"
+      ]
+    },
+    "mismatch": {
+      "environment": {
+        "denied": true,
+        "failed_conditions": [
+          "binding: environment: receipt='formal-lab.example.orders.service-env@9.9.9' execution='formal-lab.example.orders.service-env@1.0.0' MISMATCH"
+        ]
+      },
+      "session": {
+        "denied": true,
+        "failed_conditions": [
+          "binding: session_id: receipt='orders-another-tenant' execution='orders-a2-mismatch' MISMATCH"
+        ]
+      },
+      "turn": {
+        "denied": true,
+        "failed_conditions": [
+          "binding: turn: receipt={'global_step': 1, 'round': 2, 'actor_id': 'handler', 'actor_step': 1} execution={'global_step': 1, 'round': 1, 'actor_id': 'h"
+        ]
+      },
+      "versions": {
+        "denied": true,
+        "failed_conditions": [
+          "binding: versions: receipt={'model': 'orders@other'} execution={'driver': 'formal-lab.driver.ir-finite@1.0.0', 'environment': 'formal-lab.example.ord"
+        ]
+      },
+      "service": {
+        "denied": true,
+        "failed_conditions": [
+          "binding: service_identity: receipt='http://127.0.0.1:1' execution='http://127.0.0.1:35055' MISMATCH"
+        ]
+      },
+      "revision": {
+        "denied": true,
+        "failed_conditions": [
+          "state_revision: receipt checked at revision 99, the environment is at 0 (FRESH) — the state changed since the check: re-check"
+        ]
+      },
+      "actor_claimed_by_proposal": {
+        "denied": true,
+        "reasons": [
+          "formal-lab.kernel.execution-basis: IDENTITY_MISMATCH: the proposal claims actor 'intruder' but the turn belongs to 'handler'; nothing is sent"
+        ]
+      },
+      "unknown_revision": {
+        "denied": true,
+        "revision_source": "UNKNOWN",
+        "reasons": [
+          "formal-lab.kernel.execution-basis: BASIS_UNKNOWN: the write is conditional but the current revision is unknown (current revision could not be read: ConnectError: revision read failed (injected)); nothing is sent"
+        ]
+      },
+      "service_operations_of_actor": 0,
+      "service_writes_of_actor": 0
+    },
+    "resend": {
+      "stale_receipt": {
+        "decisions": [
+          [
+            "FIRST_SEND",
+            0,
+            "ALLOW"
+          ],
+          [
+            "RESEND",
+            2,
+            "DENY"
+          ]
+        ],
+        "operation_state": "FAILED",
+        "service_writes_of_actor": 0,
+        "write_revision_before": null,
+        "second_worker_reused": true,
+        "service_writes_after_second_worker": 0
+      },
+      "reissued": {
+        "decisions": [
+          [
+            "FIRST_SEND",
+            0,
+            "ALLOW"
+          ],
+          [
+            "FIRST_SEND",
+            0,
+            "ALLOW"
+          ],
+          [
+            "RESEND",
+            2,
+            "ALLOW"
+          ],
+          [
+            "RESEND",
+            2,
+            "ALLOW"
+          ]
+        ],
+        "operation_state": "COMPLETED",
+        "service_writes_of_actor": 1,
+        "write_revision_before": 2,
+        "second_worker_reused": true,
+        "service_writes_after_second_worker": 1
+      }
+    },
+    "resume": {
+      "status": "SUCCEEDED",
+      "operations": 25,
+      "after_resume": [
+        {
+          "step": 4,
+          "source": "FRESH",
+          "checked": 3,
+          "service_revision_before": 3
+        },
+        {
+          "step": 5,
+          "source": "FRESH",
+          "checked": 4,
+          "service_revision_before": 4
+        },
+        {
+          "step": 6,
+          "source": "FRESH",
+          "checked": 5,
+          "service_revision_before": 5
+        },
+        {
+          "step": 7,
+          "source": "FRESH",
+          "checked": 6,
+          "service_revision_before": 6
+        }
+      ],
+      "all_fresh_and_equal": true,
+      "service_writes_of_actor": 25,
+      "rejected_by_service": 0
+    },
+    "projection": {
+      "run_status": "SUCCEEDED",
+      "participants": {
+        "withheld_family": "stock",
+        "projected": "handler_a",
+        "unfiltered": "handler_b"
+      },
+      "model_requests": {
+        "total": 25,
+        "of_projected": 13,
+        "of_unfiltered": 12,
+        "labelled_model": "protocol-test-v1",
+        "authorization_header_present": true
+      },
+      "withheld_in_requests_of_projected": 0,
+      "withheld_in_requests_of_unfiltered": 12,
+      "withheld_in_call_records_of_projected": 0,
+      "call_records_of_projected": 13,
+      "call_records_of_unfiltered": 12,
+      "withheld_in_call_records_of_unfiltered": 12,
+      "call_records_without_actor": 0,
+      "withheld_in_checkpoint_of_projected": false,
+      "write_token_in_requests": false,
+      "llm_key_in_request_bodies": false,
+      "write_token_in_call_records": false,
+      "llm_key_in_call_records": false,
+      "operator_export": {
+        "has_withheld_family": true,
+        "has_token_path": true,
+        "has_token": false,
+        "has_llm_key": false,
+        "events": 283
+      },
+      "participant_download": {
+        "bytes": 327139,
+        "events": 151,
+        "has_withheld_family": false,
+        "has_token": false,
+        "has_token_path": false,
+        "has_llm_key": false,
+        "has_service_endpoint": false,
+        "has_other_participant_events": false,
+        "other_participant_view_or_config": false,
+        "offline_verify_exit": 0,
+        "offline_verify": "OK formal-lab/replay-bundle@2 run=run_a2_projection events=151 artifacts=0 operations=13 participants=2 contract=formal-lab-contracts/v2 digest=b0a5836e913a4e4a50c6fa5c271c9efdf3cd4d7581bb058adc7c16cb84a770f8 causality=ok"
+      },
+      "participant_settings_refused": {
+        "ORDERS_WRITE_TOKEN_FILE": true,
+        "FAL_PARTICIPANT_TOKEN_KEY": true
+      }
+    },
+    "warehouse": {
+      "round_robin": {
+        "status": "SUCCEEDED",
+        "sends": 16,
+        "revision_sources": [
+          "SERIALIZED"
+        ],
+        "all_have_current_revision": true,
+        "picker_download_events": 78,
+        "picker_download_has_dock": false,
+        "operator_has_dock": true,
+        "picker_download_has_receiver_events": false
+      },
+      "joint_batch": {
+        "status": "SUCCEEDED",
+        "sends": 20,
+        "revision_sources": [
+          "SERIALIZED"
+        ],
+        "all_have_current_revision": true,
+        "picker_download_events": 116,
+        "picker_download_has_dock": false,
+        "operator_has_dock": true,
+        "picker_download_has_receiver_events": false
+      }
+    }
+  },
+  "conclusion": {
+    "credential_required": true,
+    "credential_distribution": true,
+    "loopback_only": true,
+    "stale_receipt_zero_writes": true,
+    "check_then_write_race_refused": true,
+    "legal_same_revision_applies_once": true,
+    "same_id_same_request_reuses": true,
+    "same_id_other_params_conflict": true,
+    "binding_mismatches_refused": true,
+    "identity_claim_refused": true,
+    "unknown_revision_blocks": true,
+    "resend_same_rules": true,
+    "two_workers_send_once": true,
+    "resume_keeps_fresh_basis": true,
+    "projection_model_requests": true,
+    "projection_call_records_checkpoint": true,
+    "credentials_never_leave": true,
+    "participant_download_projected": true,
+    "participant_download_replays_offline": true,
+    "participant_settings_refused": true,
+    "warehouse_serialized_basis": true,
+    "warehouse_picker_download_projected": true
+  }
+}

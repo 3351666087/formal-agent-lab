@@ -1,4 +1,4 @@
-# 保证范围（Phase 3B 领域集成）
+# 保证范围（Phase 3B 领域集成；Phase 4A 补充 §6）
 
 本文件区分不同强度的结论，避免把其中一类当作另一类。配套：[acceptance-phase3.md](acceptance-phase3.md)、[research-readout.md](research-readout.md)、[reuse-ledger.md](reuse-ledger.md)、[handoff/phase3.md](handoff/phase3.md)。
 
@@ -36,6 +36,14 @@
 - **条件项（未在本环境执行，不冒充交付）**：真实 LLM 端点（混合策略，D3，未配置则标注替身）；CAGE RL 训练智能体（需 torch/ray，未安装，D5）；PRISM-games 领域概率绑定（备选清单）。
 - **发行重型项**：带 OCI 镜像的发行与去重离线包在宿主盘低于 15 GiB 保留量时记 BLOCKED（见 acceptance-phase3.md），非代码缺陷。
 
-## 6. 来源可追溯
+## 6. 执行依据与参与者边界（Phase 4A，A2）
+
+- **执行依据**：每次发送（首发、重发、纯数据重放）前内核构造 `ExecutionContext`：身份取自内核的 turn（提案自称的 actor / run / step 不一致即 `IDENTITY_MISMATCH`，不发送）；当前版本由环境的权威读取给出——实时服务 `env.current_revision`（FRESH），纯数据环境即本运行的世界且步骤串行（SERIALIZED），其它为 UNKNOWN；提案版本单独保留。门控只从 `GateRequest.execution` 取版本。
+- **准入**：凭据绑定 `execution_binding`（run、step、turn、actor、operation、动作与参数摘要、环境@版本、session、服务身份、版本集合、当前版本），签发与校验用同一规范化定义；`ReceiptIssuerGate` 在发送前按当时的执行依据签发。逐字段不一致各给一条拒绝原因。
+- **检查与写入之间**：声明 `env.conditional_step` 的环境（订单服务）随发送携带 `expected_revision`，由服务在写入自身的事务内核对（EXACT：版本必须相同；LOCATIONS：操作读取的位置未被写过），不符则拒绝且零业务写入；此时读不到当前版本即阻止写入（`BASIS_UNKNOWN`）。未声明该能力的实时环境，检查与写入之间的窗口**不由平台关闭**：需要版本的门控须在 UNKNOWN 时自行拒绝。
+- **参与者数据**：同一投影规则（`Projection`）作用于规划器观测、观测请求、候选（在投影后的信念上计算）、`last_outcome`（结果、冲突、错误文本）、发往模型的载荷与调用记录、检查点，以及参与者下载（只含本人与运行级事件、重新编号、环境/门控配置与地址清除、其他参与者的配置与视图清除）。运营方导出保持完整。`ParticipantServices.get_setting` 不交出环境写凭据、签名密钥与参与者令牌密钥。
+- **保证范围**：受信的进程内 Python 插件**不是沙箱**——它们与环境适配器同进程，技术上可读进程内一切；视图约束的是平台交给它们的输入，不是它们的能力。对**独立进程**：写入边界由服务进程强制（无凭据 401，凭据只在 0600 文件中、只有适配器读取，清单与参与者下载中只有路径或没有），参与者通道是令牌绑定的只读 API（`/participant/whoami`、`/participant/export`，actor 参数越权 403）。订单服务只监听回环；其**读接口在回环上不鉴权**，因此“视图对同机进程保密”只在该进程无法访问服务端口时成立（例如服务在独立主机或容器网络中）——这是部署条件，不由平台代码保证。
+
+## 7. 来源可追溯
 
 每条结论都绑定到证据文件（`docs/execution/evidence/phase3/d*.json`）、测试与检查组（`scripts/phase3_check.py` 的 `d1-mal`…`d6-domain`），以及固定的上游版本/摘要（reuse-ledger.md）。每次 attempt 独立记录，失败/重试保留，旧 PASS 不充当新结果。

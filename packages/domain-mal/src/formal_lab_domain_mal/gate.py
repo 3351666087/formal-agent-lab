@@ -15,7 +15,14 @@ from typing import Any
 
 from formal_lab_contracts import PluginDescriptor
 from formal_lab_contracts import capabilities as caps
-from formal_lab_domain_broker import HmacVerifier, KeyStore, ReceiptStore, RequestBinding, admit
+from formal_lab_domain_broker import (
+    HmacVerifier,
+    KeyStore,
+    ReceiptStore,
+    RequestBinding,
+    admit,
+    admit_execution,
+)
 from formal_lab_domain_broker.receipt import digest_params
 
 from .admission import mal_ruleset
@@ -67,8 +74,12 @@ class MalBrokerGate:
             current_revision=revision if revision is not None else -1, service_identity=self._service)
         ctx = {"lab_policy": self._lab, "target_security": self._tgt, "action_params": request.action.params,
                "id_to_full": self._id_to_full}
-        decision = admit(receipt, binding, verifier=self._verifier, rules=self._rules,
-                         role_allowed_actions=self._roles, context=ctx)
+        if getattr(request, "execution", None) is not None:  # phase 4A: verify against the kernel's basis
+            decision = admit_execution(receipt, request.execution, verifier=self._verifier, rules=self._rules,
+                                       role_allowed_actions=self._roles, context=ctx)
+        else:
+            decision = admit(receipt, binding, verifier=self._verifier, rules=self._rules,
+                             role_allowed_actions=self._roles, context=ctx)
         conditions = [ConditionCheck(name=r.kind, holds=r.holds, detail=r.detail[:200]) for r in decision.reasons]
         if decision.allowed:
             return GateResult(verdict="ALLOW", reason="receipt verified: bindings, state revision, expiry and MAL "

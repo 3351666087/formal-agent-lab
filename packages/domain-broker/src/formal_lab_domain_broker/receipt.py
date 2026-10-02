@@ -28,8 +28,11 @@ RECEIPT_FORMAT = "formal-lab/verification-receipt@1"
 
 
 def digest_params(params: dict[str, Any]) -> str:
-    """Canonical sha256 of an action's parameters — the same value the coordinator uses for request identity."""
-    return hashlib.sha256(_canon(params).encode()).hexdigest()
+    """Canonical sha256 of an action's parameters — delegates to the one contract definition (phase 4A) so issuer,
+    broker and kernel can never disagree on it."""
+    from formal_lab_contracts import params_digest
+
+    return params_digest(params)
 
 
 def _canon(obj: Any) -> str:
@@ -64,6 +67,24 @@ class ReceiptBindings:
     turn: int | None = None
     service_identity: str | None = None
     versions: dict[str, str] = field(default_factory=dict)  # model / adapter / rules / projection
+    # phase 4A: the kernel's canonical execution binding (formal_lab_contracts.execution_binding) and its digest —
+    # issued from the authoritative ExecutionContext and verified against the live one with the same definition
+    binding: dict[str, Any] | None = None
+    binding_digest: str | None = None
+
+
+def bindings_from_context(context: Any) -> ReceiptBindings:
+    """The bindings of a receipt for one send, from the kernel's ExecutionContext (never from strategy strings)."""
+    from formal_lab_contracts import execution_binding, execution_binding_digest
+
+    b = execution_binding(context)
+    return ReceiptBindings(
+        run_id=b["run_id"], step=b["step"], actor_id=b["actor_id"], operation_id=b["operation_id"],
+        action_type=b["action_type"], action_params_digest=b["action_params_digest"],
+        state_revision=b["current_revision"] if b["current_revision"] is not None else -1,
+        session_id=b["session_id"], environment=b["environment"], turn=(b["turn"] or {}).get("global_step"),
+        service_identity=b["service_identity"], versions=b["versions"], binding=b,
+        binding_digest=execution_binding_digest(context))
 
 
 @dataclass(frozen=True)
@@ -161,3 +182,20 @@ def sign_receipt(receipt: VerificationReceipt, signer: Signer) -> VerificationRe
 
 def signature_ok(receipt: VerificationReceipt, verifier: Verifier) -> bool:
     return bool(receipt.signature) and verifier.verify(receipt.canonical(), receipt.signature, key_id=receipt.issuer)
+
+
+def issue_for_context(context: Any, *, check_basis: CheckBasis, guarantee_scope: str, signer: Signer,
+                      ttl_seconds: int = 300, receipt_id: str | None = None,
+                      now: datetime | None = None) -> VerificationReceipt:
+    """Issue and sign a receipt bound to one send's authoritative ExecutionContext (phase 4A)."""
+    import uuid
+    from datetime import timedelta
+
+    if context.current_revision is None:
+        raise ValueError("cannot issue a receipt: the execution context has no current revision")
+    now = now or datetime.now(UTC)
+    receipt = VerificationReceipt(
+        receipt_id=receipt_id or f"rcpt_{uuid.uuid4().hex[:16]}", bindings=bindings_from_context(context),
+        check_basis=check_basis, guarantee_scope=guarantee_scope, issued_at=now.isoformat(),
+        expires_at=(now + timedelta(seconds=ttl_seconds)).isoformat(), issuer=signer.key_id)
+    return sign_receipt(receipt, signer)

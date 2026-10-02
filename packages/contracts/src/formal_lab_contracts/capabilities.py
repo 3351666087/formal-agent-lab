@@ -115,3 +115,8 @@ ENV_BATCH_STEP = "env.batch_step"  # step_batch(proposals, operation_id): one en
 DRIVER_JOINT_PREDICT = "driver.joint_predict"  # the model gives simultaneous actions a meaning (params.semantics)
 BATCH_START_STATE_DISJOINT_WRITES = "START_STATE_DISJOINT_WRITES"  # every action on the batch's start state;
 # disjoint writes merge, an action writing a location an earlier member already wrote is rejected (conflict)
+
+# phase 4A (A2) — execution basis at the side-effect boundary
+ENV_CURRENT_REVISION = "env.current_revision"  # current_revision(): the authoritative state revision, read fresh
+ENV_CONDITIONAL_STEP = "env.conditional_step"  # step(..., expected_revision=r): applied only if what the operation
+# depends on is unchanged since r — checked atomically where the side effect happens (transaction / conditional update)

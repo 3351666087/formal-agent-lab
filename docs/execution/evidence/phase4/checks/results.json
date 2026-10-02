@@ -2,14 +2,14 @@
   "format": "checks@3",
   "compatible_with": "checks@2",
   "suite": "phase4",
-  "generated_at": "2026-10-02T04:46:21Z",
+  "generated_at": "2026-10-02T05:48:53Z",
   "source_revision": {
-    "commit": "bccda301e58905ee0b0f37b2be9ed2938064d726",
+    "commit": "ee305fec2d599da4c22d443aa32236fd93b87d60",
     "worktree": {
-      "sha256": "a5686a47af85c44d6be82c2a82ffeea9d646fb478676fc32b2ea814a60f901ef",
+      "sha256": "294b1ab836d5b022177e98301b44eaef552abd58e694663f69cc5eb9c4f04089",
       "clean": false,
-      "changed_bytes": 50049,
-      "untracked_files": 7,
+      "changed_bytes": 165010,
+      "untracked_files": 10,
       "excluded_outputs": [
         "docs/execution/evidence/",
         "docs/handoff/",
@@ -21,16 +21,16 @@
     }
   },
   "config": {
-    "sha256": "735bfd42b321ee4cd2df41e3455a6cd287ec84da36f0bcf21661c9e1788f4d1c",
+    "sha256": "91cbdf5d1e34f38f49334bcba70e08e6d4a610e7762e29f75d7e0db7303dd341",
     "parts": {
-      "checks": "f446fe3f4270b99b983602396acd48d9a3a0928613cb3919f06459fd9d66bbde",
+      "checks": "6947f512a7c06f939fb968b9bac3b67cfc672f051a4222109bdd86c696db62af",
       "uv.lock": "be6278cfce6c4fe9ae55400b436f00cf3dd1d34a34811d402eac2c811890287a",
       "pnpm-lock.yaml": "02d23c074a75bccfaea1ed4ff51272ba3d6cbb724e8012366c8d18e9bb0a7c3a",
       "deploy/compose/services.dev.yaml": "4c876045f15d5bd972c517e7de2d3626cd252d1842797f0152f596f7d8ea9ce0",
       "deploy/compose/docker-compose.yaml": "ff4c34cae068cc6dacd4db7f4273887ff6c2bb0b3b84938a7b8969488bfb20ff"
     }
   },
-  "command": "python scripts/check_runner.py --suite phase4 --group a1",
+  "command": "python scripts/check_runner.py --suite phase4 --group a2",
   "environment": {
     "os": "Ubuntu 24.04.4 LTS",
     "arch": "aarch64",
@@ -50,13 +50,13 @@
       "MemAvailable": 4.52
     },
     "load_avg": [
-      0.06,
-      0.22,
-      0.23
+      0.74,
+      1.03,
+      0.76
     ],
     "disk_free_gib": {
       "host (repository filesystem)": 17.9,
-      "docker (/var/lib/docker)": 22.0
+      "docker (/var/lib/docker)": 21.9
     },
     "concurrency": 1,
     "note": "checks run one at a time; heavy checks ask disk_guard first"
@@ -65,47 +65,51 @@
     "cpus": 4,
     "memory_gib": {
       "MemTotal": 5.77,
-      "MemAvailable": 4.43
+      "MemAvailable": 4.47
     },
     "load_avg": [
-      0.06,
-      0.21,
-      0.23
+      0.83,
+      1.01,
+      0.77
     ],
     "disk_free_gib": {
       "host (repository filesystem)": 17.9,
-      "docker (/var/lib/docker)": 22.0
+      "docker (/var/lib/docker)": 21.9
     },
     "concurrency": 1,
     "note": "checks run one at a time; heavy checks ask disk_guard first"
   },
   "run": {
-    "started_at": "2026-10-02T04:46:14Z",
-    "finished_at": "2026-10-02T04:46:21Z",
-    "duration_s": 6.6,
+    "started_at": "2026-10-02T05:48:09Z",
+    "finished_at": "2026-10-02T05:48:53Z",
+    "duration_s": 43.4,
     "full": false,
     "selection": {
       "group": [
-        "a1"
+        "a2"
       ],
       "only": [],
       "skip": []
     },
     "checks": [
-      "p4-a1-engine",
-      "p4-a1-fault-injection"
+      "p4-a2-kernel",
+      "p4-a2-order-service",
+      "p4-a2-evidence",
+      "p4-a2-participant-api"
     ],
-    "commit": "bccda301e58905ee0b0f37b2be9ed2938064d726",
-    "worktree_sha256": "a5686a47af85c44d6be82c2a82ffeea9d646fb478676fc32b2ea814a60f901ef",
-    "nonce": "85abaa9e18e5485d844d582e52e3b829",
+    "commit": "ee305fec2d599da4c22d443aa32236fd93b87d60",
+    "worktree_sha256": "294b1ab836d5b022177e98301b44eaef552abd58e694663f69cc5eb9c4f04089",
+    "nonce": "a2fac63f6b10408db16a25df973682fd",
     "acceptance_nonce": null,
     "results": {
-      "p4-a1-engine": "PASS",
-      "p4-a1-fault-injection": "PASS"
+      "p4-a2-kernel": "PASS",
+      "p4-a2-order-service": "PASS",
+      "p4-a2-evidence": "PASS",
+      "p4-a2-participant-api": "PASS"
     }
   },
   "summary": {
-    "PASS": 2,
+    "PASS": 4,
     "FAIL": 0,
     "BLOCKED": 0,
     "NOT_RUN": 0,
@@ -113,8 +117,8 @@
     "NOT_APPLICABLE": 0
   },
   "groups": {
-    "a1": "PASS",
-    "a2": "NO_CHECKS",
+    "a1": "NOT_SELECTED",
+    "a2": "PASS",
     "a3": "NO_CHECKS",
     "a4": "NO_CHECKS",
     "a5": "NO_CHECKS",
@@ -136,7 +140,7 @@
   "complete": false,
   "mandatory_passed": false,
   "unmet": [
-    "a2=NO_CHECKS",
+    "a1=NOT_SELECTED",
     "a3=NO_CHECKS",
     "a4=NO_CHECKS",
     "a5=NO_CHECKS",
@@ -146,7 +150,7 @@
   ],
   "aggregation": "only results produced and verified by this invocation count; a partial selection is never complete; results from another commit, work tree or configuration are inherited and ignored",
   "timing": {
-    "this_run_s": 6.6,
+    "this_run_s": 43.4,
     "last_full_run_s": null,
     "last_full_run_at": null,
     "partial_runs": [
@@ -163,6 +167,23 @@
         "results": {
           "p4-a1-engine": "PASS",
           "p4-a1-fault-injection": "PASS"
+        }
+      },
+      {
+        "started_at": "2026-10-02T05:48:09Z",
+        "duration_s": 43.4,
+        "selection": {
+          "group": [
+            "a2"
+          ],
+          "only": [],
+          "skip": []
+        },
+        "results": {
+          "p4-a2-kernel": "PASS",
+          "p4-a2-order-service": "PASS",
+          "p4-a2-evidence": "PASS",
+          "p4-a2-participant-api": "PASS"
         }
       }
     ]
@@ -191,6 +212,35 @@
       "results": {
         "p4-a1-engine": "PASS",
         "p4-a1-fault-injection": "PASS"
+      }
+    },
+    {
+      "started_at": "2026-10-02T05:48:09Z",
+      "finished_at": "2026-10-02T05:48:53Z",
+      "duration_s": 43.4,
+      "full": false,
+      "selection": {
+        "group": [
+          "a2"
+        ],
+        "only": [],
+        "skip": []
+      },
+      "checks": [
+        "p4-a2-kernel",
+        "p4-a2-order-service",
+        "p4-a2-evidence",
+        "p4-a2-participant-api"
+      ],
+      "commit": "ee305fec2d599da4c22d443aa32236fd93b87d60",
+      "worktree_sha256": "294b1ab836d5b022177e98301b44eaef552abd58e694663f69cc5eb9c4f04089",
+      "nonce": "a2fac63f6b10408db16a25df973682fd",
+      "acceptance_nonce": null,
+      "results": {
+        "p4-a2-kernel": "PASS",
+        "p4-a2-order-service": "PASS",
+        "p4-a2-evidence": "PASS",
+        "p4-a2-participant-api": "PASS"
       }
     }
   ],
@@ -254,8 +304,8 @@
       "evidence_files": [],
       "first_failure": null,
       "flaky": false,
-      "inherited": false,
-      "this_run": true,
+      "inherited": true,
+      "this_run": false,
       "history": []
     },
     {
@@ -372,6 +422,399 @@
           "fresh": true
         }
       ],
+      "first_failure": null,
+      "flaky": false,
+      "inherited": true,
+      "this_run": false,
+      "history": []
+    },
+    {
+      "id": "p4-a2-kernel",
+      "group": "a2",
+      "title": "执行依据（单元）：身份取自内核、当前版本与提案版本分开、条件写、BASIS_UNKNOWN、重发/双 worker、统一绑定与逐字段拒绝、投影与凭据设置",
+      "command": "uv run --frozen pytest -p no:cacheprovider -q packages/runtime/tests/test_execution_basis.py packages/runtime/tests/test_participant_projection.py packages/runtime/tests/test_participants.py packages/runtime/tests/test_operation_consistency.py packages/domain-broker/tests tests/contracts",
+      "tasks": [
+        "P4A-A2"
+      ],
+      "evidence": [],
+      "requires": null,
+      "profile": "local-lite",
+      "kind": "mandatory",
+      "retries": 0,
+      "heavy_gib": 0.0,
+      "produces": [],
+      "protocol": false,
+      "assertions_from": null,
+      "trigger": null,
+      "result": "PASS",
+      "reason": "195 passed in 2.52s",
+      "summary": "195 passed in 2.52s",
+      "condition": null,
+      "checked_commit": "ee305fec2d599da4c22d443aa32236fd93b87d60",
+      "worktree_sha256": "294b1ab836d5b022177e98301b44eaef552abd58e694663f69cc5eb9c4f04089",
+      "worktree_clean": false,
+      "config_sha256": "91cbdf5d1e34f38f49334bcba70e08e6d4a610e7762e29f75d7e0db7303dd341",
+      "run_nonce": "a2fac63f6b10408db16a25df973682fd",
+      "started_at": "2026-10-02T05:48:09Z",
+      "finished_at": "2026-10-02T05:48:12Z",
+      "duration_s": 2.7,
+      "attempts": [
+        {
+          "attempt": 1,
+          "started_at": "2026-10-02T05:48:09Z",
+          "finished_at": "2026-10-02T05:48:12Z",
+          "duration_s": 2.7,
+          "exit_code": 0,
+          "result": "PASS",
+          "reason": "195 passed in 2.52s",
+          "log": "docs/execution/evidence/phase4/checks/logs/p4-a2-kernel/20261002T054809Z-attempt-1.log",
+          "summary": "195 passed in 2.52s",
+          "nonce": "3d4ded804ed54a65ab640c7d29bee5b1",
+          "structured_result": null,
+          "assertions": [],
+          "produced": [],
+          "pytest": {
+            "passed": 195,
+            "failed": 0,
+            "skipped": 0,
+            "deselected": 0,
+            "errors": 0,
+            "skip_reasons": [],
+            "line": "195 passed in 2.52s"
+          }
+        }
+      ],
+      "evidence_files": [],
+      "first_failure": null,
+      "flaky": false,
+      "inherited": false,
+      "this_run": true,
+      "history": []
+    },
+    {
+      "id": "p4-a2-order-service",
+      "group": "a2",
+      "title": "真实订单服务进程：写凭据、事务内 expected_revision（EXACT/LOCATIONS）、同 ID 复用/异参冲突、签发→准入→条件写的内核运行",
+      "command": "uv run --frozen pytest -p no:cacheprovider -q examples/local-order-service/tests/test_execution_basis_orders.py examples/local-order-service/tests/test_order_service.py",
+      "tasks": [
+        "P4A-A2"
+      ],
+      "evidence": [],
+      "requires": null,
+      "profile": "local-lite",
+      "kind": "mandatory",
+      "retries": 0,
+      "heavy_gib": 0.0,
+      "produces": [],
+      "protocol": false,
+      "assertions_from": null,
+      "trigger": null,
+      "result": "PASS",
+      "reason": "22 passed in 22.44s",
+      "summary": "22 passed in 22.44s",
+      "condition": null,
+      "checked_commit": "ee305fec2d599da4c22d443aa32236fd93b87d60",
+      "worktree_sha256": "294b1ab836d5b022177e98301b44eaef552abd58e694663f69cc5eb9c4f04089",
+      "worktree_clean": false,
+      "config_sha256": "91cbdf5d1e34f38f49334bcba70e08e6d4a610e7762e29f75d7e0db7303dd341",
+      "run_nonce": "a2fac63f6b10408db16a25df973682fd",
+      "started_at": "2026-10-02T05:48:12Z",
+      "finished_at": "2026-10-02T05:48:35Z",
+      "duration_s": 22.5,
+      "attempts": [
+        {
+          "attempt": 1,
+          "started_at": "2026-10-02T05:48:12Z",
+          "finished_at": "2026-10-02T05:48:35Z",
+          "duration_s": 22.5,
+          "exit_code": 0,
+          "result": "PASS",
+          "reason": "22 passed in 22.44s",
+          "log": "docs/execution/evidence/phase4/checks/logs/p4-a2-order-service/20261002T054812Z-attempt-1.log",
+          "summary": "22 passed in 22.44s",
+          "nonce": "0d63d9c893ff406bb0f1a387dab18df4",
+          "structured_result": null,
+          "assertions": [],
+          "produced": [],
+          "pytest": {
+            "passed": 22,
+            "failed": 0,
+            "skipped": 0,
+            "deselected": 0,
+            "errors": 0,
+            "skip_reasons": [],
+            "line": "22 passed in 22.44s"
+          }
+        }
+      ],
+      "evidence_files": [],
+      "first_failure": null,
+      "flaky": false,
+      "inherited": false,
+      "this_run": true,
+      "history": []
+    },
+    {
+      "id": "p4-a2-evidence",
+      "group": "a2",
+      "title": "必须复现：凭据 5/服务 7 写入 0、检查后变化被条件更新拒绝、同版本合法动作成功、ID 复用/冲突、环境/session/turn/版本错配、恢复与重发同规则、真实策略工厂 + 实际序列化/下载路径中标记字段与测试凭据不外泄（写计数取自服务记录）",
+      "command": "uv run --frozen python scripts/a2_execution_evidence.py",
+      "tasks": [
+        "P4A-A2"
+      ],
+      "evidence": [],
+      "requires": null,
+      "profile": "local-lite",
+      "kind": "mandatory",
+      "retries": 0,
+      "heavy_gib": 0.0,
+      "produces": [
+        "docs/execution/evidence/phase4/a2-execution-basis.json"
+      ],
+      "protocol": true,
+      "assertions_from": null,
+      "trigger": null,
+      "result": "PASS",
+      "reason": "[p4-a2-evidence] PASS: 22 required assertion(s) hold",
+      "summary": "[p4-a2-evidence] PASS: 22 required assertion(s) hold",
+      "condition": null,
+      "checked_commit": "ee305fec2d599da4c22d443aa32236fd93b87d60",
+      "worktree_sha256": "294b1ab836d5b022177e98301b44eaef552abd58e694663f69cc5eb9c4f04089",
+      "worktree_clean": false,
+      "config_sha256": "91cbdf5d1e34f38f49334bcba70e08e6d4a610e7762e29f75d7e0db7303dd341",
+      "run_nonce": "a2fac63f6b10408db16a25df973682fd",
+      "started_at": "2026-10-02T05:48:35Z",
+      "finished_at": "2026-10-02T05:48:41Z",
+      "duration_s": 6.0,
+      "attempts": [
+        {
+          "attempt": 1,
+          "started_at": "2026-10-02T05:48:35Z",
+          "finished_at": "2026-10-02T05:48:41Z",
+          "duration_s": 6.0,
+          "exit_code": 0,
+          "result": "PASS",
+          "reason": "[p4-a2-evidence] PASS: 22 required assertion(s) hold",
+          "log": "docs/execution/evidence/phase4/checks/logs/p4-a2-evidence/20261002T054835Z-attempt-1.log",
+          "summary": "[p4-a2-evidence] PASS: 22 required assertion(s) hold",
+          "nonce": "d81e1b0b43bb417a90c39a83f9f5811c",
+          "structured_result": "docs/execution/evidence/phase4/checks/logs/p4-a2-evidence/20261002T054835Z-attempt-1.result.json",
+          "assertions": [
+            {
+              "id": "credential_required",
+              "required": true,
+              "holds": true,
+              "detail": "anon=401 wrong=401 reset=401 recorded=0"
+            },
+            {
+              "id": "credential_distribution",
+              "required": true,
+              "holds": true,
+              "detail": "mode=0o600 argv_token=False manifest_token=False (path only: True)"
+            },
+            {
+              "id": "loopback_only",
+              "required": true,
+              "holds": true,
+              "detail": "host=127.0.0.1 non-loopback={'192.168.5.1': 'refused (ConnectionRefusedError)', '172.17.0.1': 'refused (ConnectionRefusedError)'}"
+            },
+            {
+              "id": "stale_receipt_zero_writes",
+              "required": true,
+              "holds": true,
+              "detail": "proposal@5 receipt@5 service@7 → DENY, service ops=0"
+            },
+            {
+              "id": "check_then_write_race_refused",
+              "required": true,
+              "holds": true,
+              "detail": "checked@0 write arrived @1: STALE_REVISION: verified at revision 0, the service is at 1"
+            },
+            {
+              "id": "legal_same_revision_applies_once",
+              "required": true,
+              "holds": true,
+              "detail": "checked@0 written@0"
+            },
+            {
+              "id": "same_id_same_request_reuses",
+              "required": true,
+              "holds": true,
+              "detail": "replayed=True"
+            },
+            {
+              "id": "same_id_other_params_conflict",
+              "required": true,
+              "holds": true,
+              "detail": "Conflict: operation id op-ids was received before with another request: {'actor_id': 'handler', 'action': 'reserve', 'params': {'o"
+            },
+            {
+              "id": "binding_mismatches_refused",
+              "required": true,
+              "holds": true,
+              "detail": "environment: [\"binding: environment: receipt='formal-lab.example.orders.service-env@9.9.9' execution='formal-lab.example.orders.service-env@1.0.0' MISMATCH\"]; session: [\"binding: session_id: receipt='orders-another-tenant' execution='orders-a2-mismatch' MISMATCH\"]; turn: [\"binding: turn: receipt={'global_step': 1, 'round': 2, 'actor_id': 'handler', 'actor_step': 1} execution={'global_step': 1, 'round': 1, 'actor_id': 'h\"]; versions: [\"binding: versions: receipt={'model': 'orders@other'} executio"
+            },
+            {
+              "id": "identity_claim_refused",
+              "required": true,
+              "holds": true,
+              "detail": "[\"formal-lab.kernel.execution-basis: IDENTITY_MISMATCH: the proposal claims actor 'intruder' but the turn belongs to 'handler'; nothing is sent\"]"
+            },
+            {
+              "id": "unknown_revision_blocks",
+              "required": true,
+              "holds": true,
+              "detail": "['formal-lab.kernel.execution-basis: BASIS_UNKNOWN: the write is conditional but the current revision is unknown (current revision could not be read: ConnectError: revision read failed (injected)); nothing is sent']"
+            },
+            {
+              "id": "resend_same_rules",
+              "required": true,
+              "holds": true,
+              "detail": "stale: [('FIRST_SEND', 0, 'ALLOW'), ('RESEND', 2, 'DENY')] reissued: [('FIRST_SEND', 0, 'ALLOW'), ('FIRST_SEND', 0, 'ALLOW'), ('RESEND', 2, 'ALLOW'), ('RESEND', 2, 'ALLOW')]"
+            },
+            {
+              "id": "two_workers_send_once",
+              "required": true,
+              "holds": true,
+              "detail": "shared ledger → reuse, no second write"
+            },
+            {
+              "id": "resume_keeps_fresh_basis",
+              "required": true,
+              "holds": true,
+              "detail": "25 sends, every context FRESH and equal to the service's revision_before"
+            },
+            {
+              "id": "projection_model_requests",
+              "required": true,
+              "holds": true,
+              "detail": "projected: 0/13 requests with stock[…]; unfiltered (control): 12/12"
+            },
+            {
+              "id": "projection_call_records_checkpoint",
+              "required": true,
+              "holds": true,
+              "detail": "projected: 0/13 call records with stock[…]; unfiltered (control): 12/12"
+            },
+            {
+              "id": "credentials_never_leave",
+              "required": true,
+              "holds": true,
+              "detail": "write token and model key absent from request bodies, call records, operator export, participant download"
+            },
+            {
+              "id": "participant_download_projected",
+              "required": true,
+              "holds": true,
+              "detail": "download: 151 events, no stock[…], no endpoint / credential path; operator export keeps them"
+            },
+            {
+              "id": "participant_download_replays_offline",
+              "required": true,
+              "holds": true,
+              "detail": "OK formal-lab/replay-bundle@2 run=run_a2_projection events=151 artifacts=0 operations=13 participants=2 contract=formal-lab-contracts/v2 digest=b0a5836e913a4e4a"
+            },
+            {
+              "id": "participant_settings_refused",
+              "required": true,
+              "holds": true,
+              "detail": "{'ORDERS_WRITE_TOKEN_FILE': True, 'FAL_PARTICIPANT_TOKEN_KEY': True}"
+            },
+            {
+              "id": "warehouse_serialized_basis",
+              "required": true,
+              "holds": true,
+              "detail": "round_robin: 16 gated sends, basis ['SERIALIZED']; joint_batch: 20 gated sends, basis ['SERIALIZED']"
+            },
+            {
+              "id": "warehouse_picker_download_projected",
+              "required": true,
+              "holds": true,
+              "detail": "round_robin: 78 events, dock[…] absent; joint_batch: 116 events, dock[…] absent"
+            }
+          ],
+          "produced": [
+            {
+              "path": "docs/execution/evidence/phase4/a2-execution-basis.json",
+              "exists": true,
+              "sha256": "d11bd2fa92880d0202badcd573f7731606248c5f9a6571f66132918c24643c0f",
+              "fresh": true
+            }
+          ],
+          "pytest": null
+        }
+      ],
+      "evidence_files": [
+        {
+          "path": "docs/execution/evidence/phase4/a2-execution-basis.json",
+          "exists": true,
+          "sha256": "d11bd2fa92880d0202badcd573f7731606248c5f9a6571f66132918c24643c0f",
+          "fresh": true
+        }
+      ],
+      "first_failure": null,
+      "flaky": false,
+      "inherited": false,
+      "this_run": true,
+      "history": []
+    },
+    {
+      "id": "p4-a2-participant-api",
+      "group": "a2",
+      "title": "平台参与者通道：令牌绑定 run/actor、actor 参数越权 403、无/伪造/过期令牌 401、下载为投影且可离线读取（真实 API + worker）",
+      "command": "uv run --frozen pytest -p no:cacheprovider -q -m integration tests/integration/test_participant_access_platform.py",
+      "tasks": [
+        "P4A-A2"
+      ],
+      "evidence": [],
+      "requires": null,
+      "profile": "local-lite",
+      "kind": "mandatory",
+      "retries": 0,
+      "heavy_gib": 0.0,
+      "produces": [],
+      "protocol": false,
+      "assertions_from": null,
+      "trigger": null,
+      "result": "PASS",
+      "reason": "1 passed in 11.88s",
+      "summary": "1 passed in 11.88s",
+      "condition": null,
+      "checked_commit": "ee305fec2d599da4c22d443aa32236fd93b87d60",
+      "worktree_sha256": "294b1ab836d5b022177e98301b44eaef552abd58e694663f69cc5eb9c4f04089",
+      "worktree_clean": false,
+      "config_sha256": "91cbdf5d1e34f38f49334bcba70e08e6d4a610e7762e29f75d7e0db7303dd341",
+      "run_nonce": "a2fac63f6b10408db16a25df973682fd",
+      "started_at": "2026-10-02T05:48:41Z",
+      "finished_at": "2026-10-02T05:48:53Z",
+      "duration_s": 12.1,
+      "attempts": [
+        {
+          "attempt": 1,
+          "started_at": "2026-10-02T05:48:41Z",
+          "finished_at": "2026-10-02T05:48:53Z",
+          "duration_s": 12.1,
+          "exit_code": 0,
+          "result": "PASS",
+          "reason": "1 passed in 11.88s",
+          "log": "docs/execution/evidence/phase4/checks/logs/p4-a2-participant-api/20261002T054841Z-attempt-1.log",
+          "summary": "1 passed in 11.88s",
+          "nonce": "bffd100da00b4cba94813879cd776ee8",
+          "structured_result": null,
+          "assertions": [],
+          "produced": [],
+          "pytest": {
+            "passed": 1,
+            "failed": 0,
+            "skipped": 0,
+            "deselected": 0,
+            "errors": 0,
+            "skip_reasons": [],
+            "line": "1 passed in 11.88s"
+          }
+        }
+      ],
+      "evidence_files": [],
       "first_failure": null,
       "flaky": false,
       "inherited": false,

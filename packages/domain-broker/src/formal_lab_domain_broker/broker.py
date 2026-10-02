@@ -141,8 +141,17 @@ def admit(receipt: VerificationReceipt | None, req: RequestBinding, *, verifier:
     reasons.append(Reason("expiry", live, f"expires_at {receipt.expires_at}" + ("" if live else " (EXPIRED)")))
 
     # 5. domain rules (LabPolicy / precondition / role / TargetSecurity), each explained on its own
-    ctx = {"receipt": receipt, "action_type": req.action_type, "role_allowed_actions": role_allowed_actions,
-           **(context or {})}
+    reasons += _rule_reasons(rules, {"receipt": receipt, "action_type": req.action_type,
+                                     "role_allowed_actions": role_allowed_actions, **(context or {})})
+    hard_ok = sig_ok and all(r.holds for r in binding_reasons) and fresh and live
+    return BrokerDecision("ALLOW" if (hard_ok and _rules_ok(reasons)) else "DENY", reasons)
+
+
+RULE_KINDS = ("lab_policy", "action_precondition", "role_rule", "target_security")
+
+
+def _rule_reasons(rules: RuleSet, ctx: dict[str, Any]) -> list[Reason]:
+    out: list[Reason] = []
     for fired in evaluate(rules, "side_effect_action", ctx):
         detail = fired.detail
         if fired.unknown_conditions:
@@ -156,13 +165,74 @@ def admit(receipt: VerificationReceipt | None, req: RequestBinding, *, verifier:
             holds = fired.holds is False
         else:
             holds = fired.holds is True
-        reasons.append(Reason(fired.kind, holds, f"[{fired.handling}] {detail}"))
+        out.append(Reason(fired.kind, holds, f"[{fired.handling}] {detail}"))
+    return out
 
-    hard_ok = sig_ok and all(r.holds for r in binding_reasons) and fresh and live
-    rule_ok = all(r.holds is True for r in reasons if r.kind in
-                  ("lab_policy", "action_precondition", "role_rule", "target_security"))
-    verdict = "ALLOW" if (hard_ok and rule_ok) else "DENY"
-    return BrokerDecision(verdict, reasons)
+
+def _rules_ok(reasons: list[Reason]) -> bool:
+    return all(r.holds is True for r in reasons if r.kind in RULE_KINDS)
+
+
+REQUIRED_BINDINGS = ("run_id", "step", "actor_id", "operation_id", "action_type", "action_params_digest",
+                     "environment", "session_id")
+
+
+def admit_execution(receipt: VerificationReceipt | None, execution: Any, *, verifier: Verifier, rules: RuleSet,
+                    role_allowed_actions: list[str] | None = None, context: dict[str, Any] | None = None,
+                    now: datetime | None = None) -> BrokerDecision:
+    """Admission against the kernel's authoritative ExecutionContext (phase 4A, A2): the receipt's canonical binding
+    (issued with `bindings_from_context`) must equal `execution_binding(execution)` field for field — run, step,
+    turn, actor, operation, action and parameter digest, environment, session, service identity, versions — and the
+    revision it was checked at must be the environment's current one. Every mismatch is its own explicit reason; a
+    required binding missing from the context, an unknown current revision or a receipt without an execution
+    binding all deny. Pure: no I/O."""
+    from formal_lab_contracts import BINDING_FIELDS, execution_binding
+
+    now = now or datetime.now(UTC)
+    if execution is None:
+        return BrokerDecision("DENY", [Reason("binding", False, "no execution context: the kernel did not provide "
+                                                                  "the authoritative basis of this send")])
+    if receipt is None:
+        return BrokerDecision("DENY", [Reason("binding", False, "no receipt bound to this send")])
+    reasons: list[Reason] = []
+    sig_ok = signature_ok(receipt, verifier)
+    reasons.append(Reason("provenance", sig_ok, f"signature by {receipt.issuer!r} {'verified' if sig_ok else 'INVALID'}"))
+    live = execution_binding(execution)
+    binding_ok = True
+    for key in REQUIRED_BINDINGS:
+        if live.get(key) in (None, ""):
+            binding_ok = False
+            reasons.append(Reason("binding", False, f"required binding {key} is missing from the execution context"))
+    bound = receipt.bindings.binding
+    if bound is None:
+        binding_ok = False
+        reasons.append(Reason("binding", False, "the receipt carries no execution binding (issued without the "
+                                                "kernel's ExecutionContext): re-issue it for this send"))
+    else:
+        for key in BINDING_FIELDS:
+            if key == "current_revision":
+                continue
+            ok = bound.get(key) == live.get(key)
+            binding_ok &= ok
+            reasons.append(Reason("binding", ok, f"{key}: receipt={bound.get(key)!r} execution={live.get(key)!r} "
+                                                 f"{'match' if ok else 'MISMATCH'}"))
+    checked_at = (bound or {}).get("current_revision", receipt.bindings.state_revision)
+    if execution.current_revision is None:
+        fresh = False
+        reasons.append(Reason("state_revision", False, f"current revision unknown ({execution.revision_note}): "
+                                                         "nothing can be admitted against it"))
+    else:
+        fresh = checked_at == execution.current_revision
+        reasons.append(Reason("state_revision", fresh,
+                              f"receipt checked at revision {checked_at}, the environment is at "
+                              f"{execution.current_revision} ({execution.revision_source})"
+                              + ("" if fresh else " — the state changed since the check: re-check")))
+    live_ok = not receipt.is_expired(now=now)
+    reasons.append(Reason("expiry", live_ok, f"expires_at {receipt.expires_at}" + ("" if live_ok else " (EXPIRED)")))
+    reasons += _rule_reasons(rules, {"receipt": receipt, "action_type": execution.action_type,
+                                     "role_allowed_actions": role_allowed_actions, **(context or {})})
+    ok = sig_ok and binding_ok and fresh and live_ok and _rules_ok(reasons)
+    return BrokerDecision("ALLOW" if ok else "DENY", reasons)
 
 
 # ------------------------------------------------------------------ receipt store (issuer → gate)
@@ -238,14 +308,18 @@ class BrokerGate:
         from formal_lab_contracts import GateResult
 
         receipt = self.store.get(request.request_digest)
-        revision = request.values_revision if request.values_source == "FRESH" else request.based_on_revision
-        binding = RequestBinding(
-            run_id=request.run_id, step=request.step, actor_id=request.actor_id or "",
-            operation_id=request.operation_id, action_type=request.action.action_type,
-            action_params_digest=_params_digest(request), current_revision=revision if revision is not None else -1,
-            service_identity=self.service_identity)
-        decision = admit(receipt, binding, verifier=self.verifier, rules=self.rules,
-                         role_allowed_actions=self.role_allowed_actions)
+        if getattr(request, "execution", None) is not None:  # phase 4A: the kernel's authoritative basis
+            decision = admit_execution(receipt, request.execution, verifier=self.verifier, rules=self.rules,
+                                       role_allowed_actions=self.role_allowed_actions)
+        else:  # a phase-3 kernel without an execution context: the request fields are the binding
+            revision = request.values_revision if request.values_source == "FRESH" else request.based_on_revision
+            binding = RequestBinding(
+                run_id=request.run_id, step=request.step, actor_id=request.actor_id or "",
+                operation_id=request.operation_id, action_type=request.action.action_type,
+                action_params_digest=_params_digest(request),
+                current_revision=revision if revision is not None else -1, service_identity=self.service_identity)
+            decision = admit(receipt, binding, verifier=self.verifier, rules=self.rules,
+                             role_allowed_actions=self.role_allowed_actions)
         verdict = "ALLOW" if decision.allowed else "DENY"
         conditions = _conditions(decision)
         reason = "; ".join(r.detail for r in decision.reasons if r.holds is not True) or "receipt verified"
@@ -286,3 +360,78 @@ def create_gate(config: dict[str, Any] | None, services: Any) -> BrokerGate:
 
 def _empty_rules() -> RuleSet:
     return RuleSet(ruleset_id="empty", version=1, rules=[]).released()
+
+
+
+# ------------------------------------------------------------------ issuing at the authoritative basis (phase 4A)
+
+
+def _issuer_descriptor():
+    from formal_lab_contracts import PluginDescriptor
+    from formal_lab_contracts import capabilities as caps
+
+    return PluginDescriptor(
+        plugin_id="formal-lab.broker.receipt-issuer", version="1.0.0", interface="EXECUTION_GATE",
+        interface_version="2", semantic_profiles=["deterministic_finite_v1"],
+        capabilities=[{"id": caps.GATE_PRE_EXECUTION}],
+        config_schema={"type": "object", "additionalProperties": False, "required": ["keystore_path", "basis"],
+                       "properties": {"receipts_path": {"type": "string"}, "keystore_path": {"type": "string"},
+                                      "key_id": {"type": "string"}, "basis": {"type": "object"},
+                                      "guarantee_scope": {"type": "string"}, "ttl_seconds": {"type": "integer"}}},
+        entrypoint="formal_lab_domain_broker.broker:create_issuer",
+        ui={"label": "验证凭据签发（执行依据）", "category": "gate",
+            "description": "signs a receipt bound to the send's authoritative execution context; never issues "
+                           "without a current revision or a check basis"},
+        license="Apache-2.0", source="formal-lab-domain-broker")
+
+
+ISSUER_DESCRIPTOR = _issuer_descriptor()
+
+
+class ReceiptIssuerGate:
+    """Issues, right before the send, a receipt bound to the kernel's ExecutionContext for the check basis a
+    function returns — the issuing half of 'check at the authoritative basis, admit only against it'. It never
+    issues without a current revision or a basis (DENY: nothing was verified)."""
+
+    descriptor = ISSUER_DESCRIPTOR
+
+    def __init__(self, *, store: ReceiptStore, signer: Any, basis: Any, guarantee_scope: str, ttl_seconds: int = 300):
+        self.store, self.signer, self.basis = store, signer, basis
+        self.guarantee_scope, self.ttl_seconds = guarantee_scope, ttl_seconds
+
+    def paths(self, action):
+        return []
+
+    def decide(self, request):
+        from formal_lab_contracts import GateResult
+
+        from .receipt import issue_for_context
+
+        execution = getattr(request, "execution", None)
+        if execution is None or execution.current_revision is None:
+            return GateResult(verdict="DENY", reason="cannot issue a receipt: no authoritative execution basis "
+                                                     "(current revision unknown)")
+        basis = self.basis(request)
+        if basis is None:
+            return GateResult(verdict="DENY", reason=f"nothing was verified for {request.action.action_type}: no "
+                                                     "receipt issued")
+        receipt = issue_for_context(execution, check_basis=basis, guarantee_scope=self.guarantee_scope,
+                                    signer=self.signer, ttl_seconds=self.ttl_seconds)
+        self.store.put(request.request_digest, receipt)
+        return GateResult(verdict="ALLOW", reason=f"receipt {receipt.receipt_id} issued at revision "
+                                                  f"{execution.current_revision} ({basis.query_kind} {basis.verdict})")
+
+
+def create_issuer(config: dict[str, Any] | None, services: Any) -> ReceiptIssuerGate:
+    """Config: keystore_path ({key_id: hex secret}), key_id, receipts_path, basis (a CheckBasis as a dict — what was
+    verified for the scenario's actions), guarantee_scope, ttl_seconds."""
+    from .receipt import CheckBasis, HmacSigner, KeyStore
+
+    cfg = config or {}
+    keys = KeyStore({kid: bytes.fromhex(h) for kid, h in json.loads(Path(cfg["keystore_path"]).read_text()).items()})
+    key_id = cfg.get("key_id") or next(iter(json.loads(Path(cfg["keystore_path"]).read_text())))
+    basis = CheckBasis(**cfg["basis"])
+    return ReceiptIssuerGate(store=ReceiptStore(cfg.get("receipts_path")), signer=HmacSigner(keys, key_id),
+                             basis=lambda _request: basis,
+                             guarantee_scope=cfg.get("guarantee_scope", f"{basis.query_kind} {basis.verdict}"),
+                             ttl_seconds=int(cfg.get("ttl_seconds", 300)))

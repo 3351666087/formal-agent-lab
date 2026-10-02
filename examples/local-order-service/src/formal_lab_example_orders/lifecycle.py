@@ -89,6 +89,7 @@ class ServiceManager:
     port: int | None = None
     host: str = "127.0.0.1"
     supervise: bool = False
+    secure_writes: bool = False  # phase 4A: generate a write credential; mutating routes need it
     status: str = "NEW"
     transitions: list[dict[str, Any]] = field(default_factory=list)
     restarts: list[dict[str, Any]] = field(default_factory=list)
@@ -112,6 +113,12 @@ class ServiceManager:
         return f"http://{self.host}:{self.port}"
 
     @property
+    def write_token_file(self) -> Path | None:
+        """The environment adapter's write credential (0600, inside this service's home), or None when writes are
+        open. Only the adapter's config names this path; the token itself is never written into a manifest."""
+        return self.home / "write-token" if self.secure_writes else None
+
+    @property
     def compose_project(self) -> str:
         return f"fal-orders-{self.project}"
 
@@ -132,7 +139,13 @@ class ServiceManager:
     # ------------------------------------------------------------------ lifecycle
     def create(self) -> ServiceManager:
         self.data_dir.mkdir(parents=True, exist_ok=True)
-        self._to("CREATED", f"work directory {self.home}")
+        if self.secure_writes and self.write_token_file is not None and not self.write_token_file.exists():
+            import secrets
+
+            self.write_token_file.write_text(secrets.token_urlsafe(32))
+            self.write_token_file.chmod(0o600)
+        self._to("CREATED", f"work directory {self.home}" + (" (writes need the credential)" if self.secure_writes
+                                                               else ""))
         return self
 
     def start(self) -> ServiceManager:
@@ -156,9 +169,12 @@ class ServiceManager:
     def _spawn(self) -> None:
         log = open(self.home / "service.log", "a")  # noqa: SIM115 - handed to the child process
         env = {**os.environ, "PYTHONUNBUFFERED": "1"}
+        cmd = [sys.executable, "-m", "formal_lab_example_orders.service", "--data", str(self.data_dir),
+               "--host", self.host, "--port", str(self.port), "--project", self.project]
+        if self.write_token_file is not None:
+            cmd += ["--write-token-file", str(self.write_token_file)]
         self._proc = subprocess.Popen(
-            [sys.executable, "-m", "formal_lab_example_orders.service", "--data", str(self.data_dir),
-             "--host", self.host, "--port", str(self.port), "--project", self.project],
+            cmd,
             stdout=log, stderr=subprocess.STDOUT, env=env, start_new_session=True)
         self._write_manifest()
 
@@ -211,10 +227,17 @@ class ServiceManager:
 
     def reset(self, tenant: str, *, case: str = "normal", seed: int = 0) -> dict[str, Any]:
         self._to("RESETTING", f"tenant {tenant} → {case}/{seed}")
-        resp = httpx.post(f"{self.endpoint}/t/{tenant}/admin/reset", trust_env=trust_env(f"{self.endpoint}/t/{tenant}/admin/reset"), json={"case": case, "seed": seed}, timeout=30)
+        url = f"{self.endpoint}/t/{tenant}/admin/reset"
+        resp = httpx.post(url, trust_env=trust_env(url), json={"case": case, "seed": seed}, timeout=30,
+                          headers=self.write_headers())
         resp.raise_for_status()
         self._to("READY", f"tenant {tenant} reset")
         return resp.json()
+
+    def write_headers(self) -> dict[str, str]:
+        """The operator side (this manager) presents the write credential for its own admin calls."""
+        f = self.write_token_file
+        return {"Authorization": f"Bearer {f.read_text().strip()}"} if f is not None and f.exists() else {}
 
     def kill(self) -> int:
         """SIGKILL the service process (the supervisor, if any, restarts it)."""

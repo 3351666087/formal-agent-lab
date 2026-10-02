@@ -720,6 +720,19 @@ export type At = string;
 export type CheckedAtRevision = number | null;
 export type Conditions = ConditionCheck[];
 export type DecisionId = string;
+/**
+ * params_digest(action.params)
+ */
+export type ActionParamsDigest = string;
+export type ActionType2 = string;
+/**
+ * the actor of the kernel's turn (authoritative identity)
+ */
+export type ActorId9 = string;
+/**
+ * the environment's revision at the send
+ */
+export type CurrentRevision1 = number | null;
 export type OperationId2 = string;
 /**
  * Which kind of send a pre-execution decision is about (phase 3A, G2).
@@ -728,10 +741,26 @@ export type OperationId2 = string;
  * via the `definition` "ExecutionPhase".
  */
 export type ExecutionPhase = "FIRST_SEND" | "RESEND" | "REEXECUTE";
-export type Reason8 = string;
+/**
+ * the revision the proposal was planned on
+ */
+export type ProposalRevision = number | null;
+export type ReadAt = string;
 export type RequestDigest = string;
+export type RevisionNote = string | null;
+/**
+ * FRESH: read from the environment right before the send (env.current_revision); SERIALIZED: a pure-data environment whose state lives in this serialized step; UNKNOWN: could not be read
+ */
+export type RevisionSource = "FRESH" | "SERIALIZED" | "UNKNOWN";
 export type RunId5 = string;
+export type ServiceIdentity = string | null;
+export type SessionId2 = string | null;
 export type Step5 = number;
+export type OperationId3 = string;
+export type Reason8 = string;
+export type RequestDigest1 = string;
+export type RunId6 = string;
+export type Step6 = number;
 export type ValuesSource = "FRESH" | "OBSERVATION" | "NONE";
 /**
  * This interface was referenced by `FormalLabContractsV2`'s JSON-Schema
@@ -743,7 +772,7 @@ export type GateVerdict = "ALLOW" | "DENY";
  */
 export type Decisions = ExecutionDecision[];
 export type Kind7 = "apply" | "reset" | "probe" | "batch";
-export type OperationId3 = string;
+export type OperationId4 = string;
 export type ProposalId3 = string | null;
 /**
  * the environment knows the operation (it took effect or was rejected)
@@ -754,13 +783,13 @@ export type Note3 = string;
 /**
  * sha256 of the canonical request (actor, kind, action); the same id with another request is a conflict (phase 3A)
  */
-export type RequestDigest1 = string | null;
+export type RequestDigest2 = string | null;
 export type At1 = string;
 export type By = string;
 export type Note4 = string | null;
 export type Status3 = "NEEDS_REVIEW" | "CONFIRMED_APPLIED" | "CONFIRMED_NOT_APPLIED" | "TERMINATED";
-export type RunId6 = string;
-export type Step6 = number;
+export type RunId7 = string;
+export type Step7 = number;
 export type At2 = string;
 export type Attempt = number;
 /**
@@ -795,7 +824,7 @@ export type ExecutionStage =
  */
 export type StageStatus = "OK" | "SKIPPED" | "FAILED" | "UNKNOWN";
 export type Stages = StageRecord[];
-export type Step7 = number;
+export type Step8 = number;
 export type Steps2 = StepRecord[];
 /**
  * This interface was referenced by `FormalLabContractsV2`'s JSON-Schema
@@ -813,13 +842,13 @@ export type TerminationReason =
   | "CANCELLED"
   | "FAILED"
   | "OPERATION_UNRESOLVED";
-export type ActorId9 = string | null;
+export type ActorId10 = string | null;
 export type BasedOnRevision3 = number | null;
-export type OperationId4 = string;
+export type OperationId5 = string;
 export type ProposalId4 = string | null;
-export type RequestDigest2 = string;
-export type RunId7 = string;
-export type Step8 = number;
+export type RequestDigest3 = string;
+export type RunId8 = string;
+export type Step9 = number;
 export type ValuesRevision = number | null;
 export type ValuesSource1 = "FRESH" | "OBSERVATION" | "NONE";
 export type Conditions1 = ConditionCheck[];
@@ -1060,12 +1089,12 @@ export type ReleaseId1 = string;
 export type Scope3 = "MODEL_INTERNAL";
 export type Stages1 = StageRecord[];
 export type Status5 = "RELEASED" | "REJECTED";
-export type ActorId10 = string;
+export type ActorId11 = string;
 /**
  * keys of reusable solver/plan cache entries
  */
 export type CacheRefs = string[];
-export type ActorId11 = string;
+export type ActorId12 = string;
 export type AssumptionsDigest = string | null;
 export type CreatedAtStep = number;
 /**
@@ -1117,13 +1146,13 @@ export type RngState = unknown[] | null;
 /**
  * global step after which the checkpoint was taken
  */
-export type Step9 = number;
+export type Step10 = number;
 /**
  * short natural-language summary (model-assisted)
  */
 export type Summary = string | null;
 export type ActionSpecs = ActionSpec[];
-export type ActorId12 = string;
+export type ActorId13 = string;
 export type Candidates = CandidateAction[];
 /**
  * the actor's goal (participant goal, else joint goal)
@@ -1141,9 +1170,9 @@ export type Participants2 = string[];
  * reason a REPLAN rule fired for this actor (v2)
  */
 export type ReplanRequested = string | null;
-export type RunId8 = string;
+export type RunId9 = string;
 export type Seed2 = number;
-export type Step10 = number;
+export type Step11 = number;
 export type StepId2 = string;
 /**
  * e.g. query.goal_reachability, profile.deterministic_finite_v1
@@ -1319,14 +1348,14 @@ export type Role2 = string;
 export type Version13 = string;
 export type Plugins = PluginPin[];
 export type ProjectId = string;
-export type RunId9 = string;
+export type RunId10 = string;
 export type Seed4 = number;
 /**
  * run this one re-runs (lineage)
  */
 export type SourceRunId = string | null;
 export type StatusReason = string | null;
-export type ActorId13 = string | null;
+export type ActorId14 = string | null;
 /**
  * event ids this event was caused by
  */
@@ -1338,7 +1367,7 @@ export type LogicalStep1 = number | null;
  * schema id of payload, e.g. formal-lab/events/ACTION_PROPOSED@1
  */
 export type PayloadSchema = string;
-export type RunId10 = string;
+export type RunId11 = string;
 /**
  * monotonic per-run sequence number, gap-free
  */
@@ -1421,6 +1450,7 @@ export interface FormalLabContractsV2 {
   EpisodeRecord?: EpisodeRecord;
   ErrorInfo?: ErrorInfo;
   EvidenceRef?: EvidenceRef;
+  ExecutionContext?: ExecutionContext;
   ExecutionDecision?: ExecutionDecision;
   Extension?: Extension;
   FeatureSupport?: FeatureSupport;
@@ -2603,7 +2633,7 @@ export interface StepRecord {
   probes: Probes1;
   proposal: ActionProposal | null;
   stages: Stages;
-  step: Step7;
+  step: Step8;
   turn: TurnRef | null;
 }
 /**
@@ -2661,15 +2691,15 @@ export interface OperationRecord {
   batch_outcomes: BatchOutcomes;
   decisions: Decisions;
   kind: Kind7;
-  operation_id: OperationId3;
+  operation_id: OperationId4;
   outcome: ActionOutcome | null;
   proposal_id: ProposalId3;
   reconciliation: ReconciliationResult | null;
-  request_digest: RequestDigest1;
+  request_digest: RequestDigest2;
   review: ReviewMark | null;
-  run_id: RunId6;
+  run_id: RunId7;
   state: OperationState;
-  step: Step6;
+  step: Step7;
   transitions: Transitions;
 }
 /**
@@ -2685,15 +2715,58 @@ export interface ExecutionDecision {
   checked_at_revision: CheckedAtRevision;
   conditions: Conditions;
   decision_id: DecisionId;
+  /**
+   * the basis the decision was made on (phase 4A); absent in older records
+   */
+  execution: ExecutionContext | null;
   gate: PluginRef;
-  operation_id: OperationId2;
+  operation_id: OperationId3;
   phase: ExecutionPhase;
   reason: Reason8;
-  request_digest: RequestDigest;
-  run_id: RunId5;
-  step: Step5;
+  request_digest: RequestDigest1;
+  run_id: RunId6;
+  step: Step6;
   values_source: ValuesSource;
   verdict: GateVerdict;
+}
+/**
+ * The authoritative basis of one send, built by the kernel right before it (phase 4A, A2) — never by a strategy.
+ *
+ * Identity comes from the kernel's turn (not the proposal's `actor_id` claim), the environment / session / service
+ * identity from the run's environment, and `current_revision` from the environment's own authoritative read at the
+ * side-effect boundary. `proposal_revision` is kept separately: the revision the plan was made on is not the
+ * revision the write happens on. When the current revision cannot be read it is None with `revision_source`
+ * UNKNOWN, and a gate that needs it must deny. Receipts bind to `execution_binding(context)` — the same canonical
+ * form is used to issue and to verify.
+ *
+ * This interface was referenced by `FormalLabContractsV2`'s JSON-Schema
+ * via the `definition` "ExecutionContext".
+ */
+export interface ExecutionContext {
+  action_params_digest: ActionParamsDigest;
+  action_type: ActionType2;
+  actor_id: ActorId9;
+  current_revision: CurrentRevision1;
+  environment: PluginRef;
+  operation_id: OperationId2;
+  phase: ExecutionPhase;
+  proposal_revision: ProposalRevision;
+  read_at: ReadAt;
+  request_digest: RequestDigest;
+  revision_note: RevisionNote;
+  revision_source: RevisionSource;
+  run_id: RunId5;
+  service_identity: ServiceIdentity;
+  session_id: SessionId2;
+  step: Step5;
+  turn: TurnRef | null;
+  versions: Versions;
+}
+/**
+ * model, driver/adapter, rules, participant view, environment and gate versions
+ */
+export interface Versions {
+  [k: string]: string | undefined;
 }
 /**
  * This interface was referenced by `FormalLabContractsV2`'s JSON-Schema
@@ -2749,22 +2822,27 @@ export interface StageRecord {
 /**
  * What an execution gate sees for one send (phase 3A, G2). `values` are the locations the gate asked for, read
  * by the kernel right before the send: fresh from the environment when it answers observation requests
- * (env.observe_on_request), else from the actor's current observation.
+ * (env.observe_on_request), else from the actor's current observation. `execution` (phase 4A) is the
+ * authoritative basis of the send — gates read the current revision there instead of borrowing a location.
  *
  * This interface was referenced by `FormalLabContractsV2`'s JSON-Schema
  * via the `definition` "GateRequest".
  */
 export interface GateRequest {
   action: GroundAction;
-  actor_id: ActorId9;
+  actor_id: ActorId10;
   based_on_revision: BasedOnRevision3;
   config: Config2;
-  operation_id: OperationId4;
+  /**
+   * authoritative basis of the send (phase 4A)
+   */
+  execution: ExecutionContext | null;
+  operation_id: OperationId5;
   phase: ExecutionPhase;
   proposal_id: ProposalId4;
-  request_digest: RequestDigest2;
-  run_id: RunId7;
-  step: Step8;
+  request_digest: RequestDigest3;
+  run_id: RunId8;
+  step: Step9;
   values: Values;
   values_revision: ValuesRevision;
   values_source: ValuesSource1;
@@ -3209,7 +3287,7 @@ export interface RegressionResult {
  * via the `definition` "PlannerCheckpoint".
  */
 export interface PlannerCheckpoint {
-  actor_id: ActorId10;
+  actor_id: ActorId11;
   cache_refs: CacheRefs;
   digest: Digest | null;
   plan: TaskPlan | null;
@@ -3217,7 +3295,7 @@ export interface PlannerCheckpoint {
   progress: Progress;
   remaining_budget: BudgetUsage | null;
   rng_state: RngState;
-  step: Step9;
+  step: Step10;
   summary: Summary;
 }
 /**
@@ -3227,7 +3305,7 @@ export interface PlannerCheckpoint {
  * via the `definition` "TaskPlan".
  */
 export interface TaskPlan {
-  actor_id: ActorId11;
+  actor_id: ActorId12;
   assumptions_digest: AssumptionsDigest;
   created_at_step: CreatedAtStep;
   cursor: Cursor;
@@ -3293,7 +3371,7 @@ export interface Progress {
 export interface PlanningContext {
   action_specs: ActionSpecs;
   actor_budget: Budget | null;
-  actor_id: ActorId12;
+  actor_id: ActorId13;
   actor_usage: BudgetUsage | null;
   /**
    * provenance of the belief (v2)
@@ -3312,9 +3390,9 @@ export interface PlanningContext {
   observation_request_allowed: ObservationRequestAllowed;
   participants: Participants2;
   replan_requested: ReplanRequested;
-  run_id: RunId8;
+  run_id: RunId9;
   seed: Seed2;
-  step: Step10;
+  step: Step11;
   step_id: StepId2;
   /**
    * global/actor step of this decision (v2)
@@ -3596,7 +3674,7 @@ export interface RunManifest {
   project_id: ProjectId;
   release: ReleaseRef | null;
   rules: RuleSetRef | null;
-  run_id: RunId9;
+  run_id: RunId10;
   scenario: ScenarioManifest1;
   scenario_digest: Digest;
   seed: Seed4;
@@ -3700,7 +3778,7 @@ export interface TurnPolicy1 {
  * via the `definition` "TraceEvent".
  */
 export interface TraceEvent {
-  actor_id: ActorId13;
+  actor_id: ActorId14;
   causal_parents: CausalParents;
   event_id: EventId;
   event_type: EventType;
@@ -3708,7 +3786,7 @@ export interface TraceEvent {
   logical_step: LogicalStep1;
   payload: Payload1;
   payload_schema: PayloadSchema;
-  run_id: RunId10;
+  run_id: RunId11;
   seq: Seq;
   /**
    * execution stage that emitted it (v2)
