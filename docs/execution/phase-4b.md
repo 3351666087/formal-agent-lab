@@ -65,7 +65,9 @@ MAL 模型可以继续降低到现有 `ir-world` 运行，准确说明原生后�
 
 ## B2 · CAGE 平台接入与可信比较
 
-- [ ] **P4B-B2** 将一个固定 CAGE 4 官方场景接进平台，完成原生轨迹核对和真正的配对评测，关闭原 D5 的缺口。
+- [x] **P4B-B2** 将一个固定 CAGE 4 官方场景接进平台，完成原生轨迹核对和真正的配对评测，关闭原 D5 的缺口。
+  - 证据：CybORG 4.0 Scenario4（cage-challenge-4 8c3c50ca，MIT）接入平台：环境 formal-lab.env.cage4（一个联合批次=一次 parallel_step=一个原生世界步；5 个蓝方平台控制，红/绿原生自动、逐世界步记录；占用中不启动记 AGENT_BUSY；越权主机/未声明动作拒绝）、驱动 cage4_v1（只预测适用性，效果对照 INSUFFICIENT_INFORMATION）、蓝方 sleep=官方基线/恒定监控/react、评分器（原生蓝方奖励与绿方成功率、红方立足、恢复时间等分开；蓝方代理数量不是业务存活）。原生直接路径 vs 平台路径逐世界步一致（含状态+随机数摘要）：sleep=SleepAgent、monitor 与 react（dev/holdout）=同动作序列；轮中停止新进程续跑、worker 丢失重建、应答丢失恢复执行一次、伪造历史拒绝。持久路径：API 建模型、轮中暂停+SIGKILL worker 后完成且与原生一致、参与者下载无裁判数据；平台矩阵 2 变体（dev FiniteStateRed / holdout DiscoveryFSRed 调参前固定）×3 方法×3 共享种子、100 世界步：react 相对官方基线 结束红方立足 −3（95% CI [−5.5,−0.33]）、立足主机·步 −84.8，原生蓝方奖励无明确差异（CI [−17.7,+7.3]），代价为未启动动作 +75.7；恒定监控与基线全部相同；同种子复跑一致；工程小样本不支持显著优势宣称。MonitorAgent 类不能在 Scenario4 构建（如实记录）。phase4 b2 组 3/3 PASS（b2a5382 干净工作树）。证据 docs/execution/evidence/phase4/b2-cage.json、b2-platform-run.json、b2-matrix.json、b2-paired-report.md/csv、checks-b2.json
+  - 实现：`packages/environment-cage/src/formal_lab_env_cage/_worker.py`、`packages/environment-cage/src/formal_lab_env_cage/adapter.py`、`packages/environment-cage/src/formal_lab_env_cage/model.py`、`packages/environment-cage/src/formal_lab_env_cage/strategies.py`、`packages/environment-cage/src/formal_lab_env_cage/metrics.py`、`packages/environment-cage/src/formal_lab_env_cage/trajectory.py`、`packages/environment-cage/src/formal_lab_env_cage/scenarios.py`、`scripts/b2_cage_evidence.py`、`tests/integration/test_cage_platform.py`
 
 **直接复用：** [CAGE Challenge 4](https://github.com/cage-challenge/cage-challenge-4)、[官方文档](https://cage-challenge.github.io/cage-challenge-4/)、`packages/environment-cage/src/formal_lab_env_cage/{bridge,_worker}.py`、原 `scripts/d5_cage_evidence.py`，以及 A4 的联合批次、环境协议和矩阵。当前仓库记录 CybORG 4.0、上游短修订 `8c3c50ca`；核验完整修订与依赖摘要。保留独立 venv/进程，先使用官方脚本基线，RL 训练与权重沿用选配。
 

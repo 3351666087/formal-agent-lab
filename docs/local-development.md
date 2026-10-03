@@ -165,3 +165,11 @@ python3 -m venv ~/.venvs/fal-cage
 桥默认在 `~/.venvs/fal-cage` 找 venv、在 `~/cage-src` 找源（记录 git 版本），也可设 `FAL_CAGE_HOME`、`FAL_CAGE_SRC`。安装后：`packages/environment-cage/tests` 的桥往返测试实际运行（否则按 `cage` 标记跳过），`scripts/d5_cage_evidence.py` 跑官方脚本基线并记录原生轮次/分数与平台指标（分开保留，说明不可比项）。未安装时证据脚本记 `status=BLOCKED`，不冒充分数。
 
 **结果解读**：CAGE 的每队奖励是 CybORG 自己的量纲，不能与平台的可达性判定或订单服务成功率互换；本脚本只在各自语义范围内交叉检查方向，不合并量纲。RL 训练智能体（需 torch/ray）未安装，作为条件项如实报告，不计入已交付。
+
+**平台环境（阶段 4B，B2）**：同一 venv 还提供逐世界步的会话（`_worker.py serve`，协议 `formal-lab/cage4-session@1`），平台据此把 Scenario4 当作普通环境运行：
+
+- 插件（`formal_lab.plugins` 自动发现）：环境 `formal-lab.env.cage4`（一个联合批次 = 一次 `parallel_step` = 一个原生世界步）、驱动 `formal-lab.driver.cage4`（档案 `cage4_v1`：蓝方接口——可操作主机、自己的告警、动作进行中；只预测适用性，不预测原生效果，效果对照为 INSUFFICIENT_INFORMATION）、蓝方策略 `formal-lab.cage4.blue-sleep`（= 官方基线 SleepAgent）、`blue-monitor`（恒定监控；CybORG 自带的 MonitorAgent 是 CAGE 2 时期的类，Scenario4 无法构建）、`blue-react`（只看自己的告警）、评分器 `formal-lab.cage4.metrics`（原生蓝方奖励与平台指标分开）。
+- 谁在行动：五个蓝方由平台控制（参与者 ID 即 `blue_agent_0..4`）；红方（官方 FSM 变体）与绿方（正常业务）为原生自动参与者，每个世界步随批次记录在 `world_step_report`。蓝方上一个动作未结束时 CybORG 不启动新动作，记为 `AGENT_BUSY`。红方立足点与绿方结果属于裁判数据，只在 `truth_state`（评分输入），不进入任何观测、结果或参与者下载。
+- 恢复：CybORG 不能加载状态，快照 = 复位参数 + 已提交世界步；恢复时新开 worker、同种子复位、按原 ID 重放，状态 + 随机数摘要必须与快照一致，否则拒绝；运行中 worker 丢失时同样从已提交日志重建；应答丢失时报 ResultUnknown，内核恢复到步前快照后只执行一次。
+- 建模型：`model.package(bridge.describe())`（主机全集按生成器上下限），经 API `POST /projects/{id}/models` 以 `payload`（`semantic_profile=cage4_v1`）创建；场景见 `formal_lab_env_cage.scenarios`（`dev` 红方 FiniteStateRedAgent，`holdout` 红方 DiscoveryFSRed，调参前固定）。
+- 检查：`make phase4-check ARGS="--group b2"`——`p4-b2-unit`、`p4-b2-native-platform`（`scripts/b2_cage_evidence.py`：原生直接路径与平台路径逐世界步一致、恢复）、`p4-b2-platform`（持久路径 + 平台矩阵配对报告，证据 `docs/execution/evidence/phase4/b2-*.json|md`）。

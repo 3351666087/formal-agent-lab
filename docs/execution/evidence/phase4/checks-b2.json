@@ -1,0 +1,504 @@
+{
+  "format": "checks@3",
+  "compatible_with": "checks@2",
+  "suite": "phase4",
+  "generated_at": "2026-10-03T18:07:58Z",
+  "source_revision": {
+    "commit": "b2a5382765db61b2382750b117fcea5c677b181c",
+    "worktree": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "clean": true,
+      "changed_bytes": 0,
+      "untracked_files": 0,
+      "excluded_outputs": [
+        "docs/execution/evidence/",
+        "docs/handoff/",
+        "docs/licenses.md",
+        "docs/api/openapi.json",
+        "out/",
+        "out/checks/phase4-b2/"
+      ]
+    }
+  },
+  "config": {
+    "sha256": "7a91a7f7d72bb3e62787504c9a66928d2edb54d8be19cd0850e0d2ad39e0695d",
+    "parts": {
+      "checks": "9a4e8fc2655e98eb19cd361565379cb9c43c0d39488782232cbcfef07723add4",
+      "uv.lock": "499fa9ea8ca927f6bd598a79f821959f4e0e769d84ab3bcd88dee4b58d08bcc1",
+      "pnpm-lock.yaml": "02d23c074a75bccfaea1ed4ff51272ba3d6cbb724e8012366c8d18e9bb0a7c3a",
+      "deploy/compose/services.dev.yaml": "4c876045f15d5bd972c517e7de2d3626cd252d1842797f0152f596f7d8ea9ce0",
+      "deploy/compose/docker-compose.yaml": "ff4c34cae068cc6dacd4db7f4273887ff6c2bb0b3b84938a7b8969488bfb20ff"
+    }
+  },
+  "command": "python scripts/check_runner.py --suite phase4 --group b2 --out out/checks/phase4-b2",
+  "environment": {
+    "os": "Ubuntu 24.04.4 LTS",
+    "arch": "aarch64",
+    "kernel": "6.8.0-117-generic",
+    "python": "3.12.3",
+    "uv": "uv 0.12.19 (aarch64-unknown-linux-gnu)",
+    "node": "v24.21.0",
+    "pnpm": "12.6.0",
+    "docker": "29.5.2",
+    "z3": "5.1.0",
+    "temporalio": "1.33.0"
+  },
+  "resources_before": {
+    "cpus": 4,
+    "memory_gib": {
+      "MemTotal": 5.77,
+      "MemAvailable": 4.3
+    },
+    "load_avg": [
+      0.47,
+      1.12,
+      1.25
+    ],
+    "disk_free_gib": {
+      "host (repository filesystem)": 22.3,
+      "docker (/var/lib/docker)": 19.1
+    },
+    "concurrency": 1,
+    "note": "checks run one at a time; heavy checks ask disk_guard first"
+  },
+  "resources_after": {
+    "cpus": 4,
+    "memory_gib": {
+      "MemTotal": 5.77,
+      "MemAvailable": 4.23
+    },
+    "load_avg": [
+      1.36,
+      1.59,
+      1.48
+    ],
+    "disk_free_gib": {
+      "host (repository filesystem)": 23.4,
+      "docker (/var/lib/docker)": 18.7
+    },
+    "concurrency": 1,
+    "note": "checks run one at a time; heavy checks ask disk_guard first"
+  },
+  "run": {
+    "started_at": "2026-10-03T17:57:43Z",
+    "finished_at": "2026-10-03T18:07:58Z",
+    "duration_s": 614.5,
+    "full": false,
+    "selection": {
+      "group": [
+        "b2"
+      ],
+      "only": [],
+      "skip": []
+    },
+    "checks": [
+      "p4-b2-unit",
+      "p4-b2-native-platform",
+      "p4-b2-platform"
+    ],
+    "commit": "b2a5382765db61b2382750b117fcea5c677b181c",
+    "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "nonce": "996ae28f49e34adba5b3c0f2a867c4bb",
+    "acceptance_nonce": null,
+    "results": {
+      "p4-b2-unit": "PASS",
+      "p4-b2-native-platform": "PASS",
+      "p4-b2-platform": "PASS"
+    }
+  },
+  "summary": {
+    "PASS": 3,
+    "FAIL": 0,
+    "BLOCKED": 0,
+    "NOT_RUN": 0,
+    "NOT_SELECTED": 0,
+    "NOT_APPLICABLE": 0
+  },
+  "groups": {
+    "a1": "NOT_SELECTED",
+    "a2": "NOT_SELECTED",
+    "a3": "NOT_SELECTED",
+    "a4": "NOT_SELECTED",
+    "a5": "NOT_SELECTED",
+    "b1": "NO_CHECKS",
+    "b2": "PASS",
+    "b3": "NO_CHECKS"
+  },
+  "required_groups": [
+    "a1",
+    "a2",
+    "a3",
+    "a4",
+    "a5",
+    "b1",
+    "b2",
+    "b3"
+  ],
+  "selection_status": "PASS",
+  "complete": false,
+  "mandatory_passed": false,
+  "unmet": [
+    "a1=NOT_SELECTED",
+    "a2=NOT_SELECTED",
+    "a3=NOT_SELECTED",
+    "a4=NOT_SELECTED",
+    "a5=NOT_SELECTED",
+    "b1=NO_CHECKS",
+    "b3=NO_CHECKS"
+  ],
+  "aggregation": "only results produced and verified by this invocation count; a partial selection is never complete; results from another commit, work tree or configuration are inherited and ignored",
+  "timing": {
+    "this_run_s": 614.5,
+    "last_full_run_s": null,
+    "last_full_run_at": null,
+    "partial_runs": [
+      {
+        "started_at": "2026-10-03T17:57:43Z",
+        "duration_s": 614.5,
+        "selection": {
+          "group": [
+            "b2"
+          ],
+          "only": [],
+          "skip": []
+        },
+        "results": {
+          "p4-b2-unit": "PASS",
+          "p4-b2-native-platform": "PASS",
+          "p4-b2-platform": "PASS"
+        }
+      }
+    ]
+  },
+  "runs": [
+    {
+      "started_at": "2026-10-03T17:57:43Z",
+      "finished_at": "2026-10-03T18:07:58Z",
+      "duration_s": 614.5,
+      "full": false,
+      "selection": {
+        "group": [
+          "b2"
+        ],
+        "only": [],
+        "skip": []
+      },
+      "checks": [
+        "p4-b2-unit",
+        "p4-b2-native-platform",
+        "p4-b2-platform"
+      ],
+      "commit": "b2a5382765db61b2382750b117fcea5c677b181c",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "nonce": "996ae28f49e34adba5b3c0f2a867c4bb",
+      "acceptance_nonce": null,
+      "results": {
+        "p4-b2-unit": "PASS",
+        "p4-b2-native-platform": "PASS",
+        "p4-b2-platform": "PASS"
+      }
+    }
+  ],
+  "checks": [
+    {
+      "id": "p4-b2-unit",
+      "group": "b2",
+      "title": "CAGE 4 平台接入（单元 + 工具链）：蓝方接口模型/驱动只预测适用性、指标原生分数与平台指标分开、轨迹逐步比较、会话一步一原生世界步/占用中不启动/越权主机与未声明动作拒绝、伪造历史重建被拒",
+      "command": "uv run --frozen pytest -p no:cacheprovider -q packages/environment-cage/tests",
+      "tasks": [
+        "P4B-B2"
+      ],
+      "evidence": [],
+      "requires": null,
+      "profile": "local-lite",
+      "kind": "mandatory",
+      "retries": 0,
+      "heavy_gib": 0.0,
+      "produces": [],
+      "protocol": false,
+      "assertions_from": null,
+      "trigger": null,
+      "result": "PASS",
+      "reason": "14 passed in 4.31s",
+      "summary": "14 passed in 4.31s",
+      "condition": null,
+      "checked_commit": "b2a5382765db61b2382750b117fcea5c677b181c",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "worktree_clean": true,
+      "config_sha256": "7a91a7f7d72bb3e62787504c9a66928d2edb54d8be19cd0850e0d2ad39e0695d",
+      "run_nonce": "996ae28f49e34adba5b3c0f2a867c4bb",
+      "started_at": "2026-10-03T17:57:43Z",
+      "finished_at": "2026-10-03T17:57:48Z",
+      "duration_s": 4.5,
+      "attempts": [
+        {
+          "attempt": 1,
+          "started_at": "2026-10-03T17:57:43Z",
+          "finished_at": "2026-10-03T17:57:48Z",
+          "duration_s": 4.5,
+          "exit_code": 0,
+          "result": "PASS",
+          "reason": "14 passed in 4.31s",
+          "log": "out/checks/phase4-b2/logs/p4-b2-unit/20261003T175743Z-attempt-1.log",
+          "summary": "14 passed in 4.31s",
+          "nonce": "0f58d823ce8f43119d93ec2c60ee9def",
+          "structured_result": null,
+          "assertions": [],
+          "produced": [],
+          "pytest": {
+            "passed": 14,
+            "failed": 0,
+            "skipped": 0,
+            "deselected": 0,
+            "errors": 0,
+            "skip_reasons": [],
+            "line": "14 passed in 4.31s"
+          }
+        }
+      ],
+      "evidence_files": [],
+      "first_failure": null,
+      "flaky": false,
+      "inherited": false,
+      "this_run": true,
+      "history": []
+    },
+    {
+      "id": "p4-b2-native-platform",
+      "group": "b2",
+      "title": "原生直接路径与平台适配路径逐世界步一致（含状态与随机数摘要）：sleep=官方基线 SleepAgent、monitor（恒定监控）与 react（dev / holdout）=同一动作序列的原生直接路径；参与者映射；轮中停止新进程续跑、丢失 worker 重建、丢失应答后恢复执行一次",
+      "command": "uv run --frozen python scripts/b2_cage_evidence.py",
+      "tasks": [
+        "P4B-B2"
+      ],
+      "evidence": [],
+      "requires": null,
+      "profile": "local-lite",
+      "kind": "mandatory",
+      "retries": 0,
+      "heavy_gib": 0.0,
+      "produces": [
+        "docs/execution/evidence/phase4/b2-cage.json"
+      ],
+      "protocol": true,
+      "assertions_from": null,
+      "trigger": null,
+      "result": "PASS",
+      "reason": "[p4-b2-native-platform] PASS: 10 required assertion(s) hold",
+      "summary": "[p4-b2-native-platform] PASS: 10 required assertion(s) hold",
+      "condition": null,
+      "checked_commit": "b2a5382765db61b2382750b117fcea5c677b181c",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "worktree_clean": true,
+      "config_sha256": "7a91a7f7d72bb3e62787504c9a66928d2edb54d8be19cd0850e0d2ad39e0695d",
+      "run_nonce": "996ae28f49e34adba5b3c0f2a867c4bb",
+      "started_at": "2026-10-03T17:57:48Z",
+      "finished_at": "2026-10-03T17:58:07Z",
+      "duration_s": 19.7,
+      "attempts": [
+        {
+          "attempt": 1,
+          "started_at": "2026-10-03T17:57:48Z",
+          "finished_at": "2026-10-03T17:58:07Z",
+          "duration_s": 19.7,
+          "exit_code": 0,
+          "result": "PASS",
+          "reason": "[p4-b2-native-platform] PASS: 10 required assertion(s) hold",
+          "log": "out/checks/phase4-b2/logs/p4-b2-native-platform/20261003T175748Z-attempt-1.log",
+          "summary": "[p4-b2-native-platform] PASS: 10 required assertion(s) hold",
+          "nonce": "4ae8494860c4484dba50e273c2dbfe70",
+          "structured_result": "out/checks/phase4-b2/logs/p4-b2-native-platform/20261003T175748Z-attempt-1.result.json",
+          "assertions": [
+            {
+              "id": "native_equals_platform:sleep_vs_official_baseline",
+              "required": true,
+              "holds": true,
+              "detail": "29/29 world steps equal; first difference None; rewards {'native': {'Blue': 0.0, 'Red': 0.0, 'Green': 0.0}, 'platform': {'Blue': 0.0, 'Red': 0.0, 'Green': 0.0}}"
+            },
+            {
+              "id": "native_equals_platform:monitor_vs_same_actions",
+              "required": true,
+              "holds": true,
+              "detail": "29/29 world steps equal; first difference None; rewards {'native': {'Blue': 0.0, 'Red': 0.0, 'Green': 0.0}, 'platform': {'Blue': 0.0, 'Red': 0.0, 'Green': 0.0}}"
+            },
+            {
+              "id": "native_equals_platform:react_dev_vs_same_actions",
+              "required": true,
+              "holds": true,
+              "detail": "29/29 world steps equal; first difference None; rewards {'native': {'Blue': 0.0, 'Red': 0.0, 'Green': 0.0}, 'platform': {'Blue': 0.0, 'Red': 0.0, 'Green': 0.0}}"
+            },
+            {
+              "id": "native_equals_platform:react_holdout_vs_same_actions",
+              "required": true,
+              "holds": true,
+              "detail": "29/29 world steps equal; first difference None; rewards {'native': {'Blue': 0.0, 'Red': 0.0, 'Green': 0.0}, 'platform': {'Blue': 0.0, 'Red': 0.0, 'Green': 0.0}}"
+            },
+            {
+              "id": "resume_in_a_new_process_equals_uninterrupted",
+              "required": true,
+              "holds": true,
+              "detail": "{'stopped_after_global_step': 63, 'resumed_in_new_process': True, 'status': 'SUCCEEDED', 'trajectory_equal': True, 'equal_world_steps': 29, 'world_steps': 29, 'same_metrics_except_elapsed_time': True}"
+            },
+            {
+              "id": "lost_worker_rebuilt_from_the_committed_log",
+              "required": true,
+              "holds": true,
+              "detail": "{'killed_before_world_step': 5, 'equal': True, 'rebuilds': 1, 'sessions': 2}"
+            },
+            {
+              "id": "lost_answer_restore_and_execute_once",
+              "required": true,
+              "holds": true,
+              "detail": "{'raised': 'ResultUnknown', 'equal': True, 'note': 'the pipe to a killed worker breaks: ResultUnknown; restore = verified rebuild of the pre-step state, then the step runs once'}"
+            },
+            {
+              "id": "forged_history_refused",
+              "required": true,
+              "holds": true,
+              "detail": "rebuild diverged: replaying 4 world step(s) gives digest 6a9cea344fe7, the snapshot has 04909e1290a3"
+            },
+            {
+              "id": "plugins_discovered",
+              "required": true,
+              "holds": true,
+              "detail": "formal-lab.cage4.blue-monitor, formal-lab.cage4.blue-react, formal-lab.cage4.blue-sleep, formal-lab.cage4.metrics, formal-lab.driver.cage4, formal-lab.env.cage4"
+            },
+            {
+              "id": "toolchain_recorded",
+              "required": true,
+              "holds": true,
+              "detail": "CybORG 4.0 @ 8c3c50ca54b176c2de199847944e8dcc035497e3; 20 packages sha256 961637b99469"
+            }
+          ],
+          "produced": [
+            {
+              "path": "docs/execution/evidence/phase4/b2-cage.json",
+              "exists": true,
+              "sha256": "bb60b878561c4baa9b72a9c151f7677d9a1de5e70a57ea52eeb703b9b75c4068",
+              "fresh": true
+            }
+          ],
+          "pytest": null
+        }
+      ],
+      "evidence_files": [
+        {
+          "path": "docs/execution/evidence/phase4/b2-cage.json",
+          "exists": true,
+          "sha256": "bb60b878561c4baa9b72a9c151f7677d9a1de5e70a57ea52eeb703b9b75c4068",
+          "fresh": true
+        }
+      ],
+      "first_failure": null,
+      "flaky": false,
+      "inherited": false,
+      "this_run": true,
+      "history": []
+    },
+    {
+      "id": "p4-b2-platform",
+      "group": "b2",
+      "title": "持久路径（API + Temporal + PostgreSQL）：插件发现、经 API 建模型、轮中暂停 + SIGKILL worker 后完成且与原生路径一致、参与者下载无裁判数据；平台矩阵 2 场景变体 × 3 方法 × 3 共享种子配对报告（参照官方基线）与同种子复跑",
+      "command": "uv run --frozen pytest -p no:cacheprovider -q -m 'integration and cage' tests/integration/test_cage_platform.py",
+      "tasks": [
+        "P4B-B2"
+      ],
+      "evidence": [],
+      "requires": "services",
+      "profile": "local-lite",
+      "kind": "mandatory",
+      "retries": 0,
+      "heavy_gib": 0.0,
+      "produces": [
+        "docs/execution/evidence/phase4/b2-platform-run.json",
+        "docs/execution/evidence/phase4/b2-matrix.json",
+        "docs/execution/evidence/phase4/b2-paired-report.md"
+      ],
+      "protocol": false,
+      "assertions_from": null,
+      "trigger": null,
+      "result": "PASS",
+      "reason": "2 passed in 589.63s (0:09:49)",
+      "summary": "2 passed in 589.63s (0:09:49)",
+      "condition": null,
+      "checked_commit": "b2a5382765db61b2382750b117fcea5c677b181c",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "worktree_clean": true,
+      "config_sha256": "7a91a7f7d72bb3e62787504c9a66928d2edb54d8be19cd0850e0d2ad39e0695d",
+      "run_nonce": "996ae28f49e34adba5b3c0f2a867c4bb",
+      "started_at": "2026-10-03T17:58:08Z",
+      "finished_at": "2026-10-03T18:07:58Z",
+      "duration_s": 587.4,
+      "attempts": [
+        {
+          "attempt": 1,
+          "started_at": "2026-10-03T17:58:08Z",
+          "finished_at": "2026-10-03T18:07:56Z",
+          "duration_s": 587.4,
+          "exit_code": 0,
+          "result": "PASS",
+          "reason": "2 passed in 589.63s (0:09:49)",
+          "log": "out/checks/phase4-b2/logs/p4-b2-platform/20261003T175808Z-attempt-1.log",
+          "summary": "2 passed in 589.63s (0:09:49)",
+          "nonce": "ff58445c276745768f335449a1cee9aa",
+          "structured_result": null,
+          "assertions": [],
+          "produced": [
+            {
+              "path": "docs/execution/evidence/phase4/b2-platform-run.json",
+              "exists": true,
+              "sha256": "9120924d1921df88f8a675456319c77326e6367bec6fc0aa7e26e86cd2065351",
+              "fresh": true
+            },
+            {
+              "path": "docs/execution/evidence/phase4/b2-matrix.json",
+              "exists": true,
+              "sha256": "8acd5957f34ef595b8eb3dc44cb651808b442d8cf91905c905de0cc9ed729bc9",
+              "fresh": true
+            },
+            {
+              "path": "docs/execution/evidence/phase4/b2-paired-report.md",
+              "exists": true,
+              "sha256": "a212b0762c15dc60104b8edd80d6acd23fd9e8d24bb61024fc3b98dd4530bff3",
+              "fresh": true
+            }
+          ],
+          "pytest": {
+            "passed": 2,
+            "failed": 0,
+            "skipped": 0,
+            "deselected": 0,
+            "errors": 0,
+            "skip_reasons": [],
+            "line": "2 passed in 589.63s (0:09:49)"
+          }
+        }
+      ],
+      "evidence_files": [
+        {
+          "path": "docs/execution/evidence/phase4/b2-platform-run.json",
+          "exists": true,
+          "sha256": "9120924d1921df88f8a675456319c77326e6367bec6fc0aa7e26e86cd2065351",
+          "fresh": true
+        },
+        {
+          "path": "docs/execution/evidence/phase4/b2-matrix.json",
+          "exists": true,
+          "sha256": "8acd5957f34ef595b8eb3dc44cb651808b442d8cf91905c905de0cc9ed729bc9",
+          "fresh": true
+        },
+        {
+          "path": "docs/execution/evidence/phase4/b2-paired-report.md",
+          "exists": true,
+          "sha256": "a212b0762c15dc60104b8edd80d6acd23fd9e8d24bb61024fc3b98dd4530bff3",
+          "fresh": true
+        }
+      ],
+      "first_failure": null,
+      "flaky": false,
+      "inherited": false,
+      "this_run": true,
+      "history": []
+    }
+  ]
+}
