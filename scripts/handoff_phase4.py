@@ -1,7 +1,9 @@
 """Generate the phase-4 handoff records from this invocation's check results (phase 4A; B3 completes phase 4).
 
 Reads docs/execution/evidence/phase4/checks/results.json (written by `make phase4-check`) and, when present, the
-strict local acceptance report (docs/execution/evidence/phase4/acceptance-local.json), and produces:
+strict local acceptance report (docs/execution/evidence/phase4/acceptance-local.json) and the heavy release checks
+(docs/execution/evidence/phase4/heavy-release.json: the disk blocker is RESOLVED only when all of them PASSED), and
+produces:
   * docs/handoff/phase4-checks.json    — a copy of the check results (the handoff's check record);
   * docs/handoff/phase4.manifest.json  — phase-handoff/v1: source revision, contract digests, workspace packages,
                                          registered plugins, check groups, 4A status, what is left to B1–B3,
@@ -26,6 +28,7 @@ ROOT = Path(__file__).resolve().parent.parent
 EV = ROOT / "docs" / "execution" / "evidence" / "phase4"
 RESULTS = EV / "checks" / "results.json"
 ACCEPTANCE = EV / "acceptance-local.json"
+HEAVY = EV / "heavy-release.json"  # the disk-heavy release checks, run one at a time (scripts/heavy_release_summary.py)
 MANIFEST = ROOT / "docs" / "handoff" / "phase4.manifest.json"
 CHECKS = ROOT / "docs" / "handoff" / "phase4-checks.json"
 PLATFORM = ["a1", "a2", "a3", "a4", "a5"]
@@ -43,6 +46,19 @@ BLOCKERS = [
      "cause": "a participant's view is kept from a process on the same host only if it cannot reach the service port",
      "unblock": "run the service on another host / container network for untrusted participants"},
 ]
+
+
+def _blockers(heavy: dict | None) -> list[dict]:
+    """The disk blocker is resolved only by a heavy-release record in which every heavy check PASSED."""
+    if not heavy or not heavy.get("all_passed"):
+        return BLOCKERS
+    disk = {**BLOCKERS[0], "status": "RESOLVED",
+            "resolved_by": "docs/execution/evidence/phase4/heavy-release.json",
+            "checked_commits": heavy.get("checked_commits"), "summary": heavy.get("summary"),
+            "note": "host disk freed (files moved to the user's Google Drive), disk guard split into a host reserve "
+                    "and a VM Docker-disk margin; every heavy check run one at a time — earlier FAIL / BLOCKED runs "
+                    "stay in each check's history"}
+    return [disk, *BLOCKERS[1:]]
 
 
 def _git(*args: str) -> str:
@@ -75,6 +91,7 @@ def main() -> int:
     platform_ok = all(status[g] == "PASS" for g in PLATFORM)
     contracts = {v: json.loads((ROOT / "contracts" / v / "DIGEST.json").read_text()) for v in ("v1", "v2")}
     acceptance = json.loads(ACCEPTANCE.read_text()) if ACCEPTANCE.exists() else None
+    heavy = json.loads(HEAVY.read_text()) if HEAVY.exists() else None
     real = EV / "a3-real-endpoint.json"
     real_doc = json.loads(real.read_text()) if real.exists() else {}
     manifest = {
@@ -105,7 +122,9 @@ def main() -> int:
             "protocol_test_service": {"module": "formal_lab_strategies.protocol_server", "model": "protocol-test-v1",
                                       "label": "LLM_PROTOCOL_TEST — not a model"},
             "stub": {"label": "LLM_STUB — deterministic stand-in"}},
-        "remaining_blockers": BLOCKERS,
+        "heavy_release": {k: heavy.get(k) for k in ("generated_at", "checked_commits", "summary", "all_passed")}
+        | {"record": "docs/execution/evidence/phase4/heavy-release.json"} if heavy else None,
+        "remaining_blockers": _blockers(heavy),
         "for_04b": {"register_checks": "scripts/phase4_domain_checks.py (groups b1–b3 only)",
                     "reuse": ["formal_lab_strategies.decision (model decisions)", "ExecutionContext / env.conditional_step "
                               "(execution basis)", "examples/subprocess-env (process-backed environments)",

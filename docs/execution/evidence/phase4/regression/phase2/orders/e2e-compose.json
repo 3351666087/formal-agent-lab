@@ -1,0 +1,286 @@
+{
+  "mode": "compose",
+  "project": "p2compose",
+  "workdir": "/Users/null3351/Code/formal-agent-lab/var/orders-e2e-compose",
+  "steps": {
+    "precheck": {
+      "cpus": 4,
+      "mem_available_mb": 4296,
+      "disk_free_mb": 20683,
+      "floor": {
+        "cpus": 1,
+        "mem_mb": 256,
+        "disk_mb": 200
+      },
+      "ok": true,
+      "problems": []
+    },
+    "create": {
+      "endpoint": "http://127.0.0.1:59003",
+      "health": {
+        "status": "ok",
+        "service": "local-order-service",
+        "version": "1.0.0",
+        "project": "p2compose",
+        "pid": 1,
+        "started_at": 1791040074.3001301,
+        "tenants": 0,
+        "write_auth": false
+      },
+      "seconds": 5.92,
+      "transitions": [
+        {
+          "status": "CREATED",
+          "at": "2026-10-03T15:07:53.383986+00:00",
+          "note": "work directory /Users/null3351/Code/formal-agent-lab/var/orders-e2e-compose/.fal-orders/p2compose"
+        },
+        {
+          "status": "STARTING",
+          "at": "2026-10-03T15:07:53.384324+00:00",
+          "note": ""
+        },
+        {
+          "status": "READY",
+          "at": "2026-10-03T15:07:59.298158+00:00",
+          "note": "health ok at http://127.0.0.1:59003"
+        }
+      ]
+    },
+    "experiment": {
+      "normal-rule-1": {
+        "status": "SUCCEEDED",
+        "steps": 24,
+        "metrics": {
+          "orders_completed": 6.0,
+          "late_orders": 0.0,
+          "mean_latency": 2.3333333333333335
+        },
+        "operations": {
+          "COMPLETED": 24
+        },
+        "bundle": "bundles/normal-rule-1.replay.zip",
+        "seconds": 1.15
+      },
+      "normal-rule-2": {
+        "status": "SUCCEEDED",
+        "steps": 25,
+        "metrics": {
+          "orders_completed": 6.0,
+          "late_orders": 0.0,
+          "mean_latency": 2.0
+        },
+        "operations": {
+          "COMPLETED": 25
+        },
+        "bundle": "bundles/normal-rule-2.replay.zip",
+        "seconds": 1.07
+      },
+      "normal-z3-1": {
+        "status": "SUCCEEDED",
+        "steps": 26,
+        "metrics": {
+          "orders_completed": 6.0,
+          "late_orders": 0.0,
+          "mean_latency": 2.3333333333333335
+        },
+        "operations": {
+          "COMPLETED": 26
+        },
+        "bundle": "bundles/normal-z3-1.replay.zip",
+        "seconds": 20.9
+      },
+      "normal-z3-2": {
+        "status": "SUCCEEDED",
+        "steps": 27,
+        "metrics": {
+          "orders_completed": 6.0,
+          "late_orders": 0.0,
+          "mean_latency": 2.1666666666666665
+        },
+        "operations": {
+          "COMPLETED": 27
+        },
+        "bundle": "bundles/normal-z3-2.replay.zip",
+        "seconds": 14.45
+      },
+      "delayed-rule-1": {
+        "status": "SUCCEEDED",
+        "steps": 24,
+        "metrics": {
+          "orders_completed": 6.0,
+          "late_orders": 0.0,
+          "mean_latency": 2.3333333333333335
+        },
+        "operations": {
+          "COMPLETED": 18,
+          "RECONCILED": 6
+        },
+        "bundle": "bundles/delayed-rule-1.replay.zip",
+        "seconds": 7.14
+      },
+      "delayed-rule-2": {
+        "status": "SUCCEEDED",
+        "steps": 25,
+        "metrics": {
+          "orders_completed": 6.0,
+          "late_orders": 0.0,
+          "mean_latency": 2.0
+        },
+        "operations": {
+          "COMPLETED": 19,
+          "RECONCILED": 6
+        },
+        "bundle": "bundles/delayed-rule-2.replay.zip",
+        "seconds": 7.22
+      },
+      "delayed-z3-1": {
+        "status": "SUCCEEDED",
+        "steps": 26,
+        "metrics": {
+          "orders_completed": 6.0,
+          "late_orders": 0.0,
+          "mean_latency": 2.3333333333333335
+        },
+        "operations": {
+          "COMPLETED": 20,
+          "RECONCILED": 6
+        },
+        "bundle": "bundles/delayed-z3-1.replay.zip",
+        "seconds": 7.37
+      },
+      "delayed-z3-2": {
+        "status": "SUCCEEDED",
+        "steps": 27,
+        "metrics": {
+          "orders_completed": 6.0,
+          "late_orders": 0.0,
+          "mean_latency": 2.1666666666666665
+        },
+        "operations": {
+          "COMPLETED": 21,
+          "RECONCILED": 6
+        },
+        "bundle": "bundles/delayed-z3-2.replay.zip",
+        "seconds": 7.35
+      },
+      "deviation-rule-1": {
+        "status": "SUCCEEDED",
+        "steps": 26,
+        "metrics": {
+          "orders_completed": 6.0,
+          "late_orders": 1.0,
+          "mean_latency": 3.3333333333333335
+        },
+        "operations": {
+          "COMPLETED": 26
+        },
+        "bundle": "bundles/deviation-rule-1.replay.zip",
+        "seconds": 1.02
+      },
+      "deviation-rule-2": {
+        "status": "SUCCEEDED",
+        "steps": 28,
+        "metrics": {
+          "orders_completed": 6.0,
+          "late_orders": 0.0,
+          "mean_latency": 3.0
+        },
+        "operations": {
+          "COMPLETED": 28
+        },
+        "bundle": "bundles/deviation-rule-2.replay.zip",
+        "seconds": 1.08
+      },
+      "deviation-z3-1": {
+        "status": "SUCCEEDED",
+        "steps": 30,
+        "metrics": {
+          "orders_completed": 6.0,
+          "late_orders": 1.0,
+          "mean_latency": 4.0
+        },
+        "operations": {
+          "COMPLETED": 30
+        },
+        "bundle": "bundles/deviation-z3-1.replay.zip",
+        "seconds": 13.42
+      },
+      "deviation-z3-2": {
+        "status": "SUCCEEDED",
+        "steps": 28,
+        "metrics": {
+          "orders_completed": 6.0,
+          "late_orders": 0.0,
+          "mean_latency": 2.8333333333333335
+        },
+        "operations": {
+          "COMPLETED": 28
+        },
+        "bundle": "bundles/deviation-z3-2.replay.zip",
+        "seconds": 8.12
+      }
+    },
+    "export": {
+      "bundles": 12,
+      "service_states": 12,
+      "bytes": 4749434
+    },
+    "reset": {
+      "tenants": 12,
+      "probe_after_reset": {
+        "clock": 0,
+        "backlog": 3,
+        "queue": 0
+      },
+      "probe_metrics": [
+        "throughput",
+        "completion_rate",
+        "queue_length",
+        "backlog",
+        "latency_ticks",
+        "op_latency_ms",
+        "recovery_seconds"
+      ]
+    },
+    "rerun": {
+      "identical_trajectories": 12,
+      "cells": 12,
+      "differing": []
+    },
+    "resources": {
+      "mode": "compose",
+      "containers": [
+        {
+          "BlockIO": "41.2MB / 50MB",
+          "CPUPerc": "0.32%",
+          "Container": "f16f12191ca0e061e134811dafe9eea6326d1c910dc1398097e316af77f69849",
+          "ID": "f16f12191ca0",
+          "MemPerc": "1.09%",
+          "MemUsage": "64.7MiB / 5.772GiB",
+          "Name": "fal-orders-p2compose-orders-1",
+          "NetIO": "2.44MB / 6.49MB",
+          "PIDs": "7"
+        }
+      ]
+    },
+    "cleanup": {
+      "removed": {
+        "processes": [],
+        "containers": [
+          "f16f12191ca0e061e134811dafe9eea6326d1c910dc1398097e316af77f69849"
+        ],
+        "paths": [
+          "/Users/null3351/Code/formal-agent-lab/var/orders-e2e-compose/.fal-orders/p2compose"
+        ]
+      },
+      "leftover_after_close": {
+        "processes": [],
+        "containers": [],
+        "volumes": [],
+        "paths": []
+      },
+      "state_dir_gone": true
+    }
+  },
+  "ok": true
+}

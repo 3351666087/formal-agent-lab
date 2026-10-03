@@ -1,0 +1,82 @@
+{
+  "check": "P1-113 Helm install on a kind cluster",
+  "date": "2026-10-03T15:04:32Z",
+  "cluster": {
+    "tool": "kind v0.33.0",
+    "node_image": "kindest/node:v1.37.0@sha256:a1ed56cfb0e7b93589bdf97c8cd566405a265939e3620fc4f5de89adff580ae5",
+    "kubernetes": "v1.37.0"
+  },
+  "chart": "deploy/helm/formal-agent-lab",
+  "release": "fal",
+  "image_tag": "c7f2419741da",
+  "backing_services": "test fixture deploy/helm/test/backing-services.yaml (not part of the chart)",
+  "pods": [
+    {
+      "name": "fal-formal-agent-lab-api-6f47b5765b-n82lr",
+      "phase": "Running",
+      "ready": true
+    },
+    {
+      "name": "fal-formal-agent-lab-web-75554878-shpfc",
+      "phase": "Running",
+      "ready": true
+    },
+    {
+      "name": "fal-formal-agent-lab-worker-574f779f78-wqdmq",
+      "phase": "Running",
+      "ready": true
+    },
+    {
+      "name": "postgres-6fc6fcb99c-m7mz5",
+      "phase": "Running",
+      "ready": true
+    },
+    {
+      "name": "s3-599dcc45f6-vjlc5",
+      "phase": "Running",
+      "ready": true
+    },
+    {
+      "name": "temporal-d476cb89b-hfskx",
+      "phase": "Running",
+      "ready": true
+    }
+  ],
+  "ready": {
+    "ready": true,
+    "database": {
+      "ok": true
+    },
+    "temporal": {
+      "ok": true,
+      "address": "temporal:7233"
+    },
+    "artifact_store": {
+      "ok": true,
+      "backend": "s3",
+      "bucket": "formal-lab-artifacts",
+      "endpoint": "http://s3:8333"
+    }
+  },
+  "run": {
+    "id": "run_54edbf4ef5f748c5ad19",
+    "status": "SUCCEEDED",
+    "events": 326,
+    "sse_events": 326,
+    "metrics": {
+      "delay_cost": 1.0,
+      "effect_mismatches": 3.0,
+      "goal_reached": 1.0,
+      "makespan": 9.0,
+      "mean_tardiness": 0.3333333333333333,
+      "model_calls": null,
+      "orders_completed": 3.0,
+      "rejected_actions": 17.0,
+      "steps_used": 33.0,
+      "tokens": null,
+      "wall_seconds": 13.474
+    }
+  },
+  "passed": true,
+  "install_to_result_s": 37
+}

@@ -2,7 +2,7 @@
   "format": "phase-handoff/v1",
   "phase": "4",
   "part": "4A (A1–A5, platform closure)",
-  "generated_at": "2026-10-02T20:06:09.159032+00:00",
+  "generated_at": "2026-10-03T16:28:53.398191+00:00",
   "source_revision": {
     "commit": "28ba986646d385ea7fc95831d33cda0f14ffcf0b",
     "worktree": {
@@ -20,7 +20,7 @@
       ]
     }
   },
-  "handoff_revision_parent": "28ba986646d385ea7fc95831d33cda0f14ffcf0b",
+  "handoff_revision_parent": "c7f2419741da8a0d6a13b51f7a77f20e644f3df6",
   "contracts": {
     "formal-lab-contracts/v1": "0cbd6256c21eead867cdd3bcf8ea7f1011207d4dacd6d09996b543575e21312b",
     "formal-lab-contracts/v2": "07cf6c6fbe419bf6ada825397f107f0caaf1fee6e9494ea05f2cbc45bbd30de8"
@@ -169,12 +169,31 @@
       "label": "LLM_STUB — deterministic stand-in"
     }
   },
+  "heavy_release": {
+    "generated_at": "2026-10-03T16:27:48.131579+00:00",
+    "checked_commits": [
+      "c7f2419741da8a0d6a13b51f7a77f20e644f3df6"
+    ],
+    "summary": {
+      "PASS": 7
+    },
+    "all_passed": true,
+    "record": "docs/execution/evidence/phase4/heavy-release.json"
+  },
   "remaining_blockers": [
     {
       "item": "disk-heavy release items: image-based offline bundle (scripts/offline_bundle.py --verify), image release, Compose stacks, kind install / upgrade (phase-2 local-release, phase-3 extensions)",
-      "status": "BLOCKED",
+      "status": "RESOLVED",
       "cause": "host disk: needs 8 GiB plus the 15 GiB reserve; see a5-release.json offline_stack",
-      "unblock": "free ≥ 23 GiB on the host (then `uv run --frozen python scripts/offline_bundle.py --verify`)"
+      "unblock": "free ≥ 23 GiB on the host (then `uv run --frozen python scripts/offline_bundle.py --verify`)",
+      "resolved_by": "docs/execution/evidence/phase4/heavy-release.json",
+      "checked_commits": [
+        "c7f2419741da8a0d6a13b51f7a77f20e644f3df6"
+      ],
+      "summary": {
+        "PASS": 7
+      },
+      "note": "host disk freed (files moved to the user's Google Drive), disk guard split into a host reserve and a VM Docker-disk margin; every heavy check run one at a time — earlier FAIL / BLOCKED runs stay in each check's history"
     },
     {
       "item": "multi-user sign-in (SSO) for the participant channel",

@@ -18,9 +18,23 @@
 | A2 当前状态、执行绑定与参与者输入 | 完成 | `b9fc7c4` | a2：4/4 PASS | `a2-execution-basis.json`（22/22） |
 | A3 模型调用与可恢复决策 | 完成（真实端点可用并已调用） | `773f934` | a3：4/4 PASS | `a3-model-decision.json`（9/9）、`a3-real-endpoint.json`（3/3） |
 | A4 联合轮次与配对评测 | 完成 | `9d3e3c6` | a4：3/3 PASS | `a4-rounds.json`（9/9）、`a4-paired-report.md` |
-| A5 产品入口、视觉修复与交接 | 完成；镜像离线包 BLOCKED（磁盘） | `d27c829`（验收修复 `fb50c55` `a743ab2` `995ed3d` `e3b28e9` `28ba986`） | a5：3/3 PASS | `a5-product-flow.json`、`a5-narrow.json`、`a5-release.json`、`screens/` |
+| A5 产品入口、视觉修复与交接 | 完成；镜像离线包 2026-10-03 PASS（见“重型发行检查”） | `d27c829`（验收修复 `fb50c55` `a743ab2` `995ed3d` `e3b28e9` `28ba986`） | a5：3/3 PASS | `a5-product-flow.json`、`a5-narrow.json`、`a5-release.json`、`screens/` |
 
 同一修订上的 A1—A5 检查：`28ba986`（最终代码修订，干净工作树）16/16 PASS，b1—b3 为 `NO_CHECKS`（`complete=false`，按设计；`docs/handoff/phase4-checks.json`）。严格总验收（`make acceptance-local`，`e3b28e9`，2026-10-02 18:04—19:53 UTC）：阶段二 23 PASS / 5 BLOCKED / 0 FAIL（未满足组只有 `local-release`：五个写盘重型项按 15 GiB 保留量被拒）；阶段三 **COMPLETE**（33 PASS / 2 BLOCKED，均为扩展项：含镜像发行与镜像离线包）；阶段四 16/16 PASS，b1—b3 `NO_CHECKS`；整体 `complete=false`。`e3b28e9` → `28ba986` 只改了 PRISM-games 回归写文档的位置与交接生成脚本（见“最终验收”）。
+
+**重型发行检查（2026-10-03，`c7f2419`）**：上面被磁盘拒绝的七个写盘重型项（阶段二 `local-release` 五项、阶段三两个扩展项）逐个在共享引擎上运行（`check_runner.py --suite <s> --only <id>`，证据写到 `docs/execution/evidence/phase4/regression/<suite>/`），**7/7 PASS**，汇总 `docs/execution/evidence/phase4/heavy-release.json`（`scripts/heavy_release_summary.py`；每项保留全部 attempt 与此前 FAIL / BLOCKED 的历史）。
+
+| 检查 | 结果 | 尝试 | 此前 |
+|---|---|---|---|
+| 阶段二 `offline-install`（镜像离线包：去重、空目录无包仓库安装、整栈实验） | PASS，1379 s；包 719 MB / 135 个文件 | 1 | FAIL（Docker Hub 连接中断） |
+| 阶段二 `kind-install-upgrade`（Chart 安装；从阶段一 `46400ad` 升级到迁移 0002 再回滚） | PASS，1000 s；安装、升级、回滚后的实验均 SUCCEEDED | 2（第一次镜像构建中 uv 下载失败） | — |
+| 阶段二 `compose-smoke`（整栈：实验、矩阵、S3 产物、离线校验） | PASS，961 s | 1 | BLOCKED（宿主磁盘） |
+| 阶段二 `release-manifest`（wheel / Web / 镜像摘要） | PASS，307 s；20 个 wheel、4 个镜像 | 1 | BLOCKED |
+| 阶段二 `orders-compose`（订单服务 Compose 生命周期） | PASS，137 s | 1 | — |
+| 阶段三 `p3-offline-bundle` | PASS，1010 s | 2（第一次 Docker Hub 令牌请求中断） | FAIL ×2（构建内 DNS 解析失败）、BLOCKED |
+| 阶段三 `p3-release-images`（含 OCI 镜像） | PASS，356 s | 3（前两次 Docker Hub 令牌请求中断） | BLOCKED |
+
+为此做的改动：宿主磁盘 16.7 → 28.8 GiB（经用户同意，把不常用的数据压缩后移到用户的 Google Drive，校验 MD5 后删除本地）；`c7f2419` 把磁盘守卫拆成宿主保留量（写入量 + 15 GiB）与 VM Docker 盘余量（写入量 + 2 GiB）——Docker 盘是 30 GiB 的独立文件系统，原先同一需求使 8 / 12 GiB 的检查在它上面永远无法满足；`ae95852` 让 kind 安装 / 升级检查在回归时写到自身证据目录（原先固定写 `evidence/helm/`，会覆盖阶段一 / 二记录）。失败均为网络（VM 到 Docker Hub / PyPI 的连接与 DNS 间歇中断），不是构建或产品问题；检查间只删除本项目按提交号标记的镜像、构建输出与 BuildKit 缓存，并 `fstrim` 归还宿主。
 
 **命令**
 
@@ -43,7 +57,7 @@ uv run --frozen python scripts/handoff_phase4.py  # 由本次检查结果生成 
 | 联合轮次 / 环境适配入口 | 轮次结局（PASSED / 退场 / 运行结束）、`WORLD_STEPPED`、`BatchRecord.world_step` / `automatic`、`env.world_step_report`；子进程环境范例 `examples/subprocess-env`；SDK 合同检查 `formal_lab_sdk.plugin_testing.check_environment` |
 | 矩阵复用键与评分接口 | 复用键 v3（`services/matrices.py expand_v2`：划分、内核版本、模型端点；版本未知 → RERUN）；报告 `formal_lab_eval.experiments.build_report`（固定分母成功率、不完整配对原因、工程读数）；指标 `MetricDefinition.observable` / `window` |
 | 产品与发行入口 | Web / API / CLI `fal` / SDK `formal_lab_sdk.Client`；发行 `scripts/release.py`（wheel、Web、本地运行配置、清单）、`scripts/offline_bundle.py`（镜像离线包，磁盘允许时）；`scripts/a5_release_evidence.py` |
-| 阻塞 | 镜像离线包（宿主磁盘：需 8 GiB + 15 GiB 保留量）；参与者多用户登录属部署范围；订单服务读接口回环不鉴权（部署条件）。真实端点与 Figma 本次可用、已实际使用 |
+| 阻塞 | 镜像离线包等七个写盘重型项已于 2026-10-03 在 `c7f2419` 全部 PASS（原为宿主磁盘 BLOCKED）；参与者多用户登录属部署范围；订单服务读接口回环不鉴权（部署条件）。真实端点与 Figma 本次可用、已实际使用 |
 | B1—B3 待注册位置 | `scripts/phase4_domain_checks.py`（只允许 b1—b3 组；未登记时为 `NO_CHECKS`，整体保持未完成）；证据脚本用 `scripts/check_result.py` 上报 |
 
 整体 Phase 4 的完成标记留给 B3。
@@ -223,6 +237,6 @@ uv run --frozen python scripts/handoff_phase4.py  # 由本次检查结果生成 
 | 截图链 | `capture_screens.py` 8 项检查全部为真（仓储批次 10 轮、订单恢复 6 个已对账操作、复用标记、窄屏无横向滚动、跳转链接、减少动态、无页面错误、无错误画面；`a5-web-capture.json`） |
 | Figma（`uuV6JeilZQkhnIQcJYEUET`） | 只同步事实变化的节点：`6:106`（运行台 · 仓储批次）、`6:112`（运行台 · 深色）、`6:114`（运行台 · 390 px，画框 390×293 → 390×565，换为批次面板的新截图）、`7:61`（390 px 画面的代码说明加入 640 px 规则）；其余画面、组件、变量、故事板未动；记录在 `design/figma.json` 的 `syncs` |
 | 发行 | `release.py --skip-images`：20 个 wheel（全部工作区成员，含新示例 `formal-lab-example-subprocess`）、Web 包、3 个本地运行配置（含摘要）、清单与许可清单；**在线安装**：干净 venv 从刚构建的 wheel 安装项目包、第三方依赖取自索引 / uv 缓存，无服务器下 `fal --help / replay verify / view / batches` 全部 0；**完全离线安装**：38 个 wheel 的离线目录，空目录新 venv `pip --no-index`（代理指向关闭端口）安装 `formal-lab-sdk[offline]`，对订单场景导出包 `fal replay verify / view / step` 全部 0（`a5-release.json`、`release-manifest.json`） |
-| 镜像离线包 | **BLOCKED**：`offline_bundle.py` 构建并保存四个 OCI 镜像需 8 GiB，另需保持 15 GiB 宿主保留量，宿主仅 18.7 GiB 可用（磁盘守卫拒绝）；未构建，不写成已完成 |
+| 镜像离线包 | 交接时 **BLOCKED**（构建并保存四个 OCI 镜像需 8 GiB，另需 15 GiB 宿主保留量，宿主仅 18.7 GiB）。**2026-10-03 已运行**：阶段二 `offline-install` 与阶段三 `p3-offline-bundle` 在 `c7f2419` PASS（`heavy-release.json`）；`a5-release.json` 的 `offline_stack` 仍是 `28ba986` 时的记录 |
 
 **验证**：`p4-a5-web-types`、`p4-a5-product-web`（2 项，真实 API + worker + 构建后的 Web + Playwright）、`p4-a5-release` 全部 PASS；A1—A5 当前修订检查报告见总览。
