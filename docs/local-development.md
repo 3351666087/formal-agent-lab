@@ -89,7 +89,7 @@ python scripts/local_data.py reset --yes                                 # 清�
 
 - `make disk-guard`（`python3 scripts/disk_guard.py --need 0 --trim`）报告宿主机（经共享仓库目录读取）与 `/var/lib/docker` 的剩余空间，并归还 VM 内已释放的块；
 - 重型脚本开始前自行检查余量，不足即拒绝：Compose 冒烟 6 GiB、发行构建 6 GiB、离线包 8 GiB、kind 安装 8 GiB、kind 升级 10 GiB（实测峰值约 7 GiB 加余量）；`make phase2-check` 在每个 Docker 检查后执行一次回收；
-- 建议宿主机保持 ≥ 15 GiB 空闲。
+- 建议宿主机保持 ≥ 15 GiB 空闲。检查引擎对声明了写入量的重型检查要求：宿主机 ≥ 写入量 + 15 GiB（`FAL_DISK_RESERVE_GIB`），VM 的 Docker 盘 ≥ 写入量 + 2 GiB（`FAL_DOCKER_MARGIN_GIB`；它是 30 GiB 的独立文件系统，写满只会让这一步以 ENOSPC 失败，宿主机余量不适用于它）。
 
 虚拟机中的 Docker 守护进程与其它项目共享。`make reclaim-disk` 只删除带本仓库 OCI 标签的悬空镜像与按提交号标记的本项目镜像，然后 `fstrim` 归还空闲块；全局构建缓存和共享镜像（如 `kindest/node`）不动。**不要**使用 `docker system prune`、`docker image prune -a` 或卷清理：它们会删除其它项目的镜像与数据。构建缓存可以清理——`docker builder prune -af` 只删除 BuildKit 构建缓存，不动任何镜像或卷（先用 `docker buildx du --verbose` 看一眼条目来自哪些 Dockerfile）；本项目每次版本变化都会重建约 1 GiB 的虚拟环境层，缓存累积到 10 GiB 以上时清理一次，再 `make disk-guard` 归还给宿主机。清理本项目某次临时环境：`python -m formal_lab_example_orders.lifecycle cleanup --project <name>`（只删除带 `dev.formal-lab.project=<name>` 标签的容器、卷与进程）。
 

@@ -53,6 +53,8 @@ PY = "uv run --frozen python"
 # free space every heavy check must leave on the host and Docker disks (GiB): the Mac shares its disk with the VM's
 # sparse disk images, and a full host disk once aborted the VM's journal (2026-09-28)
 RESERVE_GIB = float(os.environ.get("FAL_DISK_RESERVE_GIB", "15"))
+# the VM's Docker disk (30 GiB, its own filesystem) keeps a small margin, not the host reserve
+DOCKER_MARGIN_GIB = float(os.environ.get("FAL_DOCKER_MARGIN_GIB", "2"))
 CONFIG_FILES = ("uv.lock", "pnpm-lock.yaml", "deploy/compose/services.dev.yaml", "deploy/compose/docker-compose.yaml")
 CODE_SUFFIXES = (".py", ".pyi", ".ts", ".tsx", ".js", ".mjs", ".cjs", ".sh", ".bash")
 HISTORY = 20
@@ -472,9 +474,10 @@ def main(argv: list[str] | None = None) -> int:
         elif check.requires:
             reason = cached_probe(check.requires)
         if not reason and check.heavy_gib:
-            need = check.heavy_gib + RESERVE_GIB  # what it writes + what must stay free
-            g = subprocess.run([sys.executable, "scripts/disk_guard.py", "--need", str(need), "--label",
-                                f"{check.id} ({check.heavy_gib} GiB + {RESERVE_GIB} GiB reserve)", "--trim"],
+            need = check.heavy_gib + RESERVE_GIB  # what it writes + what must stay free on the host
+            g = subprocess.run([sys.executable, "scripts/disk_guard.py", "--need", str(need),
+                                "--docker-need", str(check.heavy_gib + DOCKER_MARGIN_GIB), "--label",
+                                f"{check.id} ({check.heavy_gib} GiB + {RESERVE_GIB} GiB host reserve)", "--trim"],
                                cwd=ROOT, capture_output=True, text=True)
             if g.returncode != 0:
                 reason = f"BLOCKED: {(g.stderr or g.stdout).strip()[-300:]}"

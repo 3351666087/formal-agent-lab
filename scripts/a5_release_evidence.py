@@ -116,7 +116,7 @@ def main() -> int:
     # ---- the image-based offline stack: the disk guard decides
     reserve = float(os.environ.get("FAL_DISK_RESERVE_GIB", "15"))
     need = 8 + reserve  # what the bundle writes (images + tar) and the host reserve kept free after it
-    guard = sh(sys.executable, "scripts/disk_guard.py", "--need", f"{need:g}", "--label",
+    guard = sh(sys.executable, "scripts/disk_guard.py", "--need", f"{need:g}", "--docker-need", "10", "--label",
                f"offline bundle (OCI images: 8 GiB + {reserve:g} GiB reserve)", check=False)
     out["offline_stack"] = {"status": "BLOCKED" if guard.returncode else "ALLOWED_NOT_RUN_HERE",
                             "need_gib": need, "guard": (guard.stdout + guard.stderr).strip()[-400:],
