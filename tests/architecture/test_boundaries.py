@@ -33,6 +33,7 @@ PACKAGES = {
     "formal_lab_example_warehouse": "examples/warehouse-allocation/src/formal_lab_example_warehouse",
     "formal_lab_example_orders": "examples/local-order-service/src/formal_lab_example_orders",
     "formal_lab_example_subprocess": "examples/subprocess-env/src/formal_lab_example_subprocess",
+    "formal_lab_env_cage": "packages/environment-cage/src/formal_lab_env_cage",
 }
 
 # allowed internal imports (dependency direction); anything not listed is a violation
@@ -67,12 +68,15 @@ ALLOWED: dict[str, set[str]] = {
     # runtime's registry; only the adapter controls a process (see below)
     "formal_lab_example_subprocess": {"formal_lab_contracts", "formal_lab_model", "formal_lab_env",
                                       "formal_lab_runtime"},
+    # CAGE 4 (phase 4B, B2): driver, environment, planners and evaluator see only the contracts; CybORG lives in the
+    # isolated venv behind `_worker.py` (see below)
+    "formal_lab_env_cage": {"formal_lab_contracts"},
 }
 # demo tooling inside the API package that seeds the example project (not on any request/run path)
 EXEMPT_FILES = {"packages/platform-api/src/formal_lab_api/seed.py"}
 PLUGIN_PACKAGES = {"formal_lab_solver_z3", "formal_lab_env", "formal_lab_strategies",
                    "formal_lab_example_scheduling", "fal_example_external_plugin", "formal_lab_example_warehouse",
-                   "formal_lab_example_orders", "formal_lab_example_subprocess"}
+                   "formal_lab_example_orders", "formal_lab_example_subprocess", "formal_lab_env_cage"}
 CORE = {"formal_lab_contracts", "formal_lab_model", "formal_lab_runtime", "formal_lab_api",
         "formal_lab_orchestrator", "formal_lab_sdk"}
 
@@ -211,3 +215,19 @@ def test_only_the_subprocess_adapter_controls_a_process():
     assert "subprocess" in _imports(base / "adapter.py")
     assert not _imports(base / "world.py") & {"subprocess", "socket", "pty", "shlex", "httpx", "paramiko"}
     assert '"-m", "formal_lab_example_subprocess.world"' in (base / "adapter.py").read_text()
+
+
+def test_only_the_cage_bridge_and_adapter_control_a_process():
+    """Phase 4B (B2): CybORG is reached only through the isolated venv's worker; the bridge (one-shot commands) and the
+    adapter (the session) start it, the worker itself imports no platform package, and nothing else in the package
+    starts a process or opens a socket."""
+    base = ROOT / PACKAGES["formal_lab_env_cage"]
+    for name in ("bridge.py", "adapter.py"):
+        assert "subprocess" in _imports(base / name)
+    for f in base.glob("*.py"):
+        if f.name in ("bridge.py", "adapter.py", "_worker.py"):
+            continue
+        assert not _imports(f) & {"subprocess", "socket", "pty", "shlex", "httpx", "paramiko"}, f.name
+    worker = _imports(base / "_worker.py")
+    assert not {m for m in worker if m.startswith("formal_lab")}, worker
+    assert not worker & {"subprocess", "socket", "httpx"}

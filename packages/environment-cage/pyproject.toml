@@ -1,11 +1,14 @@
 [project]
 name = "formal-lab-env-cage"
 version = "0.3.0"
-description = "CAGE Challenge 4 environment bridge (phase 3B, D5): run the official CybORG 4.0 baseline in an isolated venv via a typed subprocess, and record native rounds/scores separately from platform metrics"
+description = "CAGE Challenge 4 on the platform (phase 3B D5, phase 4B B2): CybORG 4.0 in an isolated venv via typed subprocesses — the official baseline, a blue-interface model and driver, a per-world-step environment, blue planners and native vs platform trajectory checks"
 requires-python = ">=3.12"
 license = "Apache-2.0"
 license-files = ["LICENSE"]
 dependencies = ["formal-lab-contracts"]
+
+[project.entry-points."formal_lab.plugins"]
+environment-cage = "formal_lab_env_cage:registrations"
 
 [build-system]
 requires = ["hatchling>=1.27"]

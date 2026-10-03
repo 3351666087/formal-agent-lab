@@ -93,3 +93,20 @@ def baseline(*, steps: int = 30, episodes: int = 1, seed: int = 0, seeds: list[i
     else:
         req["seed"] = seed
     return run(req, timeout=timeout)
+
+
+def describe(*, timeout: float = 180) -> dict[str, Any]:
+    """Scenario4 host universe, declared blue actions and official agent classes (phase 4B, B2)."""
+    return run({"cmd": "describe"}, timeout=timeout)
+
+
+def native(*, seed: int, steps: int, red: str = "FiniteStateRedAgent", blue_native: str = "SleepAgent",
+           controlled: list[str] | None = None, actions: list[dict[str, Any]] | None = None,
+           timeout: float = 900) -> dict[str, Any]:
+    """The direct path (phase 4B, B2): CybORG driven by the worker alone with the given blue actions per world step
+    (an empty dict = the native blue class acts) — the reference a platform run is compared with."""
+    req: dict[str, Any] = {"cmd": "native", "seed": seed, "steps": steps, "red": red, "blue_native": blue_native,
+                           "actions": actions or []}
+    if controlled is not None:
+        req["controlled"] = controlled
+    return run(req, timeout=timeout)

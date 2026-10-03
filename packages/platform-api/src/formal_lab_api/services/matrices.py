@@ -61,6 +61,17 @@ def attach_runs(s: Session, matrix_id: str, run_ids: list[str]) -> None:
         get_or_404(s, Run, rid, "run").matrix_id = matrix_id
 
 
+def _combo_label(chosen: dict[str, dict[str, Any]]) -> str:
+    """A cell's participants label: one participant → its strategy's name; every participant on the same strategy
+    configuration → `*=<name> (×n)`; otherwise the combination actor=name in turn order."""
+    if len(chosen) == 1:
+        return next(iter(chosen.values()))["label"]
+    ids = {c["strategy_config_id"] for c in chosen.values()}
+    if len(ids) == 1:
+        return f"*={next(iter(chosen.values()))['label']} (×{len(chosen)})"
+    return "+".join(f"{a}={c['label']}" for a, c in chosen.items())
+
+
 def _strategy_label(manifest: RunManifest) -> tuple[str, str]:
     """Strategy key/label of a run; several participants → the combination (actor=strategy, in turn order)."""
     parts = []
@@ -262,8 +273,7 @@ def expand_v2(s: Session, project_id: str, spec: dict[str, Any]) -> list[dict[st
                           "model": model_ref, "seed": int(seed), "budget": budget,
                           "ablations": {k: v for k, v in abl.items() if k != "label"}, **shared}
                 digest = config_digest(config)
-                label = "+".join(f"{a}={c['label']}" for a, c in chosen.items()) if len(chosen) > 1 else \
-                    next(iter(chosen.values()))["label"]
+                label = _combo_label(chosen)
                 cells.append({
                     "cell_id": cell_id_of(digest), "config_digest": digest, "split": split, "seed": int(seed),
                     "key_parts": {k: config_digest(v)[:12] for k, v in config.items() if k != "key_version"},

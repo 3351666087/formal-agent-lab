@@ -1,0 +1,325 @@
+{
+  "deliverable": "phase4B-B2",
+  "toolchain": {
+    "cyborg_version": "4.0",
+    "scenario": "Scenario4",
+    "python": "3.12.3",
+    "cage_src_revision": "8c3c50ca54b176c2de199847944e8dcc035497e3",
+    "cage_src_license": "Copyright (c) Commonwealth of Australia 2019  MIT LICENSE",
+    "key_packages": {
+      "numpy": "1.26.4",
+      "networkx": "3.2.1",
+      "gymnasium": "0.28.1",
+      "pettingzoo": "1.24.3",
+      "PyYAML": "6.0.1"
+    },
+    "venv_packages": 20,
+    "venv_packages_sha256": "961637b994691c559a7bab0a404ca448562b08836aad7f2a89f99702ae1139f8",
+    "venv_python": "/home/null3351.guest/.venvs/fal-cage/bin/python"
+  },
+  "plugins": [
+    "formal-lab.cage4.blue-monitor",
+    "formal-lab.cage4.blue-react",
+    "formal-lab.cage4.blue-sleep",
+    "formal-lab.cage4.metrics",
+    "formal-lab.driver.cage4",
+    "formal-lab.env.cage4"
+  ],
+  "model": {
+    "package_id": "cage4-blue",
+    "profile": "cage4_v1",
+    "digest": "6dd19074af52d749c51c5d084ca1c613a3bed23a0e5f6ba28ec9109ac522c5a4",
+    "hosts": 136,
+    "blue_actions": [
+      "sleep",
+      "monitor",
+      "analyse",
+      "remove",
+      "restore",
+      "deploy_decoy"
+    ],
+    "not_mapped": [
+      "BlockTrafficZone",
+      "AllowTrafficZone"
+    ],
+    "prediction": "applicability only — native effects not predicted (comparisons INSUFFICIENT_INFORMATION)"
+  },
+  "variants": {
+    "dev": "FiniteStateRedAgent",
+    "holdout": "DiscoveryFSRed"
+  },
+  "steps_per_episode": 30,
+  "native_classes": {
+    "SleepAgent": "runnable — the official baseline",
+    "MonitorAgent": "not runnable as a Scenario4 blue class (constructor takes no name; monitors as agent 'Blue'): TypeError in EnterpriseScenarioGenerator",
+    "cc4BlueRandomAgent": "runnable, not mapped (draws from CybORG's RNG)"
+  },
+  "native_vs_platform": {
+    "sleep_vs_official_baseline": {
+      "platform_status": "SUCCEEDED",
+      "native_driven_by": "native SleepAgent (no external action)",
+      "red": "FiniteStateRedAgent",
+      "equal": true,
+      "world_steps": 29,
+      "equal_world_steps": 29,
+      "first_difference": null,
+      "termination": {
+        "native": true,
+        "platform": true,
+        "native_world_steps": 29,
+        "platform_world_steps": 29
+      },
+      "reward_totals": {
+        "native": {
+          "Blue": 0.0,
+          "Red": 0.0,
+          "Green": 0.0
+        },
+        "platform": {
+          "Blue": 0.0,
+          "Red": 0.0,
+          "Green": 0.0
+        }
+      },
+      "metrics": {
+        "native_blue_reward": 0.0,
+        "green_failed_actions": 0.0,
+        "red_footholds_final": 4.0,
+        "red_foothold_host_steps": 64.0,
+        "unrecovered_hosts": 4.0,
+        "blue_actions_not_started": 0.0,
+        "blue_agent_count": 5.0,
+        "green_success_rate": 1.0,
+        "recovery_time": null
+      }
+    },
+    "monitor_vs_same_actions": {
+      "platform_status": "SUCCEEDED",
+      "native_driven_by": "the platform run's committed blue actions",
+      "red": "FiniteStateRedAgent",
+      "equal": true,
+      "world_steps": 29,
+      "equal_world_steps": 29,
+      "first_difference": null,
+      "termination": {
+        "native": true,
+        "platform": true,
+        "native_world_steps": 29,
+        "platform_world_steps": 29
+      },
+      "reward_totals": {
+        "native": {
+          "Blue": 0.0,
+          "Red": 0.0,
+          "Green": 0.0
+        },
+        "platform": {
+          "Blue": 0.0,
+          "Red": 0.0,
+          "Green": 0.0
+        }
+      },
+      "metrics": {
+        "native_blue_reward": 0.0,
+        "green_failed_actions": 0.0,
+        "red_footholds_final": 4.0,
+        "red_foothold_host_steps": 64.0,
+        "unrecovered_hosts": 4.0,
+        "blue_actions_not_started": 0.0,
+        "blue_agent_count": 5.0,
+        "green_success_rate": 1.0,
+        "recovery_time": null
+      }
+    },
+    "react_dev_vs_same_actions": {
+      "platform_status": "SUCCEEDED",
+      "native_driven_by": "the platform run's committed blue actions",
+      "red": "FiniteStateRedAgent",
+      "equal": true,
+      "world_steps": 29,
+      "equal_world_steps": 29,
+      "first_difference": null,
+      "termination": {
+        "native": true,
+        "platform": true,
+        "native_world_steps": 29,
+        "platform_world_steps": 29
+      },
+      "reward_totals": {
+        "native": {
+          "Blue": 0.0,
+          "Red": 0.0,
+          "Green": 0.0
+        },
+        "platform": {
+          "Blue": 0.0,
+          "Red": 0.0,
+          "Green": 0.0
+        }
+      },
+      "metrics": {
+        "native_blue_reward": 0.0,
+        "green_failed_actions": 0.0,
+        "red_footholds_final": 4.0,
+        "red_foothold_host_steps": 64.0,
+        "unrecovered_hosts": 4.0,
+        "blue_actions_not_started": 12.0,
+        "blue_agent_count": 5.0,
+        "green_success_rate": 1.0,
+        "recovery_time": null
+      }
+    },
+    "react_holdout_vs_same_actions": {
+      "platform_status": "SUCCEEDED",
+      "native_driven_by": "the platform run's committed blue actions",
+      "red": "DiscoveryFSRed",
+      "equal": true,
+      "world_steps": 29,
+      "equal_world_steps": 29,
+      "first_difference": null,
+      "termination": {
+        "native": true,
+        "platform": true,
+        "native_world_steps": 29,
+        "platform_world_steps": 29
+      },
+      "reward_totals": {
+        "native": {
+          "Blue": 0.0,
+          "Red": 0.0,
+          "Green": 0.0
+        },
+        "platform": {
+          "Blue": 0.0,
+          "Red": 0.0,
+          "Green": 0.0
+        }
+      },
+      "metrics": {
+        "native_blue_reward": 0.0,
+        "green_failed_actions": 0.0,
+        "red_footholds_final": 14.0,
+        "red_foothold_host_steps": 159.0,
+        "unrecovered_hosts": 14.0,
+        "blue_actions_not_started": 12.0,
+        "blue_agent_count": 5.0,
+        "green_success_rate": 1.0,
+        "recovery_time": null
+      }
+    }
+  },
+  "mapping": {
+    "world_steps": 29,
+    "platform_controlled": [
+      "blue_agent_0",
+      "blue_agent_1",
+      "blue_agent_2",
+      "blue_agent_3",
+      "blue_agent_4"
+    ],
+    "native_automatic": {
+      "red_agents_seen": [
+        "red_agent_0",
+        "red_agent_1",
+        "red_agent_3"
+      ],
+      "green": "EnterpriseGreenAgent (aggregated per world step)"
+    },
+    "one_world_step": {
+      "world_step": 3,
+      "blue": {
+        "blue_agent_0": {
+          "submitted": {
+            "name": "Monitor"
+          },
+          "started": true,
+          "executed": "[Monitor]",
+          "success": "TRUE",
+          "controlled": true
+        },
+        "blue_agent_1": {
+          "submitted": {
+            "name": "Sleep"
+          },
+          "started": false,
+          "executed": "[Analyse operational_zone_a_subnet_user_host_4]",
+          "success": "TRUE",
+          "controlled": true
+        },
+        "blue_agent_2": {
+          "submitted": {
+            "name": "Monitor"
+          },
+          "started": true,
+          "executed": "[Monitor]",
+          "success": "TRUE",
+          "controlled": true
+        },
+        "blue_agent_3": {
+          "submitted": {
+            "name": "Monitor"
+          },
+          "started": true,
+          "executed": "[Monitor]",
+          "success": "TRUE",
+          "controlled": true
+        },
+        "blue_agent_4": {
+          "submitted": {
+            "name": "Sleep"
+          },
+          "started": false,
+          "executed": "[Analyse admin_network_subnet_user_host_2]",
+          "success": "TRUE",
+          "controlled": true
+        }
+      },
+      "red": {
+        "red_agent_0": "[AggressiveServiceDiscovery 10.0.8.249]"
+      },
+      "green": {
+        "access:TRUE": 15,
+        "work:TRUE": 26
+      }
+    },
+    "batch_semantics": "one JOINT_BATCH round = one CybORG parallel_step = one native world step"
+  },
+  "recovery": {
+    "stopped_after_global_step": 63,
+    "resumed_in_new_process": true,
+    "status": "SUCCEEDED",
+    "trajectory_equal": true,
+    "equal_world_steps": 29,
+    "world_steps": 29,
+    "same_metrics_except_elapsed_time": true
+  },
+  "lost_worker": {
+    "between": {
+      "killed_before_world_step": 5,
+      "equal": true,
+      "rebuilds": 1,
+      "sessions": 2
+    },
+    "lost_answer": {
+      "raised": "ResultUnknown",
+      "equal": true,
+      "note": "the pipe to a killed worker breaks: ResultUnknown; restore = verified rebuild of the pre-step state, then the step runs once"
+    },
+    "forged": {
+      "refused": true,
+      "detail": "rebuild diverged: replaying 4 world step(s) gives digest 6a9cea344fe7, the snapshot has 04909e1290a3"
+    }
+  },
+  "conclusion": {
+    "native_equals_platform:sleep_vs_official_baseline": true,
+    "native_equals_platform:monitor_vs_same_actions": true,
+    "native_equals_platform:react_dev_vs_same_actions": true,
+    "native_equals_platform:react_holdout_vs_same_actions": true,
+    "resume_in_a_new_process_equals_uninterrupted": true,
+    "lost_worker_rebuilt_from_the_committed_log": true,
+    "lost_answer_restore_and_execute_once": true,
+    "forged_history_refused": true,
+    "plugins_discovered": true,
+    "toolchain_recorded": true
+  }
+}
