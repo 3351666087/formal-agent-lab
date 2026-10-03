@@ -10,8 +10,10 @@ KUBECTL_VERSION=v1.37.1
 NODE_IMAGE="kindest/node:v1.37.0@sha256:a1ed56cfb0e7b93589bdf97c8cd566405a265939e3620fc4f5de89adff580ae5"
 CLUSTER=fal-helm
 ARCH=$(uname -m | sed 's/aarch64/arm64/;s/x86_64/amd64/')
-OUT=docs/execution/evidence/helm/install.json
-LOG=docs/execution/evidence/helm/install.log
+EVD="${FAL_HELM_EVIDENCE_DIR:-docs/execution/evidence/helm}"  # regressions write elsewhere (phase 4A)
+mkdir -p "$EVD"
+OUT=$EVD/install.json
+LOG=$EVD/install.log
 exec > >(tee "$LOG") 2>&1
 python3 scripts/disk_guard.py --need 8 --label "helm install check (images + kind node)" --trim
 

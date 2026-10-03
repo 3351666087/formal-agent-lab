@@ -33,6 +33,8 @@ OUT = ROOT / "docs" / "handoff" / "phase2-checks.json"
 PYTEST = "uv run --frozen pytest -p no:cacheprovider -q"
 PY = "uv run --frozen python"
 EV = os.environ.get("FAL_EVIDENCE_DIR", "docs/execution/evidence/phase2")  # phase 4A: regressions write elsewhere
+# the Helm checks wrote phase 1 / 2 records to evidence/helm; a regression run keeps them beside its other evidence
+HELM = f"{EV}/helm" if "FAL_EVIDENCE_DIR" in os.environ else "docs/execution/evidence/helm"
 GROUPS = ["compatibility", "semantic-driver", "planning-objectives", "multi-actor-recovery", "service-operations",
           "model-release", "evaluation-replay", "product-path", "local-release", "resource-profile"]
 
@@ -159,8 +161,9 @@ CHECKS: list[Check] = [
           heavy_gib=8),
     Check("kind-install-upgrade", "local-release", ["P2-116", "P2-101", "P2-104"],
           "kind：Chart 安装、从阶段一版本升级（迁移）与回滚（仅单节点开发集群）",
-          "bash scripts/helm-install-check.sh && bash scripts/helm-upgrade-check.sh",
-          ["docs/execution/evidence/helm/install.json", "docs/execution/evidence/helm/upgrade.json"],
+          f"FAL_HELM_EVIDENCE_DIR={HELM} bash scripts/helm-install-check.sh && "
+          f"FAL_HELM_EVIDENCE_DIR={HELM} bash scripts/helm-upgrade-check.sh",
+          [f"{HELM}/install.json", f"{HELM}/upgrade.json"],
           requires="docker", profile="local-kind", heavy_gib=12),
     Check("backup-restore", "local-release", ["P2-108"], "备份 → 重置 → 恢复，用一次实际实验验证",
           f"{PY} scripts/backup_restore_check.py", [f"{EV}/backup-restore.json"], requires="services",

@@ -13,8 +13,10 @@ NODE_IMAGE="kindest/node:v1.37.0@sha256:a1ed56cfb0e7b93589bdf97c8cd566405a265939
 CLUSTER=fal-upgrade
 PREV=46400ad
 REV=$(git rev-parse HEAD); TAG=${REV:0:12}; PTAG=p1-$PREV
-OUT=docs/execution/evidence/helm/upgrade.json
-LOG=docs/execution/evidence/helm/upgrade.log
+EVD="${FAL_HELM_EVIDENCE_DIR:-docs/execution/evidence/helm}"  # regressions write elsewhere (phase 4A)
+mkdir -p "$EVD"
+OUT=$EVD/upgrade.json
+LOG=$EVD/upgrade.log
 exec > >(tee "$LOG") 2>&1
 python3 scripts/disk_guard.py --need 10 --label "helm upgrade check (measured peak ~7 GiB + reserve)" --trim
 WT=$(mktemp -d)/phase1
