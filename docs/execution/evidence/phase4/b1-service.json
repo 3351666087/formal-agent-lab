@@ -1,0 +1,224 @@
+{
+  "deliverable": "phase4B-B1 (order service)",
+  "mode": "process (local-lite, no Docker)",
+  "continuous_business": {
+    "before": {
+      "phase": "before",
+      "attempted": 3,
+      "applied": 3,
+      "success_rate": 1.0,
+      "codes": [
+        200,
+        200,
+        200
+      ]
+    },
+    "during": {
+      "phase": "during",
+      "attempted": 3,
+      "applied": 3,
+      "success_rate": 1.0,
+      "codes": [
+        200,
+        200,
+        200
+      ]
+    },
+    "recovery": {
+      "phase": "recovery",
+      "attempted": 3,
+      "applied": 3,
+      "success_rate": 1.0,
+      "codes": [
+        200,
+        200,
+        200
+      ]
+    },
+    "disruption_applied": true,
+    "recovery_applied": true,
+    "recovery_seconds": 0.086,
+    "probes": {
+      "before": {
+        "access": {
+          "operations": 3,
+          "endpoint": "http://127.0.0.1:38235",
+          "tenant": "redlab"
+        },
+        "config": null,
+        "service_state": {
+          "health": "ready",
+          "revision": 3,
+          "clock": 0
+        },
+        "success_rate": null,
+        "cost": {
+          "mode": "process",
+          "pid": 2523,
+          "data_bytes": 57344,
+          "restarts": 0,
+          "rss_kb": 50216,
+          "cpu_seconds": 0.15
+        },
+        "recovery": {
+          "baseline_revision": 3,
+          "current_revision": 3,
+          "reset_to_baseline": true
+        }
+      },
+      "during": {
+        "access": {
+          "operations": 6,
+          "endpoint": "http://127.0.0.1:38235",
+          "tenant": "redlab"
+        },
+        "config": null,
+        "service_state": {
+          "health": "ready",
+          "revision": 3,
+          "clock": 0
+        },
+        "success_rate": null,
+        "cost": {
+          "mode": "process",
+          "pid": 2523,
+          "data_bytes": 57344,
+          "restarts": 0,
+          "rss_kb": 50296,
+          "cpu_seconds": 0.16
+        },
+        "recovery": {
+          "baseline_revision": 3,
+          "current_revision": 3,
+          "reset_to_baseline": true
+        }
+      },
+      "after": {
+        "access": {
+          "operations": 9,
+          "endpoint": "http://127.0.0.1:38235",
+          "tenant": "redlab"
+        },
+        "config": null,
+        "service_state": {
+          "health": "ready",
+          "revision": 3,
+          "clock": 0
+        },
+        "success_rate": null,
+        "cost": {
+          "mode": "process",
+          "pid": 2523,
+          "data_bytes": 57344,
+          "restarts": 0,
+          "rss_kb": 50308,
+          "cpu_seconds": 0.17
+        },
+        "recovery": {
+          "baseline_revision": 3,
+          "current_revision": 3,
+          "reset_to_baseline": true
+        }
+      }
+    }
+  },
+  "privileged_action": {
+    "denied_without_receipt": {
+      "admitted": false,
+      "applied": false,
+      "verdict": "DENY",
+      "reasons": [
+        "binding=False"
+      ],
+      "failed": [
+        "no receipt bound to this request"
+      ]
+    },
+    "zero_side_effect": true
+  },
+  "model_vs_service": {
+    "match": {
+      "result": "CONSISTENT",
+      "service": true,
+      "model": true,
+      "detail": "the service and the model agree the unauthorized action is prevented"
+    },
+    "deviation": {
+      "result": "MODEL_DEVIATION",
+      "service": true,
+      "model": false,
+      "detail": "the service and the model disagree on a comparable state"
+    },
+    "undecidable": {
+      "result": "UNDECIDABLE",
+      "detail": "the service state has no comparable model state (out of scope)"
+    }
+  },
+  "model_revision": {
+    "true_deviation": {
+      "case_id": "orders-privileged-config-deviation",
+      "source": "COUNTEREXAMPLE",
+      "comparable_state": {
+        "has_receipt": false,
+        "conditions": {
+          "slow_stations": []
+        }
+      },
+      "property": "unauthorized_config_change_is_blocked",
+      "observed_on_service": true,
+      "belief_v1_predicts": false,
+      "revised_v2_predicts": true,
+      "v1_rejected_by_case": true,
+      "v2_passes_case": true,
+      "original_run_model": "orders-belief@1",
+      "revised_run_model": "orders-belief@2",
+      "original_run_keeps_its_model": true
+    },
+    "stale_difference": {
+      "belief_revision": 3,
+      "observation_revision": 3,
+      "classification": "STALE",
+      "reason": "the belief was formed before the operator changed conditions; the difference is explained by the world advancing, not a model error",
+      "enters_regression_library": false
+    },
+    "regression_library_clean": true
+  },
+  "reset_and_rerun": {
+    "reproduces": true
+  },
+  "abnormal_termination": {
+    "killed_pid": 2523,
+    "data_dir_present": true
+  },
+  "cleanup": {
+    "removed_data": true,
+    "detail": {
+      "processes": [
+        2523
+      ],
+      "containers": [],
+      "paths": [
+        "/Users/null3351/Code/formal-agent-lab/var/b1-service/.fal-orders/phase4b-b1"
+      ]
+    }
+  },
+  "lifecycle": [
+    "create",
+    "ready",
+    "register(reset+synthetic-data)",
+    "continuous-business(before/during/recovery)",
+    "reset+rerun+abnormal-termination",
+    "cleanup"
+  ],
+  "conclusion": {
+    "business_runs_before_during_and_after_recovery": true,
+    "independent_probe_records_state_and_recovery": true,
+    "denied_privileged_action_has_zero_side_effect": true,
+    "three_outcomes_match_deviation_insufficient": true,
+    "deviation_becomes_a_regression_and_revision_passes": true,
+    "stale_difference_not_a_model_error": true,
+    "reset_and_rerun_reproduces": true,
+    "resources_accountable_after_crash": true,
+    "cleaned_up": true
+  }
+}

@@ -1,4 +1,4 @@
-<!-- 任务书原文：~/Downloads/04B_opus4_8_domain_closure.md（编制 2026-10-02）；复选框编号改为 P4B-B1…B3 以便 scripts/tick.py 记录证据。执行者：Opus 5.5（任务书标题写 Opus 4.8；开发执行者型号与实验内调用的模型分别记录）。交接记录：docs/handoff/phase4.md。 -->
+<!-- 任务书原文：~/Downloads/04B_opus4_8_domain_closure.md（编制 2026-10-02）；复选框编号改为 P4B-B1…B3 以便 scripts/tick.py 记录证据。开发执行者：Opus 5.5（B2）、Opus 4.8（B1 起；会话中途切换）；任务书标题写 Opus 4.8。开发执行者型号与实验内调用的模型分别记录。交接记录：docs/handoff/phase4.md。 -->
 
 # Phase 4B：领域闭环、比较实验与最终验收（Opus 4.8）
 
@@ -33,7 +33,9 @@ Phase 4 共 8 个交付包，本文件只占 3 个。4A 已负责检查器、执
 
 ## B1 · 一个真实领域闭环
 
-- [ ] **P4B-B1** 完成 MAL/本地服务的领域检查、真实混合策略、动态蓝方和可复核结果，关闭原 D1—D4 的上述缺口。
+- [x] **P4B-B1** 完成 MAL/本地服务的领域检查、真实混合策略、动态蓝方和可复核结果，关闭原 D1—D4 的上述缺口。
+  - 证据：MAL/订单服务领域闭环，关闭 D1–D4 缺口。逐动作签发门控 formal-lab.domain.mal.receipt-issuer：发送前按当前版本检查该 compromise 步前提 + Z3 目标可达，再签发绑定本次 ExecutionContext 的凭据，Broker 只对其准入（预签演示降为 D2 夹具）。混合红方经 A3 决策路径真正调用模型：规则给可核验候选、模型择一、来源随应答（真实 LLM / 协议测试 / stub），不可达回退 RULE 保留失败调用；真实端点 https://api.uheapi.com/v1 (gpt-5.6-sol) 实跑采用 6 次可追溯模型决策。动态蓝方 formal-lab.domain.mal.blue-defender 按自身观测的已攻陷集算红方前沿、加固最近目标步，随观测变化（两受控案例）；红蓝 ROUND_ROBIN 回合由环境裁判（本夹具蓝方将红方挡在目标外）。参与者下载为投影（去凭据路径/他方配置）。无凭据零副作用、逐动作前提不成立 DENY。模型修订：真实偏差成回归案例 v1 拒 v2 过、陈旧不入库。订单服务：实验前/中/恢复后连续业务 + 独立探针 + 恢复时间、特权动作只经 Broker、一致/偏差/无法判断三结果、偏差成案修订通过旧运行留旧模型。phase4 b1 组 4/4 PASS（31f9af3 干净工作树）：p4-b1-unit(63)、p4-b1-mal-loop(11)、p4-b1-real-endpoint(11,真实提供方)、p4-b1-service(9)。证据 docs/execution/evidence/phase4/b1-mal.json、b1-real-endpoint.json、b1-service.json、checks-b1.json
+  - 实现：`packages/domain-mal/src/formal_lab_domain_mal/gate.py`、`packages/domain-mal/src/formal_lab_domain_mal/strategies.py`、`packages/domain-mal/src/formal_lab_domain_mal/run.py`、`packages/domain-mal/src/formal_lab_domain_mal/demo.py`、`scripts/b1_mal_evidence.py`、`scripts/b1_service_evidence.py`、`scripts/phase4_domain_checks.py`
 
 **直接复用：** `packages/domain-mal/src/formal_lab_domain_mal/{frontend,lowering,admission,gate,strategies,run,revision,demo}.py`、`packages/domain-broker/`、`packages/environment-mal/`、`examples/local-order-service/src/formal_lab_example_orders/`，以及 4A 的执行、客户端、TaskPlan、投影和调度接口。原 D1—D4 的测试/证据脚本随实现修复，避免另造平行演示。
 

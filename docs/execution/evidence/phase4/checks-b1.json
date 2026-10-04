@@ -1,0 +1,674 @@
+{
+  "format": "checks@3",
+  "compatible_with": "checks@2",
+  "suite": "phase4",
+  "generated_at": "2026-10-04T13:20:40Z",
+  "source_revision": {
+    "commit": "31f9af354b858a5568b4583b28524df87f776d96",
+    "worktree": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "clean": true,
+      "changed_bytes": 0,
+      "untracked_files": 0,
+      "excluded_outputs": [
+        "docs/execution/evidence/",
+        "docs/handoff/",
+        "docs/licenses.md",
+        "docs/api/openapi.json",
+        "out/",
+        "out/checks/phase4-b1/"
+      ]
+    }
+  },
+  "config": {
+    "sha256": "8f8245c8f3f01a12d001b95dc2a273df7c3b98a8bdd015f010c7610943d6bb3c",
+    "parts": {
+      "checks": "d88e990f60bbdd78ffc0c7cab9b854634faf869028040d2a7df58ae0ccf50374",
+      "uv.lock": "9bc49474fec9df3c5b1eaf25dca7d68accbc845b2a3391d30986daebe465cec5",
+      "pnpm-lock.yaml": "02d23c074a75bccfaea1ed4ff51272ba3d6cbb724e8012366c8d18e9bb0a7c3a",
+      "deploy/compose/services.dev.yaml": "4c876045f15d5bd972c517e7de2d3626cd252d1842797f0152f596f7d8ea9ce0",
+      "deploy/compose/docker-compose.yaml": "ff4c34cae068cc6dacd4db7f4273887ff6c2bb0b3b84938a7b8969488bfb20ff"
+    }
+  },
+  "command": "python scripts/check_runner.py --suite phase4 --group b1 --out out/checks/phase4-b1",
+  "environment": {
+    "os": "Ubuntu 24.04.4 LTS",
+    "arch": "aarch64",
+    "kernel": "6.8.0-117-generic",
+    "python": "3.12.3",
+    "uv": "uv 0.12.19 (aarch64-unknown-linux-gnu)",
+    "node": "v24.21.0",
+    "pnpm": "12.6.0",
+    "docker": "29.5.2",
+    "z3": "5.1.0",
+    "temporalio": "1.33.0"
+  },
+  "resources_before": {
+    "cpus": 4,
+    "memory_gib": {
+      "MemTotal": 5.77,
+      "MemAvailable": 5.35
+    },
+    "load_avg": [
+      0.1,
+      0.07,
+      0.02
+    ],
+    "disk_free_gib": {
+      "host (repository filesystem)": 37.3,
+      "docker (/var/lib/docker)": 18.7
+    },
+    "concurrency": 1,
+    "note": "checks run one at a time; heavy checks ask disk_guard first"
+  },
+  "resources_after": {
+    "cpus": 4,
+    "memory_gib": {
+      "MemTotal": 5.77,
+      "MemAvailable": 5.39
+    },
+    "load_avg": [
+      0.08,
+      0.1,
+      0.04
+    ],
+    "disk_free_gib": {
+      "host (repository filesystem)": 37.0,
+      "docker (/var/lib/docker)": 18.7
+    },
+    "concurrency": 1,
+    "note": "checks run one at a time; heavy checks ask disk_guard first"
+  },
+  "run": {
+    "started_at": "2026-10-04T13:17:07Z",
+    "finished_at": "2026-10-04T13:20:40Z",
+    "duration_s": 212.3,
+    "full": false,
+    "selection": {
+      "group": [
+        "b1"
+      ],
+      "only": [],
+      "skip": []
+    },
+    "checks": [
+      "p4-b1-unit",
+      "p4-b1-mal-loop",
+      "p4-b1-real-endpoint",
+      "p4-b1-service"
+    ],
+    "commit": "31f9af354b858a5568b4583b28524df87f776d96",
+    "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "nonce": "773ea8fdbd404bc1a594ddd34f3bf45f",
+    "acceptance_nonce": null,
+    "results": {
+      "p4-b1-unit": "PASS",
+      "p4-b1-mal-loop": "PASS",
+      "p4-b1-real-endpoint": "PASS",
+      "p4-b1-service": "PASS"
+    }
+  },
+  "summary": {
+    "PASS": 4,
+    "FAIL": 0,
+    "BLOCKED": 0,
+    "NOT_RUN": 0,
+    "NOT_SELECTED": 0,
+    "NOT_APPLICABLE": 0
+  },
+  "groups": {
+    "a1": "NOT_SELECTED",
+    "a2": "NOT_SELECTED",
+    "a3": "NOT_SELECTED",
+    "a4": "NOT_SELECTED",
+    "a5": "NOT_SELECTED",
+    "b1": "PASS",
+    "b2": "NOT_SELECTED",
+    "b3": "NO_CHECKS"
+  },
+  "required_groups": [
+    "a1",
+    "a2",
+    "a3",
+    "a4",
+    "a5",
+    "b1",
+    "b2",
+    "b3"
+  ],
+  "selection_status": "PASS",
+  "complete": false,
+  "mandatory_passed": false,
+  "unmet": [
+    "a1=NOT_SELECTED",
+    "a2=NOT_SELECTED",
+    "a3=NOT_SELECTED",
+    "a4=NOT_SELECTED",
+    "a5=NOT_SELECTED",
+    "b2=NOT_SELECTED",
+    "b3=NO_CHECKS"
+  ],
+  "aggregation": "only results produced and verified by this invocation count; a partial selection is never complete; results from another commit, work tree or configuration are inherited and ignored",
+  "timing": {
+    "this_run_s": 212.3,
+    "last_full_run_s": null,
+    "last_full_run_at": null,
+    "partial_runs": [
+      {
+        "started_at": "2026-10-04T13:17:07Z",
+        "duration_s": 212.3,
+        "selection": {
+          "group": [
+            "b1"
+          ],
+          "only": [],
+          "skip": []
+        },
+        "results": {
+          "p4-b1-unit": "PASS",
+          "p4-b1-mal-loop": "PASS",
+          "p4-b1-real-endpoint": "PASS",
+          "p4-b1-service": "PASS"
+        }
+      }
+    ]
+  },
+  "runs": [
+    {
+      "started_at": "2026-10-04T13:17:07Z",
+      "finished_at": "2026-10-04T13:20:40Z",
+      "duration_s": 212.3,
+      "full": false,
+      "selection": {
+        "group": [
+          "b1"
+        ],
+        "only": [],
+        "skip": []
+      },
+      "checks": [
+        "p4-b1-unit",
+        "p4-b1-mal-loop",
+        "p4-b1-real-endpoint",
+        "p4-b1-service"
+      ],
+      "commit": "31f9af354b858a5568b4583b28524df87f776d96",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "nonce": "773ea8fdbd404bc1a594ddd34f3bf45f",
+      "acceptance_nonce": null,
+      "results": {
+        "p4-b1-unit": "PASS",
+        "p4-b1-mal-loop": "PASS",
+        "p4-b1-real-endpoint": "PASS",
+        "p4-b1-service": "PASS"
+      }
+    }
+  ],
+  "checks": [
+    {
+      "id": "p4-b1-unit",
+      "group": "b1",
+      "title": "领域单元：MAL 降低/三引擎、Broker 准入与逐字段拒绝、逐动作签发（前提失败/无版本/非 compromise 拒绝）、混合红方来源随应答（stub/协议/回退）、动态蓝方随观测变化、红蓝回合、模型修订；订单服务领域层",
+      "command": "uv run --frozen pytest -p no:cacheprovider -q packages/domain-mal/tests packages/domain-broker/tests examples/local-order-service/tests/test_domain_lab.py",
+      "tasks": [
+        "P4B-B1"
+      ],
+      "evidence": [],
+      "requires": null,
+      "profile": "local-lite",
+      "kind": "mandatory",
+      "retries": 0,
+      "heavy_gib": 0.0,
+      "produces": [],
+      "protocol": false,
+      "assertions_from": null,
+      "trigger": null,
+      "result": "PASS",
+      "reason": "63 passed in 22.28s",
+      "summary": "63 passed in 22.28s",
+      "condition": null,
+      "checked_commit": "31f9af354b858a5568b4583b28524df87f776d96",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "worktree_clean": true,
+      "config_sha256": "8f8245c8f3f01a12d001b95dc2a273df7c3b98a8bdd015f010c7610943d6bb3c",
+      "run_nonce": "773ea8fdbd404bc1a594ddd34f3bf45f",
+      "started_at": "2026-10-04T13:17:07Z",
+      "finished_at": "2026-10-04T13:17:30Z",
+      "duration_s": 22.5,
+      "attempts": [
+        {
+          "attempt": 1,
+          "started_at": "2026-10-04T13:17:07Z",
+          "finished_at": "2026-10-04T13:17:30Z",
+          "duration_s": 22.5,
+          "exit_code": 0,
+          "result": "PASS",
+          "reason": "63 passed in 22.28s",
+          "log": "out/checks/phase4-b1/logs/p4-b1-unit/20261004T131707Z-attempt-1.log",
+          "summary": "63 passed in 22.28s",
+          "nonce": "e548f305bda74d17973ab6cd2ba58f38",
+          "structured_result": null,
+          "assertions": [],
+          "produced": [],
+          "pytest": {
+            "passed": 63,
+            "failed": 0,
+            "skipped": 0,
+            "deselected": 0,
+            "errors": 0,
+            "skip_reasons": [],
+            "line": "63 passed in 22.28s"
+          }
+        }
+      ],
+      "evidence_files": [],
+      "first_failure": null,
+      "flaky": false,
+      "inherited": false,
+      "this_run": true,
+      "history": []
+    },
+    {
+      "id": "p4-b1-mal-loop",
+      "group": "b1",
+      "title": "MAL 闭环（协议测试服务）：逐动作签发按当前版本检查后放行、目标达成；混合红方采用至少一次可追溯到模型应答的决策，stub 标 LLM_STUB、不可达回退 RULE；红蓝双方实际行动由环境裁判；参与者下载为投影（去凭据/去他方配置）；无凭据零副作用；模型修订真实偏差成案、陈旧不入库",
+      "command": "uv run --frozen python scripts/b1_mal_evidence.py",
+      "tasks": [
+        "P4B-B1"
+      ],
+      "evidence": [],
+      "requires": null,
+      "profile": "local-lite",
+      "kind": "mandatory",
+      "retries": 0,
+      "heavy_gib": 0.0,
+      "produces": [
+        "docs/execution/evidence/phase4/b1-mal.json"
+      ],
+      "protocol": true,
+      "assertions_from": null,
+      "trigger": null,
+      "result": "PASS",
+      "reason": "[p4-b1-mal-loop] PASS: 11 required assertion(s) hold",
+      "summary": "[p4-b1-mal-loop] PASS: 11 required assertion(s) hold",
+      "condition": null,
+      "checked_commit": "31f9af354b858a5568b4583b28524df87f776d96",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "worktree_clean": true,
+      "config_sha256": "8f8245c8f3f01a12d001b95dc2a273df7c3b98a8bdd015f010c7610943d6bb3c",
+      "run_nonce": "773ea8fdbd404bc1a594ddd34f3bf45f",
+      "started_at": "2026-10-04T13:17:30Z",
+      "finished_at": "2026-10-04T13:17:35Z",
+      "duration_s": 5.6,
+      "attempts": [
+        {
+          "attempt": 1,
+          "started_at": "2026-10-04T13:17:30Z",
+          "finished_at": "2026-10-04T13:17:35Z",
+          "duration_s": 5.6,
+          "exit_code": 0,
+          "result": "PASS",
+          "reason": "[p4-b1-mal-loop] PASS: 11 required assertion(s) hold",
+          "log": "out/checks/phase4-b1/logs/p4-b1-mal-loop/20261004T131730Z-attempt-1.log",
+          "summary": "[p4-b1-mal-loop] PASS: 11 required assertion(s) hold",
+          "nonce": "5db864829de84926b3ea3f3f14c30ddc",
+          "structured_result": "out/checks/phase4-b1/logs/p4-b1-mal-loop/20261004T131730Z-attempt-1.result.json",
+          "assertions": [
+            {
+              "id": "per_action_loop_reaches_goal",
+              "required": true,
+              "holds": true,
+              "detail": "{'status': 'SUCCEEDED', 'reason': \"goal 'target_reached' reached\", 'steps': 6, 'goal_reached': True, 'gate_verdicts': [<GateVerdict.ALLOW: 'ALLOW'>, <GateVerdict.ALLOW: 'ALLOW'>, <GateVerdict.ALLOW: 'ALLOW'>, <GateVerdict.ALLOW: 'ALLOW'>, <GateVerdict.ALLOW: 'ALLOW'>, <GateVerdict.ALLOW: 'ALLOW'>, <GateVerdict.ALLOW: 'ALLOW'>, <GateVerdict.ALLOW: 'ALLOW'>, <GateVerdict.ALLOW: 'ALLOW'>, <GateVerdict.ALLOW: 'ALLOW'>, <GateVerdict.ALLOW: 'ALLOW'>, <GateVerdict.ALLOW: 'ALLOW'>], 'denied_operations':"
+            },
+            {
+              "id": "every_send_checked_at_its_revision",
+              "required": true,
+              "holds": true,
+              "detail": "6 issuer checks at their revisions"
+            },
+            {
+              "id": "red_adopts_a_model_decision",
+              "required": true,
+              "holds": true,
+              "detail": "6 adopted LLM_PROTOCOL_TEST send(s) with call ids"
+            },
+            {
+              "id": "stub_labelled_and_unreachable_falls_back",
+              "required": true,
+              "holds": true,
+              "detail": "stub=LLM_STUB, unreachable=RULE (TRANSPORT_ERROR)"
+            },
+            {
+              "id": "red_and_blue_both_act",
+              "required": true,
+              "holds": true,
+              "detail": "{'rule': (6, 22, False), 'hybrid': (6, 22, False)}"
+            },
+            {
+              "id": "blue_decision_varies_with_observation",
+              "required": true,
+              "holds": true,
+              "detail": "{'case_a_harden': 'app:attemptRead', 'case_b_harden': 'app:successfulRead', 'decision_varies': True}"
+            },
+            {
+              "id": "participant_download_is_a_projection",
+              "required": true,
+              "holds": true,
+              "detail": "leaks=[]; blue config removed=True"
+            },
+            {
+              "id": "no_receipt_no_side_effect",
+              "required": true,
+              "holds": true,
+              "detail": "{'status': 'BUDGET_EXHAUSTED', 'reason': 'step budget exhausted (60/60)', 'steps': 60, 'goal_reached': False, 'gate_verdicts': [<GateVerdict.DENY: 'DENY'>, <GateVerdict.DENY: 'DENY'>, <GateVerdict.DENY: 'DENY'>, <GateVerdict.DENY: 'DENY'>, <GateVerdict.DENY: 'DENY'>, <GateVerdict.DENY: 'DENY'>, <GateVerdict.DENY: 'DENY'>, <GateVerdict.DENY: 'DENY'>, <GateVerdict.DENY: 'DENY'>, <GateVerdict.DENY: 'DENY'>, <GateVerdict.DENY: 'DENY'>, <GateVerdict.DENY: 'DENY'>, <GateVerdict.DENY: 'DENY'>, <GateVer"
+            },
+            {
+              "id": "issuer_denies_unmet_precondition",
+              "required": true,
+              "holds": true,
+              "detail": "ACTION_PRECONDITION_FAILED at revision 0: compromise(secret:read) is not applicable in the current state (PRECONDITION_F"
+            },
+            {
+              "id": "true_deviation_regression_and_revision",
+              "required": true,
+              "holds": true,
+              "detail": "{'is_model_error': True, 'old_v1_rejected': True, 'revised_v2_passes': True, 'stale': 'STALE', 'regression_library_clean': True}"
+            },
+            {
+              "id": "stale_difference_not_in_library",
+              "required": true,
+              "holds": true,
+              "detail": "STALE"
+            }
+          ],
+          "produced": [
+            {
+              "path": "docs/execution/evidence/phase4/b1-mal.json",
+              "exists": true,
+              "sha256": "f6910996e510d5c0f5d105f227a15b609e3d129c842b4377f5bae9e0c499b840",
+              "fresh": true
+            }
+          ],
+          "pytest": null
+        }
+      ],
+      "evidence_files": [
+        {
+          "path": "docs/execution/evidence/phase4/b1-mal.json",
+          "exists": true,
+          "sha256": "f6910996e510d5c0f5d105f227a15b609e3d129c842b4377f5bae9e0c499b840",
+          "fresh": true
+        }
+      ],
+      "first_failure": null,
+      "flaky": false,
+      "inherited": false,
+      "this_run": true,
+      "history": []
+    },
+    {
+      "id": "p4-b1-real-endpoint",
+      "group": "b1",
+      "title": "已配置真实端点的混合红方：至少一次被采用的攻击步选择可追溯到真实模型应答；未配置或不可达记 BLOCKED，协议测试服务不充当真实模型",
+      "command": "uv run --frozen python scripts/b1_mal_evidence.py --real",
+      "tasks": [
+        "P4B-B1"
+      ],
+      "evidence": [],
+      "requires": null,
+      "profile": "local-lite",
+      "kind": "mandatory",
+      "retries": 0,
+      "heavy_gib": 0.0,
+      "produces": [
+        "docs/execution/evidence/phase4/b1-real-endpoint.json"
+      ],
+      "protocol": true,
+      "assertions_from": null,
+      "trigger": null,
+      "result": "PASS",
+      "reason": "[p4-b1-real-endpoint] PASS: 11 required assertion(s) hold",
+      "summary": "[p4-b1-real-endpoint] PASS: 11 required assertion(s) hold",
+      "condition": null,
+      "checked_commit": "31f9af354b858a5568b4583b28524df87f776d96",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "worktree_clean": true,
+      "config_sha256": "8f8245c8f3f01a12d001b95dc2a273df7c3b98a8bdd015f010c7610943d6bb3c",
+      "run_nonce": "773ea8fdbd404bc1a594ddd34f3bf45f",
+      "started_at": "2026-10-04T13:17:35Z",
+      "finished_at": "2026-10-04T13:20:39Z",
+      "duration_s": 183.1,
+      "attempts": [
+        {
+          "attempt": 1,
+          "started_at": "2026-10-04T13:17:35Z",
+          "finished_at": "2026-10-04T13:20:39Z",
+          "duration_s": 183.1,
+          "exit_code": 0,
+          "result": "PASS",
+          "reason": "[p4-b1-real-endpoint] PASS: 11 required assertion(s) hold",
+          "log": "out/checks/phase4-b1/logs/p4-b1-real-endpoint/20261004T131735Z-attempt-1.log",
+          "summary": "[p4-b1-real-endpoint] PASS: 11 required assertion(s) hold",
+          "nonce": "a4274e72500f413883b8565d90c7515d",
+          "structured_result": "out/checks/phase4-b1/logs/p4-b1-real-endpoint/20261004T131735Z-attempt-1.result.json",
+          "assertions": [
+            {
+              "id": "per_action_loop_reaches_goal",
+              "required": true,
+              "holds": true,
+              "detail": "{'status': 'SUCCEEDED', 'reason': \"goal 'target_reached' reached\", 'steps': 6, 'goal_reached': True, 'gate_verdicts': [<GateVerdict.ALLOW: 'ALLOW'>, <GateVerdict.ALLOW: 'ALLOW'>, <GateVerdict.ALLOW: 'ALLOW'>, <GateVerdict.ALLOW: 'ALLOW'>, <GateVerdict.ALLOW: 'ALLOW'>, <GateVerdict.ALLOW: 'ALLOW'>, <GateVerdict.ALLOW: 'ALLOW'>, <GateVerdict.ALLOW: 'ALLOW'>, <GateVerdict.ALLOW: 'ALLOW'>, <GateVerdict.ALLOW: 'ALLOW'>, <GateVerdict.ALLOW: 'ALLOW'>, <GateVerdict.ALLOW: 'ALLOW'>], 'denied_operations':"
+            },
+            {
+              "id": "every_send_checked_at_its_revision",
+              "required": true,
+              "holds": true,
+              "detail": "6 issuer checks at their revisions"
+            },
+            {
+              "id": "red_adopts_a_model_decision",
+              "required": true,
+              "holds": true,
+              "detail": "6 adopted LLM send(s) with call ids"
+            },
+            {
+              "id": "stub_labelled_and_unreachable_falls_back",
+              "required": true,
+              "holds": true,
+              "detail": "stub=LLM_STUB, unreachable=RULE (TRANSPORT_ERROR)"
+            },
+            {
+              "id": "red_and_blue_both_act",
+              "required": true,
+              "holds": true,
+              "detail": "{'rule': (6, 22, False), 'hybrid': (5, 23, False)}"
+            },
+            {
+              "id": "blue_decision_varies_with_observation",
+              "required": true,
+              "holds": true,
+              "detail": "{'case_a_harden': 'app:attemptRead', 'case_b_harden': 'app:successfulRead', 'decision_varies': True}"
+            },
+            {
+              "id": "participant_download_is_a_projection",
+              "required": true,
+              "holds": true,
+              "detail": "leaks=[]; blue config removed=True"
+            },
+            {
+              "id": "no_receipt_no_side_effect",
+              "required": true,
+              "holds": true,
+              "detail": "{'status': 'BUDGET_EXHAUSTED', 'reason': 'step budget exhausted (60/60)', 'steps': 60, 'goal_reached': False, 'gate_verdicts': [<GateVerdict.DENY: 'DENY'>, <GateVerdict.DENY: 'DENY'>, <GateVerdict.DENY: 'DENY'>, <GateVerdict.DENY: 'DENY'>, <GateVerdict.DENY: 'DENY'>, <GateVerdict.DENY: 'DENY'>, <GateVerdict.DENY: 'DENY'>, <GateVerdict.DENY: 'DENY'>, <GateVerdict.DENY: 'DENY'>, <GateVerdict.DENY: 'DENY'>, <GateVerdict.DENY: 'DENY'>, <GateVerdict.DENY: 'DENY'>, <GateVerdict.DENY: 'DENY'>, <GateVer"
+            },
+            {
+              "id": "issuer_denies_unmet_precondition",
+              "required": true,
+              "holds": true,
+              "detail": "ACTION_PRECONDITION_FAILED at revision 0: compromise(secret:read) is not applicable in the current state (PRECONDITION_F"
+            },
+            {
+              "id": "true_deviation_regression_and_revision",
+              "required": true,
+              "holds": true,
+              "detail": "{'is_model_error': True, 'old_v1_rejected': True, 'revised_v2_passes': True, 'stale': 'STALE', 'regression_library_clean': True}"
+            },
+            {
+              "id": "stale_difference_not_in_library",
+              "required": true,
+              "holds": true,
+              "detail": "STALE"
+            }
+          ],
+          "produced": [
+            {
+              "path": "docs/execution/evidence/phase4/b1-real-endpoint.json",
+              "exists": true,
+              "sha256": "655941f0cd9f7592e53c6097ecba54b10bd5a7bbe975bf1f77cb32b9133154e2",
+              "fresh": true
+            }
+          ],
+          "pytest": null
+        }
+      ],
+      "evidence_files": [
+        {
+          "path": "docs/execution/evidence/phase4/b1-real-endpoint.json",
+          "exists": true,
+          "sha256": "655941f0cd9f7592e53c6097ecba54b10bd5a7bbe975bf1f77cb32b9133154e2",
+          "fresh": true
+        }
+      ],
+      "first_failure": null,
+      "flaky": false,
+      "inherited": false,
+      "this_run": true,
+      "history": []
+    },
+    {
+      "id": "p4-b1-service",
+      "group": "b1",
+      "title": "真实订单服务领域实验：全生命周期、实验前/中/恢复后连续业务探针（成功率/服务状态/恢复时间）、特权动作只经 Broker、模型与服务一致/偏差/无法判断三种结果、真实偏差成回归案例且修订模型通过、旧运行仍引用旧模型",
+      "command": "uv run --frozen python scripts/b1_service_evidence.py",
+      "tasks": [
+        "P4B-B1"
+      ],
+      "evidence": [],
+      "requires": null,
+      "profile": "local-lite",
+      "kind": "mandatory",
+      "retries": 0,
+      "heavy_gib": 0.0,
+      "produces": [
+        "docs/execution/evidence/phase4/b1-service.json"
+      ],
+      "protocol": true,
+      "assertions_from": null,
+      "trigger": null,
+      "result": "PASS",
+      "reason": "[p4-b1-service] PASS: 9 required assertion(s) hold",
+      "summary": "[p4-b1-service] PASS: 9 required assertion(s) hold",
+      "condition": null,
+      "checked_commit": "31f9af354b858a5568b4583b28524df87f776d96",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "worktree_clean": true,
+      "config_sha256": "8f8245c8f3f01a12d001b95dc2a273df7c3b98a8bdd015f010c7610943d6bb3c",
+      "run_nonce": "773ea8fdbd404bc1a594ddd34f3bf45f",
+      "started_at": "2026-10-04T13:20:39Z",
+      "finished_at": "2026-10-04T13:20:40Z",
+      "duration_s": 1.1,
+      "attempts": [
+        {
+          "attempt": 1,
+          "started_at": "2026-10-04T13:20:39Z",
+          "finished_at": "2026-10-04T13:20:40Z",
+          "duration_s": 1.1,
+          "exit_code": 0,
+          "result": "PASS",
+          "reason": "[p4-b1-service] PASS: 9 required assertion(s) hold",
+          "log": "out/checks/phase4-b1/logs/p4-b1-service/20261004T132039Z-attempt-1.log",
+          "summary": "[p4-b1-service] PASS: 9 required assertion(s) hold",
+          "nonce": "0c6fd45c5355470981b4443b1a80a9d2",
+          "structured_result": "out/checks/phase4-b1/logs/p4-b1-service/20261004T132039Z-attempt-1.result.json",
+          "assertions": [
+            {
+              "id": "business_runs_before_during_and_after_recovery",
+              "required": true,
+              "holds": true,
+              "detail": "before 3/3, during applied 3/3, recovery 3/3"
+            },
+            {
+              "id": "independent_probe_records_state_and_recovery",
+              "required": true,
+              "holds": true,
+              "detail": "probe health before/during/after; recovery_seconds 0.086"
+            },
+            {
+              "id": "denied_privileged_action_has_zero_side_effect",
+              "required": true,
+              "holds": true,
+              "detail": "DENY"
+            },
+            {
+              "id": "three_outcomes_match_deviation_insufficient",
+              "required": true,
+              "holds": true,
+              "detail": "CONSISTENT / MODEL_DEVIATION / UNDECIDABLE"
+            },
+            {
+              "id": "deviation_becomes_a_regression_and_revision_passes",
+              "required": true,
+              "holds": true,
+              "detail": "{'v1_rejected_by_case': True, 'v2_passes_case': True, 'original_run_keeps_its_model': True}"
+            },
+            {
+              "id": "stale_difference_not_a_model_error",
+              "required": true,
+              "holds": true,
+              "detail": "STALE"
+            },
+            {
+              "id": "reset_and_rerun_reproduces",
+              "required": true,
+              "holds": true,
+              "detail": "[200, 200, 200]"
+            },
+            {
+              "id": "resources_accountable_after_crash",
+              "required": true,
+              "holds": true,
+              "detail": "var/b1-service/.fal-orders/phase4b-b1/data"
+            },
+            {
+              "id": "cleaned_up",
+              "required": true,
+              "holds": true,
+              "detail": "{'processes': [2523], 'containers': [], 'paths': ['/Users/null3351/Code/formal-agent-lab/var/b1-service/.fal-orders/phase4b-b1']}"
+            }
+          ],
+          "produced": [
+            {
+              "path": "docs/execution/evidence/phase4/b1-service.json",
+              "exists": true,
+              "sha256": "8dc697ea33eff6daa120a5f16948c6d69c08abfc0797d3213603b9c606128727",
+              "fresh": true
+            }
+          ],
+          "pytest": null
+        }
+      ],
+      "evidence_files": [
+        {
+          "path": "docs/execution/evidence/phase4/b1-service.json",
+          "exists": true,
+          "sha256": "8dc697ea33eff6daa120a5f16948c6d69c08abfc0797d3213603b9c606128727",
+          "fresh": true
+        }
+      ],
+      "first_failure": null,
+      "flaky": false,
+      "inherited": false,
+      "this_run": true,
+      "history": []
+    }
+  ]
+}
