@@ -112,7 +112,8 @@ def _issuer_decisions(result: Any, issuer_plugin: str) -> list[dict[str, Any]]:
 
 def per_action_gated_red_team(package: Any, *, workdir: str | Path, target_security: TargetSecurity,
                               lab_policy: LabPolicy, strategy: str = "symbolic", service_identity: str = "mal-sim",
-                              max_model_calls: int = 0, ttl_seconds: int = 3600) -> dict[str, Any]:
+                              max_model_calls: int = 0, ttl_seconds: int = 3600,
+                              red_config: dict[str, Any] | None = None) -> dict[str, Any]:
     """The runtime-check admission loop (phase 4B, B1): receipts are issued by the MAL issuer, which checks each
     compromise action's precondition against the current state at send time (and the target's reachability in the
     model, once), then the MAL broker admits only against that receipt. Unlike `gated_red_team` (which pre-signs a
@@ -139,13 +140,18 @@ def per_action_gated_red_team(package: Any, *, workdir: str | Path, target_secur
         "target_security": target_security.to_dict(), "lab_policy": lab_policy.to_dict(),
         "role_allowed_actions": ["compromise"]}}
     scn = red_team_scenario(package, execution_gates=[issuer, gate], strategy=strategy,
-                            max_model_calls=max_model_calls)
+                            max_model_calls=max_model_calls, red_config=red_config)
     result = run_local(make_manifest(run_id=new_run_id(), project_id="phase4b-b1", scenario=scn, package=package,
                                      registry=reg), package, reg)
     issued = _issuer_decisions(result, MAL_ISSUER["plugin_id"])
+    red_sources = [{"step": st.step, "kind": str(st.proposal.source.kind),
+                    "model_call_ids": list(st.proposal.source.model_call_ids),
+                    "decided_by": str(st.proposal.source.decided_by)}
+                   for st in result.steps if st.proposal is not None and st.proposal.actor_id == "red"]
     return {
         "strategy": strategy,
         "issuer_decisions": issued,
+        "red_sources": red_sources,
         "every_send_checked_at_its_revision": all(d["verdict"] == "ALLOW" and d["checked_at_revision"] is not None
                                                   for d in issued),
         "run": _run_summary(result, goal_id),

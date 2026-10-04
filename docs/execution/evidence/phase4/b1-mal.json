@@ -1,0 +1,289 @@
+{
+  "deliverable": "phase4B-B1",
+  "endpoint": "protocol-test service (http://127.0.0.1:42927/v1)",
+  "admission_loop": {
+    "strategy": "symbolic",
+    "issuer_decisions": [
+      {
+        "step": 1,
+        "verdict": "ALLOW",
+        "checked_at_revision": 0,
+        "reason": "receipt rcpt_8772766222414410: compromise(app:attemptRead) applicable at revision 0, target reachable (Z3 WITNESS)"
+      },
+      {
+        "step": 2,
+        "verdict": "ALLOW",
+        "checked_at_revision": 1,
+        "reason": "receipt rcpt_88650d8c2d184721: compromise(app:successfulRead) applicable at revision 1, target reachable (Z3 WITNESS)"
+      },
+      {
+        "step": 3,
+        "verdict": "ALLOW",
+        "checked_at_revision": 2,
+        "reason": "receipt rcpt_58daece4700a4df1: compromise(app:read) applicable at revision 2, target reachable (Z3 WITNESS)"
+      },
+      {
+        "step": 4,
+        "verdict": "ALLOW",
+        "checked_at_revision": 3,
+        "reason": "receipt rcpt_0ac5a7b33273445d: compromise(secret:attemptRead) applicable at revision 3, target reachable (Z3 WITNESS)"
+      },
+      {
+        "step": 5,
+        "verdict": "ALLOW",
+        "checked_at_revision": 4,
+        "reason": "receipt rcpt_8fa78b9061ba400b: compromise(secret:successfulRead) applicable at revision 4, target reachable (Z3 WITNESS)"
+      },
+      {
+        "step": 6,
+        "verdict": "ALLOW",
+        "checked_at_revision": 5,
+        "reason": "receipt rcpt_87c58ad3354c4bbe: compromise(secret:read) applicable at revision 5, target reachable (Z3 WITNESS)"
+      }
+    ],
+    "red_sources": [
+      {
+        "step": 1,
+        "kind": "SYMBOLIC",
+        "model_call_ids": [],
+        "decided_by": "None"
+      },
+      {
+        "step": 2,
+        "kind": "SYMBOLIC",
+        "model_call_ids": [],
+        "decided_by": "None"
+      },
+      {
+        "step": 3,
+        "kind": "SYMBOLIC",
+        "model_call_ids": [],
+        "decided_by": "None"
+      },
+      {
+        "step": 4,
+        "kind": "SYMBOLIC",
+        "model_call_ids": [],
+        "decided_by": "None"
+      },
+      {
+        "step": 5,
+        "kind": "SYMBOLIC",
+        "model_call_ids": [],
+        "decided_by": "None"
+      },
+      {
+        "step": 6,
+        "kind": "SYMBOLIC",
+        "model_call_ids": [],
+        "decided_by": "None"
+      }
+    ],
+    "every_send_checked_at_its_revision": true,
+    "run": {
+      "status": "SUCCEEDED",
+      "reason": "goal 'target_reached' reached",
+      "steps": 6,
+      "goal_reached": true,
+      "gate_verdicts": [
+        "ALLOW",
+        "ALLOW",
+        "ALLOW",
+        "ALLOW",
+        "ALLOW",
+        "ALLOW",
+        "ALLOW",
+        "ALLOW",
+        "ALLOW",
+        "ALLOW",
+        "ALLOW",
+        "ALLOW"
+      ],
+      "denied_operations": 0
+    }
+  },
+  "live_model_red": {
+    "endpoint": "protocol-test service (http://127.0.0.1:42927/v1)",
+    "red_sources": [
+      {
+        "step": 1,
+        "kind": "LLM_PROTOCOL_TEST",
+        "model_call_ids": [
+          "ptest_00001"
+        ],
+        "decided_by": "MODEL_RESPONSE"
+      },
+      {
+        "step": 2,
+        "kind": "LLM_PROTOCOL_TEST",
+        "model_call_ids": [
+          "ptest_00002"
+        ],
+        "decided_by": "MODEL_RESPONSE"
+      },
+      {
+        "step": 3,
+        "kind": "LLM_PROTOCOL_TEST",
+        "model_call_ids": [
+          "ptest_00003"
+        ],
+        "decided_by": "MODEL_RESPONSE"
+      },
+      {
+        "step": 4,
+        "kind": "LLM_PROTOCOL_TEST",
+        "model_call_ids": [
+          "ptest_00004"
+        ],
+        "decided_by": "MODEL_RESPONSE"
+      },
+      {
+        "step": 5,
+        "kind": "LLM_PROTOCOL_TEST",
+        "model_call_ids": [
+          "ptest_00005"
+        ],
+        "decided_by": "MODEL_RESPONSE"
+      },
+      {
+        "step": 6,
+        "kind": "LLM_PROTOCOL_TEST",
+        "model_call_ids": [
+          "ptest_00006"
+        ],
+        "decided_by": "MODEL_RESPONSE"
+      }
+    ],
+    "adopted_from_model": 6,
+    "adopted_kind": "LLM_PROTOCOL_TEST",
+    "stub_kind": "LLM_STUB",
+    "fallback_kind": "RULE",
+    "fallback_failure": "TRANSPORT_ERROR"
+  },
+  "red_blue": {
+    "rule": {
+      "status": "FAILED",
+      "termination": "NO_PROGRESS",
+      "red_actions": 6,
+      "blue_actions": 22,
+      "goal_reached": false,
+      "red_all_compromise": true,
+      "blue_all_harden": true
+    },
+    "hybrid": {
+      "status": "FAILED",
+      "termination": "NO_PROGRESS",
+      "red_actions": 6,
+      "blue_actions": 22,
+      "goal_reached": false,
+      "red_all_compromise": true,
+      "blue_all_harden": true
+    }
+  },
+  "blue_controlled_cases": {
+    "case_a_harden": "app:attemptRead",
+    "case_b_harden": "app:successfulRead",
+    "decision_varies": true
+  },
+  "participant_projection": {
+    "actor": "red",
+    "events": 68,
+    "credential_paths_in_download": [],
+    "blue_config_removed": true
+  },
+  "zero_side_effect": {
+    "without_receipts": {
+      "status": "BUDGET_EXHAUSTED",
+      "reason": "step budget exhausted (60/60)",
+      "steps": 60,
+      "goal_reached": false,
+      "gate_verdicts": [
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY",
+        "DENY"
+      ],
+      "denied_operations": 60
+    },
+    "issuer_precondition_deny": {
+      "verdict": "DENY",
+      "reason": "ACTION_PRECONDITION_FAILED at revision 0: compromise(secret:read) is not applicable in the current state (PRECONDITION_FALSE); no receipt"
+    }
+  },
+  "model_revision": {
+    "is_model_error": true,
+    "old_v1_rejected": true,
+    "revised_v2_passes": true,
+    "stale": "STALE",
+    "regression_library_clean": true
+  },
+  "conclusion": {
+    "per_action_loop_reaches_goal": true,
+    "every_send_checked_at_its_revision": true,
+    "red_adopts_a_model_decision": true,
+    "stub_labelled_and_unreachable_falls_back": true,
+    "red_and_blue_both_act": true,
+    "blue_decision_varies_with_observation": true,
+    "participant_download_is_a_projection": true,
+    "no_receipt_no_side_effect": true,
+    "issuer_denies_unmet_precondition": true,
+    "true_deviation_regression_and_revision": true,
+    "stale_difference_not_in_library": true
+  }
+}

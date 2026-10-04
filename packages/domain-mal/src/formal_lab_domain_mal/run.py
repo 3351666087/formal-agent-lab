@@ -31,11 +31,14 @@ def red_team_scenario(package: ModelPackage, *, goal_property: str = "target_rea
                       seed: int = 0, scenario_id: str | None = None, name: str = "MAL red-team",
                       description: str = "", execution_gates: list[dict] | None = None,
                       strategy: str = "symbolic", max_model_calls: int = 0,
-                      env_config: dict | None = None) -> ScenarioManifest:
+                      env_config: dict | None = None, red_config: dict | None = None) -> ScenarioManifest:
     """A single-attacker scenario in the ir-world environment. `strategy` picks the red planner (symbolic = Z3
     bounded, rule = greedy, hybrid = model-assisted). `execution_gates` (D2) wires pre-send gates like the Broker.
-    `env_config` passes ir-world options such as `truth_constant_overrides` (D3 model-deviation) or `observation`."""
+    `env_config` passes ir-world options such as `truth_constant_overrides` (D3 model-deviation) or `observation`.
+    `red_config` merges into the red strategy config (e.g. {"client": "openai_compatible"} for a real-model hybrid)."""
     strat = RED_STRATEGIES[strategy](horizon, goal_property)
+    if red_config:
+        strat = {**strat, "config": {**strat.get("config", {}), **red_config}}
     return ScenarioManifest(
         scenario_id=scenario_id or f"mal-{package.package_id}",
         name=name,
@@ -57,12 +60,15 @@ BLUE = {"plugin_id": "formal-lab.domain.mal.blue-defender", "version": "1.0.0"}
 
 def red_blue_scenario(package: ModelPackage, *, goal_property: str = "target_reached", horizon: int = 120,
                       seed: int = 0, strategy: str = "rule", max_model_calls: int = 0, scenario_id: str | None = None,
-                      env_config: dict | None = None, no_progress_limit: int = 4) -> ScenarioManifest:
+                      env_config: dict | None = None, no_progress_limit: int = 4,
+                      red_config: dict | None = None, execution_gates: list[dict] | None = None) -> ScenarioManifest:
     """A turn-taking red/blue episode (phase 4B, B1): red (rule / hybrid / symbolic) and a reactive blue defender
     alternate (ROUND_ROBIN) on a defence-enabled package. Red compromises steps; blue, from its observation, hardens
     steps. The referee (the environment state) decides the outcome: red reaches `goal_property`, or blue contains it
     (red runs out of applicable steps and no progress is made). Needs a package built with `include_defense=True`."""
     strat = RED_STRATEGIES[strategy](horizon, goal_property)
+    if red_config:
+        strat = {**strat, "config": {**strat.get("config", {}), **red_config}}
     return ScenarioManifest(
         scenario_id=scenario_id or f"mal-rb-{package.package_id}",
         name="MAL 红蓝对抗",
@@ -80,6 +86,7 @@ def red_blue_scenario(package: ModelPackage, *, goal_property: str = "target_rea
                 "max_tokens": 200_000 if max_model_calls else 0},
         seed=seed,
         turns={"mode": "ROUND_ROBIN"},
+        execution_gates=execution_gates or [],
         termination={"joint_goal": goal_property, "on_no_action": "SKIP_ACTOR", "no_progress_limit": no_progress_limit},
     )
 
