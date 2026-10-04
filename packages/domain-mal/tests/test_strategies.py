@@ -131,3 +131,55 @@ def test_hybrid_provenance_follows_what_answered(package):
                                                      backoff_s=0.01, timeout_s=1, max_attempts=1))
     p = hy.propose(_compromise_context(package, ids))
     assert p.source.kind == "RULE" and hy.last_decision.failure and p.source.model_call_ids  # failed call kept
+
+
+def _blue_context(package, compromised_ids):
+    from formal_lab_contracts import BudgetUsage, CandidateAction, Observation, PlanningContext
+    from formal_lab_domain_mal.frontend import attack_graph_of
+
+    ids = list(attack_graph_of(package)["lowering"]["id_map"].values())
+    cands = [CandidateAction(action={"action_type": "harden", "params": {"n": i}}, belief_applicability="APPLICABLE")
+             for i in ids if i not in compromised_ids]
+    facts = [{"path": f"compromised[{i}]", "value": i in compromised_ids, "observed_at_step": 1} for i in ids]
+    obs = Observation(run_id="r", actor_id="blue", step=1, state_revision=0, facts=facts)
+    return PlanningContext(run_id="r", step=1, step_id="r:s1", actor_id="blue", observation=obs, action_specs=[],
+                           candidates=cands, model=package.ref(), budget={"max_steps": 120}, usage=BudgetUsage(),
+                           seed=0)
+
+
+def test_blue_defender_decision_varies_with_observation(package, native):
+    """Two controlled cases, same initial configuration but different observations of what red has compromised: the
+    reactive blue hardens a different step — it reads its observation, it is not a fixed script."""
+    from formal_lab_domain_mal.frontend import attack_graph_of
+    from formal_lab_domain_mal.strategies import MalBlueDefender
+
+    ids = attack_graph_of(package)["lowering"]["id_map"]
+    blue = MalBlueDefender(package)
+    entry = {ids[e] for e in native["entry"] if e in ids}
+    a = blue.propose(_blue_context(package, set(entry)))
+    advanced = set(entry) | ({ids["app:attemptRead"]} if "app:attemptRead" in ids else set())
+    b = blue.propose(_blue_context(package, advanced))
+    assert a.action.action_type == b.action.action_type == "harden"
+    assert a.action.params != b.action.params  # the harden target follows red's advanced frontier
+    assert "frontier" in a.rationale and "frontier" in b.rationale
+
+
+def test_red_blue_loop_both_decide_and_the_referee_judges(reg, package):
+    """A turn-taking red/blue episode: red compromises steps, blue hardens from its observation, and the outcome is
+    decided by the environment state (not a strategy's self-report)."""
+    from formal_lab_domain_mal.frontend import attack_graph_of
+    from formal_lab_domain_mal.run import red_blue_scenario
+
+    scn = red_blue_scenario(package, strategy="rule", horizon=120, seed=0)
+    res = run_local(make_manifest(run_id=new_run_id(), project_id="d3-rb", scenario=scn, package=package,
+                                  registry=reg), package, reg)
+    by = {}
+    for st in res.steps:
+        if st.proposal:
+            by.setdefault(st.actor_id, []).append(st.proposal.action.action_type)
+    assert by.get("red") and all(a == "compromise" for a in by["red"])  # red actually compromised steps
+    assert by.get("blue") and all(a == "harden" for a in by["blue"])    # blue actually hardened steps
+    gid = attack_graph_of(package)["lowering"]["goal_id"]
+    reached = bool(res.final_state.get(f"compromised[{gid}]"))
+    # the referee (env state) decides; on this fixture the reactive blue contains red (goal not reached)
+    assert reached is False and str(res.status) in ("FAILED", "BUDGET_EXHAUSTED")

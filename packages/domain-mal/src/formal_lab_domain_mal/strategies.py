@@ -155,6 +155,16 @@ RED_HYBRID = PluginDescriptor(
         "description": "model service proposes candidate steps; the rule verifies and picks an applicable one"},
     license="Apache-2.0", source="formal-lab-domain-mal")
 
+BLUE_DEFENDER = PluginDescriptor(
+    plugin_id="formal-lab.domain.mal.blue-defender", version="1.0.0", interface="PLANNER",
+    capabilities=[{"id": caps.PLAN_RULE}], semantic_profiles=["deterministic_finite_v1"],
+    config_schema={"type": "object", "additionalProperties": False},
+    entrypoint="formal_lab_domain_mal.strategies:create_blue_defender",
+    ui={"label": "MAL 蓝方防御者", "category": "rule",
+        "description": "reactive defender: from its observation of the compromised steps, hardens the step on red's "
+                       "current frontier closest to the target (a turn-taking participant, not a pre-run cut)"},
+    license="Apache-2.0", source="formal-lab-domain-mal")
+
 
 class MalRedRule:
     descriptor = RED_RULE
@@ -248,6 +258,54 @@ class MalRedHybrid:
                                  candidates_considered=len(context.candidates))
 
 
+class MalBlueDefender:
+    """Reactive defender (phase 4B, B1): a turn-taking participant, not a pre-run cut. Each turn it reads its own
+    observation of which steps are compromised, computes red's current frontier (seeds and the not-yet-compromised
+    children of compromised steps), and hardens the frontier step closest to the target — so its choice changes with
+    the observation. With no frontier step hardenable it hardens the nearest hardenable step; with no harden candidate
+    at all the kernel skips its turn (A4 wait/skip semantics)."""
+
+    descriptor = BLUE_DEFENDER
+
+    def __init__(self, package: Any):
+        report = attack_graph_of(package)["lowering"]
+        ids = report["id_map"]
+        self.inv = {v: k for k, v in ids.items()}
+        dist_full = _distances_to_goal(report["modeled_edges"], report["goal"])
+        self.dist = {ids[fn]: d for fn, d in dist_full.items() if fn in ids}
+        self.children: dict[str, list[str]] = defaultdict(list)
+        for p, c in report["modeled_edges"]:
+            self.children[ids[p]].append(ids[c])
+        self.seeds = {ids[fn] for fn in report["seed_steps"] if fn in ids}
+
+    def _frontier(self, facts: dict[str, Any]) -> set[str]:
+        compromised = {p[len("compromised["):-1] for p, v in facts.items()
+                       if p.startswith("compromised[") and v is True}
+        frontier = set(self.seeds)
+        for step in compromised:
+            frontier.update(self.children.get(step, []))
+        return {n for n in frontier if n not in compromised}
+
+    def _key(self, cand: Any) -> tuple:
+        n = str(cand.action.params.get("n"))
+        return (self.dist.get(n, 10**9), n)
+
+    def propose(self, context: PlanningContext) -> ActionProposal:
+        harden = [c for c in context.candidates if c.action.action_type == "harden"
+                  and c.belief_applicability in ("APPLICABLE", "UNKNOWN")]
+        if not harden:
+            raise NonRetryableFailure("no harden candidate for the blue defender")
+        applicable = [c for c in harden if c.belief_applicability == "APPLICABLE"] or harden
+        frontier = self._frontier({f.path: f.value for f in context.observation.facts})
+        on_frontier = [c for c in applicable if str(c.action.params.get("n")) in frontier]
+        pool = on_frontier or applicable
+        choice = min(pool, key=self._key)
+        n = str(choice.action.params.get("n"))
+        why = (f"harden {self.inv.get(n, n)} (distance {self.dist.get(n, '?')} to the target"
+               + (", on red's current frontier" if n in frontier else ", nearest hardenable step") + ")")
+        return _proposal(context, choice.action, "RULE", BLUE_DEFENDER, why)
+
+
 def _proposal(context: PlanningContext, action: Any, kind: str, descriptor: PluginDescriptor, reason: str):
     return ActionProposal(
         proposal_id=f"{context.step_id}:proposal", run_id=context.run_id, step_id=context.step_id, step=context.step,
@@ -266,3 +324,7 @@ def create_red_hybrid(config: dict[str, Any] | None, services: Any) -> MalRedHyb
     # default to the labelled stub, so a run with no endpoint configured is honest LLM_STUB, never a bare LLM label
     cfg = {"client": "stub", **(config or {})}
     return MalRedHybrid(services.pinned_model(), client_from_settings(cfg, services))
+
+
+def create_blue_defender(config: dict[str, Any] | None, services: Any) -> MalBlueDefender:
+    return MalBlueDefender(services.pinned_model())

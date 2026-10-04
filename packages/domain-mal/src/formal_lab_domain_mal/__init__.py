@@ -21,7 +21,8 @@ def registrations():
             PluginRegistration(gate.DESCRIPTOR, gate.create_mal_broker_gate),
             PluginRegistration(gate.ISSUER_DESCRIPTOR, gate.create_mal_issuer),
             PluginRegistration(strategies.RED_RULE, strategies.create_red_rule),
-            PluginRegistration(strategies.RED_HYBRID, strategies.create_red_hybrid)]
+            PluginRegistration(strategies.RED_HYBRID, strategies.create_red_hybrid),
+            PluginRegistration(strategies.BLUE_DEFENDER, strategies.create_blue_defender)]
 
 
 __all__ = [
