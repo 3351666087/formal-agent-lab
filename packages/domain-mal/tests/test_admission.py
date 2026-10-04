@@ -103,3 +103,56 @@ def test_gated_run_admits_with_receipts_and_denies_without(tmp_path, package):
     assert wo["goal_reached"] is False
     assert wo["denied_operations"] > 0
     assert "ALLOW" not in wo["gate_verdicts"]
+
+
+def _issuer(package, **kw):
+    from formal_lab_domain_mal.frontend import attack_graph_of
+    from formal_lab_domain_mal.gate import MalReceiptIssuer
+    from formal_lab_model.driver import IRFiniteDriver
+
+    inv = {v: k for k, v in attack_graph_of(package)["lowering"]["id_map"].items()}
+    return MalReceiptIssuer(loaded=IRFiniteDriver().load(package), package=package, signer=None, store=None,
+                            target=TargetSecurity(property_id="secret-confidentiality", reach_forbidden="secret:read"),
+                            bound={"max_steps": 60, "timeout_ms": 30000}, id_to_full=inv, **kw)
+
+
+def _req(action_type, n, *, revision, values):
+    from types import SimpleNamespace
+
+    from formal_lab_contracts import GroundAction
+
+    return SimpleNamespace(action=GroundAction(action_type=action_type, params={"n": n}),
+                           execution=SimpleNamespace(current_revision=revision, revision_note="test"),
+                           values=values, request_digest="d")
+
+
+def test_issuer_denies_when_the_action_precondition_fails_now(package):
+    from formal_lab_domain_mal.frontend import attack_graph_of
+
+    issuer = _issuer(package)
+    goal_id = attack_graph_of(package)["lowering"]["goal_id"]
+    # the goal step with nothing compromised yet: its precondition does not hold → DENY, no receipt (no signer used)
+    res = issuer.decide(_req("compromise", goal_id, revision=0, values={}))
+    assert res.verdict == "DENY" and "ACTION_PRECONDITION_FAILED" in res.reason
+
+
+def test_issuer_denies_without_a_current_revision_or_for_a_non_compromise_action(package):
+    from formal_lab_domain_mal.frontend import attack_graph_of
+
+    issuer = _issuer(package)
+    goal_id = attack_graph_of(package)["lowering"]["goal_id"]
+    assert issuer.decide(_req("compromise", goal_id, revision=None, values={})).verdict == "DENY"
+    assert issuer.decide(_req("harden", goal_id, revision=0, values={})).verdict == "DENY"
+
+
+def test_per_action_loop_issues_a_receipt_per_revision_and_reaches_goal(package, tmp_path):
+    from formal_lab_domain_mal.demo import per_action_gated_red_team
+
+    out = per_action_gated_red_team(package, workdir=tmp_path, strategy="symbolic",
+                                    target_security=TargetSecurity(property_id="secret-confidentiality",
+                                                                   reach_forbidden="secret:read"),
+                                    lab_policy=LabPolicy(allowed_assets=["app", "secret", "net"], max_attack_steps=40))
+    assert out["run"]["goal_reached"] and out["run"]["status"] == "SUCCEEDED"
+    assert out["every_send_checked_at_its_revision"]
+    revs = [d["checked_at_revision"] for d in out["issuer_decisions"]]
+    assert revs == sorted(revs) and len(revs) >= 3  # one issuer check per send, at increasing revisions

@@ -1,9 +1,16 @@
 """Red and blue strategies for the MAL domain (phase 3B, D3).
 
-Red (attacker), turn-taking planners that emit an `ActionProposal`:
+Red (attacker), turn-taking planners that emit an `ActionProposal`. "Attack steps" here are abstract boolean nodes of
+a MAL / coreLang attack graph lowered to the deterministic IR and run in the `ir-world` simulator — reachability over
+a modelled graph, not any real system:
   * `MalRedRule`   — a deterministic rule: compromise the applicable step closest to the goal (greedy shortest path);
-  * `MalRedHybrid` — model-assisted: a model service proposes candidate steps, the rule picks among the applicable ones
-                     (falls back to the rule when no model endpoint is configured, marked as a stub);
+  * `MalRedHybrid` — model-assisted, reusing A3's reusable decision path (`formal_lab_strategies.decision`): the rule
+                     computes the applicable candidate steps (verification) and the model chooses among them; the
+                     choice is thus always rule-verified. Provenance is taken from the answer — LLM (a real provider),
+                     LLM_PROTOCOL_TEST (the loopback test service) or LLM_STUB (the deterministic stand-in, which
+                     defers to the rule's order) — and when the model returns nothing usable it falls back to the
+                     rule, labelled RULE, keeping the failed call ids. No real endpoint configured ⇒ a labelled stub,
+                     never an LLM label without a real answer;
   * the symbolic red baseline reuses the platform's `formal-lab.planner.z3-bounded` (cost-optimal / bounded search).
 
 Blue (defender) is a configuration strategy chosen before the episode, not a turn: `min_cost_cut` picks a fewest-steps
@@ -176,29 +183,69 @@ class MalRedRule:
                          f"(distance {self.dist.get(str(choice.action.params.get('n')), '?')})")
 
 
+RED_SYSTEM = (
+    "You are the planning policy of a red-team agent inside a deterministic, finite-state attack-graph reachability "
+    "experiment. The graph is a MAL / coreLang attack graph lowered to abstract boolean attack steps and run in a "
+    "simulator — there is no real system and no commands are executed. Each turn you receive the target step and a "
+    "numbered list of attack steps that are already applicable in the current state (their modelled preconditions "
+    "hold), each with its distance to the target. Choose exactly one step to compromise next, preferring the ones "
+    "that reach the target soonest. Respond only with the JSON object requested."
+)
+
+
 class MalRedHybrid:
-    """Model-assisted red: a model service ranks candidate steps; the rule verifies applicability and picks. With no
-    real endpoint the model call is a marked stub that defers to the rule, so the strategy runs either way (the
-    real-model result is a conditional item, reported honestly)."""
+    """Model-assisted red (A3 decision path). The rule computes the applicable candidate steps; the model chooses one
+    of them (so the choice is always rule-verified); provenance is the answer's endpoint kind; a model that returns
+    nothing usable falls back to the rule. `last_decision` / `call_records` expose the calls for evidence."""
 
     descriptor = RED_HYBRID
 
-    def __init__(self, package: Any, config: dict[str, Any] | None):
+    def __init__(self, package: Any, client: Any):
         self.rule = MalRedRule(package)
-        self.client = (config or {}).get("client", "stub")
-        self.model = (config or {}).get("model")
+        self.client = client
+        report = attack_graph_of(package)["lowering"]
+        self.goal = report["goal"]
+        self.inv = {v: k for k, v in report["id_map"].items()}  # IR id → MAL full name
+        self.call_records: list[dict[str, Any]] = []
+        self.last_decision: Any = None
+
+    def _name(self, cand: Any) -> str:
+        n = str(cand.action.params.get("n"))
+        return self.inv.get(n, n)
 
     def propose(self, context: PlanningContext) -> ActionProposal:
+        from formal_lab_strategies.decision import ModelDecider, choose_request
+
         viable = [c for c in context.candidates if c.action.action_type == "compromise"
                   and c.belief_applicability in ("APPLICABLE", "UNKNOWN")]
         if not viable:
             raise NonRetryableFailure("no compromise candidate for the red hybrid")
-        # the model would rank candidates here; the stub ranks by the rule's distance heuristic
+        # verification: offer the model only the applicable candidates (UNKNOWN only if none are APPLICABLE),
+        # pre-ranked by the rule's distance so the stub (which takes index 0) reproduces the rule exactly
         applicable = [c for c in viable if c.belief_applicability == "APPLICABLE"] or viable
-        choice = sorted(applicable, key=self.rule._key)[0]
-        note = (f"hybrid ({self.client}): model proposed {len(viable)} candidate step(s); the rule verified "
-                f"applicability and picked the closest to the target")
-        return _proposal(context, choice.action, "LLM_STUB" if self.client == "stub" else "LLM", RED_HYBRID, note)
+        ranked = sorted(applicable, key=self.rule._key)
+        options = [{"action_type": "compromise", "applicability": str(c.belief_applicability),
+                    "step": self._name(c), "distance_to_target": self.rule.dist.get(str(c.action.params.get("n")))}
+                   for c in ranked]
+        compromised = sorted(self.inv.get(f.path[len("compromised["):-1], f.path)
+                             for f in context.observation.facts
+                             if f.path.startswith("compromised[") and f.value is True)
+        request = choose_request(options, system=RED_SYSTEM, goal={"target_step": self.goal},
+                                 explanation={"already_compromised": compromised,
+                                              "candidates_are": "steps already applicable in the current state"})
+        decision = ModelDecider(self.client).decide(request, context=context)
+        self.call_records, self.last_decision = decision.calls, decision
+        if decision.decided_by_model:
+            chosen = ranked[decision.content["index"]]
+            why = (f"model chose attack step {self._name(chosen)} among {len(ranked)} rule-verified applicable "
+                   f"step(s); the rule confirmed it is applicable")
+            return decision.proposal(context, chosen.action, RED_HYBRID.ref(), rationale=why,
+                                     candidates_considered=len(context.candidates))
+        chosen = ranked[0]
+        why = (f"model decision unavailable ({decision.failure}: {decision.failure_detail[:200]}); rule fallback: "
+               f"closest applicable step {self._name(chosen)}")
+        return decision.proposal(context, chosen.action, RED_HYBRID.ref(), rationale=why,
+                                 candidates_considered=len(context.candidates))
 
 
 def _proposal(context: PlanningContext, action: Any, kind: str, descriptor: PluginDescriptor, reason: str):
@@ -214,4 +261,8 @@ def create_red_rule(config: dict[str, Any] | None, services: Any) -> MalRedRule:
 
 
 def create_red_hybrid(config: dict[str, Any] | None, services: Any) -> MalRedHybrid:
-    return MalRedHybrid(services.pinned_model(), config)
+    from formal_lab_strategies.llm_planner import client_from_settings
+
+    # default to the labelled stub, so a run with no endpoint configured is honest LLM_STUB, never a bare LLM label
+    cfg = {"client": "stub", **(config or {})}
+    return MalRedHybrid(services.pinned_model(), client_from_settings(cfg, services))

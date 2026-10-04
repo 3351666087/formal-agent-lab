@@ -25,9 +25,11 @@ from formal_lab_domain_broker import (
 )
 from formal_lab_domain_broker.receipt import digest_params
 
-from .admission import mal_ruleset
+from .admission import mal_ruleset, target_check_basis
 from .config import LabPolicy, TargetSecurity
 from .frontend import attack_graph_of
+
+_POSITIVE = ("WITNESS", "OPTIMAL", "HOLDS")
 
 DESCRIPTOR = PluginDescriptor(
     plugin_id="formal-lab.domain.mal.broker-gate", version="1.0.0", interface="EXECUTION_GATE",
@@ -105,3 +107,111 @@ def create_mal_broker_gate(config: dict[str, Any] | None, services: Any) -> MalB
     return MalBrokerGate(store=store, verifier=HmacVerifier(keys), id_to_full=id_to_full, lab_policy=lab,
                          target_security=tgt, role_allowed_actions=cfg.get("role_allowed_actions", ["compromise"]),
                          service_identity=cfg.get("service_identity"))
+
+
+# --------------------------------------------------------------------------- per-action issuer (phase 4B, B1)
+
+ISSUER_DESCRIPTOR = PluginDescriptor(
+    plugin_id="formal-lab.domain.mal.receipt-issuer", version="1.0.0", interface="EXECUTION_GATE",
+    interface_version="2", semantic_profiles=["deterministic_finite_v1"],
+    capabilities=[{"id": caps.GATE_PRE_EXECUTION}],
+    config_schema={"type": "object", "additionalProperties": True, "required": ["keystore_path", "target_security"],
+                   "properties": {"keystore_path": {"type": "string"}, "key_id": {"type": "string"},
+                                  "receipts_path": {"type": "string"}, "target_security": {"type": "object"},
+                                  "ttl_seconds": {"type": "integer"}, "bound": {"type": "object"}}},
+    entrypoint="formal_lab_domain_mal.gate:create_mal_issuer",
+    ui={"label": "MAL 凭据签发（逐动作检查）", "category": "gate",
+        "description": "issues a receipt only after checking, at send time against the current state, that this "
+                       "compromise step is applicable now, and that the target is reachable in the model (Z3); no "
+                       "applicable action or no current revision → DENY, no receipt"},
+    license="Apache-2.0", source="formal-lab-domain-mal")
+
+
+class MalReceiptIssuer:
+    """Issues a receipt only after a real check at send time (phase 4B, B1): the action's precondition is evaluated on
+    the current state (the per-send, per-revision check a pre-signed path cannot give), and the target property is
+    confirmed reachable in the model by the Z3 bounded verifier (checked once — a model property, constant across the
+    run). No applicable action, no authoritative current revision, or an unreachable target ⇒ DENY and no receipt, so
+    the broker gate that follows has nothing to admit and the side effect never happens."""
+
+    descriptor = ISSUER_DESCRIPTOR
+
+    def __init__(self, *, loaded: Any, package: Any, signer: Any, store: Any, target: TargetSecurity,
+                 bound: dict[str, Any], id_to_full: dict[str, str], ttl_seconds: int = 300):
+        self.loaded = loaded
+        self.package = package
+        self.signer = signer
+        self.store = store
+        self.target = target
+        self.bound = bound
+        self.id_to_full = id_to_full
+        self.ttl = ttl_seconds
+        self._initial = loaded.initial_state()
+        self._state_paths = [p for p in loaded.state_paths() if p.startswith(("compromised[", "hardened["))]
+        self._reach: str | None = None
+
+    def paths(self, action: Any) -> list[str]:
+        # the kernel reads these fresh before the send, so the precondition is checked against the current state
+        return list(self._state_paths)
+
+    def _target_reachable(self) -> str:
+        if self._reach is None:
+            from formal_lab_contracts import CheckQuery
+            from formal_lab_solver_z3.verifier import Z3Verifier
+
+            q = CheckQuery(kind="GOAL_REACHABILITY", property_id="target_reached", bound=self.bound)
+            self._reach = Z3Verifier().check(self.package, q).verdict
+        return self._reach
+
+    def _name(self, action: Any) -> str:
+        n = str(action.params.get("n"))
+        return self.id_to_full.get(n, n)
+
+    def decide(self, request: Any):
+        from formal_lab_contracts import GateResult
+        from formal_lab_domain_broker.receipt import issue_for_context
+
+        execution = getattr(request, "execution", None)
+        if execution is None or execution.current_revision is None:
+            return GateResult(verdict="DENY", reason="cannot issue a receipt: no authoritative current revision "
+                              f"({getattr(execution, 'revision_note', None)})")
+        if request.action.action_type != "compromise":
+            return GateResult(verdict="DENY", reason=f"not a compromise action: {request.action.action_type}")
+        step = self._name(request.action)
+        rev = execution.current_revision
+        # the current state: the model's constants / initial state with the locations the kernel just read fresh
+        state = {**self._initial, **request.values}
+        pred = self.loaded.predict(state, request.action)
+        if not pred.applicable:
+            return GateResult(verdict="DENY", reason=f"ACTION_PRECONDITION_FAILED at revision {rev}: "
+                              f"compromise({step}) is not applicable in the current state ({pred.reason}); no receipt")
+        verdict = self._target_reachable()
+        if verdict not in _POSITIVE:
+            return GateResult(verdict="DENY", reason=f"the target {self.target.property_id} is not reachable in the "
+                              f"model (Z3 {verdict}); no receipt")
+        basis = target_check_basis(property_id=self.target.property_id, verdict=verdict, scope="MODEL_INTERNAL",
+                                   backend="formal-lab.verifier.z3-bmc@1.1.0", bound=self.bound)
+        receipt = issue_for_context(
+            execution, check_basis=basis,
+            guarantee_scope=f"bounded reachability of {self.target.property_id}; compromise({step}) verified "
+                            f"applicable at revision {rev}",
+            signer=self.signer, ttl_seconds=self.ttl)
+        self.store.put(request.request_digest, receipt)
+        return GateResult(verdict="ALLOW", reason=f"receipt {receipt.receipt_id}: compromise({step}) applicable at "
+                          f"revision {rev}, target reachable (Z3 {verdict})")
+
+
+def create_mal_issuer(config: dict[str, Any] | None, services: Any) -> MalReceiptIssuer:
+    from formal_lab_domain_broker import HmacSigner, KeyStore, ReceiptStore
+
+    cfg = config or {}
+    secrets = json.loads(Path(cfg["keystore_path"]).read_text())
+    keys = KeyStore({kid: bytes.fromhex(h) for kid, h in secrets.items()})
+    key_id = cfg.get("key_id") or next(iter(secrets))
+    pkg = services.pinned_model()
+    id_to_full = {v: k for k, v in attack_graph_of(pkg)["lowering"]["id_map"].items()}
+    return MalReceiptIssuer(loaded=services.loaded_model(), package=pkg, signer=HmacSigner(keys, key_id),
+                            store=ReceiptStore(cfg.get("receipts_path")),
+                            target=TargetSecurity.from_dict(cfg["target_security"]),
+                            bound=cfg.get("bound", {"max_steps": 60, "timeout_ms": 30000}), id_to_full=id_to_full,
+                            ttl_seconds=int(cfg.get("ttl_seconds", 300)))

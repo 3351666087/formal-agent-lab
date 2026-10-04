@@ -94,3 +94,59 @@ def gated_red_team(package: Any, *, workdir: str | Path, target_security: Target
         "with_receipts": _run_summary(with_receipts, goal_id),
         "without_receipts": _run_summary(without_receipts, goal_id),
     }
+
+MAL_ISSUER = {"plugin_id": "formal-lab.domain.mal.receipt-issuer", "version": "1.0.0"}
+
+
+def _issuer_decisions(result: Any, issuer_plugin: str) -> list[dict[str, Any]]:
+    """Every pre-send decision made by the issuer gate, in order — reason records the step and the revision it was
+    checked at, so the per-send, per-revision check is visible in the record (not pre-signed)."""
+    out = []
+    for st in result.steps:
+        for d in (st.operation.decisions if st.operation else []):
+            if d.gate.plugin_id == issuer_plugin:
+                out.append({"step": st.step, "verdict": str(d.verdict), "checked_at_revision": d.checked_at_revision,
+                            "reason": d.reason[:200]})
+    return out
+
+
+def per_action_gated_red_team(package: Any, *, workdir: str | Path, target_security: TargetSecurity,
+                              lab_policy: LabPolicy, strategy: str = "symbolic", service_identity: str = "mal-sim",
+                              max_model_calls: int = 0, ttl_seconds: int = 3600) -> dict[str, Any]:
+    """The runtime-check admission loop (phase 4B, B1): receipts are issued by the MAL issuer, which checks each
+    compromise action's precondition against the current state at send time (and the target's reachability in the
+    model, once), then the MAL broker admits only against that receipt. Unlike `gated_red_team` (which pre-signs a
+    fixed WITNESS for a pre-computed plan — kept as a deterministic test fixture), nothing here is pre-signed: a step
+    whose precondition does not hold at the current revision gets no receipt and is not sent.
+
+    `strategy`: symbolic / rule / hybrid red. Returns the per-send issuer decisions and the run summary."""
+    from formal_lab_runtime import default_registry, make_manifest, new_run_id, run_local
+
+    work = Path(workdir)
+    work.mkdir(parents=True, exist_ok=True)
+    reg = default_registry()
+    goal_id = attack_graph_of(package)["lowering"]["goal_id"]
+    secret = os.urandom(24)
+    ks_path = work / "keys.json"
+    ks_path.write_text(json.dumps({"issuer-1": secret.hex()}))
+    rc_path = work / "receipts.json"
+    issuer = {"plugin": MAL_ISSUER, "config": {
+        "keystore_path": str(ks_path), "key_id": "issuer-1", "receipts_path": str(rc_path),
+        "target_security": target_security.to_dict(), "ttl_seconds": ttl_seconds,
+        "bound": {"max_steps": 60, "timeout_ms": 30000}}}
+    gate = {"plugin": GATE, "config": {
+        "keystore_path": str(ks_path), "receipts_path": str(rc_path), "service_identity": service_identity,
+        "target_security": target_security.to_dict(), "lab_policy": lab_policy.to_dict(),
+        "role_allowed_actions": ["compromise"]}}
+    scn = red_team_scenario(package, execution_gates=[issuer, gate], strategy=strategy,
+                            max_model_calls=max_model_calls)
+    result = run_local(make_manifest(run_id=new_run_id(), project_id="phase4b-b1", scenario=scn, package=package,
+                                     registry=reg), package, reg)
+    issued = _issuer_decisions(result, MAL_ISSUER["plugin_id"])
+    return {
+        "strategy": strategy,
+        "issuer_decisions": issued,
+        "every_send_checked_at_its_revision": all(d["verdict"] == "ALLOW" and d["checked_at_revision"] is not None
+                                                  for d in issued),
+        "run": _run_summary(result, goal_id),
+    }

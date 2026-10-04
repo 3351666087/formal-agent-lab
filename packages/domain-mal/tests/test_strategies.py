@@ -92,3 +92,42 @@ def test_model_revision_true_deviation_and_stale(graph, native):
     assert out["stale_difference"]["classification"] == "STALE"
     assert out["stale_difference"]["enters_regression_library"] is False
     assert out["regression_library_clean"] is True
+
+
+def _compromise_context(package, ids):
+    from formal_lab_contracts import BudgetUsage, CandidateAction, Observation, PlanningContext
+
+    cands = [CandidateAction(action={"action_type": "compromise", "params": {"n": i}},
+                             belief_applicability="APPLICABLE") for i in ids]
+    obs = Observation(run_id="r", actor_id="red", step=1, state_revision=0, facts=[])
+    return PlanningContext(run_id="r", step=1, step_id="r:s1", actor_id="red", observation=obs, candidates=cands,
+                           model=package.ref(), action_specs=[], budget={"max_steps": 40}, usage=BudgetUsage(), seed=0)
+
+
+def test_hybrid_provenance_follows_what_answered(package):
+    """The hybrid is model-assisted through the A3 path: the source is the endpoint that answered (stub / protocol
+    test / real), and a model that returns nothing usable falls back to the rule — never a bare LLM label."""
+    from formal_lab_domain_mal.frontend import attack_graph_of
+    from formal_lab_domain_mal.strategies import MalRedHybrid
+    from formal_lab_strategies.model_clients import OpenAICompatibleClient, StubModelClient
+    from formal_lab_strategies.protocol_server import ProtocolTestServer
+
+    ids = list(attack_graph_of(package)["lowering"]["id_map"].values())[:3]
+
+    stub = MalRedHybrid(package, StubModelClient()).propose(_compromise_context(package, ids))
+    assert stub.source.kind == "LLM_STUB" and stub.source.model_call_ids and stub.source.decided_by == "MODEL_RESPONSE"
+
+    srv = ProtocolTestServer().start()
+    try:
+        hy = MalRedHybrid(package, OpenAICompatibleClient(base_url=srv.base_url, api_key="protocol-test-only",
+                                                          model="protocol-test-v1", backoff_s=0.01, timeout_s=5))
+        p = hy.propose(_compromise_context(package, ids))
+        assert p.source.kind == "LLM_PROTOCOL_TEST" and len(srv.requests) == 1
+        assert hy.last_decision.decided_by_model and p.action.action_type == "compromise"
+    finally:
+        srv.stop()
+
+    hy = MalRedHybrid(package, OpenAICompatibleClient(base_url="http://127.0.0.1:9", api_key="x", model="m",
+                                                     backoff_s=0.01, timeout_s=1, max_attempts=1))
+    p = hy.propose(_compromise_context(package, ids))
+    assert p.source.kind == "RULE" and hy.last_decision.failure and p.source.model_call_ids  # failed call kept

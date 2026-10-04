@@ -19,6 +19,7 @@ def registrations():
 
     return [PluginRegistration(frontend.DESCRIPTOR, frontend.create_frontend),
             PluginRegistration(gate.DESCRIPTOR, gate.create_mal_broker_gate),
+            PluginRegistration(gate.ISSUER_DESCRIPTOR, gate.create_mal_issuer),
             PluginRegistration(strategies.RED_RULE, strategies.create_red_rule),
             PluginRegistration(strategies.RED_HYBRID, strategies.create_red_hybrid)]
 
