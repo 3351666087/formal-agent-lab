@@ -203,8 +203,8 @@ def _routes(app: FastAPI) -> None:
     async def create_model(project_id: str, body: dict[str, Any] = Body(...)):
         def go(s):
             m, v = modeling.create_model(s, project_id, package_id=body["package_id"], name=body.get("name"),
-                                         ir=body.get("ir"), payload=body.get("payload"),
-                                         description=body.get("description"))
+                                         ir=body.get("ir"), payload=body.get("payload"), source=body.get("source"),
+                                         frontend=body.get("frontend"), description=body.get("description"))
             return {**modeling.model_dict(m), "version": modeling.version_dict(v)}
 
         return await db(go)
@@ -221,8 +221,8 @@ def _routes(app: FastAPI) -> None:
     @app.post(f"{API}/models/{{model_id}}/versions", status_code=201)
     async def add_version(model_id: str, body: dict[str, Any] = Body(...)):
         return await db(lambda s: modeling.version_dict(modeling.add_version(
-            s, model_id, ir=body.get("ir"), payload=body.get("payload"), note=body.get("note"),
-            parent_version=body.get("parent_version"))))
+            s, model_id, ir=body.get("ir"), payload=body.get("payload"), source=body.get("source"),
+            frontend=body.get("frontend"), note=body.get("note"), parent_version=body.get("parent_version"))))
 
     @app.get(f"{API}/models/{{model_id}}/versions/{{version}}")
     async def get_version(model_id: str, version: int):

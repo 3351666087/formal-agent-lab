@@ -113,14 +113,28 @@ def model_validate(path: Path, api: str = typer.Option(None, "--api", help="vali
 
 @model_app.command("push")
 def model_push(path: Path, project: str = typer.Option(...), package_id: str = typer.Option(...),
-               note: str = typer.Option(None), api: str = API) -> None:
-    """Create a model or add a new immutable version."""
+               note: str = typer.Option(None),
+               frontend: str = typer.Option(None, help="MODEL_FRONTEND plugin id to compile the file as a source "
+                                            "envelope (e.g. formal-lab.domain.mal.frontend); omit to push neutral IR"),
+               source_format: str = typer.Option(None, "--source-format", help="source format the frontend accepts "
+                                                  "(e.g. mal-attack-graph/v1); required with --frontend"),
+               frontend_version: str = typer.Option("1.0.0", help="MODEL_FRONTEND plugin version"),
+               api: str = API) -> None:
+    """Create a model or add a new immutable version, from neutral IR or (with --frontend) a frontend source file."""
     c = _client(api)
-    ir = json.loads(path.read_text())
+    kw: dict = {}
+    if frontend:
+        if not source_format:
+            _fail(FormalLabError("--source-format is required with --frontend"))
+        kw = {"source": {"format": source_format, "text": path.read_text()},
+              "frontend": {"plugin_id": frontend, "version": frontend_version}}
+    else:
+        kw = {"ir": json.loads(path.read_text())}
     try:
         pid = _project(c, project)
         existing = next((m for m in c.models(pid) if m["package_id"] == package_id), None)
-        res = c.add_model_version(existing["id"], ir, note) if existing else c.create_model(pid, package_id, ir)
+        res = (c.add_model_version(existing["id"], note=note, **kw) if existing
+               else c.create_model(pid, package_id, name=None, **kw))
     except FormalLabError as exc:
         _fail(exc)
     _out(res if "version" not in res or isinstance(res.get("version"), int) else res["version"])

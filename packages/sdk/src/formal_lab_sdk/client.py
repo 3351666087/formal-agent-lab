@@ -81,11 +81,20 @@ class Client:
     def models(self, project_id: str) -> list[dict[str, Any]]:
         return self.get(f"/projects/{project_id}/models")
 
-    def create_model(self, project_id: str, package_id: str, ir: dict[str, Any], name: str | None = None) -> dict:
-        return self.post(f"/projects/{project_id}/models", {"package_id": package_id, "ir": ir, "name": name})
+    def create_model(self, project_id: str, package_id: str, ir: dict[str, Any] | None = None,
+                     name: str | None = None, *, source: dict[str, Any] | None = None,
+                     frontend: dict[str, Any] | None = None) -> dict:
+        """Create a model from neutral IR, or from a frontend source envelope (`source` + `frontend`: the
+        MODEL_FRONTEND plugin that compiles it, e.g. the MAL attack-graph frontend)."""
+        body = {"package_id": package_id, "name": name}
+        body.update({"source": source, "frontend": frontend} if source is not None else {"ir": ir})
+        return self.post(f"/projects/{project_id}/models", body)
 
-    def add_model_version(self, model_id: str, ir: dict[str, Any], note: str | None = None) -> dict[str, Any]:
-        return self.post(f"/models/{model_id}/versions", {"ir": ir, "note": note})
+    def add_model_version(self, model_id: str, ir: dict[str, Any] | None = None, note: str | None = None, *,
+                          source: dict[str, Any] | None = None, frontend: dict[str, Any] | None = None) -> dict[str, Any]:
+        body: dict[str, Any] = {"note": note}
+        body.update({"source": source, "frontend": frontend} if source is not None else {"ir": ir})
+        return self.post(f"/models/{model_id}/versions", body)
 
     def model_version(self, model_id: str, version: int) -> dict[str, Any]:
         return self.get(f"/models/{model_id}/versions/{version}")

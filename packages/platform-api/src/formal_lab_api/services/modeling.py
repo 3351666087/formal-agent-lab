@@ -112,8 +112,9 @@ def loaded_of(package: ModelPackage):
 
 
 def create_model(s: Session, project_id: str, *, package_id: str, name: str | None, ir: dict[str, Any] | None = None,
-                 description: str | None = None, origin: str = "api",
-                 payload: dict[str, Any] | None = None) -> tuple[Model, ModelVersion]:
+                 description: str | None = None, origin: str = "api", payload: dict[str, Any] | None = None,
+                 source: dict[str, Any] | None = None,
+                 frontend: dict[str, Any] | None = None) -> tuple[Model, ModelVersion]:
     get_or_404(s, Project, project_id, "project")
     if s.scalar(select(Model).where(Model.project_id == project_id, Model.package_id == package_id)):
         raise Conflict(f"model {package_id!r} already exists in this project")
@@ -121,8 +122,29 @@ def create_model(s: Session, project_id: str, *, package_id: str, name: str | No
                   description=description)
     s.add(model)
     s.flush()
-    version = add_version(s, model.id, ir=ir, payload=payload, note="initial version", origin=origin)
+    version = add_version(s, model.id, ir=ir, payload=payload, source=source, frontend=frontend,
+                          note="initial version", origin=origin)
     return model, version
+
+
+def _source_package(model: Model, version: int, source: dict[str, Any], frontend: dict[str, Any] | None, origin: str,
+                    parent_version: int | None) -> ModelPackage:
+    """A model given as a frontend source envelope (P2-013, phase 4B): a registered MODEL_FRONTEND plugin compiles it
+    into the package, so the package keeps everything the frontend records (for MAL, the attack-graph extension the
+    gates and strategies read). The frontend is named explicitly; the source format must be the one it accepts."""
+    from formal_lab_contracts import PluginInterface
+
+    if not frontend:
+        raise InvalidInput("a source import needs `frontend` (the MODEL_FRONTEND plugin id/version)")
+    if "format" not in source or "text" not in source:
+        raise InvalidInput("a source import needs `source.format` and `source.text`")
+    entry = registry().resolve(PluginRef.model_validate(frontend))
+    if entry.descriptor.interface != PluginInterface.MODEL_FRONTEND:
+        raise InvalidInput(f"{entry.descriptor.plugin_id} is not a MODEL_FRONTEND")
+    fe = registry().create(entry.descriptor.ref(), {}, None)
+    src = ModelSource(format=source["format"], text=source["text"], origin=origin, parent_version=parent_version)
+    package = fe.compile(src, package_id=model.package_id, version=version)
+    return package.model_copy(update={"frontend": entry.descriptor.ref()})
 
 
 def _namespaced_package(model: Model, version: int, payload: dict[str, Any], origin: str,
@@ -150,12 +172,28 @@ def _namespaced_package(model: Model, version: int, payload: dict[str, Any], ori
 
 
 def add_version(s: Session, model_id: str, *, ir: dict[str, Any] | ModelIR | None = None, note: str | None = None,
-                parent_version: int | None = None, origin: str = "editor",
-                payload: dict[str, Any] | None = None) -> ModelVersion:
+                parent_version: int | None = None, origin: str = "editor", payload: dict[str, Any] | None = None,
+                source: dict[str, Any] | None = None, frontend: dict[str, Any] | None = None) -> ModelVersion:
     """Editing a model = inserting a new immutable version. Unchanged content returns the latest version."""
     model = s.get(Model, model_id, with_for_update=True)
     if model is None:
         raise InvalidInput(f"model {model_id} not found")
+    if source is not None:
+        version_no = model.latest_version + 1
+        package = _source_package(model, version_no, source, frontend, origin,
+                                  parent_version or (model.latest_version or None))
+        if model.latest_version:
+            latest = s.scalar(select(ModelVersion).where(ModelVersion.model_id == model_id,
+                                                         ModelVersion.version == model.latest_version))
+            if latest is not None and latest.digest == package.digest.value:
+                return latest
+        row = ModelVersion(id=new_id("mv"), model_id=model_id, version=version_no, digest=package.digest.value,
+                           semantic_profile=package.semantic_profile, package=package.model_dump(mode="json"),
+                           contract_version=CONTRACT_VERSION, parent_version=package.source.parent_version, note=note)
+        model.latest_version = version_no
+        s.add(row)
+        s.flush()
+        return row
     if payload is not None:
         version_no = model.latest_version + 1
         package = _namespaced_package(model, version_no, payload, origin,
