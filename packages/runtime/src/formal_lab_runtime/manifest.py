@@ -36,7 +36,7 @@ from formal_lab_contracts.errors import Unsupported, VersionMismatch
 from .engine import DEFAULT_VERIFIER
 from .registry import CatalogEntry, PluginRegistry
 
-PLATFORM_VERSION = "0.3.0"
+PLATFORM_VERSION = "0.4.0"
 GENERIC_EVALUATOR = PluginRef(plugin_id="formal-lab.eval.generic", version="1.0.0")
 
 

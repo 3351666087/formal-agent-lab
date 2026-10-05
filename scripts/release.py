@@ -28,7 +28,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "out" / "release"
-VERSION = "0.3.0"
+VERSION = "0.4.0"
 IMAGES = ("api", "worker", "web", "orders")
 LOCAL_CONFIGS = ("deploy/compose/docker-compose.yaml", "deploy/compose/services.dev.yaml", ".env.example")
 
