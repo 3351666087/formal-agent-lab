@@ -72,7 +72,8 @@ class SecurityProbe:
         total = sum(1 for k in props if k.startswith("done["))
         return {
             "access": {"operations": state.get("operations", 0), "endpoint": self.endpoint, "tenant": self.tenant},
-            "config": state.get("values", {}).get("conditions", metrics.get("conditions")),
+            "config": _get(self.endpoint, f"/t/{self.tenant}/admin/conditions"),  # read-only, from the service
+            "metrics": metrics,  # the service's own business metrics over the last `window` ticks
             "service_state": {"health": health.get("status"), "revision": revision, "clock": state.get("clock")},
             "success_rate": round(done / total, 3) if total else None,
             "cost": stats or {},

@@ -19,7 +19,10 @@ type Draft = {
   stop_conditions: ScenarioManifest["stop_conditions"];
   // v2 (P2-091): turn order, joint termination; v1 stop conditions stay usable for single-participant scenarios
   turns: Turns; termination: Termination | null;
+  // phase 3A gates run before every send (e.g. the Broker); kept on save, editable here (phase 4B, B3)
+  execution_gates: Gate[];
 };
+type Gate = { plugin: { plugin_id: string; version: string }; config: Record<string, unknown> };
 const DEFAULT_TURNS: Turns = { mode: "ROUND_ROBIN", table: [], observation_timing: "TURN_START", conflict_policy: "REVALIDATE" };
 
 export function ScenariosPage() {
@@ -61,6 +64,7 @@ function ScenarioEditor({ pid, sid }: { pid: string; sid: string }) {
   const models = useQuery({ queryKey: ["models", pid], queryFn: () => get<ModelSummary[]>(`/projects/${pid}/models`) });
   const envs = useQuery({ queryKey: ["plugins", "ENVIRONMENT"], queryFn: () => get<CatalogEntry[]>("/plugins?interface=ENVIRONMENT") });
   const planners = useQuery({ queryKey: ["plugins", "PLANNER"], queryFn: () => get<CatalogEntry[]>("/plugins?interface=PLANNER") });
+  const gates = useQuery({ queryKey: ["plugins", "EXECUTION_GATE"], queryFn: () => get<CatalogEntry[]>("/plugins?interface=EXECUTION_GATE") });
   const [draft, setDraft] = useState<Draft | null>(null);
   const [modelId, setModelId] = useState<string>("");
   const versionDetail = useQuery({
@@ -84,6 +88,7 @@ function ScenarioEditor({ pid, sid }: { pid: string; sid: string }) {
       participants: [{ actor_id: "agent", role: "operator", strategy: { plugin: { plugin_id: "formal-lab.planner.z3-bounded", version: "1.0.0" }, config: {} } }],
       objectives: [], budget: { max_steps: 60, max_wall_seconds: 600, max_model_calls: null, max_tokens: null }, seed: 0,
       stop_conditions: [{ kind: "NO_APPLICABLE_ACTION", property_id: null }], turns: DEFAULT_TURNS, termination: null,
+      execution_gates: [],
     } as unknown as Draft));
   }, [isNew, draft, models.data]);
 
@@ -95,7 +100,8 @@ function ScenarioEditor({ pid, sid }: { pid: string; sid: string }) {
     setDraft({ name: m.name, description: m.description ?? "", model_version_id: scenario.data.model_version_id,
       environment: m.environment, participants: m.participants, objectives: m.objectives, budget: m.budget, seed: m.seed,
       stop_conditions: m.stop_conditions, turns: { ...DEFAULT_TURNS, ...((m as never as { turns?: Turns }).turns ?? {}) },
-      termination: ((m as never as { termination?: Termination | null }).termination ?? null) });
+      termination: ((m as never as { termination?: Termination | null }).termination ?? null),
+      execution_gates: ((m as never as { execution_gates?: Gate[] }).execution_gates ?? []) });
   }, [isNew, scenario.data]);
 
   const save = useMutation({
@@ -241,6 +247,39 @@ function ScenarioEditor({ pid, sid }: { pid: string; sid: string }) {
             );
           })}
           <div className="small muted">运行时可在实验运行台选择项目中的其它策略配置覆盖默认策略（可逐个参与者指定）。</div>
+        </div>
+      </div>
+
+      <div className="card" data-testid="gates-editor">
+        <div className="card-head"><h3 className="grow">执行前门控</h3>
+          <button className="btn sm" disabled={!gates.data?.length} onClick={() => {
+            const g = gates.data![0].descriptor;
+            setDraft({ ...draft, execution_gates: [...draft.execution_gates, { plugin: { plugin_id: g.plugin_id, version: g.version }, config: {} }] });
+          }}>＋ 门控</button></div>
+        <div className="card-body stack">
+          {draft.execution_gates.length === 0 && <div className="small muted">未配置：动作经内核检查后直接发送。门控（如准入 Broker）在每次发送前依据当前状态放行或拒绝，被拒绝的动作不会发送。</div>}
+          {draft.execution_gates.map((g, i) => {
+            const entry = gates.data?.find((x) => x.descriptor.plugin_id === g.plugin.plugin_id);
+            const setG = (patch: Partial<Gate>) => setDraft({ ...draft, execution_gates: draft.execution_gates.map((x, j) => (j === i ? { ...x, ...patch } : x)) });
+            return (
+              <div key={i} className="stack participant-edit" role="group" aria-label={`门控 ${i + 1}`}>
+                <div className="row">
+                  <span className="badge outline">#{i + 1}</span>
+                  <label className="field" style={{ flex: 1 }}><span>门控插件（按顺序执行）</span>
+                    <select value={`${g.plugin.plugin_id}@${g.plugin.version}`} onChange={(e) => {
+                      const [plugin_id, version] = e.target.value.split("@");
+                      setG({ plugin: { plugin_id, version }, config: {} });
+                    }}>{!entry && <option value={`${g.plugin.plugin_id}@${g.plugin.version}`}>{g.plugin.plugin_id} ({g.plugin.version}) — 未注册</option>}
+                      {gates.data?.map((x) => <option key={`${x.descriptor.plugin_id}@${x.descriptor.version}`} value={`${x.descriptor.plugin_id}@${x.descriptor.version}`}>
+                        {x.descriptor.ui.label} ({x.descriptor.version})</option>)}</select></label>
+                  <button className="btn sm danger" onClick={() => setDraft({ ...draft, execution_gates: draft.execution_gates.filter((_, j) => j !== i) })}>移除</button>
+                </div>
+                {entry?.descriptor.ui.description && <div className="small muted">{entry.descriptor.ui.description}</div>}
+                {entry && <SchemaForm schema={entry.descriptor.config_schema as never} value={g.config}
+                  error={save.error} basePath={`/execution_gates/${i}/config`} onChange={(config) => setG({ config })} />}
+              </div>
+            );
+          })}
         </div>
       </div>
 

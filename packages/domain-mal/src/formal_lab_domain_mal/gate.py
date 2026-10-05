@@ -38,7 +38,8 @@ DESCRIPTOR = PluginDescriptor(
     config_schema={"type": "object", "additionalProperties": True, "properties": {
         "receipts_path": {"type": "string"}, "keystore_path": {"type": "string"},
         "role_allowed_actions": {"type": "array"}, "service_identity": {"type": "string"},
-        "lab_policy": {"type": "object"}, "target_security": {"type": "object"}}},
+        "lab_policy": {"type": "object"}, "target_security": {"type": "object"},
+        "governed_action_types": {"type": "array", "items": {"type": "string"}, "default": ["compromise"]}}},
     entrypoint="formal_lab_domain_mal.gate:create_mal_broker_gate",
     ui={"label": "MAL 准入 Broker", "category": "gate",
         "description": "admits a compromise action only against a valid VerificationReceipt bound to the current "
@@ -51,7 +52,8 @@ class MalBrokerGate:
 
     def __init__(self, *, store: ReceiptStore, verifier: HmacVerifier, id_to_full: dict[str, str],
                  lab_policy: LabPolicy, target_security: TargetSecurity, role_allowed_actions: list[str],
-                 service_identity: str | None = None, ruleset_version: int = 1):
+                 service_identity: str | None = None, ruleset_version: int = 1,
+                 governed_action_types: list[str] | None = None):
         self._store = store
         self._verifier = verifier
         self._rules = mal_ruleset(version=ruleset_version)
@@ -60,6 +62,7 @@ class MalBrokerGate:
         self._tgt = target_security
         self._roles = role_allowed_actions
         self._service = service_identity
+        self._governed = list(governed_action_types or ["compromise"])
 
     def paths(self, action):
         return []
@@ -67,6 +70,8 @@ class MalBrokerGate:
     def decide(self, request):
         from formal_lab_contracts import ConditionCheck, GateResult
 
+        if request.action.action_type not in self._governed:
+            return _outside_scope(request.action.action_type, self._governed)
         receipt = self._store.get(request.request_digest)
         revision = request.values_revision if request.values_source == "FRESH" else request.based_on_revision
         binding = RequestBinding(
@@ -106,7 +111,20 @@ def create_mal_broker_gate(config: dict[str, Any] | None, services: Any) -> MalB
     tgt = TargetSecurity.from_dict(cfg["target_security"])
     return MalBrokerGate(store=store, verifier=HmacVerifier(keys), id_to_full=id_to_full, lab_policy=lab,
                          target_security=tgt, role_allowed_actions=cfg.get("role_allowed_actions", ["compromise"]),
-                         service_identity=cfg.get("service_identity"))
+                         service_identity=cfg.get("service_identity"),
+                         governed_action_types=cfg.get("governed_action_types"))
+
+
+def _outside_scope(action_type: str, governed: list[str]):
+    """An action type this gate does not govern (phase 4B, B3) — e.g. the defender's `harden` in a red/blue game: the
+    admission Broker governs side-effect steps against the target (`compromise`), not the defender's own configuration
+    changes. The pass-through is explicit and recorded (condition GOVERNED_ACTION = false), never silent."""
+    from formal_lab_contracts import ConditionCheck, GateResult
+
+    return GateResult(verdict="ALLOW", reason=f"{action_type} is outside this gate's admission scope (governs "
+                      f"{', '.join(governed)}); passed on unchanged",
+                      conditions=[ConditionCheck(name="GOVERNED_ACTION", holds=False,
+                                                 detail=f"{action_type} not in {governed}")])
 
 
 # --------------------------------------------------------------------------- per-action issuer (phase 4B, B1)
@@ -118,7 +136,9 @@ ISSUER_DESCRIPTOR = PluginDescriptor(
     config_schema={"type": "object", "additionalProperties": True, "required": ["keystore_path", "target_security"],
                    "properties": {"keystore_path": {"type": "string"}, "key_id": {"type": "string"},
                                   "receipts_path": {"type": "string"}, "target_security": {"type": "object"},
-                                  "ttl_seconds": {"type": "integer"}, "bound": {"type": "object"}}},
+                                  "ttl_seconds": {"type": "integer"}, "bound": {"type": "object"},
+                                  "governed_action_types": {"type": "array", "items": {"type": "string"},
+                                                            "default": ["compromise"]}}},
     entrypoint="formal_lab_domain_mal.gate:create_mal_issuer",
     ui={"label": "MAL 凭据签发（逐动作检查）", "category": "gate",
         "description": "issues a receipt only after checking, at send time against the current state, that this "
@@ -137,8 +157,10 @@ class MalReceiptIssuer:
     descriptor = ISSUER_DESCRIPTOR
 
     def __init__(self, *, loaded: Any, package: Any, signer: Any, store: Any, target: TargetSecurity,
-                 bound: dict[str, Any], id_to_full: dict[str, str], ttl_seconds: int = 300):
+                 bound: dict[str, Any], id_to_full: dict[str, str], ttl_seconds: int = 300,
+                 governed_action_types: list[str] | None = None):
         self.loaded = loaded
+        self.governed = list(governed_action_types or ["compromise"])
         self.package = package
         self.signer = signer
         self.store = store
@@ -171,6 +193,8 @@ class MalReceiptIssuer:
         from formal_lab_contracts import GateResult
         from formal_lab_domain_broker.receipt import issue_for_context
 
+        if request.action.action_type not in self.governed:
+            return _outside_scope(request.action.action_type, self.governed)
         execution = getattr(request, "execution", None)
         if execution is None or execution.current_revision is None:
             return GateResult(verdict="DENY", reason="cannot issue a receipt: no authoritative current revision "
@@ -214,4 +238,5 @@ def create_mal_issuer(config: dict[str, Any] | None, services: Any) -> MalReceip
                             store=ReceiptStore(cfg.get("receipts_path")),
                             target=TargetSecurity.from_dict(cfg["target_security"]),
                             bound=cfg.get("bound", {"max_steps": 60, "timeout_ms": 30000}), id_to_full=id_to_full,
-                            ttl_seconds=int(cfg.get("ttl_seconds", 300)))
+                            ttl_seconds=int(cfg.get("ttl_seconds", 300)),
+                            governed_action_types=cfg.get("governed_action_types"))

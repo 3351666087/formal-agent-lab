@@ -21,6 +21,7 @@ from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 import httpx
+from evidence_io import write as write_evidence
 from formal_lab_domain_broker import HmacSigner, HmacVerifier, KeyStore, VerificationReceipt, digest_params
 from formal_lab_domain_broker.receipt import CheckBasis, ReceiptBindings, sign_receipt
 from formal_lab_example_orders.domain_lab import (
@@ -46,9 +47,9 @@ def _post_op(endpoint: str, tenant: str, op_id: str, action: str, params: dict, 
 
 
 def _conditions(endpoint: str, tenant: str) -> dict:
-    # operating conditions live in the service's meta; POSTing {} merges nothing and returns the current set (a read)
+    # the service's operating conditions, through its read-only endpoint (no write, unlike POSTing an empty update)
     url = f"{endpoint}/t/{tenant}/admin/conditions"
-    return httpx.post(url, json={}, trust_env=trust_env(url), timeout=10).json()
+    return httpx.get(url, trust_env=trust_env(url), timeout=10).json()
 
 
 def _issue(*, revision: int, conditions: dict, signer) -> VerificationReceipt:
@@ -120,13 +121,17 @@ def main() -> int:
         }
         lifecycle.append("broker-gated-privileged-action")
 
-        # simulator comparison on a comparable state: both the service and the MAL broker block the unauthorized change
+        # simulator comparison on a comparable state: what the service did (its own conditions, read back) against what
+        # the admission model decided (the broker's verdict on the same request) — both sides observed, not assumed
         ev["simulator_comparison"] = {
-            "authorized": check_property_vs_model(service_denied_without_receipt=not denied["applied"],
-                                                  model_blocks_unauthorized=True, comparable=True),
-            "unauthorized": check_property_vs_model(service_denied_without_receipt=(not denied["applied"]),
-                                                    model_blocks_unauthorized=True, comparable=True),
-            "out_of_scope": check_property_vs_model(service_denied_without_receipt=True, model_blocks_unauthorized=True,
+            "authorized": check_property_vs_model(service_denied_without_receipt=not applied_change,
+                                                  model_blocks_unauthorized=allowed.get("verdict") != "ALLOW",
+                                                  comparable=True),
+            "unauthorized": check_property_vs_model(service_denied_without_receipt=before == after_denied,
+                                                    model_blocks_unauthorized=denied.get("verdict") == "DENY",
+                                                    comparable=True),
+            "out_of_scope": check_property_vs_model(service_denied_without_receipt=before == after_denied,
+                                                    model_blocks_unauthorized=denied.get("verdict") == "DENY",
                                                     comparable=False),
         }
 
@@ -174,12 +179,17 @@ def main() -> int:
         "contract_action_only_via_broker": ev["contract_action_via_broker"]["zero_side_effect_on_service"]
         and ev["contract_action_via_broker"]["conditions_changed_after_allow"],
         "denied_action_never_reached_service": not ev["contract_action_via_broker"]["denied_without_receipt"]["applied"],
-        "probes_independent": True,
+        # the probe reads the service itself: it sees the privileged change only after the broker allowed it
+        "probes_independent": all(p["access"]["endpoint"] == ep and p["service_state"]["health"] is not None
+                                  for p in ev["probes"].values())
+        and "p2" not in ((ev["probes"]["before"].get("config") or {}).get("slow_stations") or [])
+        and "p2" in ((ev["probes"]["after"].get("config") or {}).get("slow_stations") or []),
         "reset_reproduces": ev["reset_and_rerun"]["reproduces_first_run"],
         "resources_accountable_after_crash": ev["abnormal_termination"]["resources_accountable"],
         "cleaned_up": ev["cleanup"]["removed_data"],
-        "simulator_comparison_recorded": True,
-        "offline_readable": True,
+        "simulator_comparison_recorded": ev["simulator_comparison"]["authorized"]["result"] == "CONSISTENT"
+        and ev["simulator_comparison"]["unauthorized"]["result"] == "CONSISTENT"
+        and ev["simulator_comparison"]["out_of_scope"]["result"] == "UNDECIDABLE",
     }
     _write(ev)
     print(f"  lifecycle: {' → '.join(lifecycle)}")
@@ -206,8 +216,7 @@ def _pid_alive(pid: int) -> bool:
 
 
 def _write(ev: dict) -> None:
-    OUT.parent.mkdir(parents=True, exist_ok=True)
-    OUT.write_text(json.dumps(ev, indent=2, ensure_ascii=False))
+    write_evidence(OUT, ev)  # sets conclusion.offline_readable from reading the written file back
     print(f"wrote {OUT.relative_to(ROOT)}")
 
 

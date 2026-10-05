@@ -62,6 +62,31 @@ PROFILES = {
     },
 }
 
+# The task book's three local delivery names (phase 3B / 4B) mapped onto the profiles above — the existing
+# configurations are reused, nothing is renamed. `requires_native` are toolchains outside the wheels and images.
+DELIVERY = {
+    "local-simulation": {
+        "profile": "local-lite",
+        "entry": "the local runner / `fal` against pure-data environments: formal-lab.env.ir-world runs MAL attack graphs "
+                 "(committed captures — no MAL toolchain), scheduling, warehouse and order models",
+        "requires_native": {"cage": "CybORG 4 venv ($FAL_CAGE_HOME, default ~/.venvs/fal-cage) — only for formal-lab.env.cage4",
+                            "mal": "mal-toolbox + mal-simulator venv ($FAL_MAL_HOME, default ~/.venvs/fal-mal) — only for "
+                                   "capturing a new attack graph live"},
+    },
+    "local-service-lab": {
+        "profile": "local-services",
+        "entry": "make services-up + API / worker (make dev-up, or deploy/compose/docker-compose.yaml) and the local order "
+                 "service (make orders-up) behind the domain Broker",
+        "requires_native": {},
+    },
+    "local-offline": {
+        "profile": "local-lite",
+        "entry": "a --no-index install from the release wheelhouse and `fal replay` with no server; the containerised stack "
+                 "from the image bundle (make offline-bundle, 8 GiB above the host reserve)",
+        "requires_native": {},
+    },
+}
+
 TOOLS = {
     "python3": ["python3", "--version"],
     "uv": ["uv", "--version"],
@@ -345,6 +370,11 @@ def collect() -> dict:
     }
     report["services"] = services(owners)
     report["profiles"] = assess(report)
+    report["delivery_profiles"] = {name: {**d, "status": report["profiles"][d["profile"]]["status"],
+                                          "native": {k: Path(os.environ.get(f"FAL_{k.upper()}_HOME",
+                                                                           Path.home() / ".venvs" / f"fal-{k}")).exists()
+                                                     for k in d["requires_native"]}}
+                                   for name, d in DELIVERY.items()}
     report["concurrency"] = concurrency_defaults(report["cpu_memory"])
     report["repository"] = {
         "revision": sh(["git", "-C", str(ROOT), "rev-parse", "HEAD"])[1],
@@ -379,6 +409,9 @@ def summary(r: dict) -> str:
                           + [f"port {c['port']} used by {c['owner']}" for c in p["port_conflicts"]])
         lines.append(f"profile   {name:15s} {p['status']:12s} ~{p['estimate']['memory_mib']} MiB "
                      f"{p['estimate']['cpus']} CPU {p['estimate']['disk_gib']} GiB" + (f"  ({extra})" if extra else ""))
+    for name, d in r.get("delivery_profiles", {}).items():
+        native = ", ".join(f"{k} {'present' if v else 'absent'}" for k, v in d["native"].items())
+        lines.append(f"delivery  {name:17s} → {d['profile']:14s} {d['status']}" + (f"  (native: {native})" if native else ""))
     return "\n".join(lines)
 
 

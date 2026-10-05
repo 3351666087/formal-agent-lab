@@ -66,6 +66,10 @@ export interface VersionDetail extends VersionSummary {
   package: {
     payload: { kind: "fal-ir"; ir: ModelIR } | { kind: "namespaced"; namespace: string; schema_id: string; data: Record<string, unknown> };
     digest: { value: string }; package_id: string; version: number; semantic_profile: string;
+    // provenance (phase 4B, B3): the frontend that built the package, its source and any domain extensions it keeps
+    frontend?: { plugin_id: string; version: string };
+    source?: { format: string; origin?: string | null };
+    extensions?: Record<string, { version: string; schema_id: string }>;
   };
   action_specs: { action_type: string; label?: string | null; preconditions: string[]; expected_effects: string[];
     params_schema: { properties: Record<string, { enum?: string[]; minimum?: number; maximum?: number; type: string }> } }[];

@@ -89,6 +89,17 @@ def main() -> None:
         shutil.copyfile(ROOT / src, dst)
         config_info.append({"file": f"config/{dst.name}", "source": src, "sha256": sha256(dst), "bytes": dst.stat().st_size})
 
+    # domain examples (phase 4B, B3): source envelopes a clean install imports through the MAL model frontend
+    examples = OUT / "examples"
+    examples.mkdir()
+    example_info = []
+    for name, (envelope, note) in mal_examples().items():
+        dst = examples / name
+        dst.write_text(json.dumps(envelope, ensure_ascii=False, indent=1) + "\n")
+        example_info.append({"file": f"examples/{name}", "format": "mal-attack-graph/v1",
+                             "frontend": "formal-lab.domain.mal.frontend@1.0.0", "note": note,
+                             "sha256": sha256(dst), "bytes": dst.stat().st_size})
+
     print("==> web bundle")
     sh("pnpm", "--dir", "web", "exec", "tsc", "--noEmit", "-p", "tsconfig.json")
     sh("pnpm", "--dir", "web", "exec", "vite", "build")
@@ -159,10 +170,14 @@ def main() -> None:
                  "docs/acceptance-phase2.md", "docs/contracts/v2.md", "docs/contracts/v1.md",
                  "docs/architecture/plugin-integration.md", "docs/architecture/capability-matrix.md",
                  "docs/architecture/observation-semantics.md", "docs/reuse-ledger.md", "docs/licenses.md",
-                 "docs/handoff/phase1.md", "docs/handoff/phase2.md"],
+                 "docs/handoff/phase1.md", "docs/handoff/phase2.md", "docs/handoff/phase3.md",
+                 "docs/handoff/phase4.md", "docs/acceptance-phase3.md", "docs/assurance-scope.md",
+                 "docs/research-readout.md", "docs/design-system.md"],
         "follow_up_deployment": FOLLOW_UP,
         "deployment": {"compose": "deploy/compose/docker-compose.yaml", "helm_chart": "deploy/helm/formal-agent-lab"},
         "local_configs": config_info,
+        "examples": example_info,
+        "local_profiles": doctor.DELIVERY,
         "duration_s": round(time.time() - t0, 1),
     }
     (OUT / "manifest.json").write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\n")
@@ -170,6 +185,20 @@ def main() -> None:
     evidence.parent.mkdir(parents=True, exist_ok=True)
     evidence.write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\n")
     print(f"==> {OUT / 'manifest.json'} ({len(wheel_info)} wheels, {len(images)} images) in {manifest['duration_s']} s")
+
+
+def mal_examples() -> dict[str, tuple[dict, str]]:
+    """The committed coreLang capture (net-app-data) as mal-attack-graph/v1 envelopes: the red-team package and its
+    defence-enabled (red / blue) variant."""
+    pkg = ROOT / "packages" / "domain-mal"
+    graph = json.loads((pkg / "tests/fixtures/net_app_data.graph.json").read_text())
+    native = json.loads((pkg / "tests/fixtures/net_app_data.native.json").read_text())["reachable_case"]
+    model = json.loads((pkg / "src/formal_lab_domain_mal/models/net_app_data.json").read_text())
+    base = {"language": {"name": "coreLang", "version": "1.0.0"}, "model": model, "graph": graph,
+            "entry_points": native["entry"], "goal": native["goal"], "reachable": native["compromised"]}
+    return {"mal-net-app-data.json": (base, "red team: reach secret:read"),
+            "mal-net-app-data-defence.json": ({**base, "include_defense": True},
+                                              "red / blue: the defender can harden attack steps")}
 
 
 FOLLOW_UP = [  # deployment work outside this phase: when it becomes necessary and what it depends on

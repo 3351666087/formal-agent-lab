@@ -68,6 +68,25 @@ def judge_suite(results_path: Path, nonce: str, runner_exit: int) -> dict:
     return base | {"verdict": "INCOMPLETE", "complete": False, "detail": f"unmet {doc.get('unmet')}"}
 
 
+STAGES = {"A": ("a1", "a2", "a3", "a4", "a5"), "B": ("b1", "b2", "b3")}
+
+
+def stage_status(verdicts: dict[str, dict], complete: bool) -> dict[str, dict]:
+    """Phase 4's A stage (a1–a5) and B stage (b1–b3) from the phase-4 suite, and the whole product (every suite, in
+    full, this run's reports) — reported apart, so a finished A stage never reads as a finished product."""
+    groups = (verdicts.get("phase4") or {}).get("groups") or {}
+    adopted = (verdicts.get("phase4") or {}).get("verdict") not in (None, "REPORT_MISSING", "MALFORMED_REPORT",
+                                                                     "STALE_REPORT", "RUNNER_CRASHED")
+    out = {}
+    for stage, names in STAGES.items():
+        got = {g: groups.get(g, "NOT_RUN") for g in names} if adopted else {g: "NOT_RUN" for g in names}
+        out[stage] = {"status": "PASS" if all(v == "PASS" for v in got.values()) else
+                      "NOT_RUN" if all(v == "NOT_RUN" for v in got.values()) else "INCOMPLETE", "groups": got}
+    out["product"] = {"status": "COMPLETE" if complete else "INCOMPLETE",
+                      "suites": {k: v["verdict"] for k, v in verdicts.items()}}
+    return out
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--suites", default=",".join(DEFAULT_SUITES), help="suite names or suite .py paths")
@@ -96,12 +115,13 @@ def main(argv: list[str] | None = None) -> int:
         print(f"    {key}: {verdicts[key]['verdict']} — {verdicts[key]['detail']}", flush=True)
 
     complete = bool(verdicts) and not args.group and all(v["complete"] for v in verdicts.values())
+    stages = stage_status(verdicts, complete)
     unmet = [f"{k}:{v['verdict']}" + (f" {v.get('unmet')}" if v.get("unmet") else "")
              for k, v in verdicts.items() if not v["complete"]]
     rev = subprocess.run(["git", "rev-parse", "HEAD"], cwd=ROOT, capture_output=True, text=True).stdout.strip()
     report = {"acceptance": "local", "format": "acceptance@2", "nonce": nonce, "started_at": started,
               "finished_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), "source_revision": rev,
-              "suites": verdicts, "selection": {"suites": suites, "group": args.group or None},
+              "suites": verdicts, "stages": stages, "selection": {"suites": suites, "group": args.group or None},
               "complete": complete, "unmet": unmet, "strict": not args.no_strict,
               "rule": "complete only when every suite ran in full, its report carries this run's nonce, and every "
                       "required group passed; partial runs, missing / stale / malformed reports and crashed runners "
@@ -110,6 +130,7 @@ def main(argv: list[str] | None = None) -> int:
     report_path.parent.mkdir(parents=True, exist_ok=True)
     report_path.write_text(json.dumps(report, indent=2, ensure_ascii=False) + "\n")
     print(f"\n==> acceptance-local: complete={complete} → {_rel(report_path)}")
+    print("    stages: " + "; ".join(f"{k}={v['status']}" for k, v in stages.items()))
     if unmet:
         print(f"    unmet: {unmet}")
     if args.no_strict:

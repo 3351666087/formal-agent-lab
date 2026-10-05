@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate, useParams } from "react-router";
 import type { BoundedCheckResult, ModelIR } from "@formal-lab/contracts";
 import {
-  get, irOf, post, type CheckRecord, type ModelChange, type ModelSummary, type Validation, type VersionDetail,
+  get, irOf, post, type CatalogEntry, type CheckRecord, type ModelChange, type ModelSummary, type Validation, type VersionDetail,
 } from "../api";
 import { ModelGraph } from "../components/ModelGraph";
 import { ObjectivesAndReleases } from "../components/ReleasePanel";
@@ -52,26 +52,65 @@ export function ModelWorkbench() {
   );
 }
 
+// The source formats a MODEL_FRONTEND plugin declares it compiles (capability frontend.source_format).
+const formatsOf = (e: CatalogEntry) =>
+  e.descriptor.capabilities.filter((c) => c.id === "frontend.source_format")
+    .flatMap((c) => ((c.params as { formats?: string[] } | undefined)?.formats ?? []));
+
 function CreateModel({ pid, onClose }: { pid: string; onClose: () => void }) {
   const qc = useQueryClient();
   const navigate = useNavigate();
   const [packageId, setPackageId] = useState("");
   const [name, setName] = useState("");
+  const [mode, setMode] = useState<"ir" | "source">("ir");
   const [ir, setIr] = useState<ModelIR>(blankModel());
+  // phase 4B (B3): a model given as a frontend source (e.g. a MAL attack graph) is compiled by the chosen plugin
+  const frontends = useQuery({ queryKey: ["plugins", "MODEL_FRONTEND"], enabled: mode === "source",
+    queryFn: () => get<CatalogEntry[]>("/plugins?interface=MODEL_FRONTEND") });
+  const [frontend, setFrontend] = useState("");
+  const [format, setFormat] = useState("");
+  const [text, setText] = useState("");
+  const entries = (frontends.data ?? []).filter((e) => formatsOf(e).length);
+  const entry = entries.find((e) => `${e.descriptor.plugin_id}@${e.descriptor.version}` === frontend) ?? entries[0];
+  const formats = entry ? formatsOf(entry) : [];
+  const fmt = formats.includes(format) ? format : formats[0] ?? "";
   const create = useMutation({
-    mutationFn: () => post<ModelSummary>(`/projects/${pid}/models`, { package_id: packageId, name: name || packageId, ir }),
+    mutationFn: () => post<ModelSummary>(`/projects/${pid}/models`, mode === "ir"
+      ? { package_id: packageId, name: name || packageId, ir }
+      : { package_id: packageId, name: name || packageId, source: { format: fmt, text },
+          frontend: { plugin_id: entry!.descriptor.plugin_id, version: entry!.descriptor.version } }),
     onSuccess: (m) => { qc.invalidateQueries({ queryKey: ["models", pid] }); onClose(); navigate(`/p/${pid}/models/${m.id}`); },
   });
+  const ready = /^[A-Za-z0-9][A-Za-z0-9._:@/-]*$/.test(packageId) && (mode === "ir" || (entry && fmt && text.trim()));
   return (
     <Modal title="新建模型" onClose={onClose} footer={<>
       <button className="btn" onClick={onClose}>取消</button>
-      <button className="btn primary" disabled={!/^[A-Za-z0-9][A-Za-z0-9._:@/-]*$/.test(packageId) || create.isPending}
-        onClick={() => create.mutate()}>创建 v1</button></>}>
+      <button className="btn primary" disabled={!ready || create.isPending}
+        onClick={() => create.mutate()}>{mode === "ir" ? "创建 v1" : "编译并创建 v1"}</button></>}>
       <div className="form-grid">
         <label className="field"><span>package_id</span><input value={packageId} onChange={(e) => setPackageId(e.target.value)} placeholder="例如 my-model" /></label>
         <label className="field"><span>名称</span><input value={name} onChange={(e) => setName(e.target.value)} /></label>
+        <label className="field"><span>来源</span>
+          <select value={mode} onChange={(e) => setMode(e.target.value as "ir" | "source")} aria-label="模型来源">
+            <option value="ir">IR JSON（直接编辑）</option><option value="source">源文件 → 模型前端编译</option></select></label>
       </div>
-      <label className="field"><span>初始 IR（可粘贴已有模型 JSON）</span><JsonField value={ir} onChange={setIr} rows={14} /></label>
+      {mode === "ir" ? <label className="field"><span>初始 IR（可粘贴已有模型 JSON）</span><JsonField value={ir} onChange={setIr} rows={14} /></label> : <>
+        <div className="form-grid">
+          <label className="field"><span>模型前端</span>
+            <select value={entry ? `${entry.descriptor.plugin_id}@${entry.descriptor.version}` : ""} onChange={(e) => setFrontend(e.target.value)} aria-label="模型前端">
+              {entries.map((e) => <option key={e.descriptor.plugin_id} value={`${e.descriptor.plugin_id}@${e.descriptor.version}`}>{e.descriptor.ui.label} ({e.descriptor.version})</option>)}</select></label>
+          <label className="field"><span>源格式</span>
+            <select value={fmt} onChange={(e) => setFormat(e.target.value)} aria-label="源格式">
+              {formats.map((f) => <option key={f} value={f}>{f}</option>)}</select></label>
+        </div>
+        {entry?.descriptor.ui.description && <div className="small muted">{entry.descriptor.ui.description}</div>}
+        <label className="field"><span>源内容（{fmt || "—"}）</span>
+          <textarea rows={12} value={text} onChange={(e) => setText(e.target.value)} spellCheck={false} aria-label="源内容"
+            style={{ fontFamily: "var(--font-mono)" }} /></label>
+        <label className="btn sm" style={{ alignSelf: "flex-start" }}>从文件读取
+          <input type="file" accept=".json,.txt,application/json" hidden aria-label="源文件"
+            onChange={(e) => { const f = e.target.files?.[0]; if (f) f.text().then(setText); }} /></label>
+      </>}
       <InlineError error={create.error} />
     </Modal>
   );
@@ -161,6 +200,10 @@ function ModelEditor({ modelId }: { modelId: string }) {
             ["摘要", <code title={d.digest}>{d.digest.slice(0, 16)}…</code>],
             ["规模", `${d.summary.state_locations} 个状态位置 · ${d.summary.ground_actions} 个基础动作`],
             ["创建", `${fmtTime(d.created_at)}${d.parent_version ? ` · 基于 v${d.parent_version}` : ""}`],
+            ...(d.package.frontend ? [["来源", <span data-testid="model-source"><code className="small">{d.package.frontend.plugin_id}@{d.package.frontend.version}</code>
+              {d.package.source ? <> · {d.package.source.format}{d.package.source.origin ? <span className="muted"> · {d.package.source.origin}</span> : null}</> : null}</span>] as [string, React.ReactNode]] : []),
+            ...(Object.keys(d.package.extensions ?? {}).length ? [["领域扩展", <span className="row" style={{ gap: 6 }} data-testid="model-extensions">
+              {Object.entries(d.package.extensions!).map(([k, x]) => <code key={k} className="small" title={x.schema_id}>{k} v{x.version}</code>)}</span>] as [string, React.ReactNode]] : []),
           ]} />
           {restored && <div className="callout warn small">已恢复刷新前未保存的草稿（基于 v{d.version}）。
             <button className="btn sm ghost" onClick={() => { localStorage.removeItem(draftKey(modelId)); setDraft(structuredClone(irOf(d.package)!)); setRestored(false); }}>丢弃草稿</button></div>}
@@ -169,6 +212,8 @@ function ModelEditor({ modelId }: { modelId: string }) {
               {!validation ? "校验中…" : validation.valid ? "类型检查通过" : `${issues.length + schemaErrors.length} 个问题`}
             </span>
             {dirty ? <span className="badge warn">有未保存修改</span> : <span className="badge">与 v{d.version} 一致</span>}
+            {dirty && Object.keys(d.package.extensions ?? {}).length > 0 &&
+              <span className="badge warn" title="按 IR 保存的新版本不再经过模型前端，领域扩展（如攻击图）不会带入">新版本不含领域扩展</span>}
             <input style={{ flex: 1, minWidth: 160 }} placeholder="版本说明（可选）" value={note} onChange={(e) => setNote(e.target.value)} aria-label="版本说明" />
             <button className="btn" disabled={!dirty} onClick={() => setDraft(structuredClone(irOf(d.package)!))}>撤销修改</button>
             <button className="btn primary" disabled={!dirty || invalid || save.isPending} onClick={() => save.mutate()}

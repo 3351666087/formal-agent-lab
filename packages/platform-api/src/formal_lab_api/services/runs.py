@@ -320,6 +320,15 @@ def step_detail(s: Session, run_id: str, step: int) -> dict[str, Any]:
             case "EFFECT_COMPARED":
                 out["comparison"] = p.get("comparison")
                 out["observation_after"] = p.get("observation_after")
+            case "EXECUTION_DECIDED":  # phase 4B (B3): the pre-send gate decisions (e.g. the Broker) explain the step too
+                d = p.get("decision") or {}
+                if d.get("step", step) == step:  # a batch commit carries its members' decisions at its own step
+                    out.setdefault("decisions", []).append(d)
+    batch_id = ((out.get("outcome") or {}).get("turn") or {}).get("batch_id")
+    if batch_id and "decisions" not in out:  # a JOINT_BATCH member: its decisions were recorded at the commit step
+        out["decisions"] = [r.payload["decision"] for r in list_events(s, run_id, event_types=["EXECUTION_DECIDED"],
+                                                                      limit=5000)
+                            if r.payload.get("batch_id") == batch_id and r.payload["decision"].get("step") == step]
     return out
 
 

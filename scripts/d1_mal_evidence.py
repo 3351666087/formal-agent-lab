@@ -27,6 +27,7 @@ import os
 from pathlib import Path
 from typing import Any
 
+from evidence_io import write as write_evidence
 from formal_lab_contracts import CheckQuery, ObjectiveSpec
 from formal_lab_domain_mal.config import BusinessSLO, LabPolicy, TargetSecurity
 from formal_lab_domain_mal.frontend import attack_graph_of, package_from_graph
@@ -254,11 +255,10 @@ def main() -> int:
             "three_engines_agree_reachable": reach_rec["three_engines_agree"],
             "three_engines_agree_target_holds": hold_rec["three_engines_agree"],
             "platform_episode_status": episode["status"],
-            "offline_readable": True,
+            "platform_episode_succeeded": episode["status"] == "SUCCEEDED",
         },
     }
-    OUT.parent.mkdir(parents=True, exist_ok=True)
-    OUT.write_text(json.dumps(result, indent=2, ensure_ascii=False))
+    write_evidence(OUT, result)  # sets conclusion.offline_readable from reading the written file back
     print(f"wrote {OUT.relative_to(ROOT)}")
     print(f"  import={imp['source']} fixture_match={imp['fixture_digest_match']} "
           f"agree(reach)={reach_rec['three_engines_agree']} agree(hold)={hold_rec['three_engines_agree']}")

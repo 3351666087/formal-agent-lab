@@ -94,6 +94,10 @@ class ReplayBundle:
     def step(self, n: int) -> dict[str, Any]:
         out: dict[str, Any] = {"step": n}
         for e in self.events:
+            if str(e.event_type) == "EXECUTION_DECIDED":  # a decision belongs to the step of the proposal it judged
+                if (e.payload.get("decision") or {}).get("step", e.logical_step) == n:
+                    out.setdefault("decisions", []).append(e.payload)
+                continue
             if e.logical_step != n:
                 continue
             if e.turn is not None and "turn_ref" not in out:

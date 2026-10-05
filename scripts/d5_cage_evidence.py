@@ -25,6 +25,7 @@ import statistics
 import time
 from pathlib import Path
 
+from evidence_io import write as write_evidence
 from formal_lab_env_cage import bridge
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -74,6 +75,11 @@ def main() -> int:
     dev_rewards = [_defender_reward(r) for r in dev["runs"]]
     hold_rewards = [_defender_reward(r) for r in holdout["runs"]]
     repro_match = rerun["runs"][0]["team_reward_totals"] == first["team_reward_totals"]
+    platform = [_platform_metrics(r) for r in dev["runs"] + holdout["runs"]]
+    # the platform projection leaves what does not apply to a scripted native run unset, and carries no native totals
+    separate = all(m["rejections"] is None and m["unknowns"] is None and m["model_deviation"] is None
+                   and "team_reward_totals" not in m for m in platform)
+    cross = _cross_check(dev_rewards)
 
     ev = {
         "deliverable": "phase3B-D5",
@@ -92,14 +98,15 @@ def main() -> int:
                             "first_steps": first["per_step"][:3],
                             "reward_steps": [s for s in first["per_step"]
                                              if any(v for v in s["team_rewards"].values())][:5]},
-            "one_world_step_advances_once": True,
+            "one_world_step_advances_once": [s["world_step"] for s in first["per_step"]]
+            == list(range(1, first["steps_run"] + 1)),
             "joint_actions_per_step": "every internal scripted agent acts in one native world step",
             "auto_participants": "green agents (EnterpriseGreenAgent) act automatically",
         },
         "platform_metrics": {
-            "dev": [_platform_metrics(r) for r in dev["runs"]],
-            "holdout": [_platform_metrics(r) for r in holdout["runs"]],
-            "kept_separate_from_native_scores": True,
+            "dev": platform[:len(dev["runs"])],
+            "holdout": platform[len(dev["runs"]):],
+            "kept_separate_from_native_scores": separate,
             "incomparable_items": [
                 "CAGE per-team reward is on CybORG's own scale; it is not the platform's reachability verdict or the "
                 "order service's success rate — magnitudes are not comparable across the three",
@@ -133,6 +140,7 @@ def main() -> int:
                                     "red activity; D4: the privileged action is prevented only by the broker — but the "
                                     "magnitudes are on different scales and are not merged",
             "comparable": False,
+            "observed": cross,
         },
         "conditional_items": [
             {"item": "RL-trained agent baselines (e.g. Masked PPO) and the EnterpriseMAE/ray wrapper",
@@ -140,12 +148,12 @@ def main() -> int:
              "the scripted official baseline is what is delivered here, RL baselines remain a conditional item"},
         ],
         "conclusion": {
-            "official_baseline_ran": True,
-            "native_and_platform_kept_separate": True,
+            "official_baseline_ran": bool(versions.get("cyborg_version"))
+            and all(r["steps_run"] > 0 for r in dev["runs"] + holdout["runs"]),
+            "native_and_platform_kept_separate": separate,
             "reproducible": repro_match,
-            "cross_checked_within_scopes": True,
+            "cross_checked_within_scopes": all(cross.values()),
             "traceable": bool(versions.get("cage_src_revision")),
-            "offline_readable": True,
         },
     }
     _write(ev)
@@ -157,9 +165,23 @@ def main() -> int:
     return 0
 
 
+def _cross_check(dev_rewards: list[float]) -> dict[str, bool]:
+    """The direction in each scope, from its own evidence in this directory (D1, D4) and this run (CAGE)."""
+    def concl(name: str) -> dict:
+        p = OUT.parent / name
+        try:
+            return json.loads(p.read_text()).get("conclusion") or {}
+        except (OSError, json.JSONDecodeError):
+            return {}
+
+    return {"MAL_target_reachable_three_engines": concl("d1-mal.json").get("three_engines_agree_reachable") is True,
+            "D4_privileged_action_only_via_broker": concl("d4-service-lab.json").get("contract_action_only_via_broker")
+            is True,
+            "CAGE_blue_reward_negative_under_red": bool(dev_rewards) and statistics.mean(dev_rewards) < 0}
+
+
 def _write(ev: dict) -> None:
-    OUT.parent.mkdir(parents=True, exist_ok=True)
-    OUT.write_text(json.dumps(ev, indent=2, ensure_ascii=False))
+    write_evidence(OUT, ev)  # sets conclusion.offline_readable from reading the written file back
     print(f"wrote {OUT.relative_to(ROOT)}")
 
 

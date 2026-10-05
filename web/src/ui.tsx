@@ -288,7 +288,7 @@ export function SchemaForm({ schema, value, onChange, error, basePath }: {
 }) {
   const props = schema.properties ?? {};
   const keys = Object.keys(props);
-  const [raw, setRaw] = useState<string | null>(null);
+  const [raw, setRaw] = useState<Record<string, string>>({});  // per field: JSON text still being typed
   const errs = basePath ? fieldErrorsAt(error, basePath) : {};
   if (!keys.length && schema.additionalProperties !== false) {
     return <JsonField value={value} onChange={onChange} />;
@@ -327,8 +327,14 @@ export function SchemaForm({ schema, value, onChange, error, basePath }: {
         } else if (t === "string") {
           input = <input value={cur === undefined ? "" : String(cur)} onChange={(e) => set(k, e.target.value || undefined)} />;
         } else {
-          input = <textarea rows={3} value={raw ?? JSON.stringify(cur ?? null, null, 1)}
-            onChange={(e) => { setRaw(e.target.value); try { set(k, JSON.parse(e.target.value)); setRaw(null); } catch { /* keep typing */ } }} />;
+          input = <textarea rows={3} value={raw[k] ?? (cur === undefined ? "" : JSON.stringify(cur, null, 1))}
+            placeholder={p.default !== undefined ? `默认 ${JSON.stringify(p.default)}` : "（未设置：用插件默认）"}
+            onChange={(e) => {
+              const text = e.target.value;
+              if (!text.trim()) { setRaw(({ [k]: _, ...rest }) => rest); set(k, undefined); return; }
+              setRaw((r) => ({ ...r, [k]: text }));
+              try { set(k, JSON.parse(text)); setRaw(({ [k]: _, ...rest }) => rest); } catch { /* keep typing */ }
+            }} />;
         }
         return (
           <label className={`field ${errs[k] ? "invalid" : ""}`} key={k} aria-invalid={Boolean(errs[k])}>

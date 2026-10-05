@@ -25,7 +25,8 @@ SOURCE_FORMAT = "mal-attack-graph/v1"
 
 DESCRIPTOR = PluginDescriptor(
     plugin_id=FRONTEND_ID, version="1.0.0", interface="MODEL_FRONTEND",
-    capabilities=[{"id": "profile.deterministic_finite_v1"}],
+    capabilities=[{"id": "profile.deterministic_finite_v1"},
+                  {"id": "frontend.source_format", "params": {"formats": ["mal-attack-graph/v1"]}}],
     semantic_profiles=["deterministic_finite_v1"],
     config_schema={"type": "object", "additionalProperties": False},
     entrypoint="formal_lab_domain_mal.frontend:create_frontend",
@@ -82,9 +83,13 @@ class MalFrontend:
         env = json.loads(source.text)
         if "graph" not in env or "goal" not in env:
             raise InvalidInput("mal-attack-graph/v1 envelope needs `graph` and `goal`")
+        # optional (phase 4B, B3): `include_defense` adds the defender's harden action (red/blue), `initial_hardened`
+        # pre-hardens steps — the same options package_from_graph takes, so the API/CLI import builds either package
         return package_from_graph(env["graph"], env.get("entry_points", []), env["goal"],
                                   package_id=package_id, version=version, reachable=env.get("reachable"),
-                                  model=env.get("model"), language=env.get("language"))
+                                  model=env.get("model"), language=env.get("language"),
+                                  include_defense=bool(env.get("include_defense", False)),
+                                  initial_hardened=env.get("initial_hardened"))
 
 
 def create_frontend(config: dict[str, Any] | None = None, services: Any = None) -> MalFrontend:

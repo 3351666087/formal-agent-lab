@@ -32,6 +32,7 @@ DOMAIN_GROUPS = ("b1", "b2", "b3")
 
 PYTEST = "uv run --frozen pytest -p no:cacheprovider -q"
 PY = "uv run --frozen python"
+IT = f"{PYTEST} -m integration"
 
 
 DOMAIN_CHECKS: list[Check] = [
@@ -71,4 +72,23 @@ DOMAIN_CHECKS: list[Check] = [
           f"{PYTEST} -m 'integration and cage' tests/integration/test_cage_platform.py", ["P4B-B2"],
           requires="services",
           produces=[f"{EV}/b2-platform-run.json", f"{EV}/b2-matrix.json", f"{EV}/b2-paired-report.md"]),
+    # ------------------------------------------------------------ B3 domain product flow, release and delivery
+    Check("p4-b3-unit", "b3",
+          "B3 修复的单元：MAL 门控只管准入范围内动作（蓝方加固显式放行并记录、攻击方视图下陈旧红方步被签发方拒绝）、"
+          "回放包一步保留全部门控决策、领域证据结论由实际检查产生（存在 / 通过 / 当前修订分别判定）、验收按 A / B / 全产品分别报告",
+          f"{PYTEST} tests/tools/test_evidence_io.py tests/tools/test_acceptance_local.py "
+          "packages/domain-mal/tests/test_admission.py", ["P4B-B3"]),
+    Check("p4-b3-product-flow", "b3",
+          "MAL 领域经 Web / API / CLI / SDK：Web 表单经模型前端导入攻击图（保留领域扩展）、CLI 导入防御变体、SDK 模型修订（不完整捕获 v1 "
+          "与完整捕获 v2 的有界结论不同）、场景表单显示并保存门控、CLI 运行逐动作准入红队、API / CLI 解释步含 Broker 判定、API 红蓝"
+          "（攻击方视图隐藏加固 → 陈旧步被拒、蓝方加固显式放行）、Web 运行台 / 步骤详情 / 证据回放 / 基准页、参与者下载为各自投影、"
+          "CLI 导出后停止 API 离线回放",
+          f"{IT} tests/integration/test_product_flow_b3.py", ["P4B-B3"], requires="services",
+          produces=[f"{EV}/b3-product-flow.json"]),
+    Check("p4-b3-release", "b3",
+          "发行（领域）：wheel 含领域包与 MAL 示例、三种本地交付名映射到既有配置；在线 / 仅本机缓存 / 完全离线三种安装分开标记；"
+          "local-simulation 在完全离线环境跑逐动作准入红队；local-service-lab 从干净安装启动 API + worker，导入 / 配置 / 运行 / 导出后停止，"
+          "订单服务经 Broker 无凭据零副作用、凭据放行；local-offline 网络关闭回放两份回放包",
+          f"{PY} scripts/b3_release_evidence.py", ["P4B-B3"], protocol=True, requires="services", heavy_gib=3,
+          produces=[f"{EV}/b3-release.json"]),
 ]

@@ -82,3 +82,15 @@ def test_old_report_left_on_disk_is_not_adopted(tmp_path):
 def test_no_strict_reports_but_exits_zero(tmp_path):
     code, rep = run(tmp_path, suite(tmp_path, "one", GOOD), extra=["--group", "a", "--no-strict"])
     assert code == 0 and rep["complete"] is False and rep["strict"] is False
+
+
+def test_stages_are_reported_apart():
+    """Phase 4B (B3): the A stage, the B stage and the whole product each get their own status."""
+    groups = {"a1": "PASS", "a2": "PASS", "a3": "PASS", "a4": "PASS", "a5": "PASS",
+              "b1": "PASS", "b2": "PASS", "b3": "FAIL"}
+    verdicts = {"phase2": {"verdict": "COMPLETE", "complete": True},
+                "phase4": {"verdict": "INCOMPLETE", "complete": False, "groups": groups}}
+    st = acceptance.stage_status(verdicts, complete=False)
+    assert st["A"]["status"] == "PASS" and st["B"]["status"] == "INCOMPLETE" and st["product"]["status"] == "INCOMPLETE"
+    stale = acceptance.stage_status({"phase4": {"verdict": "STALE_REPORT", "groups": groups}}, complete=False)
+    assert stale["A"]["status"] == "NOT_RUN"  # an old report's groups never count

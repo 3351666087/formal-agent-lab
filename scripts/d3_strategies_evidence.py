@@ -23,6 +23,7 @@ import json
 import os
 from pathlib import Path
 
+from evidence_io import write as write_evidence
 from formal_lab_domain_mal.frontend import attack_graph_of, package_from_graph
 from formal_lab_domain_mal.revision import model_revision_cases
 from formal_lab_domain_mal.run import red_team_scenario
@@ -50,8 +51,11 @@ def _run(reg, package, strategy, seed=0, max_model_calls=0):
     res = run_local(make_manifest(run_id=new_run_id(), project_id="phase3b-d3", scenario=scn, package=package,
                                   registry=reg), package, reg)
     gid = attack_graph_of(package)["lowering"]["goal_id"]
+    sources = [st.proposal.source for st in res.steps if st.proposal is not None]
     return {"strategy": strategy, "status": str(res.status), "steps": len(res.steps),
-            "goal_reached": bool(res.final_state.get(f"compromised[{gid}]")), "reason": res.reason}
+            "goal_reached": bool(res.final_state.get(f"compromised[{gid}]")), "reason": res.reason,
+            "source_kinds": sorted({str(s.kind) for s in sources}),
+            "model_call_ids": sum(len(s.model_call_ids) for s in sources)}
 
 
 def main() -> int:
@@ -88,14 +92,20 @@ def main() -> int:
     }
 
     # hybrid real-model conditional
+    # the mode is read from the hybrid run's own proposal sources, never from whether an endpoint is configured
+    # (phase 4B, B3): this D3 baseline runs the hybrid with its stub client; real-model red is B1's p4-b1-real-endpoint
     endpoint = os.environ.get("FAL_LLM_BASE_URL") or os.environ.get("ANTHROPIC_BASE_URL")
+    hyb = next(r for r in red_baselines if r["strategy"] == "hybrid")
+    kinds = hyb["source_kinds"]
+    used = ("REAL" if "LLM" in kinds else "PROTOCOL_TEST" if "LLM_PROTOCOL_TEST" in kinds
+            else "STUB" if "LLM_STUB" in kinds else "RULE")
     hybrid_model = {
         "real_endpoint_configured": bool(endpoint),
-        "mode": "REAL" if endpoint else "STUB",
-        "note": ("a real model endpoint is configured; the hybrid strategy's model calls are live"
-                 if endpoint else "no model endpoint configured — the hybrid strategy ran with a marked stub that "
-                 "defers ranking to the rule; the real-model result is a conditional item, not claimed as delivered"),
-        "hybrid_reached_goal": next(r["goal_reached"] for r in red_baselines if r["strategy"] == "hybrid"),
+        "mode": used, "source_kinds": kinds, "model_call_ids": hyb["model_call_ids"],
+        "note": ("the hybrid's adopted decisions trace to real model answers" if used == "REAL" else
+                 f"the hybrid ran with {used.lower()} decisions (source kinds {kinds}); no real-model result is "
+                 "claimed here — the real-endpoint run is phase 4B's p4-b1-real-endpoint"),
+        "hybrid_reached_goal": hyb["goal_reached"],
     }
 
     # model revision (D-022)
@@ -118,15 +128,14 @@ def main() -> int:
             "both_sides_complete_experiment": all(r["goal_reached"] for r in red_baselines)
             and all(not r["goal_reached"] for r in blue_runs),
             "checkpoint_recovery_preserves_progress": checkpoint["same_outcome"],
-            "real_model_reported_honestly": True,
+            "model_mode_from_proposal_sources": bool(kinds) and (used != "REAL" or (bool(endpoint)
+                                                                                and hyb["model_call_ids"] > 0)),
             "one_true_revision_succeeds": revision["true_deviation"]["revised_model_v2_passes_case"]
             and revision["true_deviation"]["old_model_v1_rejected"],
             "stale_not_polluting_regression": revision["regression_library_clean"],
-            "offline_readable": True,
         },
     }
-    OUT.parent.mkdir(parents=True, exist_ok=True)
-    OUT.write_text(json.dumps(result, indent=2, ensure_ascii=False))
+    write_evidence(OUT, result)  # sets conclusion.offline_readable from reading the written file back
     print(f"wrote {OUT.relative_to(ROOT)}")
     print("  red baselines:", {r["strategy"]: r["goal_reached"] for r in red_baselines})
     print(f"  blue cut={cut} cost={len(cut)} all_red_blocked={result['blue_defense']['all_red_blocked']}")

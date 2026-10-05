@@ -28,6 +28,15 @@ def package():
                                                                                      "version": "1.0.0"})
 
 
+@pytest.fixture(scope="module")
+def package_def():
+    graph = json.loads((FIX / "net_app_data.graph.json").read_text())
+    native = json.loads((FIX / "net_app_data.native.json").read_text())["reachable_case"]
+    return package_from_graph(graph, native["entry"], native["goal"], package_id="mal-net-app-data-rb", version=1,
+                              reachable=native["compromised"], language={"name": "coreLang", "version": "1.0.0"},
+                              include_defense=True)
+
+
 @pytest.fixture
 def issuer():
     ks = KeyStore({"issuer-1": b"mal-signing-secret"})
@@ -142,7 +151,56 @@ def test_issuer_denies_without_a_current_revision_or_for_a_non_compromise_action
     issuer = _issuer(package)
     goal_id = attack_graph_of(package)["lowering"]["goal_id"]
     assert issuer.decide(_req("compromise", goal_id, revision=None, values={})).verdict == "DENY"
-    assert issuer.decide(_req("harden", goal_id, revision=0, values={})).verdict == "DENY"
+    # a governed non-compromise action type gets no receipt
+    strict = _issuer(package, governed_action_types=["compromise", "harden"])
+    assert strict.decide(_req("harden", goal_id, revision=0, values={})).verdict == "DENY"
+
+
+def test_actions_outside_the_admission_scope_pass_explicitly(package):
+    """Phase 4B (B3): the defender's `harden` is not an admission-governed step — it passes with a recorded reason
+    and a GOVERNED_ACTION=false condition (it used to be denied, so blue could never act in a gated red/blue run)."""
+    from formal_lab_domain_mal.frontend import attack_graph_of
+    from formal_lab_domain_mal.gate import MalBrokerGate
+
+    goal_id = attack_graph_of(package)["lowering"]["goal_id"]
+    res = _issuer(package).decide(_req("harden", goal_id, revision=None, values={}))
+    assert res.verdict == "ALLOW" and "outside this gate's admission scope" in res.reason
+    assert [(c.name, c.holds) for c in res.conditions] == [("GOVERNED_ACTION", False)]
+    gate = MalBrokerGate(store=None, verifier=None, id_to_full={}, lab_policy=None, target_security=None,
+                         role_allowed_actions=["compromise"])
+    assert gate.decide(_req("harden", goal_id, revision=0, values={})).verdict == "ALLOW"
+
+
+def test_gated_red_blue_lets_blue_defend_and_denies_stale_red_steps(package_def, tmp_path):
+    """A gated red/blue episode: blue's hardens are applied; red, whose role view withholds `hardened`, keeps trying a
+    step blue has hardened — the issuer checks it at send time and denies it (no receipt, nothing sent)."""
+    import os
+    import uuid
+
+    from formal_lab_domain_mal.run import red_blue_scenario
+    from formal_lab_runtime import default_registry, make_manifest, run_local
+
+    ks = tmp_path / "k.json"
+    ks.write_text(json.dumps({"issuer-1": os.urandom(24).hex()}))
+    rc = str(tmp_path / "r.json")
+    tgt = {"property_id": "secret-confidentiality", "reach_forbidden": "secret:read"}
+    gates = [{"plugin": {"plugin_id": "formal-lab.domain.mal.receipt-issuer", "version": "1.0.0"},
+              "config": {"keystore_path": str(ks), "receipts_path": rc, "target_security": tgt}},
+             {"plugin": {"plugin_id": "formal-lab.domain.mal.broker-gate", "version": "1.0.0"},
+              "config": {"keystore_path": str(ks), "receipts_path": rc, "target_security": tgt,
+                         "lab_policy": {"allowed_assets": ["app", "secret", "net"], "max_attack_steps": 40}}}]
+    scn = red_blue_scenario(package_def, strategy="rule", horizon=30, seed=0, execution_gates=gates)
+    body = scn.model_dump(mode="json")
+    body["participants"][0]["view"] = {"exclude": ["hardened"], "label": "attacker view"}
+    scn = scn.model_validate(body)
+    reg = default_registry()
+    res = run_local(make_manifest(run_id=f"t_{uuid.uuid4().hex[:6]}", project_id="t", scenario=scn,
+                                  package=package_def, registry=reg), package_def, reg)
+    applied = {(st.proposal.actor_id, str(st.outcome.status)) for st in res.steps if st.outcome and st.proposal}
+    assert ("blue", "APPLIED") in applied and ("red", "REJECTED") in applied
+    denials = [d for st in res.steps for d in (st.operation.decisions if st.operation else [])
+               if str(d.verdict) == "DENY"]
+    assert denials and all("ACTION_PRECONDITION_FAILED" in d.reason for d in denials)
 
 
 def test_per_action_loop_issues_a_receipt_per_revision_and_reaches_goal(package, tmp_path):
@@ -156,3 +214,31 @@ def test_per_action_loop_issues_a_receipt_per_revision_and_reaches_goal(package,
     assert out["every_send_checked_at_its_revision"]
     revs = [d["checked_at_revision"] for d in out["issuer_decisions"]]
     assert revs == sorted(revs) and len(revs) >= 3  # one issuer check per send, at increasing revisions
+
+
+def test_exported_bundle_keeps_every_gate_decision_of_a_step(package, tmp_path):
+    """Phase 4B (B3): offline replay explains a step with all its pre-send decisions (issuer and Broker), not only the
+    last one recorded."""
+    import uuid
+
+    from formal_lab_contracts.bundle import read_bundle
+    from formal_lab_domain_mal.run import red_team_scenario
+    from formal_lab_runtime import default_registry, make_manifest, run_local
+    from formal_lab_runtime.bundles import bundle_from_local
+
+    ks = tmp_path / "k.json"
+    ks.write_text(json.dumps({"issuer-1": "11" * 24}))
+    rc = str(tmp_path / "r.json")
+    tgt = {"property_id": "secret-confidentiality", "reach_forbidden": "secret:read"}
+    gates = [{"plugin": {"plugin_id": "formal-lab.domain.mal.receipt-issuer", "version": "1.0.0"},
+              "config": {"keystore_path": str(ks), "receipts_path": rc, "target_security": tgt}},
+             {"plugin": {"plugin_id": "formal-lab.domain.mal.broker-gate", "version": "1.0.0"},
+              "config": {"keystore_path": str(ks), "receipts_path": rc, "target_security": tgt,
+                         "lab_policy": {"allowed_assets": ["app", "secret", "net"], "max_attack_steps": 40}}}]
+    reg = default_registry()
+    scn = red_team_scenario(package, execution_gates=gates)
+    res = run_local(make_manifest(run_id=f"t_{uuid.uuid4().hex[:6]}", project_id="t", scenario=scn, package=package,
+                                  registry=reg), package, reg)
+    step = read_bundle(bundle_from_local(res, package)).step(1)
+    assert [d["decision"]["gate"]["plugin_id"] for d in step["decisions"]] == [
+        "formal-lab.domain.mal.receipt-issuer", "formal-lab.domain.mal.broker-gate"]

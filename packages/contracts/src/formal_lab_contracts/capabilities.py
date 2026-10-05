@@ -8,6 +8,9 @@ from .objects import PluginDescriptor
 # Semantic profiles
 PROFILE_DETERMINISTIC_FINITE_V1 = "profile.deterministic_finite_v1"
 
+# Model frontends: the source formats a MODEL_FRONTEND compiles, params {"formats": [...]} (phase 4B, B3)
+FRONTEND_SOURCE_FORMAT = "frontend.source_format"
+
 # Verifier queries
 QUERY_GOAL_REACHABILITY = "query.goal_reachability"
 QUERY_INVARIANT_VIOLATION = "query.invariant_violation"

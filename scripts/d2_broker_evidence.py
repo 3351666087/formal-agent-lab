@@ -23,6 +23,7 @@ import tempfile
 from dataclasses import replace
 from pathlib import Path
 
+from evidence_io import write as write_evidence
 from formal_lab_domain_broker import (
     HmacSigner,
     HmacVerifier,
@@ -161,11 +162,9 @@ def main() -> int:
             "rejection_zero_side_effect": (not run["without_receipts"]["goal_reached"]
                                            and run["without_receipts"]["denied_operations"] > 0),
             "every_rejection_class_explained": all(r["verdict"] == "DENY" for r in admit_taxonomy()[1:]),
-            "offline_readable": True,
         },
     }
-    OUT.parent.mkdir(parents=True, exist_ok=True)
-    OUT.write_text(json.dumps(result, indent=2, ensure_ascii=False))
+    write_evidence(OUT, result)  # sets conclusion.offline_readable from reading the written file back
     print(f"wrote {OUT.relative_to(ROOT)}")
     print(f"  ruleset={rs.ruleset_id} v{rs.version} digest={rs.digest()[:12]} status={rs.status}")
     print(f"  with_receipts={run['with_receipts']['status']} goal={run['with_receipts']['goal_reached']} "

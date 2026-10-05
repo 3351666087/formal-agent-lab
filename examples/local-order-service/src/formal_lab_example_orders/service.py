@@ -14,6 +14,7 @@ Fixed business API (per tenant = one environment session; each tenant is its own
   POST /t/{tenant}/admin/reset                   service-side reset to a case instance (SERVICE_RESET)
   GET  /t/{tenant}/admin/export                  business state export;  POST …/admin/import  (STATE_IMPORT)
   POST /t/{tenant}/admin/conditions              operating conditions (slow stations, held responses, crash)
+  GET  /t/{tenant}/admin/conditions              the current operating conditions (a read: probes, no writes)
 An operation id is bound to the request it was first received with: the same id with the same request returns the
 stored answer (`replayed`), with another actor / action / parameters it is refused with 409 OPERATION_ID_CONFLICT.
   DELETE /t/{tenant}                             remove the tenant (session close)
@@ -535,6 +536,11 @@ def create_app(data_dir: Path, *, project: str = "local", write_token: str | Non
             except ValueError as exc:
                 raise HTTPException(400, str(exc)) from exc
         return state(tenant)
+
+    @app.get("/t/{tenant}/admin/conditions")
+    def current_conditions(tenant: str) -> dict[str, Any]:
+        with store(tenant).connect() as conn:
+            return Store.meta(conn, "conditions", {})
 
     @app.post("/t/{tenant}/admin/conditions", dependencies=write)
     def conditions(tenant: str, body: dict[str, Any] = Body(...)) -> dict[str, Any]:

@@ -48,8 +48,8 @@ def _post_op(ep, op_id, action, params, actor="ops"):
 def _conditions(ep):
     from formal_lab_example_orders.net import trust_env
 
-    url = f"{ep}/t/{TENANT}/admin/conditions"
-    return httpx.post(url, json={}, trust_env=trust_env(url), timeout=10).json()
+    url = f"{ep}/t/{TENANT}/admin/conditions"  # the read-only endpoint (POSTing {} would rewrite the station flags)
+    return httpx.get(url, trust_env=trust_env(url), timeout=10).json()
 
 
 def _revision(ep):

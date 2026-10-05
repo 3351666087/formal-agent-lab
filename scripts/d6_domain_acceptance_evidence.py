@@ -19,6 +19,8 @@ import json
 import os
 from pathlib import Path
 
+from evidence_io import assess, revision
+from evidence_io import write as write_evidence
 from formal_lab_contracts import CheckQuery, ModelSource
 from formal_lab_domain_mal.frontend import MalFrontend, attack_graph_of
 from formal_lab_domain_mal.run import run_red_team, run_summary
@@ -77,8 +79,11 @@ def main() -> int:
     domain_plugins = sorted(e.descriptor.plugin_id for e in disc.entries()
                             if e.descriptor.source in ("formal-lab-domain-mal", "formal-lab-domain-broker"))
 
-    # the six deliverables and their evidence files (D6 is this script's own output, written below)
-    deliverables = {d: {"evidence": f, "present": d == "D6" or (EVDIR / f).exists()} for d, f in D_EVIDENCE.items()}
+    # D1–D5: present, passed and produced at the current clean revision are three separate verdicts (phase 4B, B3) —
+    # a file that merely exists, or that passed at another revision, does not count (D6 is this script's own output)
+    current = revision()
+    deliverables = {d: {"evidence": f, **assess(EVDIR / f, current)} for d, f in D_EVIDENCE.items() if d != "D6"}
+    embedded = reloaded.package is not None and reloaded.package.digest == pkg.digest
 
     result = {
         "deliverable": "phase3B-D6",
@@ -87,7 +92,7 @@ def main() -> int:
             "run": {"status": episode["status"], "goal_reached": episode["status"] == "SUCCEEDED",
                     "attack_path_len": len(episode["attack_path"])},
             "explain": explain,
-            "export": {"bundle_file": str(BUNDLE.relative_to(ROOT)), "embedded_package": True,
+            "export": {"bundle_file": str(BUNDLE.relative_to(ROOT)), "embedded_package": embedded,
                        "bytes": len(BUNDLE.read_text())},
             "offline_replay": replay,
         },
@@ -98,25 +103,27 @@ def main() -> int:
             "web": "the model-workbench discovers MODEL_FRONTEND plugins; the domain frontend is in the registry",
             "domain_plugins_discoverable": domain_plugins, "load_errors": disc.load_errors,
         },
-        "deliverables": deliverables,
+        "deliverables": deliverables, "current_revision": current,
         "conclusion": {
             "import_run_explain_export_offline_replay": (imported["semantic_profile"] == "deterministic_finite_v1"
                                                          and episode["status"] == "SUCCEEDED"
                                                          and explain["verdict"] == "WITNESS"
-                                                         and replay["same"]),
-            "all_six_evidence_present": all(v["present"] for v in deliverables.values()),
+                                                         and embedded and replay["same"]),
+            "d1_d5_evidence_present": all(v["present"] for v in deliverables.values()),
+            "d1_d5_evidence_passed": all(v["passed"] for v in deliverables.values()),
+            "d1_d5_evidence_current_revision": all(v["current_revision"] for v in deliverables.values()),
             "plugins_discoverable_no_errors": not disc.load_errors and len(domain_plugins) >= 4,
-            "offline_readable": True,
         },
     }
-    OUT.write_text(json.dumps(result, indent=2, ensure_ascii=False))
+    write_evidence(OUT, result)  # sets conclusion.offline_readable from reading the written file back
     print(f"wrote {OUT.relative_to(ROOT)}")
     c = result["conclusion"]
     print(f"  import->run->explain->export->offline-replay: {c['import_run_explain_export_offline_replay']}")
     print(f"  run={episode['status']} explain={explain['verdict']} replay_same={replay['same']} "
           f"witness_replay={bundle.replay.get('witness')}")
     print(f"  domain plugins: {domain_plugins}")
-    print(f"  all six evidence present: {c['all_six_evidence_present']}")
+    print(f"  D1–D5 evidence present={c['d1_d5_evidence_present']} passed={c['d1_d5_evidence_passed']} "
+          f"current revision={c['d1_d5_evidence_current_revision']}")
     return 0
 
 
