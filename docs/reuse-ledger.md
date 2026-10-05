@@ -154,3 +154,10 @@
 ### 平台内部复用
 
 领域包只经 G1—G6 的公开接口接入：`MODEL_FRONTEND`（MAL 攻击图→确定性 IR）、`SEMANTIC_DRIVER`/`PLANNER`/`VERIFIER`（复用 IRFiniteDriver、z3-bounded、z3-bmc）、`EXECUTION_GATE`（Broker）、`PROBE`、`SessionEnvironment`（订单服务生命周期）、`ScenarioManifest`/`run_local`/`QueryBundle`。签名用 stdlib `hmac`（HMAC-SHA256，FIPS-198），未给冻结锁新增编译依赖。
+
+## 5. 阶段四（Phase 4B）复用
+
+- **无新增第三方代码或依赖**：`uv.lock` 的变化只有工作区内部依赖（`formal-lab-domain-mal` 依赖 `formal-lab-strategies`、`formal-lab-solver-z3`）与 0.4.0 版本号。
+- **CybORG 4.0**（git `8c3c50ca`，MIT，未修改、不分发）：从 D5 的脚本基线扩展为平台环境 `formal-lab.env.cage4`，仍经独立 venv `~/.venvs/fal-cage` 的类型化子进程调用（`packages/environment-cage/src/formal_lab_env_cage/_worker.py`）。
+- **模型端点**：沿用 A3 的 `formal_lab_strategies.decision` 与 OpenAI 兼容客户端；端点地址与密钥只在 git 忽略的 `.env`。
+- **平台内部复用**：B3 的发行检查沿用 `scripts/release.py` 与 A5 的安装 / 回放流程；本地交付名映射到 `scripts/doctor.py` 已有配置（`DELIVERY`）。
