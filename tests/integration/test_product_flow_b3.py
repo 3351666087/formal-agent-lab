@@ -39,7 +39,7 @@ from formal_lab_contracts import ModelSource
 from formal_lab_contracts.bundle import read_bundle
 from formal_lab_sdk import Client
 
-pytestmark = [pytest.mark.integration, pytest.mark.timeout(1800)]
+pytestmark = [pytest.mark.integration, pytest.mark.ui, pytest.mark.timeout(1800)]  # a browser flow (see test_web_ui)
 ROOT = Path(__file__).resolve().parents[2]
 EVIDENCE = ROOT / (os.environ.get("B3_EVIDENCE_DIR") or os.environ.get("FAL_EVIDENCE_DIR", "docs/execution/evidence/phase4"))
 SCREENS = EVIDENCE / "screens"
