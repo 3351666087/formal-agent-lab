@@ -65,3 +65,22 @@ def test_partial_rerun_keeps_history_and_times_separately(tmp_path, monkeypatch)
     assert ok["history"] and ok["history"][0]["result"] == "PASS"  # the earlier invocation is kept
     broken = next(c for c in doc["checks"] if c["id"] == "broken")
     assert broken["inherited"] is False and broken["result"] == "FAIL"  # same commit, tree and config: still current
+
+
+def test_freshness_uses_the_file_systems_clock(tmp_path):
+    """Phase 4B (B3): produced files are judged fresh against the attempt's start on the clock of the file system
+    they live on. A VM writing to a host-shared mount sees mtimes seconds behind its own clock; a file written
+    during the attempt must still count as fresh, and one written before it must not."""
+    import os
+    import time
+
+    skew = 5.0  # the file system's clock runs 5 s behind the process clock
+    start_fs = time.time() - skew
+    fresh, stale = tmp_path / "fresh.json", tmp_path / "stale.json"
+    fresh.write_text("{}")
+    stale.write_text("{}")
+    os.utime(fresh, (start_fs + 0.2, start_fs + 0.2))  # written just after the attempt started (fs clock)
+    os.utime(stale, (start_fs - 30, start_fs - 30))    # left over from an earlier run
+    assert runner.read_produced(fresh, start_fs, None)["fresh"]
+    assert not runner.read_produced(fresh, time.time(), None)["fresh"]  # the old process-clock comparison failed
+    assert "stale evidence" in runner.read_produced(stale, start_fs, None)["error"]

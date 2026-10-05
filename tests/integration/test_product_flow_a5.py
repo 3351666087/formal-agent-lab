@@ -25,7 +25,7 @@ import pytest
 from formal_lab_contracts.bundle import read_bundle
 from formal_lab_sdk import Client
 
-pytestmark = pytest.mark.integration
+pytestmark = [pytest.mark.integration, pytest.mark.ui]  # browser flows: run locally / in acceptance, not in CI
 ROOT = Path(__file__).resolve().parents[2]
 EVIDENCE = ROOT / (os.environ.get("A5_EVIDENCE_DIR") or os.environ.get("FAL_EVIDENCE_DIR", "docs/execution/evidence/phase4"))
 SCREENS = EVIDENCE / "screens"

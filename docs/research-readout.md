@@ -1,4 +1,4 @@
-# 研究读数（Phase 3B 领域集成）
+# 研究读数（Phase 3B 领域集成；Phase 4B 补充 §5）
 
 本轮把安全领域（MAL/coreLang、CAGE 4、受控本地服务）接入通用实验平台，形式化闭环与红蓝/准入/修订机制在真实上游工具上跑通。方法来源见 [reuse-ledger.md](reuse-ledger.md) 第 4 节；保证范围见 [assurance-scope.md](assurance-scope.md)。
 
@@ -26,3 +26,22 @@
 - 真实 LLM 端点（混合策略）、CAGE RL 训练智能体（torch/ray）、PRISM-games 领域概率绑定为条件项/备选清单，未在本环境执行，不冒充交付。
 - MAL 的其它语义（TTC、随机、部分观测、数量奖励）超出确定性 profile；蓝方加固是 MAL 防御的 IR 级抽象，具体 coreLang 防御语义另行声明。
 - 带镜像发行与去重离线包受宿主磁盘保留量限制（见 acceptance-phase3.md），在更空磁盘上可补跑。
+
+## 5. Phase 4B 读数（工程检查与研究结论分开）
+
+**CAGE 4 配对比较**（`b2-paired-report.md`，CybORG 4.0 Scenario4，2 个场景变体 × 3 种方法 × 3 个共享种子，18/18 单元完成；平台规则“告警响应”相对官方 SleepAgent 基线，6 对配对，95% 区间）：
+
+| 指标 | 配对差 | 95% 区间 | 读数 |
+|---|---|---|---|
+| `red_footholds_final` | −3.0 | [−5.5, −0.33] | 工程读数（小样本） |
+| `unrecovered_hosts` | −3.0 | [−5.5, −0.33] | 工程读数（小样本） |
+| `red_foothold_host_steps` | −84.8 | [−140.3, −33.2] | 工程读数（小样本） |
+| `native_blue_reward` | −5.3 | [−17.7, 7.3] | 区间跨 0，不下结论 |
+
+恒定监控（Monitor）与基线的差为 0：它不改变状态（B ≡ A），与原生路径一致。原生分数与平台指标分开报告。
+
+**模型修订**（`b3-product-flow.json`）：不完整捕获的 v1 在 60 步界内给出 `NO_WITNESS_WITHIN_BOUND`，完整捕获的 v2 给出 `WITNESS`（参考解释器回放 CONFIRMED）；可比较状态上的真实偏差进入回归库，陈旧差异不进入（`b1-mal.json`、`b1-service.json`）。
+
+**真实模型调用**（`b1-real-endpoint.json`）：已配置的 OpenAI 兼容端点被实际调用，被采用的决策可追溯到模型应答；协议测试服务与确定性替身另行标注，不作为模型结果。
+
+**已证明与未证明**：检查表明机制按声明工作（四个入口、逐步证据、离线回放、三种安装方式、原生 / 平台一致）；研究优势**未证明**——比较样本小（6 对），只作工程读数；未运行 RL 训练智能体与概率后端（任务书选配）。

@@ -1,4 +1,4 @@
-# 保证范围（Phase 3B 领域集成；Phase 4A 补充 §6）
+# 保证范围（Phase 3B 领域集成；Phase 4A 补充 §6；Phase 4B 补充 §7）
 
 本文件区分不同强度的结论，避免把其中一类当作另一类。配套：[acceptance-phase3.md](acceptance-phase3.md)、[research-readout.md](research-readout.md)、[reuse-ledger.md](reuse-ledger.md)、[handoff/phase3.md](handoff/phase3.md)。
 
@@ -44,6 +44,20 @@
 - **参与者数据**：同一投影规则（`Projection`）作用于规划器观测、观测请求、候选（在投影后的信念上计算）、`last_outcome`（结果、冲突、错误文本）、发往模型的载荷与调用记录、检查点，以及参与者下载（只含本人与运行级事件、重新编号、环境/门控配置与地址清除、其他参与者的配置与视图清除）。运营方导出保持完整。`ParticipantServices.get_setting` 不交出环境写凭据、签名密钥与参与者令牌密钥。
 - **保证范围**：受信的进程内 Python 插件**不是沙箱**——它们与环境适配器同进程，技术上可读进程内一切；视图约束的是平台交给它们的输入，不是它们的能力。对**独立进程**：写入边界由服务进程强制（无凭据 401，凭据只在 0600 文件中、只有适配器读取，清单与参与者下载中只有路径或没有），参与者通道是令牌绑定的只读 API（`/participant/whoami`、`/participant/export`，actor 参数越权 403）。订单服务只监听回环；其**读接口在回环上不鉴权**，因此“视图对同机进程保密”只在该进程无法访问服务端口时成立（例如服务在独立主机或容器网络中）——这是部署条件，不由平台代码保证。
 
-## 7. 来源可追溯
+## 7. Phase 4B 证据索引与证据状态
+
+| 结论 | 检查（`scripts/phase4_domain_checks.py`） | 证据（`docs/execution/evidence/phase4/`） |
+|---|---|---|
+| B1 领域闭环（模型内结论与实测） | `p4-b1-unit`、`p4-b1-mal-loop`、`p4-b1-service` | `b1-mal.json`、`b1-service.json` |
+| B1 真实模型调用 | `p4-b1-real-endpoint` | `b1-real-endpoint.json`（端点与模型名；凭据不在证据中） |
+| B2 原生与平台逐世界步一致、配对比较 | `p4-b2-unit`、`p4-b2-native-platform`、`p4-b2-platform` | `b2-cage.json`、`b2-platform-run.json`、`b2-paired-report.md` |
+| B3 四个入口的产品流程 | `p4-b3-product-flow` | `b3-product-flow.json`、`screens/b3-*.png` |
+| B3 发行与本地交付 | `p4-b3-release` | `b3-release.json`、`release-manifest.json` |
+
+- **证据状态由实际检查产生**：领域证据脚本的结论只含计算得出的布尔值；`offline_readable` 是写出后从磁盘回读的结果；每份证据记录生成时的修订（`scripts/evidence_io.py`）。“文件存在”“检查通过”“属于当前干净修订”三者分别判定（D6 与 `assess()`），任一不满足即不计为通过。
+- **安装方式分开标记**：在线（第三方来自包仓库）、仅本机缓存（`uv --offline`）、完全离线（`pip --no-index`，wheelhouse 一次性在线下载，安装与运行期间代理指向关闭端口）。外部原生工具链（CybORG、mal-toolbox / mal-simulator）不进入 wheel、镜像与离线包。
+- **工程检查与研究结论分开**：检查通过表示机制按声明工作；比较结果为小样本工程读数，置信区间跨 0 的项不下结论（见 [research-readout.md](research-readout.md) §5）。
+
+## 8. 来源可追溯
 
 每条结论都绑定到证据文件（`docs/execution/evidence/phase3/d*.json`）、测试与检查组（`scripts/phase3_check.py` 的 `d1-mal`…`d6-domain`），以及固定的上游版本/摘要（reuse-ledger.md）。每次 attempt 独立记录，失败/重试保留，旧 PASS 不充当新结果。
