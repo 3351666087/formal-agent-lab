@@ -1252,8 +1252,12 @@ def _apply_joint(rc: RunComponents, snapshot: EnvironmentSnapshot, plan: PlanPha
     _restore(rc, snapshot)
     last_key = plan.events[-1].key if plan.events else (new.last_event_key or event_key(m.run_id, 0, "snapshot"))
     timeout = m.turns.batch_timeout_s
-    waited = ((datetime.fromisoformat(plan.proposed_at) - record.opened_at).total_seconds()
-              if plan.proposed_at else 0.0)
+    # how long after the batch opened this member's proposal was ready. The wall-clock timestamps survive a worker
+    # restart, but the clock may be stepped (NTP): stepped back, a late member would look on time. Its own planning
+    # time on the monotonic clock is a lower bound of the wait that cannot go backwards.
+    wall = ((datetime.fromisoformat(plan.proposed_at) - record.opened_at).total_seconds()
+            if plan.proposed_at else 0.0)
+    waited = max(wall, plan.elapsed_s) if plan.proposed_at else 0.0
     late = timeout is not None and plan.skipped is None and waited > timeout
     acted = False
     if plan.skipped is not None:

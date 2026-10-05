@@ -1,0 +1,145 @@
+{
+  "deliverable": "phase4B-B3 domain product flow",
+  "domain": "MAL coreLang attack graph (net-app-data)",
+  "project_id": "prj_f7cf479747814d61a105",
+  "entries": {
+    "web_model_import": {
+      "model_id": "mdl_d8498b0dc0be4359bcf7",
+      "version_id": "mv_6de86be35c954fa7bbca",
+      "source": "formal-lab.domain.mal.frontend@1.0.0 · mal-attack-graph/v1 · MAL coreLang 1.0.0 attack graph (sha256 e121dbd41c8f)",
+      "extensions": "org.mal-lang.attack-graph v1.0.0",
+      "screenshot": "screens/b3-model-import.png"
+    },
+    "cli_model_push": {
+      "model_id": "mdl_2388d09ea3ba4c50af22",
+      "stdout": "{\n  \"id\": \"mv_521a749be2b74332a7ef\",\n  \"model_id\": \"mdl_2388d09ea3ba4c50af22\",\n  \"version\": 1,\n  \"digest\": \"59bec8126bfc7c20225c6cefabe5465fc7a1a8f4c0db03de69a825dc75e57dc5\",\n  \"semantic_profile\": \"de",
+      "actions": [
+        "compromise",
+        "harden"
+      ]
+    },
+    "sdk_configure": {
+      "scenarios": [
+        "scn_dd034a8f14c44f96a2b9",
+        "scn_94ddcb5375ec41e9a0da"
+      ],
+      "strategies": [
+        "stg_a3a9fd53613f49098989",
+        "stg_513a043f88ed4a5c8ecb"
+      ],
+      "gates": [
+        "formal-lab.domain.mal.receipt-issuer",
+        "formal-lab.domain.mal.broker-gate"
+      ]
+    },
+    "web_scenario_form": {
+      "gates_shown": [
+        "formal-lab.domain.mal.receipt-issuer@1.0.0",
+        "formal-lab.domain.mal.broker-gate@1.0.0"
+      ],
+      "revision_after_save": 2,
+      "gates_kept": true,
+      "screenshot": "screens/b3-scenario-gates.png"
+    },
+    "cli_run_start": {
+      "run_id": "run_42f5c09f224548c791c1",
+      "status": "SUCCEEDED",
+      "steps": 6
+    },
+    "api_cli_explain_step1": {
+      "action": {
+        "params": {
+          "n": "app__attemptRead"
+        },
+        "action_type": "compromise"
+      },
+      "source": "SYMBOLIC",
+      "decisions": [
+        {
+          "gate": "formal-lab.domain.mal.receipt-issuer",
+          "verdict": "ALLOW",
+          "revision": 0,
+          "reason": "receipt rcpt_a124cf3f5e4a4cba: compromise(app:attemptRead) applicable at revision 0, target reachable (Z3 WITNESS)"
+        },
+        {
+          "gate": "formal-lab.domain.mal.broker-gate",
+          "verdict": "ALLOW",
+          "revision": 0,
+          "reason": "receipt verified: bindings, state revision, expiry and MAL domain rules (LabPolicy / precondition / role / TargetSecurity) all hold"
+        }
+      ],
+      "comparison": "MATCH",
+      "expected_by": "model:mal-net-app-data@1 on belief"
+    },
+    "api_red_blue": {
+      "run_id": "run_5ea48fce24024cf9a0be",
+      "status": "BUDGET_EXHAUSTED",
+      "steps": 40,
+      "outcomes": {
+        "blue:APPLIED": 20,
+        "red:APPLIED": 1,
+        "red:REJECTED": 19
+      },
+      "denied_step": 3,
+      "deny_reason": "ACTION_PRECONDITION_FAILED at revision 2: compromise(app:successfulRead) is not applicable in the current state (PRECONDITION_FALSE); no receipt",
+      "blue_pass_reason": "harden is outside this gate's admission scope (governs compromise); passed on unchanged",
+      "red_withheld_locations": 29
+    },
+    "web_console": {
+      "bundle_bytes": 298616,
+      "screenshots": [
+        "screens/b3-step-broker-decisions.png",
+        "screens/b3-red-denied-step.png"
+      ]
+    },
+    "web_evidence": {
+      "run_id": "run_5ea48fce24024cf9a0be",
+      "replayed_step": 3,
+      "screenshot": "screens/b3-evidence-replay.png"
+    },
+    "sdk_web_matrix": {
+      "matrix_id": "mtx_5f3e005a4c3646628ac7",
+      "cells": [
+        "DONE",
+        "DONE"
+      ],
+      "complete": true,
+      "screenshot": "screens/b3-benchmark.png"
+    },
+    "offline_replay_api_stopped": {
+      "api_reachable": false,
+      "verify": "OK formal-lab/replay-bundle@2 run=run_42f5c09f224548c791c1 events=75 artifacts=7 operations=6 participants=1 contract=formal-lab-contracts/v2 digest=07cf6c6fbe419bf6ada825397f107f0caaf1fee6e9494ea05f2",
+      "view_lines": 10,
+      "step1_action": {
+        "action_type": "compromise",
+        "params": {
+          "n": "app__attemptRead"
+        }
+      },
+      "step1_gates": [
+        "formal-lab.domain.mal.receipt-issuer",
+        "formal-lab.domain.mal.broker-gate"
+      ]
+    }
+  },
+  "checks": {
+    "model_revision": {
+      "belief_v1": "NO_WITNESS_WITHIN_BOUND",
+      "truth_v2": "WITNESS",
+      "v2_witness_steps": 7,
+      "deviation": "model error on a comparable state (belief misses the target)"
+    },
+    "role_views": {
+      "red": {
+        "events": 189,
+        "credential_paths": [],
+        "other_config_removed": true
+      },
+      "blue": {
+        "events": 207,
+        "credential_paths": [],
+        "other_config_removed": true
+      }
+    }
+  }
+}

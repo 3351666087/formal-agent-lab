@@ -1,0 +1,230 @@
+{
+  "deliverable": "phase4B-B3 release",
+  "release": {
+    "reused": false,
+    "reason": null,
+    "version": "0.4.0",
+    "revision": {
+      "repository": "https://github.com/3351666087/formal-agent-lab",
+      "revision": "a6506fcefb84151d9dfe1a54d5738fb5ec7c01da",
+      "dirty": true
+    },
+    "wheels": 20,
+    "domain_wheels": {
+      "formal_lab_domain_mal": true,
+      "formal_lab_domain_broker": true,
+      "formal_lab_env_mal": true,
+      "formal_lab_env_cage": true
+    },
+    "examples": [
+      {
+        "file": "examples/mal-net-app-data.json",
+        "format": "mal-attack-graph/v1",
+        "frontend": "formal-lab.domain.mal.frontend@1.0.0",
+        "note": "red team: reach secret:read",
+        "sha256": "93c2165b70f33f66c2cfeeef315a71b37a7291b6889178a8eda207b62d831b4c",
+        "bytes": 57815
+      },
+      {
+        "file": "examples/mal-net-app-data-defence.json",
+        "format": "mal-attack-graph/v1",
+        "frontend": "formal-lab.domain.mal.frontend@1.0.0",
+        "note": "red / blue: the defender can harden attack steps",
+        "sha256": "8ffb4ca87f3d1087bd927e4c3107de559f074c6bc6d0832ac3535e0d1fab2172",
+        "bytes": 57841
+      }
+    ],
+    "web": {
+      "file": "formal-agent-lab-web-0.4.0.tar.gz",
+      "sha256": "39adbf1bbd521eda8b42913f77805be6c89326d8f494ab3c838075da221b9f81",
+      "bytes": 723428
+    },
+    "local_configs": 3,
+    "local_profiles": {
+      "local-simulation": {
+        "profile": "local-lite",
+        "entry": "the local runner / `fal` against pure-data environments: formal-lab.env.ir-world runs MAL attack graphs (committed captures — no MAL toolchain), scheduling, warehouse and order models",
+        "requires_native": {
+          "cage": "CybORG 4 venv ($FAL_CAGE_HOME, default ~/.venvs/fal-cage) — only for formal-lab.env.cage4",
+          "mal": "mal-toolbox + mal-simulator venv ($FAL_MAL_HOME, default ~/.venvs/fal-mal) — only for capturing a new attack graph live"
+        }
+      },
+      "local-service-lab": {
+        "profile": "local-services",
+        "entry": "make services-up + API / worker (make dev-up, or deploy/compose/docker-compose.yaml) and the local order service (make orders-up) behind the domain Broker",
+        "requires_native": {}
+      },
+      "local-offline": {
+        "profile": "local-lite",
+        "entry": "a --no-index install from the release wheelhouse and `fal replay` with no server; the containerised stack from the image bundle (make offline-bundle, 8 GiB above the host reserve)",
+        "requires_native": {}
+      }
+    },
+    "images": "p3-release-images / GHCR (not rebuilt here)"
+  },
+  "install_modes": {
+    "online": {
+      "exit": 0,
+      "third_party_from": "package index (uv; its cache may serve hits)",
+      "tail": "0906\n + typing-extensions==4.16.0\n + typing-inspection==0.4.4\n + universal-pathlib==0.3.10\n + urllib3==2.8.0\n + uvicorn==0.54.0\n + uvloop==0.23.0\n + watchfiles==1.3.0\n + websockets==17.2\n + wrapt==2.5.0\n + yarl==1.25.1\n + z3-solver==5.1.0.0\n + zipfile-zstd==0.0.4\n + zipp==4.1.1\n + zstandard==0.25.0\n"
+    },
+    "cache": {
+      "exit": 0,
+      "third_party_from": "the local uv cache only (uv --offline, proxies closed)",
+      "tail": "0906\n + typing-extensions==4.16.0\n + typing-inspection==0.4.4\n + universal-pathlib==0.3.10\n + urllib3==2.8.0\n + uvicorn==0.54.0\n + uvloop==0.23.0\n + watchfiles==1.3.0\n + websockets==17.2\n + wrapt==2.5.0\n + yarl==1.25.1\n + z3-solver==5.1.0.0\n + zipfile-zstd==0.0.4\n + zipp==4.1.1\n + zstandard==0.25.0\n"
+    },
+    "offline": {
+      "exit": 0,
+      "wheelhouse_download_exit": 0,
+      "wheelhouse_files": 118,
+      "third_party_from": "the wheelhouse only (pip --no-index; HTTP(S) proxies closed)",
+      "installed": {
+        "formal-lab-contracts": "2.0.0",
+        "formal-lab-domain-broker": "0.4.0",
+        "formal-lab-domain-mal": "0.4.0",
+        "formal-lab-evaluation": "0.4.0",
+        "formal-lab-example-orders": "0.4.0",
+        "formal-lab-model-core": "0.4.0",
+        "formal-lab-neutral-env": "0.4.0",
+        "formal-lab-orchestrator": "0.4.0",
+        "formal-lab-platform-api": "0.4.0",
+        "formal-lab-runtime": "0.4.0",
+        "formal-lab-sdk": "0.4.0",
+        "formal-lab-solver-prism-games": "0.4.0",
+        "formal-lab-solver-z3": "0.4.0",
+        "formal-lab-strategies": "0.4.0"
+      },
+      "tail": " tiktoken-0.14.0 typer-0.27.2 types-protobuf-7.35.1.20260906 typing-extensions-4.16.0 typing-inspection-0.4.4 universal-pathlib-0.3.10 urllib3-2.8.0 uvicorn-0.54.0 uvloop-0.23.0 watchfiles-1.3.0 websockets-17.2 wrapt-2.5.0 yarl-1.25.1 z3-solver-5.1.0.0 zipfile-zstd-0.0.4 zipp-4.1.1 zstandard-0.25.0\n"
+    }
+  },
+  "local_simulation": {
+    "exit": 0,
+    "status": "SUCCEEDED",
+    "steps": 6,
+    "bundle": "/tmp/b3-release-_5vae74j/empty/sim/mal.replay.zip",
+    "decisions": 12,
+    "all_allow_at_revision": true,
+    "gates": [
+      "formal-lab.domain.mal.broker-gate",
+      "formal-lab.domain.mal.receipt-issuer"
+    ],
+    "imported_from": {
+      "domain_mal": "/tmp/b3-release-_5vae74j/empty/venv/lib/python3.12/site-packages/formal_lab_domain_mal/__init__.py",
+      "runtime": "/tmp/b3-release-_5vae74j/empty/venv/lib/python3.12/site-packages/formal_lab_runtime/__init__.py"
+    }
+  },
+  "local_service_lab": {
+    "platform": {
+      "api": "http://127.0.0.1:56761/api/v1",
+      "migrate_exit": 0,
+      "project": {
+        "exit": 0,
+        "id": "prj_414ccf8a17ce4ab4a2c9",
+        "name": "B3 发行物 64c929",
+        "description": "B3: the MAL domain from the release outputs",
+        "group": null,
+        "created_at": "2026-10-05T04:27:27.030761+00:00",
+        "updated_at": "2026-10-05T04:27:27.030763+00:00",
+        "counts": {
+          "models": 0,
+          "scenarios": 0,
+          "runs": 0
+        }
+      },
+      "model_push": {
+        "version": 1,
+        "semantic_profile": "deterministic_finite_v1"
+      },
+      "configure": {
+        "exit": 0,
+        "scenario_id": "scn_c41c4d6750244d5b8738"
+      },
+      "run": {
+        "run_id": "run_a43877cf146e489c996d",
+        "exit": 0,
+        "status": "SUCCEEDED",
+        "first_line": "run run_a43877cf146e489c996d QUEUED"
+      },
+      "bundle": {
+        "file": "/tmp/b3-release-_5vae74j/platform/platform.replay.zip",
+        "sha256": "f6e43f1eda6b5cf9572d01e35f19099183a920547e275021a42270121c08f28b"
+      },
+      "stopped": true,
+      "api_reachable_after_stop": false
+    },
+    "order_service": {
+      "exit": 0,
+      "ready": "ok",
+      "business": [
+        200,
+        200,
+        200
+      ],
+      "broker": {
+        "denied_verdict": "DENY",
+        "zero_side_effect": true,
+        "allowed_verdict": "ALLOW",
+        "applied": true,
+        "probe_sees_change": true
+      },
+      "close": {
+        "processes": [
+          287658
+        ],
+        "containers": [],
+        "paths": [
+          "/tmp/b3-release-_5vae74j/orders/.fal-orders/b3-release"
+        ]
+      }
+    }
+  },
+  "local_offline": {
+    "simulation_bundle": [
+      {
+        "command": "fal replay verify <bundle>",
+        "exit_code": 0,
+        "first_line": "OK formal-lab/replay-bundle@2 run=run_b3_release_mal events=75 artifacts=1 operations=6 participants=1 contract=formal-lab-contracts/v2 digest=07cf6c6fbe419bf6a"
+      },
+      {
+        "command": "fal replay step <bundle> 1",
+        "exit_code": 0,
+        "first_line": "{",
+        "gates": [
+          "formal-lab.domain.mal.receipt-issuer",
+          "formal-lab.domain.mal.broker-gate"
+        ]
+      }
+    ],
+    "platform_bundle": [
+      {
+        "command": "fal replay verify <bundle>",
+        "exit_code": 0,
+        "first_line": "OK formal-lab/replay-bundle@2 run=run_a43877cf146e489c996d events=75 artifacts=7 operations=6 participants=1 contract=formal-lab-contracts/v2 digest=07cf6c6fbe4"
+      },
+      {
+        "command": "fal replay step <bundle> 1",
+        "exit_code": 0,
+        "first_line": "{",
+        "gates": [
+          "formal-lab.domain.mal.receipt-issuer",
+          "formal-lab.domain.mal.broker-gate"
+        ]
+      }
+    ]
+  },
+  "native_toolchains": {
+    "cage": true,
+    "mal": true
+  },
+  "native_note": "CybORG (CAGE 4) and mal-toolbox / mal-simulator are not in the wheels, images or the offline bundle: they live in their own venvs and must be installed beforehand for formal-lab.env.cage4 and for capturing new attack graphs; committed MAL captures run without them",
+  "conclusion": {
+    "release_has_domain_packages_and_examples": true,
+    "install_online": true,
+    "install_cache_only": true,
+    "install_fully_offline": true,
+    "local_simulation_domain_experiment_offline": true,
+    "local_service_lab_platform_from_clean_install": true,
+    "local_service_lab_order_service_broker": true,
+    "local_offline_replay_both_bundles": true
+  }
+}

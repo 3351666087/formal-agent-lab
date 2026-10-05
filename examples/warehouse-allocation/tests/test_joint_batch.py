@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import time
+from datetime import timedelta
 from typing import Any
 
 import pytest
@@ -200,3 +201,24 @@ def test_joint_batch_needs_a_batch_environment():
     with pytest.raises(Unsupported, match=r"env\.batch_step"):
         make_manifest(run_id="run_g4_neg", project_id="orders", scenario=sc, package=pkg, registry=default_registry(),
                       seed=1)
+
+
+def test_batch_deadline_survives_a_wall_clock_stepped_back(monkeypatch):
+    """Phase 4B (B3): the batch deadline must not be fooled by NTP stepping the wall clock backwards while a member
+    plans — its monotonic planning time is a lower bound of the wait (a VM acceptance run hit exactly this)."""
+    import formal_lab_runtime.engine as engine
+
+    real = engine.utcnow
+    calls = {"n": 0}
+
+    def stepped():  # every read of the wall clock is a second earlier than the one before (stepped back)
+        calls["n"] += 1
+        return real() - timedelta(seconds=calls["n"])
+
+    monkeypatch.setattr(engine, "utcnow", stepped)
+    reg = registry()
+    pkg, sc = scenario(spy={"picker": {"sleep": 0.4}}, turns={**JOINT, "batch_timeout_s": 0.2})
+    sc = sc.model_copy(update={"budget": sc.budget.model_copy(update={"max_steps": 4})})
+    _, res = run(pkg, sc, reg, run_id="run_g4_stepped_clock")
+    first = events(res, "BATCH_SUBMITTED")[0].payload["batch"]
+    assert dict((x["actor_id"], x["status"]) for x in first["members"])["picker"] == "TIMED_OUT"
