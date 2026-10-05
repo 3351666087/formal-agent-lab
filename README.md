@@ -65,6 +65,23 @@
 
 深色模式与窄屏：[run-batch-dark.png](docs/assets/screens/run-batch-dark.png) · [landing-dark.png](docs/assets/screens/landing-dark.png) · [run-narrow.png](docs/assets/screens/run-narrow.png)。
 
+## 安全领域：攻击图、准入 Broker、红蓝对抗
+
+同一条回路也用在安全领域：导入一张 coreLang 攻击图作为形式模型，有界验证器给出到目标步骤的可达见证，一个**逐动作的准入 Broker** 在每次发送前按当时的状态判定，红蓝对抗中攻击方只看到自己视图内的位置，整个运行同样导出成可离线阅读的回放包。领域能力全部通过平台的公开插件接口接入（模型前端、执行门控、策略、环境），核心引擎不含任何领域专有逻辑。下面四张图来自同一次真实运行（`tests/integration/test_product_flow_b3.py`，MAL net-app-data 攻击图）。
+
+<table>
+<tr>
+<td width="50%"><img src="docs/assets/screens/b3-model-import.png" alt="模型工作台：导入 MAL 攻击图"><br><sub><b>导入攻击图</b>：coreLang 攻击图经模型前端（<code>mal-attack-graph/v1</code>）编译为确定性有限模型，保留原始攻击图扩展；结构图呈现攻击步骤 → <code>compromise</code> 动作 → 到达 <code>secret:read</code>。</sub></td>
+<td width="50%"><img src="docs/assets/screens/b3-scenario-gates.png" alt="场景：执行前门控"><br><sub><b>执行前门控</b>：场景表单按顺序配置两个门控——凭据签发（逐动作检查）与准入 Broker（LabPolicy / TargetSecurity 分离）；保存后固定在场景快照里。</sub></td>
+</tr>
+<tr>
+<td><img src="docs/assets/screens/b3-step-broker-decisions.png" alt="步骤详情：Broker 判定"><br><sub><b>每次发送前的判定</b>：签发方按当时的状态修订检查该攻击步骤的前提与目标可达性（Z3），再由 Broker 依凭据放行；步骤详情完整列出两条执行前决策。</sub></td>
+<td><img src="docs/assets/screens/b3-red-denied-step.png" alt="红蓝对抗：攻击方视角"><br><sub><b>红蓝对抗（攻击方视角）</b>：攻击方视图隐藏了加固位置；对一个已被防守方加固的步骤，签发方在当时修订上判定前提不成立 → <code>DENY</code> → 动作 <code>REJECTED</code>，从不发送（零副作用）。</sub></td>
+</tr>
+</table>
+
+准入与红蓝的边界说明见 [assurance-scope.md](docs/assurance-scope.md)（§1 模型内结论 / §2 实测结论分列）；基准页的红队策略配对比较见 [b3-benchmark.png](docs/assets/screens/b3-benchmark.png)，证据回放见 [b3-evidence-replay.png](docs/assets/screens/b3-evidence-replay.png)。这是一个面向防御研究与可复核性的实验台：攻击步骤是抽象攻击图上的节点选择，在模拟器内进行，不针对任何真实系统。
+
 ## 功能地图
 
 | 功能区 | 能做什么 | 入口 |
