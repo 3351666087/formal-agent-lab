@@ -1,6 +1,6 @@
 # 第三方依赖与许可证清单
 
-由 `scripts/license_inventory.py` 生成（2026-10-02T20:05:33Z）：Python 环境中实际安装的发行包（区分运行时闭包与开发/测试工具）与 Web 生产依赖。许可证取自包元数据；逐项清单见 `docs/execution/evidence/phase4/licenses.json`。项目本身：Apache-2.0（`LICENSE`、`NOTICE`）。上游复用与调用位置见 [reuse-ledger.md](reuse-ledger.md)。
+由 `scripts/license_inventory.py` 生成（2026-10-05T12:44:29Z）：Python 环境中实际安装的发行包（区分运行时闭包与开发/测试工具）与 Web 生产依赖。许可证取自包元数据；逐项清单见 `docs/execution/evidence/phase4/licenses.json`。项目本身：Apache-2.0（`LICENSE`、`NOTICE`）。上游复用与调用位置见 [reuse-ledger.md](reuse-ledger.md)。
 
 - Python 运行时依赖 97 个，开发/测试工具 10 个；Web 生产依赖 8 个。
 

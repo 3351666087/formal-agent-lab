@@ -1,6 +1,6 @@
 {
   "format": "formal-agent-lab/doctor@1",
-  "captured_at": "2026-10-02T18:52:01Z",
+  "captured_at": "2026-10-05T10:39:41Z",
   "hostname": "colima",
   "os": {
     "system": "Linux",
@@ -17,30 +17,30 @@
     "cgroup_cpu_quota": null,
     "cpus_usable": 4,
     "memory_total_mib": 5910,
-    "memory_available_mib": 3919,
+    "memory_available_mib": 3502,
     "cgroup_memory_limit_mib": null,
     "memory_usable_mib": 5910,
     "loadavg": [
-      1.56,
-      1.29,
-      1.12
+      2.19,
+      2.69,
+      1.86
     ]
   },
   "disk": {
     "repository": {
       "path": "/Users/null3351/Code/formal-agent-lab",
       "total_gib": 228.3,
-      "free_gib": 17.5
+      "free_gib": 33.0
     },
     "home": {
       "path": "/home/null3351.guest",
       "total_gib": 18.3,
-      "free_gib": 13.0
+      "free_gib": 11.4
     },
     "tmp": {
       "path": "/tmp",
       "total_gib": 18.3,
-      "free_gib": 13.0
+      "free_gib": 11.4
     }
   },
   "docker": {
@@ -54,32 +54,32 @@
     "root_disk": {
       "path": "/var/lib/docker",
       "total_gib": 29.4,
-      "free_gib": 21.3
+      "free_gib": 13.8
     },
     "cgroup_driver": "cgroupfs",
     "cgroup_version": "2",
     "containers_running": 3,
-    "images": 23,
+    "images": 24,
     "usage": [
       {
         "type": "Images",
-        "size": "5.06GB",
-        "reclaimable": "1.32GB (26%)"
+        "size": "9.401GB",
+        "reclaimable": "1.316GB (13%)"
       },
       {
         "type": "Containers",
-        "size": "389.1kB",
+        "size": "417.8kB",
         "reclaimable": "0B (0%)"
       },
       {
         "type": "Local Volumes",
-        "size": "1.718GB",
+        "size": "4.946GB",
         "reclaimable": "836.2kB (0%)"
       },
       {
         "type": "Build Cache",
-        "size": "60.79MB",
-        "reclaimable": "34.3MB"
+        "size": "5.834GB",
+        "reclaimable": "5.803GB"
       }
     ],
     "buildx": "github.com/docker/buildx v0.34.1 e0b0e77d18d3379bc1e0d55f3b37de288d36fe47"
@@ -162,7 +162,7 @@
       "8000": "project:api (scripts/dev.sh)",
       "8233": "project:fal-dev-temporal-1",
       "8333": "project:fal-dev-s3-1",
-      "8765": "pid 1611539 (python)"
+      "8765": "pid 340403 (python)"
     },
     "in_use": [
       5173,
@@ -186,23 +186,23 @@
       "fal-dev_temporaldata"
     ],
     "images": [
-      "formal-agent-lab/api:0.3.0",
-      "formal-agent-lab/api:92036918f6eb",
+      "formal-agent-lab/api:0.4.0",
+      "formal-agent-lab/api:b993dc90c72b",
       "formal-agent-lab/api:local",
-      "formal-agent-lab/orders:0.3.0",
-      "formal-agent-lab/orders:92036918f6eb",
+      "formal-agent-lab/orders:0.4.0",
+      "formal-agent-lab/orders:b993dc90c72b",
       "formal-agent-lab/orders:local",
-      "formal-agent-lab/web:0.3.0",
-      "formal-agent-lab/web:92036918f6eb",
+      "formal-agent-lab/web:0.4.0",
+      "formal-agent-lab/web:b993dc90c72b",
       "formal-agent-lab/web:local",
-      "formal-agent-lab/worker:0.3.0",
-      "formal-agent-lab/worker:92036918f6eb",
+      "formal-agent-lab/worker:0.4.0",
+      "formal-agent-lab/worker:b993dc90c72b",
       "formal-agent-lab/worker:local"
     ],
     "kind_clusters": []
   },
   "network": {
-    "proxy": "http://192.168.5.2:7897",
+    "proxy": null,
     "no_proxy": "127.0.0.1,localhost,::1,127.0.0.1,localhost,::1,127.0.0.1,localhost,::1,127.0.0.1,localhost,::1,127.0.0.1,localhost,::1,127.0.0.1,localhost,::1",
     "loopback_excluded": true
   },
@@ -242,7 +242,7 @@
       "port_conflicts": [
         {
           "port": 8765,
-          "owner": "pid 1611539 (python)"
+          "owner": "pid 340403 (python)"
         }
       ],
       "ports": [
@@ -269,6 +269,35 @@
       "ports": []
     }
   },
+  "delivery_profiles": {
+    "local-simulation": {
+      "profile": "local-lite",
+      "entry": "the local runner / `fal` against pure-data environments: formal-lab.env.ir-world runs MAL attack graphs (committed captures — no MAL toolchain), scheduling, warehouse and order models",
+      "requires_native": {
+        "cage": "CybORG 4 venv ($FAL_CAGE_HOME, default ~/.venvs/fal-cage) — only for formal-lab.env.cage4",
+        "mal": "mal-toolbox + mal-simulator venv ($FAL_MAL_HOME, default ~/.venvs/fal-mal) — only for capturing a new attack graph live"
+      },
+      "status": "AVAILABLE",
+      "native": {
+        "cage": true,
+        "mal": true
+      }
+    },
+    "local-service-lab": {
+      "profile": "local-services",
+      "entry": "make services-up + API / worker (make dev-up, or deploy/compose/docker-compose.yaml) and the local order service (make orders-up) behind the domain Broker",
+      "requires_native": {},
+      "status": "DEGRADED",
+      "native": {}
+    },
+    "local-offline": {
+      "profile": "local-lite",
+      "entry": "a --no-index install from the release wheelhouse and `fal replay` with no server; the containerised stack from the image bundle (make offline-bundle, 8 GiB above the host reserve)",
+      "requires_native": {},
+      "status": "AVAILABLE",
+      "native": {}
+    }
+  },
   "concurrency": {
     "experiments": 1,
     "solver_threads": 1,
@@ -277,8 +306,8 @@
     "basis": "4 usable CPU(s), 5910 MiB usable memory"
   },
   "repository": {
-    "revision": "e3b28e9dba6491c9d4320fdc768ac2eb87f41645",
-    "dirty_files": 37
+    "revision": "b993dc90c72b413b4d0b5e28e23cad993f9acba4",
+    "dirty_files": 62
   },
-  "duration_s": 1.35
+  "duration_s": 3.74
 }

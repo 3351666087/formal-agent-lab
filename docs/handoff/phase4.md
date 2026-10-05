@@ -1,6 +1,6 @@
 # 阶段四交接（Phase 4：平台修复与可验证交接 + 领域收口）
 
-任务书：[docs/execution/phase-4a.md](../execution/phase-4a.md)（原文 `04A_opus5_5_platform_closure.md`，2026-10-02，A1—A5，开发执行者 Opus 5.5）；B1—B3 由 `04B_opus4_8_domain_closure.md` 交接。本文件是阶段四唯一的交接记录：每个交付包完成时追加证据，最终补齐 [phase4.manifest.json](phase4.manifest.json) 与 [phase4-checks.json](phase4-checks.json)。整体 Phase 4 的完成标记留给 B3。阶段二（`4e1f959`）、阶段三（`67e1b82`，0.3.0 发布 `9203691`）的交接是历史证据。
+任务书：[docs/execution/phase-4a.md](../execution/phase-4a.md)（原文 `04A_opus5_5_platform_closure.md`，2026-10-02，A1—A5，开发执行者 Opus 5.5）；B1—B3 由 `04B_opus4_8_domain_closure.md` 交接。本文件是阶段四唯一的交接记录：每个交付包完成时追加证据，最终补齐 [phase4.manifest.json](phase4.manifest.json) 与 [phase4-checks.json](phase4-checks.json)。整体 Phase 4 已在 B3 完成：严格总验收在 `b993dc9` 上 `complete=true`（见“4B 交接总览”）。阶段二（`4e1f959`）、阶段三（`67e1b82`，0.3.0 发布 `9203691`）的交接是历史证据。
 
 ## 接手核对（2026-10-02）
 
@@ -60,7 +60,7 @@ uv run --frozen python scripts/handoff_phase4.py  # 由本次检查结果生成 
 | 阻塞 | 镜像离线包等七个写盘重型项已于 2026-10-03 在 `c7f2419` 全部 PASS（原为宿主磁盘 BLOCKED）；参与者多用户登录属部署范围；订单服务读接口回环不鉴权（部署条件）。真实端点与 Figma 本次可用、已实际使用 |
 | B1—B3 待注册位置 | `scripts/phase4_domain_checks.py`（只允许 b1—b3 组；未登记时为 `NO_CHECKS`，整体保持未完成）；证据脚本用 `scripts/check_result.py` 上报 |
 
-整体 Phase 4 的完成标记留给 B3。
+4A 之后的 B1—B3 与最终验收见下文“4B 交接总览”。
 
 
 ## 最终验收（严格总验收的三次运行）
@@ -240,3 +240,78 @@ uv run --frozen python scripts/handoff_phase4.py  # 由本次检查结果生成 
 | 镜像离线包 | 交接时 **BLOCKED**（构建并保存四个 OCI 镜像需 8 GiB，另需 15 GiB 宿主保留量，宿主仅 18.7 GiB）。**2026-10-03 已运行**：阶段二 `offline-install` 与阶段三 `p3-offline-bundle` 在 `c7f2419` PASS（`heavy-release.json`）；`a5-release.json` 的 `offline_stack` 仍是 `28ba986` 时的记录 |
 
 **验证**：`p4-a5-web-types`、`p4-a5-product-web`（2 项，真实 API + worker + 构建后的 Web + Playwright）、`p4-a5-release` 全部 PASS；A1—A5 当前修订检查报告见总览。
+
+## 4B 交接总览（领域收口，B1—B3）
+
+任务书：[docs/execution/phase-4b.md](../execution/phase-4b.md)（原文 `04B_opus4_8_domain_closure.md`）。执行顺序经用户确认为 B2 → B1 → B3；开发执行者 Opus 5.5（B2、B3）与 Opus 4.8（B1，会话中途切换），与实验内调用的模型分开记录。
+
+| 包 | 状态 | 提交 | 检查（`make phase4-check`） | 主要证据 |
+|---|---|---|---|---|
+| B2 CAGE 4 平台接入与配对评测 | 完成 | `b2a5382`（记录 `7ba72f8`） | b2：3/3 PASS | `b2-cage.json`、`b2-platform-run.json`、`b2-matrix.json`、`b2-paired-report.md` |
+| B1 MAL / 订单服务领域闭环 | 完成（真实端点已调用） | `d7cb685` `6ffc440` `31f9af3`（记录 `8d56a35`） | b1：4/4 PASS | `b1-mal.json`、`b1-real-endpoint.json`、`b1-service.json` |
+| B3 产品流程、发行、总验收与交接 | 完成 | `26712bc` `59e97b0`；0.4.0 `a6506fc`；验收修复 `e91c793` `b993dc9` | b3：3/3 PASS | `b3-product-flow.json`、`b3-release.json`、`acceptance-local.json`、`screens/b3-*.png` |
+
+### B3 · 产品流程与修复
+
+| 项 | 结果 |
+|---|---|
+| 四个入口 | Web 表单经模型前端导入（保留领域扩展）· CLI `fal model push --frontend` · SDK 配置场景 / 策略 / 矩阵与模型修订检查 · API 运行与参与者令牌；CLI 导出后停止 API 离线回放（`tests/integration/test_product_flow_b3.py`） |
+| 运行台 / 步骤详情 / 证据回放 / 基准页 | 均在同一项目的真实运行上访问并截图（`docs/execution/evidence/phase4/screens/b3-*.png`） |
+| 修复：门控作用范围 | 领域门控只管理 `governed_action_types`（默认 `compromise`）；范围外动作显式放行并记录 `GOVERNED_ACTION=false`（此前红蓝门控运行中防守方动作全部被拒） |
+| 修复：解释与回放 | `GET /runs/{id}/steps/{n}` 返回该步全部门控决策（批次成员归到自身步）；`ReplayBundle.step` 保留一步的全部决策（此前只留最后一条） |
+| 修复：Web 表单 | 场景编辑器新增执行门控编辑（此前保存会丢失门控）；模型工作台可从前端源文件导入（前端以 `frontend.source_format` 声明格式），显示来源与领域扩展；SchemaForm 每字段独立保存未完成的 JSON |
+| 修复：订单服务探针 | 新增只读 `GET /t/{tenant}/admin/conditions`；探针此前记录的 `config` 恒为 null；证据脚本不再用“空更新”读取条件 |
+| 证据由实际检查产生 | `scripts/evidence_io.py`：记录生成修订、以回读结果设置 `offline_readable`、分别判定存在 / 通过 / 当前修订；D1—D5 不再有固定布尔值，D6 分别核对三者 |
+| CI | 浏览器产品流程测试补 `ui` 标记（CI 集成作业无 pnpm / 浏览器；自 `a743ab2` 起 CI 因此报错）；验收检查仍运行它们 |
+
+### B3 · 发行与本地交付
+
+| 交付名 | 现有配置 | 实际入口（`p4-b3-release`，干净目录） |
+|---|---|---|
+| local-simulation | `local-lite` | 完全离线环境中以发行物中的 MAL 示例运行逐动作准入实验并导出回放包 |
+| local-service-lab | `local-services` | 在线安装的干净环境中启动 API + worker（独立数据库），导入 / 配置 / 运行 / 导出后停止；订单服务从其 wheel 启动，经 Broker 无凭据零副作用、有凭据放行 |
+| local-offline | `local-lite` + 镜像离线包 | 网络关闭（代理指向关闭端口）时回放两份回放包；镜像离线包由阶段二 `offline-install` / 阶段三 `p3-offline-bundle` 验证 |
+
+安装方式分开标记：在线（项目 wheel 来自发行物、第三方来自包仓库）、仅本机缓存（`uv --offline`）、完全离线（`pip --no-index`，wheelhouse 一次性在线下载）。外部原生工具链（CybORG、mal-toolbox / mal-simulator）不进入 wheel、镜像与离线包，需预先装在各自 venv；已提交的 MAL 捕获无需它们即可运行。
+
+### 最终验收（B3，严格总验收）
+
+严格总验收（`make acceptance-local`）在最终修订 `b993dc9`（干净工作树，tree `e3b0c44298fc`）上一次完成三个套件，报告只采纳本次运行写出的结果（nonce）：
+
+| 套件 | 结果 | 说明 |
+|---|---|---|
+| 阶段二必做回归 | **COMPLETE**，28/28 PASS | 0 BLOCKED、无重试；含 `local-release` 全部写盘重型项（镜像发行、Compose、镜像离线包、kind 安装 / 升级 / 回滚） |
+| 阶段三适用回归 | **COMPLETE**，35/35 PASS | 0 BLOCKED、无重试；含 G5 Web / 产品流程（开发平台已起）、G6 镜像发行与镜像离线包、D1—D6 |
+| 阶段四 A1—A5、B1—B3 | **COMPLETE**，26/26 PASS | a1—a5、b1—b3 全部组 PASS、无重试；A3 与 B1 的真实端点检查实际调用了已配置的中转 |
+
+报告：`docs/execution/evidence/phase4/acceptance-local.json`（2026-10-05T07:55:57Z — 2026-10-05T12:45:13Z，`complete=true`，阶段 A=PASS、B=PASS、全产品 COMPLETE）。此前的尝试全部保留（`docs/execution/evidence/phase4/acceptance-runs/`）：
+
+| 尝试 | 修订 | 结果 | 原因与处理 |
+|---|---|---|---|
+| 1 | `a6506fc` | 阶段二 COMPLETE、阶段四 COMPLETE（A/B PASS）、阶段三 FAIL | D2 / D4 / D6：VM 时钟比宿主共享挂载的 mtime 快约 2 s（且 NTP 会回拨），检查器按 `mtime ≥ t0 − 1 s` 判证据新鲜度 → 误判陈旧；D6 另因发行检查重写 `docs/licenses.md` 被判“工作树脏”；G5 未起开发平台 NOT_RUN；G6 PyPI / Docker Hub DNS 中断、镜像离线包被磁盘保留量拒绝。修复 `e91c793`：以同一文件系统上的起始标记判新鲜度、时长用单调时钟、生成文档不计入脏、发行检查重试 |
+| 2 | `2f464b1` | 中止（阶段二全量单元 1 失败） | 同步批次期限用墙钟差判定，NTP 回拨使超时成员被当作按时提交。修复 `b993dc9`：以成员自身单调规划时长为下限；回归测试在旧引擎上失败、修复后通过 |
+| 3 | `b993dc9` | 中止（阶段二两个重型项 BLOCKED） | 我在验收期间并行构建发行镜像，占用了磁盘余量。回收本项目镜像与构建缓存、把宿主上不常用的 ESP32 工具链移到用户的 Google Drive（经用户同意，MD5 校验，`RESTORE.md` 在 Drive）后重跑 |
+| 4（最终） | `b993dc9` | 见上表 | 期间不并行任何重型任务 |
+
+### 发布
+
+| 项 | 位置 |
+|---|---|
+| GitHub Release | [v0.4.0](https://github.com/3351666087/formal-agent-lab/releases/tag/v0.4.0)（Latest，标签指向 `b993dc9`，该提交 CI 绿）：wheel 包、Web 包、发行清单、两个 MAL 示例、LICENSE、NOTICE |
+| GitHub Packages（GHCR） | `ghcr.io/3351666087/formal-agent-lab/{api,worker,web,orders}` 的 `0.4.0` 与 `b993dc90c72b`（linux/arm64，摘要见发行说明）；推送后已登出 |
+| About | 描述与 19 个主题已更新 |
+| CI | `b993dc9`：`contracts-and-unit`、`integration` 均成功（自 `a743ab2` 以来首次全绿；原因是浏览器产品流程测试缺 `ui` 标记） |
+
+### 条件项与不在完成分母内的项
+
+| 项 | 状态 |
+|---|---|
+| CAGE 4 RL 训练智能体（torch / ray） | 未运行（任务书选配；未安装） |
+| 领域概率后端（PRISM-games 绑定） | 未运行（任务书选配） |
+| 云部署 | 不在本阶段范围（Helm chart 已有，针对真实集群） |
+| 独立使用者复现 | 无人参与：本次为**自动化干净环境复现**（`p4-b3-release`），未进行用户访谈或外部验收 |
+
+### Alpha / Beta 判断
+
+- **达到 Alpha**：本地单用户范围内，平台与领域的必做检查在同一修订一次全部通过（阶段二、三回归与阶段四 A1—B3）；发行物可在干净目录在线 / 仅缓存 / 完全离线安装并跑真实实验、停服务后离线回放；真实模型调用、原生与平台逐步一致、配对比较均有证据。
+- **未达到 Beta**：没有独立使用者凭文档复现（本次是自动化干净环境复现）；研究优势未证明（CAGE 比较仅 6 对样本，工程读数）；RL 训练智能体、概率后端、云部署为选配且未做；VM 时钟偏移 / 回拨引起的两类缺陷刚在本次修复，需要更长时间的运行观察。

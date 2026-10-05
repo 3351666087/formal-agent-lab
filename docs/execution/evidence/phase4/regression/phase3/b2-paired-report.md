@@ -5,11 +5,10 @@
 - [acceptance] 18 cell(s): 18 finished, 0 failed or cancelled, 0 not run; goal reached in 18 of 18; missing metrics: recovery_time 13
 - [acceptance] success 18/18 = 100% (denominator: every planned cell); timed out 0, reused 0, new runs 18
 - [acceptance] 2 comparison(s) have no complete pairs (the metric is missing on one side or the dimension varies only where the other does not) — no conclusion from them
-- [acceptance] method: *=B 恒定监控 · Monitor (×5) is better on wall_seconds (mean paired difference -3.13, 95% CI [-4.76, -1.54], 6 pairs, 0 unpaired)
+- [acceptance] method: *=A 官方基线 · SleepAgent 映射 (×5) is better on wall_seconds (mean paired difference +3.03, 95% CI [+0.0817, +6.01], 6 pairs, 0 unpaired)
 - [acceptance] method: *=A 官方基线 · SleepAgent 映射 (×5) is better on rejected_actions (mean paired difference +75.7, 95% CI [+58.7, +90.8], 6 pairs, 0 unpaired)
-- [acceptance] method: *=A 官方基线 · SleepAgent 映射 (×5) is better on wall_seconds (mean paired difference +17.6, 95% CI [+0.633, +34.9], 6 pairs, 0 unpaired)
 - [acceptance] method: *=C 平台规则 · 告警响应 (×5) is better on red_footholds_final (mean paired difference -3, 95% CI [-5.5, -0.333], 6 pairs, 0 unpaired) — engineering reading (small sample)
-- [acceptance] method: *=C 平台规则 · 告警响应 (×5) is better on red_foothold_host_steps (mean paired difference -84.8, 95% CI [-140, -33.2], 6 pairs, 0 unpaired) — engineering reading (small sample)
+- [acceptance] method: *=C 平台规则 · 告警响应 (×5) is better on red_foothold_host_steps (mean paired difference -84.8, 95% CI [-140, -34], 6 pairs, 0 unpaired) — engineering reading (small sample)
 - [acceptance] method: *=C 平台规则 · 告警响应 (×5) is better on unrecovered_hosts (mean paired difference -3, 95% CI [-5.5, -0.333], 6 pairs, 0 unpaired) — engineering reading (small sample)
 - [acceptance] method: *=A 官方基线 · SleepAgent 映射 (×5) is better on blue_actions_not_started (mean paired difference +75.7, 95% CI [+58.7, +90.8], 6 pairs, 0 unpaired)
 
@@ -23,102 +22,102 @@ Success: 18/18 (goal reached / every planned cell of this split (fixed before th
 
 | scenario | participants | backend | rules | model | ablation | budget | metric | value | 95% CI | n | missing | source |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
-| CAGE 4 · holdout · 5003 | *=A 官方基线 · SleepAgent 映射 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | goal_reached | 1 | [0.439, 1] | 3 | 0 | evaluator formal-lab.eval.generic |
-| CAGE 4 · holdout · 5003 | *=A 官方基线 · SleepAgent 映射 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | steps_used | 495 | [495, 495] | 3 | 0 | evaluator formal-lab.eval.generic |
-| CAGE 4 · holdout · 5003 | *=A 官方基线 · SleepAgent 映射 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | rejected_actions | 0 | [0, 0] | 3 | 0 | evaluator formal-lab.eval.generic |
-| CAGE 4 · holdout · 5003 | *=A 官方基线 · SleepAgent 映射 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | effect_mismatches | 0 | [0, 0] | 3 | 0 | evaluator formal-lab.eval.generic |
-| CAGE 4 · holdout · 5003 | *=A 官方基线 · SleepAgent 映射 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | model_calls | — | — | 0 | 0 | evaluator formal-lab.eval.generic |
-| CAGE 4 · holdout · 5003 | *=A 官方基线 · SleepAgent 映射 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | tokens | — | — | 0 | 0 | evaluator formal-lab.eval.generic |
-| CAGE 4 · holdout · 5003 | *=A 官方基线 · SleepAgent 映射 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | wall_seconds | 61.47 | [59.6, 64.2] | 3 | 0 | evaluator formal-lab.eval.generic |
-| CAGE 4 · holdout · 5003 | *=A 官方基线 · SleepAgent 映射 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | native_blue_reward | 0 | [0, 0] | 3 | 0 | evaluator formal-lab.cage4.metrics |
-| CAGE 4 · holdout · 5003 | *=A 官方基线 · SleepAgent 映射 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | green_success_rate | 0.9996 | [0.999, 1] | 3 | 0 | evaluator formal-lab.cage4.metrics |
-| CAGE 4 · holdout · 5003 | *=A 官方基线 · SleepAgent 映射 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | green_failed_actions | 1.333 | [0, 4] | 3 | 0 | evaluator formal-lab.cage4.metrics |
-| CAGE 4 · holdout · 5003 | *=A 官方基线 · SleepAgent 映射 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | red_footholds_final | 42.67 | [39, 47] | 3 | 0 | evaluator formal-lab.cage4.metrics |
-| CAGE 4 · holdout · 5003 | *=A 官方基线 · SleepAgent 映射 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | red_foothold_host_steps | 2184 | [2.17e+03, 2.22e+03] | 3 | 0 | evaluator formal-lab.cage4.metrics |
-| CAGE 4 · holdout · 5003 | *=A 官方基线 · SleepAgent 映射 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | recovery_time | — | — | 0 | 3 | evaluator formal-lab.cage4.metrics |
-| CAGE 4 · holdout · 5003 | *=A 官方基线 · SleepAgent 映射 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | unrecovered_hosts | 42.67 | [39, 47] | 3 | 0 | evaluator formal-lab.cage4.metrics |
-| CAGE 4 · holdout · 5003 | *=A 官方基线 · SleepAgent 映射 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | blue_actions_not_started | 0 | [0, 0] | 3 | 0 | evaluator formal-lab.cage4.metrics |
-| CAGE 4 · holdout · 5003 | *=A 官方基线 · SleepAgent 映射 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | blue_agent_count | 5 | [5, 5] | 3 | 0 | evaluator formal-lab.cage4.metrics |
-| CAGE 4 · holdout · 5003 | *=B 恒定监控 · Monitor (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | goal_reached | 1 | [0.439, 1] | 3 | 0 | evaluator formal-lab.eval.generic |
-| CAGE 4 · holdout · 5003 | *=B 恒定监控 · Monitor (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | steps_used | 495 | [495, 495] | 3 | 0 | evaluator formal-lab.eval.generic |
-| CAGE 4 · holdout · 5003 | *=B 恒定监控 · Monitor (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | rejected_actions | 0 | [0, 0] | 3 | 0 | evaluator formal-lab.eval.generic |
-| CAGE 4 · holdout · 5003 | *=B 恒定监控 · Monitor (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | effect_mismatches | 0 | [0, 0] | 3 | 0 | evaluator formal-lab.eval.generic |
-| CAGE 4 · holdout · 5003 | *=B 恒定监控 · Monitor (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | model_calls | — | — | 0 | 0 | evaluator formal-lab.eval.generic |
-| CAGE 4 · holdout · 5003 | *=B 恒定监控 · Monitor (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | tokens | — | — | 0 | 0 | evaluator formal-lab.eval.generic |
-| CAGE 4 · holdout · 5003 | *=B 恒定监控 · Monitor (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | wall_seconds | 57.9 | [55.7, 59.6] | 3 | 0 | evaluator formal-lab.eval.generic |
-| CAGE 4 · holdout · 5003 | *=B 恒定监控 · Monitor (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | native_blue_reward | 0 | [0, 0] | 3 | 0 | evaluator formal-lab.cage4.metrics |
-| CAGE 4 · holdout · 5003 | *=B 恒定监控 · Monitor (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | green_success_rate | 0.9996 | [0.999, 1] | 3 | 0 | evaluator formal-lab.cage4.metrics |
-| CAGE 4 · holdout · 5003 | *=B 恒定监控 · Monitor (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | green_failed_actions | 1.333 | [0, 4] | 3 | 0 | evaluator formal-lab.cage4.metrics |
-| CAGE 4 · holdout · 5003 | *=B 恒定监控 · Monitor (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | red_footholds_final | 42.67 | [39, 47] | 3 | 0 | evaluator formal-lab.cage4.metrics |
-| CAGE 4 · holdout · 5003 | *=B 恒定监控 · Monitor (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | red_foothold_host_steps | 2184 | [2.17e+03, 2.22e+03] | 3 | 0 | evaluator formal-lab.cage4.metrics |
-| CAGE 4 · holdout · 5003 | *=B 恒定监控 · Monitor (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | recovery_time | — | — | 0 | 3 | evaluator formal-lab.cage4.metrics |
-| CAGE 4 · holdout · 5003 | *=B 恒定监控 · Monitor (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | unrecovered_hosts | 42.67 | [39, 47] | 3 | 0 | evaluator formal-lab.cage4.metrics |
-| CAGE 4 · holdout · 5003 | *=B 恒定监控 · Monitor (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | blue_actions_not_started | 0 | [0, 0] | 3 | 0 | evaluator formal-lab.cage4.metrics |
-| CAGE 4 · holdout · 5003 | *=B 恒定监控 · Monitor (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | blue_agent_count | 5 | [5, 5] | 3 | 0 | evaluator formal-lab.cage4.metrics |
-| CAGE 4 · holdout · 5003 | *=C 平台规则 · 告警响应 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | goal_reached | 1 | [0.439, 1] | 3 | 0 | evaluator formal-lab.eval.generic |
-| CAGE 4 · holdout · 5003 | *=C 平台规则 · 告警响应 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | steps_used | 495 | [495, 495] | 3 | 0 | evaluator formal-lab.eval.generic |
-| CAGE 4 · holdout · 5003 | *=C 平台规则 · 告警响应 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | rejected_actions | 93 | [86, 102] | 3 | 0 | evaluator formal-lab.eval.generic |
-| CAGE 4 · holdout · 5003 | *=C 平台规则 · 告警响应 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | effect_mismatches | 0 | [0, 0] | 3 | 0 | evaluator formal-lab.eval.generic |
-| CAGE 4 · holdout · 5003 | *=C 平台规则 · 告警响应 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | model_calls | — | — | 0 | 0 | evaluator formal-lab.eval.generic |
-| CAGE 4 · holdout · 5003 | *=C 平台规则 · 告警响应 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | tokens | — | — | 0 | 0 | evaluator formal-lab.eval.generic |
-| CAGE 4 · holdout · 5003 | *=C 平台规则 · 告警响应 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | wall_seconds | 95.11 | [63.9, 111] | 3 | 0 | evaluator formal-lab.eval.generic |
-| CAGE 4 · holdout · 5003 | *=C 平台规则 · 告警响应 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | native_blue_reward | -7.667 | [-10, -6] | 3 | 0 | evaluator formal-lab.cage4.metrics |
-| CAGE 4 · holdout · 5003 | *=C 平台规则 · 告警响应 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | green_success_rate | 1 | [1, 1] | 3 | 0 | evaluator formal-lab.cage4.metrics |
-| CAGE 4 · holdout · 5003 | *=C 平台规则 · 告警响应 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | green_failed_actions | 0 | [0, 0] | 3 | 0 | evaluator formal-lab.cage4.metrics |
-| CAGE 4 · holdout · 5003 | *=C 平台规则 · 告警响应 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | red_footholds_final | 38 | [35, 40] | 3 | 0 | evaluator formal-lab.cage4.metrics |
-| CAGE 4 · holdout · 5003 | *=C 平台规则 · 告警响应 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | red_foothold_host_steps | 2079 | [2.05e+03, 2.1e+03] | 3 | 0 | evaluator formal-lab.cage4.metrics |
-| CAGE 4 · holdout · 5003 | *=C 平台规则 · 告警响应 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | recovery_time | 28.79 | [26.7, 32.2] | 3 | 0 | evaluator formal-lab.cage4.metrics |
-| CAGE 4 · holdout · 5003 | *=C 平台规则 · 告警响应 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | unrecovered_hosts | 38 | [35, 40] | 3 | 0 | evaluator formal-lab.cage4.metrics |
-| CAGE 4 · holdout · 5003 | *=C 平台规则 · 告警响应 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | blue_actions_not_started | 93 | [86, 102] | 3 | 0 | evaluator formal-lab.cage4.metrics |
-| CAGE 4 · holdout · 5003 | *=C 平台规则 · 告警响应 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | blue_agent_count | 5 | [5, 5] | 3 | 0 | evaluator formal-lab.cage4.metrics |
-| CAGE 4 · dev · a27b | *=A 官方基线 · SleepAgent 映射 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | goal_reached | 1 | [0.439, 1] | 3 | 0 | evaluator formal-lab.eval.generic |
-| CAGE 4 · dev · a27b | *=A 官方基线 · SleepAgent 映射 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | steps_used | 495 | [495, 495] | 3 | 0 | evaluator formal-lab.eval.generic |
-| CAGE 4 · dev · a27b | *=A 官方基线 · SleepAgent 映射 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | rejected_actions | 0 | [0, 0] | 3 | 0 | evaluator formal-lab.eval.generic |
-| CAGE 4 · dev · a27b | *=A 官方基线 · SleepAgent 映射 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | effect_mismatches | 0 | [0, 0] | 3 | 0 | evaluator formal-lab.eval.generic |
-| CAGE 4 · dev · a27b | *=A 官方基线 · SleepAgent 映射 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | model_calls | — | — | 0 | 0 | evaluator formal-lab.eval.generic |
-| CAGE 4 · dev · a27b | *=A 官方基线 · SleepAgent 映射 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | tokens | — | — | 0 | 0 | evaluator formal-lab.eval.generic |
-| CAGE 4 · dev · a27b | *=A 官方基线 · SleepAgent 映射 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | wall_seconds | 59.06 | [56.1, 61.1] | 3 | 0 | evaluator formal-lab.eval.generic |
-| CAGE 4 · dev · a27b | *=A 官方基线 · SleepAgent 映射 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | native_blue_reward | -66 | [-90, -21] | 3 | 0 | evaluator formal-lab.cage4.metrics |
-| CAGE 4 · dev · a27b | *=A 官方基线 · SleepAgent 映射 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | green_success_rate | 0.9947 | [0.992, 0.998] | 3 | 0 | evaluator formal-lab.cage4.metrics |
-| CAGE 4 · dev · a27b | *=A 官方基线 · SleepAgent 映射 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | green_failed_actions | 19 | [6, 30] | 3 | 0 | evaluator formal-lab.cage4.metrics |
-| CAGE 4 · dev · a27b | *=A 官方基线 · SleepAgent 映射 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | red_footholds_final | 33.33 | [26, 38] | 3 | 0 | evaluator formal-lab.cage4.metrics |
-| CAGE 4 · dev · a27b | *=A 官方基线 · SleepAgent 映射 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | red_foothold_host_steps | 1512 | [1.24e+03, 1.8e+03] | 3 | 0 | evaluator formal-lab.cage4.metrics |
-| CAGE 4 · dev · a27b | *=A 官方基线 · SleepAgent 映射 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | recovery_time | — | — | 0 | 3 | evaluator formal-lab.cage4.metrics |
-| CAGE 4 · dev · a27b | *=A 官方基线 · SleepAgent 映射 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | unrecovered_hosts | 33.33 | [26, 38] | 3 | 0 | evaluator formal-lab.cage4.metrics |
-| CAGE 4 · dev · a27b | *=A 官方基线 · SleepAgent 映射 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | blue_actions_not_started | 0 | [0, 0] | 3 | 0 | evaluator formal-lab.cage4.metrics |
-| CAGE 4 · dev · a27b | *=A 官方基线 · SleepAgent 映射 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | blue_agent_count | 5 | [5, 5] | 3 | 0 | evaluator formal-lab.cage4.metrics |
-| CAGE 4 · dev · a27b | *=B 恒定监控 · Monitor (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | goal_reached | 1 | [0.439, 1] | 3 | 0 | evaluator formal-lab.eval.generic |
-| CAGE 4 · dev · a27b | *=B 恒定监控 · Monitor (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | steps_used | 495 | [495, 495] | 3 | 0 | evaluator formal-lab.eval.generic |
-| CAGE 4 · dev · a27b | *=B 恒定监控 · Monitor (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | rejected_actions | 0 | [0, 0] | 3 | 0 | evaluator formal-lab.eval.generic |
-| CAGE 4 · dev · a27b | *=B 恒定监控 · Monitor (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | effect_mismatches | 0 | [0, 0] | 3 | 0 | evaluator formal-lab.eval.generic |
-| CAGE 4 · dev · a27b | *=B 恒定监控 · Monitor (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | model_calls | — | — | 0 | 0 | evaluator formal-lab.eval.generic |
-| CAGE 4 · dev · a27b | *=B 恒定监控 · Monitor (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | tokens | — | — | 0 | 0 | evaluator formal-lab.eval.generic |
-| CAGE 4 · dev · a27b | *=B 恒定监控 · Monitor (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | wall_seconds | 56.38 | [54.5, 59] | 3 | 0 | evaluator formal-lab.eval.generic |
-| CAGE 4 · dev · a27b | *=B 恒定监控 · Monitor (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | native_blue_reward | -66 | [-90, -21] | 3 | 0 | evaluator formal-lab.cage4.metrics |
-| CAGE 4 · dev · a27b | *=B 恒定监控 · Monitor (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | green_success_rate | 0.9947 | [0.992, 0.998] | 3 | 0 | evaluator formal-lab.cage4.metrics |
-| CAGE 4 · dev · a27b | *=B 恒定监控 · Monitor (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | green_failed_actions | 19 | [6, 30] | 3 | 0 | evaluator formal-lab.cage4.metrics |
-| CAGE 4 · dev · a27b | *=B 恒定监控 · Monitor (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | red_footholds_final | 33.33 | [26, 38] | 3 | 0 | evaluator formal-lab.cage4.metrics |
-| CAGE 4 · dev · a27b | *=B 恒定监控 · Monitor (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | red_foothold_host_steps | 1512 | [1.24e+03, 1.8e+03] | 3 | 0 | evaluator formal-lab.cage4.metrics |
-| CAGE 4 · dev · a27b | *=B 恒定监控 · Monitor (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | recovery_time | — | — | 0 | 3 | evaluator formal-lab.cage4.metrics |
-| CAGE 4 · dev · a27b | *=B 恒定监控 · Monitor (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | unrecovered_hosts | 33.33 | [26, 38] | 3 | 0 | evaluator formal-lab.cage4.metrics |
-| CAGE 4 · dev · a27b | *=B 恒定监控 · Monitor (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | blue_actions_not_started | 0 | [0, 0] | 3 | 0 | evaluator formal-lab.cage4.metrics |
-| CAGE 4 · dev · a27b | *=B 恒定监控 · Monitor (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | blue_agent_count | 5 | [5, 5] | 3 | 0 | evaluator formal-lab.cage4.metrics |
-| CAGE 4 · dev · a27b | *=C 平台规则 · 告警响应 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | goal_reached | 1 | [0.439, 1] | 3 | 0 | evaluator formal-lab.eval.generic |
-| CAGE 4 · dev · a27b | *=C 平台规则 · 告警响应 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | steps_used | 495 | [495, 495] | 3 | 0 | evaluator formal-lab.eval.generic |
-| CAGE 4 · dev · a27b | *=C 平台规则 · 告警响应 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | rejected_actions | 58.33 | [40, 73] | 3 | 0 | evaluator formal-lab.eval.generic |
-| CAGE 4 · dev · a27b | *=C 平台规则 · 告警响应 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | effect_mismatches | 0 | [0, 0] | 3 | 0 | evaluator formal-lab.eval.generic |
-| CAGE 4 · dev · a27b | *=C 平台规则 · 告警响应 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | model_calls | — | — | 0 | 0 | evaluator formal-lab.eval.generic |
-| CAGE 4 · dev · a27b | *=C 平台规则 · 告警响应 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | tokens | — | — | 0 | 0 | evaluator formal-lab.eval.generic |
-| CAGE 4 · dev · a27b | *=C 平台规则 · 告警响应 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | wall_seconds | 60.7 | [60.4, 61.1] | 3 | 0 | evaluator formal-lab.eval.generic |
-| CAGE 4 · dev · a27b | *=C 平台规则 · 告警响应 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | native_blue_reward | -69 | [-120, -21] | 3 | 0 | evaluator formal-lab.cage4.metrics |
-| CAGE 4 · dev · a27b | *=C 平台规则 · 告警响应 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | green_success_rate | 0.9943 | [0.992, 0.997] | 3 | 0 | evaluator formal-lab.cage4.metrics |
-| CAGE 4 · dev · a27b | *=C 平台规则 · 告警响应 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | green_failed_actions | 20.33 | [11, 30] | 3 | 0 | evaluator formal-lab.cage4.metrics |
-| CAGE 4 · dev · a27b | *=C 平台规则 · 告警响应 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | red_footholds_final | 32 | [26, 38] | 3 | 0 | evaluator formal-lab.cage4.metrics |
-| CAGE 4 · dev · a27b | *=C 平台规则 · 告警响应 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | red_foothold_host_steps | 1447 | [1.24e+03, 1.63e+03] | 3 | 0 | evaluator formal-lab.cage4.metrics |
-| CAGE 4 · dev · a27b | *=C 平台规则 · 告警响应 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | recovery_time | 23.75 | — | 2 | 1 | evaluator formal-lab.cage4.metrics |
-| CAGE 4 · dev · a27b | *=C 平台规则 · 告警响应 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | unrecovered_hosts | 32 | [26, 38] | 3 | 0 | evaluator formal-lab.cage4.metrics |
-| CAGE 4 · dev · a27b | *=C 平台规则 · 告警响应 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | blue_actions_not_started | 58.33 | [40, 73] | 3 | 0 | evaluator formal-lab.cage4.metrics |
-| CAGE 4 · dev · a27b | *=C 平台规则 · 告警响应 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | blue_agent_count | 5 | [5, 5] | 3 | 0 | evaluator formal-lab.cage4.metrics |
+| CAGE 4 · dev · ac1c | *=A 官方基线 · SleepAgent 映射 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | goal_reached | 1 | [0.439, 1] | 3 | 0 | evaluator formal-lab.eval.generic |
+| CAGE 4 · dev · ac1c | *=A 官方基线 · SleepAgent 映射 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | steps_used | 495 | [495, 495] | 3 | 0 | evaluator formal-lab.eval.generic |
+| CAGE 4 · dev · ac1c | *=A 官方基线 · SleepAgent 映射 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | rejected_actions | 0 | [0, 0] | 3 | 0 | evaluator formal-lab.eval.generic |
+| CAGE 4 · dev · ac1c | *=A 官方基线 · SleepAgent 映射 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | effect_mismatches | 0 | [0, 0] | 3 | 0 | evaluator formal-lab.eval.generic |
+| CAGE 4 · dev · ac1c | *=A 官方基线 · SleepAgent 映射 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | model_calls | — | — | 0 | 0 | evaluator formal-lab.eval.generic |
+| CAGE 4 · dev · ac1c | *=A 官方基线 · SleepAgent 映射 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | tokens | — | — | 0 | 0 | evaluator formal-lab.eval.generic |
+| CAGE 4 · dev · ac1c | *=A 官方基线 · SleepAgent 映射 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | wall_seconds | 57.41 | [54.6, 58.9] | 3 | 0 | evaluator formal-lab.eval.generic |
+| CAGE 4 · dev · ac1c | *=A 官方基线 · SleepAgent 映射 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | native_blue_reward | -66 | [-90, -21] | 3 | 0 | evaluator formal-lab.cage4.metrics |
+| CAGE 4 · dev · ac1c | *=A 官方基线 · SleepAgent 映射 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | green_success_rate | 0.9947 | [0.992, 0.998] | 3 | 0 | evaluator formal-lab.cage4.metrics |
+| CAGE 4 · dev · ac1c | *=A 官方基线 · SleepAgent 映射 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | green_failed_actions | 19 | [6, 30] | 3 | 0 | evaluator formal-lab.cage4.metrics |
+| CAGE 4 · dev · ac1c | *=A 官方基线 · SleepAgent 映射 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | red_footholds_final | 33.33 | [26, 38] | 3 | 0 | evaluator formal-lab.cage4.metrics |
+| CAGE 4 · dev · ac1c | *=A 官方基线 · SleepAgent 映射 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | red_foothold_host_steps | 1512 | [1.24e+03, 1.8e+03] | 3 | 0 | evaluator formal-lab.cage4.metrics |
+| CAGE 4 · dev · ac1c | *=A 官方基线 · SleepAgent 映射 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | recovery_time | — | — | 0 | 3 | evaluator formal-lab.cage4.metrics |
+| CAGE 4 · dev · ac1c | *=A 官方基线 · SleepAgent 映射 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | unrecovered_hosts | 33.33 | [26, 38] | 3 | 0 | evaluator formal-lab.cage4.metrics |
+| CAGE 4 · dev · ac1c | *=A 官方基线 · SleepAgent 映射 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | blue_actions_not_started | 0 | [0, 0] | 3 | 0 | evaluator formal-lab.cage4.metrics |
+| CAGE 4 · dev · ac1c | *=A 官方基线 · SleepAgent 映射 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | blue_agent_count | 5 | [5, 5] | 3 | 0 | evaluator formal-lab.cage4.metrics |
+| CAGE 4 · dev · ac1c | *=B 恒定监控 · Monitor (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | goal_reached | 1 | [0.439, 1] | 3 | 0 | evaluator formal-lab.eval.generic |
+| CAGE 4 · dev · ac1c | *=B 恒定监控 · Monitor (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | steps_used | 495 | [495, 495] | 3 | 0 | evaluator formal-lab.eval.generic |
+| CAGE 4 · dev · ac1c | *=B 恒定监控 · Monitor (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | rejected_actions | 0 | [0, 0] | 3 | 0 | evaluator formal-lab.eval.generic |
+| CAGE 4 · dev · ac1c | *=B 恒定监控 · Monitor (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | effect_mismatches | 0 | [0, 0] | 3 | 0 | evaluator formal-lab.eval.generic |
+| CAGE 4 · dev · ac1c | *=B 恒定监控 · Monitor (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | model_calls | — | — | 0 | 0 | evaluator formal-lab.eval.generic |
+| CAGE 4 · dev · ac1c | *=B 恒定监控 · Monitor (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | tokens | — | — | 0 | 0 | evaluator formal-lab.eval.generic |
+| CAGE 4 · dev · ac1c | *=B 恒定监控 · Monitor (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | wall_seconds | 63.77 | [61.9, 66.8] | 3 | 0 | evaluator formal-lab.eval.generic |
+| CAGE 4 · dev · ac1c | *=B 恒定监控 · Monitor (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | native_blue_reward | -66 | [-90, -21] | 3 | 0 | evaluator formal-lab.cage4.metrics |
+| CAGE 4 · dev · ac1c | *=B 恒定监控 · Monitor (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | green_success_rate | 0.9947 | [0.992, 0.998] | 3 | 0 | evaluator formal-lab.cage4.metrics |
+| CAGE 4 · dev · ac1c | *=B 恒定监控 · Monitor (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | green_failed_actions | 19 | [6, 30] | 3 | 0 | evaluator formal-lab.cage4.metrics |
+| CAGE 4 · dev · ac1c | *=B 恒定监控 · Monitor (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | red_footholds_final | 33.33 | [26, 38] | 3 | 0 | evaluator formal-lab.cage4.metrics |
+| CAGE 4 · dev · ac1c | *=B 恒定监控 · Monitor (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | red_foothold_host_steps | 1512 | [1.24e+03, 1.8e+03] | 3 | 0 | evaluator formal-lab.cage4.metrics |
+| CAGE 4 · dev · ac1c | *=B 恒定监控 · Monitor (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | recovery_time | — | — | 0 | 3 | evaluator formal-lab.cage4.metrics |
+| CAGE 4 · dev · ac1c | *=B 恒定监控 · Monitor (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | unrecovered_hosts | 33.33 | [26, 38] | 3 | 0 | evaluator formal-lab.cage4.metrics |
+| CAGE 4 · dev · ac1c | *=B 恒定监控 · Monitor (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | blue_actions_not_started | 0 | [0, 0] | 3 | 0 | evaluator formal-lab.cage4.metrics |
+| CAGE 4 · dev · ac1c | *=B 恒定监控 · Monitor (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | blue_agent_count | 5 | [5, 5] | 3 | 0 | evaluator formal-lab.cage4.metrics |
+| CAGE 4 · dev · ac1c | *=C 平台规则 · 告警响应 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | goal_reached | 1 | [0.439, 1] | 3 | 0 | evaluator formal-lab.eval.generic |
+| CAGE 4 · dev · ac1c | *=C 平台规则 · 告警响应 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | steps_used | 495 | [495, 495] | 3 | 0 | evaluator formal-lab.eval.generic |
+| CAGE 4 · dev · ac1c | *=C 平台规则 · 告警响应 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | rejected_actions | 58.33 | [40, 73] | 3 | 0 | evaluator formal-lab.eval.generic |
+| CAGE 4 · dev · ac1c | *=C 平台规则 · 告警响应 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | effect_mismatches | 0 | [0, 0] | 3 | 0 | evaluator formal-lab.eval.generic |
+| CAGE 4 · dev · ac1c | *=C 平台规则 · 告警响应 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | model_calls | — | — | 0 | 0 | evaluator formal-lab.eval.generic |
+| CAGE 4 · dev · ac1c | *=C 平台规则 · 告警响应 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | tokens | — | — | 0 | 0 | evaluator formal-lab.eval.generic |
+| CAGE 4 · dev · ac1c | *=C 平台规则 · 告警响应 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | wall_seconds | 65.71 | [57.1, 71.8] | 3 | 0 | evaluator formal-lab.eval.generic |
+| CAGE 4 · dev · ac1c | *=C 平台规则 · 告警响应 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | native_blue_reward | -69 | [-120, -21] | 3 | 0 | evaluator formal-lab.cage4.metrics |
+| CAGE 4 · dev · ac1c | *=C 平台规则 · 告警响应 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | green_success_rate | 0.9943 | [0.992, 0.997] | 3 | 0 | evaluator formal-lab.cage4.metrics |
+| CAGE 4 · dev · ac1c | *=C 平台规则 · 告警响应 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | green_failed_actions | 20.33 | [11, 30] | 3 | 0 | evaluator formal-lab.cage4.metrics |
+| CAGE 4 · dev · ac1c | *=C 平台规则 · 告警响应 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | red_footholds_final | 32 | [26, 38] | 3 | 0 | evaluator formal-lab.cage4.metrics |
+| CAGE 4 · dev · ac1c | *=C 平台规则 · 告警响应 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | red_foothold_host_steps | 1447 | [1.24e+03, 1.63e+03] | 3 | 0 | evaluator formal-lab.cage4.metrics |
+| CAGE 4 · dev · ac1c | *=C 平台规则 · 告警响应 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | recovery_time | 23.75 | — | 2 | 1 | evaluator formal-lab.cage4.metrics |
+| CAGE 4 · dev · ac1c | *=C 平台规则 · 告警响应 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | unrecovered_hosts | 32 | [26, 38] | 3 | 0 | evaluator formal-lab.cage4.metrics |
+| CAGE 4 · dev · ac1c | *=C 平台规则 · 告警响应 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | blue_actions_not_started | 58.33 | [40, 73] | 3 | 0 | evaluator formal-lab.cage4.metrics |
+| CAGE 4 · dev · ac1c | *=C 平台规则 · 告警响应 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | blue_agent_count | 5 | [5, 5] | 3 | 0 | evaluator formal-lab.cage4.metrics |
+| CAGE 4 · holdout · 9fcb | *=A 官方基线 · SleepAgent 映射 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | goal_reached | 1 | [0.439, 1] | 3 | 0 | evaluator formal-lab.eval.generic |
+| CAGE 4 · holdout · 9fcb | *=A 官方基线 · SleepAgent 映射 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | steps_used | 495 | [495, 495] | 3 | 0 | evaluator formal-lab.eval.generic |
+| CAGE 4 · holdout · 9fcb | *=A 官方基线 · SleepAgent 映射 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | rejected_actions | 0 | [0, 0] | 3 | 0 | evaluator formal-lab.eval.generic |
+| CAGE 4 · holdout · 9fcb | *=A 官方基线 · SleepAgent 映射 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | effect_mismatches | 0 | [0, 0] | 3 | 0 | evaluator formal-lab.eval.generic |
+| CAGE 4 · holdout · 9fcb | *=A 官方基线 · SleepAgent 映射 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | model_calls | — | — | 0 | 0 | evaluator formal-lab.eval.generic |
+| CAGE 4 · holdout · 9fcb | *=A 官方基线 · SleepAgent 映射 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | tokens | — | — | 0 | 0 | evaluator formal-lab.eval.generic |
+| CAGE 4 · holdout · 9fcb | *=A 官方基线 · SleepAgent 映射 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | wall_seconds | 60.75 | [58.4, 62.1] | 3 | 0 | evaluator formal-lab.eval.generic |
+| CAGE 4 · holdout · 9fcb | *=A 官方基线 · SleepAgent 映射 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | native_blue_reward | 0 | [0, 0] | 3 | 0 | evaluator formal-lab.cage4.metrics |
+| CAGE 4 · holdout · 9fcb | *=A 官方基线 · SleepAgent 映射 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | green_success_rate | 0.9996 | [0.999, 1] | 3 | 0 | evaluator formal-lab.cage4.metrics |
+| CAGE 4 · holdout · 9fcb | *=A 官方基线 · SleepAgent 映射 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | green_failed_actions | 1.333 | [0, 4] | 3 | 0 | evaluator formal-lab.cage4.metrics |
+| CAGE 4 · holdout · 9fcb | *=A 官方基线 · SleepAgent 映射 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | red_footholds_final | 42.67 | [39, 47] | 3 | 0 | evaluator formal-lab.cage4.metrics |
+| CAGE 4 · holdout · 9fcb | *=A 官方基线 · SleepAgent 映射 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | red_foothold_host_steps | 2184 | [2.17e+03, 2.22e+03] | 3 | 0 | evaluator formal-lab.cage4.metrics |
+| CAGE 4 · holdout · 9fcb | *=A 官方基线 · SleepAgent 映射 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | recovery_time | — | — | 0 | 3 | evaluator formal-lab.cage4.metrics |
+| CAGE 4 · holdout · 9fcb | *=A 官方基线 · SleepAgent 映射 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | unrecovered_hosts | 42.67 | [39, 47] | 3 | 0 | evaluator formal-lab.cage4.metrics |
+| CAGE 4 · holdout · 9fcb | *=A 官方基线 · SleepAgent 映射 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | blue_actions_not_started | 0 | [0, 0] | 3 | 0 | evaluator formal-lab.cage4.metrics |
+| CAGE 4 · holdout · 9fcb | *=A 官方基线 · SleepAgent 映射 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | blue_agent_count | 5 | [5, 5] | 3 | 0 | evaluator formal-lab.cage4.metrics |
+| CAGE 4 · holdout · 9fcb | *=B 恒定监控 · Monitor (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | goal_reached | 1 | [0.439, 1] | 3 | 0 | evaluator formal-lab.eval.generic |
+| CAGE 4 · holdout · 9fcb | *=B 恒定监控 · Monitor (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | steps_used | 495 | [495, 495] | 3 | 0 | evaluator formal-lab.eval.generic |
+| CAGE 4 · holdout · 9fcb | *=B 恒定监控 · Monitor (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | rejected_actions | 0 | [0, 0] | 3 | 0 | evaluator formal-lab.eval.generic |
+| CAGE 4 · holdout · 9fcb | *=B 恒定监控 · Monitor (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | effect_mismatches | 0 | [0, 0] | 3 | 0 | evaluator formal-lab.eval.generic |
+| CAGE 4 · holdout · 9fcb | *=B 恒定监控 · Monitor (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | model_calls | — | — | 0 | 0 | evaluator formal-lab.eval.generic |
+| CAGE 4 · holdout · 9fcb | *=B 恒定监控 · Monitor (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | tokens | — | — | 0 | 0 | evaluator formal-lab.eval.generic |
+| CAGE 4 · holdout · 9fcb | *=B 恒定监控 · Monitor (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | wall_seconds | 60.45 | [58.9, 63.2] | 3 | 0 | evaluator formal-lab.eval.generic |
+| CAGE 4 · holdout · 9fcb | *=B 恒定监控 · Monitor (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | native_blue_reward | 0 | [0, 0] | 3 | 0 | evaluator formal-lab.cage4.metrics |
+| CAGE 4 · holdout · 9fcb | *=B 恒定监控 · Monitor (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | green_success_rate | 0.9996 | [0.999, 1] | 3 | 0 | evaluator formal-lab.cage4.metrics |
+| CAGE 4 · holdout · 9fcb | *=B 恒定监控 · Monitor (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | green_failed_actions | 1.333 | [0, 4] | 3 | 0 | evaluator formal-lab.cage4.metrics |
+| CAGE 4 · holdout · 9fcb | *=B 恒定监控 · Monitor (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | red_footholds_final | 42.67 | [39, 47] | 3 | 0 | evaluator formal-lab.cage4.metrics |
+| CAGE 4 · holdout · 9fcb | *=B 恒定监控 · Monitor (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | red_foothold_host_steps | 2184 | [2.17e+03, 2.22e+03] | 3 | 0 | evaluator formal-lab.cage4.metrics |
+| CAGE 4 · holdout · 9fcb | *=B 恒定监控 · Monitor (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | recovery_time | — | — | 0 | 3 | evaluator formal-lab.cage4.metrics |
+| CAGE 4 · holdout · 9fcb | *=B 恒定监控 · Monitor (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | unrecovered_hosts | 42.67 | [39, 47] | 3 | 0 | evaluator formal-lab.cage4.metrics |
+| CAGE 4 · holdout · 9fcb | *=B 恒定监控 · Monitor (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | blue_actions_not_started | 0 | [0, 0] | 3 | 0 | evaluator formal-lab.cage4.metrics |
+| CAGE 4 · holdout · 9fcb | *=B 恒定监控 · Monitor (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | blue_agent_count | 5 | [5, 5] | 3 | 0 | evaluator formal-lab.cage4.metrics |
+| CAGE 4 · holdout · 9fcb | *=C 平台规则 · 告警响应 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | goal_reached | 1 | [0.439, 1] | 3 | 0 | evaluator formal-lab.eval.generic |
+| CAGE 4 · holdout · 9fcb | *=C 平台规则 · 告警响应 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | steps_used | 495 | [495, 495] | 3 | 0 | evaluator formal-lab.eval.generic |
+| CAGE 4 · holdout · 9fcb | *=C 平台规则 · 告警响应 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | rejected_actions | 93 | [86, 102] | 3 | 0 | evaluator formal-lab.eval.generic |
+| CAGE 4 · holdout · 9fcb | *=C 平台规则 · 告警响应 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | effect_mismatches | 0 | [0, 0] | 3 | 0 | evaluator formal-lab.eval.generic |
+| CAGE 4 · holdout · 9fcb | *=C 平台规则 · 告警响应 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | model_calls | — | — | 0 | 0 | evaluator formal-lab.eval.generic |
+| CAGE 4 · holdout · 9fcb | *=C 平台规则 · 告警响应 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | tokens | — | — | 0 | 0 | evaluator formal-lab.eval.generic |
+| CAGE 4 · holdout · 9fcb | *=C 平台规则 · 告警响应 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | wall_seconds | 59.06 | [58.5, 59.8] | 3 | 0 | evaluator formal-lab.eval.generic |
+| CAGE 4 · holdout · 9fcb | *=C 平台规则 · 告警响应 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | native_blue_reward | -7.667 | [-10, -6] | 3 | 0 | evaluator formal-lab.cage4.metrics |
+| CAGE 4 · holdout · 9fcb | *=C 平台规则 · 告警响应 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | green_success_rate | 1 | [1, 1] | 3 | 0 | evaluator formal-lab.cage4.metrics |
+| CAGE 4 · holdout · 9fcb | *=C 平台规则 · 告警响应 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | green_failed_actions | 0 | [0, 0] | 3 | 0 | evaluator formal-lab.cage4.metrics |
+| CAGE 4 · holdout · 9fcb | *=C 平台规则 · 告警响应 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | red_footholds_final | 38 | [35, 40] | 3 | 0 | evaluator formal-lab.cage4.metrics |
+| CAGE 4 · holdout · 9fcb | *=C 平台规则 · 告警响应 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | red_foothold_host_steps | 2079 | [2.05e+03, 2.1e+03] | 3 | 0 | evaluator formal-lab.cage4.metrics |
+| CAGE 4 · holdout · 9fcb | *=C 平台规则 · 告警响应 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | recovery_time | 28.79 | [26.7, 32.2] | 3 | 0 | evaluator formal-lab.cage4.metrics |
+| CAGE 4 · holdout · 9fcb | *=C 平台规则 · 告警响应 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | unrecovered_hosts | 38 | [35, 40] | 3 | 0 | evaluator formal-lab.cage4.metrics |
+| CAGE 4 · holdout · 9fcb | *=C 平台规则 · 告警响应 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | blue_actions_not_started | 93 | [86, 102] | 3 | 0 | evaluator formal-lab.cage4.metrics |
+| CAGE 4 · holdout · 9fcb | *=C 平台规则 · 告警响应 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | blue_agent_count | 5 | [5, 5] | 3 | 0 | evaluator formal-lab.cage4.metrics |
 
 ### Pooled across scenarios (unit: scenario; cluster bootstrap)
 
@@ -130,7 +129,7 @@ Success: 18/18 (goal reached / every planned cell of this split (fixed before th
 | *=A 官方基线 · SleepAgent 映射 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | effect_mismatches | 0 | [0, 0] | 2 | 6 |
 | *=A 官方基线 · SleepAgent 映射 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | model_calls | — | — | 0 | 0 |
 | *=A 官方基线 · SleepAgent 映射 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | tokens | — | — | 0 | 0 |
-| *=A 官方基线 · SleepAgent 映射 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | wall_seconds | 60.27 | [59.1, 61.5] | 2 | 6 |
+| *=A 官方基线 · SleepAgent 映射 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | wall_seconds | 59.08 | [57.4, 60.8] | 2 | 6 |
 | *=A 官方基线 · SleepAgent 映射 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | native_blue_reward | -33 | [-66, 0] | 2 | 6 |
 | *=A 官方基线 · SleepAgent 映射 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | green_success_rate | 0.9971 | [0.995, 1] | 2 | 6 |
 | *=A 官方基线 · SleepAgent 映射 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | green_failed_actions | 10.17 | [1.33, 19] | 2 | 6 |
@@ -146,7 +145,7 @@ Success: 18/18 (goal reached / every planned cell of this split (fixed before th
 | *=B 恒定监控 · Monitor (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | effect_mismatches | 0 | [0, 0] | 2 | 6 |
 | *=B 恒定监控 · Monitor (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | model_calls | — | — | 0 | 0 |
 | *=B 恒定监控 · Monitor (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | tokens | — | — | 0 | 0 |
-| *=B 恒定监控 · Monitor (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | wall_seconds | 57.14 | [56.4, 57.9] | 2 | 6 |
+| *=B 恒定监控 · Monitor (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | wall_seconds | 62.11 | [60.4, 63.8] | 2 | 6 |
 | *=B 恒定监控 · Monitor (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | native_blue_reward | -33 | [-66, 0] | 2 | 6 |
 | *=B 恒定监控 · Monitor (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | green_success_rate | 0.9971 | [0.995, 1] | 2 | 6 |
 | *=B 恒定监控 · Monitor (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | green_failed_actions | 10.17 | [1.33, 19] | 2 | 6 |
@@ -162,7 +161,7 @@ Success: 18/18 (goal reached / every planned cell of this split (fixed before th
 | *=C 平台规则 · 告警响应 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | effect_mismatches | 0 | [0, 0] | 2 | 6 |
 | *=C 平台规则 · 告警响应 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | model_calls | — | — | 0 | 0 |
 | *=C 平台规则 · 告警响应 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | tokens | — | — | 0 | 0 |
-| *=C 平台规则 · 告警响应 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | wall_seconds | 77.9 | [60.7, 95.1] | 2 | 6 |
+| *=C 平台规则 · 告警响应 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | wall_seconds | 62.39 | [59.1, 65.7] | 2 | 6 |
 | *=C 平台规则 · 告警响应 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | native_blue_reward | -38.33 | [-69, -7.67] | 2 | 6 |
 | *=C 平台规则 · 告警响应 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | green_success_rate | 0.9971 | [0.994, 1] | 2 | 6 |
 | *=C 平台规则 · 告警响应 (×5) | scenario | scenario | cage4-blue@1 | none | max_steps=510 | green_failed_actions | 10.17 | [0, 20.3] | 2 | 6 |
@@ -181,19 +180,19 @@ Success: 18/18 (goal reached / every planned cell of this split (fixed before th
 | method | *=A 官方基线 · SleepAgent 映射 (×5) | *=B 恒定监控 · Monitor (×5) | steps_used | 0 | [0, 0] | 6 | 0 | — | significance not reported: 0 non-zero paired differences < 6 (engineering) |
 | method | *=A 官方基线 · SleepAgent 映射 (×5) | *=B 恒定监控 · Monitor (×5) | rejected_actions | 0 | [0, 0] | 6 | 0 | — | significance not reported: 0 non-zero paired differences < 6 (engineering) |
 | method | *=A 官方基线 · SleepAgent 映射 (×5) | *=B 恒定监控 · Monitor (×5) | effect_mismatches | 0 | [0, 0] | 6 | 0 | — | significance not reported: 0 non-zero paired differences < 6 (engineering) |
-| method | *=A 官方基线 · SleepAgent 映射 (×5) | *=B 恒定监控 · Monitor (×5) | wall_seconds | -3.128 | [-4.76, -1.54] | 6 | 0 | *=B 恒定监控 · Monitor (×5) | p=0.0312 (statistical) |
+| method | *=A 官方基线 · SleepAgent 映射 (×5) | *=B 恒定监控 · Monitor (×5) | wall_seconds | 3.031 | [0.0817, 6.01] | 6 | 0 | *=A 官方基线 · SleepAgent 映射 (×5) | p=0.156 (statistical) |
 | method | *=A 官方基线 · SleepAgent 映射 (×5) | *=B 恒定监控 · Monitor (×5) | native_blue_reward | 0 | [0, 0] | 6 | 0 | — | significance not reported: 0 non-zero paired differences < 6 (engineering) |
 | method | *=A 官方基线 · SleepAgent 映射 (×5) | *=B 恒定监控 · Monitor (×5) | green_success_rate | 0 | [0, 0] | 6 | 0 | — | significance not reported: 0 non-zero paired differences < 6 (engineering) |
 | method | *=A 官方基线 · SleepAgent 映射 (×5) | *=B 恒定监控 · Monitor (×5) | green_failed_actions | 0 | [0, 0] | 6 | 0 | — | significance not reported: 0 non-zero paired differences < 6 (engineering) |
 | method | *=A 官方基线 · SleepAgent 映射 (×5) | *=B 恒定监控 · Monitor (×5) | red_footholds_final | 0 | [0, 0] | 6 | 0 | — | significance not reported: 0 non-zero paired differences < 6 (engineering) |
 | method | *=A 官方基线 · SleepAgent 映射 (×5) | *=B 恒定监控 · Monitor (×5) | red_foothold_host_steps | 0 | [0, 0] | 6 | 0 | — | significance not reported: 0 non-zero paired differences < 6 (engineering) |
 | method | *=A 官方基线 · SleepAgent 映射 (×5) | *=B 恒定监控 · Monitor (×5) | recovery_time | — | — | 0 | 6 | — | no complete pairs (engineering) |
-|  | incomplete pair ['acceptance', 'scn_1f5b086f84414217b079', 'scenario', 'scenario', 'cage4-blue@1', 'none', 'max_steps=510', 1] | missing both | a: MISSING: no host left the red foothold set before the end | b: MISSING: no host left the red foothold set before the end | | | | | |
-|  | incomplete pair ['acceptance', 'scn_1f5b086f84414217b079', 'scenario', 'scenario', 'cage4-blue@1', 'none', 'max_steps=510', 2] | missing both | a: MISSING: no host left the red foothold set before the end | b: MISSING: no host left the red foothold set before the end | | | | | |
-|  | incomplete pair ['acceptance', 'scn_1f5b086f84414217b079', 'scenario', 'scenario', 'cage4-blue@1', 'none', 'max_steps=510', 3] | missing both | a: MISSING: no host left the red foothold set before the end | b: MISSING: no host left the red foothold set before the end | | | | | |
-|  | incomplete pair ['acceptance', 'scn_adb227f0061743d2863d', 'scenario', 'scenario', 'cage4-blue@1', 'none', 'max_steps=510', 1] | missing both | a: MISSING: no host left the red foothold set before the end | b: MISSING: no host left the red foothold set before the end | | | | | |
-|  | incomplete pair ['acceptance', 'scn_adb227f0061743d2863d', 'scenario', 'scenario', 'cage4-blue@1', 'none', 'max_steps=510', 2] | missing both | a: MISSING: no host left the red foothold set before the end | b: MISSING: no host left the red foothold set before the end | | | | | |
-|  | incomplete pair ['acceptance', 'scn_adb227f0061743d2863d', 'scenario', 'scenario', 'cage4-blue@1', 'none', 'max_steps=510', 3] | missing both | a: MISSING: no host left the red foothold set before the end | b: MISSING: no host left the red foothold set before the end | | | | | |
+|  | incomplete pair ['acceptance', 'scn_2ae707eca3c34175bdf2', 'scenario', 'scenario', 'cage4-blue@1', 'none', 'max_steps=510', 1] | missing both | a: MISSING: no host left the red foothold set before the end | b: MISSING: no host left the red foothold set before the end | | | | | |
+|  | incomplete pair ['acceptance', 'scn_2ae707eca3c34175bdf2', 'scenario', 'scenario', 'cage4-blue@1', 'none', 'max_steps=510', 2] | missing both | a: MISSING: no host left the red foothold set before the end | b: MISSING: no host left the red foothold set before the end | | | | | |
+|  | incomplete pair ['acceptance', 'scn_2ae707eca3c34175bdf2', 'scenario', 'scenario', 'cage4-blue@1', 'none', 'max_steps=510', 3] | missing both | a: MISSING: no host left the red foothold set before the end | b: MISSING: no host left the red foothold set before the end | | | | | |
+|  | incomplete pair ['acceptance', 'scn_7990ff71bc224856971d', 'scenario', 'scenario', 'cage4-blue@1', 'none', 'max_steps=510', 1] | missing both | a: MISSING: no host left the red foothold set before the end | b: MISSING: no host left the red foothold set before the end | | | | | |
+|  | incomplete pair ['acceptance', 'scn_7990ff71bc224856971d', 'scenario', 'scenario', 'cage4-blue@1', 'none', 'max_steps=510', 2] | missing both | a: MISSING: no host left the red foothold set before the end | b: MISSING: no host left the red foothold set before the end | | | | | |
+|  | incomplete pair ['acceptance', 'scn_7990ff71bc224856971d', 'scenario', 'scenario', 'cage4-blue@1', 'none', 'max_steps=510', 3] | missing both | a: MISSING: no host left the red foothold set before the end | b: MISSING: no host left the red foothold set before the end | | | | | |
 | method | *=A 官方基线 · SleepAgent 映射 (×5) | *=B 恒定监控 · Monitor (×5) | unrecovered_hosts | 0 | [0, 0] | 6 | 0 | — | significance not reported: 0 non-zero paired differences < 6 (engineering) |
 | method | *=A 官方基线 · SleepAgent 映射 (×5) | *=B 恒定监控 · Monitor (×5) | blue_actions_not_started | 0 | [0, 0] | 6 | 0 | — | significance not reported: 0 non-zero paired differences < 6 (engineering) |
 | method | *=A 官方基线 · SleepAgent 映射 (×5) | *=B 恒定监控 · Monitor (×5) | blue_agent_count | 0 | [0, 0] | 6 | 0 | — | significance not reported: 0 non-zero paired differences < 6 (engineering) |
@@ -201,19 +200,19 @@ Success: 18/18 (goal reached / every planned cell of this split (fixed before th
 | method | *=A 官方基线 · SleepAgent 映射 (×5) | *=C 平台规则 · 告警响应 (×5) | steps_used | 0 | [0, 0] | 6 | 0 | — | significance not reported: 0 non-zero paired differences < 6 (engineering) |
 | method | *=A 官方基线 · SleepAgent 映射 (×5) | *=C 平台规则 · 告警响应 (×5) | rejected_actions | 75.67 | [58.7, 90.8] | 6 | 0 | *=A 官方基线 · SleepAgent 映射 (×5) | p=0.0312 (statistical) |
 | method | *=A 官方基线 · SleepAgent 映射 (×5) | *=C 平台规则 · 告警响应 (×5) | effect_mismatches | 0 | [0, 0] | 6 | 0 | — | significance not reported: 0 non-zero paired differences < 6 (engineering) |
-| method | *=A 官方基线 · SleepAgent 映射 (×5) | *=C 平台规则 · 告警响应 (×5) | wall_seconds | 17.64 | [0.633, 34.9] | 6 | 0 | *=A 官方基线 · SleepAgent 映射 (×5) | p=0.156 (statistical) |
-| method | *=A 官方基线 · SleepAgent 映射 (×5) | *=C 平台规则 · 告警响应 (×5) | native_blue_reward | -5.333 | [-17.7, 7.33] | 6 | 0 | *=A 官方基线 · SleepAgent 映射 (×5) | significance not reported: 5 non-zero paired differences < 6 (engineering) |
+| method | *=A 官方基线 · SleepAgent 映射 (×5) | *=C 平台规则 · 告警响应 (×5) | wall_seconds | 3.308 | [-1.98, 9.83] | 6 | 0 | *=A 官方基线 · SleepAgent 映射 (×5) | p=0.844 (statistical) |
+| method | *=A 官方基线 · SleepAgent 映射 (×5) | *=C 平台规则 · 告警响应 (×5) | native_blue_reward | -5.333 | [-17.2, 7.17] | 6 | 0 | *=A 官方基线 · SleepAgent 映射 (×5) | significance not reported: 5 non-zero paired differences < 6 (engineering) |
 | method | *=A 官方基线 · SleepAgent 映射 (×5) | *=C 平台规则 · 告警响应 (×5) | green_success_rate | -1.158e-06 | [-0.000634, 0.000547] | 6 | 0 | *=A 官方基线 · SleepAgent 映射 (×5) | significance not reported: 3 non-zero paired differences < 6 (engineering) |
 | method | *=A 官方基线 · SleepAgent 映射 (×5) | *=C 平台规则 · 告警响应 (×5) | green_failed_actions | 0 | [-2, 2.33] | 6 | 0 | — | significance not reported: 3 non-zero paired differences < 6 (engineering) |
 | method | *=A 官方基线 · SleepAgent 映射 (×5) | *=C 平台规则 · 告警响应 (×5) | red_footholds_final | -3 | [-5.5, -0.333] | 6 | 0 | *=C 平台规则 · 告警响应 (×5) | significance not reported: 5 non-zero paired differences < 6 (engineering) |
-| method | *=A 官方基线 · SleepAgent 映射 (×5) | *=C 平台规则 · 告警响应 (×5) | red_foothold_host_steps | -84.83 | [-140, -33.2] | 6 | 0 | *=C 平台规则 · 告警响应 (×5) | significance not reported: 5 non-zero paired differences < 6 (engineering) |
+| method | *=A 官方基线 · SleepAgent 映射 (×5) | *=C 平台规则 · 告警响应 (×5) | red_foothold_host_steps | -84.83 | [-140, -34] | 6 | 0 | *=C 平台规则 · 告警响应 (×5) | significance not reported: 5 non-zero paired differences < 6 (engineering) |
 | method | *=A 官方基线 · SleepAgent 映射 (×5) | *=C 平台规则 · 告警响应 (×5) | recovery_time | — | — | 0 | 6 | — | no complete pairs (engineering) |
-|  | incomplete pair ['acceptance', 'scn_1f5b086f84414217b079', 'scenario', 'scenario', 'cage4-blue@1', 'none', 'max_steps=510', 1] | missing a | a: MISSING: no host left the red foothold set before the end | b: present | | | | | |
-|  | incomplete pair ['acceptance', 'scn_1f5b086f84414217b079', 'scenario', 'scenario', 'cage4-blue@1', 'none', 'max_steps=510', 2] | missing a | a: MISSING: no host left the red foothold set before the end | b: present | | | | | |
-|  | incomplete pair ['acceptance', 'scn_1f5b086f84414217b079', 'scenario', 'scenario', 'cage4-blue@1', 'none', 'max_steps=510', 3] | missing a | a: MISSING: no host left the red foothold set before the end | b: present | | | | | |
-|  | incomplete pair ['acceptance', 'scn_adb227f0061743d2863d', 'scenario', 'scenario', 'cage4-blue@1', 'none', 'max_steps=510', 1] | missing both | a: MISSING: no host left the red foothold set before the end | b: MISSING: no host left the red foothold set before the end | | | | | |
-|  | incomplete pair ['acceptance', 'scn_adb227f0061743d2863d', 'scenario', 'scenario', 'cage4-blue@1', 'none', 'max_steps=510', 2] | missing a | a: MISSING: no host left the red foothold set before the end | b: present | | | | | |
-|  | incomplete pair ['acceptance', 'scn_adb227f0061743d2863d', 'scenario', 'scenario', 'cage4-blue@1', 'none', 'max_steps=510', 3] | missing a | a: MISSING: no host left the red foothold set before the end | b: present | | | | | |
+|  | incomplete pair ['acceptance', 'scn_2ae707eca3c34175bdf2', 'scenario', 'scenario', 'cage4-blue@1', 'none', 'max_steps=510', 1] | missing both | a: MISSING: no host left the red foothold set before the end | b: MISSING: no host left the red foothold set before the end | | | | | |
+|  | incomplete pair ['acceptance', 'scn_2ae707eca3c34175bdf2', 'scenario', 'scenario', 'cage4-blue@1', 'none', 'max_steps=510', 2] | missing a | a: MISSING: no host left the red foothold set before the end | b: present | | | | | |
+|  | incomplete pair ['acceptance', 'scn_2ae707eca3c34175bdf2', 'scenario', 'scenario', 'cage4-blue@1', 'none', 'max_steps=510', 3] | missing a | a: MISSING: no host left the red foothold set before the end | b: present | | | | | |
+|  | incomplete pair ['acceptance', 'scn_7990ff71bc224856971d', 'scenario', 'scenario', 'cage4-blue@1', 'none', 'max_steps=510', 1] | missing a | a: MISSING: no host left the red foothold set before the end | b: present | | | | | |
+|  | incomplete pair ['acceptance', 'scn_7990ff71bc224856971d', 'scenario', 'scenario', 'cage4-blue@1', 'none', 'max_steps=510', 2] | missing a | a: MISSING: no host left the red foothold set before the end | b: present | | | | | |
+|  | incomplete pair ['acceptance', 'scn_7990ff71bc224856971d', 'scenario', 'scenario', 'cage4-blue@1', 'none', 'max_steps=510', 3] | missing a | a: MISSING: no host left the red foothold set before the end | b: present | | | | | |
 | method | *=A 官方基线 · SleepAgent 映射 (×5) | *=C 平台规则 · 告警响应 (×5) | unrecovered_hosts | -3 | [-5.5, -0.333] | 6 | 0 | *=C 平台规则 · 告警响应 (×5) | significance not reported: 5 non-zero paired differences < 6 (engineering) |
 | method | *=A 官方基线 · SleepAgent 映射 (×5) | *=C 平台规则 · 告警响应 (×5) | blue_actions_not_started | 75.67 | [58.7, 90.8] | 6 | 0 | *=A 官方基线 · SleepAgent 映射 (×5) | p=0.0312 (statistical) |
 | method | *=A 官方基线 · SleepAgent 映射 (×5) | *=C 平台规则 · 告警响应 (×5) | blue_agent_count | 0 | [0, 0] | 6 | 0 | — | significance not reported: 0 non-zero paired differences < 6 (engineering) |

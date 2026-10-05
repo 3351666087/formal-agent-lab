@@ -1,16 +1,16 @@
 {
   "acceptance": "local",
   "format": "acceptance@2",
-  "nonce": "e9bbe2d36ad44ab2a469eff46dc8170e",
-  "started_at": "2026-10-05T07:55:57Z",
-  "finished_at": "2026-10-05T12:45:13Z",
-  "source_revision": "b993dc90c72b413b4d0b5e28e23cad993f9acba4",
+  "nonce": "fd539fa9fe654c338616f7c45ab68d4f",
+  "started_at": "2026-10-05T01:19:43Z",
+  "finished_at": "2026-10-05T04:27:32Z",
+  "source_revision": "a6506fcefb84151d9dfe1a54d5738fb5ec7c01da",
   "suites": {
     "phase2": {
       "report": "out/acceptance/phase2/results.json",
       "runner_exit": 0,
-      "report_sha256": "4c956212d1028e2143acad8fb55c4799a26c19c208987089294433d56f63fb76",
-      "commit": "b993dc90c72b413b4d0b5e28e23cad993f9acba4",
+      "report_sha256": "1783e7acdada7adef6e89439476a40f802755c44805873176a99587d25f6ce71",
+      "commit": "a6506fcefb84151d9dfe1a54d5738fb5ec7c01da",
       "groups": {
         "compatibility": "PASS",
         "semantic-driver": "PASS",
@@ -40,42 +40,48 @@
     },
     "phase3": {
       "report": "out/acceptance/phase3/results.json",
-      "runner_exit": 0,
-      "report_sha256": "755fc9381d4ed149f1f20fba04b8250d1c968a528af66faa98dd87a85a34207e",
-      "commit": "b993dc90c72b413b4d0b5e28e23cad993f9acba4",
+      "runner_exit": 1,
+      "report_sha256": "50159c608a50dfb6bdeb6a61d031f6751ae5919d7866ce9d3583901122896410",
+      "commit": "a6506fcefb84151d9dfe1a54d5738fb5ec7c01da",
       "groups": {
         "g1-contracts": "PASS",
         "g2-operations": "PASS",
         "g3-release": "PASS",
         "g4-batch": "PASS",
-        "g5-product": "PASS",
-        "g6-release": "PASS",
+        "g5-product": "INCOMPLETE",
+        "g6-release": "FAIL",
         "d1-mal": "PASS",
-        "d2-broker": "PASS",
+        "d2-broker": "FAIL",
         "d3-strategies": "PASS",
-        "d4-service": "PASS",
+        "d4-service": "FAIL",
         "d5-cage": "PASS",
-        "d6-domain": "PASS",
+        "d6-domain": "FAIL",
         "regression": "PASS"
       },
       "summary": {
-        "PASS": 35,
-        "FAIL": 0,
-        "BLOCKED": 0,
-        "NOT_RUN": 0,
+        "PASS": 27,
+        "FAIL": 5,
+        "BLOCKED": 1,
+        "NOT_RUN": 2,
         "NOT_SELECTED": 0,
         "NOT_APPLICABLE": 0
       },
-      "unmet": [],
-      "verdict": "COMPLETE",
-      "complete": true,
-      "detail": "every required group passed"
+      "unmet": [
+        "g5-product=INCOMPLETE",
+        "g6-release=FAIL",
+        "d2-broker=FAIL",
+        "d4-service=FAIL",
+        "d6-domain=FAIL"
+      ],
+      "verdict": "INCOMPLETE",
+      "complete": false,
+      "detail": "unmet ['g5-product=INCOMPLETE', 'g6-release=FAIL', 'd2-broker=FAIL', 'd4-service=FAIL', 'd6-domain=FAIL']"
     },
     "phase4": {
       "report": "out/acceptance/phase4/results.json",
       "runner_exit": 0,
-      "report_sha256": "ede52af4424c16f7082f2f0e610bc59a422bf2123c8369f3ec031084a097699e",
-      "commit": "b993dc90c72b413b4d0b5e28e23cad993f9acba4",
+      "report_sha256": "8ae8c6b607147dc3b6c88c3a19004708a1ed8632296846bc276705511ab87fe4",
+      "commit": "a6506fcefb84151d9dfe1a54d5738fb5ec7c01da",
       "groups": {
         "a1": "PASS",
         "a2": "PASS",
@@ -120,10 +126,10 @@
       }
     },
     "product": {
-      "status": "COMPLETE",
+      "status": "INCOMPLETE",
       "suites": {
         "phase2": "COMPLETE",
-        "phase3": "COMPLETE",
+        "phase3": "INCOMPLETE",
         "phase4": "COMPLETE"
       }
     }
@@ -136,8 +142,10 @@
     ],
     "group": null
   },
-  "complete": true,
-  "unmet": [],
+  "complete": false,
+  "unmet": [
+    "phase3:INCOMPLETE ['g5-product=INCOMPLETE', 'g6-release=FAIL', 'd2-broker=FAIL', 'd4-service=FAIL', 'd6-domain=FAIL']"
+  ],
   "strict": true,
   "rule": "complete only when every suite ran in full, its report carries this run's nonce, and every required group passed; partial runs, missing / stale / malformed reports and crashed runners are never complete"
 }

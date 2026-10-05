@@ -97,7 +97,9 @@ MAL 模型可以继续降低到现有 `ir-world` 运行，准确说明原生后�
 
 ## B3 · 最终产品与本地交付
 
-- [ ] **P4B-B3** 完成真实领域产品流程、当前修订全量必做验收和诚实交接，关闭原 D6 及剩余交付缺口。
+- [x] **P4B-B3** 完成真实领域产品流程、当前修订全量必做验收和诚实交接，关闭原 D6 及剩余交付缺口。
+  - 证据：严格总验收 complete=true at b993dc9（阶段二 28/28、阶段三 35/35、阶段四 26/26，A=PASS、B=PASS、全产品 COMPLETE）；CI 绿；v0.4.0 Release + GHCR 0.4.0 已发布；交接 docs/handoff/phase4.md
+  - 实现：`docs/execution/evidence/phase4/acceptance-local.json`、`docs/handoff/phase4.manifest.json`、`docs/execution/evidence/phase4/b3-product-flow.json`、`docs/execution/evidence/phase4/b3-release.json`
 
 **直接复用：** A1 的 `scripts/phase4_check.py`/验收器、A5 的 SDK/CLI/Web 流程与发行工具、`scripts/d1_mal_evidence.py` 至 `scripts/d6_domain_acceptance_evidence.py`、`docs/design-system.md`、`design/figma.json`、`docs/assurance-scope.md`、`docs/research-readout.md`、`docs/reuse-ledger.md`。
 

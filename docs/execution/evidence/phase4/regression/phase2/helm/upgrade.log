@@ -1,21 +1,21 @@
-disk-guard: /mnt/lima-colima: 4.5 GiB (4866183168 bytes) trimmed; /: 940.3 MiB (985956352 bytes) trimmed
-disk-guard: helm upgrade check (measured peak ~7 GiB + reserve): host (repository filesystem) 22.7 GiB free, docker data (/var/lib/docker) 18.8 GiB free (needs 10 GiB)
-==> images: previous (46400ad → p1-46400ad) and current (c7f2419741da)
+disk-guard: /mnt/lima-colima: 2.9 GiB (3125981184 bytes) trimmed; /: 802.5 MiB (841482240 bytes) trimmed
+disk-guard: helm upgrade check (measured peak ~7 GiB + reserve): host (repository filesystem) 30.2 GiB free, docker data (/var/lib/docker) 15.1 GiB free (needs 10 GiB)
+==> images: previous (46400ad → p1-46400ad) and current (b993dc90c72b)
 Preparing worktree (detached HEAD 46400ad)
- Image formal-agent-lab/api:p1-46400ad Building 
- Image formal-agent-lab/api:p1-46400ad Building 
  Image formal-agent-lab/worker:p1-46400ad Building 
  Image formal-agent-lab/web:p1-46400ad Building 
+ Image formal-agent-lab/api:p1-46400ad Building 
+ Image formal-agent-lab/api:p1-46400ad Building 
  Image formal-agent-lab/api:p1-46400ad Built 
  Image formal-agent-lab/worker:p1-46400ad Built 
  Image formal-agent-lab/web:p1-46400ad Built 
- Image formal-agent-lab/worker:c7f2419741da Building 
- Image formal-agent-lab/web:c7f2419741da Building 
- Image formal-agent-lab/api:c7f2419741da Building 
- Image formal-agent-lab/api:c7f2419741da Building 
- Image formal-agent-lab/api:c7f2419741da Built 
- Image formal-agent-lab/worker:c7f2419741da Built 
- Image formal-agent-lab/web:c7f2419741da Built 
+ Image formal-agent-lab/api:b993dc90c72b Building 
+ Image formal-agent-lab/web:b993dc90c72b Building 
+ Image formal-agent-lab/api:b993dc90c72b Building 
+ Image formal-agent-lab/worker:b993dc90c72b Building 
+ Image formal-agent-lab/web:b993dc90c72b Built 
+ Image formal-agent-lab/api:b993dc90c72b Built 
+ Image formal-agent-lab/worker:b993dc90c72b Built 
 ==> kind cluster fal-upgrade
 Creating cluster "fal-upgrade" ...
  • Ensuring node image (kindest/node:v1.37.0) 🖼️  ...
@@ -38,13 +38,13 @@ You can now use your cluster with:
 
 kubectl cluster-info --context kind-fal-upgrade
 
-Have a nice day! 👋
-Image: "formal-agent-lab/api:p1-46400ad" with ID "sha256:e970593a9d8a1885f3bdcd9f5d1627515a99381c4def7beaf47edafb92ad94f9" not yet present on node "fal-upgrade-control-plane", loading...
-Image: "formal-agent-lab/worker:p1-46400ad" with ID "sha256:1aba8f381537abcc129c356866d939c358c7f8a12d018840b88776ac9fbc37ab" not yet present on node "fal-upgrade-control-plane", loading...
-Image: "formal-agent-lab/web:p1-46400ad" with ID "sha256:72fafeb4659f131eb0691e954b12045928f2bd75bc8030fd5ccbd3c9149132c4" not yet present on node "fal-upgrade-control-plane", loading...
-Image: "formal-agent-lab/api:c7f2419741da" with ID "sha256:b4fa83830151e4f977adcd3e7369569271c56dd2b22af1834b173a23068c0eb4" not yet present on node "fal-upgrade-control-plane", loading...
-Image: "formal-agent-lab/worker:c7f2419741da" with ID "sha256:1cefd50f08a547446ee1cddba94d848ba0926534e32207c901be706b065667e8" not yet present on node "fal-upgrade-control-plane", loading...
-Image: "formal-agent-lab/web:c7f2419741da" with ID "sha256:4781680bc5e492461c55409d5907f8304f1f71c328ed920202d9e02cce2ca5b3" not yet present on node "fal-upgrade-control-plane", loading...
+Thanks for using kind! 😊
+Image: "formal-agent-lab/api:p1-46400ad" with ID "sha256:5c6be504b05414f2cab9dd3444af5aac9f6e436f1833d31e5e3efeedfb961c97" not yet present on node "fal-upgrade-control-plane", loading...
+Image: "formal-agent-lab/worker:p1-46400ad" with ID "sha256:7626e8adea056ad35e2ea82c14ec45d8093cf7b0b24ee9db20667f1f60b2cd6a" not yet present on node "fal-upgrade-control-plane", loading...
+Image: "formal-agent-lab/web:p1-46400ad" with ID "sha256:5b524b903e783906801a4cfb780430eaf97918ca30039db9c82d60c8a58f1f35" not yet present on node "fal-upgrade-control-plane", loading...
+Image: "formal-agent-lab/api:b993dc90c72b" with ID "sha256:343ed47b6a817ef478647beff0318a5bc310506509e6fb0359ba13afdfe50765" not yet present on node "fal-upgrade-control-plane", loading...
+Image: "formal-agent-lab/worker:b993dc90c72b" with ID "sha256:a41265d96410829e0282f4ce2e21d2e3f448447651f61b807ea1711eb56ebd77" not yet present on node "fal-upgrade-control-plane", loading...
+Image: "formal-agent-lab/web:b993dc90c72b" with ID "sha256:7ad6d8314371b417be5935fee34088ba1897b2979f3aeec1f647d6ff96544c29" not yet present on node "fal-upgrade-control-plane", loading...
 loaded chrislusf/seaweedfs:4.47 (linux/arm64)
 loaded postgres:16-alpine (linux/arm64)
 loaded temporalio/temporal:1.9.1 (linux/arm64)
@@ -62,7 +62,7 @@ deployment "temporal" successfully rolled out
 deployment "s3" successfully rolled out
 ==> install previous chart + images (46400ad)
 NAME: fal
-LAST DEPLOYED: Sat Oct  3 23:06:12 2026
+LAST DEPLOYED: Mon Oct  5 18:37:46 2026
 NAMESPACE: default
 STATUS: deployed
 REVISION: 1
@@ -80,18 +80,18 @@ Web UI:  kubectl port-forward svc/fal-formal-agent-lab-web 8080:80   → http://
 Readiness: kubectl port-forward svc/fal-formal-agent-lab-api 8000:8000 ; curl 127.0.0.1:8000/api/v1/health/ready
 Seed the demo project: kubectl exec deploy/fal-formal-agent-lab-api -- python -m formal_lab_api.seed
 alembic: 0001
-{"phase": "previous", "at": "2026-10-03T15:06:34Z", "ready": true, "platform_version": "0.1.0", "runs_listed": 0, "scenario": "状态延迟", "strategy_config_id": "stg_ed874f04fad04bddaf18", "run_id": "run_96642093a0614afa9fbc", "run_status": "SUCCEEDED", "steps": 31}
-==> upgrade to current chart + images (c7f2419741da)
+{"phase": "previous", "at": "2026-10-05T10:38:08Z", "ready": true, "platform_version": "0.1.0", "runs_listed": 0, "scenario": "状态延迟", "strategy_config_id": "stg_cf81f93cdc404b40879a", "run_id": "run_6d234de1cabb49ef968a", "run_status": "SUCCEEDED", "steps": 31}
+==> upgrade to current chart + images (b993dc90c72b)
 Release "fal" has been upgraded. Happy Helming!
 NAME: fal
-LAST DEPLOYED: Sat Oct  3 23:06:47 2026
+LAST DEPLOYED: Mon Oct  5 18:38:23 2026
 NAMESPACE: default
 STATUS: deployed
 REVISION: 2
 DESCRIPTION: Upgrade complete
 TEST SUITE: None
 NOTES:
-formal-agent-lab 0.3.0 installed as fal.
+formal-agent-lab 0.4.0 installed as fal.
 
 External services this release expects (not deployed by the chart):
   PostgreSQL  secret formal-agent-lab-db/database-url
@@ -102,15 +102,15 @@ Web UI:  kubectl port-forward svc/fal-formal-agent-lab-web 8080:80   → http://
 Readiness: kubectl port-forward svc/fal-formal-agent-lab-api 8000:8000 ; curl 127.0.0.1:8000/api/v1/health/ready
 Seed the demo project: kubectl exec deploy/fal-formal-agent-lab-api -- python -m formal_lab_api.seed
 alembic: 0002
-{"phase": "upgraded", "at": "2026-10-03T15:07:09Z", "ready": true, "platform_version": "0.3.0", "old_run_readable": true, "old_run_contract": "formal-lab-contracts/v1", "runs_listed": 1, "scenario": "两名调度员（轮流）", "strategy_config_id": null, "run_id": "run_b82c0e66d8a74c76be79", "run_status": "SUCCEEDED", "steps": 20}
+{"phase": "upgraded", "at": "2026-10-05T10:38:46Z", "ready": true, "platform_version": "0.4.0", "old_run_readable": true, "old_run_contract": "formal-lab-contracts/v1", "runs_listed": 1, "scenario": "两名调度员（轮流）", "strategy_config_id": null, "run_id": "run_0633fc8dabb448a1b419", "run_status": "SUCCEEDED", "steps": 20}
 ==> rollback to revision 1 (previous chart + images; the database stays at 0002)
 Rollback was a success! Happy Helming!
 REVISION	UPDATED                 	STATUS    	CHART                 	APP VERSION	DESCRIPTION     
-1       	Sat Oct  3 23:06:12 2026	superseded	formal-agent-lab-0.1.0	0.1.0      	Install complete
-2       	Sat Oct  3 23:06:47 2026	superseded	formal-agent-lab-0.3.0	0.3.0      	Upgrade complete
-3       	Sat Oct  3 23:07:17 2026	deployed  	formal-agent-lab-0.1.0	0.1.0      	Rollback to 1   
-{"phase": "rolled-back", "at": "2026-10-03T15:07:34Z", "ready": true, "platform_version": "0.1.0", "strategies_list_error": "NOT_FOUND: plugin formal-lab.example.scheduling.task-planner@1.0.0 is not installed", "old_run_readable": true, "old_run_contract": "(field not reported)", "runs_listed": 2, "scenario": "状态延迟", "strategy_config_id": "stg_ed874f04fad04bddaf18", "run_id": "run_f806a89caf014ee58a9e", "run_status": "SUCCEEDED", "steps": 31}
+1       	Mon Oct  5 18:37:46 2026	superseded	formal-agent-lab-0.1.0	0.1.0      	Install complete
+2       	Mon Oct  5 18:38:23 2026	superseded	formal-agent-lab-0.4.0	0.4.0      	Upgrade complete
+3       	Mon Oct  5 18:38:55 2026	deployed  	formal-agent-lab-0.1.0	0.1.0      	Rollback to 1   
+{"phase": "rolled-back", "at": "2026-10-05T10:39:13Z", "ready": true, "platform_version": "0.1.0", "strategies_list_error": "NOT_FOUND: plugin formal-lab.example.scheduling.task-planner@1.0.0 is not installed", "old_run_readable": true, "old_run_contract": "(field not reported)", "runs_listed": 2, "scenario": "状态延迟", "strategy_config_id": "stg_cf81f93cdc404b40879a", "run_id": "run_f77709762c2248bc97a6", "run_status": "SUCCEEDED", "steps": 31}
 {"passed": true, "installed-revision": "0001", "previous": "SUCCEEDED", "upgraded-revision": "0002", "upgraded": "SUCCEEDED", "rolled-back-revision": "0002", "rolled-back": "SUCCEEDED"}
 ==> OK (docs/execution/evidence/phase4/regression/phase2/helm/upgrade.json)
-disk-guard: /mnt/lima-colima: 5.9 GiB (6362382336 bytes) trimmed; /: 798.4 MiB (837193728 bytes) trimmed
-disk-guard: after the upgrade check: host (repository filesystem) 20.2 GiB free, docker data (/var/lib/docker) 17.5 GiB free (needs 0 GiB)
+disk-guard: /mnt/lima-colima: 3.5 GiB (3795341312 bytes) trimmed; /: 1.2 GiB (1333055488 bytes) trimmed
+disk-guard: after the upgrade check: host (repository filesystem) 28.6 GiB free, docker data (/var/lib/docker) 13.7 GiB free (needs 0 GiB)

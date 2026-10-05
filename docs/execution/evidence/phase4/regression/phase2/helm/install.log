@@ -1,16 +1,16 @@
-disk-guard: /mnt/lima-colima: 2.5 GiB (2717601792 bytes) trimmed; /: 158.2 MiB (165859328 bytes) trimmed
-disk-guard: helm install check (images + kind node): host (repository filesystem) 28.6 GiB free, docker data (/var/lib/docker) 21.6 GiB free (needs 8 GiB)
+disk-guard: /mnt/lima-colima: 0 B (0 bytes) trimmed; /: 0 B (0 bytes) trimmed
+disk-guard: helm install check (images + kind node): host (repository filesystem) 32.8 GiB free, docker data (/var/lib/docker) 15.1 GiB free (needs 8 GiB)
 ==> images
+ Image formal-agent-lab/api:local Building 
+ Image formal-agent-lab/api:local Building 
  Image formal-agent-lab/web:local Building 
  Image formal-agent-lab/worker:local Building 
  Image formal-agent-lab/orders:local Building 
- Image formal-agent-lab/api:local Building 
- Image formal-agent-lab/api:local Building 
- Image formal-agent-lab/web:local Built 
- Image formal-agent-lab/worker:local Built 
  Image formal-agent-lab/api:local Built 
  Image formal-agent-lab/api:local Built 
  Image formal-agent-lab/orders:local Built 
+ Image formal-agent-lab/web:local Built 
+ Image formal-agent-lab/worker:local Built 
 ==> kind cluster fal-helm (kindest/node:v1.37.0@sha256:a1ed56cfb0e7b93589bdf97c8cd566405a265939e3620fc4f5de89adff580ae5)
 Creating cluster "fal-helm" ...
  • Ensuring node image (kindest/node:v1.37.0) 🖼️  ...
@@ -27,16 +27,16 @@ Creating cluster "fal-helm" ...
  ✓ Installing StorageClass 💾
  • Waiting ≤ 3m0s for control-plane = Ready ⏳  ...
  ✓ Waiting ≤ 3m0s for control-plane = Ready ⏳
- • Ready after 18s 💚
+ • Ready after 19s 💚
 Set kubectl context to "kind-fal-helm"
 You can now use your cluster with:
 
 kubectl cluster-info --context kind-fal-helm
 
-Have a nice day! 👋
-Image: "formal-agent-lab/api:c7f2419741da" with ID "sha256:7f8aed62c2b0ce5e0fc75a63f1c1dc36aa37dd8c5ce8c74cbff1f624c3fd3399" not yet present on node "fal-helm-control-plane", loading...
-Image: "formal-agent-lab/worker:c7f2419741da" with ID "sha256:0888adceb075733775f6de51a8a11d1c0a6d2d924a0184bb95736501c0f9e85e" not yet present on node "fal-helm-control-plane", loading...
-Image: "formal-agent-lab/web:c7f2419741da" with ID "sha256:a2df2e56278d8cd0afc15a9a6a5fc281a62938e8dda5ddddb06f544471b13396" not yet present on node "fal-helm-control-plane", loading...
+Have a question, bug, or feature request? Let us know! https://kind.sigs.k8s.io/#community 🙂
+Image: "formal-agent-lab/api:b993dc90c72b" with ID "sha256:4da5a40c602e2294145914a1d6ed21e81c6329c5e0d78cca0b21fdcdb6aee3df" not yet present on node "fal-helm-control-plane", loading...
+Image: "formal-agent-lab/worker:b993dc90c72b" with ID "sha256:600d6cf8c048df511a9d8c72d13d906e5cc68681b2f11987d3fdba17f0e46cfd" not yet present on node "fal-helm-control-plane", loading...
+Image: "formal-agent-lab/web:b993dc90c72b" with ID "sha256:c41a045aacb066798768ca92517654e58d737c16c7caa77a47ded6cbdbbd0317" not yet present on node "fal-helm-control-plane", loading...
 loaded chrislusf/seaweedfs:4.47 (linux/arm64)
 loaded postgres:16-alpine (linux/arm64)
 loaded temporalio/temporal:1.9.1 (linux/arm64)
@@ -55,14 +55,14 @@ deployment "temporal" successfully rolled out
 deployment "s3" successfully rolled out
 ==> helm install (images pinned by tag loaded into the node; pullPolicy Never)
 NAME: fal
-LAST DEPLOYED: Sat Oct  3 23:03:55 2026
+LAST DEPLOYED: Mon Oct  5 17:28:50 2026
 NAMESPACE: default
 STATUS: deployed
 REVISION: 1
 DESCRIPTION: Install complete
 TEST SUITE: None
 NOTES:
-formal-agent-lab 0.3.0 installed as fal.
+formal-agent-lab 0.4.0 installed as fal.
 
 External services this release expects (not deployed by the chart):
   PostgreSQL  secret formal-agent-lab-db/database-url
@@ -73,7 +73,7 @@ Web UI:  kubectl port-forward svc/fal-formal-agent-lab-web 8080:80   → http://
 Readiness: kubectl port-forward svc/fal-formal-agent-lab-api 8000:8000 ; curl 127.0.0.1:8000/api/v1/health/ready
 Seed the demo project: kubectl exec deploy/fal-formal-agent-lab-api -- python -m formal_lab_api.seed
 NAME: fal
-LAST DEPLOYED: Sat Oct  3 23:03:55 2026
+LAST DEPLOYED: Mon Oct  5 17:28:50 2026
 NAMESPACE: default
 STATUS: deployed
 REVISION: 1
@@ -81,25 +81,25 @@ DESCRIPTION: Install complete
 RESOURCES:
 ==> v1/Pod(related)
 NAME                                        READY   STATUS    RESTARTS   AGE
-fal-formal-agent-lab-api-6f47b5765b-n82lr   1/1     Running   0          11s
-fal-formal-agent-lab-web-75554878-shpfc   1/1   Running   0     11s
-fal-formal-agent-lab-worker-574f779f78-wqdmq   1/1   Running   0     11s
+fal-formal-agent-lab-api-84f6bb8d9d-wgl59   1/1     Running   0          11s
+fal-formal-agent-lab-web-59557d4776-6wzll   1/1   Running   0     12s
+fal-formal-agent-lab-worker-66d4c49d4d-25hv5   1/1   Running   0     12s
 
 ==> v1/Service
-NAME                       TYPE        CLUSTER-IP    EXTERNAL-IP   PORT(S)    AGE
-fal-formal-agent-lab-api   ClusterIP   10.96.177.1   <none>        8000/TCP   11s
-fal-formal-agent-lab-web   ClusterIP   10.96.63.68   <none>   80/TCP   11s
+NAME                       TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)    AGE
+fal-formal-agent-lab-api   ClusterIP   10.96.173.43   <none>        8000/TCP   11s
+fal-formal-agent-lab-web   ClusterIP   10.96.240.237   <none>   80/TCP   11s
 
 ==> v1/Deployment
 NAME                       READY   UP-TO-DATE   AVAILABLE   AGE
 fal-formal-agent-lab-api   1/1     1            1           11s
 fal-formal-agent-lab-web   1/1   1     1     11s
-fal-formal-agent-lab-worker   1/1   1     1     11s
+fal-formal-agent-lab-worker   1/1   1     1     12s
 
 
 TEST SUITE: None
 NOTES:
-formal-agent-lab 0.3.0 installed as fal.
+formal-agent-lab 0.4.0 installed as fal.
 
 External services this release expects (not deployed by the chart):
   PostgreSQL  secret formal-agent-lab-db/database-url
@@ -110,13 +110,13 @@ Web UI:  kubectl port-forward svc/fal-formal-agent-lab-web 8080:80   → http://
 Readiness: kubectl port-forward svc/fal-formal-agent-lab-api 8000:8000 ; curl 127.0.0.1:8000/api/v1/health/ready
 Seed the demo project: kubectl exec deploy/fal-formal-agent-lab-api -- python -m formal_lab_api.seed
 NAME                                           READY   STATUS    RESTARTS   AGE   IP            NODE                     NOMINATED NODE   READINESS GATES
-fal-formal-agent-lab-api-6f47b5765b-n82lr      1/1     Running   0          11s   10.244.0.10   fal-helm-control-plane   <none>           <none>
-fal-formal-agent-lab-web-75554878-shpfc        1/1     Running   0          11s   10.244.0.11   fal-helm-control-plane   <none>           <none>
-fal-formal-agent-lab-worker-574f779f78-wqdmq   1/1     Running   0          11s   10.244.0.9    fal-helm-control-plane   <none>           <none>
-postgres-6fc6fcb99c-m7mz5                      1/1     Running   0          20s   10.244.0.6    fal-helm-control-plane   <none>           <none>
-s3-599dcc45f6-vjlc5                            1/1     Running   0          20s   10.244.0.7    fal-helm-control-plane   <none>           <none>
-temporal-d476cb89b-hfskx                       1/1     Running   0          20s   10.244.0.5    fal-helm-control-plane   <none>           <none>
+fal-formal-agent-lab-api-84f6bb8d9d-wgl59      1/1     Running   0          12s   10.244.0.11   fal-helm-control-plane   <none>           <none>
+fal-formal-agent-lab-web-59557d4776-6wzll      1/1     Running   0          12s   10.244.0.9    fal-helm-control-plane   <none>           <none>
+fal-formal-agent-lab-worker-66d4c49d4d-25hv5   1/1     Running   0          12s   10.244.0.10   fal-helm-control-plane   <none>           <none>
+postgres-6fc6fcb99c-4jz26                      1/1     Running   0          19s   10.244.0.5    fal-helm-control-plane   <none>           <none>
+s3-599dcc45f6-2qfwn                            1/1     Running   0          19s   10.244.0.7    fal-helm-control-plane   <none>           <none>
+temporal-d476cb89b-8pkgm                       1/1     Running   0          19s   10.244.0.6    fal-helm-control-plane   <none>           <none>
 ==> seed + experiment through the web service
-{"scheduling": {"project_id": "prj_70bbc86968b1470ea8d8", "model_id": "mdl_3fa24cd6e5c740bbad02", "model_version": 1, "strategies": {"EDD 规则": "stg_a10b952de139433982a4", "Z3 有界规划": "stg_54ab5a196daf4e238e42", "LLM（真实模型）": "stg_e5bf87a707924e1ab9eb", "LLM 替身（stub）": "stg_1ea35b69845d402eb2be", "任务计划（规则生成）": "stg_142a8405810c4e5e9ee4", "任务计划（符号生成）": "stg_2178aed971df44ab95f4", "任务计划（模型生成，真实模型）": "stg_e61f5cb8ee06456b8b51", "任务计划（模型生成，替身）": "stg_7ae12398a0d7486299ae", "Z3 成本最优": "stg_c1099583015642568afd"}}, "warehouse": {"project_id": "prj_e7e37330898242f6b9be", "model_id": "mdl_3cfe19915d5347609ab6", "strategies": {"仓储规则（全部）": "stg_28fb1d52815d434c947f", "仓储规则（收货）": "stg_6818ab87832e4c61bebb", "仓储规则（拣货）": "stg_2cbafd6ea4d248478495"}}, "orders": {"project_id": "prj_2d966dd4dd7e404fb4c8", "model_id": "mdl_9716e2d2341e4237acc8", "strategies": {"订单处理规则": "stg_5410b5a8cab64be6b88a", "Z3 有界规划（订单）": "stg_fc2333332e274331ae67"}, "endpoint": "http://127.0.0.1:8765"}}
+{"scheduling": {"project_id": "prj_bd998adcc94c4545afcf", "model_id": "mdl_9704fe6fc92e475fada6", "model_version": 1, "strategies": {"EDD 规则": "stg_192806a3ff4a4c3dbde3", "Z3 有界规划": "stg_4dc16df40fa449a9ad81", "LLM（真实模型）": "stg_3c226e57563a4f3d9ae7", "LLM 替身（stub）": "stg_7dcd302e99774ab4912e", "任务计划（规则生成）": "stg_35840a6937b9480ebf51", "任务计划（符号生成）": "stg_00c7f043c2f54357a54b", "任务计划（模型生成，真实模型）": "stg_38034e1fd53e4384b56a", "任务计划（模型生成，替身）": "stg_d29c101f751a4c99a7bc", "Z3 成本最优": "stg_bb353b14d07441a6bd54"}}, "warehouse": {"project_id": "prj_90c513ca07cc477fb0b2", "model_id": "mdl_1472650fb69f45c48197", "strategies": {"仓储规则（全部）": "stg_5aa2762398eb408f82b2", "仓储规则（收货）": "stg_b4ab289148bb48b9a3ef", "仓储规则（拣货）": "stg_0da57091a85342afa77a"}}, "orders": {"project_id": "prj_0941589a78d24b288ab8", "model_id": "mdl_939e747f99ff44c186e3", "strategies": {"订单处理规则": "stg_19a1f153801741268c8d", "Z3 有界规划（订单）": "stg_d787406de80d4cf5b704"}, "endpoint": "http://127.0.0.1:8765"}}
 {"passed": true, "run": "SUCCEEDED", "kubernetes": "v1.37.0"}
 ==> OK (docs/execution/evidence/phase4/regression/phase2/helm/install.json)

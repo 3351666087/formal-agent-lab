@@ -27,7 +27,7 @@
         "assumed: one ground action per logical step; deterministic effects as specified by deterministic_finite_v1",
         "assumed: only paths of at most 60 step(s) are considered",
         "scope: MODEL_INTERNAL (a conclusion about the model, not the real system); bound 60 step(s), timeout 30000 ms",
-        "backend: z3 5.1.0, 52 ms, status sat"
+        "backend: z3 5.1.0, 111 ms, status sat"
       ],
       "witness_replay": {
         "witness": "CONFIRMED",
@@ -37,7 +37,7 @@
     "export": {
       "bundle_file": "docs/execution/evidence/phase4/regression/phase3/d6-mal-query-bundle.json",
       "embedded_package": true,
-      "bytes": 139519
+      "bytes": 139521
     },
     "offline_replay": {
       "same": true,
@@ -63,8 +63,10 @@
     "domain_plugins_discoverable": [
       "formal-lab.broker.receipt-gate",
       "formal-lab.broker.receipt-issuer",
+      "formal-lab.domain.mal.blue-defender",
       "formal-lab.domain.mal.broker-gate",
       "formal-lab.domain.mal.frontend",
+      "formal-lab.domain.mal.receipt-issuer",
       "formal-lab.domain.mal.red-hybrid",
       "formal-lab.domain.mal.red-rule"
     ],
@@ -73,33 +75,74 @@
   "deliverables": {
     "D1": {
       "evidence": "d1-mal.json",
-      "present": true
+      "present": true,
+      "passed": true,
+      "current_revision": true,
+      "failed": [],
+      "produced_at": {
+        "commit": "b993dc90c72b413b4d0b5e28e23cad993f9acba4",
+        "dirty": false
+      }
     },
     "D2": {
       "evidence": "d2-broker.json",
-      "present": true
+      "present": true,
+      "passed": true,
+      "current_revision": true,
+      "failed": [],
+      "produced_at": {
+        "commit": "b993dc90c72b413b4d0b5e28e23cad993f9acba4",
+        "dirty": false
+      }
     },
     "D3": {
       "evidence": "d3-strategies.json",
-      "present": true
+      "present": true,
+      "passed": true,
+      "current_revision": true,
+      "failed": [],
+      "produced_at": {
+        "commit": "b993dc90c72b413b4d0b5e28e23cad993f9acba4",
+        "dirty": false
+      }
     },
     "D4": {
       "evidence": "d4-service-lab.json",
-      "present": true
+      "present": true,
+      "passed": true,
+      "current_revision": true,
+      "failed": [],
+      "produced_at": {
+        "commit": "b993dc90c72b413b4d0b5e28e23cad993f9acba4",
+        "dirty": false
+      }
     },
     "D5": {
       "evidence": "d5-cage.json",
-      "present": true
-    },
-    "D6": {
-      "evidence": "d6-domain-acceptance.json",
-      "present": true
+      "present": true,
+      "passed": true,
+      "current_revision": true,
+      "failed": [],
+      "produced_at": {
+        "commit": "b993dc90c72b413b4d0b5e28e23cad993f9acba4",
+        "dirty": false
+      }
     }
+  },
+  "current_revision": {
+    "commit": "b993dc90c72b413b4d0b5e28e23cad993f9acba4",
+    "dirty": false
   },
   "conclusion": {
     "import_run_explain_export_offline_replay": true,
-    "all_six_evidence_present": true,
+    "d1_d5_evidence_present": true,
+    "d1_d5_evidence_passed": true,
+    "d1_d5_evidence_current_revision": true,
     "plugins_discoverable_no_errors": true,
     "offline_readable": true
+  },
+  "produced_at": {
+    "commit": "b993dc90c72b413b4d0b5e28e23cad993f9acba4",
+    "dirty": false
   }
 }

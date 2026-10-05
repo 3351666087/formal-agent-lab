@@ -7,21 +7,33 @@
       "status": "SUCCEEDED",
       "steps": 6,
       "goal_reached": true,
-      "reason": "goal 'target_reached' reached"
+      "reason": "goal 'target_reached' reached",
+      "source_kinds": [
+        "RULE"
+      ],
+      "model_call_ids": 0
     },
     {
       "strategy": "symbolic",
       "status": "SUCCEEDED",
       "steps": 6,
       "goal_reached": true,
-      "reason": "goal 'target_reached' reached"
+      "reason": "goal 'target_reached' reached",
+      "source_kinds": [
+        "SYMBOLIC"
+      ],
+      "model_call_ids": 0
     },
     {
       "strategy": "hybrid",
       "status": "SUCCEEDED",
       "steps": 6,
       "goal_reached": true,
-      "reason": "goal 'target_reached' reached"
+      "reason": "goal 'target_reached' reached",
+      "source_kinds": [
+        "LLM_STUB"
+      ],
+      "model_call_ids": 6
     }
   ],
   "blue_defense": {
@@ -35,21 +47,33 @@
         "status": "FAILED",
         "steps": 22,
         "goal_reached": false,
-        "reason": "NON_RETRYABLE_FAILURE: no compromise candidate for the red rule"
+        "reason": "NON_RETRYABLE_FAILURE: no compromise candidate for the red rule",
+        "source_kinds": [
+          "RULE"
+        ],
+        "model_call_ids": 0
       },
       {
         "strategy": "symbolic",
         "status": "FAILED",
         "steps": 28,
         "goal_reached": false,
-        "reason": "no applicable action for red on its belief"
+        "reason": "no applicable action for red on its belief",
+        "source_kinds": [
+          "SYMBOLIC"
+        ],
+        "model_call_ids": 0
       },
       {
         "strategy": "hybrid",
-        "status": "FAILED",
-        "steps": 22,
+        "status": "BUDGET_EXHAUSTED",
+        "steps": 10,
         "goal_reached": false,
-        "reason": "NON_RETRYABLE_FAILURE: no compromise candidate for the red hybrid"
+        "reason": "model-call budget exhausted (10/10)",
+        "source_kinds": [
+          "LLM_STUB"
+        ],
+        "model_call_ids": 10
       }
     ],
     "all_red_blocked": true
@@ -64,9 +88,13 @@
     "plan_progress_preserved": true
   },
   "hybrid_model": {
-    "real_endpoint_configured": false,
+    "real_endpoint_configured": true,
     "mode": "STUB",
-    "note": "no model endpoint configured — the hybrid strategy ran with a marked stub that defers ranking to the rule; the real-model result is a conditional item, not claimed as delivered",
+    "source_kinds": [
+      "LLM_STUB"
+    ],
+    "model_call_ids": 6,
+    "note": "the hybrid ran with stub decisions (source kinds ['LLM_STUB']); no real-model result is claimed here — the real-endpoint run is phase 4B's p4-b1-real-endpoint",
     "hybrid_reached_goal": true
   },
   "model_revision": {
@@ -112,7 +140,7 @@
         "origin": {
           "reason": "belief model built from an incomplete native capture (missing the goal's propagation)"
         },
-        "created_at": "2026-10-02T19:19:25.695802Z"
+        "created_at": "2026-10-05T11:23:30.175077Z"
       },
       "old_model_v1_rejected": true,
       "revised_model_v2_released": true,
@@ -133,9 +161,13 @@
   "conclusion": {
     "both_sides_complete_experiment": true,
     "checkpoint_recovery_preserves_progress": true,
-    "real_model_reported_honestly": true,
+    "model_mode_from_proposal_sources": true,
     "one_true_revision_succeeds": true,
     "stale_not_polluting_regression": true,
     "offline_readable": true
+  },
+  "produced_at": {
+    "commit": "b993dc90c72b413b4d0b5e28e23cad993f9acba4",
+    "dirty": false
   }
 }

@@ -4,11 +4,11 @@
   "precheck": {
     "ok": true,
     "cpus": 4,
-    "disk_free_mb": 17815
+    "disk_free_mb": 31099
   },
   "environment": {
     "identity": "order-service",
-    "endpoint": "http://127.0.0.1:35763",
+    "endpoint": "http://127.0.0.1:53299",
     "project": "phase3b-d4",
     "ready": "ok",
     "test_identity": "redlab"
@@ -56,8 +56,8 @@
   "simulator_comparison": {
     "authorized": {
       "result": "CONSISTENT",
-      "service": true,
-      "model": true,
+      "service": false,
+      "model": false,
       "detail": "the service and the model agree the unauthorized action is prevented"
     },
     "unauthorized": {
@@ -84,10 +84,27 @@
     "before": {
       "access": {
         "operations": 3,
-        "endpoint": "http://127.0.0.1:35763",
+        "endpoint": "http://127.0.0.1:53299",
         "tenant": "redlab"
       },
-      "config": null,
+      "config": {},
+      "metrics": {
+        "clock": 0,
+        "window": {
+          "kind": "LOGICAL_STEPS",
+          "size": 6,
+          "start": 0,
+          "end": 0
+        },
+        "throughput": 0.0,
+        "completion_rate": 0.0,
+        "queue_length": 0,
+        "backlog": 3,
+        "latency_ticks": null,
+        "op_latency_ms_p50": 2.9404163360595703,
+        "restarts": 0,
+        "recovery_seconds": null
+      },
       "service_state": {
         "health": "ready",
         "revision": 3,
@@ -96,11 +113,11 @@
       "success_rate": null,
       "cost": {
         "mode": "process",
-        "pid": 1770795,
+        "pid": 566166,
         "data_bytes": 57344,
         "restarts": 0,
-        "rss_kb": 50204,
-        "cpu_seconds": 0.14
+        "rss_kb": 49972,
+        "cpu_seconds": 0.57
       },
       "recovery": {
         "baseline_revision": 3,
@@ -111,10 +128,31 @@
     "after": {
       "access": {
         "operations": 3,
-        "endpoint": "http://127.0.0.1:35763",
+        "endpoint": "http://127.0.0.1:53299",
         "tenant": "redlab"
       },
-      "config": null,
+      "config": {
+        "slow_stations": [
+          "p2"
+        ]
+      },
+      "metrics": {
+        "clock": 0,
+        "window": {
+          "kind": "LOGICAL_STEPS",
+          "size": 6,
+          "start": 0,
+          "end": 0
+        },
+        "throughput": 0.0,
+        "completion_rate": 0.0,
+        "queue_length": 0,
+        "backlog": 3,
+        "latency_ticks": null,
+        "op_latency_ms_p50": 2.9404163360595703,
+        "restarts": 0,
+        "recovery_seconds": null
+      },
       "service_state": {
         "health": "ready",
         "revision": 3,
@@ -123,11 +161,11 @@
       "success_rate": null,
       "cost": {
         "mode": "process",
-        "pid": 1770795,
+        "pid": 566166,
         "data_bytes": 57344,
         "restarts": 0,
-        "rss_kb": 50276,
-        "cpu_seconds": 0.15
+        "rss_kb": 50056,
+        "cpu_seconds": 0.61
       },
       "recovery": {
         "baseline_revision": 3,
@@ -138,10 +176,27 @@
     "after_reset": {
       "access": {
         "operations": 3,
-        "endpoint": "http://127.0.0.1:35763",
+        "endpoint": "http://127.0.0.1:53299",
         "tenant": "redlab"
       },
-      "config": null,
+      "config": {},
+      "metrics": {
+        "clock": 0,
+        "window": {
+          "kind": "LOGICAL_STEPS",
+          "size": 6,
+          "start": 0,
+          "end": 0
+        },
+        "throughput": 0.0,
+        "completion_rate": 0.0,
+        "queue_length": 0,
+        "backlog": 3,
+        "latency_ticks": null,
+        "op_latency_ms_p50": 3.852367401123047,
+        "restarts": 0,
+        "recovery_seconds": null
+      },
       "service_state": {
         "health": "ready",
         "revision": 3,
@@ -150,11 +205,11 @@
       "success_rate": null,
       "cost": {
         "mode": "process",
-        "pid": 1770795,
+        "pid": 566166,
         "data_bytes": 57344,
         "restarts": 0,
-        "rss_kb": 50296,
-        "cpu_seconds": 0.16
+        "rss_kb": 50088,
+        "cpu_seconds": 0.64
       },
       "recovery": {
         "baseline_revision": 3,
@@ -165,7 +220,7 @@
   },
   "export_size": 4353,
   "abnormal_termination": {
-    "killed_pid": 1770795,
+    "killed_pid": 566166,
     "process_alive": true,
     "data_dir_present": true,
     "data_dir": "var/d4-lab/.fal-orders/phase3b-d4/data",
@@ -175,7 +230,7 @@
     "removed_data": true,
     "detail": {
       "processes": [
-        1770795
+        566166
       ],
       "containers": [],
       "paths": [
@@ -216,5 +271,9 @@
     "cleaned_up": true,
     "simulator_comparison_recorded": true,
     "offline_readable": true
+  },
+  "produced_at": {
+    "commit": "b993dc90c72b413b4d0b5e28e23cad993f9acba4",
+    "dirty": false
   }
 }

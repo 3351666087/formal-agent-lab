@@ -2,9 +2,9 @@
   "format": "checks@3",
   "compatible_with": "checks@2",
   "suite": "phase4",
-  "generated_at": "2026-10-02T20:05:43Z",
+  "generated_at": "2026-10-05T12:45:13Z",
   "source_revision": {
-    "commit": "28ba986646d385ea7fc95831d33cda0f14ffcf0b",
+    "commit": "b993dc90c72b413b4d0b5e28e23cad993f9acba4",
     "worktree": {
       "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "clean": true,
@@ -16,21 +16,21 @@
         "docs/licenses.md",
         "docs/api/openapi.json",
         "out/",
-        "docs/execution/evidence/phase4/checks/"
+        "out/acceptance/phase4/"
       ]
     }
   },
   "config": {
-    "sha256": "c88301517e5dfd98ab03891c3ee52c70c3d3a11960e5256312816d95eb041348",
+    "sha256": "31b0a71b59a15958c1a2463f7812f6bdb9a5c7edaf8102162ad973103b6e96cb",
     "parts": {
-      "checks": "2b48cc2625c59e24f09435a50f0608f405eb833df59b97876e89aebc4b120676",
-      "uv.lock": "499fa9ea8ca927f6bd598a79f821959f4e0e769d84ab3bcd88dee4b58d08bcc1",
+      "checks": "827ae2612648c3bdd6b5389617d20561ee6aadd775bfdcc8f1c40dc9d9539a7a",
+      "uv.lock": "4d3a54f797927fbc03bbb772f4386cf437468e023d39b23ec94d38c045f04ced",
       "pnpm-lock.yaml": "02d23c074a75bccfaea1ed4ff51272ba3d6cbb724e8012366c8d18e9bb0a7c3a",
       "deploy/compose/services.dev.yaml": "4c876045f15d5bd972c517e7de2d3626cd252d1842797f0152f596f7d8ea9ce0",
       "deploy/compose/docker-compose.yaml": "ff4c34cae068cc6dacd4db7f4273887ff6c2bb0b3b84938a7b8969488bfb20ff"
     }
   },
-  "command": "python scripts/check_runner.py --suite phase4 --group a1,a2,a3,a4,a5",
+  "command": "python scripts/check_runner.py --suite phase4 --out /Users/null3351/Code/formal-agent-lab/out/acceptance/phase4",
   "environment": {
     "os": "Ubuntu 24.04.4 LTS",
     "arch": "aarch64",
@@ -47,16 +47,16 @@
     "cpus": 4,
     "memory_gib": {
       "MemTotal": 5.77,
-      "MemAvailable": 3.88
+      "MemAvailable": 3.34
     },
     "load_avg": [
-      0.39,
-      0.74,
-      0.89
+      1.57,
+      1.75,
+      1.69
     ],
     "disk_free_gib": {
-      "host (repository filesystem)": 17.2,
-      "docker (/var/lib/docker)": 21.2
+      "host (repository filesystem)": 27.9,
+      "docker (/var/lib/docker)": 13.4
     },
     "concurrency": 1,
     "note": "checks run one at a time; heavy checks ask disk_guard first"
@@ -65,33 +65,27 @@
     "cpus": 4,
     "memory_gib": {
       "MemTotal": 5.77,
-      "MemAvailable": 3.74
+      "MemAvailable": 3.2
     },
     "load_avg": [
-      1.25,
-      0.97,
-      0.91
+      1.47,
+      1.88,
+      1.78
     ],
     "disk_free_gib": {
-      "host (repository filesystem)": 17.1,
-      "docker (/var/lib/docker)": 21.1
+      "host (repository filesystem)": 25.4,
+      "docker (/var/lib/docker)": 13.0
     },
     "concurrency": 1,
     "note": "checks run one at a time; heavy checks ask disk_guard first"
   },
   "run": {
-    "started_at": "2026-10-02T19:55:17Z",
-    "finished_at": "2026-10-02T20:05:43Z",
-    "duration_s": 626.3,
-    "full": false,
+    "started_at": "2026-10-05T12:07:00Z",
+    "finished_at": "2026-10-05T12:45:13Z",
+    "duration_s": 2294.3,
+    "full": true,
     "selection": {
-      "group": [
-        "a1",
-        "a2",
-        "a3",
-        "a4",
-        "a5"
-      ],
+      "group": [],
       "only": [],
       "skip": []
     },
@@ -111,12 +105,22 @@
       "p4-a4-platform",
       "p4-a5-web-types",
       "p4-a5-product-web",
-      "p4-a5-release"
+      "p4-a5-release",
+      "p4-b1-unit",
+      "p4-b1-mal-loop",
+      "p4-b1-real-endpoint",
+      "p4-b1-service",
+      "p4-b2-unit",
+      "p4-b2-native-platform",
+      "p4-b2-platform",
+      "p4-b3-unit",
+      "p4-b3-product-flow",
+      "p4-b3-release"
     ],
-    "commit": "28ba986646d385ea7fc95831d33cda0f14ffcf0b",
+    "commit": "b993dc90c72b413b4d0b5e28e23cad993f9acba4",
     "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "nonce": "3a30942b4ffa4c56a711a40ca194a0a2",
-    "acceptance_nonce": null,
+    "nonce": "fabadd22f7474dc9bb989c109054917a",
+    "acceptance_nonce": "e9bbe2d36ad44ab2a469eff46dc8170e",
     "results": {
       "p4-a1-engine": "PASS",
       "p4-a1-fault-injection": "PASS",
@@ -133,11 +137,21 @@
       "p4-a4-platform": "PASS",
       "p4-a5-web-types": "PASS",
       "p4-a5-product-web": "PASS",
-      "p4-a5-release": "PASS"
+      "p4-a5-release": "PASS",
+      "p4-b1-unit": "PASS",
+      "p4-b1-mal-loop": "PASS",
+      "p4-b1-real-endpoint": "PASS",
+      "p4-b1-service": "PASS",
+      "p4-b2-unit": "PASS",
+      "p4-b2-native-platform": "PASS",
+      "p4-b2-platform": "PASS",
+      "p4-b3-unit": "PASS",
+      "p4-b3-product-flow": "PASS",
+      "p4-b3-release": "PASS"
     }
   },
   "summary": {
-    "PASS": 16,
+    "PASS": 26,
     "FAIL": 0,
     "BLOCKED": 0,
     "NOT_RUN": 0,
@@ -150,9 +164,9 @@
     "a3": "PASS",
     "a4": "PASS",
     "a5": "PASS",
-    "b1": "NO_CHECKS",
-    "b2": "NO_CHECKS",
-    "b3": "NO_CHECKS"
+    "b1": "PASS",
+    "b2": "PASS",
+    "b3": "PASS"
   },
   "required_groups": [
     "a1",
@@ -165,21 +179,17 @@
     "b3"
   ],
   "selection_status": "PASS",
-  "complete": false,
-  "mandatory_passed": false,
-  "unmet": [
-    "b1=NO_CHECKS",
-    "b2=NO_CHECKS",
-    "b3=NO_CHECKS"
-  ],
+  "complete": true,
+  "mandatory_passed": true,
+  "unmet": [],
   "aggregation": "only results produced and verified by this invocation count; a partial selection is never complete; results from another commit, work tree or configuration are inherited and ignored",
   "timing": {
-    "this_run_s": 626.3,
-    "last_full_run_s": null,
-    "last_full_run_at": null,
+    "this_run_s": 2294.3,
+    "last_full_run_s": 2294.3,
+    "last_full_run_at": "2026-10-05T12:07:00Z",
     "partial_runs": [
       {
-        "started_at": "2026-10-02T04:46:14Z",
+        "started_at": "2026-10-02T04:46:32Z",
         "duration_s": 6.6,
         "selection": {
           "group": [
@@ -192,162 +202,13 @@
           "p4-a1-engine": "PASS",
           "p4-a1-fault-injection": "PASS"
         }
-      },
-      {
-        "started_at": "2026-10-02T05:48:09Z",
-        "duration_s": 43.4,
-        "selection": {
-          "group": [
-            "a2"
-          ],
-          "only": [],
-          "skip": []
-        },
-        "results": {
-          "p4-a2-kernel": "PASS",
-          "p4-a2-order-service": "PASS",
-          "p4-a2-evidence": "PASS",
-          "p4-a2-participant-api": "PASS"
-        }
-      },
-      {
-        "started_at": "2026-10-02T10:22:16Z",
-        "duration_s": 353.3,
-        "selection": {
-          "group": [
-            "a3"
-          ],
-          "only": [],
-          "skip": []
-        },
-        "results": {
-          "p4-a3-unit": "PASS",
-          "p4-a3-decision": "PASS",
-          "p4-a3-platform": "PASS",
-          "p4-a3-real-endpoint": "PASS"
-        }
-      },
-      {
-        "started_at": "2026-10-02T10:28:37Z",
-        "duration_s": 316.6,
-        "selection": {
-          "group": [
-            "a3"
-          ],
-          "only": [],
-          "skip": []
-        },
-        "results": {
-          "p4-a3-unit": "PASS",
-          "p4-a3-decision": "PASS",
-          "p4-a3-platform": "PASS",
-          "p4-a3-real-endpoint": "PASS"
-        }
-      },
-      {
-        "started_at": "2026-10-02T11:21:53Z",
-        "duration_s": 371.4,
-        "selection": {
-          "group": [
-            "a4"
-          ],
-          "only": [],
-          "skip": []
-        },
-        "results": {
-          "p4-a4-unit": "PASS",
-          "p4-a4-rounds": "PASS",
-          "p4-a4-platform": "PASS"
-        }
-      },
-      {
-        "started_at": "2026-10-02T12:06:18Z",
-        "duration_s": 61.1,
-        "selection": {
-          "group": [
-            "a5"
-          ],
-          "only": [],
-          "skip": []
-        },
-        "results": {
-          "p4-a5-web-types": "PASS",
-          "p4-a5-product-web": "PASS",
-          "p4-a5-release": "PASS"
-        }
-      },
-      {
-        "started_at": "2026-10-02T12:11:01Z",
-        "duration_s": 807.2,
-        "selection": {
-          "group": [
-            "a1",
-            "a2",
-            "a3",
-            "a4",
-            "a5"
-          ],
-          "only": [],
-          "skip": []
-        },
-        "results": {
-          "p4-a1-engine": "PASS",
-          "p4-a1-fault-injection": "PASS",
-          "p4-a2-kernel": "PASS",
-          "p4-a2-order-service": "PASS",
-          "p4-a2-evidence": "PASS",
-          "p4-a2-participant-api": "PASS",
-          "p4-a3-unit": "PASS",
-          "p4-a3-decision": "PASS",
-          "p4-a3-platform": "PASS",
-          "p4-a3-real-endpoint": "PASS",
-          "p4-a4-unit": "PASS",
-          "p4-a4-rounds": "PASS",
-          "p4-a4-platform": "PASS",
-          "p4-a5-web-types": "PASS",
-          "p4-a5-product-web": "PASS",
-          "p4-a5-release": "PASS"
-        }
-      },
-      {
-        "started_at": "2026-10-02T19:55:17Z",
-        "duration_s": 626.3,
-        "selection": {
-          "group": [
-            "a1",
-            "a2",
-            "a3",
-            "a4",
-            "a5"
-          ],
-          "only": [],
-          "skip": []
-        },
-        "results": {
-          "p4-a1-engine": "PASS",
-          "p4-a1-fault-injection": "PASS",
-          "p4-a2-kernel": "PASS",
-          "p4-a2-order-service": "PASS",
-          "p4-a2-evidence": "PASS",
-          "p4-a2-participant-api": "PASS",
-          "p4-a3-unit": "PASS",
-          "p4-a3-decision": "PASS",
-          "p4-a3-platform": "PASS",
-          "p4-a3-real-endpoint": "PASS",
-          "p4-a4-unit": "PASS",
-          "p4-a4-rounds": "PASS",
-          "p4-a4-platform": "PASS",
-          "p4-a5-web-types": "PASS",
-          "p4-a5-product-web": "PASS",
-          "p4-a5-release": "PASS"
-        }
       }
     ]
   },
   "runs": [
     {
-      "started_at": "2026-10-02T04:46:14Z",
-      "finished_at": "2026-10-02T04:46:21Z",
+      "started_at": "2026-10-02T04:46:32Z",
+      "finished_at": "2026-10-02T04:46:39Z",
       "duration_s": 6.6,
       "full": false,
       "selection": {
@@ -363,167 +224,20 @@
       ],
       "commit": "bccda301e58905ee0b0f37b2be9ed2938064d726",
       "worktree_sha256": "a5686a47af85c44d6be82c2a82ffeea9d646fb478676fc32b2ea814a60f901ef",
-      "nonce": "85abaa9e18e5485d844d582e52e3b829",
-      "acceptance_nonce": null,
+      "nonce": "27930f13e91b45349c1eb0fcf42b5d6f",
+      "acceptance_nonce": "07ccd387c33a4ca984920e2c5d56edec",
       "results": {
         "p4-a1-engine": "PASS",
         "p4-a1-fault-injection": "PASS"
       }
     },
     {
-      "started_at": "2026-10-02T05:48:09Z",
-      "finished_at": "2026-10-02T05:48:53Z",
-      "duration_s": 43.4,
-      "full": false,
+      "started_at": "2026-10-02T14:19:35Z",
+      "finished_at": "2026-10-02T14:32:44Z",
+      "duration_s": 788.9,
+      "full": true,
       "selection": {
-        "group": [
-          "a2"
-        ],
-        "only": [],
-        "skip": []
-      },
-      "checks": [
-        "p4-a2-kernel",
-        "p4-a2-order-service",
-        "p4-a2-evidence",
-        "p4-a2-participant-api"
-      ],
-      "commit": "ee305fec2d599da4c22d443aa32236fd93b87d60",
-      "worktree_sha256": "294b1ab836d5b022177e98301b44eaef552abd58e694663f69cc5eb9c4f04089",
-      "nonce": "a2fac63f6b10408db16a25df973682fd",
-      "acceptance_nonce": null,
-      "results": {
-        "p4-a2-kernel": "PASS",
-        "p4-a2-order-service": "PASS",
-        "p4-a2-evidence": "PASS",
-        "p4-a2-participant-api": "PASS"
-      }
-    },
-    {
-      "started_at": "2026-10-02T10:22:16Z",
-      "finished_at": "2026-10-02T10:28:09Z",
-      "duration_s": 353.3,
-      "full": false,
-      "selection": {
-        "group": [
-          "a3"
-        ],
-        "only": [],
-        "skip": []
-      },
-      "checks": [
-        "p4-a3-unit",
-        "p4-a3-decision",
-        "p4-a3-platform",
-        "p4-a3-real-endpoint"
-      ],
-      "commit": "b9fc7c40312eff713f44bb97817a15f65aea1de4",
-      "worktree_sha256": "3ada4377d1af441e4e4d31763d4c1f0ac86e5597efa510a2024b89755a101b0a",
-      "nonce": "c229b0d6e4ac4dbda21334b7557a7553",
-      "acceptance_nonce": null,
-      "results": {
-        "p4-a3-unit": "PASS",
-        "p4-a3-decision": "PASS",
-        "p4-a3-platform": "PASS",
-        "p4-a3-real-endpoint": "PASS"
-      }
-    },
-    {
-      "started_at": "2026-10-02T10:28:37Z",
-      "finished_at": "2026-10-02T10:33:54Z",
-      "duration_s": 316.6,
-      "full": false,
-      "selection": {
-        "group": [
-          "a3"
-        ],
-        "only": [],
-        "skip": []
-      },
-      "checks": [
-        "p4-a3-unit",
-        "p4-a3-decision",
-        "p4-a3-platform",
-        "p4-a3-real-endpoint"
-      ],
-      "commit": "b9fc7c40312eff713f44bb97817a15f65aea1de4",
-      "worktree_sha256": "09742611be2fe6877f2129e2ec54e9459ebfdd8786e1db34bcd38745f523294c",
-      "nonce": "0b4cfcc6b0484cb397e8f96b7e6b3728",
-      "acceptance_nonce": null,
-      "results": {
-        "p4-a3-unit": "PASS",
-        "p4-a3-decision": "PASS",
-        "p4-a3-platform": "PASS",
-        "p4-a3-real-endpoint": "PASS"
-      }
-    },
-    {
-      "started_at": "2026-10-02T11:21:53Z",
-      "finished_at": "2026-10-02T11:28:04Z",
-      "duration_s": 371.4,
-      "full": false,
-      "selection": {
-        "group": [
-          "a4"
-        ],
-        "only": [],
-        "skip": []
-      },
-      "checks": [
-        "p4-a4-unit",
-        "p4-a4-rounds",
-        "p4-a4-platform"
-      ],
-      "commit": "773f9345c654d3d9e6dd438980834169cebd1449",
-      "worktree_sha256": "282e7962b44f0e44fc83cd5d4e2e71773abc01106ea991ffbf17b32cb921e041",
-      "nonce": "7db218674e3944588ac43a378965f855",
-      "acceptance_nonce": null,
-      "results": {
-        "p4-a4-unit": "PASS",
-        "p4-a4-rounds": "PASS",
-        "p4-a4-platform": "PASS"
-      }
-    },
-    {
-      "started_at": "2026-10-02T12:06:18Z",
-      "finished_at": "2026-10-02T12:07:19Z",
-      "duration_s": 61.1,
-      "full": false,
-      "selection": {
-        "group": [
-          "a5"
-        ],
-        "only": [],
-        "skip": []
-      },
-      "checks": [
-        "p4-a5-web-types",
-        "p4-a5-product-web",
-        "p4-a5-release"
-      ],
-      "commit": "9d3e3c606c705ec42ff43caed8c45f5033e8a795",
-      "worktree_sha256": "052e2b850db9e3e4c15d34a0abd1a7335a6a4c68c59bac5caf304236ec119286",
-      "nonce": "5af86070317448179f6ab512bce2b37e",
-      "acceptance_nonce": null,
-      "results": {
-        "p4-a5-web-types": "PASS",
-        "p4-a5-product-web": "PASS",
-        "p4-a5-release": "PASS"
-      }
-    },
-    {
-      "started_at": "2026-10-02T12:11:01Z",
-      "finished_at": "2026-10-02T12:24:28Z",
-      "duration_s": 807.2,
-      "full": false,
-      "selection": {
-        "group": [
-          "a1",
-          "a2",
-          "a3",
-          "a4",
-          "a5"
-        ],
+        "group": [],
         "only": [],
         "skip": []
       },
@@ -545,10 +259,10 @@
         "p4-a5-product-web",
         "p4-a5-release"
       ],
-      "commit": "d27c82918e8685d309526c792c239f6e35eb8fc1",
-      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-      "nonce": "3984b6c299c14677a4be14e0db086099",
-      "acceptance_nonce": null,
+      "commit": "a743ab21399d7035aa4195111d8e326af9d7ee36",
+      "worktree_sha256": "45b828de650493bcddb577a82dedc41030b2470944c01cc7fb805466aec9baa0",
+      "nonce": "e24e9d9f0e2d449594cc969a61b462de",
+      "acceptance_nonce": "025e525f10ae4139a2555c48ed248084",
       "results": {
         "p4-a1-engine": "PASS",
         "p4-a1-fault-injection": "PASS",
@@ -569,18 +283,12 @@
       }
     },
     {
-      "started_at": "2026-10-02T19:55:17Z",
-      "finished_at": "2026-10-02T20:05:43Z",
-      "duration_s": 626.3,
-      "full": false,
+      "started_at": "2026-10-02T17:45:03Z",
+      "finished_at": "2026-10-02T17:58:04Z",
+      "duration_s": 780.9,
+      "full": true,
       "selection": {
-        "group": [
-          "a1",
-          "a2",
-          "a3",
-          "a4",
-          "a5"
-        ],
+        "group": [],
         "only": [],
         "skip": []
       },
@@ -602,10 +310,10 @@
         "p4-a5-product-web",
         "p4-a5-release"
       ],
-      "commit": "28ba986646d385ea7fc95831d33cda0f14ffcf0b",
-      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-      "nonce": "3a30942b4ffa4c56a711a40ca194a0a2",
-      "acceptance_nonce": null,
+      "commit": "995ed3d4879a780c4a9b2ad31c4b4a6b6af6e61d",
+      "worktree_sha256": "199a046b0bfe789ef73b1c233b7a7ad04b7db7f22bec39157189bc411e4e0126",
+      "nonce": "709b59b53ce9475cb4c11335c62f7e80",
+      "acceptance_nonce": "d6c41b5c50e74c34adfee024708ea45e",
       "results": {
         "p4-a1-engine": "PASS",
         "p4-a1-fault-injection": "PASS",
@@ -623,6 +331,199 @@
         "p4-a5-web-types": "PASS",
         "p4-a5-product-web": "PASS",
         "p4-a5-release": "PASS"
+      }
+    },
+    {
+      "started_at": "2026-10-02T19:42:03Z",
+      "finished_at": "2026-10-02T19:53:18Z",
+      "duration_s": 674.9,
+      "full": true,
+      "selection": {
+        "group": [],
+        "only": [],
+        "skip": []
+      },
+      "checks": [
+        "p4-a1-engine",
+        "p4-a1-fault-injection",
+        "p4-a2-kernel",
+        "p4-a2-order-service",
+        "p4-a2-evidence",
+        "p4-a2-participant-api",
+        "p4-a3-unit",
+        "p4-a3-decision",
+        "p4-a3-platform",
+        "p4-a3-real-endpoint",
+        "p4-a4-unit",
+        "p4-a4-rounds",
+        "p4-a4-platform",
+        "p4-a5-web-types",
+        "p4-a5-product-web",
+        "p4-a5-release"
+      ],
+      "commit": "e3b28e9dba6491c9d4320fdc768ac2eb87f41645",
+      "worktree_sha256": "a12661763e237e54d05d53ac6a3adb7500b61412ef484fac827f6a3ae27e8177",
+      "nonce": "3d4c8eb56b48418f84f10f28bd7467f2",
+      "acceptance_nonce": "7bca8b87576247ef8b018a1a3e9d5c1c",
+      "results": {
+        "p4-a1-engine": "PASS",
+        "p4-a1-fault-injection": "PASS",
+        "p4-a2-kernel": "PASS",
+        "p4-a2-order-service": "PASS",
+        "p4-a2-evidence": "PASS",
+        "p4-a2-participant-api": "PASS",
+        "p4-a3-unit": "PASS",
+        "p4-a3-decision": "PASS",
+        "p4-a3-platform": "PASS",
+        "p4-a3-real-endpoint": "PASS",
+        "p4-a4-unit": "PASS",
+        "p4-a4-rounds": "PASS",
+        "p4-a4-platform": "PASS",
+        "p4-a5-web-types": "PASS",
+        "p4-a5-product-web": "PASS",
+        "p4-a5-release": "PASS"
+      }
+    },
+    {
+      "started_at": "2026-10-05T03:55:23Z",
+      "finished_at": "2026-10-05T04:27:32Z",
+      "duration_s": 1929.0,
+      "full": true,
+      "selection": {
+        "group": [],
+        "only": [],
+        "skip": []
+      },
+      "checks": [
+        "p4-a1-engine",
+        "p4-a1-fault-injection",
+        "p4-a2-kernel",
+        "p4-a2-order-service",
+        "p4-a2-evidence",
+        "p4-a2-participant-api",
+        "p4-a3-unit",
+        "p4-a3-decision",
+        "p4-a3-platform",
+        "p4-a3-real-endpoint",
+        "p4-a4-unit",
+        "p4-a4-rounds",
+        "p4-a4-platform",
+        "p4-a5-web-types",
+        "p4-a5-product-web",
+        "p4-a5-release",
+        "p4-b1-unit",
+        "p4-b1-mal-loop",
+        "p4-b1-real-endpoint",
+        "p4-b1-service",
+        "p4-b2-unit",
+        "p4-b2-native-platform",
+        "p4-b2-platform",
+        "p4-b3-unit",
+        "p4-b3-product-flow",
+        "p4-b3-release"
+      ],
+      "commit": "a6506fcefb84151d9dfe1a54d5738fb5ec7c01da",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "nonce": "410f02c9d0cb4598a8c89246db8120aa",
+      "acceptance_nonce": "fd539fa9fe654c338616f7c45ab68d4f",
+      "results": {
+        "p4-a1-engine": "PASS",
+        "p4-a1-fault-injection": "PASS",
+        "p4-a2-kernel": "PASS",
+        "p4-a2-order-service": "PASS",
+        "p4-a2-evidence": "PASS",
+        "p4-a2-participant-api": "PASS",
+        "p4-a3-unit": "PASS",
+        "p4-a3-decision": "PASS",
+        "p4-a3-platform": "PASS",
+        "p4-a3-real-endpoint": "PASS",
+        "p4-a4-unit": "PASS",
+        "p4-a4-rounds": "PASS",
+        "p4-a4-platform": "PASS",
+        "p4-a5-web-types": "PASS",
+        "p4-a5-product-web": "PASS",
+        "p4-a5-release": "PASS",
+        "p4-b1-unit": "PASS",
+        "p4-b1-mal-loop": "PASS",
+        "p4-b1-real-endpoint": "PASS",
+        "p4-b1-service": "PASS",
+        "p4-b2-unit": "PASS",
+        "p4-b2-native-platform": "PASS",
+        "p4-b2-platform": "PASS",
+        "p4-b3-unit": "PASS",
+        "p4-b3-product-flow": "PASS",
+        "p4-b3-release": "PASS"
+      }
+    },
+    {
+      "started_at": "2026-10-05T12:07:00Z",
+      "finished_at": "2026-10-05T12:45:13Z",
+      "duration_s": 2294.3,
+      "full": true,
+      "selection": {
+        "group": [],
+        "only": [],
+        "skip": []
+      },
+      "checks": [
+        "p4-a1-engine",
+        "p4-a1-fault-injection",
+        "p4-a2-kernel",
+        "p4-a2-order-service",
+        "p4-a2-evidence",
+        "p4-a2-participant-api",
+        "p4-a3-unit",
+        "p4-a3-decision",
+        "p4-a3-platform",
+        "p4-a3-real-endpoint",
+        "p4-a4-unit",
+        "p4-a4-rounds",
+        "p4-a4-platform",
+        "p4-a5-web-types",
+        "p4-a5-product-web",
+        "p4-a5-release",
+        "p4-b1-unit",
+        "p4-b1-mal-loop",
+        "p4-b1-real-endpoint",
+        "p4-b1-service",
+        "p4-b2-unit",
+        "p4-b2-native-platform",
+        "p4-b2-platform",
+        "p4-b3-unit",
+        "p4-b3-product-flow",
+        "p4-b3-release"
+      ],
+      "commit": "b993dc90c72b413b4d0b5e28e23cad993f9acba4",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "nonce": "fabadd22f7474dc9bb989c109054917a",
+      "acceptance_nonce": "e9bbe2d36ad44ab2a469eff46dc8170e",
+      "results": {
+        "p4-a1-engine": "PASS",
+        "p4-a1-fault-injection": "PASS",
+        "p4-a2-kernel": "PASS",
+        "p4-a2-order-service": "PASS",
+        "p4-a2-evidence": "PASS",
+        "p4-a2-participant-api": "PASS",
+        "p4-a3-unit": "PASS",
+        "p4-a3-decision": "PASS",
+        "p4-a3-platform": "PASS",
+        "p4-a3-real-endpoint": "PASS",
+        "p4-a4-unit": "PASS",
+        "p4-a4-rounds": "PASS",
+        "p4-a4-platform": "PASS",
+        "p4-a5-web-types": "PASS",
+        "p4-a5-product-web": "PASS",
+        "p4-a5-release": "PASS",
+        "p4-b1-unit": "PASS",
+        "p4-b1-mal-loop": "PASS",
+        "p4-b1-real-endpoint": "PASS",
+        "p4-b1-service": "PASS",
+        "p4-b2-unit": "PASS",
+        "p4-b2-native-platform": "PASS",
+        "p4-b2-platform": "PASS",
+        "p4-b3-unit": "PASS",
+        "p4-b3-product-flow": "PASS",
+        "p4-b3-release": "PASS"
       }
     }
   ],
@@ -646,40 +547,40 @@
       "assertions_from": null,
       "trigger": null,
       "result": "PASS",
-      "reason": "40 passed in 4.57s",
-      "summary": "40 passed in 4.57s",
+      "reason": "48 passed in 47.18s",
+      "summary": "48 passed in 47.18s",
       "condition": null,
-      "checked_commit": "28ba986646d385ea7fc95831d33cda0f14ffcf0b",
+      "checked_commit": "b993dc90c72b413b4d0b5e28e23cad993f9acba4",
       "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "worktree_clean": true,
-      "config_sha256": "c88301517e5dfd98ab03891c3ee52c70c3d3a11960e5256312816d95eb041348",
-      "run_nonce": "3a30942b4ffa4c56a711a40ca194a0a2",
-      "started_at": "2026-10-02T19:55:17Z",
-      "finished_at": "2026-10-02T19:55:21Z",
-      "duration_s": 4.8,
+      "config_sha256": "31b0a71b59a15958c1a2463f7812f6bdb9a5c7edaf8102162ad973103b6e96cb",
+      "run_nonce": "fabadd22f7474dc9bb989c109054917a",
+      "started_at": "2026-10-05T12:07:00Z",
+      "finished_at": "2026-10-05T12:07:47Z",
+      "duration_s": 47.4,
       "attempts": [
         {
           "attempt": 1,
-          "started_at": "2026-10-02T19:55:17Z",
-          "finished_at": "2026-10-02T19:55:21Z",
-          "duration_s": 4.8,
+          "started_at": "2026-10-05T12:07:00Z",
+          "finished_at": "2026-10-05T12:07:47Z",
+          "duration_s": 47.4,
           "exit_code": 0,
           "result": "PASS",
-          "reason": "40 passed in 4.57s",
-          "log": "docs/execution/evidence/phase4/checks/logs/p4-a1-engine/20261002T195517Z-attempt-1.log",
-          "summary": "40 passed in 4.57s",
-          "nonce": "6ffb5895cc074670bab509dd726d0cdf",
+          "reason": "48 passed in 47.18s",
+          "log": "out/acceptance/phase4/logs/p4-a1-engine/20261005T120700Z-attempt-1.log",
+          "summary": "48 passed in 47.18s",
+          "nonce": "746b629fe42d47e5b5a0606274ad8131",
           "structured_result": null,
           "assertions": [],
           "produced": [],
           "pytest": {
-            "passed": 40,
+            "passed": 48,
             "failed": 0,
             "skipped": 0,
             "deselected": 0,
             "errors": 0,
             "skip_reasons": [],
-            "line": "40 passed in 4.57s"
+            "line": "48 passed in 47.18s"
           }
         }
       ],
@@ -691,15 +592,36 @@
       "history": [
         {
           "result": "PASS",
-          "checked_commit": "d27c82918e8685d309526c792c239f6e35eb8fc1",
-          "finished_at": "2026-10-02T12:11:06Z",
-          "duration_s": 5.0,
+          "checked_commit": "a6506fcefb84151d9dfe1a54d5738fb5ec7c01da",
+          "finished_at": "2026-10-05T03:55:54Z",
+          "duration_s": 31.3,
+          "attempts": 1
+        },
+        {
+          "result": "PASS",
+          "checked_commit": "e3b28e9dba6491c9d4320fdc768ac2eb87f41645",
+          "finished_at": "2026-10-02T19:42:29Z",
+          "duration_s": 26.6,
+          "attempts": 1
+        },
+        {
+          "result": "PASS",
+          "checked_commit": "995ed3d4879a780c4a9b2ad31c4b4a6b6af6e61d",
+          "finished_at": "2026-10-02T17:45:26Z",
+          "duration_s": 23.8,
+          "attempts": 1
+        },
+        {
+          "result": "PASS",
+          "checked_commit": "a743ab21399d7035aa4195111d8e326af9d7ee36",
+          "finished_at": "2026-10-02T14:19:42Z",
+          "duration_s": 6.3,
           "attempts": 1
         },
         {
           "result": "PASS",
           "checked_commit": "bccda301e58905ee0b0f37b2be9ed2938064d726",
-          "finished_at": "2026-10-02T04:46:19Z",
+          "finished_at": "2026-10-02T04:46:37Z",
           "duration_s": 4.9,
           "attempts": 1
         }
@@ -729,27 +651,27 @@
       "reason": "[p4-a1-fault-injection] PASS: 8 required assertion(s) hold",
       "summary": "[p4-a1-fault-injection] PASS: 8 required assertion(s) hold",
       "condition": null,
-      "checked_commit": "28ba986646d385ea7fc95831d33cda0f14ffcf0b",
+      "checked_commit": "b993dc90c72b413b4d0b5e28e23cad993f9acba4",
       "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "worktree_clean": true,
-      "config_sha256": "c88301517e5dfd98ab03891c3ee52c70c3d3a11960e5256312816d95eb041348",
-      "run_nonce": "3a30942b4ffa4c56a711a40ca194a0a2",
-      "started_at": "2026-10-02T19:55:21Z",
-      "finished_at": "2026-10-02T19:55:23Z",
-      "duration_s": 1.6,
+      "config_sha256": "31b0a71b59a15958c1a2463f7812f6bdb9a5c7edaf8102162ad973103b6e96cb",
+      "run_nonce": "fabadd22f7474dc9bb989c109054917a",
+      "started_at": "2026-10-05T12:07:47Z",
+      "finished_at": "2026-10-05T12:07:58Z",
+      "duration_s": 11.0,
       "attempts": [
         {
           "attempt": 1,
-          "started_at": "2026-10-02T19:55:21Z",
-          "finished_at": "2026-10-02T19:55:23Z",
-          "duration_s": 1.6,
+          "started_at": "2026-10-05T12:07:47Z",
+          "finished_at": "2026-10-05T12:07:58Z",
+          "duration_s": 11.0,
           "exit_code": 0,
           "result": "PASS",
           "reason": "[p4-a1-fault-injection] PASS: 8 required assertion(s) hold",
-          "log": "docs/execution/evidence/phase4/checks/logs/p4-a1-fault-injection/20261002T195521Z-attempt-1.log",
+          "log": "out/acceptance/phase4/logs/p4-a1-fault-injection/20261005T120747Z-attempt-1.log",
           "summary": "[p4-a1-fault-injection] PASS: 8 required assertion(s) hold",
-          "nonce": "a4859c22b0df44d0befce05596ed2a6d",
-          "structured_result": "docs/execution/evidence/phase4/checks/logs/p4-a1-fault-injection/20261002T195521Z-attempt-1.result.json",
+          "nonce": "f36ea69f1e7a4acd99c3a3e67a259843",
+          "structured_result": "out/acceptance/phase4/logs/p4-a1-fault-injection/20261005T120747Z-attempt-1.result.json",
           "assertions": [
             {
               "id": "exit_zero_reports_blocked",
@@ -773,7 +695,7 @@
               "id": "crash_with_old_pass_on_disk",
               "required": true,
               "holds": true,
-              "detail": "expected {'check_result': 'FAIL', 'silent_rewrite_result': 'FAIL', 'complete': False, 'strict_exit': 1} observed {'strict_exit': 1, 'complete': False, 'groups': {'a': 'FAIL', 'b': 'FAIL'}, 'check_result': 'FAIL', 'check_reason': 'exit 139: # case/x at 28ba986646d3 (tree e3b0c44298fc, profile local-lite) · attempt 1 · started 2026-10-02T19:55:22Z', 'inherited': False, 'silent_rewrite_result': 'FAIL'}"
+              "detail": "expected {'check_result': 'FAIL', 'silent_rewrite_result': 'FAIL', 'complete': False, 'strict_exit': 1} observed {'strict_exit': 1, 'complete': False, 'groups': {'a': 'FAIL', 'b': 'FAIL'}, 'check_result': 'FAIL', 'check_reason': 'exit 139: # case/x at b993dc90c72b (tree 4d49763ed0d2, profile local-lite) · attempt 1 · started 2026-10-05T12:07:53Z', 'inherited': False, 'silent_rewrite_result': 'FAIL'}"
             },
             {
               "id": "single_group_selected",
@@ -785,7 +707,7 @@
               "id": "reuse_after_config_change",
               "required": true,
               "holds": true,
-              "detail": "expected {'inherited': True, 'complete': False, 'strict_exit': 1} observed {'strict_exit': 1, 'complete': False, 'groups': {'a': 'PASS', 'b': 'NOT_SELECTED'}, 'check_result': 'PASS', 'check_reason': '# case/y at 28ba986646d3 (tree e3b0c44298fc, profile local-lite) · attempt 1 · started 2026-10-02T19:55:23Z', 'inherited': True}"
+              "detail": "expected {'inherited': True, 'complete': False, 'strict_exit': 1} observed {'strict_exit': 1, 'complete': False, 'groups': {'a': 'PASS', 'b': 'NOT_SELECTED'}, 'check_result': 'PASS', 'check_reason': '# case/y at b993dc90c72b (tree 4d49763ed0d2, profile local-lite) · attempt 1 · started 2026-10-05T12:07:55Z', 'inherited': True}"
             },
             {
               "id": "acceptance_stale_report",
@@ -804,7 +726,7 @@
             {
               "path": "docs/execution/evidence/phase4/a1-status-protocol.json",
               "exists": true,
-              "sha256": "c9441cd2d8e52845e1d6e3791cbdc364590b277df03202ec2ba955d79ae39370",
+              "sha256": "91e45a2a5af1b8236c800254136f6f7a255da410e8ca03fdd7132d0a410c7986",
               "fresh": true
             }
           ],
@@ -815,7 +737,7 @@
         {
           "path": "docs/execution/evidence/phase4/a1-status-protocol.json",
           "exists": true,
-          "sha256": "c9441cd2d8e52845e1d6e3791cbdc364590b277df03202ec2ba955d79ae39370",
+          "sha256": "91e45a2a5af1b8236c800254136f6f7a255da410e8ca03fdd7132d0a410c7986",
           "fresh": true
         }
       ],
@@ -826,15 +748,36 @@
       "history": [
         {
           "result": "PASS",
-          "checked_commit": "d27c82918e8685d309526c792c239f6e35eb8fc1",
-          "finished_at": "2026-10-02T12:11:07Z",
-          "duration_s": 1.6,
+          "checked_commit": "a6506fcefb84151d9dfe1a54d5738fb5ec7c01da",
+          "finished_at": "2026-10-05T03:56:04Z",
+          "duration_s": 9.6,
+          "attempts": 1
+        },
+        {
+          "result": "PASS",
+          "checked_commit": "e3b28e9dba6491c9d4320fdc768ac2eb87f41645",
+          "finished_at": "2026-10-02T19:42:38Z",
+          "duration_s": 8.3,
+          "attempts": 1
+        },
+        {
+          "result": "PASS",
+          "checked_commit": "995ed3d4879a780c4a9b2ad31c4b4a6b6af6e61d",
+          "finished_at": "2026-10-02T17:45:34Z",
+          "duration_s": 7.6,
+          "attempts": 1
+        },
+        {
+          "result": "PASS",
+          "checked_commit": "a743ab21399d7035aa4195111d8e326af9d7ee36",
+          "finished_at": "2026-10-02T14:19:44Z",
+          "duration_s": 2.1,
           "attempts": 1
         },
         {
           "result": "PASS",
           "checked_commit": "bccda301e58905ee0b0f37b2be9ed2938064d726",
-          "finished_at": "2026-10-02T04:46:21Z",
+          "finished_at": "2026-10-02T04:46:39Z",
           "duration_s": 1.7,
           "attempts": 1
         }
@@ -859,29 +802,29 @@
       "assertions_from": null,
       "trigger": null,
       "result": "PASS",
-      "reason": "195 passed in 2.40s",
-      "summary": "195 passed in 2.40s",
+      "reason": "195 passed in 3.57s",
+      "summary": "195 passed in 3.57s",
       "condition": null,
-      "checked_commit": "28ba986646d385ea7fc95831d33cda0f14ffcf0b",
+      "checked_commit": "b993dc90c72b413b4d0b5e28e23cad993f9acba4",
       "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "worktree_clean": true,
-      "config_sha256": "c88301517e5dfd98ab03891c3ee52c70c3d3a11960e5256312816d95eb041348",
-      "run_nonce": "3a30942b4ffa4c56a711a40ca194a0a2",
-      "started_at": "2026-10-02T19:55:23Z",
-      "finished_at": "2026-10-02T19:55:26Z",
-      "duration_s": 2.6,
+      "config_sha256": "31b0a71b59a15958c1a2463f7812f6bdb9a5c7edaf8102162ad973103b6e96cb",
+      "run_nonce": "fabadd22f7474dc9bb989c109054917a",
+      "started_at": "2026-10-05T12:07:58Z",
+      "finished_at": "2026-10-05T12:08:02Z",
+      "duration_s": 3.8,
       "attempts": [
         {
           "attempt": 1,
-          "started_at": "2026-10-02T19:55:23Z",
-          "finished_at": "2026-10-02T19:55:26Z",
-          "duration_s": 2.6,
+          "started_at": "2026-10-05T12:07:58Z",
+          "finished_at": "2026-10-05T12:08:02Z",
+          "duration_s": 3.8,
           "exit_code": 0,
           "result": "PASS",
-          "reason": "195 passed in 2.40s",
-          "log": "docs/execution/evidence/phase4/checks/logs/p4-a2-kernel/20261002T195523Z-attempt-1.log",
-          "summary": "195 passed in 2.40s",
-          "nonce": "182f8a5ac3764effbcc17dbb919321a7",
+          "reason": "195 passed in 3.57s",
+          "log": "out/acceptance/phase4/logs/p4-a2-kernel/20261005T120758Z-attempt-1.log",
+          "summary": "195 passed in 3.57s",
+          "nonce": "30ab27f7f4b2437690ecfbc0c7ff7e2b",
           "structured_result": null,
           "assertions": [],
           "produced": [],
@@ -892,7 +835,7 @@
             "deselected": 0,
             "errors": 0,
             "skip_reasons": [],
-            "line": "195 passed in 2.40s"
+            "line": "195 passed in 3.57s"
           }
         }
       ],
@@ -904,16 +847,30 @@
       "history": [
         {
           "result": "PASS",
-          "checked_commit": "d27c82918e8685d309526c792c239f6e35eb8fc1",
-          "finished_at": "2026-10-02T12:11:10Z",
-          "duration_s": 3.0,
+          "checked_commit": "a6506fcefb84151d9dfe1a54d5738fb5ec7c01da",
+          "finished_at": "2026-10-05T03:56:07Z",
+          "duration_s": 3.3,
           "attempts": 1
         },
         {
           "result": "PASS",
-          "checked_commit": "ee305fec2d599da4c22d443aa32236fd93b87d60",
-          "finished_at": "2026-10-02T05:48:12Z",
-          "duration_s": 2.7,
+          "checked_commit": "e3b28e9dba6491c9d4320fdc768ac2eb87f41645",
+          "finished_at": "2026-10-02T19:42:40Z",
+          "duration_s": 2.6,
+          "attempts": 1
+        },
+        {
+          "result": "PASS",
+          "checked_commit": "995ed3d4879a780c4a9b2ad31c4b4a6b6af6e61d",
+          "finished_at": "2026-10-02T17:45:37Z",
+          "duration_s": 2.6,
+          "attempts": 1
+        },
+        {
+          "result": "PASS",
+          "checked_commit": "a743ab21399d7035aa4195111d8e326af9d7ee36",
+          "finished_at": "2026-10-02T14:19:46Z",
+          "duration_s": 2.6,
           "attempts": 1
         }
       ]
@@ -937,29 +894,29 @@
       "assertions_from": null,
       "trigger": null,
       "result": "PASS",
-      "reason": "22 passed in 21.40s",
-      "summary": "22 passed in 21.40s",
+      "reason": "22 passed in 24.95s",
+      "summary": "22 passed in 24.95s",
       "condition": null,
-      "checked_commit": "28ba986646d385ea7fc95831d33cda0f14ffcf0b",
+      "checked_commit": "b993dc90c72b413b4d0b5e28e23cad993f9acba4",
       "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "worktree_clean": true,
-      "config_sha256": "c88301517e5dfd98ab03891c3ee52c70c3d3a11960e5256312816d95eb041348",
-      "run_nonce": "3a30942b4ffa4c56a711a40ca194a0a2",
-      "started_at": "2026-10-02T19:55:26Z",
-      "finished_at": "2026-10-02T19:55:47Z",
-      "duration_s": 21.6,
+      "config_sha256": "31b0a71b59a15958c1a2463f7812f6bdb9a5c7edaf8102162ad973103b6e96cb",
+      "run_nonce": "fabadd22f7474dc9bb989c109054917a",
+      "started_at": "2026-10-05T12:08:02Z",
+      "finished_at": "2026-10-05T12:08:27Z",
+      "duration_s": 25.3,
       "attempts": [
         {
           "attempt": 1,
-          "started_at": "2026-10-02T19:55:26Z",
-          "finished_at": "2026-10-02T19:55:47Z",
-          "duration_s": 21.6,
+          "started_at": "2026-10-05T12:08:02Z",
+          "finished_at": "2026-10-05T12:08:27Z",
+          "duration_s": 25.3,
           "exit_code": 0,
           "result": "PASS",
-          "reason": "22 passed in 21.40s",
-          "log": "docs/execution/evidence/phase4/checks/logs/p4-a2-order-service/20261002T195526Z-attempt-1.log",
-          "summary": "22 passed in 21.40s",
-          "nonce": "a0938586a2204a0482cd134c02b0a332",
+          "reason": "22 passed in 24.95s",
+          "log": "out/acceptance/phase4/logs/p4-a2-order-service/20261005T120802Z-attempt-1.log",
+          "summary": "22 passed in 24.95s",
+          "nonce": "e0e2e09597e34d30b3f6b89cff3fa943",
           "structured_result": null,
           "assertions": [],
           "produced": [],
@@ -970,7 +927,7 @@
             "deselected": 0,
             "errors": 0,
             "skip_reasons": [],
-            "line": "22 passed in 21.40s"
+            "line": "22 passed in 24.95s"
           }
         }
       ],
@@ -982,16 +939,30 @@
       "history": [
         {
           "result": "PASS",
-          "checked_commit": "d27c82918e8685d309526c792c239f6e35eb8fc1",
-          "finished_at": "2026-10-02T12:11:33Z",
-          "duration_s": 22.8,
+          "checked_commit": "a6506fcefb84151d9dfe1a54d5738fb5ec7c01da",
+          "finished_at": "2026-10-05T03:56:29Z",
+          "duration_s": 21.8,
           "attempts": 1
         },
         {
           "result": "PASS",
-          "checked_commit": "ee305fec2d599da4c22d443aa32236fd93b87d60",
-          "finished_at": "2026-10-02T05:48:35Z",
-          "duration_s": 22.5,
+          "checked_commit": "e3b28e9dba6491c9d4320fdc768ac2eb87f41645",
+          "finished_at": "2026-10-02T19:43:02Z",
+          "duration_s": 22.1,
+          "attempts": 1
+        },
+        {
+          "result": "PASS",
+          "checked_commit": "995ed3d4879a780c4a9b2ad31c4b4a6b6af6e61d",
+          "finished_at": "2026-10-02T17:45:59Z",
+          "duration_s": 22.0,
+          "attempts": 1
+        },
+        {
+          "result": "PASS",
+          "checked_commit": "a743ab21399d7035aa4195111d8e326af9d7ee36",
+          "finished_at": "2026-10-02T14:20:10Z",
+          "duration_s": 23.2,
           "attempts": 1
         }
       ]
@@ -1020,27 +991,27 @@
       "reason": "[p4-a2-evidence] PASS: 22 required assertion(s) hold",
       "summary": "[p4-a2-evidence] PASS: 22 required assertion(s) hold",
       "condition": null,
-      "checked_commit": "28ba986646d385ea7fc95831d33cda0f14ffcf0b",
+      "checked_commit": "b993dc90c72b413b4d0b5e28e23cad993f9acba4",
       "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "worktree_clean": true,
-      "config_sha256": "c88301517e5dfd98ab03891c3ee52c70c3d3a11960e5256312816d95eb041348",
-      "run_nonce": "3a30942b4ffa4c56a711a40ca194a0a2",
-      "started_at": "2026-10-02T19:55:47Z",
-      "finished_at": "2026-10-02T19:55:53Z",
-      "duration_s": 5.9,
+      "config_sha256": "31b0a71b59a15958c1a2463f7812f6bdb9a5c7edaf8102162ad973103b6e96cb",
+      "run_nonce": "fabadd22f7474dc9bb989c109054917a",
+      "started_at": "2026-10-05T12:08:27Z",
+      "finished_at": "2026-10-05T12:08:33Z",
+      "duration_s": 5.7,
       "attempts": [
         {
           "attempt": 1,
-          "started_at": "2026-10-02T19:55:47Z",
-          "finished_at": "2026-10-02T19:55:53Z",
-          "duration_s": 5.9,
+          "started_at": "2026-10-05T12:08:27Z",
+          "finished_at": "2026-10-05T12:08:33Z",
+          "duration_s": 5.7,
           "exit_code": 0,
           "result": "PASS",
           "reason": "[p4-a2-evidence] PASS: 22 required assertion(s) hold",
-          "log": "docs/execution/evidence/phase4/checks/logs/p4-a2-evidence/20261002T195547Z-attempt-1.log",
+          "log": "out/acceptance/phase4/logs/p4-a2-evidence/20261005T120827Z-attempt-1.log",
           "summary": "[p4-a2-evidence] PASS: 22 required assertion(s) hold",
-          "nonce": "16b345f240b5455094bb7bb9e2d29f19",
-          "structured_result": "docs/execution/evidence/phase4/checks/logs/p4-a2-evidence/20261002T195547Z-attempt-1.result.json",
+          "nonce": "e07da6b40f7f44a4bf42e8e9601265b1",
+          "structured_result": "out/acceptance/phase4/logs/p4-a2-evidence/20261005T120827Z-attempt-1.result.json",
           "assertions": [
             {
               "id": "credential_required",
@@ -1179,7 +1150,7 @@
             {
               "path": "docs/execution/evidence/phase4/a2-execution-basis.json",
               "exists": true,
-              "sha256": "283cde573883217b9994d159d16628171e7ecffc15d39df9a7bdfd21e1fc1728",
+              "sha256": "8bda514a3f13c56852332089245b6f5a5f14e8087c83dc66c684e6919bda239e",
               "fresh": true
             }
           ],
@@ -1190,7 +1161,7 @@
         {
           "path": "docs/execution/evidence/phase4/a2-execution-basis.json",
           "exists": true,
-          "sha256": "283cde573883217b9994d159d16628171e7ecffc15d39df9a7bdfd21e1fc1728",
+          "sha256": "8bda514a3f13c56852332089245b6f5a5f14e8087c83dc66c684e6919bda239e",
           "fresh": true
         }
       ],
@@ -1201,16 +1172,30 @@
       "history": [
         {
           "result": "PASS",
-          "checked_commit": "d27c82918e8685d309526c792c239f6e35eb8fc1",
-          "finished_at": "2026-10-02T12:11:39Z",
+          "checked_commit": "a6506fcefb84151d9dfe1a54d5738fb5ec7c01da",
+          "finished_at": "2026-10-05T03:56:35Z",
+          "duration_s": 5.8,
+          "attempts": 1
+        },
+        {
+          "result": "PASS",
+          "checked_commit": "e3b28e9dba6491c9d4320fdc768ac2eb87f41645",
+          "finished_at": "2026-10-02T19:43:08Z",
+          "duration_s": 5.9,
+          "attempts": 1
+        },
+        {
+          "result": "PASS",
+          "checked_commit": "995ed3d4879a780c4a9b2ad31c4b4a6b6af6e61d",
+          "finished_at": "2026-10-02T17:46:05Z",
           "duration_s": 6.0,
           "attempts": 1
         },
         {
           "result": "PASS",
-          "checked_commit": "ee305fec2d599da4c22d443aa32236fd93b87d60",
-          "finished_at": "2026-10-02T05:48:41Z",
-          "duration_s": 6.0,
+          "checked_commit": "a743ab21399d7035aa4195111d8e326af9d7ee36",
+          "finished_at": "2026-10-02T14:20:16Z",
+          "duration_s": 6.2,
           "attempts": 1
         }
       ]
@@ -1234,29 +1219,29 @@
       "assertions_from": null,
       "trigger": null,
       "result": "PASS",
-      "reason": "1 passed in 11.89s",
-      "summary": "1 passed in 11.89s",
+      "reason": "1 passed in 13.35s",
+      "summary": "1 passed in 13.35s",
       "condition": null,
-      "checked_commit": "28ba986646d385ea7fc95831d33cda0f14ffcf0b",
+      "checked_commit": "b993dc90c72b413b4d0b5e28e23cad993f9acba4",
       "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "worktree_clean": true,
-      "config_sha256": "c88301517e5dfd98ab03891c3ee52c70c3d3a11960e5256312816d95eb041348",
-      "run_nonce": "3a30942b4ffa4c56a711a40ca194a0a2",
-      "started_at": "2026-10-02T19:55:53Z",
-      "finished_at": "2026-10-02T19:56:05Z",
-      "duration_s": 12.1,
+      "config_sha256": "31b0a71b59a15958c1a2463f7812f6bdb9a5c7edaf8102162ad973103b6e96cb",
+      "run_nonce": "fabadd22f7474dc9bb989c109054917a",
+      "started_at": "2026-10-05T12:08:33Z",
+      "finished_at": "2026-10-05T12:08:47Z",
+      "duration_s": 13.8,
       "attempts": [
         {
           "attempt": 1,
-          "started_at": "2026-10-02T19:55:53Z",
-          "finished_at": "2026-10-02T19:56:05Z",
-          "duration_s": 12.1,
+          "started_at": "2026-10-05T12:08:33Z",
+          "finished_at": "2026-10-05T12:08:47Z",
+          "duration_s": 13.8,
           "exit_code": 0,
           "result": "PASS",
-          "reason": "1 passed in 11.89s",
-          "log": "docs/execution/evidence/phase4/checks/logs/p4-a2-participant-api/20261002T195553Z-attempt-1.log",
-          "summary": "1 passed in 11.89s",
-          "nonce": "cc7b17354d7a458c93f0de2499f067af",
+          "reason": "1 passed in 13.35s",
+          "log": "out/acceptance/phase4/logs/p4-a2-participant-api/20261005T120833Z-attempt-1.log",
+          "summary": "1 passed in 13.35s",
+          "nonce": "8777d79262c341ffbda73393a4de8031",
           "structured_result": null,
           "assertions": [],
           "produced": [],
@@ -1267,7 +1252,7 @@
             "deselected": 0,
             "errors": 0,
             "skip_reasons": [],
-            "line": "1 passed in 11.89s"
+            "line": "1 passed in 13.35s"
           }
         }
       ],
@@ -1279,16 +1264,30 @@
       "history": [
         {
           "result": "PASS",
-          "checked_commit": "d27c82918e8685d309526c792c239f6e35eb8fc1",
-          "finished_at": "2026-10-02T12:11:51Z",
+          "checked_commit": "a6506fcefb84151d9dfe1a54d5738fb5ec7c01da",
+          "finished_at": "2026-10-05T03:56:50Z",
+          "duration_s": 15.5,
+          "attempts": 1
+        },
+        {
+          "result": "PASS",
+          "checked_commit": "e3b28e9dba6491c9d4320fdc768ac2eb87f41645",
+          "finished_at": "2026-10-02T19:43:21Z",
           "duration_s": 12.2,
           "attempts": 1
         },
         {
           "result": "PASS",
-          "checked_commit": "ee305fec2d599da4c22d443aa32236fd93b87d60",
-          "finished_at": "2026-10-02T05:48:53Z",
-          "duration_s": 12.1,
+          "checked_commit": "995ed3d4879a780c4a9b2ad31c4b4a6b6af6e61d",
+          "finished_at": "2026-10-02T17:46:16Z",
+          "duration_s": 11.8,
+          "attempts": 1
+        },
+        {
+          "result": "PASS",
+          "checked_commit": "a743ab21399d7035aa4195111d8e326af9d7ee36",
+          "finished_at": "2026-10-02T14:20:29Z",
+          "duration_s": 12.8,
           "attempts": 1
         }
       ]
@@ -1312,29 +1311,29 @@
       "assertions_from": null,
       "trigger": null,
       "result": "PASS",
-      "reason": "38 passed in 88.98s (0:01:28)",
-      "summary": "38 passed in 88.98s (0:01:28)",
+      "reason": "38 passed in 140.19s (0:02:20)",
+      "summary": "38 passed in 140.19s (0:02:20)",
       "condition": null,
-      "checked_commit": "28ba986646d385ea7fc95831d33cda0f14ffcf0b",
+      "checked_commit": "b993dc90c72b413b4d0b5e28e23cad993f9acba4",
       "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "worktree_clean": true,
-      "config_sha256": "c88301517e5dfd98ab03891c3ee52c70c3d3a11960e5256312816d95eb041348",
-      "run_nonce": "3a30942b4ffa4c56a711a40ca194a0a2",
-      "started_at": "2026-10-02T19:56:05Z",
-      "finished_at": "2026-10-02T19:57:34Z",
-      "duration_s": 89.2,
+      "config_sha256": "31b0a71b59a15958c1a2463f7812f6bdb9a5c7edaf8102162ad973103b6e96cb",
+      "run_nonce": "fabadd22f7474dc9bb989c109054917a",
+      "started_at": "2026-10-05T12:08:47Z",
+      "finished_at": "2026-10-05T12:11:08Z",
+      "duration_s": 141.1,
       "attempts": [
         {
           "attempt": 1,
-          "started_at": "2026-10-02T19:56:05Z",
-          "finished_at": "2026-10-02T19:57:34Z",
-          "duration_s": 89.2,
+          "started_at": "2026-10-05T12:08:47Z",
+          "finished_at": "2026-10-05T12:11:08Z",
+          "duration_s": 141.1,
           "exit_code": 0,
           "result": "PASS",
-          "reason": "38 passed in 88.98s (0:01:28)",
-          "log": "docs/execution/evidence/phase4/checks/logs/p4-a3-unit/20261002T195605Z-attempt-1.log",
-          "summary": "38 passed in 88.98s (0:01:28)",
-          "nonce": "5572fe7ebef04f80973b02962868347f",
+          "reason": "38 passed in 140.19s (0:02:20)",
+          "log": "out/acceptance/phase4/logs/p4-a3-unit/20261005T120847Z-attempt-1.log",
+          "summary": "38 passed in 140.19s (0:02:20)",
+          "nonce": "f7956dfbaa694f7faf253b6ccae92349",
           "structured_result": null,
           "assertions": [],
           "produced": [],
@@ -1345,7 +1344,7 @@
             "deselected": 0,
             "errors": 0,
             "skip_reasons": [],
-            "line": "38 passed in 88.98s (0:01:28)"
+            "line": "38 passed in 140.19s (0:02:20)"
           }
         }
       ],
@@ -1357,23 +1356,30 @@
       "history": [
         {
           "result": "PASS",
-          "checked_commit": "d27c82918e8685d309526c792c239f6e35eb8fc1",
-          "finished_at": "2026-10-02T12:13:29Z",
-          "duration_s": 97.5,
+          "checked_commit": "a6506fcefb84151d9dfe1a54d5738fb5ec7c01da",
+          "finished_at": "2026-10-05T03:58:41Z",
+          "duration_s": 110.4,
           "attempts": 1
         },
         {
           "result": "PASS",
-          "checked_commit": "b9fc7c40312eff713f44bb97817a15f65aea1de4",
-          "finished_at": "2026-10-02T10:30:37Z",
-          "duration_s": 120.2,
+          "checked_commit": "e3b28e9dba6491c9d4320fdc768ac2eb87f41645",
+          "finished_at": "2026-10-02T19:44:56Z",
+          "duration_s": 95.0,
           "attempts": 1
         },
         {
           "result": "PASS",
-          "checked_commit": "b9fc7c40312eff713f44bb97817a15f65aea1de4",
-          "finished_at": "2026-10-02T10:24:09Z",
-          "duration_s": 112.9,
+          "checked_commit": "995ed3d4879a780c4a9b2ad31c4b4a6b6af6e61d",
+          "finished_at": "2026-10-02T17:47:50Z",
+          "duration_s": 93.4,
+          "attempts": 1
+        },
+        {
+          "result": "PASS",
+          "checked_commit": "a743ab21399d7035aa4195111d8e326af9d7ee36",
+          "finished_at": "2026-10-02T14:22:13Z",
+          "duration_s": 104.6,
           "attempts": 1
         }
       ]
@@ -1402,27 +1408,27 @@
       "reason": "[p4-a3-decision] PASS: 9 required assertion(s) hold",
       "summary": "[p4-a3-decision] PASS: 9 required assertion(s) hold",
       "condition": null,
-      "checked_commit": "28ba986646d385ea7fc95831d33cda0f14ffcf0b",
+      "checked_commit": "b993dc90c72b413b4d0b5e28e23cad993f9acba4",
       "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "worktree_clean": true,
-      "config_sha256": "c88301517e5dfd98ab03891c3ee52c70c3d3a11960e5256312816d95eb041348",
-      "run_nonce": "3a30942b4ffa4c56a711a40ca194a0a2",
-      "started_at": "2026-10-02T19:57:34Z",
-      "finished_at": "2026-10-02T19:58:14Z",
-      "duration_s": 39.8,
+      "config_sha256": "31b0a71b59a15958c1a2463f7812f6bdb9a5c7edaf8102162ad973103b6e96cb",
+      "run_nonce": "fabadd22f7474dc9bb989c109054917a",
+      "started_at": "2026-10-05T12:11:08Z",
+      "finished_at": "2026-10-05T12:11:52Z",
+      "duration_s": 44.1,
       "attempts": [
         {
           "attempt": 1,
-          "started_at": "2026-10-02T19:57:34Z",
-          "finished_at": "2026-10-02T19:58:14Z",
-          "duration_s": 39.8,
+          "started_at": "2026-10-05T12:11:08Z",
+          "finished_at": "2026-10-05T12:11:52Z",
+          "duration_s": 44.1,
           "exit_code": 0,
           "result": "PASS",
           "reason": "[p4-a3-decision] PASS: 9 required assertion(s) hold",
-          "log": "docs/execution/evidence/phase4/checks/logs/p4-a3-decision/20261002T195734Z-attempt-1.log",
+          "log": "out/acceptance/phase4/logs/p4-a3-decision/20261005T121108Z-attempt-1.log",
           "summary": "[p4-a3-decision] PASS: 9 required assertion(s) hold",
-          "nonce": "e4cbb0cddbb14bacade2ae83e81b17bf",
-          "structured_result": "docs/execution/evidence/phase4/checks/logs/p4-a3-decision/20261002T195734Z-attempt-1.result.json",
+          "nonce": "2a98aa14c3be4a11b348faa60706423f",
+          "structured_result": "out/acceptance/phase4/logs/p4-a3-decision/20261005T121108Z-attempt-1.result.json",
           "assertions": [
             {
               "id": "decision_follows_answer",
@@ -1483,7 +1489,7 @@
             {
               "path": "docs/execution/evidence/phase4/a3-model-decision.json",
               "exists": true,
-              "sha256": "8e38bb8982de5ad59ce00dd1adb7eadb96404ca7a92a2e12eec8935d4e518ae8",
+              "sha256": "2a639da86725abea1008c2d03575b91653ffbfbc75aef362d3a916e1e0ff4ad3",
               "fresh": true
             }
           ],
@@ -1494,7 +1500,7 @@
         {
           "path": "docs/execution/evidence/phase4/a3-model-decision.json",
           "exists": true,
-          "sha256": "8e38bb8982de5ad59ce00dd1adb7eadb96404ca7a92a2e12eec8935d4e518ae8",
+          "sha256": "2a639da86725abea1008c2d03575b91653ffbfbc75aef362d3a916e1e0ff4ad3",
           "fresh": true
         }
       ],
@@ -1505,23 +1511,30 @@
       "history": [
         {
           "result": "PASS",
-          "checked_commit": "d27c82918e8685d309526c792c239f6e35eb8fc1",
-          "finished_at": "2026-10-02T12:14:09Z",
-          "duration_s": 40.2,
+          "checked_commit": "a6506fcefb84151d9dfe1a54d5738fb5ec7c01da",
+          "finished_at": "2026-10-05T03:59:21Z",
+          "duration_s": 40.0,
           "attempts": 1
         },
         {
           "result": "PASS",
-          "checked_commit": "b9fc7c40312eff713f44bb97817a15f65aea1de4",
-          "finished_at": "2026-10-02T10:31:23Z",
-          "duration_s": 45.9,
+          "checked_commit": "e3b28e9dba6491c9d4320fdc768ac2eb87f41645",
+          "finished_at": "2026-10-02T19:45:35Z",
+          "duration_s": 39.8,
           "attempts": 1
         },
         {
           "result": "PASS",
-          "checked_commit": "b9fc7c40312eff713f44bb97817a15f65aea1de4",
-          "finished_at": "2026-10-02T10:24:53Z",
-          "duration_s": 44.3,
+          "checked_commit": "995ed3d4879a780c4a9b2ad31c4b4a6b6af6e61d",
+          "finished_at": "2026-10-02T17:48:29Z",
+          "duration_s": 39.6,
+          "attempts": 1
+        },
+        {
+          "result": "PASS",
+          "checked_commit": "a743ab21399d7035aa4195111d8e326af9d7ee36",
+          "finished_at": "2026-10-02T14:22:54Z",
+          "duration_s": 41.4,
           "attempts": 1
         }
       ]
@@ -1545,29 +1558,29 @@
       "assertions_from": null,
       "trigger": null,
       "result": "PASS",
-      "reason": "1 passed in 21.91s",
-      "summary": "1 passed in 21.91s",
+      "reason": "1 passed in 33.74s",
+      "summary": "1 passed in 33.74s",
       "condition": null,
-      "checked_commit": "28ba986646d385ea7fc95831d33cda0f14ffcf0b",
+      "checked_commit": "b993dc90c72b413b4d0b5e28e23cad993f9acba4",
       "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "worktree_clean": true,
-      "config_sha256": "c88301517e5dfd98ab03891c3ee52c70c3d3a11960e5256312816d95eb041348",
-      "run_nonce": "3a30942b4ffa4c56a711a40ca194a0a2",
-      "started_at": "2026-10-02T19:58:14Z",
-      "finished_at": "2026-10-02T19:58:36Z",
-      "duration_s": 22.2,
+      "config_sha256": "31b0a71b59a15958c1a2463f7812f6bdb9a5c7edaf8102162ad973103b6e96cb",
+      "run_nonce": "fabadd22f7474dc9bb989c109054917a",
+      "started_at": "2026-10-05T12:11:52Z",
+      "finished_at": "2026-10-05T12:12:26Z",
+      "duration_s": 34.2,
       "attempts": [
         {
           "attempt": 1,
-          "started_at": "2026-10-02T19:58:14Z",
-          "finished_at": "2026-10-02T19:58:36Z",
-          "duration_s": 22.2,
+          "started_at": "2026-10-05T12:11:52Z",
+          "finished_at": "2026-10-05T12:12:26Z",
+          "duration_s": 34.2,
           "exit_code": 0,
           "result": "PASS",
-          "reason": "1 passed in 21.91s",
-          "log": "docs/execution/evidence/phase4/checks/logs/p4-a3-platform/20261002T195814Z-attempt-1.log",
-          "summary": "1 passed in 21.91s",
-          "nonce": "0e6992a94a3f40b4852020b6d5836c29",
+          "reason": "1 passed in 33.74s",
+          "log": "out/acceptance/phase4/logs/p4-a3-platform/20261005T121152Z-attempt-1.log",
+          "summary": "1 passed in 33.74s",
+          "nonce": "08f43e5eb2a34ec5839c3d809965bbdb",
           "structured_result": null,
           "assertions": [],
           "produced": [],
@@ -1578,7 +1591,7 @@
             "deselected": 0,
             "errors": 0,
             "skip_reasons": [],
-            "line": "1 passed in 21.91s"
+            "line": "1 passed in 33.74s"
           }
         }
       ],
@@ -1590,23 +1603,30 @@
       "history": [
         {
           "result": "PASS",
-          "checked_commit": "d27c82918e8685d309526c792c239f6e35eb8fc1",
-          "finished_at": "2026-10-02T12:14:42Z",
+          "checked_commit": "a6506fcefb84151d9dfe1a54d5738fb5ec7c01da",
+          "finished_at": "2026-10-05T03:59:54Z",
+          "duration_s": 33.1,
+          "attempts": 1
+        },
+        {
+          "result": "PASS",
+          "checked_commit": "e3b28e9dba6491c9d4320fdc768ac2eb87f41645",
+          "finished_at": "2026-10-02T19:46:08Z",
           "duration_s": 33.0,
           "attempts": 1
         },
         {
           "result": "PASS",
-          "checked_commit": "b9fc7c40312eff713f44bb97817a15f65aea1de4",
-          "finished_at": "2026-10-02T10:31:56Z",
+          "checked_commit": "995ed3d4879a780c4a9b2ad31c4b4a6b6af6e61d",
+          "finished_at": "2026-10-02T17:49:02Z",
           "duration_s": 33.1,
           "attempts": 1
         },
         {
           "result": "PASS",
-          "checked_commit": "b9fc7c40312eff713f44bb97817a15f65aea1de4",
-          "finished_at": "2026-10-02T10:25:26Z",
-          "duration_s": 33.1,
+          "checked_commit": "a743ab21399d7035aa4195111d8e326af9d7ee36",
+          "finished_at": "2026-10-02T14:23:17Z",
+          "duration_s": 22.6,
           "attempts": 1
         }
       ]
@@ -1635,27 +1655,27 @@
       "reason": "[p4-a3-real-endpoint] PASS: 3 required assertion(s) hold",
       "summary": "[p4-a3-real-endpoint] PASS: 3 required assertion(s) hold",
       "condition": null,
-      "checked_commit": "28ba986646d385ea7fc95831d33cda0f14ffcf0b",
+      "checked_commit": "b993dc90c72b413b4d0b5e28e23cad993f9acba4",
       "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "worktree_clean": true,
-      "config_sha256": "c88301517e5dfd98ab03891c3ee52c70c3d3a11960e5256312816d95eb041348",
-      "run_nonce": "3a30942b4ffa4c56a711a40ca194a0a2",
-      "started_at": "2026-10-02T19:58:36Z",
-      "finished_at": "2026-10-02T19:59:58Z",
-      "duration_s": 82.0,
+      "config_sha256": "31b0a71b59a15958c1a2463f7812f6bdb9a5c7edaf8102162ad973103b6e96cb",
+      "run_nonce": "fabadd22f7474dc9bb989c109054917a",
+      "started_at": "2026-10-05T12:12:26Z",
+      "finished_at": "2026-10-05T12:15:09Z",
+      "duration_s": 162.5,
       "attempts": [
         {
           "attempt": 1,
-          "started_at": "2026-10-02T19:58:36Z",
-          "finished_at": "2026-10-02T19:59:58Z",
-          "duration_s": 82.0,
+          "started_at": "2026-10-05T12:12:26Z",
+          "finished_at": "2026-10-05T12:15:09Z",
+          "duration_s": 162.5,
           "exit_code": 0,
           "result": "PASS",
           "reason": "[p4-a3-real-endpoint] PASS: 3 required assertion(s) hold",
-          "log": "docs/execution/evidence/phase4/checks/logs/p4-a3-real-endpoint/20261002T195836Z-attempt-1.log",
+          "log": "out/acceptance/phase4/logs/p4-a3-real-endpoint/20261005T121226Z-attempt-1.log",
           "summary": "[p4-a3-real-endpoint] PASS: 3 required assertion(s) hold",
-          "nonce": "1560214d437b4816a79b1c3e820af704",
-          "structured_result": "docs/execution/evidence/phase4/checks/logs/p4-a3-real-endpoint/20261002T195836Z-attempt-1.result.json",
+          "nonce": "d2fd6dbc813047d98ad2f4b7ca15503e",
+          "structured_result": "out/acceptance/phase4/logs/p4-a3-real-endpoint/20261005T121226Z-attempt-1.result.json",
           "assertions": [
             {
               "id": "real_provider_answered",
@@ -1680,7 +1700,7 @@
             {
               "path": "docs/execution/evidence/phase4/a3-real-endpoint.json",
               "exists": true,
-              "sha256": "5c7836d51a2c641dc6ea713c89873f668a6d30b509014535abdb664cad3d791b",
+              "sha256": "c61b1f96cc37290f2c5790bf1ecdb27a76f57088b362488fd6900edf5cd913ee",
               "fresh": true
             }
           ],
@@ -1691,7 +1711,7 @@
         {
           "path": "docs/execution/evidence/phase4/a3-real-endpoint.json",
           "exists": true,
-          "sha256": "5c7836d51a2c641dc6ea713c89873f668a6d30b509014535abdb664cad3d791b",
+          "sha256": "c61b1f96cc37290f2c5790bf1ecdb27a76f57088b362488fd6900edf5cd913ee",
           "fresh": true
         }
       ],
@@ -1702,23 +1722,30 @@
       "history": [
         {
           "result": "PASS",
-          "checked_commit": "d27c82918e8685d309526c792c239f6e35eb8fc1",
-          "finished_at": "2026-10-02T12:17:08Z",
-          "duration_s": 145.8,
+          "checked_commit": "a6506fcefb84151d9dfe1a54d5738fb5ec7c01da",
+          "finished_at": "2026-10-05T04:04:11Z",
+          "duration_s": 257.1,
           "attempts": 1
         },
         {
           "result": "PASS",
-          "checked_commit": "b9fc7c40312eff713f44bb97817a15f65aea1de4",
-          "finished_at": "2026-10-02T10:33:54Z",
-          "duration_s": 117.3,
+          "checked_commit": "e3b28e9dba6491c9d4320fdc768ac2eb87f41645",
+          "finished_at": "2026-10-02T19:47:28Z",
+          "duration_s": 80.0,
           "attempts": 1
         },
         {
           "result": "PASS",
-          "checked_commit": "b9fc7c40312eff713f44bb97817a15f65aea1de4",
-          "finished_at": "2026-10-02T10:28:09Z",
-          "duration_s": 163.0,
+          "checked_commit": "995ed3d4879a780c4a9b2ad31c4b4a6b6af6e61d",
+          "finished_at": "2026-10-02T17:52:04Z",
+          "duration_s": 181.6,
+          "attempts": 1
+        },
+        {
+          "result": "PASS",
+          "checked_commit": "a743ab21399d7035aa4195111d8e326af9d7ee36",
+          "finished_at": "2026-10-02T14:25:05Z",
+          "duration_s": 108.0,
           "attempts": 1
         }
       ]
@@ -1742,40 +1769,40 @@
       "assertions_from": null,
       "trigger": null,
       "result": "PASS",
-      "reason": "40 passed in 90.67s (0:01:30)",
-      "summary": "40 passed in 90.67s (0:01:30)",
+      "reason": "41 passed in 195.95s (0:03:15)",
+      "summary": "41 passed in 195.95s (0:03:15)",
       "condition": null,
-      "checked_commit": "28ba986646d385ea7fc95831d33cda0f14ffcf0b",
+      "checked_commit": "b993dc90c72b413b4d0b5e28e23cad993f9acba4",
       "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "worktree_clean": true,
-      "config_sha256": "c88301517e5dfd98ab03891c3ee52c70c3d3a11960e5256312816d95eb041348",
-      "run_nonce": "3a30942b4ffa4c56a711a40ca194a0a2",
-      "started_at": "2026-10-02T19:59:58Z",
-      "finished_at": "2026-10-02T20:01:30Z",
-      "duration_s": 91.1,
+      "config_sha256": "31b0a71b59a15958c1a2463f7812f6bdb9a5c7edaf8102162ad973103b6e96cb",
+      "run_nonce": "fabadd22f7474dc9bb989c109054917a",
+      "started_at": "2026-10-05T12:15:09Z",
+      "finished_at": "2026-10-05T12:18:25Z",
+      "duration_s": 196.6,
       "attempts": [
         {
           "attempt": 1,
-          "started_at": "2026-10-02T19:59:58Z",
-          "finished_at": "2026-10-02T20:01:30Z",
-          "duration_s": 91.1,
+          "started_at": "2026-10-05T12:15:09Z",
+          "finished_at": "2026-10-05T12:18:25Z",
+          "duration_s": 196.6,
           "exit_code": 0,
           "result": "PASS",
-          "reason": "40 passed in 90.67s (0:01:30)",
-          "log": "docs/execution/evidence/phase4/checks/logs/p4-a4-unit/20261002T195958Z-attempt-1.log",
-          "summary": "40 passed in 90.67s (0:01:30)",
-          "nonce": "1049e032a45e4eba8c7f0ea6941c73e2",
+          "reason": "41 passed in 195.95s (0:03:15)",
+          "log": "out/acceptance/phase4/logs/p4-a4-unit/20261005T121509Z-attempt-1.log",
+          "summary": "41 passed in 195.95s (0:03:15)",
+          "nonce": "b56bc40f79c546ac849fff4713195ac4",
           "structured_result": null,
           "assertions": [],
           "produced": [],
           "pytest": {
-            "passed": 40,
+            "passed": 41,
             "failed": 0,
             "skipped": 0,
             "deselected": 0,
             "errors": 0,
             "skip_reasons": [],
-            "line": "40 passed in 90.67s (0:01:30)"
+            "line": "41 passed in 195.95s (0:03:15)"
           }
         }
       ],
@@ -1787,16 +1814,30 @@
       "history": [
         {
           "result": "PASS",
-          "checked_commit": "d27c82918e8685d309526c792c239f6e35eb8fc1",
-          "finished_at": "2026-10-02T12:20:16Z",
-          "duration_s": 188.1,
+          "checked_commit": "a6506fcefb84151d9dfe1a54d5738fb5ec7c01da",
+          "finished_at": "2026-10-05T04:06:22Z",
+          "duration_s": 131.1,
           "attempts": 1
         },
         {
           "result": "PASS",
-          "checked_commit": "773f9345c654d3d9e6dd438980834169cebd1449",
-          "finished_at": "2026-10-02T11:24:03Z",
-          "duration_s": 130.4,
+          "checked_commit": "e3b28e9dba6491c9d4320fdc768ac2eb87f41645",
+          "finished_at": "2026-10-02T19:49:04Z",
+          "duration_s": 95.3,
+          "attempts": 1
+        },
+        {
+          "result": "PASS",
+          "checked_commit": "995ed3d4879a780c4a9b2ad31c4b4a6b6af6e61d",
+          "finished_at": "2026-10-02T17:53:52Z",
+          "duration_s": 108.4,
+          "attempts": 1
+        },
+        {
+          "result": "PASS",
+          "checked_commit": "a743ab21399d7035aa4195111d8e326af9d7ee36",
+          "finished_at": "2026-10-02T14:28:21Z",
+          "duration_s": 195.7,
           "attempts": 1
         }
       ]
@@ -1826,27 +1867,27 @@
       "reason": "[p4-a4-rounds] PASS: 9 required assertion(s) hold",
       "summary": "[p4-a4-rounds] PASS: 9 required assertion(s) hold",
       "condition": null,
-      "checked_commit": "28ba986646d385ea7fc95831d33cda0f14ffcf0b",
+      "checked_commit": "b993dc90c72b413b4d0b5e28e23cad993f9acba4",
       "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "worktree_clean": true,
-      "config_sha256": "c88301517e5dfd98ab03891c3ee52c70c3d3a11960e5256312816d95eb041348",
-      "run_nonce": "3a30942b4ffa4c56a711a40ca194a0a2",
-      "started_at": "2026-10-02T20:01:30Z",
-      "finished_at": "2026-10-02T20:01:33Z",
-      "duration_s": 3.2,
+      "config_sha256": "31b0a71b59a15958c1a2463f7812f6bdb9a5c7edaf8102162ad973103b6e96cb",
+      "run_nonce": "fabadd22f7474dc9bb989c109054917a",
+      "started_at": "2026-10-05T12:18:25Z",
+      "finished_at": "2026-10-05T12:18:29Z",
+      "duration_s": 4.2,
       "attempts": [
         {
           "attempt": 1,
-          "started_at": "2026-10-02T20:01:30Z",
-          "finished_at": "2026-10-02T20:01:33Z",
-          "duration_s": 3.2,
+          "started_at": "2026-10-05T12:18:25Z",
+          "finished_at": "2026-10-05T12:18:29Z",
+          "duration_s": 4.2,
           "exit_code": 0,
           "result": "PASS",
           "reason": "[p4-a4-rounds] PASS: 9 required assertion(s) hold",
-          "log": "docs/execution/evidence/phase4/checks/logs/p4-a4-rounds/20261002T200130Z-attempt-1.log",
+          "log": "out/acceptance/phase4/logs/p4-a4-rounds/20261005T121825Z-attempt-1.log",
           "summary": "[p4-a4-rounds] PASS: 9 required assertion(s) hold",
-          "nonce": "5b0644e4692140d7acea12ace9817be3",
-          "structured_result": "docs/execution/evidence/phase4/checks/logs/p4-a4-rounds/20261002T200130Z-attempt-1.result.json",
+          "nonce": "9bbf7bcd06fe4c3eb4c875fb1b0f74cd",
+          "structured_result": "out/acceptance/phase4/logs/p4-a4-rounds/20261005T121825Z-attempt-1.result.json",
           "assertions": [
             {
               "id": "idle_participant_does_not_stop_the_other",
@@ -1894,7 +1935,7 @@
               "id": "timeout_kills_the_child",
               "required": true,
               "holds": true,
-              "detail": "{'raised': 'Timeout', 'waited_s': 0.51, 'old_child_alive': False}"
+              "detail": "{'raised': 'Timeout', 'waited_s': 0.52, 'old_child_alive': False}"
             },
             {
               "id": "paired_report_hand_check",
@@ -1907,7 +1948,7 @@
             {
               "path": "docs/execution/evidence/phase4/a4-rounds.json",
               "exists": true,
-              "sha256": "6fa64676ca5aa09bc218ae43241e54f16b241b286160815692b14219fc96fd61",
+              "sha256": "9befce3d74634ed2c151848a6536122f3130faae662b96ce7f132b53102b0cf9",
               "fresh": true
             },
             {
@@ -1924,7 +1965,7 @@
         {
           "path": "docs/execution/evidence/phase4/a4-rounds.json",
           "exists": true,
-          "sha256": "6fa64676ca5aa09bc218ae43241e54f16b241b286160815692b14219fc96fd61",
+          "sha256": "9befce3d74634ed2c151848a6536122f3130faae662b96ce7f132b53102b0cf9",
           "fresh": true
         },
         {
@@ -1941,16 +1982,30 @@
       "history": [
         {
           "result": "PASS",
-          "checked_commit": "d27c82918e8685d309526c792c239f6e35eb8fc1",
-          "finished_at": "2026-10-02T12:20:19Z",
-          "duration_s": 3.3,
+          "checked_commit": "a6506fcefb84151d9dfe1a54d5738fb5ec7c01da",
+          "finished_at": "2026-10-05T04:06:26Z",
+          "duration_s": 4.2,
           "attempts": 1
         },
         {
           "result": "PASS",
-          "checked_commit": "773f9345c654d3d9e6dd438980834169cebd1449",
-          "finished_at": "2026-10-02T11:24:07Z",
-          "duration_s": 3.9,
+          "checked_commit": "e3b28e9dba6491c9d4320fdc768ac2eb87f41645",
+          "finished_at": "2026-10-02T19:49:07Z",
+          "duration_s": 3.2,
+          "attempts": 1
+        },
+        {
+          "result": "PASS",
+          "checked_commit": "995ed3d4879a780c4a9b2ad31c4b4a6b6af6e61d",
+          "finished_at": "2026-10-02T17:53:56Z",
+          "duration_s": 3.2,
+          "attempts": 1
+        },
+        {
+          "result": "PASS",
+          "checked_commit": "a743ab21399d7035aa4195111d8e326af9d7ee36",
+          "finished_at": "2026-10-02T14:28:24Z",
+          "duration_s": 3.5,
           "attempts": 1
         }
       ]
@@ -1974,29 +2029,29 @@
       "assertions_from": null,
       "trigger": null,
       "result": "PASS",
-      "reason": "7 passed in 188.08s (0:03:08)",
-      "summary": "7 passed in 188.08s (0:03:08)",
+      "reason": "7 passed in 215.24s (0:03:35)",
+      "summary": "7 passed in 215.24s (0:03:35)",
       "condition": null,
-      "checked_commit": "28ba986646d385ea7fc95831d33cda0f14ffcf0b",
+      "checked_commit": "b993dc90c72b413b4d0b5e28e23cad993f9acba4",
       "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "worktree_clean": true,
-      "config_sha256": "c88301517e5dfd98ab03891c3ee52c70c3d3a11960e5256312816d95eb041348",
-      "run_nonce": "3a30942b4ffa4c56a711a40ca194a0a2",
-      "started_at": "2026-10-02T20:01:33Z",
-      "finished_at": "2026-10-02T20:04:41Z",
-      "duration_s": 188.4,
+      "config_sha256": "31b0a71b59a15958c1a2463f7812f6bdb9a5c7edaf8102162ad973103b6e96cb",
+      "run_nonce": "fabadd22f7474dc9bb989c109054917a",
+      "started_at": "2026-10-05T12:18:29Z",
+      "finished_at": "2026-10-05T12:22:05Z",
+      "duration_s": 215.8,
       "attempts": [
         {
           "attempt": 1,
-          "started_at": "2026-10-02T20:01:33Z",
-          "finished_at": "2026-10-02T20:04:41Z",
-          "duration_s": 188.4,
+          "started_at": "2026-10-05T12:18:29Z",
+          "finished_at": "2026-10-05T12:22:05Z",
+          "duration_s": 215.8,
           "exit_code": 0,
           "result": "PASS",
-          "reason": "7 passed in 188.08s (0:03:08)",
-          "log": "docs/execution/evidence/phase4/checks/logs/p4-a4-platform/20261002T200133Z-attempt-1.log",
-          "summary": "7 passed in 188.08s (0:03:08)",
-          "nonce": "96e4724b40434f2da558212323de2e1c",
+          "reason": "7 passed in 215.24s (0:03:35)",
+          "log": "out/acceptance/phase4/logs/p4-a4-platform/20261005T121829Z-attempt-1.log",
+          "summary": "7 passed in 215.24s (0:03:35)",
+          "nonce": "7ab007f3f3b448e89a313f983bd59b3d",
           "structured_result": null,
           "assertions": [],
           "produced": [],
@@ -2007,7 +2062,7 @@
             "deselected": 0,
             "errors": 0,
             "skip_reasons": [],
-            "line": "7 passed in 188.08s (0:03:08)"
+            "line": "7 passed in 215.24s (0:03:35)"
           }
         }
       ],
@@ -2019,16 +2074,30 @@
       "history": [
         {
           "result": "PASS",
-          "checked_commit": "d27c82918e8685d309526c792c239f6e35eb8fc1",
-          "finished_at": "2026-10-02T12:23:26Z",
-          "duration_s": 187.1,
+          "checked_commit": "a6506fcefb84151d9dfe1a54d5738fb5ec7c01da",
+          "finished_at": "2026-10-05T04:10:14Z",
+          "duration_s": 227.8,
           "attempts": 1
         },
         {
           "result": "PASS",
-          "checked_commit": "773f9345c654d3d9e6dd438980834169cebd1449",
-          "finished_at": "2026-10-02T11:28:04Z",
-          "duration_s": 237.1,
+          "checked_commit": "e3b28e9dba6491c9d4320fdc768ac2eb87f41645",
+          "finished_at": "2026-10-02T19:52:15Z",
+          "duration_s": 188.5,
+          "attempts": 1
+        },
+        {
+          "result": "PASS",
+          "checked_commit": "995ed3d4879a780c4a9b2ad31c4b4a6b6af6e61d",
+          "finished_at": "2026-10-02T17:57:03Z",
+          "duration_s": 187.4,
+          "attempts": 1
+        },
+        {
+          "result": "PASS",
+          "checked_commit": "a743ab21399d7035aa4195111d8e326af9d7ee36",
+          "finished_at": "2026-10-02T14:31:35Z",
+          "duration_s": 190.6,
           "attempts": 1
         }
       ]
@@ -2052,29 +2121,29 @@
       "assertions_from": null,
       "trigger": null,
       "result": "PASS",
-      "reason": "# phase4/p4-a5-web-types at 28ba986646d3 (tree e3b0c44298fc, profile local-lite) · attempt 1 · started 2026-10-02T20:04:41Z",
-      "summary": "# phase4/p4-a5-web-types at 28ba986646d3 (tree e3b0c44298fc, profile local-lite) · attempt 1 · started 2026-10-02T20:04:41Z",
+      "reason": "# phase4/p4-a5-web-types at b993dc90c72b (tree e3b0c44298fc, profile local-lite) · attempt 1 · started 2026-10-05T12:22:05Z",
+      "summary": "# phase4/p4-a5-web-types at b993dc90c72b (tree e3b0c44298fc, profile local-lite) · attempt 1 · started 2026-10-05T12:22:05Z",
       "condition": null,
-      "checked_commit": "28ba986646d385ea7fc95831d33cda0f14ffcf0b",
+      "checked_commit": "b993dc90c72b413b4d0b5e28e23cad993f9acba4",
       "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "worktree_clean": true,
-      "config_sha256": "c88301517e5dfd98ab03891c3ee52c70c3d3a11960e5256312816d95eb041348",
-      "run_nonce": "3a30942b4ffa4c56a711a40ca194a0a2",
-      "started_at": "2026-10-02T20:04:41Z",
-      "finished_at": "2026-10-02T20:04:41Z",
-      "duration_s": 0.4,
+      "config_sha256": "31b0a71b59a15958c1a2463f7812f6bdb9a5c7edaf8102162ad973103b6e96cb",
+      "run_nonce": "fabadd22f7474dc9bb989c109054917a",
+      "started_at": "2026-10-05T12:22:05Z",
+      "finished_at": "2026-10-05T12:22:06Z",
+      "duration_s": 0.6,
       "attempts": [
         {
           "attempt": 1,
-          "started_at": "2026-10-02T20:04:41Z",
-          "finished_at": "2026-10-02T20:04:41Z",
-          "duration_s": 0.4,
+          "started_at": "2026-10-05T12:22:05Z",
+          "finished_at": "2026-10-05T12:22:06Z",
+          "duration_s": 0.6,
           "exit_code": 0,
           "result": "PASS",
-          "reason": "# phase4/p4-a5-web-types at 28ba986646d3 (tree e3b0c44298fc, profile local-lite) · attempt 1 · started 2026-10-02T20:04:41Z",
-          "log": "docs/execution/evidence/phase4/checks/logs/p4-a5-web-types/20261002T200441Z-attempt-1.log",
-          "summary": "# phase4/p4-a5-web-types at 28ba986646d3 (tree e3b0c44298fc, profile local-lite) · attempt 1 · started 2026-10-02T20:04:41Z",
-          "nonce": "edd960fec99d40b2b7c035de00dc50e4",
+          "reason": "# phase4/p4-a5-web-types at b993dc90c72b (tree e3b0c44298fc, profile local-lite) · attempt 1 · started 2026-10-05T12:22:05Z",
+          "log": "out/acceptance/phase4/logs/p4-a5-web-types/20261005T122205Z-attempt-1.log",
+          "summary": "# phase4/p4-a5-web-types at b993dc90c72b (tree e3b0c44298fc, profile local-lite) · attempt 1 · started 2026-10-05T12:22:05Z",
+          "nonce": "19cfbc5e050043ec910fedf6a5417eff",
           "structured_result": null,
           "assertions": [],
           "produced": [],
@@ -2089,15 +2158,29 @@
       "history": [
         {
           "result": "PASS",
-          "checked_commit": "d27c82918e8685d309526c792c239f6e35eb8fc1",
-          "finished_at": "2026-10-02T12:23:26Z",
+          "checked_commit": "a6506fcefb84151d9dfe1a54d5738fb5ec7c01da",
+          "finished_at": "2026-10-05T04:10:15Z",
+          "duration_s": 0.6,
+          "attempts": 1
+        },
+        {
+          "result": "PASS",
+          "checked_commit": "e3b28e9dba6491c9d4320fdc768ac2eb87f41645",
+          "finished_at": "2026-10-02T19:52:16Z",
           "duration_s": 0.3,
           "attempts": 1
         },
         {
           "result": "PASS",
-          "checked_commit": "9d3e3c606c705ec42ff43caed8c45f5033e8a795",
-          "finished_at": "2026-10-02T12:06:19Z",
+          "checked_commit": "995ed3d4879a780c4a9b2ad31c4b4a6b6af6e61d",
+          "finished_at": "2026-10-02T17:57:03Z",
+          "duration_s": 0.3,
+          "attempts": 1
+        },
+        {
+          "result": "PASS",
+          "checked_commit": "a743ab21399d7035aa4195111d8e326af9d7ee36",
+          "finished_at": "2026-10-02T14:31:35Z",
           "duration_s": 0.4,
           "attempts": 1
         }
@@ -2125,42 +2208,42 @@
       "assertions_from": null,
       "trigger": null,
       "result": "PASS",
-      "reason": "2 passed in 42.13s",
-      "summary": "2 passed in 42.13s",
+      "reason": "2 passed in 50.77s",
+      "summary": "2 passed in 50.77s",
       "condition": null,
-      "checked_commit": "28ba986646d385ea7fc95831d33cda0f14ffcf0b",
+      "checked_commit": "b993dc90c72b413b4d0b5e28e23cad993f9acba4",
       "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "worktree_clean": true,
-      "config_sha256": "c88301517e5dfd98ab03891c3ee52c70c3d3a11960e5256312816d95eb041348",
-      "run_nonce": "3a30942b4ffa4c56a711a40ca194a0a2",
-      "started_at": "2026-10-02T20:04:41Z",
-      "finished_at": "2026-10-02T20:05:24Z",
-      "duration_s": 42.4,
+      "config_sha256": "31b0a71b59a15958c1a2463f7812f6bdb9a5c7edaf8102162ad973103b6e96cb",
+      "run_nonce": "fabadd22f7474dc9bb989c109054917a",
+      "started_at": "2026-10-05T12:22:06Z",
+      "finished_at": "2026-10-05T12:22:57Z",
+      "duration_s": 51.3,
       "attempts": [
         {
           "attempt": 1,
-          "started_at": "2026-10-02T20:04:41Z",
-          "finished_at": "2026-10-02T20:05:24Z",
-          "duration_s": 42.4,
+          "started_at": "2026-10-05T12:22:06Z",
+          "finished_at": "2026-10-05T12:22:57Z",
+          "duration_s": 51.3,
           "exit_code": 0,
           "result": "PASS",
-          "reason": "2 passed in 42.13s",
-          "log": "docs/execution/evidence/phase4/checks/logs/p4-a5-product-web/20261002T200441Z-attempt-1.log",
-          "summary": "2 passed in 42.13s",
-          "nonce": "c94cd8067c644dc69bfafcfb29493424",
+          "reason": "2 passed in 50.77s",
+          "log": "out/acceptance/phase4/logs/p4-a5-product-web/20261005T122206Z-attempt-1.log",
+          "summary": "2 passed in 50.77s",
+          "nonce": "d448a969c41540188b8f84c26e2d80f4",
           "structured_result": null,
           "assertions": [],
           "produced": [
             {
               "path": "docs/execution/evidence/phase4/a5-product-flow.json",
               "exists": true,
-              "sha256": "11d2daa0df687e129d3e20b61712fafb228ca68eac1ae7f790fd56b23bee9522",
+              "sha256": "6bbf94f2c4dabda095d06ecac47e10e2416fc3d512e5341cc5d3093b4e34b094",
               "fresh": true
             },
             {
               "path": "docs/execution/evidence/phase4/a5-narrow.json",
               "exists": true,
-              "sha256": "8d4b93efefd05b20745246eab646b050264d3264121f67fd2bdf41cf9b9ff83e",
+              "sha256": "ae9249f1950aea0eaf1aebe2c9e61d64805590a7cb8a691729272cff6b4acb28",
               "fresh": true
             }
           ],
@@ -2171,7 +2254,7 @@
             "deselected": 0,
             "errors": 0,
             "skip_reasons": [],
-            "line": "2 passed in 42.13s"
+            "line": "2 passed in 50.77s"
           }
         }
       ],
@@ -2179,13 +2262,13 @@
         {
           "path": "docs/execution/evidence/phase4/a5-product-flow.json",
           "exists": true,
-          "sha256": "11d2daa0df687e129d3e20b61712fafb228ca68eac1ae7f790fd56b23bee9522",
+          "sha256": "6bbf94f2c4dabda095d06ecac47e10e2416fc3d512e5341cc5d3093b4e34b094",
           "fresh": true
         },
         {
           "path": "docs/execution/evidence/phase4/a5-narrow.json",
           "exists": true,
-          "sha256": "8d4b93efefd05b20745246eab646b050264d3264121f67fd2bdf41cf9b9ff83e",
+          "sha256": "ae9249f1950aea0eaf1aebe2c9e61d64805590a7cb8a691729272cff6b4acb28",
           "fresh": true
         }
       ],
@@ -2196,16 +2279,30 @@
       "history": [
         {
           "result": "PASS",
-          "checked_commit": "d27c82918e8685d309526c792c239f6e35eb8fc1",
-          "finished_at": "2026-10-02T12:24:10Z",
-          "duration_s": 43.1,
+          "checked_commit": "a6506fcefb84151d9dfe1a54d5738fb5ec7c01da",
+          "finished_at": "2026-10-05T04:11:05Z",
+          "duration_s": 50.5,
           "attempts": 1
         },
         {
           "result": "PASS",
-          "checked_commit": "9d3e3c606c705ec42ff43caed8c45f5033e8a795",
-          "finished_at": "2026-10-02T12:07:05Z",
-          "duration_s": 46.8,
+          "checked_commit": "e3b28e9dba6491c9d4320fdc768ac2eb87f41645",
+          "finished_at": "2026-10-02T19:52:59Z",
+          "duration_s": 42.9,
+          "attempts": 1
+        },
+        {
+          "result": "PASS",
+          "checked_commit": "995ed3d4879a780c4a9b2ad31c4b4a6b6af6e61d",
+          "finished_at": "2026-10-02T17:57:45Z",
+          "duration_s": 42.0,
+          "attempts": 1
+        },
+        {
+          "result": "PASS",
+          "checked_commit": "a743ab21399d7035aa4195111d8e326af9d7ee36",
+          "finished_at": "2026-10-02T14:32:22Z",
+          "duration_s": 46.4,
           "attempts": 1
         }
       ]
@@ -2235,33 +2332,33 @@
       "reason": "[p4-a5-release] PASS: 4 required assertion(s) hold",
       "summary": "[p4-a5-release] PASS: 4 required assertion(s) hold",
       "condition": null,
-      "checked_commit": "28ba986646d385ea7fc95831d33cda0f14ffcf0b",
+      "checked_commit": "b993dc90c72b413b4d0b5e28e23cad993f9acba4",
       "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "worktree_clean": true,
-      "config_sha256": "c88301517e5dfd98ab03891c3ee52c70c3d3a11960e5256312816d95eb041348",
-      "run_nonce": "3a30942b4ffa4c56a711a40ca194a0a2",
-      "started_at": "2026-10-02T20:05:24Z",
-      "finished_at": "2026-10-02T20:05:43Z",
-      "duration_s": 19.1,
+      "config_sha256": "31b0a71b59a15958c1a2463f7812f6bdb9a5c7edaf8102162ad973103b6e96cb",
+      "run_nonce": "fabadd22f7474dc9bb989c109054917a",
+      "started_at": "2026-10-05T12:22:57Z",
+      "finished_at": "2026-10-05T12:23:19Z",
+      "duration_s": 21.9,
       "attempts": [
         {
           "attempt": 1,
-          "started_at": "2026-10-02T20:05:24Z",
-          "finished_at": "2026-10-02T20:05:43Z",
-          "duration_s": 19.1,
+          "started_at": "2026-10-05T12:22:57Z",
+          "finished_at": "2026-10-05T12:23:19Z",
+          "duration_s": 21.9,
           "exit_code": 0,
           "result": "PASS",
           "reason": "[p4-a5-release] PASS: 4 required assertion(s) hold",
-          "log": "docs/execution/evidence/phase4/checks/logs/p4-a5-release/20261002T200524Z-attempt-1.log",
+          "log": "out/acceptance/phase4/logs/p4-a5-release/20261005T122257Z-attempt-1.log",
           "summary": "[p4-a5-release] PASS: 4 required assertion(s) hold",
-          "nonce": "7ff36fdc4f454624b1a697088527fc36",
-          "structured_result": "docs/execution/evidence/phase4/checks/logs/p4-a5-release/20261002T200524Z-attempt-1.result.json",
+          "nonce": "065dc3ba6cf94ee59f524c90561b590c",
+          "structured_result": "out/acceptance/phase4/logs/p4-a5-release/20261005T122257Z-attempt-1.result.json",
           "assertions": [
             {
               "id": "release_outputs",
               "required": true,
               "holds": true,
-              "detail": "20 wheels for 20 workspace members, web 717668 B, 3 local configs, manifest /Users/null3351/Code/formal-agent-lab/out/release/manifest.json"
+              "detail": "20 wheels for 20 workspace members, web 723436 B, 3 local configs, manifest /Users/null3351/Code/formal-agent-lab/out/release/manifest.json"
             },
             {
               "id": "online_clean_install_and_replay",
@@ -2279,20 +2376,20 @@
               "id": "ordinary_scenario_bundle",
               "required": true,
               "holds": true,
-              "detail": "{'run_id': 'run_a5_release_orders', 'status': 'SUCCEEDED', 'steps': 25, 'events': 207, 'sha256': 'efc74e6c22ede6ba4c69f29b2c648d94446b496974c73df82019d2cbb247abd0'}"
+              "detail": "{'run_id': 'run_a5_release_orders', 'status': 'SUCCEEDED', 'steps': 25, 'events': 207, 'sha256': 'e5d15f532d0d03d7598859d804f83bb405279605ba752c6064429587cc5fc017'}"
             }
           ],
           "produced": [
             {
               "path": "docs/execution/evidence/phase4/a5-release.json",
               "exists": true,
-              "sha256": "54bef37250b979af4696a2282c9da645c060488ec90233c3092bd99df9ec86ed",
+              "sha256": "11fdded691619f36155ccd40242e8ad691466dd502819c0472db37ef23eeb79d",
               "fresh": true
             },
             {
               "path": "docs/execution/evidence/phase4/release-manifest.json",
               "exists": true,
-              "sha256": "156588f613776086e7daa012564990e84dbd7d3e8aa74e4a047bc79c0d98b1be",
+              "sha256": "add56b005540d61fdfb9a4947a74b7f29130c46c8044e9ced9ec1a2a0cfb0aef",
               "fresh": true
             }
           ],
@@ -2303,13 +2400,13 @@
         {
           "path": "docs/execution/evidence/phase4/a5-release.json",
           "exists": true,
-          "sha256": "54bef37250b979af4696a2282c9da645c060488ec90233c3092bd99df9ec86ed",
+          "sha256": "11fdded691619f36155ccd40242e8ad691466dd502819c0472db37ef23eeb79d",
           "fresh": true
         },
         {
           "path": "docs/execution/evidence/phase4/release-manifest.json",
           "exists": true,
-          "sha256": "156588f613776086e7daa012564990e84dbd7d3e8aa74e4a047bc79c0d98b1be",
+          "sha256": "add56b005540d61fdfb9a4947a74b7f29130c46c8044e9ced9ec1a2a0cfb0aef",
           "fresh": true
         }
       ],
@@ -2320,16 +2417,1137 @@
       "history": [
         {
           "result": "PASS",
-          "checked_commit": "d27c82918e8685d309526c792c239f6e35eb8fc1",
-          "finished_at": "2026-10-02T12:24:28Z",
-          "duration_s": 18.3,
+          "checked_commit": "a6506fcefb84151d9dfe1a54d5738fb5ec7c01da",
+          "finished_at": "2026-10-05T04:11:47Z",
+          "duration_s": 42.1,
           "attempts": 1
         },
         {
           "result": "PASS",
-          "checked_commit": "9d3e3c606c705ec42ff43caed8c45f5033e8a795",
-          "finished_at": "2026-10-02T12:07:19Z",
-          "duration_s": 13.9,
+          "checked_commit": "e3b28e9dba6491c9d4320fdc768ac2eb87f41645",
+          "finished_at": "2026-10-02T19:53:18Z",
+          "duration_s": 19.1,
+          "attempts": 1
+        },
+        {
+          "result": "PASS",
+          "checked_commit": "995ed3d4879a780c4a9b2ad31c4b4a6b6af6e61d",
+          "finished_at": "2026-10-02T17:58:04Z",
+          "duration_s": 18.2,
+          "attempts": 1
+        },
+        {
+          "result": "PASS",
+          "checked_commit": "a743ab21399d7035aa4195111d8e326af9d7ee36",
+          "finished_at": "2026-10-02T14:32:44Z",
+          "duration_s": 22.4,
+          "attempts": 1
+        }
+      ]
+    },
+    {
+      "id": "p4-b1-unit",
+      "group": "b1",
+      "title": "领域单元：MAL 降低/三引擎、Broker 准入与逐字段拒绝、逐动作签发（前提失败/无版本/非 compromise 拒绝）、混合红方来源随应答（stub/协议/回退）、动态蓝方随观测变化、红蓝回合、模型修订；订单服务领域层",
+      "command": "uv run --frozen pytest -p no:cacheprovider -q packages/domain-mal/tests packages/domain-broker/tests examples/local-order-service/tests/test_domain_lab.py",
+      "tasks": [
+        "P4B-B1"
+      ],
+      "evidence": [],
+      "requires": null,
+      "profile": "local-lite",
+      "kind": "mandatory",
+      "retries": 0,
+      "heavy_gib": 0.0,
+      "produces": [],
+      "protocol": false,
+      "assertions_from": null,
+      "trigger": null,
+      "result": "PASS",
+      "reason": "66 passed in 25.16s",
+      "summary": "66 passed in 25.16s",
+      "condition": null,
+      "checked_commit": "b993dc90c72b413b4d0b5e28e23cad993f9acba4",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "worktree_clean": true,
+      "config_sha256": "31b0a71b59a15958c1a2463f7812f6bdb9a5c7edaf8102162ad973103b6e96cb",
+      "run_nonce": "fabadd22f7474dc9bb989c109054917a",
+      "started_at": "2026-10-05T12:23:19Z",
+      "finished_at": "2026-10-05T12:23:44Z",
+      "duration_s": 25.4,
+      "attempts": [
+        {
+          "attempt": 1,
+          "started_at": "2026-10-05T12:23:19Z",
+          "finished_at": "2026-10-05T12:23:44Z",
+          "duration_s": 25.4,
+          "exit_code": 0,
+          "result": "PASS",
+          "reason": "66 passed in 25.16s",
+          "log": "out/acceptance/phase4/logs/p4-b1-unit/20261005T122319Z-attempt-1.log",
+          "summary": "66 passed in 25.16s",
+          "nonce": "2ffb4b637d75433fb4d861977b7a4827",
+          "structured_result": null,
+          "assertions": [],
+          "produced": [],
+          "pytest": {
+            "passed": 66,
+            "failed": 0,
+            "skipped": 0,
+            "deselected": 0,
+            "errors": 0,
+            "skip_reasons": [],
+            "line": "66 passed in 25.16s"
+          }
+        }
+      ],
+      "evidence_files": [],
+      "first_failure": null,
+      "flaky": false,
+      "inherited": false,
+      "this_run": true,
+      "history": [
+        {
+          "result": "PASS",
+          "checked_commit": "a6506fcefb84151d9dfe1a54d5738fb5ec7c01da",
+          "finished_at": "2026-10-05T04:12:08Z",
+          "duration_s": 21.2,
+          "attempts": 1
+        }
+      ]
+    },
+    {
+      "id": "p4-b1-mal-loop",
+      "group": "b1",
+      "title": "MAL 闭环（协议测试服务）：逐动作签发按当前版本检查后放行、目标达成；混合红方采用至少一次可追溯到模型应答的决策，stub 标 LLM_STUB、不可达回退 RULE；红蓝双方实际行动由环境裁判；参与者下载为投影（去凭据/去他方配置）；无凭据零副作用；模型修订真实偏差成案、陈旧不入库",
+      "command": "uv run --frozen python scripts/b1_mal_evidence.py",
+      "tasks": [
+        "P4B-B1"
+      ],
+      "evidence": [],
+      "requires": null,
+      "profile": "local-lite",
+      "kind": "mandatory",
+      "retries": 0,
+      "heavy_gib": 0.0,
+      "produces": [
+        "docs/execution/evidence/phase4/b1-mal.json"
+      ],
+      "protocol": true,
+      "assertions_from": null,
+      "trigger": null,
+      "result": "PASS",
+      "reason": "[p4-b1-mal-loop] PASS: 11 required assertion(s) hold",
+      "summary": "[p4-b1-mal-loop] PASS: 11 required assertion(s) hold",
+      "condition": null,
+      "checked_commit": "b993dc90c72b413b4d0b5e28e23cad993f9acba4",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "worktree_clean": true,
+      "config_sha256": "31b0a71b59a15958c1a2463f7812f6bdb9a5c7edaf8102162ad973103b6e96cb",
+      "run_nonce": "fabadd22f7474dc9bb989c109054917a",
+      "started_at": "2026-10-05T12:23:44Z",
+      "finished_at": "2026-10-05T12:23:48Z",
+      "duration_s": 4.0,
+      "attempts": [
+        {
+          "attempt": 1,
+          "started_at": "2026-10-05T12:23:44Z",
+          "finished_at": "2026-10-05T12:23:48Z",
+          "duration_s": 4.0,
+          "exit_code": 0,
+          "result": "PASS",
+          "reason": "[p4-b1-mal-loop] PASS: 11 required assertion(s) hold",
+          "log": "out/acceptance/phase4/logs/p4-b1-mal-loop/20261005T122344Z-attempt-1.log",
+          "summary": "[p4-b1-mal-loop] PASS: 11 required assertion(s) hold",
+          "nonce": "73369f0aa8ce4aa18a194d8b3a8cfee9",
+          "structured_result": "out/acceptance/phase4/logs/p4-b1-mal-loop/20261005T122344Z-attempt-1.result.json",
+          "assertions": [
+            {
+              "id": "per_action_loop_reaches_goal",
+              "required": true,
+              "holds": true,
+              "detail": "{'status': 'SUCCEEDED', 'reason': \"goal 'target_reached' reached\", 'steps': 6, 'goal_reached': True, 'gate_verdicts': [<GateVerdict.ALLOW: 'ALLOW'>, <GateVerdict.ALLOW: 'ALLOW'>, <GateVerdict.ALLOW: 'ALLOW'>, <GateVerdict.ALLOW: 'ALLOW'>, <GateVerdict.ALLOW: 'ALLOW'>, <GateVerdict.ALLOW: 'ALLOW'>, <GateVerdict.ALLOW: 'ALLOW'>, <GateVerdict.ALLOW: 'ALLOW'>, <GateVerdict.ALLOW: 'ALLOW'>, <GateVerdict.ALLOW: 'ALLOW'>, <GateVerdict.ALLOW: 'ALLOW'>, <GateVerdict.ALLOW: 'ALLOW'>], 'denied_operations':"
+            },
+            {
+              "id": "every_send_checked_at_its_revision",
+              "required": true,
+              "holds": true,
+              "detail": "6 issuer checks at their revisions"
+            },
+            {
+              "id": "red_adopts_a_model_decision",
+              "required": true,
+              "holds": true,
+              "detail": "6 adopted LLM_PROTOCOL_TEST send(s) with call ids"
+            },
+            {
+              "id": "stub_labelled_and_unreachable_falls_back",
+              "required": true,
+              "holds": true,
+              "detail": "stub=LLM_STUB, unreachable=RULE (TRANSPORT_ERROR)"
+            },
+            {
+              "id": "red_and_blue_both_act",
+              "required": true,
+              "holds": true,
+              "detail": "{'rule': (6, 22, False), 'hybrid': (6, 22, False)}"
+            },
+            {
+              "id": "blue_decision_varies_with_observation",
+              "required": true,
+              "holds": true,
+              "detail": "{'case_a_harden': 'app:attemptRead', 'case_b_harden': 'app:successfulRead', 'decision_varies': True}"
+            },
+            {
+              "id": "participant_download_is_a_projection",
+              "required": true,
+              "holds": true,
+              "detail": "leaks=[]; blue config removed=True"
+            },
+            {
+              "id": "no_receipt_no_side_effect",
+              "required": true,
+              "holds": true,
+              "detail": "{'status': 'BUDGET_EXHAUSTED', 'reason': 'step budget exhausted (60/60)', 'steps': 60, 'goal_reached': False, 'gate_verdicts': [<GateVerdict.DENY: 'DENY'>, <GateVerdict.DENY: 'DENY'>, <GateVerdict.DENY: 'DENY'>, <GateVerdict.DENY: 'DENY'>, <GateVerdict.DENY: 'DENY'>, <GateVerdict.DENY: 'DENY'>, <GateVerdict.DENY: 'DENY'>, <GateVerdict.DENY: 'DENY'>, <GateVerdict.DENY: 'DENY'>, <GateVerdict.DENY: 'DENY'>, <GateVerdict.DENY: 'DENY'>, <GateVerdict.DENY: 'DENY'>, <GateVerdict.DENY: 'DENY'>, <GateVer"
+            },
+            {
+              "id": "issuer_denies_unmet_precondition",
+              "required": true,
+              "holds": true,
+              "detail": "ACTION_PRECONDITION_FAILED at revision 0: compromise(secret:read) is not applicable in the current state (PRECONDITION_F"
+            },
+            {
+              "id": "true_deviation_regression_and_revision",
+              "required": true,
+              "holds": true,
+              "detail": "{'is_model_error': True, 'old_v1_rejected': True, 'revised_v2_passes': True, 'stale': 'STALE', 'regression_library_clean': True}"
+            },
+            {
+              "id": "stale_difference_not_in_library",
+              "required": true,
+              "holds": true,
+              "detail": "STALE"
+            }
+          ],
+          "produced": [
+            {
+              "path": "docs/execution/evidence/phase4/b1-mal.json",
+              "exists": true,
+              "sha256": "c5c04757e626bb2c1eb653579a17a914142689e2839d7c1ee4713f4713a8b4ac",
+              "fresh": true
+            }
+          ],
+          "pytest": null
+        }
+      ],
+      "evidence_files": [
+        {
+          "path": "docs/execution/evidence/phase4/b1-mal.json",
+          "exists": true,
+          "sha256": "c5c04757e626bb2c1eb653579a17a914142689e2839d7c1ee4713f4713a8b4ac",
+          "fresh": true
+        }
+      ],
+      "first_failure": null,
+      "flaky": false,
+      "inherited": false,
+      "this_run": true,
+      "history": [
+        {
+          "result": "PASS",
+          "checked_commit": "a6506fcefb84151d9dfe1a54d5738fb5ec7c01da",
+          "finished_at": "2026-10-05T04:12:14Z",
+          "duration_s": 6.0,
+          "attempts": 1
+        }
+      ]
+    },
+    {
+      "id": "p4-b1-real-endpoint",
+      "group": "b1",
+      "title": "已配置真实端点的混合红方：至少一次被采用的攻击步选择可追溯到真实模型应答；未配置或不可达记 BLOCKED，协议测试服务不充当真实模型",
+      "command": "uv run --frozen python scripts/b1_mal_evidence.py --real",
+      "tasks": [
+        "P4B-B1"
+      ],
+      "evidence": [],
+      "requires": null,
+      "profile": "local-lite",
+      "kind": "mandatory",
+      "retries": 0,
+      "heavy_gib": 0.0,
+      "produces": [
+        "docs/execution/evidence/phase4/b1-real-endpoint.json"
+      ],
+      "protocol": true,
+      "assertions_from": null,
+      "trigger": null,
+      "result": "PASS",
+      "reason": "[p4-b1-real-endpoint] PASS: 11 required assertion(s) hold",
+      "summary": "[p4-b1-real-endpoint] PASS: 11 required assertion(s) hold",
+      "condition": null,
+      "checked_commit": "b993dc90c72b413b4d0b5e28e23cad993f9acba4",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "worktree_clean": true,
+      "config_sha256": "31b0a71b59a15958c1a2463f7812f6bdb9a5c7edaf8102162ad973103b6e96cb",
+      "run_nonce": "fabadd22f7474dc9bb989c109054917a",
+      "started_at": "2026-10-05T12:23:48Z",
+      "finished_at": "2026-10-05T12:27:58Z",
+      "duration_s": 250.1,
+      "attempts": [
+        {
+          "attempt": 1,
+          "started_at": "2026-10-05T12:23:48Z",
+          "finished_at": "2026-10-05T12:27:58Z",
+          "duration_s": 250.1,
+          "exit_code": 0,
+          "result": "PASS",
+          "reason": "[p4-b1-real-endpoint] PASS: 11 required assertion(s) hold",
+          "log": "out/acceptance/phase4/logs/p4-b1-real-endpoint/20261005T122348Z-attempt-1.log",
+          "summary": "[p4-b1-real-endpoint] PASS: 11 required assertion(s) hold",
+          "nonce": "77bef2c3eff446dba2197e5eb45494e7",
+          "structured_result": "out/acceptance/phase4/logs/p4-b1-real-endpoint/20261005T122348Z-attempt-1.result.json",
+          "assertions": [
+            {
+              "id": "per_action_loop_reaches_goal",
+              "required": true,
+              "holds": true,
+              "detail": "{'status': 'SUCCEEDED', 'reason': \"goal 'target_reached' reached\", 'steps': 6, 'goal_reached': True, 'gate_verdicts': [<GateVerdict.ALLOW: 'ALLOW'>, <GateVerdict.ALLOW: 'ALLOW'>, <GateVerdict.ALLOW: 'ALLOW'>, <GateVerdict.ALLOW: 'ALLOW'>, <GateVerdict.ALLOW: 'ALLOW'>, <GateVerdict.ALLOW: 'ALLOW'>, <GateVerdict.ALLOW: 'ALLOW'>, <GateVerdict.ALLOW: 'ALLOW'>, <GateVerdict.ALLOW: 'ALLOW'>, <GateVerdict.ALLOW: 'ALLOW'>, <GateVerdict.ALLOW: 'ALLOW'>, <GateVerdict.ALLOW: 'ALLOW'>], 'denied_operations':"
+            },
+            {
+              "id": "every_send_checked_at_its_revision",
+              "required": true,
+              "holds": true,
+              "detail": "6 issuer checks at their revisions"
+            },
+            {
+              "id": "red_adopts_a_model_decision",
+              "required": true,
+              "holds": true,
+              "detail": "6 adopted LLM send(s) with call ids"
+            },
+            {
+              "id": "stub_labelled_and_unreachable_falls_back",
+              "required": true,
+              "holds": true,
+              "detail": "stub=LLM_STUB, unreachable=RULE (TRANSPORT_ERROR)"
+            },
+            {
+              "id": "red_and_blue_both_act",
+              "required": true,
+              "holds": true,
+              "detail": "{'rule': (6, 22, False), 'hybrid': (5, 23, False)}"
+            },
+            {
+              "id": "blue_decision_varies_with_observation",
+              "required": true,
+              "holds": true,
+              "detail": "{'case_a_harden': 'app:attemptRead', 'case_b_harden': 'app:successfulRead', 'decision_varies': True}"
+            },
+            {
+              "id": "participant_download_is_a_projection",
+              "required": true,
+              "holds": true,
+              "detail": "leaks=[]; blue config removed=True"
+            },
+            {
+              "id": "no_receipt_no_side_effect",
+              "required": true,
+              "holds": true,
+              "detail": "{'status': 'BUDGET_EXHAUSTED', 'reason': 'step budget exhausted (60/60)', 'steps': 60, 'goal_reached': False, 'gate_verdicts': [<GateVerdict.DENY: 'DENY'>, <GateVerdict.DENY: 'DENY'>, <GateVerdict.DENY: 'DENY'>, <GateVerdict.DENY: 'DENY'>, <GateVerdict.DENY: 'DENY'>, <GateVerdict.DENY: 'DENY'>, <GateVerdict.DENY: 'DENY'>, <GateVerdict.DENY: 'DENY'>, <GateVerdict.DENY: 'DENY'>, <GateVerdict.DENY: 'DENY'>, <GateVerdict.DENY: 'DENY'>, <GateVerdict.DENY: 'DENY'>, <GateVerdict.DENY: 'DENY'>, <GateVer"
+            },
+            {
+              "id": "issuer_denies_unmet_precondition",
+              "required": true,
+              "holds": true,
+              "detail": "ACTION_PRECONDITION_FAILED at revision 0: compromise(secret:read) is not applicable in the current state (PRECONDITION_F"
+            },
+            {
+              "id": "true_deviation_regression_and_revision",
+              "required": true,
+              "holds": true,
+              "detail": "{'is_model_error': True, 'old_v1_rejected': True, 'revised_v2_passes': True, 'stale': 'STALE', 'regression_library_clean': True}"
+            },
+            {
+              "id": "stale_difference_not_in_library",
+              "required": true,
+              "holds": true,
+              "detail": "STALE"
+            }
+          ],
+          "produced": [
+            {
+              "path": "docs/execution/evidence/phase4/b1-real-endpoint.json",
+              "exists": true,
+              "sha256": "60845453b9cb903d36cc256f6841b105c050f17d32f2ebd360c51ff30723e6b8",
+              "fresh": true
+            }
+          ],
+          "pytest": null
+        }
+      ],
+      "evidence_files": [
+        {
+          "path": "docs/execution/evidence/phase4/b1-real-endpoint.json",
+          "exists": true,
+          "sha256": "60845453b9cb903d36cc256f6841b105c050f17d32f2ebd360c51ff30723e6b8",
+          "fresh": true
+        }
+      ],
+      "first_failure": null,
+      "flaky": false,
+      "inherited": false,
+      "this_run": true,
+      "history": [
+        {
+          "result": "PASS",
+          "checked_commit": "a6506fcefb84151d9dfe1a54d5738fb5ec7c01da",
+          "finished_at": "2026-10-05T04:13:18Z",
+          "duration_s": 63.8,
+          "attempts": 1
+        }
+      ]
+    },
+    {
+      "id": "p4-b1-service",
+      "group": "b1",
+      "title": "真实订单服务领域实验：全生命周期、实验前/中/恢复后连续业务探针（成功率/服务状态/恢复时间）、特权动作只经 Broker、模型与服务一致/偏差/无法判断三种结果、真实偏差成回归案例且修订模型通过、旧运行仍引用旧模型",
+      "command": "uv run --frozen python scripts/b1_service_evidence.py",
+      "tasks": [
+        "P4B-B1"
+      ],
+      "evidence": [],
+      "requires": null,
+      "profile": "local-lite",
+      "kind": "mandatory",
+      "retries": 0,
+      "heavy_gib": 0.0,
+      "produces": [
+        "docs/execution/evidence/phase4/b1-service.json"
+      ],
+      "protocol": true,
+      "assertions_from": null,
+      "trigger": null,
+      "result": "PASS",
+      "reason": "[p4-b1-service] PASS: 9 required assertion(s) hold",
+      "summary": "[p4-b1-service] PASS: 9 required assertion(s) hold",
+      "condition": null,
+      "checked_commit": "b993dc90c72b413b4d0b5e28e23cad993f9acba4",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "worktree_clean": true,
+      "config_sha256": "31b0a71b59a15958c1a2463f7812f6bdb9a5c7edaf8102162ad973103b6e96cb",
+      "run_nonce": "fabadd22f7474dc9bb989c109054917a",
+      "started_at": "2026-10-05T12:27:58Z",
+      "finished_at": "2026-10-05T12:28:00Z",
+      "duration_s": 1.3,
+      "attempts": [
+        {
+          "attempt": 1,
+          "started_at": "2026-10-05T12:27:58Z",
+          "finished_at": "2026-10-05T12:28:00Z",
+          "duration_s": 1.3,
+          "exit_code": 0,
+          "result": "PASS",
+          "reason": "[p4-b1-service] PASS: 9 required assertion(s) hold",
+          "log": "out/acceptance/phase4/logs/p4-b1-service/20261005T122758Z-attempt-1.log",
+          "summary": "[p4-b1-service] PASS: 9 required assertion(s) hold",
+          "nonce": "3af18fc99f894fc4a3eb9da548d3b729",
+          "structured_result": "out/acceptance/phase4/logs/p4-b1-service/20261005T122758Z-attempt-1.result.json",
+          "assertions": [
+            {
+              "id": "business_runs_before_during_and_after_recovery",
+              "required": true,
+              "holds": true,
+              "detail": "before 3/3, during applied 3/3, recovery 3/3"
+            },
+            {
+              "id": "independent_probe_records_state_and_recovery",
+              "required": true,
+              "holds": true,
+              "detail": "probe health before/during/after; recovery_seconds 0.11"
+            },
+            {
+              "id": "denied_privileged_action_has_zero_side_effect",
+              "required": true,
+              "holds": true,
+              "detail": "DENY"
+            },
+            {
+              "id": "three_outcomes_match_deviation_insufficient",
+              "required": true,
+              "holds": true,
+              "detail": "CONSISTENT / MODEL_DEVIATION / UNDECIDABLE"
+            },
+            {
+              "id": "deviation_becomes_a_regression_and_revision_passes",
+              "required": true,
+              "holds": true,
+              "detail": "{'v1_rejected_by_case': True, 'v2_passes_case': True, 'original_run_keeps_its_model': True}"
+            },
+            {
+              "id": "stale_difference_not_a_model_error",
+              "required": true,
+              "holds": true,
+              "detail": "STALE"
+            },
+            {
+              "id": "reset_and_rerun_reproduces",
+              "required": true,
+              "holds": true,
+              "detail": "[200, 200, 200]"
+            },
+            {
+              "id": "resources_accountable_after_crash",
+              "required": true,
+              "holds": true,
+              "detail": "var/b1-service/.fal-orders/phase4b-b1/data"
+            },
+            {
+              "id": "cleaned_up",
+              "required": true,
+              "holds": true,
+              "detail": "{'processes': [622650], 'containers': [], 'paths': ['/Users/null3351/Code/formal-agent-lab/var/b1-service/.fal-orders/phase4b-b1']}"
+            }
+          ],
+          "produced": [
+            {
+              "path": "docs/execution/evidence/phase4/b1-service.json",
+              "exists": true,
+              "sha256": "b16a8a059ec9cda5e046cd93e72e1c67e6db73646520bff37f6d44272f1b09cb",
+              "fresh": true
+            }
+          ],
+          "pytest": null
+        }
+      ],
+      "evidence_files": [
+        {
+          "path": "docs/execution/evidence/phase4/b1-service.json",
+          "exists": true,
+          "sha256": "b16a8a059ec9cda5e046cd93e72e1c67e6db73646520bff37f6d44272f1b09cb",
+          "fresh": true
+        }
+      ],
+      "first_failure": null,
+      "flaky": false,
+      "inherited": false,
+      "this_run": true,
+      "history": [
+        {
+          "result": "PASS",
+          "checked_commit": "a6506fcefb84151d9dfe1a54d5738fb5ec7c01da",
+          "finished_at": "2026-10-05T04:13:19Z",
+          "duration_s": 1.2,
+          "attempts": 1
+        }
+      ]
+    },
+    {
+      "id": "p4-b2-unit",
+      "group": "b2",
+      "title": "CAGE 4 平台接入（单元 + 工具链）：蓝方接口模型/驱动只预测适用性、指标原生分数与平台指标分开、轨迹逐步比较、会话一步一原生世界步/占用中不启动/越权主机与未声明动作拒绝、伪造历史重建被拒",
+      "command": "uv run --frozen pytest -p no:cacheprovider -q packages/environment-cage/tests",
+      "tasks": [
+        "P4B-B2"
+      ],
+      "evidence": [],
+      "requires": null,
+      "profile": "local-lite",
+      "kind": "mandatory",
+      "retries": 0,
+      "heavy_gib": 0.0,
+      "produces": [],
+      "protocol": false,
+      "assertions_from": null,
+      "trigger": null,
+      "result": "PASS",
+      "reason": "14 passed in 4.38s",
+      "summary": "14 passed in 4.38s",
+      "condition": null,
+      "checked_commit": "b993dc90c72b413b4d0b5e28e23cad993f9acba4",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "worktree_clean": true,
+      "config_sha256": "31b0a71b59a15958c1a2463f7812f6bdb9a5c7edaf8102162ad973103b6e96cb",
+      "run_nonce": "fabadd22f7474dc9bb989c109054917a",
+      "started_at": "2026-10-05T12:28:00Z",
+      "finished_at": "2026-10-05T12:28:04Z",
+      "duration_s": 4.6,
+      "attempts": [
+        {
+          "attempt": 1,
+          "started_at": "2026-10-05T12:28:00Z",
+          "finished_at": "2026-10-05T12:28:04Z",
+          "duration_s": 4.6,
+          "exit_code": 0,
+          "result": "PASS",
+          "reason": "14 passed in 4.38s",
+          "log": "out/acceptance/phase4/logs/p4-b2-unit/20261005T122800Z-attempt-1.log",
+          "summary": "14 passed in 4.38s",
+          "nonce": "7948392857714d3887c20cd06760eb17",
+          "structured_result": null,
+          "assertions": [],
+          "produced": [],
+          "pytest": {
+            "passed": 14,
+            "failed": 0,
+            "skipped": 0,
+            "deselected": 0,
+            "errors": 0,
+            "skip_reasons": [],
+            "line": "14 passed in 4.38s"
+          }
+        }
+      ],
+      "evidence_files": [],
+      "first_failure": null,
+      "flaky": false,
+      "inherited": false,
+      "this_run": true,
+      "history": [
+        {
+          "result": "PASS",
+          "checked_commit": "a6506fcefb84151d9dfe1a54d5738fb5ec7c01da",
+          "finished_at": "2026-10-05T04:13:24Z",
+          "duration_s": 4.5,
+          "attempts": 1
+        }
+      ]
+    },
+    {
+      "id": "p4-b2-native-platform",
+      "group": "b2",
+      "title": "原生直接路径与平台适配路径逐世界步一致（含状态与随机数摘要）：sleep=官方基线 SleepAgent、monitor（恒定监控）与 react（dev / holdout）=同一动作序列的原生直接路径；参与者映射；轮中停止新进程续跑、丢失 worker 重建、丢失应答后恢复执行一次",
+      "command": "uv run --frozen python scripts/b2_cage_evidence.py",
+      "tasks": [
+        "P4B-B2"
+      ],
+      "evidence": [],
+      "requires": null,
+      "profile": "local-lite",
+      "kind": "mandatory",
+      "retries": 0,
+      "heavy_gib": 0.0,
+      "produces": [
+        "docs/execution/evidence/phase4/b2-cage.json"
+      ],
+      "protocol": true,
+      "assertions_from": null,
+      "trigger": null,
+      "result": "PASS",
+      "reason": "[p4-b2-native-platform] PASS: 10 required assertion(s) hold",
+      "summary": "[p4-b2-native-platform] PASS: 10 required assertion(s) hold",
+      "condition": null,
+      "checked_commit": "b993dc90c72b413b4d0b5e28e23cad993f9acba4",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "worktree_clean": true,
+      "config_sha256": "31b0a71b59a15958c1a2463f7812f6bdb9a5c7edaf8102162ad973103b6e96cb",
+      "run_nonce": "fabadd22f7474dc9bb989c109054917a",
+      "started_at": "2026-10-05T12:28:04Z",
+      "finished_at": "2026-10-05T12:28:27Z",
+      "duration_s": 22.6,
+      "attempts": [
+        {
+          "attempt": 1,
+          "started_at": "2026-10-05T12:28:04Z",
+          "finished_at": "2026-10-05T12:28:27Z",
+          "duration_s": 22.6,
+          "exit_code": 0,
+          "result": "PASS",
+          "reason": "[p4-b2-native-platform] PASS: 10 required assertion(s) hold",
+          "log": "out/acceptance/phase4/logs/p4-b2-native-platform/20261005T122804Z-attempt-1.log",
+          "summary": "[p4-b2-native-platform] PASS: 10 required assertion(s) hold",
+          "nonce": "bec533d0f3054ce0939a72f34521b3f8",
+          "structured_result": "out/acceptance/phase4/logs/p4-b2-native-platform/20261005T122804Z-attempt-1.result.json",
+          "assertions": [
+            {
+              "id": "native_equals_platform:sleep_vs_official_baseline",
+              "required": true,
+              "holds": true,
+              "detail": "29/29 world steps equal; first difference None; rewards {'native': {'Blue': 0.0, 'Red': 0.0, 'Green': 0.0}, 'platform': {'Blue': 0.0, 'Red': 0.0, 'Green': 0.0}}"
+            },
+            {
+              "id": "native_equals_platform:monitor_vs_same_actions",
+              "required": true,
+              "holds": true,
+              "detail": "29/29 world steps equal; first difference None; rewards {'native': {'Blue': 0.0, 'Red': 0.0, 'Green': 0.0}, 'platform': {'Blue': 0.0, 'Red': 0.0, 'Green': 0.0}}"
+            },
+            {
+              "id": "native_equals_platform:react_dev_vs_same_actions",
+              "required": true,
+              "holds": true,
+              "detail": "29/29 world steps equal; first difference None; rewards {'native': {'Blue': 0.0, 'Red': 0.0, 'Green': 0.0}, 'platform': {'Blue': 0.0, 'Red': 0.0, 'Green': 0.0}}"
+            },
+            {
+              "id": "native_equals_platform:react_holdout_vs_same_actions",
+              "required": true,
+              "holds": true,
+              "detail": "29/29 world steps equal; first difference None; rewards {'native': {'Blue': 0.0, 'Red': 0.0, 'Green': 0.0}, 'platform': {'Blue': 0.0, 'Red': 0.0, 'Green': 0.0}}"
+            },
+            {
+              "id": "resume_in_a_new_process_equals_uninterrupted",
+              "required": true,
+              "holds": true,
+              "detail": "{'stopped_after_global_step': 63, 'resumed_in_new_process': True, 'status': 'SUCCEEDED', 'trajectory_equal': True, 'equal_world_steps': 29, 'world_steps': 29, 'same_metrics_except_elapsed_time': True}"
+            },
+            {
+              "id": "lost_worker_rebuilt_from_the_committed_log",
+              "required": true,
+              "holds": true,
+              "detail": "{'killed_before_world_step': 5, 'equal': True, 'rebuilds': 1, 'sessions': 2}"
+            },
+            {
+              "id": "lost_answer_restore_and_execute_once",
+              "required": true,
+              "holds": true,
+              "detail": "{'raised': 'ResultUnknown', 'equal': True, 'note': 'the pipe to a killed worker breaks: ResultUnknown; restore = verified rebuild of the pre-step state, then the step runs once'}"
+            },
+            {
+              "id": "forged_history_refused",
+              "required": true,
+              "holds": true,
+              "detail": "rebuild diverged: replaying 4 world step(s) gives digest 6a9cea344fe7, the snapshot has 04909e1290a3"
+            },
+            {
+              "id": "plugins_discovered",
+              "required": true,
+              "holds": true,
+              "detail": "formal-lab.cage4.blue-monitor, formal-lab.cage4.blue-react, formal-lab.cage4.blue-sleep, formal-lab.cage4.metrics, formal-lab.driver.cage4, formal-lab.env.cage4"
+            },
+            {
+              "id": "toolchain_recorded",
+              "required": true,
+              "holds": true,
+              "detail": "CybORG 4.0 @ 8c3c50ca54b176c2de199847944e8dcc035497e3; 20 packages sha256 961637b99469"
+            }
+          ],
+          "produced": [
+            {
+              "path": "docs/execution/evidence/phase4/b2-cage.json",
+              "exists": true,
+              "sha256": "bb60b878561c4baa9b72a9c151f7677d9a1de5e70a57ea52eeb703b9b75c4068",
+              "fresh": true
+            }
+          ],
+          "pytest": null
+        }
+      ],
+      "evidence_files": [
+        {
+          "path": "docs/execution/evidence/phase4/b2-cage.json",
+          "exists": true,
+          "sha256": "bb60b878561c4baa9b72a9c151f7677d9a1de5e70a57ea52eeb703b9b75c4068",
+          "fresh": true
+        }
+      ],
+      "first_failure": null,
+      "flaky": false,
+      "inherited": false,
+      "this_run": true,
+      "history": [
+        {
+          "result": "PASS",
+          "checked_commit": "a6506fcefb84151d9dfe1a54d5738fb5ec7c01da",
+          "finished_at": "2026-10-05T04:13:43Z",
+          "duration_s": 18.9,
+          "attempts": 1
+        }
+      ]
+    },
+    {
+      "id": "p4-b2-platform",
+      "group": "b2",
+      "title": "持久路径（API + Temporal + PostgreSQL）：插件发现、经 API 建模型、轮中暂停 + SIGKILL worker 后完成且与原生路径一致、参与者下载无裁判数据；平台矩阵 2 场景变体 × 3 方法 × 3 共享种子配对报告（参照官方基线）与同种子复跑",
+      "command": "uv run --frozen pytest -p no:cacheprovider -q -m 'integration and cage' tests/integration/test_cage_platform.py",
+      "tasks": [
+        "P4B-B2"
+      ],
+      "evidence": [],
+      "requires": "services",
+      "profile": "local-lite",
+      "kind": "mandatory",
+      "retries": 0,
+      "heavy_gib": 0.0,
+      "produces": [
+        "docs/execution/evidence/phase4/b2-platform-run.json",
+        "docs/execution/evidence/phase4/b2-matrix.json",
+        "docs/execution/evidence/phase4/b2-paired-report.md"
+      ],
+      "protocol": false,
+      "assertions_from": null,
+      "trigger": null,
+      "result": "PASS",
+      "reason": "2 passed in 876.82s (0:14:36)",
+      "summary": "2 passed in 876.82s (0:14:36)",
+      "condition": null,
+      "checked_commit": "b993dc90c72b413b4d0b5e28e23cad993f9acba4",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "worktree_clean": true,
+      "config_sha256": "31b0a71b59a15958c1a2463f7812f6bdb9a5c7edaf8102162ad973103b6e96cb",
+      "run_nonce": "fabadd22f7474dc9bb989c109054917a",
+      "started_at": "2026-10-05T12:28:28Z",
+      "finished_at": "2026-10-05T12:43:06Z",
+      "duration_s": 877.5,
+      "attempts": [
+        {
+          "attempt": 1,
+          "started_at": "2026-10-05T12:28:28Z",
+          "finished_at": "2026-10-05T12:43:05Z",
+          "duration_s": 877.5,
+          "exit_code": 0,
+          "result": "PASS",
+          "reason": "2 passed in 876.82s (0:14:36)",
+          "log": "out/acceptance/phase4/logs/p4-b2-platform/20261005T122828Z-attempt-1.log",
+          "summary": "2 passed in 876.82s (0:14:36)",
+          "nonce": "eee90a966e624509baa236d8721e5df8",
+          "structured_result": null,
+          "assertions": [],
+          "produced": [
+            {
+              "path": "docs/execution/evidence/phase4/b2-platform-run.json",
+              "exists": true,
+              "sha256": "74eca98e959782bad07a113dce6c9725a0f91babee70f86059a2e28e8a6b5273",
+              "fresh": true
+            },
+            {
+              "path": "docs/execution/evidence/phase4/b2-matrix.json",
+              "exists": true,
+              "sha256": "4ed6ad0747853c88b173de8f937fde9a367dd2dc294e12fedfaead0dbb7befe3",
+              "fresh": true
+            },
+            {
+              "path": "docs/execution/evidence/phase4/b2-paired-report.md",
+              "exists": true,
+              "sha256": "335eb8899e4a5694069276844d42c4cc0ad5751e35e99bbb925de5745d3cf725",
+              "fresh": true
+            }
+          ],
+          "pytest": {
+            "passed": 2,
+            "failed": 0,
+            "skipped": 0,
+            "deselected": 0,
+            "errors": 0,
+            "skip_reasons": [],
+            "line": "2 passed in 876.82s (0:14:36)"
+          }
+        }
+      ],
+      "evidence_files": [
+        {
+          "path": "docs/execution/evidence/phase4/b2-platform-run.json",
+          "exists": true,
+          "sha256": "74eca98e959782bad07a113dce6c9725a0f91babee70f86059a2e28e8a6b5273",
+          "fresh": true
+        },
+        {
+          "path": "docs/execution/evidence/phase4/b2-matrix.json",
+          "exists": true,
+          "sha256": "4ed6ad0747853c88b173de8f937fde9a367dd2dc294e12fedfaead0dbb7befe3",
+          "fresh": true
+        },
+        {
+          "path": "docs/execution/evidence/phase4/b2-paired-report.md",
+          "exists": true,
+          "sha256": "335eb8899e4a5694069276844d42c4cc0ad5751e35e99bbb925de5745d3cf725",
+          "fresh": true
+        }
+      ],
+      "first_failure": null,
+      "flaky": false,
+      "inherited": false,
+      "this_run": true,
+      "history": [
+        {
+          "result": "PASS",
+          "checked_commit": "a6506fcefb84151d9dfe1a54d5738fb5ec7c01da",
+          "finished_at": "2026-10-05T04:25:45Z",
+          "duration_s": 720.5,
+          "attempts": 1
+        }
+      ]
+    },
+    {
+      "id": "p4-b3-unit",
+      "group": "b3",
+      "title": "B3 修复的单元：MAL 门控只管准入范围内动作（蓝方加固显式放行并记录、攻击方视图下陈旧红方步被签发方拒绝）、回放包一步保留全部门控决策、领域证据结论由实际检查产生（存在 / 通过 / 当前修订分别判定）、验收按 A / B / 全产品分别报告",
+      "command": "uv run --frozen pytest -p no:cacheprovider -q tests/tools/test_evidence_io.py tests/tools/test_acceptance_local.py packages/domain-mal/tests/test_admission.py",
+      "tasks": [
+        "P4B-B3"
+      ],
+      "evidence": [],
+      "requires": null,
+      "profile": "local-lite",
+      "kind": "mandatory",
+      "retries": 0,
+      "heavy_gib": 0.0,
+      "produces": [],
+      "protocol": false,
+      "assertions_from": null,
+      "trigger": null,
+      "result": "PASS",
+      "reason": "21 passed in 15.03s",
+      "summary": "21 passed in 15.03s",
+      "condition": null,
+      "checked_commit": "b993dc90c72b413b4d0b5e28e23cad993f9acba4",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "worktree_clean": true,
+      "config_sha256": "31b0a71b59a15958c1a2463f7812f6bdb9a5c7edaf8102162ad973103b6e96cb",
+      "run_nonce": "fabadd22f7474dc9bb989c109054917a",
+      "started_at": "2026-10-05T12:43:06Z",
+      "finished_at": "2026-10-05T12:43:22Z",
+      "duration_s": 15.7,
+      "attempts": [
+        {
+          "attempt": 1,
+          "started_at": "2026-10-05T12:43:06Z",
+          "finished_at": "2026-10-05T12:43:22Z",
+          "duration_s": 15.7,
+          "exit_code": 0,
+          "result": "PASS",
+          "reason": "21 passed in 15.03s",
+          "log": "out/acceptance/phase4/logs/p4-b3-unit/20261005T124306Z-attempt-1.log",
+          "summary": "21 passed in 15.03s",
+          "nonce": "58ce1221c0f54ddaa7a3e0acda73427c",
+          "structured_result": null,
+          "assertions": [],
+          "produced": [],
+          "pytest": {
+            "passed": 21,
+            "failed": 0,
+            "skipped": 0,
+            "deselected": 0,
+            "errors": 0,
+            "skip_reasons": [],
+            "line": "21 passed in 15.03s"
+          }
+        }
+      ],
+      "evidence_files": [],
+      "first_failure": null,
+      "flaky": false,
+      "inherited": false,
+      "this_run": true,
+      "history": [
+        {
+          "result": "PASS",
+          "checked_commit": "a6506fcefb84151d9dfe1a54d5738fb5ec7c01da",
+          "finished_at": "2026-10-05T04:25:57Z",
+          "duration_s": 11.8,
+          "attempts": 1
+        }
+      ]
+    },
+    {
+      "id": "p4-b3-product-flow",
+      "group": "b3",
+      "title": "MAL 领域经 Web / API / CLI / SDK：Web 表单经模型前端导入攻击图（保留领域扩展）、CLI 导入防御变体、SDK 模型修订（不完整捕获 v1 与完整捕获 v2 的有界结论不同）、场景表单显示并保存门控、CLI 运行逐动作准入红队、API / CLI 解释步含 Broker 判定、API 红蓝（攻击方视图隐藏加固 → 陈旧步被拒、蓝方加固显式放行）、Web 运行台 / 步骤详情 / 证据回放 / 基准页、参与者下载为各自投影、CLI 导出后停止 API 离线回放",
+      "command": "uv run --frozen pytest -p no:cacheprovider -q -m integration tests/integration/test_product_flow_b3.py",
+      "tasks": [
+        "P4B-B3"
+      ],
+      "evidence": [],
+      "requires": "services",
+      "profile": "local-lite",
+      "kind": "mandatory",
+      "retries": 0,
+      "heavy_gib": 0.0,
+      "produces": [
+        "docs/execution/evidence/phase4/b3-product-flow.json"
+      ],
+      "protocol": false,
+      "assertions_from": null,
+      "trigger": null,
+      "result": "PASS",
+      "reason": "1 passed in 56.81s",
+      "summary": "1 passed in 56.81s",
+      "condition": null,
+      "checked_commit": "b993dc90c72b413b4d0b5e28e23cad993f9acba4",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "worktree_clean": true,
+      "config_sha256": "31b0a71b59a15958c1a2463f7812f6bdb9a5c7edaf8102162ad973103b6e96cb",
+      "run_nonce": "fabadd22f7474dc9bb989c109054917a",
+      "started_at": "2026-10-05T12:43:22Z",
+      "finished_at": "2026-10-05T12:44:19Z",
+      "duration_s": 57.3,
+      "attempts": [
+        {
+          "attempt": 1,
+          "started_at": "2026-10-05T12:43:22Z",
+          "finished_at": "2026-10-05T12:44:19Z",
+          "duration_s": 57.3,
+          "exit_code": 0,
+          "result": "PASS",
+          "reason": "1 passed in 56.81s",
+          "log": "out/acceptance/phase4/logs/p4-b3-product-flow/20261005T124322Z-attempt-1.log",
+          "summary": "1 passed in 56.81s",
+          "nonce": "fc1a5cd24aec4a3c81ad7c55a178b68f",
+          "structured_result": null,
+          "assertions": [],
+          "produced": [
+            {
+              "path": "docs/execution/evidence/phase4/b3-product-flow.json",
+              "exists": true,
+              "sha256": "eb79acd7b069df162c28539e66cecd66f554e6068e9c3ddbbe8dd46fd9b431cd",
+              "fresh": true
+            }
+          ],
+          "pytest": {
+            "passed": 1,
+            "failed": 0,
+            "skipped": 0,
+            "deselected": 0,
+            "errors": 0,
+            "skip_reasons": [],
+            "line": "1 passed in 56.81s"
+          }
+        }
+      ],
+      "evidence_files": [
+        {
+          "path": "docs/execution/evidence/phase4/b3-product-flow.json",
+          "exists": true,
+          "sha256": "eb79acd7b069df162c28539e66cecd66f554e6068e9c3ddbbe8dd46fd9b431cd",
+          "fresh": true
+        }
+      ],
+      "first_failure": null,
+      "flaky": false,
+      "inherited": false,
+      "this_run": true,
+      "history": [
+        {
+          "result": "PASS",
+          "checked_commit": "a6506fcefb84151d9dfe1a54d5738fb5ec7c01da",
+          "finished_at": "2026-10-05T04:26:28Z",
+          "duration_s": 31.1,
+          "attempts": 1
+        }
+      ]
+    },
+    {
+      "id": "p4-b3-release",
+      "group": "b3",
+      "title": "发行（领域）：wheel 含领域包与 MAL 示例、三种本地交付名映射到既有配置；在线 / 仅本机缓存 / 完全离线三种安装分开标记；local-simulation 在完全离线环境跑逐动作准入红队；local-service-lab 从干净安装启动 API + worker，导入 / 配置 / 运行 / 导出后停止，订单服务经 Broker 无凭据零副作用、凭据放行；local-offline 网络关闭回放两份回放包",
+      "command": "uv run --frozen python scripts/b3_release_evidence.py",
+      "tasks": [
+        "P4B-B3"
+      ],
+      "evidence": [],
+      "requires": "services",
+      "profile": "local-lite",
+      "kind": "mandatory",
+      "retries": 0,
+      "heavy_gib": 3,
+      "produces": [
+        "docs/execution/evidence/phase4/b3-release.json"
+      ],
+      "protocol": true,
+      "assertions_from": null,
+      "trigger": null,
+      "result": "PASS",
+      "reason": "[p4-b3-release] PASS: 8 required assertion(s) hold",
+      "summary": "[p4-b3-release] PASS: 8 required assertion(s) hold",
+      "condition": null,
+      "checked_commit": "b993dc90c72b413b4d0b5e28e23cad993f9acba4",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "worktree_clean": true,
+      "config_sha256": "31b0a71b59a15958c1a2463f7812f6bdb9a5c7edaf8102162ad973103b6e96cb",
+      "run_nonce": "fabadd22f7474dc9bb989c109054917a",
+      "started_at": "2026-10-05T12:44:19Z",
+      "finished_at": "2026-10-05T12:45:13Z",
+      "duration_s": 53.8,
+      "attempts": [
+        {
+          "attempt": 1,
+          "started_at": "2026-10-05T12:44:19Z",
+          "finished_at": "2026-10-05T12:45:13Z",
+          "duration_s": 53.8,
+          "exit_code": 0,
+          "result": "PASS",
+          "reason": "[p4-b3-release] PASS: 8 required assertion(s) hold",
+          "log": "out/acceptance/phase4/logs/p4-b3-release/20261005T124419Z-attempt-1.log",
+          "summary": "[p4-b3-release] PASS: 8 required assertion(s) hold",
+          "nonce": "66fc74f563e84cfdbba3ff536d4818f6",
+          "structured_result": "out/acceptance/phase4/logs/p4-b3-release/20261005T124419Z-attempt-1.result.json",
+          "assertions": [
+            {
+              "id": "release_has_domain_packages_and_examples",
+              "required": true,
+              "holds": true,
+              "detail": "20 wheels, domain {'formal_lab_domain_mal': True, 'formal_lab_domain_broker': True, 'formal_lab_env_mal': True, 'formal_lab_env_cage': True}, examples ['examples/mal-net-app-data.json', 'examples/mal-net-app-data-defence.json']"
+            },
+            {
+              "id": "install_online",
+              "required": true,
+              "holds": true,
+              "detail": ".23.0\n + watchfiles==1.3.0\n + websockets==17.2\n + wrapt==2.5.0\n + yarl==1.25.1\n + z3-solver==5.1.0.0\n + zipfile-zstd==0.0.4\n + zipp==4.1.1\n + zstandard==0.25.0\n"
+            },
+            {
+              "id": "install_cache_only",
+              "required": true,
+              "holds": true,
+              "detail": ".23.0\n + watchfiles==1.3.0\n + websockets==17.2\n + wrapt==2.5.0\n + yarl==1.25.1\n + z3-solver==5.1.0.0\n + zipfile-zstd==0.0.4\n + zipp==4.1.1\n + zstandard==0.25.0\n"
+            },
+            {
+              "id": "install_fully_offline",
+              "required": true,
+              "holds": true,
+              "detail": "--no-index from 118 wheels: tchfiles-1.3.0 websockets-17.2 wrapt-2.5.0 yarl-1.25.1 z3-solver-5.1.0.0 zipfile-zstd-0.0.4 zipp-4.1.1 zstandard-0.25.0\n"
+            },
+            {
+              "id": "local_simulation_domain_experiment_offline",
+              "required": true,
+              "holds": true,
+              "detail": "{\"status\": \"SUCCEEDED\", \"steps\": 6, \"decisions\": 12, \"imported_from\": {\"domain_mal\": \"/tmp/b3-release-3rnew3w5/empty/venv/lib/python3.12/site-packages/formal_lab_domain_mal/__init__.py\", \"runtime\": \"/tmp/b3-release-3rnew3w5/empty/venv/lib/python3.12/site-packages/formal_lab_runtime/__init__.py\"}, \"error\": null}"
+            },
+            {
+              "id": "local_service_lab_platform_from_clean_install",
+              "required": true,
+              "holds": true,
+              "detail": "{\"migrate_exit\": 0, \"model_push\": {\"version\": 1, \"semantic_profile\": \"deterministic_finite_v1\"}, \"run\": {\"run_id\": \"run_458c9eedfa864b03bb00\", \"exit\": 0, \"status\": \"SUCCEEDED\", \"first_line\": \"run run_458c9eedfa864b03bb00 QUEUED\"}, \"stopped\": true, \"api_reachable_after_stop\": false}"
+            },
+            {
+              "id": "local_service_lab_order_service_broker",
+              "required": true,
+              "holds": true,
+              "detail": "{\"exit\": 0, \"ready\": \"ok\", \"business\": [200, 200, 200], \"broker\": {\"denied_verdict\": \"DENY\", \"zero_side_effect\": true, \"allowed_verdict\": \"ALLOW\", \"applied\": true, \"probe_sees_change\": true}, \"close\": {\"processes\": [643943], \"containers\": [], \"paths\": [\"/tmp/b3-release-3rnew3w5/orders/.fal-orders/b3-release\"]}}"
+            },
+            {
+              "id": "local_offline_replay_both_bundles",
+              "required": true,
+              "holds": true,
+              "detail": "{\"simulation_bundle\": [{\"command\": \"fal replay verify <bundle>\", \"exit_code\": 0, \"first_line\": \"OK formal-lab/replay-bundle@2 run=run_b3_release_mal events=75 artifacts=1 operations=6 participants=1 contract=formal-lab-contracts/v2 digest=07cf6c6fbe419bf6a\"}, {\"command\": \"fal replay step <bundle> 1\", \"exit_code\": 0, \"first_line\": \"{\", \"gates\": [\"formal-lab.domain.mal.receipt-issuer\", \"formal-lab.d"
+            }
+          ],
+          "produced": [
+            {
+              "path": "docs/execution/evidence/phase4/b3-release.json",
+              "exists": true,
+              "sha256": "971ad346f1aead72f59bbc884c2003d4d2daf452993b258e8004a4bc899830c0",
+              "fresh": true
+            }
+          ],
+          "pytest": null
+        }
+      ],
+      "evidence_files": [
+        {
+          "path": "docs/execution/evidence/phase4/b3-release.json",
+          "exists": true,
+          "sha256": "971ad346f1aead72f59bbc884c2003d4d2daf452993b258e8004a4bc899830c0",
+          "fresh": true
+        }
+      ],
+      "first_failure": null,
+      "flaky": false,
+      "inherited": false,
+      "this_run": true,
+      "history": [
+        {
+          "result": "PASS",
+          "checked_commit": "a6506fcefb84151d9dfe1a54d5738fb5ec7c01da",
+          "finished_at": "2026-10-05T04:27:32Z",
+          "duration_s": 63.6,
           "attempts": 1
         }
       ]

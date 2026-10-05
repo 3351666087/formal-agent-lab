@@ -1,6 +1,6 @@
 # Model-assisted strategies: evidence against the configured endpoint
 
-Generated 2026-10-02T18:53:25Z by `scripts/model_evidence.py`; model label `gpt-5.6-sol`. Real-model reruns claim only request and evidence reproducibility.
+Generated 2026-10-05T10:41:15Z by `scripts/model_evidence.py`; model label `gpt-5.6-sol`. Real-model reruns claim only request and evidence reproducibility.
 
 | check | status | claim |
 |---|---|---|
