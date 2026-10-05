@@ -107,7 +107,9 @@
 | `demo.svg` `demo-cover.svg` `demo.html` `architecture.svg` | `python3 scripts/render_demo.py svg`（只需标准库） | `design/animation/storyboard.json`、`demo-data.json`、`design/tokens.json` |
 | 视频帧 → `demo.mp4`、`demo-cover.png` | `scripts/in-vm.sh 'uv run --frozen python scripts/render_demo.py frames'`，再在宿主机 `python3 scripts/render_demo.py encode`（ffmpeg、rsvg-convert） | `demo.svg`（Chromium 按 Web Animations API 逐帧定位，30 fps，1920×1080） |
 
-动画的数值来自订单服务示例 deviation 案例的真实运行与 `docs/execution/evidence/phase3/g3-release.json`，`demo-data.json` 记录来源与采集提交；修改分镜只改 `storyboard.json`，再重新生成全部产物。GitHub README 直接嵌入动画 SVG（`<img>` 中 CSS 动画可播放，系统设置减少动态时显示静态总结），并链接 MP4 与网页预览。
+动画的数值来自订单服务示例 deviation 案例的真实运行与 `docs/execution/evidence/phase3/g3-release.json`，`demo-data.json` 记录来源与采集提交；修改分镜只改 `storyboard.json`，再重新生成全部产物。
+
+媒体视觉（phase 4B 起）：深色画布取自产品深色主题 tokens（`color.dark`、`evidence.*.dark`），在其下加更深的底色 `#0b0f15`、32 px 网格与品牌色光晕；数据与命令一律用等宽字体，标题与说明用无衬线字体。分镜 24 s、六幕（MODEL / CHECK / PLAN / EXECUTE / DEVIATE / RELEASE），每幕左侧为编号、标题、说明与真实命令，右侧为通用组件：模式图（实体·性质 / 状态 / 动作，写入与读取边不跨列）、有界检查标尺（界内扫描、界外不下结论）、决策与执行管线（脉冲沿管线移动）、操作账本、逐字段比较（◌ 预测 vs ● 观测）、发布卡片与回放包。底部为六段时间线、播放头与当前状态行；右下角注明数据来源与采集提交。组件只读 `storyboard.json` 与 `demo-data.json`，换一份分镜和数据即可生成另一段演示。GitHub README 直接嵌入动画 SVG（`<img>` 中 CSS 动画可播放，系统设置减少动态时显示静态总结），并链接 MP4 与网页预览。
 
 ## 8. 基准截图
 
