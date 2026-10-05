@@ -86,13 +86,14 @@ CHECKS = [
           ["P3A-G6"], [f"{EV}/doctor.json"]),
     Check("p3-release-light", "g6-release", "发行（不建镜像）：全部 wheel、Web 包、干净 venv 中的 SDK/CLI、许可证清单",
           f"{PY} scripts/release.py --skip-images --out out/release-p3 --evidence {EV}/release-manifest.json",
-          ["P3A-G6"], [f"{EV}/release-manifest.json", "docs/licenses.md"], heavy_gib=1),
+          ["P3A-G6"], [f"{EV}/release-manifest.json", "docs/licenses.md"], heavy_gib=1,
+          retries=2),  # fetches build backends from the package index: a DNS / connection drop is retried, all kept
     Check("p3-release-images", "g6-release", "发行（含 OCI 镜像与异架构构建）", f"{PY} scripts/release.py --out out/release-p3-images "
           f"--evidence {EV}/release-manifest-images.json", ["P3A-G6"], [f"{EV}/release-manifest-images.json"],
-          requires="docker", kind="extension", heavy_gib=8),
+          requires="docker", kind="extension", heavy_gib=8, retries=2),  # base images from Docker Hub
     Check("p3-offline-bundle", "g6-release", "去重离线包：空目录无包仓库安装与整栈实验", f"{PY} scripts/offline_bundle.py --verify",
           ["P3A-G6"], [f"{EV}/offline-manifest.json"], requires="docker", kind="extension",
-          heavy_gib=12),
+          heavy_gib=12, retries=2),
     # ------------------------------------------------------------ D1 MAL model and native simulator
     Check("p3-mal-lowering", "d1-mal",
           "coreLang 攻击图降低到确定性 IR；原生模拟器 / 参考解释器 / Z3 三引擎一致；红队在 ir-world 中到达目标；配置往返（离线夹具，无需 MAL 工具链）",

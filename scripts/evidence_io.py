@@ -19,8 +19,10 @@ from pathlib import Path
 from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
-# evidence and scratch output never make the source revision dirty
-_IGNORED = (":!docs/execution/evidence", ":!var", ":!out")
+# evidence, scratch output and generated documents never make the source revision dirty (the same outputs the
+# handoff's work-tree digest excludes: the release regenerates docs/licenses.md, the handoff docs/api/openapi.json)
+_IGNORED = (":!docs/execution/evidence", ":!var", ":!out", ":!docs/licenses.md", ":!docs/api/openapi.json",
+            ":!docs/handoff")
 
 
 def revision() -> dict[str, Any]:

@@ -248,7 +248,7 @@ def read_produced(path: Path, started: float, assertions_from: str | None) -> di
     if not info["exists"]:
         return info | {"error": f"evidence missing: {rel(path)}"}
     info["sha256"] = sha256_of(path)
-    info["fresh"] = path.stat().st_mtime >= started - 1.0
+    info["fresh"] = path.stat().st_mtime >= started - 1.0  # `started`: the attempt's start on this file system's clock
     if not info["fresh"]:
         return info | {"error": f"stale evidence: {rel(path)} was not written by this attempt"}
     if path.suffix == ".json":
@@ -317,7 +317,12 @@ def run_attempt(check: Check, n: int, logdir: Path, env: dict[str, str], header:
     nonce = uuid.uuid4().hex
     attempt_env = {**env, "FAL_CHECK_ID": check.id, "FAL_CHECK_ATTEMPT": str(n), "FAL_CHECK_NONCE": nonce,
                    "FAL_CHECK_RESULT": str(result_path)}
-    started, t0 = stamp(), time.time()
+    started, t0, m0 = stamp(), time.time(), time.monotonic()  # durations on the monotonic clock: NTP may step the wall clock
+    # freshness of produced files is judged on the clock of the file system they are written to: a marker touched
+    # now carries that clock's "now" (a VM writing to a host-shared mount sees mtimes seconds behind its own clock)
+    marker = logdir / f"{tag}.start"
+    marker.touch()
+    fs_t0 = min(t0, marker.stat().st_mtime)
     timed_out = False
     with log.open("w") as fh:
         fh.write(f"$ {check.command}\n# {header} · attempt {n} · started {started}\n\n")
@@ -333,11 +338,11 @@ def run_attempt(check: Check, n: int, logdir: Path, env: dict[str, str], header:
     tail = [ln for ln in text.strip().splitlines() if ln.strip() and not ln.startswith("make[")]
     summary = tail[-1][:300] if tail else ""
     structured = read_structured(result_path, nonce)
-    produced = [read_produced(ROOT / p, t0, check.assertions_from) for p in check.produces]
+    produced = [read_produced(ROOT / p, fs_t0, check.assertions_from) for p in check.produces]
     pytest = pytest_summary(text) if "pytest" in check.command else None
     result, reason, assertions = decide(exit_code=code, timed_out=timed_out, structured=structured,
                                         produced=produced, pytest=pytest, protocol=check.protocol, summary=summary)
-    return {"attempt": n, "started_at": started, "finished_at": stamp(), "duration_s": round(time.time() - t0, 1),
+    return {"attempt": n, "started_at": started, "finished_at": stamp(), "duration_s": round(time.monotonic() - m0, 1),
             "exit_code": code, "result": result, "reason": reason, "log": rel(log), "summary": summary,
             "nonce": nonce, "structured_result": rel(result_path) if structured.get("present") else None,
             "assertions": assertions, "produced": produced, "pytest": pytest}
@@ -455,7 +460,7 @@ def main(argv: list[str] | None = None) -> int:
     print(f"==> {suite.name}: {len(selected)} check(s) at {rev[:12]} (tree {tree['sha256'][:12]}, "
           f"config {config['sha256'][:12]}); resources {res_before['disk_free_gib']} → {out}", flush=True)
     probes: dict[str, str | None] = {}
-    started_run, t_all = stamp(), time.time()
+    started_run, t_all = stamp(), time.monotonic()
 
     def cached_probe(name: str) -> str | None:
         if name not in probes:
@@ -532,7 +537,7 @@ def main(argv: list[str] | None = None) -> int:
         selection_status = "INCOMPLETE"
     unmet = [f"{g}={status_by_group[g]}" for g in required if status_by_group[g] != "PASS"]
     summary = {k: sum(1 for r in this_run if r["result"] == k) for k in STATUSES}
-    this_inv = {"started_at": started_run, "finished_at": stamp(), "duration_s": round(time.time() - t_all, 1),
+    this_inv = {"started_at": started_run, "finished_at": stamp(), "duration_s": round(time.monotonic() - t_all, 1),
                 "full": full, "selection": {"group": sorted(groups), "only": sorted(only), "skip": sorted(skip)},
                 "checks": [c.id for c in selected], "commit": rev, "worktree_sha256": tree["sha256"],
                 "nonce": run_nonce, "acceptance_nonce": os.environ.get("FAL_ACCEPTANCE_NONCE"),
