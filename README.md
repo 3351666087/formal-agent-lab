@@ -1,26 +1,52 @@
 <p align="center">
-  <img src="docs/assets/demo.svg" alt="formal-agent-lab：模型 → 计划 → 运行 → 偏差 → 证据（20 秒循环，订单服务示例的一次真实运行）" width="100%">
+  <img src="docs/assets/demo.svg" alt="formal-agent-lab：模型 → 有界检查 → 计划 → 执行 → 偏差 → 发布与回放（24 秒循环，订单服务示例的一次真实运行）" width="100%">
 </p>
 
 <p align="center">
-  <a href="https://github.com/3351666087/formal-agent-lab/actions/workflows/ci.yml"><img src="https://github.com/3351666087/formal-agent-lab/actions/workflows/ci.yml/badge.svg" alt="ci"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/github/license/3351666087/formal-agent-lab" alt="license"></a>
+  <a href="https://github.com/3351666087/formal-agent-lab/releases/latest"><img src="https://img.shields.io/github/v/release/3351666087/formal-agent-lab?color=8a9bff&labelColor=0f131a&style=flat-square" alt="release"></a>
+  <a href="https://github.com/3351666087/formal-agent-lab/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/3351666087/formal-agent-lab/ci.yml?branch=main&label=ci&labelColor=0f131a&style=flat-square" alt="ci"></a>
+  <img src="https://img.shields.io/badge/python-3.12-6bb6db?labelColor=0f131a&style=flat-square" alt="python 3.12">
+  <img src="https://img.shields.io/badge/contracts-v2-b69cf0?labelColor=0f131a&style=flat-square" alt="contracts v2">
+  <a href="LICENSE"><img src="https://img.shields.io/github/license/3351666087/formal-agent-lab?color=55c486&labelColor=0f131a&style=flat-square" alt="license"></a>
 </p>
 
 <p align="center">
-  <b>演示</b>：上方动画（可编辑 SVG）· <a href="docs/assets/demo.mp4">视频 MP4（1080p，20 s）</a> · <a href="docs/assets/demo.html">网页预览（可暂停、拖动）</a> · <a href="docs/assets/demo-cover.png">静态封面</a>
+  <a href="docs/assets/demo.mp4">视频 MP4（1080p · 24 s）</a> · <a href="docs/assets/demo.html">网页预览（可暂停 / 拖动）</a> · <a href="docs/assets/demo-cover.png">静态封面</a> · <a href="docs/assets/architecture.svg">架构图</a>
 </p>
 
 # formal-agent-lab
 
-**从形式模型出发，让智能体的每一步都可检查、可比较、可回放。** 一个在本机运行的研究工作台：用有限状态模型描述一个业务世界（订单处理、仓储分配、生产调度……），先做类型检查与有界查询；再让一个或多个参与者（规则、Z3 规划、任务计划、LLM 策略）在纯数据模拟器或真实的本地业务服务中行动；每个动作的效果与模型预测逐字段比较，差异变成修订建议与回归案例；整个过程是一条带因果链的事件轨迹，可以导出成回放包离线阅读。
+**从形式模型出发，让智能体的每一步都可检查、可比较、可回放。**
+
+一个在本机运行的研究工作台。先用有限状态模型描述一个世界（订单处理、仓储分配、生产调度……），做类型检查和有界查询；再让一个或多个参与者——规则、Z3 规划、任务计划或 LLM 策略——在纯数据模拟器或真实的本地业务服务里行动。每个动作在发送前经过检查与执行门控，发送后与模型预测逐字段比较；差异变成修订建议和回归案例；整个过程是一条带因果链的事件轨迹，可以导出成回放包离线阅读。
+
+<table>
+<tr>
+<td width="33%" valign="top"><b>模型优先</b><br><sub>状态、动作、性质先写进 <code>deterministic_finite_v1</code> 模型；类型检查、Z3 有界查询与成本最优都在运行之前。有界结论只对界内成立，不宣称更多。</sub></td>
+<td width="33%" valign="top"><b>先检查，再执行</b><br><sub>策略只在模型给出的候选中选，前提先检查；环境操作先持久化意图，执行门控在发送前决定，应答丢失时按操作 id 对账，从不盲目重发。</sub></td>
+<td width="33%" valign="top"><b>证据可回放</b><br><sub>预测与观测逐字段比较（● 观测 · ◆ 范围内核实 · ◌ 预测 · ○ 未知）；差异 → 修订建议 → 回归案例 → 发布；运行导出为自包含回放包。</sub></td>
+</tr>
+</table>
 
 - **它是**：单用户、本地优先的实验平台与建模引擎（PostgreSQL + Temporal + FastAPI + React，全部在本机或本地虚拟机）；模型语义、环境、策略、验证器、执行门控、评分器都是可替换的插件。
 - **它不是**：通用智能体框架或托管服务；不需要 LLM（LLM 策略是可选插件，另有确定性替身）；有界检查只在给定步数内给出结论，不宣称无界的正确性。
 
-> 本页的截图和动画都来自这个仓库在本机上的真实运行：截图由 [`scripts/capture_screens.py`](scripts/capture_screens.py) 驱动 Web 界面走完真实流程后生成；动画里的数字取自订单服务示例（工位 p2 实际半速、模型按正常速度预测）的运行与 [`docs/execution/evidence/phase3/g3-release.json`](docs/execution/evidence/phase3/g3-release.json)。示例项目的数据是种子数据，结果是真实结果。
+## 一次真实运行
+
+上面的动画逐帧取自订单服务示例的一次运行（服务里工位 p2 实际半速，模型按正常速度预测），数据见 [`design/animation/demo-data.json`](design/animation/demo-data.json)，由 [`scripts/render_demo.py`](scripts/render_demo.py) 生成：
+
+| | 阶段 | 发生了什么 | 结果 |
+|---|---|---|---|
+| 01 | 模型 | `fal model push` 导入订单处理模型 | 49 个状态位置 · 27 个基础动作 · 类型检查通过 |
+| 02 | 有界检查 | Z3 查询 12 步内能否完成全部订单 | `NO_WITNESS_WITHIN_BOUND`：界内无见证，界外不下结论 |
+| 03 | 计划 | 规则策略每步从模型候选中选，前提先检查 | 26 步完成全部订单，0 次拒绝 |
+| 04 | 执行 | 每个操作 `PREPARED → DISPATCHED → COMPLETED`，按操作 id 可查 | 251 个事件，全部带因果父事件 |
+| 05 | 偏差 | 第 9 步 `tick()`：`remaining[o2]` 预测 3、观测 4 | 26 次比较中 4 处不同 → 修订建议（`tick` 读 `arrive_at, slow`）+ 4 个回归案例 |
+| 06 | 发布 | 回归案例重放 | v1 4 × FAIL → `REJECTED`；v2 `slow[p2] = true` 4 × PASS → `RELEASED`，0 处差异；回放包离线可读 |
 
 ## 真实界面
+
+截图由 [`scripts/capture_screens.py`](scripts/capture_screens.py) 驱动 Web 界面走完真实流程后生成（示例项目是种子数据，结果是真实结果）。
 
 <table>
 <tr>
@@ -38,6 +64,23 @@
 </table>
 
 深色模式与窄屏：[run-batch-dark.png](docs/assets/screens/run-batch-dark.png) · [landing-dark.png](docs/assets/screens/landing-dark.png) · [run-narrow.png](docs/assets/screens/run-narrow.png)。
+
+## 安全领域：攻击图、准入 Broker、红蓝对抗
+
+同一条回路也用在安全领域：导入一张 coreLang 攻击图作为形式模型，有界验证器给出到目标步骤的可达见证，一个**逐动作的准入 Broker** 在每次发送前按当时的状态判定，红蓝对抗中攻击方只看到自己视图内的位置，整个运行同样导出成可离线阅读的回放包。领域能力全部通过平台的公开插件接口接入（模型前端、执行门控、策略、环境），核心引擎不含任何领域专有逻辑。下面四张图来自同一次真实运行（`tests/integration/test_product_flow_b3.py`，MAL net-app-data 攻击图）。
+
+<table>
+<tr>
+<td width="50%"><img src="docs/assets/screens/b3-model-import.png" alt="模型工作台：导入 MAL 攻击图"><br><sub><b>导入攻击图</b>：coreLang 攻击图经模型前端（<code>mal-attack-graph/v1</code>）编译为确定性有限模型，保留原始攻击图扩展；结构图呈现攻击步骤 → <code>compromise</code> 动作 → 到达 <code>secret:read</code>。</sub></td>
+<td width="50%"><img src="docs/assets/screens/b3-scenario-gates.png" alt="场景：执行前门控"><br><sub><b>执行前门控</b>：场景表单按顺序配置两个门控——凭据签发（逐动作检查）与准入 Broker（LabPolicy / TargetSecurity 分离）；保存后固定在场景快照里。</sub></td>
+</tr>
+<tr>
+<td><img src="docs/assets/screens/b3-step-broker-decisions.png" alt="步骤详情：Broker 判定"><br><sub><b>每次发送前的判定</b>：签发方按当时的状态修订检查该攻击步骤的前提与目标可达性（Z3），再由 Broker 依凭据放行；步骤详情完整列出两条执行前决策。</sub></td>
+<td><img src="docs/assets/screens/b3-red-denied-step.png" alt="红蓝对抗：攻击方视角"><br><sub><b>红蓝对抗（攻击方视角）</b>：攻击方视图隐藏了加固位置；对一个已被防守方加固的步骤，签发方在当时修订上判定前提不成立 → <code>DENY</code> → 动作 <code>REJECTED</code>，从不发送（零副作用）。</sub></td>
+</tr>
+</table>
+
+准入与红蓝的边界说明见 [assurance-scope.md](docs/assurance-scope.md)（§1 模型内结论 / §2 实测结论分列）；基准页的红队策略配对比较见 [b3-benchmark.png](docs/assets/screens/b3-benchmark.png)，证据回放见 [b3-evidence-replay.png](docs/assets/screens/b3-evidence-replay.png)。这是一个面向防御研究与可复核性的实验台：攻击步骤是抽象攻击图上的节点选择，在模拟器内进行，不针对任何真实系统。
 
 ## 功能地图
 
@@ -78,6 +121,7 @@ fal replay verify wh.replay.zip && fal replay batches wh.replay.zip   # 离线�
 
 ## 文档
 
+- **阶段四交接**：平台修复（A1–A5）[docs/execution/phase-4a.md](docs/execution/phase-4a.md) · 领域收口（B1–B3）[docs/execution/phase-4b.md](docs/execution/phase-4b.md) · 交接 [docs/handoff/phase4.md](docs/handoff/phase4.md) · 检查 `make phase4-check` / `make acceptance-local`
 - **阶段三交接**：通用平台与视觉（G1–G6）[docs/execution/phase-3a.md](docs/execution/phase-3a.md) · 领域集成（D1–D6）[docs/execution/phase-3b.md](docs/execution/phase-3b.md) · 交接 [docs/handoff/phase3.md](docs/handoff/phase3.md) · 保证范围 [docs/assurance-scope.md](docs/assurance-scope.md) · 验收 [docs/acceptance-phase3.md](docs/acceptance-phase3.md) · 研究读数 [docs/research-readout.md](docs/research-readout.md) · 检查 `make phase3-check` / `make acceptance-local` → [docs/execution/evidence/phase3/checks/](docs/execution/evidence/phase3/checks/results.json)
 - **设计系统**：[docs/design-system.md](docs/design-system.md)（tokens、组件、图表、页面、媒体生成命令、基准截图）· [Figma 设计文件](https://www.figma.com/design/uuV6JeilZQkhnIQcJYEUET)
 - **阶段二（历史验收）**：[docs/handoff/phase2.md](docs/handoff/phase2.md) · [验收](docs/acceptance-phase2.md) · 阶段一 [phase1.md](docs/handoff/phase1.md)
