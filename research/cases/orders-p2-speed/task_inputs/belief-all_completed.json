@@ -1,0 +1,1758 @@
+{
+ "fixture": {
+  "case": "deviation",
+  "conditions": {
+   "slow_stations": [
+    "p2"
+   ]
+  },
+  "instance": {
+   "case": "deviation",
+   "orders": [
+    {
+     "arrive_at": 0,
+     "due": 6,
+     "order_id": "o1",
+     "proc_time": 1,
+     "qty": 2,
+     "sku": "a"
+    },
+    {
+     "arrive_at": 0,
+     "due": 7,
+     "order_id": "o2",
+     "proc_time": 4,
+     "qty": 1,
+     "sku": "b"
+    },
+    {
+     "arrive_at": 0,
+     "due": 9,
+     "order_id": "o3",
+     "proc_time": 1,
+     "qty": 3,
+     "sku": "a"
+    },
+    {
+     "arrive_at": 2,
+     "due": 11,
+     "order_id": "o4",
+     "proc_time": 2,
+     "qty": 2,
+     "sku": "b"
+    },
+    {
+     "arrive_at": 3,
+     "due": 12,
+     "order_id": "o5",
+     "proc_time": 2,
+     "qty": 1,
+     "sku": "a"
+    },
+    {
+     "arrive_at": 4,
+     "due": 14,
+     "order_id": "o6",
+     "proc_time": 2,
+     "qty": 3,
+     "sku": "b"
+    }
+   ],
+   "seed": 1,
+   "service": {
+    "slow_stations": [
+     "p2"
+    ]
+   },
+   "stations": [
+    "p1",
+    "p2"
+   ],
+   "stock": {
+    "a": 6,
+    "b": 6
+   }
+  },
+  "label": "预测效果偏差",
+  "seed": 1
+ },
+ "model": {
+  "compiled": [],
+  "contract_version": "formal-lab-contracts/v2",
+  "created_at": "2026-10-07T00:42:45.444995Z",
+  "digest": {
+   "algorithm": "sha256",
+   "value": "283cf3fcd9cc114d38b0763956b048d45a906b3ba9889f10c836d2c3ea1f061c"
+  },
+  "extensions": {},
+  "frontend": {
+   "plugin_id": "formal-lab.frontend.ir-json",
+   "version": "1.0.0"
+  },
+  "package_id": "local-order-service",
+  "payload": {
+   "ir": {
+    "actions": [
+     {
+      "cost": 1,
+      "description": null,
+      "effects": [
+       {
+        "kind": "assign",
+        "target": {
+         "index": [
+          {
+           "name": "o",
+           "op": "ref"
+          }
+         ],
+         "var": "status"
+        },
+        "value": {
+         "domain": null,
+         "op": "const",
+         "value": "reserved"
+        }
+       },
+       {
+        "domain": "skus",
+        "effects": [
+         {
+          "kind": "assign",
+          "target": {
+           "index": [
+            {
+             "name": "s",
+             "op": "ref"
+            }
+           ],
+           "var": "stock"
+          },
+          "value": {
+           "args": [
+            {
+             "index": [
+              {
+               "name": "s",
+               "op": "ref"
+              }
+             ],
+             "name": "stock",
+             "op": "var"
+            },
+            {
+             "index": [
+              {
+               "name": "o",
+               "op": "ref"
+              }
+             ],
+             "name": "qty",
+             "op": "var"
+            }
+           ],
+           "op": "sub"
+          }
+         }
+        ],
+        "kind": "forall",
+        "var": "s",
+        "where": {
+         "args": [
+          {
+           "index": [
+            {
+             "name": "o",
+             "op": "ref"
+            }
+           ],
+           "name": "sku_of",
+           "op": "var"
+          },
+          {
+           "name": "s",
+           "op": "ref"
+          }
+         ],
+         "op": "eq"
+        }
+       }
+      ],
+      "label": "预约库存",
+      "name": "reserve",
+      "params": [
+       {
+        "name": "o",
+        "type": {
+         "kind": "entity",
+         "set": "orders"
+        }
+       }
+      ],
+      "precondition": {
+       "args": [
+        {
+         "args": [
+          {
+           "index": [
+            {
+             "name": "o",
+             "op": "ref"
+            }
+           ],
+           "name": "status",
+           "op": "var"
+          },
+          {
+           "domain": null,
+           "op": "const",
+           "value": "submitted"
+          }
+         ],
+         "op": "eq"
+        },
+        {
+         "args": [
+          {
+           "index": [
+            {
+             "index": [
+              {
+               "name": "o",
+               "op": "ref"
+              }
+             ],
+             "name": "sku_of",
+             "op": "var"
+            }
+           ],
+           "name": "stock",
+           "op": "var"
+          },
+          {
+           "index": [
+            {
+             "name": "o",
+             "op": "ref"
+            }
+           ],
+           "name": "qty",
+           "op": "var"
+          }
+         ],
+         "op": "ge"
+        }
+       ],
+       "op": "and"
+      },
+      "retry": "RECONCILE_THEN_RETRY",
+      "timeout_seconds": 30.0
+     },
+     {
+      "cost": 1,
+      "description": null,
+      "effects": [
+       {
+        "kind": "assign",
+        "target": {
+         "index": [
+          {
+           "name": "o",
+           "op": "ref"
+          }
+         ],
+         "var": "status"
+        },
+        "value": {
+         "domain": null,
+         "op": "const",
+         "value": "queued"
+        }
+       },
+       {
+        "kind": "assign",
+        "target": {
+         "index": [
+          {
+           "name": "o",
+           "op": "ref"
+          }
+         ],
+         "var": "queued_seq"
+        },
+        "value": {
+         "index": [],
+         "name": "next_seq",
+         "op": "var"
+        }
+       },
+       {
+        "kind": "assign",
+        "target": {
+         "index": [],
+         "var": "next_seq"
+        },
+        "value": {
+         "args": [
+          {
+           "index": [],
+           "name": "next_seq",
+           "op": "var"
+          },
+          {
+           "domain": null,
+           "op": "const",
+           "value": 1
+          }
+         ],
+         "op": "add"
+        }
+       }
+      ],
+      "label": "加入处理队列",
+      "name": "enqueue",
+      "params": [
+       {
+        "name": "o",
+        "type": {
+         "kind": "entity",
+         "set": "orders"
+        }
+       }
+      ],
+      "precondition": {
+       "args": [
+        {
+         "args": [
+          {
+           "index": [
+            {
+             "name": "o",
+             "op": "ref"
+            }
+           ],
+           "name": "status",
+           "op": "var"
+          },
+          {
+           "domain": null,
+           "op": "const",
+           "value": "reserved"
+          }
+         ],
+         "op": "eq"
+        },
+        {
+         "args": [
+          {
+           "index": [],
+           "name": "next_seq",
+           "op": "var"
+          },
+          {
+           "domain": null,
+           "op": "const",
+           "value": 9
+          }
+         ],
+         "op": "lt"
+        }
+       ],
+       "op": "and"
+      },
+      "retry": "RECONCILE_THEN_RETRY",
+      "timeout_seconds": 30.0
+     },
+     {
+      "cost": 1,
+      "description": null,
+      "effects": [
+       {
+        "kind": "assign",
+        "target": {
+         "index": [
+          {
+           "name": "o",
+           "op": "ref"
+          }
+         ],
+         "var": "status"
+        },
+        "value": {
+         "domain": null,
+         "op": "const",
+         "value": "processing"
+        }
+       },
+       {
+        "kind": "assign",
+        "target": {
+         "index": [
+          {
+           "name": "o",
+           "op": "ref"
+          },
+          {
+           "name": "st",
+           "op": "ref"
+          }
+         ],
+         "var": "on"
+        },
+        "value": {
+         "domain": null,
+         "op": "const",
+         "value": true
+        }
+       },
+       {
+        "kind": "assign",
+        "target": {
+         "index": [
+          {
+           "name": "o",
+           "op": "ref"
+          }
+         ],
+         "var": "remaining"
+        },
+        "value": {
+         "index": [
+          {
+           "name": "o",
+           "op": "ref"
+          }
+         ],
+         "name": "proc_time",
+         "op": "var"
+        }
+       },
+       {
+        "kind": "assign",
+        "target": {
+         "index": [
+          {
+           "name": "o",
+           "op": "ref"
+          }
+         ],
+         "var": "queued_seq"
+        },
+        "value": {
+         "domain": null,
+         "op": "const",
+         "value": 0
+        }
+       }
+      ],
+      "label": "开始处理",
+      "name": "start",
+      "params": [
+       {
+        "name": "o",
+        "type": {
+         "kind": "entity",
+         "set": "orders"
+        }
+       },
+       {
+        "name": "st",
+        "type": {
+         "kind": "entity",
+         "set": "stations"
+        }
+       }
+      ],
+      "precondition": {
+       "args": [
+        {
+         "args": [
+          {
+           "index": [
+            {
+             "name": "o",
+             "op": "ref"
+            }
+           ],
+           "name": "status",
+           "op": "var"
+          },
+          {
+           "domain": null,
+           "op": "const",
+           "value": "queued"
+          }
+         ],
+         "op": "eq"
+        },
+        {
+         "args": [
+          {
+           "body": {
+            "index": [
+             {
+              "name": "x",
+              "op": "ref"
+             },
+             {
+              "name": "st",
+              "op": "ref"
+             }
+            ],
+            "name": "on",
+            "op": "var"
+           },
+           "default": null,
+           "domain": "orders",
+           "op": "exists",
+           "var": "x",
+           "where": null
+          }
+         ],
+         "op": "not"
+        },
+        {
+         "body": {
+          "args": [
+           {
+            "index": [
+             {
+              "name": "x",
+              "op": "ref"
+             }
+            ],
+            "name": "queued_seq",
+            "op": "var"
+           },
+           {
+            "index": [
+             {
+              "name": "o",
+              "op": "ref"
+             }
+            ],
+            "name": "queued_seq",
+            "op": "var"
+           }
+          ],
+          "op": "ge"
+         },
+         "default": null,
+         "domain": "orders",
+         "op": "forall",
+         "var": "x",
+         "where": {
+          "args": [
+           {
+            "index": [
+             {
+              "name": "x",
+              "op": "ref"
+             }
+            ],
+            "name": "status",
+            "op": "var"
+           },
+           {
+            "domain": null,
+            "op": "const",
+            "value": "queued"
+           }
+          ],
+          "op": "eq"
+         }
+        }
+       ],
+       "op": "and"
+      },
+      "retry": "RECONCILE_THEN_RETRY",
+      "timeout_seconds": 30.0
+     },
+     {
+      "cost": 1,
+      "description": null,
+      "effects": [
+       {
+        "kind": "assign",
+        "target": {
+         "index": [],
+         "var": "clock"
+        },
+        "value": {
+         "args": [
+          {
+           "index": [],
+           "name": "clock",
+           "op": "var"
+          },
+          {
+           "domain": null,
+           "op": "const",
+           "value": 1
+          }
+         ],
+         "op": "add"
+        }
+       },
+       {
+        "kind": "assign",
+        "target": {
+         "index": [],
+         "var": "tick_parity"
+        },
+        "value": {
+         "args": [
+          {
+           "index": [],
+           "name": "tick_parity",
+           "op": "var"
+          }
+         ],
+         "op": "not"
+        }
+       },
+       {
+        "domain": "orders",
+        "effects": [
+         {
+          "kind": "assign",
+          "target": {
+           "index": [
+            {
+             "name": "o",
+             "op": "ref"
+            }
+           ],
+           "var": "remaining"
+          },
+          "value": {
+           "args": [
+            {
+             "index": [
+              {
+               "name": "o",
+               "op": "ref"
+              }
+             ],
+             "name": "remaining",
+             "op": "var"
+            },
+            {
+             "domain": null,
+             "op": "const",
+             "value": 1
+            }
+           ],
+           "op": "sub"
+          }
+         },
+         {
+          "condition": {
+           "args": [
+            {
+             "index": [
+              {
+               "name": "o",
+               "op": "ref"
+              }
+             ],
+             "name": "remaining",
+             "op": "var"
+            },
+            {
+             "domain": null,
+             "op": "const",
+             "value": 1
+            }
+           ],
+           "op": "le"
+          },
+          "kind": "when",
+          "otherwise": [],
+          "then": [
+           {
+            "kind": "assign",
+            "target": {
+             "index": [
+              {
+               "name": "o",
+               "op": "ref"
+              }
+             ],
+             "var": "status"
+            },
+            "value": {
+             "domain": null,
+             "op": "const",
+             "value": "completed"
+            }
+           },
+           {
+            "kind": "assign",
+            "target": {
+             "index": [
+              {
+               "name": "o",
+               "op": "ref"
+              }
+             ],
+             "var": "done_at"
+            },
+            "value": {
+             "args": [
+              {
+               "index": [],
+               "name": "clock",
+               "op": "var"
+              },
+              {
+               "domain": null,
+               "op": "const",
+               "value": 1
+              }
+             ],
+             "op": "add"
+            }
+           },
+           {
+            "domain": "stations",
+            "effects": [
+             {
+              "kind": "assign",
+              "target": {
+               "index": [
+                {
+                 "name": "o",
+                 "op": "ref"
+                },
+                {
+                 "name": "st",
+                 "op": "ref"
+                }
+               ],
+               "var": "on"
+              },
+              "value": {
+               "domain": null,
+               "op": "const",
+               "value": false
+              }
+             }
+            ],
+            "kind": "forall",
+            "var": "st",
+            "where": null
+           }
+          ]
+         }
+        ],
+        "kind": "forall",
+        "var": "o",
+        "where": {
+         "args": [
+          {
+           "args": [
+            {
+             "index": [
+              {
+               "name": "o",
+               "op": "ref"
+              }
+             ],
+             "name": "status",
+             "op": "var"
+            },
+            {
+             "domain": null,
+             "op": "const",
+             "value": "processing"
+            }
+           ],
+           "op": "eq"
+          },
+          {
+           "body": {
+            "args": [
+             {
+              "index": [
+               {
+                "name": "o",
+                "op": "ref"
+               },
+               {
+                "name": "st",
+                "op": "ref"
+               }
+              ],
+              "name": "on",
+              "op": "var"
+             },
+             {
+              "args": [
+               {
+                "args": [
+                 {
+                  "index": [
+                   {
+                    "name": "st",
+                    "op": "ref"
+                   }
+                  ],
+                  "name": "slow",
+                  "op": "var"
+                 }
+                ],
+                "op": "not"
+               },
+               {
+                "index": [],
+                "name": "tick_parity",
+                "op": "var"
+               }
+              ],
+              "op": "or"
+             }
+            ],
+            "op": "and"
+           },
+           "default": null,
+           "domain": "stations",
+           "op": "exists",
+           "var": "st",
+           "where": null
+          }
+         ],
+         "op": "and"
+        }
+       },
+       {
+        "domain": "orders",
+        "effects": [
+         {
+          "kind": "assign",
+          "target": {
+           "index": [
+            {
+             "name": "o",
+             "op": "ref"
+            }
+           ],
+           "var": "status"
+          },
+          "value": {
+           "domain": null,
+           "op": "const",
+           "value": "submitted"
+          }
+         }
+        ],
+        "kind": "forall",
+        "var": "o",
+        "where": {
+         "args": [
+          {
+           "args": [
+            {
+             "index": [
+              {
+               "name": "o",
+               "op": "ref"
+              }
+             ],
+             "name": "status",
+             "op": "var"
+            },
+            {
+             "domain": null,
+             "op": "const",
+             "value": "pending"
+            }
+           ],
+           "op": "eq"
+          },
+          {
+           "args": [
+            {
+             "index": [
+              {
+               "name": "o",
+               "op": "ref"
+              }
+             ],
+             "name": "arrive_at",
+             "op": "var"
+            },
+            {
+             "args": [
+              {
+               "index": [],
+               "name": "clock",
+               "op": "var"
+              },
+              {
+               "domain": null,
+               "op": "const",
+               "value": 1
+              }
+             ],
+             "op": "add"
+            }
+           ],
+           "op": "eq"
+          }
+         ],
+         "op": "and"
+        }
+       }
+      ],
+      "label": "推进时间",
+      "name": "tick",
+      "params": [],
+      "precondition": {
+       "args": [
+        {
+         "index": [],
+         "name": "clock",
+         "op": "var"
+        },
+        {
+         "domain": null,
+         "op": "const",
+         "value": 24
+        }
+       ],
+       "op": "lt"
+      },
+      "retry": "RECONCILE_THEN_RETRY",
+      "timeout_seconds": 30.0
+     },
+     {
+      "cost": 1,
+      "description": null,
+      "effects": [
+       {
+        "kind": "assign",
+        "target": {
+         "index": [
+          {
+           "name": "s",
+           "op": "ref"
+          }
+         ],
+         "var": "stock"
+        },
+        "value": {
+         "args": [
+          {
+           "index": [
+            {
+             "name": "s",
+             "op": "ref"
+            }
+           ],
+           "name": "stock",
+           "op": "var"
+          },
+          {
+           "domain": null,
+           "op": "const",
+           "value": 4
+          }
+         ],
+         "op": "add"
+        }
+       },
+       {
+        "kind": "assign",
+        "target": {
+         "index": [
+          {
+           "name": "s",
+           "op": "ref"
+          }
+         ],
+         "var": "restocked"
+        },
+        "value": {
+         "domain": null,
+         "op": "const",
+         "value": true
+        }
+       }
+      ],
+      "label": "补货",
+      "name": "restock",
+      "params": [
+       {
+        "name": "s",
+        "type": {
+         "kind": "entity",
+         "set": "skus"
+        }
+       }
+      ],
+      "precondition": {
+       "args": [
+        {
+         "args": [
+          {
+           "index": [
+            {
+             "name": "s",
+             "op": "ref"
+            }
+           ],
+           "name": "restocked",
+           "op": "var"
+          }
+         ],
+         "op": "not"
+        },
+        {
+         "args": [
+          {
+           "args": [
+            {
+             "index": [
+              {
+               "name": "s",
+               "op": "ref"
+              }
+             ],
+             "name": "stock",
+             "op": "var"
+            },
+            {
+             "domain": null,
+             "op": "const",
+             "value": 4
+            }
+           ],
+           "op": "add"
+          },
+          {
+           "domain": null,
+           "op": "const",
+           "value": 12
+          }
+         ],
+         "op": "le"
+        }
+       ],
+       "op": "and"
+      },
+      "retry": "RECONCILE_THEN_RETRY",
+      "timeout_seconds": 30.0
+     }
+    ],
+    "constants": [
+     {
+      "description": null,
+      "index": [
+       "orders"
+      ],
+      "name": "sku_of",
+      "type": {
+       "kind": "entity",
+       "set": "skus"
+      },
+      "value": {
+       "cells": [
+        {
+         "index": [
+          "o1"
+         ],
+         "value": "a"
+        },
+        {
+         "index": [
+          "o2"
+         ],
+         "value": "b"
+        },
+        {
+         "index": [
+          "o3"
+         ],
+         "value": "a"
+        },
+        {
+         "index": [
+          "o4"
+         ],
+         "value": "b"
+        },
+        {
+         "index": [
+          "o5"
+         ],
+         "value": "a"
+        },
+        {
+         "index": [
+          "o6"
+         ],
+         "value": "b"
+        }
+       ],
+       "default": null
+      }
+     },
+     {
+      "description": null,
+      "index": [
+       "orders"
+      ],
+      "name": "qty",
+      "type": {
+       "kind": "int",
+       "max": 4,
+       "min": 1
+      },
+      "value": {
+       "cells": [
+        {
+         "index": [
+          "o1"
+         ],
+         "value": 2
+        },
+        {
+         "index": [
+          "o2"
+         ],
+         "value": 1
+        },
+        {
+         "index": [
+          "o3"
+         ],
+         "value": 3
+        },
+        {
+         "index": [
+          "o4"
+         ],
+         "value": 2
+        },
+        {
+         "index": [
+          "o5"
+         ],
+         "value": 1
+        },
+        {
+         "index": [
+          "o6"
+         ],
+         "value": 3
+        }
+       ],
+       "default": null
+      }
+     },
+     {
+      "description": null,
+      "index": [
+       "orders"
+      ],
+      "name": "arrive_at",
+      "type": {
+       "kind": "int",
+       "max": 24,
+       "min": 0
+      },
+      "value": {
+       "cells": [
+        {
+         "index": [
+          "o1"
+         ],
+         "value": 0
+        },
+        {
+         "index": [
+          "o2"
+         ],
+         "value": 0
+        },
+        {
+         "index": [
+          "o3"
+         ],
+         "value": 0
+        },
+        {
+         "index": [
+          "o4"
+         ],
+         "value": 2
+        },
+        {
+         "index": [
+          "o5"
+         ],
+         "value": 3
+        },
+        {
+         "index": [
+          "o6"
+         ],
+         "value": 4
+        }
+       ],
+       "default": null
+      }
+     },
+     {
+      "description": null,
+      "index": [
+       "orders"
+      ],
+      "name": "due",
+      "type": {
+       "kind": "int",
+       "max": 24,
+       "min": 0
+      },
+      "value": {
+       "cells": [
+        {
+         "index": [
+          "o1"
+         ],
+         "value": 6
+        },
+        {
+         "index": [
+          "o2"
+         ],
+         "value": 7
+        },
+        {
+         "index": [
+          "o3"
+         ],
+         "value": 9
+        },
+        {
+         "index": [
+          "o4"
+         ],
+         "value": 11
+        },
+        {
+         "index": [
+          "o5"
+         ],
+         "value": 12
+        },
+        {
+         "index": [
+          "o6"
+         ],
+         "value": 14
+        }
+       ],
+       "default": null
+      }
+     },
+     {
+      "description": "a slow station advances processing only on every other tick (hidden-reality hook)",
+      "index": [
+       "stations"
+      ],
+      "name": "slow",
+      "type": {
+       "kind": "bool"
+      },
+      "value": {
+       "cells": [],
+       "default": false
+      }
+     }
+    ],
+    "description": "Order handling: reserve stock, queue, process on stations, complete; orders keep arriving.",
+    "entity_sets": [
+     {
+      "description": null,
+      "label": "订单",
+      "members": [
+       "o1",
+       "o2",
+       "o3",
+       "o4",
+       "o5",
+       "o6"
+      ],
+      "name": "orders"
+     },
+     {
+      "description": null,
+      "label": "库存品",
+      "members": [
+       "a",
+       "b"
+      ],
+      "name": "skus"
+     },
+     {
+      "description": null,
+      "label": "处理工位",
+      "members": [
+       "p1",
+       "p2"
+      ],
+      "name": "stations"
+     }
+    ],
+    "enums": [
+     {
+      "description": null,
+      "name": "order_status",
+      "values": [
+       "pending",
+       "submitted",
+       "reserved",
+       "queued",
+       "processing",
+       "completed"
+      ]
+     }
+    ],
+    "features": [],
+    "name": "local-order-service",
+    "objectives": [],
+    "properties": [
+     {
+      "description": null,
+      "expr": {
+       "body": {
+        "args": [
+         {
+          "index": [
+           {
+            "name": "o",
+            "op": "ref"
+           }
+          ],
+          "name": "status",
+          "op": "var"
+         },
+         {
+          "domain": null,
+          "op": "const",
+          "value": "completed"
+         }
+        ],
+        "op": "eq"
+       },
+       "default": null,
+       "domain": "orders",
+       "op": "forall",
+       "var": "o",
+       "where": null
+      },
+      "id": "all_completed",
+      "kind": "goal",
+      "label": "全部订单完成"
+     },
+     {
+      "description": null,
+      "expr": {
+       "body": {
+        "args": [
+         {
+          "body": {
+           "index": [
+            {
+             "name": "o",
+             "op": "ref"
+            },
+            {
+             "name": "st",
+             "op": "ref"
+            }
+           ],
+           "name": "on",
+           "op": "var"
+          },
+          "default": null,
+          "domain": "orders",
+          "op": "count",
+          "var": "o",
+          "where": null
+         },
+         {
+          "domain": null,
+          "op": "const",
+          "value": 1
+         }
+        ],
+        "op": "le"
+       },
+       "default": null,
+       "domain": "stations",
+       "op": "forall",
+       "var": "st",
+       "where": null
+      },
+      "id": "station_capacity",
+      "kind": "invariant",
+      "label": "工位容量"
+     },
+     {
+      "description": null,
+      "expr": {
+       "body": {
+        "args": [
+         {
+          "args": [
+           {
+            "index": [],
+            "name": "clock",
+            "op": "var"
+           },
+           {
+            "index": [
+             {
+              "name": "o",
+              "op": "ref"
+             }
+            ],
+            "name": "due",
+            "op": "var"
+           }
+          ],
+          "op": "gt"
+         },
+         {
+          "args": [
+           {
+            "index": [
+             {
+              "name": "o",
+              "op": "ref"
+             }
+            ],
+            "name": "status",
+            "op": "var"
+           },
+           {
+            "domain": null,
+            "op": "const",
+            "value": "completed"
+           }
+          ],
+          "op": "eq"
+         }
+        ],
+        "op": "implies"
+       },
+       "default": null,
+       "domain": "orders",
+       "op": "forall",
+       "var": "o",
+       "where": null
+      },
+      "id": "on_time",
+      "kind": "invariant",
+      "label": "无延期"
+     }
+    ],
+    "semantic_profile": "deterministic_finite_v1",
+    "state": [
+     {
+      "description": null,
+      "index": [
+       "orders"
+      ],
+      "initial": {
+       "cells": [
+        {
+         "index": [
+          "o1"
+         ],
+         "value": "submitted"
+        },
+        {
+         "index": [
+          "o2"
+         ],
+         "value": "submitted"
+        },
+        {
+         "index": [
+          "o3"
+         ],
+         "value": "submitted"
+        },
+        {
+         "index": [
+          "o4"
+         ],
+         "value": "pending"
+        },
+        {
+         "index": [
+          "o5"
+         ],
+         "value": "pending"
+        },
+        {
+         "index": [
+          "o6"
+         ],
+         "value": "pending"
+        }
+       ],
+       "default": null
+      },
+      "label": "订单状态",
+      "name": "status",
+      "observable": true,
+      "type": {
+       "kind": "enum",
+       "name": "order_status"
+      }
+     },
+     {
+      "description": null,
+      "index": [
+       "skus"
+      ],
+      "initial": {
+       "cells": [
+        {
+         "index": [
+          "a"
+         ],
+         "value": 6
+        },
+        {
+         "index": [
+          "b"
+         ],
+         "value": 6
+        }
+       ],
+       "default": null
+      },
+      "label": "可用库存",
+      "name": "stock",
+      "observable": true,
+      "type": {
+       "kind": "int",
+       "max": 12,
+       "min": 0
+      }
+     },
+     {
+      "description": null,
+      "index": [
+       "skus"
+      ],
+      "initial": {
+       "cells": [],
+       "default": false
+      },
+      "label": "已补货",
+      "name": "restocked",
+      "observable": true,
+      "type": {
+       "kind": "bool"
+      }
+     },
+     {
+      "description": null,
+      "index": [
+       "orders",
+       "stations"
+      ],
+      "initial": {
+       "cells": [],
+       "default": false
+      },
+      "label": "订单所在工位",
+      "name": "on",
+      "observable": true,
+      "type": {
+       "kind": "bool"
+      }
+     },
+     {
+      "description": null,
+      "index": [
+       "orders"
+      ],
+      "initial": {
+       "cells": [],
+       "default": 0
+      },
+      "label": "剩余处理时间",
+      "name": "remaining",
+      "observable": true,
+      "type": {
+       "kind": "int",
+       "max": 9,
+       "min": 0
+      }
+     },
+     {
+      "description": "instance data (set per case and seed); never changed by actions",
+      "index": [
+       "orders"
+      ],
+      "initial": {
+       "cells": [
+        {
+         "index": [
+          "o1"
+         ],
+         "value": 2
+        },
+        {
+         "index": [
+          "o2"
+         ],
+         "value": 3
+        },
+        {
+         "index": [
+          "o3"
+         ],
+         "value": 2
+        },
+        {
+         "index": [
+          "o4"
+         ],
+         "value": 2
+        },
+        {
+         "index": [
+          "o5"
+         ],
+         "value": 3
+        },
+        {
+         "index": [
+          "o6"
+         ],
+         "value": 2
+        }
+       ],
+       "default": null
+      },
+      "label": "处理时间",
+      "name": "proc_time",
+      "observable": true,
+      "type": {
+       "kind": "int",
+       "max": 9,
+       "min": 1
+      }
+     },
+     {
+      "description": "0 = not queued",
+      "index": [
+       "orders"
+      ],
+      "initial": {
+       "cells": [],
+       "default": 0
+      },
+      "label": "排队序号",
+      "name": "queued_seq",
+      "observable": true,
+      "type": {
+       "kind": "int",
+       "max": 9,
+       "min": 0
+      }
+     },
+     {
+      "description": null,
+      "index": [],
+      "initial": {
+       "cells": [],
+       "default": 1
+      },
+      "label": null,
+      "name": "next_seq",
+      "observable": true,
+      "type": {
+       "kind": "int",
+       "max": 9,
+       "min": 1
+      }
+     },
+     {
+      "description": null,
+      "index": [
+       "orders"
+      ],
+      "initial": {
+       "cells": [],
+       "default": 0
+      },
+      "label": "完成时刻",
+      "name": "done_at",
+      "observable": true,
+      "type": {
+       "kind": "int",
+       "max": 24,
+       "min": 0
+      }
+     },
+     {
+      "description": null,
+      "index": [],
+      "initial": {
+       "cells": [],
+       "default": 0
+      },
+      "label": "逻辑时间",
+      "name": "clock",
+      "observable": true,
+      "type": {
+       "kind": "int",
+       "max": 24,
+       "min": 0
+      }
+     },
+     {
+      "description": null,
+      "index": [],
+      "initial": {
+       "cells": [],
+       "default": false
+      },
+      "label": null,
+      "name": "tick_parity",
+      "observable": true,
+      "type": {
+       "kind": "bool"
+      }
+     }
+    ]
+   },
+   "kind": "fal-ir"
+  },
+  "semantic_profile": "deterministic_finite_v1",
+  "source": {
+   "artifact": null,
+   "author": null,
+   "format": "fal-ir-json/v1",
+   "origin": "examples/local-order-service",
+   "parent_version": null,
+   "text": "{\n  \"semantic_profile\": \"deterministic_finite_v1\",\n  \"name\": \"local-order-service\",\n  \"description\": \"Order handling: reserve stock, queue, process on stations, complete; orders keep arriving.\",\n  \"enums\": [\n    {\n      \"name\": \"order_status\",\n      \"values\": [\n        \"pending\",\n        \"submitted\",\n        \"reserved\",\n        \"queued\",\n        \"processing\",\n        \"completed\"\n      ],\n      \"description\": null\n    }\n  ],\n  \"entity_sets\": [\n    {\n      \"name\": \"orders\",\n      \"members\": [\n        \"o1\",\n        \"o2\",\n        \"o3\",\n        \"o4\",\n        \"o5\",\n        \"o6\"\n      ],\n      \"label\": \"订单\",\n      \"description\": null\n    },\n    {\n      \"name\": \"skus\",\n      \"members\": [\n        \"a\",\n        \"b\"\n      ],\n      \"label\": \"库存品\",\n      \"description\": null\n    },\n    {\n      \"name\": \"stations\",\n      \"members\": [\n        \"p1\",\n        \"p2\"\n      ],\n      \"label\": \"处理工位\",\n      \"description\": null\n    }\n  ],\n  \"constants\": [\n    {\n      \"name\": \"sku_of\",\n      \"type\": {\n        \"kind\": \"entity\",\n        \"set\": \"skus\"\n      },\n      \"index\": [\n        \"orders\"\n      ],\n      \"value\": {\n        \"default\": null,\n        \"cells\": [\n          {\n            \"index\": [\n              \"o1\"\n            ],\n            \"value\": \"a\"\n          },\n          {\n            \"index\": [\n              \"o2\"\n            ],\n            \"value\": \"b\"\n          },\n          {\n            \"index\": [\n              \"o3\"\n            ],\n            \"value\": \"a\"\n          },\n          {\n            \"index\": [\n              \"o4\"\n            ],\n            \"value\": \"b\"\n          },\n          {\n            \"index\": [\n              \"o5\"\n            ],\n            \"value\": \"a\"\n          },\n          {\n            \"index\": [\n              \"o6\"\n            ],\n            \"value\": \"b\"\n          }\n        ]\n      },\n      \"description\": null\n    },\n    {\n      \"name\": \"qty\",\n      \"type\": {\n        \"kind\": \"int\",\n        \"min\": 1,\n        \"max\": 4\n      },\n      \"index\": [\n        \"orders\"\n      ],\n      \"value\": {\n        \"default\": null,\n        \"cells\": [\n          {\n            \"index\": [\n              \"o1\"\n            ],\n            \"value\": 2\n          },\n          {\n            \"index\": [\n              \"o2\"\n            ],\n            \"value\": 1\n          },\n          {\n            \"index\": [\n              \"o3\"\n            ],\n            \"value\": 3\n          },\n          {\n            \"index\": [\n              \"o4\"\n            ],\n            \"value\": 2\n          },\n          {\n            \"index\": [\n              \"o5\"\n            ],\n            \"value\": 1\n          },\n          {\n            \"index\": [\n              \"o6\"\n            ],\n            \"value\": 3\n          }\n        ]\n      },\n      \"description\": null\n    },\n    {\n      \"name\": \"arrive_at\",\n      \"type\": {\n        \"kind\": \"int\",\n        \"min\": 0,\n        \"max\": 24\n      },\n      \"index\": [\n        \"orders\"\n      ],\n      \"value\": {\n        \"default\": null,\n        \"cells\": [\n          {\n            \"index\": [\n              \"o1\"\n            ],\n            \"value\": 0\n          },\n          {\n            \"index\": [\n              \"o2\"\n            ],\n            \"value\": 0\n          },\n          {\n            \"index\": [\n              \"o3\"\n            ],\n            \"value\": 0\n          },\n          {\n            \"index\": [\n              \"o4\"\n            ],\n            \"value\": 2\n          },\n          {\n            \"index\": [\n              \"o5\"\n            ],\n            \"value\": 3\n          },\n          {\n            \"index\": [\n              \"o6\"\n            ],\n            \"value\": 4\n          }\n        ]\n      },\n      \"description\": null\n    },\n    {\n      \"name\": \"due\",\n      \"type\": {\n        \"kind\": \"int\",\n        \"min\": 0,\n        \"max\": 24\n      },\n      \"index\": [\n        \"orders\"\n      ],\n      \"value\": {\n        \"default\": null,\n        \"cells\": [\n          {\n            \"index\": [\n              \"o1\"\n            ],\n            \"value\": 6\n          },\n          {\n            \"index\": [\n              \"o2\"\n            ],\n            \"value\": 7\n          },\n          {\n            \"index\": [\n              \"o3\"\n            ],\n            \"value\": 9\n          },\n          {\n            \"index\": [\n              \"o4\"\n            ],\n            \"value\": 11\n          },\n          {\n            \"index\": [\n              \"o5\"\n            ],\n            \"value\": 12\n          },\n          {\n            \"index\": [\n              \"o6\"\n            ],\n            \"value\": 14\n          }\n        ]\n      },\n      \"description\": null\n    },\n    {\n      \"name\": \"slow\",\n      \"type\": {\n        \"kind\": \"bool\"\n      },\n      \"index\": [\n        \"stations\"\n      ],\n      \"value\": {\n        \"default\": false,\n        \"cells\": []\n      },\n      \"description\": \"a slow station advances processing only on every other tick (hidden-reality hook)\"\n    }\n  ],\n  \"state\": [\n    {\n      \"name\": \"status\",\n      \"type\": {\n        \"kind\": \"enum\",\n        \"name\": \"order_status\"\n      },\n      \"index\": [\n        \"orders\"\n      ],\n      \"initial\": {\n        \"default\": null,\n        \"cells\": [\n          {\n            \"index\": [\n              \"o1\"\n            ],\n            \"value\": \"submitted\"\n          },\n          {\n            \"index\": [\n              \"o2\"\n            ],\n            \"value\": \"submitted\"\n          },\n          {\n            \"index\": [\n              \"o3\"\n            ],\n            \"value\": \"submitted\"\n          },\n          {\n            \"index\": [\n              \"o4\"\n            ],\n            \"value\": \"pending\"\n          },\n          {\n            \"index\": [\n              \"o5\"\n            ],\n            \"value\": \"pending\"\n          },\n          {\n            \"index\": [\n              \"o6\"\n            ],\n            \"value\": \"pending\"\n          }\n        ]\n      },\n      \"label\": \"订单状态\",\n      \"description\": null,\n      \"observable\": true\n    },\n    {\n      \"name\": \"stock\",\n      \"type\": {\n        \"kind\": \"int\",\n        \"min\": 0,\n        \"max\": 12\n      },\n      \"index\": [\n        \"skus\"\n      ],\n      \"initial\": {\n        \"default\": null,\n        \"cells\": [\n          {\n            \"index\": [\n              \"a\"\n            ],\n            \"value\": 6\n          },\n          {\n            \"index\": [\n              \"b\"\n            ],\n            \"value\": 6\n          }\n        ]\n      },\n      \"label\": \"可用库存\",\n      \"description\": null,\n      \"observable\": true\n    },\n    {\n      \"name\": \"restocked\",\n      \"type\": {\n        \"kind\": \"bool\"\n      },\n      \"index\": [\n        \"skus\"\n      ],\n      \"initial\": {\n        \"default\": false,\n        \"cells\": []\n      },\n      \"label\": \"已补货\",\n      \"description\": null,\n      \"observable\": true\n    },\n    {\n      \"name\": \"on\",\n      \"type\": {\n        \"kind\": \"bool\"\n      },\n      \"index\": [\n        \"orders\",\n        \"stations\"\n      ],\n      \"initial\": {\n        \"default\": false,\n        \"cells\": []\n      },\n      \"label\": \"订单所在工位\",\n      \"description\": null,\n      \"observable\": true\n    },\n    {\n      \"name\": \"remaining\",\n      \"type\": {\n        \"kind\": \"int\",\n        \"min\": 0,\n        \"max\": 9\n      },\n      \"index\": [\n        \"orders\"\n      ],\n      \"initial\": {\n        \"default\": 0,\n        \"cells\": []\n      },\n      \"label\": \"剩余处理时间\",\n      \"description\": null,\n      \"observable\": true\n    },\n    {\n      \"name\": \"proc_time\",\n      \"type\": {\n        \"kind\": \"int\",\n        \"min\": 1,\n        \"max\": 9\n      },\n      \"index\": [\n        \"orders\"\n      ],\n      \"initial\": {\n        \"default\": null,\n        \"cells\": [\n          {\n            \"index\": [\n              \"o1\"\n            ],\n            \"value\": 2\n          },\n          {\n            \"index\": [\n              \"o2\"\n            ],\n            \"value\": 3\n          },\n          {\n            \"index\": [\n              \"o3\"\n            ],\n            \"value\": 2\n          },\n          {\n            \"index\": [\n              \"o4\"\n            ],\n            \"value\": 2\n          },\n          {\n            \"index\": [\n              \"o5\"\n            ],\n            \"value\": 3\n          },\n          {\n            \"index\": [\n              \"o6\"\n            ],\n            \"value\": 2\n          }\n        ]\n      },\n      \"label\": \"处理时间\",\n      \"description\": \"instance data (set per case and seed); never changed by actions\",\n      \"observable\": true\n    },\n    {\n      \"name\": \"queued_seq\",\n      \"type\": {\n        \"kind\": \"int\",\n        \"min\": 0,\n        \"max\": 9\n      },\n      \"index\": [\n        \"orders\"\n      ],\n      \"initial\": {\n        \"default\": 0,\n        \"cells\": []\n      },\n      \"label\": \"排队序号\",\n      \"description\": \"0 = not queued\",\n      \"observable\": true\n    },\n    {\n      \"name\": \"next_seq\",\n      \"type\": {\n        \"kind\": \"int\",\n        \"min\": 1,\n        \"max\": 9\n      },\n      \"index\": [],\n      \"initial\": {\n        \"default\": 1,\n        \"cells\": []\n      },\n      \"label\": null,\n      \"description\": null,\n      \"observable\": true\n    },\n    {\n      \"name\": \"done_at\",\n      \"type\": {\n        \"kind\": \"int\",\n        \"min\": 0,\n        \"max\": 24\n      },\n      \"index\": [\n        \"orders\"\n      ],\n      \"initial\": {\n        \"default\": 0,\n        \"cells\": []\n      },\n      \"label\": \"完成时刻\",\n      \"description\": null,\n      \"observable\": true\n    },\n    {\n      \"name\": \"clock\",\n      \"type\": {\n        \"kind\": \"int\",\n        \"min\": 0,\n        \"max\": 24\n      },\n      \"index\": [],\n      \"initial\": {\n        \"default\": 0,\n        \"cells\": []\n      },\n      \"label\": \"逻辑时间\",\n      \"description\": null,\n      \"observable\": true\n    },\n    {\n      \"name\": \"tick_parity\",\n      \"type\": {\n        \"kind\": \"bool\"\n      },\n      \"index\": [],\n      \"initial\": {\n        \"default\": false,\n        \"cells\": []\n      },\n      \"label\": null,\n      \"description\": null,\n      \"observable\": true\n    }\n  ],\n  \"actions\": [\n    {\n      \"name\": \"reserve\",\n      \"params\": [\n        {\n          \"name\": \"o\",\n          \"type\": {\n            \"kind\": \"entity\",\n            \"set\": \"orders\"\n          }\n        }\n      ],\n      \"precondition\": {\n        \"op\": \"and\",\n        \"args\": [\n          {\n            \"op\": \"eq\",\n            \"args\": [\n              {\n                \"op\": \"var\",\n                \"name\": \"status\",\n                \"index\": [\n                  {\n                    \"op\": \"ref\",\n                    \"name\": \"o\"\n                  }\n                ]\n              },\n              {\n                \"op\": \"const\",\n                \"value\": \"submitted\",\n                \"domain\": null\n              }\n            ]\n          },\n          {\n            \"op\": \"ge\",\n            \"args\": [\n              {\n                \"op\": \"var\",\n                \"name\": \"stock\",\n                \"index\": [\n                  {\n                    \"op\": \"var\",\n                    \"name\": \"sku_of\",\n                    \"index\": [\n                      {\n                        \"op\": \"ref\",\n                        \"name\": \"o\"\n                      }\n                    ]\n                  }\n                ]\n              },\n              {\n                \"op\": \"var\",\n                \"name\": \"qty\",\n                \"index\": [\n                  {\n                    \"op\": \"ref\",\n                    \"name\": \"o\"\n                  }\n                ]\n              }\n            ]\n          }\n        ]\n      },\n      \"effects\": [\n        {\n          \"kind\": \"assign\",\n          \"target\": {\n            \"var\": \"status\",\n            \"index\": [\n              {\n                \"op\": \"ref\",\n                \"name\": \"o\"\n              }\n            ]\n          },\n          \"value\": {\n            \"op\": \"const\",\n            \"value\": \"reserved\",\n            \"domain\": null\n          }\n        },\n        {\n          \"kind\": \"forall\",\n          \"var\": \"s\",\n          \"domain\": \"skus\",\n          \"where\": {\n            \"op\": \"eq\",\n            \"args\": [\n              {\n                \"op\": \"var\",\n                \"name\": \"sku_of\",\n                \"index\": [\n                  {\n                    \"op\": \"ref\",\n                    \"name\": \"o\"\n                  }\n                ]\n              },\n              {\n                \"op\": \"ref\",\n                \"name\": \"s\"\n              }\n            ]\n          },\n          \"effects\": [\n            {\n              \"kind\": \"assign\",\n              \"target\": {\n                \"var\": \"stock\",\n                \"index\": [\n                  {\n                    \"op\": \"ref\",\n                    \"name\": \"s\"\n                  }\n                ]\n              },\n              \"value\": {\n                \"op\": \"sub\",\n                \"args\": [\n                  {\n                    \"op\": \"var\",\n                    \"name\": \"stock\",\n                    \"index\": [\n                      {\n                        \"op\": \"ref\",\n                        \"name\": \"s\"\n                      }\n                    ]\n                  },\n                  {\n                    \"op\": \"var\",\n                    \"name\": \"qty\",\n                    \"index\": [\n                      {\n                        \"op\": \"ref\",\n                        \"name\": \"o\"\n                      }\n                    ]\n                  }\n                ]\n              }\n            }\n          ]\n        }\n      ],\n      \"cost\": 1,\n      \"label\": \"预约库存\",\n      \"description\": null,\n      \"timeout_seconds\": 30.0,\n      \"retry\": \"RECONCILE_THEN_RETRY\"\n    },\n    {\n      \"name\": \"enqueue\",\n      \"params\": [\n        {\n          \"name\": \"o\",\n          \"type\": {\n            \"kind\": \"entity\",\n            \"set\": \"orders\"\n          }\n        }\n      ],\n      \"precondition\": {\n        \"op\": \"and\",\n        \"args\": [\n          {\n            \"op\": \"eq\",\n            \"args\": [\n              {\n                \"op\": \"var\",\n                \"name\": \"status\",\n                \"index\": [\n                  {\n                    \"op\": \"ref\",\n                    \"name\": \"o\"\n                  }\n                ]\n              },\n              {\n                \"op\": \"const\",\n                \"value\": \"reserved\",\n                \"domain\": null\n              }\n            ]\n          },\n          {\n            \"op\": \"lt\",\n            \"args\": [\n              {\n                \"op\": \"var\",\n                \"name\": \"next_seq\",\n                \"index\": []\n              },\n              {\n                \"op\": \"const\",\n                \"value\": 9,\n                \"domain\": null\n              }\n            ]\n          }\n        ]\n      },\n      \"effects\": [\n        {\n          \"kind\": \"assign\",\n          \"target\": {\n            \"var\": \"status\",\n            \"index\": [\n              {\n                \"op\": \"ref\",\n                \"name\": \"o\"\n              }\n            ]\n          },\n          \"value\": {\n            \"op\": \"const\",\n            \"value\": \"queued\",\n            \"domain\": null\n          }\n        },\n        {\n          \"kind\": \"assign\",\n          \"target\": {\n            \"var\": \"queued_seq\",\n            \"index\": [\n              {\n                \"op\": \"ref\",\n                \"name\": \"o\"\n              }\n            ]\n          },\n          \"value\": {\n            \"op\": \"var\",\n            \"name\": \"next_seq\",\n            \"index\": []\n          }\n        },\n        {\n          \"kind\": \"assign\",\n          \"target\": {\n            \"var\": \"next_seq\",\n            \"index\": []\n          },\n          \"value\": {\n            \"op\": \"add\",\n            \"args\": [\n              {\n                \"op\": \"var\",\n                \"name\": \"next_seq\",\n                \"index\": []\n              },\n              {\n                \"op\": \"const\",\n                \"value\": 1,\n                \"domain\": null\n              }\n            ]\n          }\n        }\n      ],\n      \"cost\": 1,\n      \"label\": \"加入处理队列\",\n      \"description\": null,\n      \"timeout_seconds\": 30.0,\n      \"retry\": \"RECONCILE_THEN_RETRY\"\n    },\n    {\n      \"name\": \"start\",\n      \"params\": [\n        {\n          \"name\": \"o\",\n          \"type\": {\n            \"kind\": \"entity\",\n            \"set\": \"orders\"\n          }\n        },\n        {\n          \"name\": \"st\",\n          \"type\": {\n            \"kind\": \"entity\",\n            \"set\": \"stations\"\n          }\n        }\n      ],\n      \"precondition\": {\n        \"op\": \"and\",\n        \"args\": [\n          {\n            \"op\": \"eq\",\n            \"args\": [\n              {\n                \"op\": \"var\",\n                \"name\": \"status\",\n                \"index\": [\n                  {\n                    \"op\": \"ref\",\n                    \"name\": \"o\"\n                  }\n                ]\n              },\n              {\n                \"op\": \"const\",\n                \"value\": \"queued\",\n                \"domain\": null\n              }\n            ]\n          },\n          {\n            \"op\": \"not\",\n            \"args\": [\n              {\n                \"op\": \"exists\",\n                \"var\": \"x\",\n                \"domain\": \"orders\",\n                \"where\": null,\n                \"body\": {\n                  \"op\": \"var\",\n                  \"name\": \"on\",\n                  \"index\": [\n                    {\n                      \"op\": \"ref\",\n                      \"name\": \"x\"\n                    },\n                    {\n                      \"op\": \"ref\",\n                      \"name\": \"st\"\n                    }\n                  ]\n                },\n                \"default\": null\n              }\n            ]\n          },\n          {\n            \"op\": \"forall\",\n            \"var\": \"x\",\n            \"domain\": \"orders\",\n            \"where\": {\n              \"op\": \"eq\",\n              \"args\": [\n                {\n                  \"op\": \"var\",\n                  \"name\": \"status\",\n                  \"index\": [\n                    {\n                      \"op\": \"ref\",\n                      \"name\": \"x\"\n                    }\n                  ]\n                },\n                {\n                  \"op\": \"const\",\n                  \"value\": \"queued\",\n                  \"domain\": null\n                }\n              ]\n            },\n            \"body\": {\n              \"op\": \"ge\",\n              \"args\": [\n                {\n                  \"op\": \"var\",\n                  \"name\": \"queued_seq\",\n                  \"index\": [\n                    {\n                      \"op\": \"ref\",\n                      \"name\": \"x\"\n                    }\n                  ]\n                },\n                {\n                  \"op\": \"var\",\n                  \"name\": \"queued_seq\",\n                  \"index\": [\n                    {\n                      \"op\": \"ref\",\n                      \"name\": \"o\"\n                    }\n                  ]\n                }\n              ]\n            },\n            \"default\": null\n          }\n        ]\n      },\n      \"effects\": [\n        {\n          \"kind\": \"assign\",\n          \"target\": {\n            \"var\": \"status\",\n            \"index\": [\n              {\n                \"op\": \"ref\",\n                \"name\": \"o\"\n              }\n            ]\n          },\n          \"value\": {\n            \"op\": \"const\",\n            \"value\": \"processing\",\n            \"domain\": null\n          }\n        },\n        {\n          \"kind\": \"assign\",\n          \"target\": {\n            \"var\": \"on\",\n            \"index\": [\n              {\n                \"op\": \"ref\",\n                \"name\": \"o\"\n              },\n              {\n                \"op\": \"ref\",\n                \"name\": \"st\"\n              }\n            ]\n          },\n          \"value\": {\n            \"op\": \"const\",\n            \"value\": true,\n            \"domain\": null\n          }\n        },\n        {\n          \"kind\": \"assign\",\n          \"target\": {\n            \"var\": \"remaining\",\n            \"index\": [\n              {\n                \"op\": \"ref\",\n                \"name\": \"o\"\n              }\n            ]\n          },\n          \"value\": {\n            \"op\": \"var\",\n            \"name\": \"proc_time\",\n            \"index\": [\n              {\n                \"op\": \"ref\",\n                \"name\": \"o\"\n              }\n            ]\n          }\n        },\n        {\n          \"kind\": \"assign\",\n          \"target\": {\n            \"var\": \"queued_seq\",\n            \"index\": [\n              {\n                \"op\": \"ref\",\n                \"name\": \"o\"\n              }\n            ]\n          },\n          \"value\": {\n            \"op\": \"const\",\n            \"value\": 0,\n            \"domain\": null\n          }\n        }\n      ],\n      \"cost\": 1,\n      \"label\": \"开始处理\",\n      \"description\": null,\n      \"timeout_seconds\": 30.0,\n      \"retry\": \"RECONCILE_THEN_RETRY\"\n    },\n    {\n      \"name\": \"tick\",\n      \"params\": [],\n      \"precondition\": {\n        \"op\": \"lt\",\n        \"args\": [\n          {\n            \"op\": \"var\",\n            \"name\": \"clock\",\n            \"index\": []\n          },\n          {\n            \"op\": \"const\",\n            \"value\": 24,\n            \"domain\": null\n          }\n        ]\n      },\n      \"effects\": [\n        {\n          \"kind\": \"assign\",\n          \"target\": {\n            \"var\": \"clock\",\n            \"index\": []\n          },\n          \"value\": {\n            \"op\": \"add\",\n            \"args\": [\n              {\n                \"op\": \"var\",\n                \"name\": \"clock\",\n                \"index\": []\n              },\n              {\n                \"op\": \"const\",\n                \"value\": 1,\n                \"domain\": null\n              }\n            ]\n          }\n        },\n        {\n          \"kind\": \"assign\",\n          \"target\": {\n            \"var\": \"tick_parity\",\n            \"index\": []\n          },\n          \"value\": {\n            \"op\": \"not\",\n            \"args\": [\n              {\n                \"op\": \"var\",\n                \"name\": \"tick_parity\",\n                \"index\": []\n              }\n            ]\n          }\n        },\n        {\n          \"kind\": \"forall\",\n          \"var\": \"o\",\n          \"domain\": \"orders\",\n          \"where\": {\n            \"op\": \"and\",\n            \"args\": [\n              {\n                \"op\": \"eq\",\n                \"args\": [\n                  {\n                    \"op\": \"var\",\n                    \"name\": \"status\",\n                    \"index\": [\n                      {\n                        \"op\": \"ref\",\n                        \"name\": \"o\"\n                      }\n                    ]\n                  },\n                  {\n                    \"op\": \"const\",\n                    \"value\": \"processing\",\n                    \"domain\": null\n                  }\n                ]\n              },\n              {\n                \"op\": \"exists\",\n                \"var\": \"st\",\n                \"domain\": \"stations\",\n                \"where\": null,\n                \"body\": {\n                  \"op\": \"and\",\n                  \"args\": [\n                    {\n                      \"op\": \"var\",\n                      \"name\": \"on\",\n                      \"index\": [\n                        {\n                          \"op\": \"ref\",\n                          \"name\": \"o\"\n                        },\n                        {\n                          \"op\": \"ref\",\n                          \"name\": \"st\"\n                        }\n                      ]\n                    },\n                    {\n                      \"op\": \"or\",\n                      \"args\": [\n                        {\n                          \"op\": \"not\",\n                          \"args\": [\n                            {\n                              \"op\": \"var\",\n                              \"name\": \"slow\",\n                              \"index\": [\n                                {\n                                  \"op\": \"ref\",\n                                  \"name\": \"st\"\n                                }\n                              ]\n                            }\n                          ]\n                        },\n                        {\n                          \"op\": \"var\",\n                          \"name\": \"tick_parity\",\n                          \"index\": []\n                        }\n                      ]\n                    }\n                  ]\n                },\n                \"default\": null\n              }\n            ]\n          },\n          \"effects\": [\n            {\n              \"kind\": \"assign\",\n              \"target\": {\n                \"var\": \"remaining\",\n                \"index\": [\n                  {\n                    \"op\": \"ref\",\n                    \"name\": \"o\"\n                  }\n                ]\n              },\n              \"value\": {\n                \"op\": \"sub\",\n                \"args\": [\n                  {\n                    \"op\": \"var\",\n                    \"name\": \"remaining\",\n                    \"index\": [\n                      {\n                        \"op\": \"ref\",\n                        \"name\": \"o\"\n                      }\n                    ]\n                  },\n                  {\n                    \"op\": \"const\",\n                    \"value\": 1,\n                    \"domain\": null\n                  }\n                ]\n              }\n            },\n            {\n              \"kind\": \"when\",\n              \"condition\": {\n                \"op\": \"le\",\n                \"args\": [\n                  {\n                    \"op\": \"var\",\n                    \"name\": \"remaining\",\n                    \"index\": [\n                      {\n                        \"op\": \"ref\",\n                        \"name\": \"o\"\n                      }\n                    ]\n                  },\n                  {\n                    \"op\": \"const\",\n                    \"value\": 1,\n                    \"domain\": null\n                  }\n                ]\n              },\n              \"then\": [\n                {\n                  \"kind\": \"assign\",\n                  \"target\": {\n                    \"var\": \"status\",\n                    \"index\": [\n                      {\n                        \"op\": \"ref\",\n                        \"name\": \"o\"\n                      }\n                    ]\n                  },\n                  \"value\": {\n                    \"op\": \"const\",\n                    \"value\": \"completed\",\n                    \"domain\": null\n                  }\n                },\n                {\n                  \"kind\": \"assign\",\n                  \"target\": {\n                    \"var\": \"done_at\",\n                    \"index\": [\n                      {\n                        \"op\": \"ref\",\n                        \"name\": \"o\"\n                      }\n                    ]\n                  },\n                  \"value\": {\n                    \"op\": \"add\",\n                    \"args\": [\n                      {\n                        \"op\": \"var\",\n                        \"name\": \"clock\",\n                        \"index\": []\n                      },\n                      {\n                        \"op\": \"const\",\n                        \"value\": 1,\n                        \"domain\": null\n                      }\n                    ]\n                  }\n                },\n                {\n                  \"kind\": \"forall\",\n                  \"var\": \"st\",\n                  \"domain\": \"stations\",\n                  \"where\": null,\n                  \"effects\": [\n                    {\n                      \"kind\": \"assign\",\n                      \"target\": {\n                        \"var\": \"on\",\n                        \"index\": [\n                          {\n                            \"op\": \"ref\",\n                            \"name\": \"o\"\n                          },\n                          {\n                            \"op\": \"ref\",\n                            \"name\": \"st\"\n                          }\n                        ]\n                      },\n                      \"value\": {\n                        \"op\": \"const\",\n                        \"value\": false,\n                        \"domain\": null\n                      }\n                    }\n                  ]\n                }\n              ],\n              \"otherwise\": []\n            }\n          ]\n        },\n        {\n          \"kind\": \"forall\",\n          \"var\": \"o\",\n          \"domain\": \"orders\",\n          \"where\": {\n            \"op\": \"and\",\n            \"args\": [\n              {\n                \"op\": \"eq\",\n                \"args\": [\n                  {\n                    \"op\": \"var\",\n                    \"name\": \"status\",\n                    \"index\": [\n                      {\n                        \"op\": \"ref\",\n                        \"name\": \"o\"\n                      }\n                    ]\n                  },\n                  {\n                    \"op\": \"const\",\n                    \"value\": \"pending\",\n                    \"domain\": null\n                  }\n                ]\n              },\n              {\n                \"op\": \"eq\",\n                \"args\": [\n                  {\n                    \"op\": \"var\",\n                    \"name\": \"arrive_at\",\n                    \"index\": [\n                      {\n                        \"op\": \"ref\",\n                        \"name\": \"o\"\n                      }\n                    ]\n                  },\n                  {\n                    \"op\": \"add\",\n                    \"args\": [\n                      {\n                        \"op\": \"var\",\n                        \"name\": \"clock\",\n                        \"index\": []\n                      },\n                      {\n                        \"op\": \"const\",\n                        \"value\": 1,\n                        \"domain\": null\n                      }\n                    ]\n                  }\n                ]\n              }\n            ]\n          },\n          \"effects\": [\n            {\n              \"kind\": \"assign\",\n              \"target\": {\n                \"var\": \"status\",\n                \"index\": [\n                  {\n                    \"op\": \"ref\",\n                    \"name\": \"o\"\n                  }\n                ]\n              },\n              \"value\": {\n                \"op\": \"const\",\n                \"value\": \"submitted\",\n                \"domain\": null\n              }\n            }\n          ]\n        }\n      ],\n      \"cost\": 1,\n      \"label\": \"推进时间\",\n      \"description\": null,\n      \"timeout_seconds\": 30.0,\n      \"retry\": \"RECONCILE_THEN_RETRY\"\n    },\n    {\n      \"name\": \"restock\",\n      \"params\": [\n        {\n          \"name\": \"s\",\n          \"type\": {\n            \"kind\": \"entity\",\n            \"set\": \"skus\"\n          }\n        }\n      ],\n      \"precondition\": {\n        \"op\": \"and\",\n        \"args\": [\n          {\n            \"op\": \"not\",\n            \"args\": [\n              {\n                \"op\": \"var\",\n                \"name\": \"restocked\",\n                \"index\": [\n                  {\n                    \"op\": \"ref\",\n                    \"name\": \"s\"\n                  }\n                ]\n              }\n            ]\n          },\n          {\n            \"op\": \"le\",\n            \"args\": [\n              {\n                \"op\": \"add\",\n                \"args\": [\n                  {\n                    \"op\": \"var\",\n                    \"name\": \"stock\",\n                    \"index\": [\n                      {\n                        \"op\": \"ref\",\n                        \"name\": \"s\"\n                      }\n                    ]\n                  },\n                  {\n                    \"op\": \"const\",\n                    \"value\": 4,\n                    \"domain\": null\n                  }\n                ]\n              },\n              {\n                \"op\": \"const\",\n                \"value\": 12,\n                \"domain\": null\n              }\n            ]\n          }\n        ]\n      },\n      \"effects\": [\n        {\n          \"kind\": \"assign\",\n          \"target\": {\n            \"var\": \"stock\",\n            \"index\": [\n              {\n                \"op\": \"ref\",\n                \"name\": \"s\"\n              }\n            ]\n          },\n          \"value\": {\n            \"op\": \"add\",\n            \"args\": [\n              {\n                \"op\": \"var\",\n                \"name\": \"stock\",\n                \"index\": [\n                  {\n                    \"op\": \"ref\",\n                    \"name\": \"s\"\n                  }\n                ]\n              },\n              {\n                \"op\": \"const\",\n                \"value\": 4,\n                \"domain\": null\n              }\n            ]\n          }\n        },\n        {\n          \"kind\": \"assign\",\n          \"target\": {\n            \"var\": \"restocked\",\n            \"index\": [\n              {\n                \"op\": \"ref\",\n                \"name\": \"s\"\n              }\n            ]\n          },\n          \"value\": {\n            \"op\": \"const\",\n            \"value\": true,\n            \"domain\": null\n          }\n        }\n      ],\n      \"cost\": 1,\n      \"label\": \"补货\",\n      \"description\": null,\n      \"timeout_seconds\": 30.0,\n      \"retry\": \"RECONCILE_THEN_RETRY\"\n    }\n  ],\n  \"properties\": [\n    {\n      \"id\": \"all_completed\",\n      \"kind\": \"goal\",\n      \"expr\": {\n        \"op\": \"forall\",\n        \"var\": \"o\",\n        \"domain\": \"orders\",\n        \"where\": null,\n        \"body\": {\n          \"op\": \"eq\",\n          \"args\": [\n            {\n              \"op\": \"var\",\n              \"name\": \"status\",\n              \"index\": [\n                {\n                  \"op\": \"ref\",\n                  \"name\": \"o\"\n                }\n              ]\n            },\n            {\n              \"op\": \"const\",\n              \"value\": \"completed\",\n              \"domain\": null\n            }\n          ]\n        },\n        \"default\": null\n      },\n      \"label\": \"全部订单完成\",\n      \"description\": null\n    },\n    {\n      \"id\": \"station_capacity\",\n      \"kind\": \"invariant\",\n      \"expr\": {\n        \"op\": \"forall\",\n        \"var\": \"st\",\n        \"domain\": \"stations\",\n        \"where\": null,\n        \"body\": {\n          \"op\": \"le\",\n          \"args\": [\n            {\n              \"op\": \"count\",\n              \"var\": \"o\",\n              \"domain\": \"orders\",\n              \"where\": null,\n              \"body\": {\n                \"op\": \"var\",\n                \"name\": \"on\",\n                \"index\": [\n                  {\n                    \"op\": \"ref\",\n                    \"name\": \"o\"\n                  },\n                  {\n                    \"op\": \"ref\",\n                    \"name\": \"st\"\n                  }\n                ]\n              },\n              \"default\": null\n            },\n            {\n              \"op\": \"const\",\n              \"value\": 1,\n              \"domain\": null\n            }\n          ]\n        },\n        \"default\": null\n      },\n      \"label\": \"工位容量\",\n      \"description\": null\n    },\n    {\n      \"id\": \"on_time\",\n      \"kind\": \"invariant\",\n      \"expr\": {\n        \"op\": \"forall\",\n        \"var\": \"o\",\n        \"domain\": \"orders\",\n        \"where\": null,\n        \"body\": {\n          \"op\": \"implies\",\n          \"args\": [\n            {\n              \"op\": \"gt\",\n              \"args\": [\n                {\n                  \"op\": \"var\",\n                  \"name\": \"clock\",\n                  \"index\": []\n                },\n                {\n                  \"op\": \"var\",\n                  \"name\": \"due\",\n                  \"index\": [\n                    {\n                      \"op\": \"ref\",\n                      \"name\": \"o\"\n                    }\n                  ]\n                }\n              ]\n            },\n            {\n              \"op\": \"eq\",\n              \"args\": [\n                {\n                  \"op\": \"var\",\n                  \"name\": \"status\",\n                  \"index\": [\n                    {\n                      \"op\": \"ref\",\n                      \"name\": \"o\"\n                    }\n                  ]\n                },\n                {\n                  \"op\": \"const\",\n                  \"value\": \"completed\",\n                  \"domain\": null\n                }\n              ]\n            }\n          ]\n        },\n        \"default\": null\n      },\n      \"label\": \"无延期\",\n      \"description\": null\n    }\n  ],\n  \"features\": [],\n  \"objectives\": []\n}"
+  },
+  "version": 1
+ },
+ "property": {
+  "id": "all_completed",
+  "kind": "goal"
+ },
+ "question": "Is all_completed reachable within the bound for this program run?"
+}

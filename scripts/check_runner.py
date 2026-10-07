@@ -551,6 +551,9 @@ def main(argv: list[str] | None = None) -> int:
         "environment": versions(), "resources_before": res_before, "resources_after": resources(),
         "run": this_inv, "summary": summary, "groups": status_by_group, "required_groups": list(required),
         "selection_status": selection_status, "complete": complete, "mandatory_passed": complete,
+        # the two numbers a partial research-check run must always report apart: did the chosen checks pass, and is the
+        # whole suite complete (a one-group run can be selected_passed while overall_complete is still false)
+        "selected_passed": selection_status == "PASS", "overall_complete": complete,
         "unmet": unmet if not complete else [],
         "aggregation": "only results produced and verified by this invocation count; a partial selection is never "
                        "complete; results from another commit, work tree or configuration are inherited and ignored",

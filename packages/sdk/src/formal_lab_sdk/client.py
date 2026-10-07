@@ -279,6 +279,27 @@ class Client:
                              params={"matrix_id": matrix_id} if matrix_id else None,
                              headers={"content-type": "application/zip"})
 
+    # ------------------------------------------------------------------ research cases (phase 5A)
+    def research_cases(self, project_id: str) -> list[dict[str, Any]]:
+        return self.get(f"/projects/{project_id}/research/cases")
+
+    def import_research_case(self, project_id: str, data: bytes) -> dict[str, Any]:
+        """Import a case directory packaged as a zip; the platform validates it (digests, identities, separation)."""
+        return self._request("POST", f"/projects/{project_id}/research/cases", content=data,
+                             headers={"content-type": "application/zip"})
+
+    def research_case(self, rc_id: str) -> dict[str, Any]:
+        return self.get(f"/research/cases/{rc_id}")
+
+    def export_research_case(self, rc_id: str) -> bytes:
+        return self.get(f"/research/cases/{rc_id}/export")
+
+    def model_version_research(self, version_id: str) -> list[dict[str, Any]]:
+        return self.get(f"/model-versions/{version_id}/research")
+
+    def run_research(self, run_id: str) -> list[dict[str, Any]]:
+        return self.get(f"/runs/{run_id}/research")
+
     def create_matrix(self, project_id: str, *, scenarios: list[str], strategies: list[str], seeds: list[int],
                       budgets: list[dict] | None = None, name: str | None = None) -> dict[str, Any]:
         return self.post(f"/projects/{project_id}/matrices", {"scenarios": scenarios, "strategies": strategies,

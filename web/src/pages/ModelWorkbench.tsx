@@ -3,7 +3,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate, useParams } from "react-router";
 import type { BoundedCheckResult, ModelIR } from "@formal-lab/contracts";
 import {
-  get, irOf, post, type CatalogEntry, type CheckRecord, type ModelChange, type ModelSummary, type Validation, type VersionDetail,
+  get, irOf, modelVersionResearch, post, type CatalogEntry, type CheckRecord, type ModelChange, type ModelSummary,
+  type ResearchLink, type Validation, type VersionDetail,
 } from "../api";
 import { ModelGraph } from "../components/ModelGraph";
 import { ObjectivesAndReleases } from "../components/ReleasePanel";
@@ -11,9 +12,9 @@ import { ProbabilisticPanel } from "../components/ProbabilisticPanel";
 import { blankModel, effectLines, exprText, typeText } from "../ir";
 import { Icon } from "../icons";
 import {
-  Empty, ErrorState, fmtTime, InlineError, Json, JsonField, KV, Loading, Modal, QueryState, Tabs, useToast, VerdictBadge, PageHead } from "../ui";
+  CorrespondenceBadge, Empty, ErrorState, fmtTime, InlineError, Json, JsonField, KV, Loading, Modal, QueryState, Tabs, useToast, VerdictBadge, PageHead } from "../ui";
 
-type Tab = "graph" | "form" | "json" | "diff" | "check" | "release" | "prob" | "caps";
+type Tab = "graph" | "form" | "json" | "diff" | "check" | "release" | "prob" | "caps" | "research";
 const draftKey = (modelId: string) => `fal:model-draft:${modelId}`;
 
 export function ModelWorkbench() {
@@ -237,7 +238,7 @@ function ModelEditor({ modelId }: { modelId: string }) {
         <Tabs label="模型视图" value={tab} onChange={setTab} tabs={[
           { id: "graph", label: "结构图" }, { id: "form", label: "表单编辑" }, { id: "json", label: "JSON" },
           { id: "diff", label: "版本差异" }, { id: "check", label: "编译与检查" }, { id: "release", label: "目标与发布" },
-          { id: "prob", label: "概率扩展" }, { id: "caps", label: "能力矩阵" },
+          { id: "prob", label: "概率扩展" }, { id: "caps", label: "能力矩阵" }, { id: "research", label: "研究案例" },
         ]} />
         <div className="card-body">
           {draft && tab === "graph" && <ModelGraph ir={draft} />}
@@ -248,9 +249,51 @@ function ModelEditor({ modelId }: { modelId: string }) {
           {tab === "release" && <ObjectivesAndReleases pid={pid!} detail={d} onDiff={() => setTab("diff")} />}
           {tab === "prob" && <ProbabilisticPanel versionId={d.id} />}
           {tab === "caps" && <div className="stack"><CapabilityReportView versionId={d.id} /><CapabilityMatrix rows={d.capability_matrix} /></div>}
+          {tab === "research" && <ResearchForVersion versionId={d.id} />}
         </div>
       </div>
     </div>
+  );
+}
+
+// ------------------------------------------------------------------ research cases that verify this model version
+function ResearchForVersion({ versionId }: { versionId: string }) {
+  const q = useQuery({ queryKey: ["mv-research", versionId], queryFn: () => modelVersionResearch(versionId) });
+  return (
+    <QueryState q={q} empty={<Empty title="没有引用此模型版本的研究案例"
+      hint="导入研究案例后，验证该模型版本的模型—程序对应结果会出现在这里。" />}>
+      {(cases: ResearchLink[]) => (
+        <div className="stack">
+          {cases.map((c) => (
+            <div key={c.id} className="card pad stack" data-testid="research-case">
+              <div className="row">
+                <strong className="grow">{c.title}</strong>
+                <span className="badge">{c.track === "implementation_conformance" ? "实现一致性" : "合成表示"}</span>
+                <span className="badge info" title="机制族">{c.mechanism_family}</span>
+              </div>
+              <div className="muted small">{c.purpose}</div>
+              <KV items={[
+                ["软件修订", <code title={c.software_revision}>{c.software_revision.slice(0, 12)}…</code>],
+                ["案例摘要", <code title={c.case_digest}>{c.case_digest.slice(0, 12)}…</code>],
+              ]} />
+              <table className="table" aria-label="模型—程序对应结果">
+                <thead><tr><th>性质</th><th>模型结论</th><th>程序回归</th><th>对应</th></tr></thead>
+                <tbody>
+                  {c.conformance.map((r, i) => (
+                    <tr key={i}>
+                      <td><code>{r.property_id}</code></td>
+                      <td><VerdictBadge verdict={r.model_verdict} /></td>
+                      <td><span className={`badge ${r.regression_status === "PASS" ? "ok" : r.regression_status === "FAIL" ? "err" : ""}`}>{r.regression_status}</span></td>
+                      <td><CorrespondenceBadge status={r.correspondence} /></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ))}
+        </div>
+      )}
+    </QueryState>
   );
 }
 

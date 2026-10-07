@@ -1,0 +1,964 @@
+{
+  "$defs": {
+    "ArtifactRef": {
+      "additionalProperties": false,
+      "description": "Pointer to a large object held by an ArtifactStore (never inlined into events).",
+      "properties": {
+        "digest": {
+          "$ref": "#/$defs/Digest"
+        },
+        "format_version": {
+          "minLength": 1,
+          "title": "Format Version",
+          "type": "string"
+        },
+        "media_type": {
+          "minLength": 3,
+          "title": "Media Type",
+          "type": "string"
+        },
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Name"
+        },
+        "size_bytes": {
+          "minimum": 0,
+          "title": "Size Bytes",
+          "type": "integer"
+        },
+        "uri": {
+          "description": "object location, e.g. file://… or s3://bucket/key",
+          "minLength": 1,
+          "title": "Uri",
+          "type": "string"
+        }
+      },
+      "required": [
+        "uri",
+        "media_type",
+        "size_bytes",
+        "digest",
+        "format_version"
+      ],
+      "title": "ArtifactRef",
+      "type": "object"
+    },
+    "ArtifactRole": {
+      "enum": [
+        "model",
+        "source",
+        "fixture",
+        "criterion",
+        "observation",
+        "model_check",
+        "regression",
+        "conformance",
+        "reference",
+        "task_input",
+        "log"
+      ],
+      "title": "ArtifactRole",
+      "type": "string"
+    },
+    "Bounds": {
+      "additionalProperties": false,
+      "properties": {
+        "inputs": {
+          "description": "input domain / instance the conclusions are bounded to",
+          "minLength": 1,
+          "title": "Inputs",
+          "type": "string"
+        },
+        "max_steps": {
+          "minimum": 1,
+          "title": "Max Steps",
+          "type": "integer"
+        },
+        "timeout_ms": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Timeout Ms"
+        }
+      },
+      "required": [
+        "max_steps",
+        "inputs"
+      ],
+      "title": "Bounds",
+      "type": "object"
+    },
+    "CaseArtifact": {
+      "additionalProperties": false,
+      "description": "One file of the case, by path inside the case directory and its sha256 (the file itself is the evidence).",
+      "properties": {
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Description"
+        },
+        "id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:@/-]{0,254}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "media_type": {
+          "minLength": 3,
+          "title": "Media Type",
+          "type": "string"
+        },
+        "path": {
+          "description": "relative to the case directory",
+          "pattern": "^[A-Za-z0-9._@+=,-][A-Za-z0-9._@+=,/-]*$",
+          "title": "Path",
+          "type": "string"
+        },
+        "revision": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{40}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "software revision the artifact was produced at, when it was",
+          "title": "Revision"
+        },
+        "role": {
+          "$ref": "#/$defs/ArtifactRole"
+        },
+        "sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "side": {
+          "default": "none",
+          "description": "which compared software version the artifact belongs to",
+          "enum": [
+            "before",
+            "after",
+            "both",
+            "none"
+          ],
+          "title": "Side",
+          "type": "string"
+        },
+        "stored": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ArtifactRef"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "set by a platform import (artifact store)"
+        }
+      },
+      "required": [
+        "id",
+        "role",
+        "path",
+        "sha256",
+        "media_type"
+      ],
+      "title": "CaseArtifact",
+      "type": "object"
+    },
+    "CaseIdentity": {
+      "additionalProperties": false,
+      "properties": {
+        "case_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:@/-]{0,254}$",
+          "title": "Case Id",
+          "type": "string"
+        },
+        "case_version": {
+          "minimum": 1,
+          "title": "Case Version",
+          "type": "integer"
+        },
+        "mechanism_family": {
+          "description": "e.g. timing-model-deviation, state-machine-transition",
+          "minLength": 1,
+          "title": "Mechanism Family",
+          "type": "string"
+        },
+        "purpose": {
+          "description": "what the case is for, in plain words (kept, never disguised)",
+          "minLength": 1,
+          "title": "Purpose",
+          "type": "string"
+        },
+        "title": {
+          "minLength": 1,
+          "title": "Title",
+          "type": "string"
+        },
+        "track": {
+          "$ref": "#/$defs/Track"
+        }
+      },
+      "required": [
+        "case_id",
+        "case_version",
+        "track",
+        "mechanism_family",
+        "title",
+        "purpose"
+      ],
+      "title": "CaseIdentity",
+      "type": "object"
+    },
+    "CaseModel": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact_id": {
+          "description": "the model package file in the case",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:@/-]{0,254}$",
+          "title": "Artifact Id",
+          "type": "string"
+        },
+        "assumptions": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Assumptions",
+          "type": "array"
+        },
+        "bounds": {
+          "$ref": "#/$defs/Bounds"
+        },
+        "label": {
+          "minLength": 1,
+          "title": "Label",
+          "type": "string"
+        },
+        "model_ref": {
+          "$ref": "#/$defs/ModelRef"
+        },
+        "properties": {
+          "items": {
+            "$ref": "#/$defs/PropertySpec"
+          },
+          "minItems": 1,
+          "title": "Properties",
+          "type": "array"
+        },
+        "role": {
+          "enum": [
+            "belief",
+            "revised",
+            "reference"
+          ],
+          "title": "Role",
+          "type": "string"
+        },
+        "semantic_profile": {
+          "title": "Semantic Profile",
+          "type": "string"
+        },
+        "uncovered_semantics": {
+          "description": "what the model deliberately leaves out",
+          "items": {
+            "type": "string"
+          },
+          "title": "Uncovered Semantics",
+          "type": "array"
+        }
+      },
+      "required": [
+        "label",
+        "role",
+        "model_ref",
+        "artifact_id",
+        "semantic_profile",
+        "properties",
+        "bounds"
+      ],
+      "title": "CaseModel",
+      "type": "object"
+    },
+    "Command": {
+      "additionalProperties": false,
+      "properties": {
+        "command": {
+          "minLength": 1,
+          "title": "Command",
+          "type": "string"
+        },
+        "purpose": {
+          "minLength": 1,
+          "title": "Purpose",
+          "type": "string"
+        }
+      },
+      "required": [
+        "command",
+        "purpose"
+      ],
+      "title": "Command",
+      "type": "object"
+    },
+    "Comparison": {
+      "additionalProperties": false,
+      "properties": {
+        "after": {
+          "$ref": "#/$defs/VersionSide"
+        },
+        "before": {
+          "$ref": "#/$defs/VersionSide"
+        },
+        "change_basis": {
+          "description": "why the versions differ (commit, issue, operating condition)",
+          "minLength": 1,
+          "title": "Change Basis",
+          "type": "string"
+        },
+        "regression_test_source": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "where the regression tests come from",
+          "title": "Regression Test Source"
+        }
+      },
+      "required": [
+        "before",
+        "after",
+        "change_basis"
+      ],
+      "title": "Comparison",
+      "type": "object"
+    },
+    "Correspondence": {
+      "additionalProperties": false,
+      "properties": {
+        "evidence_artifact_ids": {
+          "items": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:@/-]{0,254}$",
+            "type": "string"
+          },
+          "title": "Evidence Artifact Ids",
+          "type": "array"
+        },
+        "model": {
+          "$ref": "#/$defs/ModelElement"
+        },
+        "note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Note"
+        },
+        "program": {
+          "$ref": "#/$defs/ProgramElement"
+        },
+        "relation": {
+          "description": "reviewed by a person / established by measured agreement / proven formally",
+          "enum": [
+            "MANUAL_REVIEW",
+            "MEASURED",
+            "FORMAL_PROOF"
+          ],
+          "title": "Relation",
+          "type": "string"
+        }
+      },
+      "required": [
+        "program",
+        "model",
+        "relation"
+      ],
+      "title": "Correspondence",
+      "type": "object"
+    },
+    "Criterion": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:@/-]{0,254}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "text": {
+          "minLength": 1,
+          "title": "Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "text"
+      ],
+      "title": "Criterion",
+      "type": "object"
+    },
+    "DependencyDigest": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "description": "e.g. uv.lock, pnpm-lock.yaml, a container image",
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "sha256"
+      ],
+      "title": "DependencyDigest",
+      "type": "object"
+    },
+    "Digest": {
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": {
+          "const": "sha256",
+          "default": "sha256",
+          "title": "Algorithm",
+          "type": "string"
+        },
+        "value": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "Digest",
+      "type": "object"
+    },
+    "ModelElement": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "enum": [
+            "state",
+            "action",
+            "constant",
+            "observation",
+            "property"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "name"
+      ],
+      "title": "ModelElement",
+      "type": "object"
+    },
+    "ModelRef": {
+      "additionalProperties": false,
+      "properties": {
+        "digest": {
+          "$ref": "#/$defs/Digest"
+        },
+        "package_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:@/-]{0,254}$",
+          "title": "Package Id",
+          "type": "string"
+        },
+        "version": {
+          "minimum": 1,
+          "title": "Version",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "package_id",
+        "version",
+        "digest"
+      ],
+      "title": "ModelRef",
+      "type": "object"
+    },
+    "ProgramElement": {
+      "additionalProperties": false,
+      "properties": {
+        "component": {
+          "minLength": 1,
+          "title": "Component",
+          "type": "string"
+        },
+        "path": {
+          "description": "repository path at the case's software revision",
+          "pattern": "^[A-Za-z0-9._@+=,-][A-Za-z0-9._@+=,/-]*$",
+          "title": "Path",
+          "type": "string"
+        },
+        "symbol": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Symbol"
+        }
+      },
+      "required": [
+        "component",
+        "path"
+      ],
+      "title": "ProgramElement",
+      "type": "object"
+    },
+    "PropertySpec": {
+      "additionalProperties": false,
+      "properties": {
+        "digest": {
+          "description": "sha256 of the canonical {id, kind, expr} of the property",
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Digest",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "goal",
+            "invariant"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "property_id": {
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*$",
+          "title": "Property Id",
+          "type": "string"
+        },
+        "summary": {
+          "minLength": 1,
+          "title": "Summary",
+          "type": "string"
+        }
+      },
+      "required": [
+        "property_id",
+        "kind",
+        "digest",
+        "summary"
+      ],
+      "title": "PropertySpec",
+      "type": "object"
+    },
+    "Reproduction": {
+      "additionalProperties": false,
+      "properties": {
+        "cleanup": {
+          "minLength": 1,
+          "title": "Cleanup",
+          "type": "string"
+        },
+        "commands": {
+          "description": "commands that were actually run",
+          "items": {
+            "$ref": "#/$defs/Command"
+          },
+          "title": "Commands",
+          "type": "array"
+        },
+        "environment": {
+          "description": "the local entry point (profile, services)",
+          "minLength": 1,
+          "title": "Environment",
+          "type": "string"
+        },
+        "nondeterminism": {
+          "description": "external sources of variation",
+          "items": {
+            "type": "string"
+          },
+          "title": "Nondeterminism",
+          "type": "array"
+        },
+        "prerequisites": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Prerequisites",
+          "type": "array"
+        },
+        "reset": {
+          "minLength": 1,
+          "title": "Reset",
+          "type": "string"
+        },
+        "seeds": {
+          "items": {
+            "type": "integer"
+          },
+          "title": "Seeds",
+          "type": "array"
+        }
+      },
+      "required": [
+        "environment",
+        "reset",
+        "cleanup"
+      ],
+      "title": "Reproduction",
+      "type": "object"
+    },
+    "ResearchCase": {
+      "additionalProperties": false,
+      "properties": {
+        "artifacts": {
+          "items": {
+            "$ref": "#/$defs/CaseArtifact"
+          },
+          "minItems": 1,
+          "title": "Artifacts",
+          "type": "array"
+        },
+        "case_digest": {
+          "description": "sha256 of the canonical case without this field and without platform-local `stored` references",
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Case Digest",
+          "type": "string"
+        },
+        "comparison": {
+          "$ref": "#/$defs/Comparison"
+        },
+        "correspondence": {
+          "items": {
+            "$ref": "#/$defs/Correspondence"
+          },
+          "title": "Correspondence",
+          "type": "array"
+        },
+        "identity": {
+          "$ref": "#/$defs/CaseIdentity"
+        },
+        "models": {
+          "items": {
+            "$ref": "#/$defs/CaseModel"
+          },
+          "minItems": 1,
+          "title": "Models",
+          "type": "array"
+        },
+        "protocol": {
+          "const": "fal-research-case/v1",
+          "default": "fal-research-case/v1",
+          "title": "Protocol",
+          "type": "string"
+        },
+        "reproduction": {
+          "$ref": "#/$defs/Reproduction"
+        },
+        "software": {
+          "$ref": "#/$defs/SoftwareSource"
+        },
+        "validation": {
+          "$ref": "#/$defs/Validation"
+        }
+      },
+      "required": [
+        "identity",
+        "software",
+        "comparison",
+        "models",
+        "validation",
+        "reproduction",
+        "artifacts",
+        "case_digest"
+      ],
+      "title": "ResearchCase",
+      "type": "object"
+    },
+    "SoftwareSource": {
+      "additionalProperties": false,
+      "properties": {
+        "build_dependencies": {
+          "items": {
+            "$ref": "#/$defs/DependencyDigest"
+          },
+          "title": "Build Dependencies",
+          "type": "array"
+        },
+        "config_sha256": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "the configuration / operating conditions the program ran with",
+          "title": "Config Sha256"
+        },
+        "license": {
+          "minLength": 1,
+          "title": "License",
+          "type": "string"
+        },
+        "repository": {
+          "minLength": 1,
+          "title": "Repository",
+          "type": "string"
+        },
+        "revision": {
+          "pattern": "^[0-9a-f]{40}$",
+          "title": "Revision",
+          "type": "string"
+        },
+        "runtime_dependencies": {
+          "items": {
+            "$ref": "#/$defs/DependencyDigest"
+          },
+          "title": "Runtime Dependencies",
+          "type": "array"
+        },
+        "trees": {
+          "description": "the relevant directories at that revision",
+          "items": {
+            "$ref": "#/$defs/TreeDigest"
+          },
+          "minItems": 1,
+          "title": "Trees",
+          "type": "array"
+        },
+        "variant": {
+          "enum": [
+            "upstream_release",
+            "upstream_commit",
+            "own_test_variant"
+          ],
+          "title": "Variant",
+          "type": "string"
+        },
+        "variant_note": {
+          "description": "what was changed / configured; an own variant is not an upstream release",
+          "minLength": 1,
+          "title": "Variant Note",
+          "type": "string"
+        }
+      },
+      "required": [
+        "repository",
+        "license",
+        "revision",
+        "trees",
+        "variant",
+        "variant_note"
+      ],
+      "title": "SoftwareSource",
+      "type": "object"
+    },
+    "Track": {
+      "description": "The two experiment lines of phases 5–7, counted apart.",
+      "enum": [
+        "implementation_conformance",
+        "synthetic_representation"
+      ],
+      "title": "Track",
+      "type": "string"
+    },
+    "TreeDigest": {
+      "additionalProperties": false,
+      "properties": {
+        "git_tree": {
+          "description": "`git rev-parse <revision>:<path>`",
+          "pattern": "^[0-9a-f]{40}$",
+          "title": "Git Tree",
+          "type": "string"
+        },
+        "path": {
+          "pattern": "^[A-Za-z0-9._@+=,-][A-Za-z0-9._@+=,/-]*$",
+          "title": "Path",
+          "type": "string"
+        }
+      },
+      "required": [
+        "path",
+        "git_tree"
+      ],
+      "title": "TreeDigest",
+      "type": "object"
+    },
+    "Validation": {
+      "additionalProperties": false,
+      "properties": {
+        "conformance_ids": {
+          "items": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:@/-]{0,254}$",
+            "type": "string"
+          },
+          "title": "Conformance Ids",
+          "type": "array"
+        },
+        "criteria": {
+          "items": {
+            "$ref": "#/$defs/Criterion"
+          },
+          "title": "Criteria",
+          "type": "array"
+        },
+        "fixture_ids": {
+          "items": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:@/-]{0,254}$",
+            "type": "string"
+          },
+          "title": "Fixture Ids",
+          "type": "array"
+        },
+        "model_check_ids": {
+          "items": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:@/-]{0,254}$",
+            "type": "string"
+          },
+          "title": "Model Check Ids",
+          "type": "array"
+        },
+        "observation_ids": {
+          "items": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:@/-]{0,254}$",
+            "type": "string"
+          },
+          "title": "Observation Ids",
+          "type": "array"
+        },
+        "reference_ids": {
+          "description": "verification only",
+          "items": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:@/-]{0,254}$",
+            "type": "string"
+          },
+          "title": "Reference Ids",
+          "type": "array"
+        },
+        "regression_ids": {
+          "items": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:@/-]{0,254}$",
+            "type": "string"
+          },
+          "title": "Regression Ids",
+          "type": "array"
+        },
+        "task_input_ids": {
+          "description": "what a provider model may be given",
+          "items": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:@/-]{0,254}$",
+            "type": "string"
+          },
+          "title": "Task Input Ids",
+          "type": "array"
+        }
+      },
+      "title": "Validation",
+      "type": "object"
+    },
+    "VersionSide": {
+      "additionalProperties": false,
+      "properties": {
+        "absent_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Absent Reason"
+        },
+        "artifact_ids": {
+          "items": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:@/-]{0,254}$",
+            "type": "string"
+          },
+          "title": "Artifact Ids",
+          "type": "array"
+        },
+        "present": {
+          "title": "Present",
+          "type": "boolean"
+        },
+        "revision": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{40}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Revision"
+        }
+      },
+      "required": [
+        "present"
+      ],
+      "title": "VersionSide",
+      "type": "object"
+    }
+  },
+  "$id": "https://formal-lab.dev/fal-research-case/v1",
+  "$ref": "#/$defs/ResearchCase",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "fal-research-case/v1"
+}

@@ -2,14 +2,16 @@ import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useNavigate, useParams } from "react-router";
 import type { TraceEvent } from "@formal-lab/contracts";
-import { fetchAllEvents, get, type RunDetail, type RunSummary } from "../api";
+import { fetchAllEvents, get, researchCase, runResearch, type ResearchCaseDetail, type ResearchLink,
+  type RunDetail, type RunSummary } from "../api";
 import { groupSteps, StepDetail } from "../components/Steps";
 import { BatchPanel } from "../components/RunKernel";
 import { Icon } from "../icons";
-import { Empty, fmtTime, fmtValue, Json, KV, Loading, QueryState, shortId, StatusBadge, Tabs, PageHead } from "../ui";
+import { CorrespondenceBadge, Empty, fmtTime, fmtValue, Json, KV, Loading, QueryState, shortId, StatusBadge, Tabs,
+  VerdictBadge, PageHead } from "../ui";
 import { useRunLabels } from "./RunConsole";
 
-type Tab = "replay" | "navigate" | "causal" | "diff" | "artifacts" | "lineage" | "batches";
+type Tab = "replay" | "navigate" | "causal" | "diff" | "artifacts" | "lineage" | "batches" | "research";
 
 export function EvidencePage() {
   const { pid, runId } = useParams();
@@ -70,7 +72,8 @@ function RunEvidence({ pid, runId }: { pid: string; runId: string }) {
         <Tabs label="证据视图" value={tab} onChange={setTab} tabs={[
           { id: "replay", label: "按步回放" }, { id: "navigate", label: "关联定位" }, { id: "causal", label: "因果时间线" },
           { id: "diff", label: "差异报告" }, ...(joint ? [{ id: "batches" as Tab, label: "同步批次" }] : []),
-          { id: "artifacts", label: "产物" }, { id: "lineage", label: "来源与清单" }]} />
+          { id: "artifacts", label: "产物" }, { id: "lineage", label: "来源与清单" },
+          { id: "research", label: "对应验证" }]} />
         <div className="card-body">
           {tab === "replay" && <Replay events={events.data} runId={runId} labels={labels} focus={focus} />}
           {tab === "navigate" && <Navigator pid={pid} run={run.data} events={events.data} goto={goto} />}
@@ -79,9 +82,111 @@ function RunEvidence({ pid, runId }: { pid: string; runId: string }) {
           {tab === "batches" && <BatchPanel run={run.data} events={events.data} labels={labels} />}
           {tab === "artifacts" && <Artifacts runId={runId} />}
           {tab === "lineage" && <Lineage run={run.data} pid={pid} />}
+          {tab === "research" && <RunResearch pid={pid} runId={runId} />}
         </div>
       </div>
     </div>
+  );
+}
+
+// ------------------------------------------------------------------ model–program correspondence (phase 5A)
+function RunResearch({ pid, runId }: { pid: string; runId: string }) {
+  const q = useQuery({ queryKey: ["run-research", runId], queryFn: () => runResearch(runId) });
+  return (
+    <QueryState q={q} empty={<Empty title="该实验不是任何研究案例的记录观测"
+      hint="把研究案例导入项目后，以此实验为记录观测的模型—程序对应验证会出现在这里。" />}>
+      {(links: ResearchLink[]) => (
+        <div className="stack">
+          {links.map((l) => <ResearchCaseCard key={l.id} pid={pid} link={l} />)}
+        </div>
+      )}
+    </QueryState>
+  );
+}
+
+function ResearchCaseCard({ pid, link }: { pid: string; link: ResearchLink }) {
+  const q = useQuery({ queryKey: ["research-case", link.id], queryFn: () => researchCase(link.id) });
+  return (
+    <QueryState q={q}>
+      {(c: ResearchCaseDetail) => (
+        <div className="card pad stack" data-testid="run-research-case">
+          <div className="row">
+            <strong className="grow">{c.title}</strong>
+            <span className="badge">{c.track === "implementation_conformance" ? "实现一致性" : "合成表示"}</span>
+            <span className="badge info" title="机制族">{c.mechanism_family}</span>
+            <a className="btn sm" href={`/api/v1/research/cases/${c.id}/export`} download>
+              <Icon name="export" size="sm" />导出案例</a>
+          </div>
+          <div className="muted small">{c.purpose}</div>
+
+          <h3 className="small" style={{ margin: "4px 0 0" }}>软件来源</h3>
+          <KV items={[
+            ["仓库 / 许可", <span><code>{c.software.repository}</code> · {c.software.license}</span>],
+            ["修订", <code title={c.software.revision}>{c.software.revision.slice(0, 12)}…</code>],
+            ["变体", <span><span className="badge">{c.software.variant}</span> <span className="muted small">{c.software.variant_note}</span></span>],
+            ["目录树摘要", <span className="stack" style={{ gap: 2 }}>{c.software.trees.map((t) => (
+              <span key={t.path} className="small"><code>{t.path}</code> · <code title={t.git_tree}>{t.git_tree.slice(0, 12)}…</code></span>))}</span>],
+            ...(c.software.config_sha256 ? [["运行配置摘要", <code title={c.software.config_sha256}>{c.software.config_sha256.slice(0, 12)}…</code>] as [string, React.ReactNode]] : []),
+          ]} />
+
+          <h3 className="small" style={{ margin: "4px 0 0" }}>模型、性质、界限与假设</h3>
+          {c.models.map((m) => (
+            <div key={m.label} className="card pad stack" style={{ gap: 4 }}>
+              <div className="row">
+                <span className="badge">{m.role === "belief" ? "信念" : m.role === "revised" ? "修订" : "参考"}</span>
+                <code className="grow">{m.model_ref.package_id}@{m.model_ref.version}</code>
+                <span className="badge info">{m.semantic_profile}</span>
+                <code className="small" title={m.model_ref.digest.value}>{m.model_ref.digest.value.slice(0, 12)}…</code>
+              </div>
+              <div className="small">界限：最多 {m.bounds.max_steps} 步{m.bounds.timeout_ms ? ` · ${m.bounds.timeout_ms} ms` : ""} · {m.bounds.inputs}</div>
+              <table className="table" aria-label={`${m.label} 性质`}>
+                <thead><tr><th>性质</th><th>种类</th><th>说明</th><th>表达式摘要</th></tr></thead>
+                <tbody>{m.properties.map((p) => (
+                  <tr key={p.property_id}><td><code>{p.property_id}</code></td><td>{p.kind === "goal" ? "目标" : "不变式"}</td>
+                    <td>{p.summary}</td><td><code title={p.digest}>{p.digest.slice(0, 12)}…</code></td></tr>))}</tbody>
+              </table>
+              {m.assumptions.length > 0 && <div className="small muted">抽象假设：{m.assumptions.join("；")}</div>}
+              {m.uncovered_semantics.length > 0 && <div className="small muted">未覆盖语义：{m.uncovered_semantics.join("；")}</div>}
+            </div>
+          ))}
+
+          <h3 className="small" style={{ margin: "4px 0 0" }}>模型内结论 · 程序回归 · 对应（三层分开）</h3>
+          <table className="table" aria-label="对应结果">
+            <thead><tr><th>结果</th><th>性质</th><th>模型结论</th><th>程序回归</th><th>对应</th></tr></thead>
+            <tbody>
+              {c.conformance.map((r) => (
+                <tr key={r.id}>
+                  <td><code className="small">{r.label}</code></td>
+                  <td><code>{r.property_id}</code></td>
+                  <td><VerdictBadge verdict={r.model_verdict} /></td>
+                  <td><span className={`badge ${r.regression_status === "PASS" ? "ok" : r.regression_status === "FAIL" ? "err" : ""}`}>{r.regression_status}</span></td>
+                  <td><CorrespondenceBadge status={r.correspondence} /></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <div className="small muted">对应仅覆盖记录运行的已执行步骤内声明范围内的字段，不等于模型与程序的语义等价。</div>
+
+          {c.correspondence.length > 0 && (
+            <details>
+              <summary className="small">程序组件 ↔ 模型元素对应（{c.correspondence.length}）</summary>
+              <table className="table" aria-label="组件对应">
+                <thead><tr><th>程序组件</th><th>模型元素</th><th>关系</th></tr></thead>
+                <tbody>{c.correspondence.map((x, i) => (
+                  <tr key={i}>
+                    <td><code className="small">{x.program.component}</code>{x.program.symbol ? <span className="muted small"> · {x.program.symbol}</span> : null}</td>
+                    <td>{x.model.kind} <code>{x.model.name}</code></td>
+                    <td><span className="badge" title={x.note ?? undefined}>{x.relation === "MANUAL_REVIEW" ? "人工审阅" : x.relation === "MEASURED" ? "实测对应" : "形式证明"}</span></td>
+                  </tr>))}</tbody>
+              </table>
+            </details>
+          )}
+
+          <div className="small muted">记录观测：此实验 · 案例摘要 <code title={c.case_digest}>{c.case_digest.slice(0, 12)}…</code>
+            {c.models[0]?.model_ref && <> · <Link to={`/p/${pid}/models`}>模型工作台</Link></>}</div>
+        </div>
+      )}
+    </QueryState>
   );
 }
 

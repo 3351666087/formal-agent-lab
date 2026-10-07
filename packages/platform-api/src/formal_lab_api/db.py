@@ -314,6 +314,51 @@ class CheckRow(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
 
+class ResearchCaseRow(Base):
+    """A `fal-research-case/v1` document imported into a project (phase 5A). Artifacts live in the artifact store;
+    this row holds the case document with the stored refs, so a model version or imported run traces back to it."""
+
+    __tablename__ = "research_cases"
+    __table_args__ = (UniqueConstraint("project_id", "case_id", "case_version", name="uq_research_case_version"),)
+    id: Mapped[str] = mapped_column(String(40), primary_key=True)
+    project_id: Mapped[str] = mapped_column(ForeignKey("projects.id", ondelete="CASCADE"), index=True)
+    case_id: Mapped[str] = mapped_column(String(120))
+    case_version: Mapped[int] = mapped_column(Integer)
+    protocol: Mapped[str] = mapped_column(String(40))
+    track: Mapped[str] = mapped_column(String(40))
+    mechanism_family: Mapped[str] = mapped_column(String(120))
+    title: Mapped[str] = mapped_column(Text)
+    purpose: Mapped[str] = mapped_column(Text)
+    software_revision: Mapped[str] = mapped_column(String(40), index=True)
+    case_digest: Mapped[str] = mapped_column(String(64), index=True)
+    definition_digest: Mapped[str] = mapped_column(String(64))
+    document: Mapped[dict[str, Any]] = mapped_column(JsonType, doc="ResearchCase with artifacts[*].stored set")
+    observation_run_id: Mapped[str | None] = mapped_column(ForeignKey("runs.id", ondelete="SET NULL"), index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+
+class ResearchConformanceRow(Base):
+    """One `fal-conformance-result/v1` of a case: the model verdict, the program regression and the correspondence
+    kept apart, linked to a model version by digest (when the platform knows that model)."""
+
+    __tablename__ = "research_conformance"
+    id: Mapped[str] = mapped_column(String(40), primary_key=True)
+    research_case_id: Mapped[str] = mapped_column(ForeignKey("research_cases.id", ondelete="CASCADE"), index=True)
+    label: Mapped[str] = mapped_column(String(120))
+    package_id: Mapped[str] = mapped_column(String(200))
+    version: Mapped[int] = mapped_column(Integer)
+    model_digest: Mapped[str] = mapped_column(String(64), index=True)
+    model_version_id: Mapped[str | None] = mapped_column(ForeignKey("model_versions.id", ondelete="SET NULL"),
+                                                         index=True)
+    property_id: Mapped[str] = mapped_column(String(120))
+    property_digest: Mapped[str] = mapped_column(String(64))
+    correspondence: Mapped[str] = mapped_column(String(24))
+    model_verdict: Mapped[str] = mapped_column(String(32))
+    regression_status: Mapped[str] = mapped_column(String(16))
+    document: Mapped[dict[str, Any]] = mapped_column(JsonType, doc="ConformanceResult")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+
 class PluginRow(Base):
     __tablename__ = "plugin_catalog"
     plugin_id: Mapped[str] = mapped_column(String(200), primary_key=True)

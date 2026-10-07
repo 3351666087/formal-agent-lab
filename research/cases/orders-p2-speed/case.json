@@ -1,0 +1,373 @@
+{
+ "protocol": "fal-research-case/v1",
+ "identity": {
+  "case_id": "orders-p2-speed",
+  "case_version": 1,
+  "track": "implementation_conformance",
+  "mechanism_family": "timing-model-deviation",
+  "title": "Order service: p2 processing-speed deviation",
+  "purpose": "Verify that a belief model's timing prediction deviates from the real order service while the revised model corresponds, on one recorded run."
+ },
+ "software": {
+  "repository": "https://github.com/3351666087/formal-agent-lab",
+  "license": "Apache-2.0",
+  "revision": "a05c1d22006b864c336a907a1826b15e9ea7593a",
+  "trees": [
+   {
+    "path": "examples/local-order-service",
+    "git_tree": "82e9f6f1b70d1b1f3021b8d9ddd1ededfa5f7285"
+   }
+  ],
+  "config_sha256": "59336f92188d13cdedf4c23ef88f042b00aa08db71020ac27fbc759c338265d7",
+  "build_dependencies": [],
+  "runtime_dependencies": [],
+  "variant": "own_test_variant",
+  "variant_note": "the repo's own order service run under the lab `deviation` operating condition (station p2 at half speed); not an upstream release"
+ },
+ "comparison": {
+  "before": {
+   "present": false,
+   "revision": null,
+   "artifact_ids": [],
+   "absent_reason": "the program code is unchanged; what differs is the model (belief vs revised) and the operating condition, not a source revision"
+  },
+  "after": {
+   "present": true,
+   "revision": "a05c1d22006b864c336a907a1826b15e9ea7593a",
+   "artifact_ids": [
+    "obs-run",
+    "fixture-deviation",
+    "regression"
+   ],
+   "absent_reason": null
+  },
+  "change_basis": "operating condition: station p2 runs at half speed; the belief model assumes nominal speed, the revised model encodes slow[p2]=true",
+  "regression_test_source": "examples/local-order-service/tests (the service's own suite)"
+ },
+ "models": [
+  {
+   "label": "v1",
+   "role": "belief",
+   "model_ref": {
+    "package_id": "local-order-service",
+    "version": 1,
+    "digest": {
+     "algorithm": "sha256",
+     "value": "283cf3fcd9cc114d38b0763956b048d45a906b3ba9889f10c836d2c3ea1f061c"
+    }
+   },
+   "artifact_id": "model-v1",
+   "semantic_profile": "deterministic_finite_v1",
+   "properties": [
+    {
+     "property_id": "all_completed",
+     "kind": "goal",
+     "digest": "6207780f49f4e5ec62dc88ea04d756dbe97bbf2ca39fd35953db6b9bdeac1ecf",
+     "summary": "every order eventually reaches completed"
+    }
+   ],
+   "bounds": {
+    "max_steps": 26,
+    "timeout_ms": 120000,
+    "inputs": "deviation instance, seed 1"
+   },
+   "assumptions": [
+    "deterministic finite abstraction of the service state machine",
+    "one lab operating condition (slow[p2]); other stations nominal"
+   ],
+   "uncovered_semantics": [
+    "HTTP transport and serialization",
+    "process concurrency and retries",
+    "database persistence details"
+   ]
+  },
+  {
+   "label": "v2",
+   "role": "revised",
+   "model_ref": {
+    "package_id": "local-order-service",
+    "version": 2,
+    "digest": {
+     "algorithm": "sha256",
+     "value": "fcbca828c69e864f9dd0098b5450355ecc0dbbdf293482d88b84c558536ddbe7"
+    }
+   },
+   "artifact_id": "model-v2",
+   "semantic_profile": "deterministic_finite_v1",
+   "properties": [
+    {
+     "property_id": "all_completed",
+     "kind": "goal",
+     "digest": "6207780f49f4e5ec62dc88ea04d756dbe97bbf2ca39fd35953db6b9bdeac1ecf",
+     "summary": "every order eventually reaches completed"
+    }
+   ],
+   "bounds": {
+    "max_steps": 26,
+    "timeout_ms": 120000,
+    "inputs": "deviation instance, seed 1"
+   },
+   "assumptions": [
+    "deterministic finite abstraction of the service state machine",
+    "one lab operating condition (slow[p2]); other stations nominal"
+   ],
+   "uncovered_semantics": [
+    "HTTP transport and serialization",
+    "process concurrency and retries",
+    "database persistence details"
+   ]
+  }
+ ],
+ "correspondence": [
+  {
+   "program": {
+    "component": "tick handler",
+    "path": "examples/local-order-service/src/formal_lab_example_orders/service.py",
+    "symbol": "apply_operation"
+   },
+   "model": {
+    "kind": "action",
+    "name": "tick"
+   },
+   "relation": "MEASURED",
+   "evidence_artifact_ids": [
+    "obs-run"
+   ],
+   "note": "one tick advances the clock; slow stations advance every other tick"
+  },
+  {
+   "program": {
+    "component": "station speed",
+    "path": "examples/local-order-service/src/formal_lab_example_orders/service.py",
+    "symbol": "stations.slow"
+   },
+   "model": {
+    "kind": "constant",
+    "name": "slow"
+   },
+   "relation": "MANUAL_REVIEW",
+   "evidence_artifact_ids": [],
+   "note": "the slow-station column is the model constant slow[station]"
+  },
+  {
+   "program": {
+    "component": "reservation",
+    "path": "examples/local-order-service/src/formal_lab_example_orders/service.py",
+    "symbol": "apply_operation"
+   },
+   "model": {
+    "kind": "action",
+    "name": "reserve"
+   },
+   "relation": "MEASURED",
+   "evidence_artifact_ids": [
+    "obs-run"
+   ],
+   "note": "reserve decrements stock and sets status"
+  },
+  {
+   "program": {
+    "component": "order ledger",
+    "path": "examples/local-order-service/src/formal_lab_example_orders/service.py",
+    "symbol": "values"
+   },
+   "model": {
+    "kind": "observation",
+    "name": "remaining"
+   },
+   "relation": "MEASURED",
+   "evidence_artifact_ids": [
+    "obs-run"
+   ],
+   "note": "remaining[oid] is the program's per-order work left"
+  }
+ ],
+ "validation": {
+  "criteria": [
+   {
+    "id": "c-belief-deviates",
+    "text": "the belief model (v1) deviates from the recorded run"
+   },
+   {
+    "id": "c-revised-corresponds",
+    "text": "the revised model (v2) corresponds on the same run"
+   },
+   {
+    "id": "c-regression",
+    "text": "the service's own regression suite passes at this revision"
+   }
+  ],
+  "fixture_ids": [
+   "fixture-deviation"
+  ],
+  "observation_ids": [
+   "obs-run"
+  ],
+  "model_check_ids": [
+   "check-v1",
+   "check-v2"
+  ],
+  "regression_ids": [
+   "regression"
+  ],
+  "conformance_ids": [
+   "conf-v1",
+   "conf-v2"
+  ],
+  "reference_ids": [
+   "reference"
+  ],
+  "task_input_ids": [
+   "task-input"
+  ]
+ },
+ "reproduction": {
+  "environment": "Colima VM; order service via ServiceManager(process); Z3 verifier; no network",
+  "reset": "a fresh ServiceManager workdir per run (remove_data on close)",
+  "cleanup": "ServiceManager.close(remove_data=True)",
+  "seeds": [
+   1
+  ],
+  "nondeterminism": [
+   "none in scope: rule strategy, fixed seed, local process"
+  ],
+  "commands": [
+   {
+    "command": "python scripts/p5a_orders_case.py",
+    "purpose": "build and validate this case"
+   },
+   {
+    "command": "pytest examples/local-order-service/tests",
+    "purpose": "program regression"
+   }
+  ],
+  "prerequisites": [
+   "uv sync --frozen",
+   "the order-service example installed in the project venv"
+  ]
+ },
+ "artifacts": [
+  {
+   "id": "model-v1",
+   "role": "model",
+   "path": "models/orders-v1.package.json",
+   "sha256": "1549f2c3d397a0470e07241155e7c6a6d75ed147d8df8725c3be3251a78094dd",
+   "media_type": "application/json",
+   "side": "none",
+   "revision": null,
+   "description": "belief model: every station at nominal speed",
+   "stored": null
+  },
+  {
+   "id": "model-v2",
+   "role": "model",
+   "path": "models/orders-v2.package.json",
+   "sha256": "469ff125865404bd31682e8fdefc0b76b21ad2120b439f2b5c4e0b674f1295ac",
+   "media_type": "application/json",
+   "side": "none",
+   "revision": null,
+   "description": "revised model: slow[p2] = true",
+   "stored": null
+  },
+  {
+   "id": "fixture-deviation",
+   "role": "fixture",
+   "path": "fixtures/deviation.json",
+   "sha256": "f8851bbbd33e2aa9b1d7b8b06048953d558d264600c346ac0e2039cc99030728",
+   "media_type": "application/json",
+   "side": "after",
+   "revision": "a05c1d22006b864c336a907a1826b15e9ea7593a",
+   "description": "instance seed 1 + operating conditions (station p2 at half speed)",
+   "stored": null
+  },
+  {
+   "id": "obs-run",
+   "role": "observation",
+   "path": "observations/run-deviation.replay.zip",
+   "sha256": "3cac5e96949b852f996b71915adc733f54f2b8b94202d8bed3ee0b99cb4ed9c2",
+   "media_type": "application/zip",
+   "side": "after",
+   "revision": "a05c1d22006b864c336a907a1826b15e9ea7593a",
+   "description": "replay bundle of the recorded deviation run against the real service",
+   "stored": null
+  },
+  {
+   "id": "check-v1",
+   "role": "model_check",
+   "path": "model_checks/v1-all_completed.qb.json",
+   "sha256": "4658e749afc6a41a234f1811ab050d2aa1f3ecea548e7c47d69837fcde41d9d5",
+   "media_type": "application/json",
+   "side": "none",
+   "revision": null,
+   "description": "GOAL_REACHABILITY(all_completed) on v1: UNKNOWN",
+   "stored": null
+  },
+  {
+   "id": "check-v2",
+   "role": "model_check",
+   "path": "model_checks/v2-all_completed.qb.json",
+   "sha256": "12f75c5907dd6af0ebf66071cb96aef5c75f1bdbb5ee9ed650c2f1c871169bef",
+   "media_type": "application/json",
+   "side": "none",
+   "revision": null,
+   "description": "GOAL_REACHABILITY(all_completed) on v2: UNKNOWN",
+   "stored": null
+  },
+  {
+   "id": "regression",
+   "role": "regression",
+   "path": "regression/orders-junit.xml",
+   "sha256": "e30c53d3c9d9eb6a426e1e9842fb1ea3e76406ed6a6468af7882e936804af048",
+   "media_type": "application/xml",
+   "side": "after",
+   "revision": "a05c1d22006b864c336a907a1826b15e9ea7593a",
+   "description": "pytest examples/local-order-service/tests: 26/26 passed",
+   "stored": null
+  },
+  {
+   "id": "task-input",
+   "role": "task_input",
+   "path": "task_inputs/belief-all_completed.json",
+   "sha256": "b1b3ef6abadde44afae2fcb949a84abe8910d60cf9e3227a279ae35e6d7f899d",
+   "media_type": "application/json",
+   "side": "none",
+   "revision": null,
+   "description": "belief model + property + fixture only (reference answers kept out)",
+   "stored": null
+  },
+  {
+   "id": "conf-v1",
+   "role": "conformance",
+   "path": "conformance/v1-all_completed.result.json",
+   "sha256": "a70b576962a989ab241c037ade8a5aa337af716dbfd7afab0ab96661763083c7",
+   "media_type": "application/json",
+   "side": "none",
+   "revision": null,
+   "description": "belief model vs run: DEVIATES",
+   "stored": null
+  },
+  {
+   "id": "conf-v2",
+   "role": "conformance",
+   "path": "conformance/v2-all_completed.result.json",
+   "sha256": "d9b48fd08c4e65a31d8022c8f39641d260bff803ceaff20c14d5891877a84cff",
+   "media_type": "application/json",
+   "side": "none",
+   "revision": null,
+   "description": "revised model vs run: CORRESPONDS",
+   "stored": null
+  },
+  {
+   "id": "reference",
+   "role": "reference",
+   "path": "reference/expected.json",
+   "sha256": "84a650b850daf7cf005d253d99ad72ab3613b77836c290122a64890f0eb2cdac",
+   "media_type": "application/json",
+   "side": "none",
+   "revision": null,
+   "description": "expected correspondence verdicts (v1 DEVIATES, v2 CORRESPONDS)",
+   "stored": null
+  }
+ ],
+ "case_digest": "8a00984f661eb4b2754d96db1e3d2d15f1d0e96b9c358a268310f64923759be2"
+}

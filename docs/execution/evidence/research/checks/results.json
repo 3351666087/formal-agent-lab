@@ -1,0 +1,426 @@
+{
+  "format": "checks@3",
+  "compatible_with": "checks@2",
+  "suite": "research",
+  "generated_at": "2026-10-07T01:11:15Z",
+  "source_revision": {
+    "commit": "a05c1d22006b864c336a907a1826b15e9ea7593a",
+    "worktree": {
+      "sha256": "cc20ace30b173d267923e5c70dd0e45381d1056f3de1e753a4df27be5690756a",
+      "clean": false,
+      "changed_bytes": 36654,
+      "untracked_files": 29,
+      "excluded_outputs": [
+        "docs/execution/evidence/",
+        "docs/handoff/",
+        "research/results/",
+        "out/",
+        "docs/execution/evidence/research/checks/"
+      ]
+    }
+  },
+  "config": {
+    "sha256": "c9baf92157986211689c6e94700edc6671f6fab58b1dfb93eb6a51eb08da0b31",
+    "parts": {
+      "checks": "60ef0ff28740fc6f60e6b48795af65592bea7e025e579cfb86c5a6ff4245006d",
+      "uv.lock": "4d3a54f797927fbc03bbb772f4386cf437468e023d39b23ec94d38c045f04ced",
+      "pnpm-lock.yaml": "02d23c074a75bccfaea1ed4ff51272ba3d6cbb724e8012366c8d18e9bb0a7c3a",
+      "deploy/compose/services.dev.yaml": "4c876045f15d5bd972c517e7de2d3626cd252d1842797f0152f596f7d8ea9ce0",
+      "deploy/compose/docker-compose.yaml": "ff4c34cae068cc6dacd4db7f4273887ff6c2bb0b3b84938a7b8969488bfb20ff"
+    }
+  },
+  "command": "python scripts/check_runner.py --suite research --group p5a",
+  "environment": {
+    "os": "Ubuntu 24.04.4 LTS",
+    "arch": "aarch64",
+    "kernel": "6.8.0-117-generic",
+    "python": "3.12.3",
+    "uv": "uv 0.12.19 (aarch64-unknown-linux-gnu)",
+    "node": "v24.21.0",
+    "pnpm": "12.6.0",
+    "docker": "29.5.2",
+    "z3": "5.1.0",
+    "temporalio": "1.33.0"
+  },
+  "resources_before": {
+    "cpus": 4,
+    "memory_gib": {
+      "MemTotal": 5.77,
+      "MemAvailable": 3.3
+    },
+    "load_avg": [
+      0.24,
+      0.28,
+      0.27
+    ],
+    "disk_free_gib": {
+      "host (repository filesystem)": 13.0,
+      "docker (/var/lib/docker)": 13.0
+    },
+    "concurrency": 1,
+    "note": "checks run one at a time; heavy checks ask disk_guard first"
+  },
+  "resources_after": {
+    "cpus": 4,
+    "memory_gib": {
+      "MemTotal": 5.77,
+      "MemAvailable": 3.2
+    },
+    "load_avg": [
+      0.24,
+      0.28,
+      0.27
+    ],
+    "disk_free_gib": {
+      "host (repository filesystem)": 13.0,
+      "docker (/var/lib/docker)": 13.0
+    },
+    "concurrency": 1,
+    "note": "checks run one at a time; heavy checks ask disk_guard first"
+  },
+  "run": {
+    "started_at": "2026-10-07T01:11:14Z",
+    "finished_at": "2026-10-07T01:11:15Z",
+    "duration_s": 1.1,
+    "full": false,
+    "selection": {
+      "group": [
+        "p5a"
+      ],
+      "only": [],
+      "skip": []
+    },
+    "checks": [
+      "p5a-unit",
+      "p5a-case"
+    ],
+    "commit": "a05c1d22006b864c336a907a1826b15e9ea7593a",
+    "worktree_sha256": "cc20ace30b173d267923e5c70dd0e45381d1056f3de1e753a4df27be5690756a",
+    "nonce": "d971209829894cefa4840d2ecb0ff1c3",
+    "acceptance_nonce": null,
+    "results": {
+      "p5a-unit": "PASS",
+      "p5a-case": "PASS"
+    }
+  },
+  "summary": {
+    "PASS": 2,
+    "FAIL": 0,
+    "BLOCKED": 0,
+    "NOT_RUN": 0,
+    "NOT_SELECTED": 0,
+    "NOT_APPLICABLE": 0
+  },
+  "groups": {
+    "p5a": "PASS",
+    "p5b": "NO_CHECKS",
+    "p6a": "NO_CHECKS",
+    "p6b": "NO_CHECKS",
+    "p7": "NO_CHECKS"
+  },
+  "required_groups": [
+    "p5a",
+    "p5b",
+    "p6a",
+    "p6b",
+    "p7"
+  ],
+  "selection_status": "PASS",
+  "complete": false,
+  "mandatory_passed": false,
+  "selected_passed": true,
+  "overall_complete": false,
+  "unmet": [
+    "p5b=NO_CHECKS",
+    "p6a=NO_CHECKS",
+    "p6b=NO_CHECKS",
+    "p7=NO_CHECKS"
+  ],
+  "aggregation": "only results produced and verified by this invocation count; a partial selection is never complete; results from another commit, work tree or configuration are inherited and ignored",
+  "timing": {
+    "this_run_s": 1.1,
+    "last_full_run_s": null,
+    "last_full_run_at": null,
+    "partial_runs": [
+      {
+        "started_at": "2026-10-07T00:54:32Z",
+        "duration_s": 1.2,
+        "selection": {
+          "group": [
+            "p5a"
+          ],
+          "only": [],
+          "skip": []
+        },
+        "results": {
+          "p5a-unit": "PASS",
+          "p5a-case": "PASS"
+        }
+      },
+      {
+        "started_at": "2026-10-07T01:11:14Z",
+        "duration_s": 1.1,
+        "selection": {
+          "group": [
+            "p5a"
+          ],
+          "only": [],
+          "skip": []
+        },
+        "results": {
+          "p5a-unit": "PASS",
+          "p5a-case": "PASS"
+        }
+      }
+    ]
+  },
+  "runs": [
+    {
+      "started_at": "2026-10-07T00:54:32Z",
+      "finished_at": "2026-10-07T00:54:33Z",
+      "duration_s": 1.2,
+      "full": false,
+      "selection": {
+        "group": [
+          "p5a"
+        ],
+        "only": [],
+        "skip": []
+      },
+      "checks": [
+        "p5a-unit",
+        "p5a-case"
+      ],
+      "commit": "a05c1d22006b864c336a907a1826b15e9ea7593a",
+      "worktree_sha256": "c7f6cf677dd27397a21465c66dd18bd8a305b1ac849cc2b4679b74d8bc8802e2",
+      "nonce": "81ed28161ae447c680c65155dacd1aec",
+      "acceptance_nonce": null,
+      "results": {
+        "p5a-unit": "PASS",
+        "p5a-case": "PASS"
+      }
+    },
+    {
+      "started_at": "2026-10-07T01:11:14Z",
+      "finished_at": "2026-10-07T01:11:15Z",
+      "duration_s": 1.1,
+      "full": false,
+      "selection": {
+        "group": [
+          "p5a"
+        ],
+        "only": [],
+        "skip": []
+      },
+      "checks": [
+        "p5a-unit",
+        "p5a-case"
+      ],
+      "commit": "a05c1d22006b864c336a907a1826b15e9ea7593a",
+      "worktree_sha256": "cc20ace30b173d267923e5c70dd0e45381d1056f3de1e753a4df27be5690756a",
+      "nonce": "d971209829894cefa4840d2ecb0ff1c3",
+      "acceptance_nonce": null,
+      "results": {
+        "p5a-unit": "PASS",
+        "p5a-case": "PASS"
+      }
+    }
+  ],
+  "checks": [
+    {
+      "id": "p5a-unit",
+      "group": "p5a",
+      "title": "导入校验与对应验证（单元）：合法普通样例、性质错配、版本错配、缺观测、陈旧证据、参考答案不得作任务输入、离线读取；信念模型偏离、修订模型对应，三层结果各自独立，对应判定各分支",
+      "command": "uv run --frozen pytest -p no:cacheprovider -q tests/tools/test_research_validate.py tests/tools/test_research_conformance.py",
+      "tasks": [
+        "P5A-01",
+        "P5A-02"
+      ],
+      "evidence": [],
+      "requires": null,
+      "profile": "local-lite",
+      "kind": "mandatory",
+      "retries": 0,
+      "heavy_gib": 0.0,
+      "produces": [],
+      "protocol": false,
+      "assertions_from": null,
+      "trigger": null,
+      "result": "PASS",
+      "reason": "14 passed in 0.51s",
+      "summary": "14 passed in 0.51s",
+      "condition": null,
+      "checked_commit": "a05c1d22006b864c336a907a1826b15e9ea7593a",
+      "worktree_sha256": "cc20ace30b173d267923e5c70dd0e45381d1056f3de1e753a4df27be5690756a",
+      "worktree_clean": false,
+      "config_sha256": "c9baf92157986211689c6e94700edc6671f6fab58b1dfb93eb6a51eb08da0b31",
+      "run_nonce": "d971209829894cefa4840d2ecb0ff1c3",
+      "started_at": "2026-10-07T01:11:14Z",
+      "finished_at": "2026-10-07T01:11:15Z",
+      "duration_s": 0.7,
+      "attempts": [
+        {
+          "attempt": 1,
+          "started_at": "2026-10-07T01:11:14Z",
+          "finished_at": "2026-10-07T01:11:15Z",
+          "duration_s": 0.7,
+          "exit_code": 0,
+          "result": "PASS",
+          "reason": "14 passed in 0.51s",
+          "log": "docs/execution/evidence/research/checks/logs/p5a-unit/20261007T011114Z-attempt-1.log",
+          "summary": "14 passed in 0.51s",
+          "nonce": "f019995381c0429fad17bcea70819087",
+          "structured_result": null,
+          "assertions": [],
+          "produced": [],
+          "pytest": {
+            "passed": 14,
+            "failed": 0,
+            "skipped": 0,
+            "deselected": 0,
+            "errors": 0,
+            "skip_reasons": [],
+            "line": "14 passed in 0.51s"
+          }
+        }
+      ],
+      "evidence_files": [],
+      "first_failure": null,
+      "flaky": false,
+      "inherited": false,
+      "this_run": true,
+      "history": [
+        {
+          "result": "PASS",
+          "checked_commit": "a05c1d22006b864c336a907a1826b15e9ea7593a",
+          "finished_at": "2026-10-07T00:54:33Z",
+          "duration_s": 0.8,
+          "attempts": 1
+        }
+      ]
+    },
+    {
+      "id": "p5a-case",
+      "group": "p5a",
+      "title": "普通业务样例端到端：委托案例通过校验、从记录运行重算对应得到参考判定（信念 DEVIATES / 修订 CORRESPONDS）、离线读取成立",
+      "command": "uv run --frozen python scripts/p5a_case_check.py",
+      "tasks": [
+        "P5A-01",
+        "P5A-02"
+      ],
+      "evidence": [],
+      "requires": null,
+      "profile": "local-lite",
+      "kind": "mandatory",
+      "retries": 0,
+      "heavy_gib": 0.0,
+      "produces": [
+        "docs/execution/evidence/research/p5a/case.json"
+      ],
+      "protocol": true,
+      "assertions_from": null,
+      "trigger": null,
+      "result": "PASS",
+      "reason": "[p5a-case] PASS: 7 required assertion(s) hold",
+      "summary": "[p5a-case] PASS: 7 required assertion(s) hold",
+      "condition": null,
+      "checked_commit": "a05c1d22006b864c336a907a1826b15e9ea7593a",
+      "worktree_sha256": "cc20ace30b173d267923e5c70dd0e45381d1056f3de1e753a4df27be5690756a",
+      "worktree_clean": false,
+      "config_sha256": "c9baf92157986211689c6e94700edc6671f6fab58b1dfb93eb6a51eb08da0b31",
+      "run_nonce": "d971209829894cefa4840d2ecb0ff1c3",
+      "started_at": "2026-10-07T01:11:15Z",
+      "finished_at": "2026-10-07T01:11:15Z",
+      "duration_s": 0.4,
+      "attempts": [
+        {
+          "attempt": 1,
+          "started_at": "2026-10-07T01:11:15Z",
+          "finished_at": "2026-10-07T01:11:15Z",
+          "duration_s": 0.4,
+          "exit_code": 0,
+          "result": "PASS",
+          "reason": "[p5a-case] PASS: 7 required assertion(s) hold",
+          "log": "docs/execution/evidence/research/checks/logs/p5a-case/20261007T011115Z-attempt-1.log",
+          "summary": "[p5a-case] PASS: 7 required assertion(s) hold",
+          "nonce": "b2f5c2d5f9474397b00ad241fccbd0be",
+          "structured_result": "docs/execution/evidence/research/checks/logs/p5a-case/20261007T011115Z-attempt-1.result.json",
+          "assertions": [
+            {
+              "id": "case_validates",
+              "required": true,
+              "holds": true,
+              "detail": "0 problem(s): []"
+            },
+            {
+              "id": "references_checked",
+              "required": true,
+              "holds": true,
+              "detail": "checked {'case_digest': 1, 'artifact': 11, 'reference': 17, 'model': 2, 'property': 2, 'software': 1, 'conformance': 2}"
+            },
+            {
+              "id": "v1_matches_reference",
+              "required": true,
+              "holds": true,
+              "detail": "v1: derived DEVIATES, reference DEVIATES"
+            },
+            {
+              "id": "v2_matches_reference",
+              "required": true,
+              "holds": true,
+              "detail": "v2: derived CORRESPONDS, reference CORRESPONDS"
+            },
+            {
+              "id": "belief_deviates_revised_corresponds",
+              "required": true,
+              "holds": true,
+              "detail": "{'v1': 'DEVIATES', 'v2': 'CORRESPONDS'}"
+            },
+            {
+              "id": "three_layers_recorded_apart",
+              "required": true,
+              "holds": true,
+              "detail": "model=UNKNOWN regression=PASS correspondence=DEVIATES"
+            },
+            {
+              "id": "offline_read",
+              "required": true,
+              "holds": true,
+              "detail": "offline ok=True, problems=[]"
+            }
+          ],
+          "produced": [
+            {
+              "path": "docs/execution/evidence/research/p5a/case.json",
+              "exists": true,
+              "sha256": "b115390d0220944da593d856c444b4c8a9d4913bcc0f1600b251e98e8e28a9ae",
+              "fresh": true
+            }
+          ],
+          "pytest": null
+        }
+      ],
+      "evidence_files": [
+        {
+          "path": "docs/execution/evidence/research/p5a/case.json",
+          "exists": true,
+          "sha256": "b115390d0220944da593d856c444b4c8a9d4913bcc0f1600b251e98e8e28a9ae",
+          "fresh": true
+        }
+      ],
+      "first_failure": null,
+      "flaky": false,
+      "inherited": false,
+      "this_run": true,
+      "history": [
+        {
+          "result": "PASS",
+          "checked_commit": "a05c1d22006b864c336a907a1826b15e9ea7593a",
+          "finished_at": "2026-10-07T00:54:33Z",
+          "duration_s": 0.5,
+          "attempts": 1
+        }
+      ]
+    }
+  ]
+}

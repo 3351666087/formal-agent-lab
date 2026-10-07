@@ -41,7 +41,7 @@ from .db import (
     session_scope,
 )
 from .orchestration import TemporalOrchestrator
-from .services import catalog, governance, modeling, operations, probabilistic, runs, scenarios
+from .services import catalog, governance, modeling, operations, probabilistic, research, runs, scenarios
 from .services.common import artifact_store, get_or_404
 from .services.events import list_events, to_trace_event
 from .settings import get_settings
@@ -586,6 +586,40 @@ def _routes(app: FastAPI) -> None:
         data, name = await run_in_threadpool(go)
         return Response(content=data, media_type="application/zip",
                         headers={"Content-Disposition": f'attachment; filename="{name}"'})
+
+    # ------------------------------------------------------------------ research cases and conformance (phase 5A)
+    @app.post(f"{API}/projects/{{project_id}}/research/cases", status_code=201)
+    async def import_research_case(project_id: str, request: Request):
+        data = await request.body()
+        if not data:
+            raise HTTPException(status_code=400, detail="empty body: POST the case directory as a zip")
+        return jsonable_encoder(await db(lambda s: research.import_case(s, project_id, data)))
+
+    @app.get(f"{API}/projects/{{project_id}}/research/cases")
+    async def list_research_cases(project_id: str):
+        return jsonable_encoder(await db(lambda s: research.list_cases(s, project_id)))
+
+    @app.get(f"{API}/research/cases/{{rc_id}}")
+    async def get_research_case(rc_id: str):
+        return jsonable_encoder(await db(lambda s: research.case_detail(s, rc_id)))
+
+    @app.get(f"{API}/research/cases/{{rc_id}}/export")
+    async def export_research_case(rc_id: str):
+        def go():
+            with session_scope() as s:
+                return research.export_case(s, rc_id)
+
+        data, name = await run_in_threadpool(go)
+        return Response(content=data, media_type="application/zip",
+                        headers={"Content-Disposition": f'attachment; filename="{name}"'})
+
+    @app.get(f"{API}/model-versions/{{version_id}}/research")
+    async def model_version_research(version_id: str):
+        return jsonable_encoder(await db(lambda s: research.cases_for_model_version(s, version_id)))
+
+    @app.get(f"{API}/runs/{{run_id}}/research")
+    async def run_research(run_id: str):
+        return jsonable_encoder(await db(lambda s: research.conformance_for_run(s, run_id)))
 
     # ------------------------------------------------------------------ participant access (phase 4A, A2)
     @app.post(f"{API}/runs/{{run_id}}/participants/{{actor_id}}/access", status_code=201)

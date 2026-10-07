@@ -38,6 +38,7 @@ lock: ## re-resolve dependency locks
 .PHONY: contracts contracts-check
 contracts: ## regenerate JSON Schemas, digests, TypeScript types and docs (v2 live, v1 frozen) from the Pydantic source
 	$(PY) -m formal_lab_contracts.schema_export --out contracts/v2 --v1-out contracts/v1
+	$(PY) -m formal_lab_contracts.research --out contracts/research
 	pnpm --filter @formal-lab/contracts run generate
 	$(PY) -m formal_lab_contracts.docs --out docs/contracts/v2.md --v1-out docs/contracts/v1.md
 
@@ -153,12 +154,15 @@ phase1-check: ## run every phase-1 acceptance check and write docs/handoff/phase
 handoff: ## regenerate docs/handoff/phase1.manifest.json from the repository and check results
 	uv run --frozen python scripts/handoff.py
 
-.PHONY: phase3-check phase4-check acceptance-local checks design-check
+.PHONY: phase3-check phase4-check research-check acceptance-local checks design-check
 phase3-check: ## phase-3 local checks (engine: scripts/check_runner.py) → docs/execution/evidence/phase3/checks/ (ARGS="--group g" / "--only id" / "--out dir")
 	$(UV_RUN) python scripts/phase3_check.py $(ARGS)
 
 phase4-check: ## phase-4 local checks (groups a1–a5, b1–b3) → docs/execution/evidence/phase4/checks/ (ARGS="--group a1,a2" / "--strict")
 	$(UV_RUN) python scripts/phase4_check.py $(ARGS)
+
+research-check: ## research-track checks (groups p5a–p7) → docs/execution/evidence/research/checks/ (ARGS="--group p5a" / "--strict")
+	$(UV_RUN) python scripts/research_check.py $(ARGS)
 
 acceptance-local: ## strict final acceptance: phase-2 + phase-3 regression + phase-4 → docs/execution/evidence/phase4/acceptance-local.json (ARGS="--suites phase4 --group a1" / "--no-strict")
 	$(UV_RUN) python scripts/acceptance_local.py $(ARGS)

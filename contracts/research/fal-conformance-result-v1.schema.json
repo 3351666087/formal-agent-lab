@@ -1,0 +1,621 @@
+{
+  "$defs": {
+    "Bounds": {
+      "additionalProperties": false,
+      "properties": {
+        "inputs": {
+          "description": "input domain / instance the conclusions are bounded to",
+          "minLength": 1,
+          "title": "Inputs",
+          "type": "string"
+        },
+        "max_steps": {
+          "minimum": 1,
+          "title": "Max Steps",
+          "type": "integer"
+        },
+        "timeout_ms": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Timeout Ms"
+        }
+      },
+      "required": [
+        "max_steps",
+        "inputs"
+      ],
+      "title": "Bounds",
+      "type": "object"
+    },
+    "CaseRef": {
+      "additionalProperties": false,
+      "properties": {
+        "case_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:@/-]{0,254}$",
+          "title": "Case Id",
+          "type": "string"
+        },
+        "case_version": {
+          "minimum": 1,
+          "title": "Case Version",
+          "type": "integer"
+        },
+        "definition_digest": {
+          "description": "sha256 of the case definition (identity, software, comparison, models, correspondence) — results are case artifacts themselves, so they bind to the definition, not to the whole case digest",
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Definition Digest",
+          "type": "string"
+        }
+      },
+      "required": [
+        "case_id",
+        "case_version",
+        "definition_digest"
+      ],
+      "title": "CaseRef",
+      "type": "object"
+    },
+    "ConformanceItem": {
+      "additionalProperties": false,
+      "properties": {
+        "action": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Action"
+        },
+        "element": {
+          "description": "model location / element the item compares",
+          "minLength": 1,
+          "title": "Element",
+          "type": "string"
+        },
+        "evidence": {
+          "description": "observed / verified-within-scope / unknown / not-comparable",
+          "title": "Evidence",
+          "type": "string"
+        },
+        "observed": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Observed"
+        },
+        "predicted": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Predicted"
+        },
+        "status": {
+          "enum": [
+            "MATCH",
+            "DIFFERENT",
+            "UNKNOWN",
+            "NOT_COMPARABLE"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "step": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Step"
+        }
+      },
+      "required": [
+        "element",
+        "status",
+        "evidence"
+      ],
+      "title": "ConformanceItem",
+      "type": "object"
+    },
+    "ConformanceResult": {
+      "additionalProperties": false,
+      "properties": {
+        "assumptions": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Assumptions",
+          "type": "array"
+        },
+        "bound": {
+          "$ref": "#/$defs/Bounds"
+        },
+        "case": {
+          "$ref": "#/$defs/CaseRef"
+        },
+        "correspondence": {
+          "enum": [
+            "CORRESPONDS",
+            "DEVIATES",
+            "UNCONFIRMED",
+            "SPURIOUS",
+            "UNKNOWN",
+            "NOT_COMPARABLE",
+            "UNSUPPORTED",
+            "TIMEOUT"
+          ],
+          "title": "Correspondence",
+          "type": "string"
+        },
+        "correspondence_note": {
+          "minLength": 1,
+          "title": "Correspondence Note",
+          "type": "string"
+        },
+        "counterexample": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CounterexampleEvidence"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "counts": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "description": "item status → number",
+          "title": "Counts",
+          "type": "object"
+        },
+        "items": {
+          "items": {
+            "$ref": "#/$defs/ConformanceItem"
+          },
+          "title": "Items",
+          "type": "array"
+        },
+        "model": {
+          "$ref": "#/$defs/ModelRef"
+        },
+        "model_conclusion": {
+          "$ref": "#/$defs/ModelConclusion"
+        },
+        "program_observations": {
+          "items": {
+            "$ref": "#/$defs/ProgramObservation"
+          },
+          "title": "Program Observations",
+          "type": "array"
+        },
+        "program_regression": {
+          "$ref": "#/$defs/ProgramRegression"
+        },
+        "property_digest": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Property Digest",
+          "type": "string"
+        },
+        "property_id": {
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*$",
+          "title": "Property Id",
+          "type": "string"
+        },
+        "protocol": {
+          "const": "fal-conformance-result/v1",
+          "default": "fal-conformance-result/v1",
+          "title": "Protocol",
+          "type": "string"
+        },
+        "scope": {
+          "description": "what the correspondence covers — never semantic equivalence",
+          "minLength": 1,
+          "title": "Scope",
+          "type": "string"
+        },
+        "software": {
+          "$ref": "#/$defs/SoftwareRef"
+        },
+        "tools": {
+          "items": {
+            "$ref": "#/$defs/ToolIdentity"
+          },
+          "minItems": 1,
+          "title": "Tools",
+          "type": "array"
+        }
+      },
+      "required": [
+        "case",
+        "model",
+        "software",
+        "property_id",
+        "property_digest",
+        "bound",
+        "model_conclusion",
+        "program_regression",
+        "correspondence",
+        "correspondence_note",
+        "scope",
+        "tools"
+      ],
+      "title": "ConformanceResult",
+      "type": "object"
+    },
+    "CounterexampleEvidence": {
+      "additionalProperties": false,
+      "description": "What is known about a model counterexample on the program side (it is UNCONFIRMED without either).",
+      "properties": {
+        "artifact_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:@/-]{0,254}$",
+          "title": "Artifact Id",
+          "type": "string"
+        },
+        "note": {
+          "minLength": 1,
+          "title": "Note",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "reproduced",
+            "abstraction_error"
+          ],
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "status",
+        "artifact_id",
+        "note"
+      ],
+      "title": "CounterexampleEvidence",
+      "type": "object"
+    },
+    "Digest": {
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": {
+          "const": "sha256",
+          "default": "sha256",
+          "title": "Algorithm",
+          "type": "string"
+        },
+        "value": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "Digest",
+      "type": "object"
+    },
+    "ModelConclusion": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact_id": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._:@/-]{0,254}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Artifact Id"
+        },
+        "artifact_sha256": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Artifact Sha256"
+        },
+        "explanation": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Explanation"
+        },
+        "query": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "e.g. GOAL_REACHABILITY(all_completed)",
+          "title": "Query"
+        },
+        "verdict": {
+          "enum": [
+            "WITNESS",
+            "NO_WITNESS_WITHIN_BOUND",
+            "UNKNOWN",
+            "UNSUPPORTED",
+            "TIMEOUT",
+            "NOT_RUN"
+          ],
+          "title": "Verdict",
+          "type": "string"
+        }
+      },
+      "required": [
+        "verdict"
+      ],
+      "title": "ModelConclusion",
+      "type": "object"
+    },
+    "ModelRef": {
+      "additionalProperties": false,
+      "properties": {
+        "digest": {
+          "$ref": "#/$defs/Digest"
+        },
+        "package_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:@/-]{0,254}$",
+          "title": "Package Id",
+          "type": "string"
+        },
+        "version": {
+          "minimum": 1,
+          "title": "Version",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "package_id",
+        "version",
+        "digest"
+      ],
+      "title": "ModelRef",
+      "type": "object"
+    },
+    "ProgramObservation": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:@/-]{0,254}$",
+          "title": "Artifact Id",
+          "type": "string"
+        },
+        "sha256": {
+          "description": "the observation the result was computed from (staleness check)",
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "summary": {
+          "minLength": 1,
+          "title": "Summary",
+          "type": "string"
+        }
+      },
+      "required": [
+        "artifact_id",
+        "sha256",
+        "summary"
+      ],
+      "title": "ProgramObservation",
+      "type": "object"
+    },
+    "ProgramRegression": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact_id": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._:@/-]{0,254}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Artifact Id"
+        },
+        "artifact_sha256": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Artifact Sha256"
+        },
+        "status": {
+          "enum": [
+            "PASS",
+            "FAIL",
+            "NOT_RUN",
+            "UNKNOWN"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "summary": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Summary"
+        }
+      },
+      "required": [
+        "status"
+      ],
+      "title": "ProgramRegression",
+      "type": "object"
+    },
+    "SoftwareRef": {
+      "additionalProperties": false,
+      "properties": {
+        "config_sha256": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Config Sha256"
+        },
+        "revision": {
+          "pattern": "^[0-9a-f]{40}$",
+          "title": "Revision",
+          "type": "string"
+        },
+        "trees": {
+          "items": {
+            "$ref": "#/$defs/TreeDigest"
+          },
+          "minItems": 1,
+          "title": "Trees",
+          "type": "array"
+        }
+      },
+      "required": [
+        "revision",
+        "trees"
+      ],
+      "title": "SoftwareRef",
+      "type": "object"
+    },
+    "ToolIdentity": {
+      "additionalProperties": false,
+      "properties": {
+        "digest": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Digest"
+        },
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "version": {
+          "minLength": 1,
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "version"
+      ],
+      "title": "ToolIdentity",
+      "type": "object"
+    },
+    "TreeDigest": {
+      "additionalProperties": false,
+      "properties": {
+        "git_tree": {
+          "description": "`git rev-parse <revision>:<path>`",
+          "pattern": "^[0-9a-f]{40}$",
+          "title": "Git Tree",
+          "type": "string"
+        },
+        "path": {
+          "pattern": "^[A-Za-z0-9._@+=,-][A-Za-z0-9._@+=,/-]*$",
+          "title": "Path",
+          "type": "string"
+        }
+      },
+      "required": [
+        "path",
+        "git_tree"
+      ],
+      "title": "TreeDigest",
+      "type": "object"
+    }
+  },
+  "$id": "https://formal-lab.dev/fal-conformance-result/v1",
+  "$ref": "#/$defs/ConformanceResult",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "fal-conformance-result/v1"
+}

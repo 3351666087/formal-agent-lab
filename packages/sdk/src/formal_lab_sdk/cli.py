@@ -25,6 +25,7 @@ ops_app = typer.Typer(no_args_is_help=True, help="environment operations of a ru
 rules_app = typer.Typer(no_args_is_help=True, help="rule sets (event–condition–handler), versioned")
 release_app = typer.Typer(no_args_is_help=True, help="pre-release checks of a model version (and rules)")
 regression_app = typer.Typer(no_args_is_help=True, help="regression cases from effect differences / counterexamples")
+research_app = typer.Typer(no_args_is_help=True, help="research cases and model–program conformance (phase 5A)")
 app.add_typer(model_app, name="model")
 app.add_typer(run_app, name="run")
 app.add_typer(matrix_app, name="matrix")
@@ -33,6 +34,7 @@ app.add_typer(ops_app, name="ops")
 app.add_typer(rules_app, name="rules")
 app.add_typer(release_app, name="release")
 app.add_typer(regression_app, name="regression")
+app.add_typer(research_app, name="research")
 
 API = typer.Option(DEFAULT_URL, "--api", envvar="FAL_API_URL", help="platform API base URL")
 
@@ -808,6 +810,90 @@ def replay_reexecute(path: Path, allow_live: bool = typer.Option(False, "--allow
                + ("identical" if same else f"diverges at step {old[first][0] if first is not None else len(old)}"))
     if not same:
         raise typer.Exit(1)
+
+
+# ---------------------------------------------------------------------------- research (phase 5A)
+def _case_zip(path: Path) -> bytes:
+    """A case given as a .zip is sent as is; a directory is packed with its own name as the top entry."""
+    if path.is_file():
+        return path.read_bytes()
+    import io
+    import zipfile
+
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
+        for p in sorted(path.rglob("*")):
+            if p.is_file():
+                zf.write(p, (Path(path.name) / p.relative_to(path)).as_posix())
+    return buf.getvalue()
+
+
+@research_app.command("validate")
+def research_validate(path: Path, repo: Path = typer.Option(None, help="repository to verify software trees against")):
+    """Validate a case directory or exported zip offline: digests, model/property identity, before/after sides, data
+    separation (and software trees when `--repo` is given). Exit 1 if it does not validate."""
+    from formal_lab_runtime.research import load_case, validate_case
+
+    report, _ = validate_case(load_case(str(path)), repo=repo)
+    _out(report.as_dict())
+    raise typer.Exit(0 if report.ok else 1)
+
+
+@research_app.command("conformance")
+def research_conformance(path: Path, model: str = typer.Option(..., "--model", help="model label, e.g. v1"),
+                         property: str = typer.Option(..., "--property", help="property id"),
+                         observation: str = typer.Option("obs-run", "--observation", help="observation artifact id")):
+    """Re-derive one model–program conformance result from the recorded observation (offline, deterministic)."""
+    from formal_lab_contracts.research import ModelConclusion, ProgramRegression, ResearchCase
+    from formal_lab_runtime.research import load_case, replay_conformance
+
+    files = load_case(str(path))
+    case = ResearchCase.model_validate(files.document)
+    res = replay_conformance(files, case, model_label=model, property_id=property, observation_id=observation,
+                             model_conclusion=ModelConclusion(verdict="NOT_RUN"),
+                             program_regression=ProgramRegression(status="NOT_RUN"))
+    _out({"correspondence": res.correspondence, "note": res.correspondence_note, "counts": res.counts,
+          "scope": res.scope, "items_preview": [i.model_dump() for i in res.items[:10]]})
+
+
+@research_app.command("import")
+def research_import(path: Path, project: str = typer.Option(..., help="project id or name"), api: str = API):
+    """Send a case (directory or zip) to the platform, which validates and stores it, and prints the provenance."""
+    try:
+        c = _client(api)
+        _out(c.import_research_case(_project(c, project), _case_zip(path)))
+    except FormalLabError as exc:
+        _fail(exc)
+
+
+@research_app.command("list")
+def research_list(project: str = typer.Option(..., help="project id or name"), api: str = API):
+    try:
+        c = _client(api)
+        _out(c.research_cases(_project(c, project)))
+    except FormalLabError as exc:
+        _fail(exc)
+
+
+@research_app.command("show")
+def research_show(rc_id: str, api: str = API):
+    """The full provenance of an imported case: software, models, correspondence, conformance verdicts."""
+    try:
+        _out(_client(api).research_case(rc_id))
+    except FormalLabError as exc:
+        _fail(exc)
+
+
+@research_app.command("export")
+def research_export(rc_id: str, output: Path = typer.Option(None, "-o", help="write the zip here"), api: str = API):
+    try:
+        data = _client(api).export_research_case(rc_id)
+    except FormalLabError as exc:
+        _fail(exc)
+        return
+    out = output or Path(f"{rc_id}.case.zip")
+    out.write_bytes(data)
+    typer.echo(f"wrote {out} ({len(data)} bytes)")
 
 
 def main() -> None:

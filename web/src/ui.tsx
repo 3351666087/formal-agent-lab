@@ -158,6 +158,23 @@ export function ComparisonBadge({ verdict }: { verdict?: string | null }) {
   return <span className={`badge ${tone}`} title={verdict}>{label}</span>;
 }
 
+// model–program correspondence (fal-conformance-result/v1): DEVIATES is a real finding, not a UI error
+const CORR: Record<string, [string, string, string]> = {
+  CORRESPONDS: ["ok", "对应", "model and program agree within the declared scope"],
+  DEVIATES: ["warn", "偏离", "the model's prediction differs from the program"],
+  UNCONFIRMED: ["info", "未确认", "a model counterexample the program observations do not reproduce"],
+  SPURIOUS: ["info", "抽象误差", "the model counterexample comes from an abstraction error"],
+  UNKNOWN: ["", "未知", "could not be compared"],
+  NOT_COMPARABLE: ["", "不可比", "nothing in scope to compare"],
+  UNSUPPORTED: ["", "不支持", "semantics not supported by the checker"],
+  TIMEOUT: ["", "超时", "the checker timed out"],
+};
+export function CorrespondenceBadge({ status }: { status?: string | null }) {
+  if (!status) return <span className="badge">—</span>;
+  const [tone, label, title] = CORR[status] ?? ["", status, status];
+  return <span className={`badge ${tone}`} title={`${status}: ${title}`}>{label}</span>;
+}
+
 const SOURCE: Record<string, [string, string]> = {
   RULE: ["", "规则"], SYMBOLIC: ["info", "符号/Z3"], LLM: ["accent", "LLM"], LLM_STUB: ["warn", "LLM 替身"],
   LLM_PROTOCOL_TEST: ["warn", "协议测试服务"], HUMAN: ["", "人工"], EXTERNAL: ["", "外部插件"],

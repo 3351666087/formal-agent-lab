@@ -1,0 +1,1059 @@
+{
+ "protocol": "fal-conformance-result/v1",
+ "case": {
+  "case_id": "orders-p2-speed",
+  "case_version": 1,
+  "definition_digest": "6628f89487511583cd8e400b1bba5deb4407edb17891376fd87bb43e821df6c6"
+ },
+ "model": {
+  "package_id": "local-order-service",
+  "version": 2,
+  "digest": {
+   "algorithm": "sha256",
+   "value": "fcbca828c69e864f9dd0098b5450355ecc0dbbdf293482d88b84c558536ddbe7"
+  }
+ },
+ "software": {
+  "revision": "a05c1d22006b864c336a907a1826b15e9ea7593a",
+  "trees": [
+   {
+    "path": "examples/local-order-service",
+    "git_tree": "82e9f6f1b70d1b1f3021b8d9ddd1ededfa5f7285"
+   }
+  ],
+  "config_sha256": "59336f92188d13cdedf4c23ef88f042b00aa08db71020ac27fbc759c338265d7"
+ },
+ "property_id": "all_completed",
+ "property_digest": "6207780f49f4e5ec62dc88ea04d756dbe97bbf2ca39fd35953db6b9bdeac1ecf",
+ "bound": {
+  "max_steps": 26,
+  "timeout_ms": 120000,
+  "inputs": "deviation instance, seed 1"
+ },
+ "assumptions": [
+  "deterministic finite abstraction of the service state machine",
+  "one lab operating condition (slow[p2]); other stations nominal"
+ ],
+ "model_conclusion": {
+  "verdict": "UNKNOWN",
+  "query": "GOAL_REACHABILITY(all_completed)",
+  "explanation": null,
+  "artifact_id": "check-v2",
+  "artifact_sha256": "12f75c5907dd6af0ebf66071cb96aef5c75f1bdbb5ee9ed650c2f1c871169bef"
+ },
+ "program_regression": {
+  "status": "PASS",
+  "summary": "26/26 passed at a05c1d22006b",
+  "artifact_id": "regression",
+  "artifact_sha256": "e30c53d3c9d9eb6a426e1e9842fb1ea3e76406ed6a6468af7882e936804af048"
+ },
+ "program_observations": [
+  {
+   "artifact_id": "obs-run",
+   "sha256": "3cac5e96949b852f996b71915adc733f54f2b8b94202d8bed3ee0b99cb4ed9c2",
+   "summary": "run run_p5a_orders_deviation: 26 executed step(s) replayed, 250 events"
+  }
+ ],
+ "items": [
+  {
+   "step": 1,
+   "action": "reserve(o1)",
+   "element": "status[o1]",
+   "predicted": "reserved",
+   "observed": "reserved",
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 1,
+   "action": "reserve(o1)",
+   "element": "stock[a]",
+   "predicted": 4,
+   "observed": 4,
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 2,
+   "action": "enqueue(o1)",
+   "element": "next_seq",
+   "predicted": 2,
+   "observed": 2,
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 2,
+   "action": "enqueue(o1)",
+   "element": "queued_seq[o1]",
+   "predicted": 1,
+   "observed": 1,
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 2,
+   "action": "enqueue(o1)",
+   "element": "status[o1]",
+   "predicted": "queued",
+   "observed": "queued",
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 3,
+   "action": "start(o1, p1)",
+   "element": "on[o1,p1]",
+   "predicted": true,
+   "observed": true,
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 3,
+   "action": "start(o1, p1)",
+   "element": "queued_seq[o1]",
+   "predicted": 0,
+   "observed": 0,
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 3,
+   "action": "start(o1, p1)",
+   "element": "remaining[o1]",
+   "predicted": 1,
+   "observed": 1,
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 3,
+   "action": "start(o1, p1)",
+   "element": "status[o1]",
+   "predicted": "processing",
+   "observed": "processing",
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 4,
+   "action": "reserve(o2)",
+   "element": "status[o2]",
+   "predicted": "reserved",
+   "observed": "reserved",
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 4,
+   "action": "reserve(o2)",
+   "element": "stock[b]",
+   "predicted": 5,
+   "observed": 5,
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 5,
+   "action": "enqueue(o2)",
+   "element": "next_seq",
+   "predicted": 3,
+   "observed": 3,
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 5,
+   "action": "enqueue(o2)",
+   "element": "queued_seq[o2]",
+   "predicted": 2,
+   "observed": 2,
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 5,
+   "action": "enqueue(o2)",
+   "element": "status[o2]",
+   "predicted": "queued",
+   "observed": "queued",
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 6,
+   "action": "start(o2, p2)",
+   "element": "on[o2,p2]",
+   "predicted": true,
+   "observed": true,
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 6,
+   "action": "start(o2, p2)",
+   "element": "queued_seq[o2]",
+   "predicted": 0,
+   "observed": 0,
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 6,
+   "action": "start(o2, p2)",
+   "element": "remaining[o2]",
+   "predicted": 4,
+   "observed": 4,
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 6,
+   "action": "start(o2, p2)",
+   "element": "status[o2]",
+   "predicted": "processing",
+   "observed": "processing",
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 7,
+   "action": "reserve(o3)",
+   "element": "status[o3]",
+   "predicted": "reserved",
+   "observed": "reserved",
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 7,
+   "action": "reserve(o3)",
+   "element": "stock[a]",
+   "predicted": 1,
+   "observed": 1,
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 8,
+   "action": "enqueue(o3)",
+   "element": "next_seq",
+   "predicted": 4,
+   "observed": 4,
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 8,
+   "action": "enqueue(o3)",
+   "element": "queued_seq[o3]",
+   "predicted": 3,
+   "observed": 3,
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 8,
+   "action": "enqueue(o3)",
+   "element": "status[o3]",
+   "predicted": "queued",
+   "observed": "queued",
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 9,
+   "action": "tick()",
+   "element": "clock",
+   "predicted": 1,
+   "observed": 1,
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 9,
+   "action": "tick()",
+   "element": "done_at[o1]",
+   "predicted": 1,
+   "observed": 1,
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 9,
+   "action": "tick()",
+   "element": "on[o1,p1]",
+   "predicted": false,
+   "observed": false,
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 9,
+   "action": "tick()",
+   "element": "on[o1,p2]",
+   "predicted": false,
+   "observed": false,
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 9,
+   "action": "tick()",
+   "element": "remaining[o1]",
+   "predicted": 0,
+   "observed": 0,
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 9,
+   "action": "tick()",
+   "element": "status[o1]",
+   "predicted": "completed",
+   "observed": "completed",
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 9,
+   "action": "tick()",
+   "element": "tick_parity",
+   "predicted": true,
+   "observed": true,
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 10,
+   "action": "start(o3, p1)",
+   "element": "on[o3,p1]",
+   "predicted": true,
+   "observed": true,
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 10,
+   "action": "start(o3, p1)",
+   "element": "queued_seq[o3]",
+   "predicted": 0,
+   "observed": 0,
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 10,
+   "action": "start(o3, p1)",
+   "element": "remaining[o3]",
+   "predicted": 1,
+   "observed": 1,
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 10,
+   "action": "start(o3, p1)",
+   "element": "status[o3]",
+   "predicted": "processing",
+   "observed": "processing",
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 11,
+   "action": "tick()",
+   "element": "clock",
+   "predicted": 2,
+   "observed": 2,
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 11,
+   "action": "tick()",
+   "element": "done_at[o3]",
+   "predicted": 2,
+   "observed": 2,
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 11,
+   "action": "tick()",
+   "element": "on[o3,p1]",
+   "predicted": false,
+   "observed": false,
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 11,
+   "action": "tick()",
+   "element": "on[o3,p2]",
+   "predicted": false,
+   "observed": false,
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 11,
+   "action": "tick()",
+   "element": "remaining[o2]",
+   "predicted": 3,
+   "observed": 3,
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 11,
+   "action": "tick()",
+   "element": "remaining[o3]",
+   "predicted": 0,
+   "observed": 0,
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 11,
+   "action": "tick()",
+   "element": "status[o3]",
+   "predicted": "completed",
+   "observed": "completed",
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 11,
+   "action": "tick()",
+   "element": "status[o4]",
+   "predicted": "submitted",
+   "observed": "submitted",
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 11,
+   "action": "tick()",
+   "element": "tick_parity",
+   "predicted": false,
+   "observed": false,
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 12,
+   "action": "reserve(o4)",
+   "element": "status[o4]",
+   "predicted": "reserved",
+   "observed": "reserved",
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 12,
+   "action": "reserve(o4)",
+   "element": "stock[b]",
+   "predicted": 3,
+   "observed": 3,
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 13,
+   "action": "enqueue(o4)",
+   "element": "next_seq",
+   "predicted": 5,
+   "observed": 5,
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 13,
+   "action": "enqueue(o4)",
+   "element": "queued_seq[o4]",
+   "predicted": 4,
+   "observed": 4,
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 13,
+   "action": "enqueue(o4)",
+   "element": "status[o4]",
+   "predicted": "queued",
+   "observed": "queued",
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 14,
+   "action": "start(o4, p1)",
+   "element": "on[o4,p1]",
+   "predicted": true,
+   "observed": true,
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 14,
+   "action": "start(o4, p1)",
+   "element": "queued_seq[o4]",
+   "predicted": 0,
+   "observed": 0,
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 14,
+   "action": "start(o4, p1)",
+   "element": "remaining[o4]",
+   "predicted": 2,
+   "observed": 2,
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 14,
+   "action": "start(o4, p1)",
+   "element": "status[o4]",
+   "predicted": "processing",
+   "observed": "processing",
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 15,
+   "action": "tick()",
+   "element": "clock",
+   "predicted": 3,
+   "observed": 3,
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 15,
+   "action": "tick()",
+   "element": "remaining[o4]",
+   "predicted": 1,
+   "observed": 1,
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 15,
+   "action": "tick()",
+   "element": "status[o5]",
+   "predicted": "submitted",
+   "observed": "submitted",
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 15,
+   "action": "tick()",
+   "element": "tick_parity",
+   "predicted": true,
+   "observed": true,
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 16,
+   "action": "reserve(o5)",
+   "element": "status[o5]",
+   "predicted": "reserved",
+   "observed": "reserved",
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 16,
+   "action": "reserve(o5)",
+   "element": "stock[a]",
+   "predicted": 0,
+   "observed": 0,
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 17,
+   "action": "enqueue(o5)",
+   "element": "next_seq",
+   "predicted": 6,
+   "observed": 6,
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 17,
+   "action": "enqueue(o5)",
+   "element": "queued_seq[o5]",
+   "predicted": 5,
+   "observed": 5,
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 17,
+   "action": "enqueue(o5)",
+   "element": "status[o5]",
+   "predicted": "queued",
+   "observed": "queued",
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 18,
+   "action": "tick()",
+   "element": "clock",
+   "predicted": 4,
+   "observed": 4,
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 18,
+   "action": "tick()",
+   "element": "done_at[o4]",
+   "predicted": 4,
+   "observed": 4,
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 18,
+   "action": "tick()",
+   "element": "on[o4,p1]",
+   "predicted": false,
+   "observed": false,
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 18,
+   "action": "tick()",
+   "element": "on[o4,p2]",
+   "predicted": false,
+   "observed": false,
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 18,
+   "action": "tick()",
+   "element": "remaining[o2]",
+   "predicted": 2,
+   "observed": 2,
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 18,
+   "action": "tick()",
+   "element": "remaining[o4]",
+   "predicted": 0,
+   "observed": 0,
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 18,
+   "action": "tick()",
+   "element": "status[o4]",
+   "predicted": "completed",
+   "observed": "completed",
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 18,
+   "action": "tick()",
+   "element": "status[o6]",
+   "predicted": "submitted",
+   "observed": "submitted",
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 18,
+   "action": "tick()",
+   "element": "tick_parity",
+   "predicted": false,
+   "observed": false,
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 19,
+   "action": "start(o5, p1)",
+   "element": "on[o5,p1]",
+   "predicted": true,
+   "observed": true,
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 19,
+   "action": "start(o5, p1)",
+   "element": "queued_seq[o5]",
+   "predicted": 0,
+   "observed": 0,
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 19,
+   "action": "start(o5, p1)",
+   "element": "remaining[o5]",
+   "predicted": 2,
+   "observed": 2,
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 19,
+   "action": "start(o5, p1)",
+   "element": "status[o5]",
+   "predicted": "processing",
+   "observed": "processing",
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 20,
+   "action": "reserve(o6)",
+   "element": "status[o6]",
+   "predicted": "reserved",
+   "observed": "reserved",
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 20,
+   "action": "reserve(o6)",
+   "element": "stock[b]",
+   "predicted": 0,
+   "observed": 0,
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 21,
+   "action": "enqueue(o6)",
+   "element": "next_seq",
+   "predicted": 7,
+   "observed": 7,
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 21,
+   "action": "enqueue(o6)",
+   "element": "queued_seq[o6]",
+   "predicted": 6,
+   "observed": 6,
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 21,
+   "action": "enqueue(o6)",
+   "element": "status[o6]",
+   "predicted": "queued",
+   "observed": "queued",
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 22,
+   "action": "tick()",
+   "element": "clock",
+   "predicted": 5,
+   "observed": 5,
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 22,
+   "action": "tick()",
+   "element": "remaining[o5]",
+   "predicted": 1,
+   "observed": 1,
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 22,
+   "action": "tick()",
+   "element": "tick_parity",
+   "predicted": true,
+   "observed": true,
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 23,
+   "action": "tick()",
+   "element": "clock",
+   "predicted": 6,
+   "observed": 6,
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 23,
+   "action": "tick()",
+   "element": "done_at[o5]",
+   "predicted": 6,
+   "observed": 6,
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 23,
+   "action": "tick()",
+   "element": "on[o5,p1]",
+   "predicted": false,
+   "observed": false,
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 23,
+   "action": "tick()",
+   "element": "on[o5,p2]",
+   "predicted": false,
+   "observed": false,
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 23,
+   "action": "tick()",
+   "element": "remaining[o2]",
+   "predicted": 1,
+   "observed": 1,
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 23,
+   "action": "tick()",
+   "element": "remaining[o5]",
+   "predicted": 0,
+   "observed": 0,
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 23,
+   "action": "tick()",
+   "element": "status[o5]",
+   "predicted": "completed",
+   "observed": "completed",
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 23,
+   "action": "tick()",
+   "element": "tick_parity",
+   "predicted": false,
+   "observed": false,
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 24,
+   "action": "start(o6, p1)",
+   "element": "on[o6,p1]",
+   "predicted": true,
+   "observed": true,
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 24,
+   "action": "start(o6, p1)",
+   "element": "queued_seq[o6]",
+   "predicted": 0,
+   "observed": 0,
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 24,
+   "action": "start(o6, p1)",
+   "element": "remaining[o6]",
+   "predicted": 2,
+   "observed": 2,
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 24,
+   "action": "start(o6, p1)",
+   "element": "status[o6]",
+   "predicted": "processing",
+   "observed": "processing",
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 25,
+   "action": "tick()",
+   "element": "clock",
+   "predicted": 7,
+   "observed": 7,
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 25,
+   "action": "tick()",
+   "element": "remaining[o6]",
+   "predicted": 1,
+   "observed": 1,
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 25,
+   "action": "tick()",
+   "element": "tick_parity",
+   "predicted": true,
+   "observed": true,
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 26,
+   "action": "tick()",
+   "element": "clock",
+   "predicted": 8,
+   "observed": 8,
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 26,
+   "action": "tick()",
+   "element": "done_at[o2]",
+   "predicted": 8,
+   "observed": 8,
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 26,
+   "action": "tick()",
+   "element": "done_at[o6]",
+   "predicted": 8,
+   "observed": 8,
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 26,
+   "action": "tick()",
+   "element": "on[o2,p1]",
+   "predicted": false,
+   "observed": false,
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 26,
+   "action": "tick()",
+   "element": "on[o2,p2]",
+   "predicted": false,
+   "observed": false,
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 26,
+   "action": "tick()",
+   "element": "on[o6,p1]",
+   "predicted": false,
+   "observed": false,
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 26,
+   "action": "tick()",
+   "element": "on[o6,p2]",
+   "predicted": false,
+   "observed": false,
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 26,
+   "action": "tick()",
+   "element": "remaining[o2]",
+   "predicted": 0,
+   "observed": 0,
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 26,
+   "action": "tick()",
+   "element": "remaining[o6]",
+   "predicted": 0,
+   "observed": 0,
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 26,
+   "action": "tick()",
+   "element": "status[o2]",
+   "predicted": "completed",
+   "observed": "completed",
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 26,
+   "action": "tick()",
+   "element": "status[o6]",
+   "predicted": "completed",
+   "observed": "completed",
+   "status": "MATCH",
+   "evidence": "observed"
+  },
+  {
+   "step": 26,
+   "action": "tick()",
+   "element": "tick_parity",
+   "predicted": false,
+   "observed": false,
+   "status": "MATCH",
+   "evidence": "observed"
+  }
+ ],
+ "counterexample": null,
+ "correspondence": "CORRESPONDS",
+ "correspondence_note": "all 109 compared field(s) match within the declared scope",
+ "scope": "the 26 executed step(s) of the recorded run, fields of every family; an agreement on these steps is not semantic equivalence of model and program",
+ "counts": {
+  "MATCH": 109
+ },
+ "tools": [
+  {
+   "name": "formal_lab_runtime.research.replay_conformance",
+   "version": "0.4.0",
+   "digest": null
+  },
+  {
+   "name": "formal_lab_model.compare.compare_effects",
+   "version": "0.4.0",
+   "digest": null
+  }
+ ]
+}

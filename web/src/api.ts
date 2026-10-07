@@ -151,6 +151,51 @@ export interface MatrixReport {
   definitions: { metric_id: string; label: string; unit: string; direction: string; aggregation: string }[];
   methods: Record<string, string>;
 }
+// ------------------------------------------------------------------ research cases (phase 5A)
+export interface TreeDigest { path: string; git_tree: string }
+export interface SoftwareSource {
+  repository: string; license: string; revision: string; trees: TreeDigest[];
+  config_sha256: string | null; variant: string; variant_note: string;
+  build_dependencies: { name: string; sha256: string }[]; runtime_dependencies: { name: string; sha256: string }[];
+}
+export interface PropertySpec { property_id: string; kind: string; digest: string; summary: string }
+export interface CaseModelView {
+  label: string; role: string; model_ref: { package_id: string; version: number; digest: { value: string } };
+  semantic_profile: string; properties: PropertySpec[];
+  bounds: { max_steps: number; timeout_ms: number | null; inputs: string };
+  assumptions: string[]; uncovered_semantics: string[];
+}
+export interface CorrespondenceLink {
+  program: { component: string; path: string; symbol: string | null };
+  model: { kind: string; name: string }; relation: string; note: string | null;
+}
+export interface CaseArtifactView {
+  id: string; role: string; path: string; sha256: string; media_type: string; side: string; description: string | null;
+}
+export interface ConformanceEntry {
+  id: string; label: string; package_id: string; version: number; model_digest: string;
+  model_version_id: string | null; property_id: string; property_digest: string;
+  correspondence: string; model_verdict: string; regression_status: string; result: Record<string, unknown>;
+}
+export interface ResearchCaseSummary {
+  id: string; project_id: string; case_id: string; case_version: number; protocol: string; track: string;
+  mechanism_family: string; title: string; purpose: string; software_revision: string; case_digest: string;
+  observation_run_id: string | null; created_at: string;
+}
+export interface ResearchCaseDetail extends ResearchCaseSummary {
+  software: SoftwareSource; comparison: Record<string, unknown>; models: CaseModelView[];
+  correspondence: CorrespondenceLink[]; validation: Record<string, unknown>; reproduction: Record<string, unknown>;
+  artifacts: CaseArtifactView[]; conformance: ConformanceEntry[];
+}
+export interface ResearchLink extends ResearchCaseSummary {
+  conformance: { label: string; property_id: string; correspondence: string; model_verdict: string;
+    regression_status: string }[];
+}
+export const researchCases = (pid: string) => get<ResearchCaseSummary[]>(`/projects/${pid}/research/cases`);
+export const researchCase = (id: string) => get<ResearchCaseDetail>(`/research/cases/${id}`);
+export const modelVersionResearch = (vid: string) => get<ResearchLink[]>(`/model-versions/${vid}/research`);
+export const runResearch = (rid: string) => get<ResearchLink[]>(`/runs/${rid}/research`);
+
 export type { TraceEvent };
 
 export const TERMINAL = new Set(["SUCCEEDED", "FAILED", "CANCELLED", "BUDGET_EXHAUSTED"]);
