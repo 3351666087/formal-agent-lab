@@ -1,0 +1,110 @@
+{
+ "protocol": "fal-research-response/v1",
+ "experiment": {
+  "study_id": "cyber-attackgraph",
+  "unit_id": "ag-1005-reachability.gpt-6-astra-relay.S.r1",
+  "track": "formal_model_analysis",
+  "case_id": null,
+  "case_version": null,
+  "task_id": "ag-1005-reachability",
+  "task_digest": "be2626004147fc0a58be83a732eca073d8662e53aabc5aa4f8eae52b3f047da0",
+  "representation_id": "steplist",
+  "replicate_id": 1,
+  "assistance_mode": "STATIC_UNASSISTED",
+  "sampling_id": "ag-1005-reachability.gpt-6-astra-relay.S.r1#0"
+ },
+ "call": {
+  "provider": "openai",
+  "provider_config_id": "gpt-6-astra-relay",
+  "api": "openai.chat.completions",
+  "api_version": "v1",
+  "endpoint": "https://api.uheapi.com/v1/chat/completions",
+  "route": "COMPATIBLE_RELAY",
+  "endpoint_kind": "PROVIDER",
+  "model_requested": "gpt-6-astra",
+  "model_returned": "gpt-6-astra",
+  "model_switched": false,
+  "model_identity": "RELAY_REPORTED",
+  "response_id": "resp_00f4dd4c67358e8b016acd1a37ba50819ab8aeb0d1fcd5ac0e",
+  "request_id": "580e1ddd-96ee-4929-a806-98d70308bf35, ccf99300-f6ab-40aa-912f-6f6558917e88",
+  "started_at": "2026-10-12T17:34:46Z",
+  "finished_at": "2026-10-12T17:34:52Z",
+  "params": {
+   "max_completion_tokens": 3000
+  },
+  "params_digest": "813038d95bea64de"
+ },
+ "raw": {
+  "body": {
+   "id": "resp_00f4dd4c67358e8b016acd1a37ba50819ab8aeb0d1fcd5ac0e",
+   "object": "chat.completion",
+   "created": 1791826492,
+   "model": "gpt-6-astra",
+   "choices": [
+    {
+     "index": 0,
+     "message": {
+      "role": "assistant",
+      "content": "{\"reachable\":true,\"rationale\":\"The target remains reachable via edge0:reach → h2_0:reach → h4_0:obtain → crown:obtain. Each subsequent step is OR and has its preceding parent reachable. Neither blocked step (h3_2:access or h4_2:pivot) is used.\"}"
+     },
+     "finish_reason": "stop"
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 4760,
+    "completion_tokens": 76,
+    "total_tokens": 4836,
+    "prompt_tokens_details": {
+     "cached_tokens": 4608
+    }
+   },
+   "service_tier": "default"
+  },
+  "body_text": null,
+  "visible_text": "{\"reachable\":true,\"rationale\":\"The target remains reachable via edge0:reach → h2_0:reach → h4_0:obtain → crown:obtain. Each subsequent step is OR and has its preceding parent reachable. Neither blocked step (h3_2:access or h4_2:pivot) is used.\"}",
+  "finish_reason": "stop",
+  "finish_class": "STOP",
+  "refusal": null,
+  "truncated": false,
+  "tool_calls": [],
+  "reasoning": "NOT_EXPOSED"
+ },
+ "status": {
+  "outcome": "ANSWERED",
+  "transport_ok": true,
+  "http_status": 200,
+  "provider_error_type": null,
+  "provider_error": null,
+  "model_switched": false,
+  "attempts": [
+   {
+    "attempt_no": 1,
+    "attempt_id": "att_7542ec13f264",
+    "sent": true,
+    "confirmed": true,
+    "http_status": 200,
+    "error_class": null,
+    "error": null,
+    "latency_ms": 5298.8
+   }
+  ],
+  "network_retries": 2,
+  "note": null
+ },
+ "cost": {
+  "usage_known": true,
+  "input_tokens": 4760,
+  "output_tokens": 76,
+  "reasoning_tokens": null,
+  "cache_read_tokens": 4608,
+  "cache_write_tokens": null,
+  "latency_ms": 5300.5,
+  "http_attempts": 1,
+  "possibly_billed_unconfirmed": 0,
+  "prompt_digest": "7d3a94a581c148b2",
+  "config_digest": "687a29ef8fc767e7"
+ },
+ "task_input_digest": "7d3a94a581c148b2068406fb711da0cb14a66e11d5e2d189930dbf6ba1654206",
+ "reuse_key": "8581ed93dc047c1d517ce6fb72c499575f6086104f3abff4028a8e03e6ec49a9",
+ "recorded_at": "2026-10-12T17:34:52Z"
+}

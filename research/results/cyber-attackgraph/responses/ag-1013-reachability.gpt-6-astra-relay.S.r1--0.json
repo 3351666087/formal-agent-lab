@@ -1,0 +1,113 @@
+{
+ "protocol": "fal-research-response/v1",
+ "experiment": {
+  "study_id": "cyber-attackgraph",
+  "unit_id": "ag-1013-reachability.gpt-6-astra-relay.S.r1",
+  "track": "formal_model_analysis",
+  "case_id": null,
+  "case_version": null,
+  "task_id": "ag-1013-reachability",
+  "task_digest": "24a450955f40e6b0f6360279ec2341dc6a081c3feb186d90ab2a78cc3343debe",
+  "representation_id": "steplist",
+  "replicate_id": 1,
+  "assistance_mode": "STATIC_UNASSISTED",
+  "sampling_id": "ag-1013-reachability.gpt-6-astra-relay.S.r1#0"
+ },
+ "call": {
+  "provider": "openai",
+  "provider_config_id": "gpt-6-astra-relay",
+  "api": "openai.chat.completions",
+  "api_version": "v1",
+  "endpoint": "https://api.uheapi.com/v1/chat/completions",
+  "route": "COMPATIBLE_RELAY",
+  "endpoint_kind": "PROVIDER",
+  "model_requested": "gpt-6-astra",
+  "model_returned": "gpt-6-astra",
+  "model_switched": false,
+  "model_identity": "RELAY_REPORTED",
+  "response_id": "resp_076f8c0e1e5b5f7d016acd1f83bb2487d0b9a50b29150e884a",
+  "request_id": "2bbb0dc6-ad22-461d-bc61-e3993029b61f, d6f3399f-7d46-4ad0-a987-7bbf79595537",
+  "started_at": "2026-10-12T17:57:23Z",
+  "finished_at": "2026-10-12T17:57:35Z",
+  "params": {
+   "max_completion_tokens": 3000
+  },
+  "params_digest": "813038d95bea64de"
+ },
+ "raw": {
+  "body": {
+   "id": "resp_076f8c0e1e5b5f7d016acd1f83bb2487d0b9a50b29150e884a",
+   "object": "chat.completion",
+   "created": 1791827855,
+   "model": "gpt-6-astra",
+   "choices": [
+    {
+     "index": 0,
+     "message": {
+      "role": "assistant",
+      "content": "{\"reachable\":false,\"rationale\":\"The target is not reachable. The blocked steps h1_0:access and h2_0:traverse prevent h3_0:reach and h3_1:traverse. Since h2_2:traverse also depends on blocked h1_0:access, none of h4_0:pivot, h4_1:obtain, or h4_2:obtain can be reached, so crown:obtain remains unreachable.\"}"
+     },
+     "finish_reason": "stop"
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 4841,
+    "completion_tokens": 253,
+    "total_tokens": 5094,
+    "prompt_tokens_details": {
+     "cached_tokens": 3379
+    },
+    "completion_tokens_details": {
+     "reasoning_tokens": 143
+    }
+   },
+   "service_tier": "default"
+  },
+  "body_text": null,
+  "visible_text": "{\"reachable\":false,\"rationale\":\"The target is not reachable. The blocked steps h1_0:access and h2_0:traverse prevent h3_0:reach and h3_1:traverse. Since h2_2:traverse also depends on blocked h1_0:access, none of h4_0:pivot, h4_1:obtain, or h4_2:obtain can be reached, so crown:obtain remains unreachable.\"}",
+  "finish_reason": "stop",
+  "finish_class": "STOP",
+  "refusal": null,
+  "truncated": false,
+  "tool_calls": [],
+  "reasoning": "NOT_EXPOSED"
+ },
+ "status": {
+  "outcome": "ANSWERED",
+  "transport_ok": true,
+  "http_status": 200,
+  "provider_error_type": null,
+  "provider_error": null,
+  "model_switched": false,
+  "attempts": [
+   {
+    "attempt_no": 1,
+    "attempt_id": "att_e17ea916672e",
+    "sent": true,
+    "confirmed": true,
+    "http_status": 200,
+    "error_class": null,
+    "error": null,
+    "latency_ms": 12101.6
+   }
+  ],
+  "network_retries": 2,
+  "note": null
+ },
+ "cost": {
+  "usage_known": true,
+  "input_tokens": 4841,
+  "output_tokens": 253,
+  "reasoning_tokens": 143,
+  "cache_read_tokens": 3379,
+  "cache_write_tokens": null,
+  "latency_ms": 12104.1,
+  "http_attempts": 1,
+  "possibly_billed_unconfirmed": 0,
+  "prompt_digest": "33d20a7db747ca85",
+  "config_digest": "687a29ef8fc767e7"
+ },
+ "task_input_digest": "33d20a7db747ca858b6d944dc4d8e435516c7ecacc0814b73a83cfc5b2cb5778",
+ "reuse_key": "d303c6f76fc2eab0615f84346b3668ce95f5966c27b222153b116dfc6eb31eb7",
+ "recorded_at": "2026-10-12T17:57:35Z"
+}

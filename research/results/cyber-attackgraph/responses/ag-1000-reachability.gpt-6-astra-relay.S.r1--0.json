@@ -1,0 +1,110 @@
+{
+ "protocol": "fal-research-response/v1",
+ "experiment": {
+  "study_id": "cyber-attackgraph",
+  "unit_id": "ag-1000-reachability.gpt-6-astra-relay.S.r1",
+  "track": "formal_model_analysis",
+  "case_id": null,
+  "case_version": null,
+  "task_id": "ag-1000-reachability",
+  "task_digest": "9ed2e4a44549d6ba19e2a25d5ca4ae3467aa0e08cdf2fe5bdc9d3e8600a3d0a2",
+  "representation_id": "steplist",
+  "replicate_id": 1,
+  "assistance_mode": "STATIC_UNASSISTED",
+  "sampling_id": "ag-1000-reachability.gpt-6-astra-relay.S.r1#0"
+ },
+ "call": {
+  "provider": "openai",
+  "provider_config_id": "gpt-6-astra-relay",
+  "api": "openai.chat.completions",
+  "api_version": "v1",
+  "endpoint": "https://api.uheapi.com/v1/chat/completions",
+  "route": "COMPATIBLE_RELAY",
+  "endpoint_kind": "PROVIDER",
+  "model_requested": "gpt-6-astra",
+  "model_returned": "gpt-6-astra",
+  "model_switched": false,
+  "model_identity": "RELAY_REPORTED",
+  "response_id": "resp_0d61b364cbf0f744016acd16dd73408193b347ac0a76c0bc00",
+  "request_id": "348e0e53-0ed7-42cd-9cb5-9baf7ed6b08e, 75308044-3352-4816-bc5e-c7596a57ae53, e0eb0179-5ac6-465b-a0e2-0410821918ac",
+  "started_at": "2026-10-12T17:20:28Z",
+  "finished_at": "2026-10-12T17:20:34Z",
+  "params": {
+   "max_completion_tokens": 3000
+  },
+  "params_digest": "813038d95bea64de"
+ },
+ "raw": {
+  "body": {
+   "id": "resp_0d61b364cbf0f744016acd16dd73408193b347ac0a76c0bc00",
+   "object": "chat.completion",
+   "created": 1791825634,
+   "model": "gpt-6-astra",
+   "choices": [
+    {
+     "index": 0,
+     "message": {
+      "role": "assistant",
+      "content": "{\"reachable\":false,\"rationale\":\"Both parents of h3_1:obtain (h2_2:traverse and h1_1:access) are blocked, so that OR step is unreachable. Those same blocked steps are required by the AND step h3_0:traverse, making it unreachable as well. Neither parent of crown:obtain is reachable, so the target is unreachable.\"}"
+     },
+     "finish_reason": "stop"
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 4652,
+    "completion_tokens": 89,
+    "total_tokens": 4741,
+    "prompt_tokens_details": {
+     "cached_tokens": 4480
+    }
+   },
+   "service_tier": "default"
+  },
+  "body_text": null,
+  "visible_text": "{\"reachable\":false,\"rationale\":\"Both parents of h3_1:obtain (h2_2:traverse and h1_1:access) are blocked, so that OR step is unreachable. Those same blocked steps are required by the AND step h3_0:traverse, making it unreachable as well. Neither parent of crown:obtain is reachable, so the target is unreachable.\"}",
+  "finish_reason": "stop",
+  "finish_class": "STOP",
+  "refusal": null,
+  "truncated": false,
+  "tool_calls": [],
+  "reasoning": "NOT_EXPOSED"
+ },
+ "status": {
+  "outcome": "ANSWERED",
+  "transport_ok": true,
+  "http_status": 200,
+  "provider_error_type": null,
+  "provider_error": null,
+  "model_switched": false,
+  "attempts": [
+   {
+    "attempt_no": 1,
+    "attempt_id": "att_d452808b7524",
+    "sent": true,
+    "confirmed": true,
+    "http_status": 200,
+    "error_class": null,
+    "error": null,
+    "latency_ms": 5736.7
+   }
+  ],
+  "network_retries": 2,
+  "note": null
+ },
+ "cost": {
+  "usage_known": true,
+  "input_tokens": 4652,
+  "output_tokens": 89,
+  "reasoning_tokens": null,
+  "cache_read_tokens": 4480,
+  "cache_write_tokens": null,
+  "latency_ms": 5738.0,
+  "http_attempts": 1,
+  "possibly_billed_unconfirmed": 0,
+  "prompt_digest": "a8df19f8aa351c88",
+  "config_digest": "687a29ef8fc767e7"
+ },
+ "task_input_digest": "a8df19f8aa351c886b8ea467bb1046dd08354f36a5f07e7b6a738f6a1ab4ed47",
+ "reuse_key": "2798fa0b92b95a82205a318ff4a112831df322314aa94eae875a281d039dd225",
+ "recorded_at": "2026-10-12T17:20:34Z"
+}

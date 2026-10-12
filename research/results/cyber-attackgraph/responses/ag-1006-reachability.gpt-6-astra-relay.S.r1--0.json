@@ -1,0 +1,113 @@
+{
+ "protocol": "fal-research-response/v1",
+ "experiment": {
+  "study_id": "cyber-attackgraph",
+  "unit_id": "ag-1006-reachability.gpt-6-astra-relay.S.r1",
+  "track": "formal_model_analysis",
+  "case_id": null,
+  "case_version": null,
+  "task_id": "ag-1006-reachability",
+  "task_digest": "15fa69e6f81080f54a26225028572c7b8a0d02bc45ff6afc79fdb3b86fe61aa8",
+  "representation_id": "steplist",
+  "replicate_id": 1,
+  "assistance_mode": "STATIC_UNASSISTED",
+  "sampling_id": "ag-1006-reachability.gpt-6-astra-relay.S.r1#0"
+ },
+ "call": {
+  "provider": "openai",
+  "provider_config_id": "gpt-6-astra-relay",
+  "api": "openai.chat.completions",
+  "api_version": "v1",
+  "endpoint": "https://api.uheapi.com/v1/chat/completions",
+  "route": "COMPATIBLE_RELAY",
+  "endpoint_kind": "PROVIDER",
+  "model_requested": "gpt-6-astra",
+  "model_returned": "gpt-6-astra",
+  "model_switched": false,
+  "model_identity": "RELAY_REPORTED",
+  "response_id": "resp_0bf066c1c457522c016acd1acb1d6c87d29eb2bfeac39224e3",
+  "request_id": "8d29b0d4-5431-4df7-bc62-b7e168b12e4d, f8fa0ea2-fc66-41ef-9b61-636d8551af33",
+  "started_at": "2026-10-12T17:37:11Z",
+  "finished_at": "2026-10-12T17:37:20Z",
+  "params": {
+   "max_completion_tokens": 3000
+  },
+  "params_digest": "813038d95bea64de"
+ },
+ "raw": {
+  "body": {
+   "id": "resp_0bf066c1c457522c016acd1acb1d6c87d29eb2bfeac39224e3",
+   "object": "chat.completion",
+   "created": 1791826640,
+   "model": "gpt-6-astra",
+   "choices": [
+    {
+     "index": 0,
+     "message": {
+      "role": "assistant",
+      "content": "{\"reachable\":false,\"rationale\":\"All three parents of crown:obtain are unreachable. h4_0:obtain and h4_2:access each require the blocked h2_1:reach. h4_1:reach requires h3_0:access, which depends on h2_3:escalate; that AND step requires the blocked h1_3:obtain. Thus no parent can reach the OR target.\"}"
+     },
+     "finish_reason": "stop"
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 4934,
+    "completion_tokens": 134,
+    "total_tokens": 5068,
+    "prompt_tokens_details": {
+     "cached_tokens": 4167
+    },
+    "completion_tokens_details": {
+     "reasoning_tokens": 34
+    }
+   },
+   "service_tier": "default"
+  },
+  "body_text": null,
+  "visible_text": "{\"reachable\":false,\"rationale\":\"All three parents of crown:obtain are unreachable. h4_0:obtain and h4_2:access each require the blocked h2_1:reach. h4_1:reach requires h3_0:access, which depends on h2_3:escalate; that AND step requires the blocked h1_3:obtain. Thus no parent can reach the OR target.\"}",
+  "finish_reason": "stop",
+  "finish_class": "STOP",
+  "refusal": null,
+  "truncated": false,
+  "tool_calls": [],
+  "reasoning": "NOT_EXPOSED"
+ },
+ "status": {
+  "outcome": "ANSWERED",
+  "transport_ok": true,
+  "http_status": 200,
+  "provider_error_type": null,
+  "provider_error": null,
+  "model_switched": false,
+  "attempts": [
+   {
+    "attempt_no": 1,
+    "attempt_id": "att_444a615d4b36",
+    "sent": true,
+    "confirmed": true,
+    "http_status": 200,
+    "error_class": null,
+    "error": null,
+    "latency_ms": 9654.6
+   }
+  ],
+  "network_retries": 2,
+  "note": null
+ },
+ "cost": {
+  "usage_known": true,
+  "input_tokens": 4934,
+  "output_tokens": 134,
+  "reasoning_tokens": 34,
+  "cache_read_tokens": 4167,
+  "cache_write_tokens": null,
+  "latency_ms": 9656.5,
+  "http_attempts": 1,
+  "possibly_billed_unconfirmed": 0,
+  "prompt_digest": "27b103a98c01066c",
+  "config_digest": "687a29ef8fc767e7"
+ },
+ "task_input_digest": "27b103a98c01066c1e662e60a31fe5cb3a1376d807902e0df73a425bad15037e",
+ "reuse_key": "80296b2df252167e3763bd86860361bfeed6b88e740ac508878a383cd94000a1",
+ "recorded_at": "2026-10-12T17:37:20Z"
+}

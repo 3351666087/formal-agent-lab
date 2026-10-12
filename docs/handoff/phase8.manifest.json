@@ -1,0 +1,74 @@
+{
+  "format": "phase-handoff/v1",
+  "phase": "8",
+  "part": "defensive attack-graph analysis — verifier-grounded cyber study and the large real batch",
+  "generated_at": "2026-10-12T18:14:36.255043+00:00",
+  "self_initiated": "expansion requested by the user: more/harder cases, a substantial cyber domain, and a large real batch where every step is worthy of a frontier model",
+  "handoff_revision": "2b44b7b52c4854839d5f47904689ea4baf04cd43",
+  "mechanism": {
+    "what": "abstract AND/OR attack graphs (entry footholds → intermediate steps → target), the standard object of defensive attack-graph / threat-model analysis; steps are abstract graph nodes, not operational exploitation instructions",
+    "module": "packages/domain-mal/src/formal_lab_domain_mal/analysis.py",
+    "ground_truth": "Z3 verifier / model semantics, cross-checked (native oracle vs Z3)"
+  },
+  "question_kinds": {
+    "shortest_cost": "minimum attack-path cost to the target (Z3 OPTIMIZE_OBJECTIVE)",
+    "reachability": "is the target reachable under a deployed defence set (Z3 GOAL_REACHABILITY)",
+    "min_defense": "smallest number of defences that cut every path (AND/OR min-cut, Z3-confirmed)",
+    "step_enabled": "is a derived step enabled in a given state (AND/OR semantics)"
+  },
+  "difficulty_spread": {
+    "graphs": 48,
+    "nodes": [
+      12,
+      20
+    ],
+    "shortest_cost": [
+      3,
+      6
+    ],
+    "min_cut": [
+      1,
+      3
+    ]
+  },
+  "study": {
+    "id": "cyber-attackgraph",
+    "tasks": 183,
+    "planned_units": 1098,
+    "models": [
+      "gpt-6-astra",
+      "claude-opus-5-5"
+    ],
+    "replicates": 3
+  },
+  "check": {
+    "command": "make research-check ARGS=\"--group p8\"",
+    "ground_truth_z3_confirmed": true,
+    "scorer_verified_on_loopback": true
+  },
+  "real_batch": {
+    "status": "RUNNING_OR_NOT_RUN",
+    "command": "uv run --frozen python scripts/cyber_run.py (resumable)",
+    "planned": null,
+    "model_produced": null,
+    "budget": null,
+    "conditions": [],
+    "evidence": [
+      "research/results/cyber-attackgraph/report.md",
+      "docs/execution/evidence/research/cyber/run.json"
+    ]
+  },
+  "caveats": [
+    "both models answer through a relay — identity is relay-reported, so this is a hard discriminating experiment, not a verified GPT-vs-Claude ranking",
+    "the attack graphs are abstract formal models for defensive analysis, not scans of a real network; `program_correspondence` here means the answer agrees with the Z3 verifier, not a program observation"
+  ],
+  "tasks": {
+    "P8-01": "study, scorer, check — DONE",
+    "P8-02": "the real ~1098-unit dual-model batch — RUNNING/PENDING"
+  },
+  "related": [
+    "docs/handoff/phase7.md",
+    "docs/research/protocol.md",
+    "docs/research/known-gaps.md"
+  ]
+}

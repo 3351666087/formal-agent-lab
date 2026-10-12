@@ -6,7 +6,9 @@
 
 ## 8.1 · 攻击图分析研究体（验证器判定）
 
-- [ ] **P8-01** 构建防御性攻击图分析研究体：形式 AND/OR 模型族、四类验证器判定的难题、评分器与数据隔离，并以 Z3 复核基准答案。
+- [x] **P8-01** 构建防御性攻击图分析研究体：形式 AND/OR 模型族、四类验证器判定的难题、评分器与数据隔离，并以 Z3 复核基准答案。
+  - 证据：defensive attack-graph analysis study built and checked: packages/domain-mal/analysis.py (AND/OR generator + native oracle + Z3 ground truth for shortest cost / reachability-under-defense / min-cut / step-enabled, cross-checked), scorer attackgraph.analysis@1, research/studies/cyber-attackgraph (48 graphs, 183 tasks, 1098 planned units, answers wrapped to prevent ANSWER_LEAK). cyber-attackgraph check PASS (6 assertions: validates+separated, single track, ground truth re-derived+Z3-confirmed on sampled graphs, scorer labels scripted loopback, no key leak). FORMAL_MODEL_ANALYSIS track added (contracts regen, web label). Targeted regression 334 passed.
+  - 实现：`packages/domain-mal/src/formal_lab_domain_mal/analysis.py`、`scripts/cyber_attackgraph_study.py`、`scripts/cyber_attackgraph_check.py`
 
 机制：`packages/domain-mal/analysis.py`（生成器、原生可达性预言、Z3 最短代价/可达性、AND/OR 最小割、步骤使能），评分器 `attackgraph.analysis@1`（按验证器基准判对错，`program_correspondence` 记录是否与验证器一致），研究体 `research/studies/cyber-attackgraph`。答案以 `{"value": …}` 包裹，杜绝裸整数泄漏进题面（ANSWER_LEAK）。检查 `scripts/cyber_attackgraph_check.py`：研究体校验+数据隔离、抽样图基准从零重算并经 Z3 确认、评分器在协议回放上按脚本正确标注、密钥不落盘。注册 `p8`。
 
