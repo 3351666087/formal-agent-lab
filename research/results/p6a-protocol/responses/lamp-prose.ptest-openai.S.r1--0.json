@@ -1,0 +1,105 @@
+{
+ "protocol": "fal-research-response/v1",
+ "experiment": {
+  "study_id": "p6a-protocol",
+  "unit_id": "lamp-prose.ptest-openai.S.r1",
+  "track": "synthetic_representation",
+  "case_id": null,
+  "case_version": null,
+  "task_id": "lamp-prose",
+  "task_digest": "876719d12329de3a7c4e97f81f25e6336c16c293bd27e3d929f4afd197e64a3c",
+  "representation_id": "prose",
+  "replicate_id": 1,
+  "assistance_mode": "STATIC_UNASSISTED",
+  "sampling_id": "lamp-prose.ptest-openai.S.r1#0"
+ },
+ "call": {
+  "provider": "openai",
+  "provider_config_id": "ptest-openai",
+  "api": "openai.chat.completions",
+  "api_version": "v1",
+  "endpoint": "http://127.0.0.1:38007/v1/chat/completions",
+  "route": "LOOPBACK_TEST",
+  "endpoint_kind": "PROTOCOL_TEST",
+  "model_requested": "protocol-test-v1",
+  "model_returned": "protocol-test-other",
+  "model_switched": true,
+  "model_identity": "TEST_SERVICE",
+  "response_id": "ptest_00018",
+  "request_id": null,
+  "started_at": "2026-10-12T14:33:27Z",
+  "finished_at": "2026-10-12T14:33:27Z",
+  "params": {
+   "max_tokens": 512
+  },
+  "params_digest": "76faa9c2bf0081a9"
+ },
+ "raw": {
+  "body": {
+   "id": "ptest_00018",
+   "object": "chat.completion",
+   "choices": [
+    {
+     "index": 0,
+     "message": {
+      "role": "assistant",
+      "content": "{\"note\": \"answered by another model\"}"
+     },
+     "finish_reason": "stop"
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 299,
+    "completion_tokens": 9,
+    "total_tokens": 308
+   },
+   "model": "protocol-test-other"
+  },
+  "body_text": null,
+  "visible_text": "{\"note\": \"answered by another model\"}",
+  "finish_reason": "stop",
+  "finish_class": "STOP",
+  "refusal": null,
+  "truncated": false,
+  "tool_calls": [],
+  "reasoning": "NOT_EXPOSED"
+ },
+ "status": {
+  "outcome": "ANSWERED",
+  "transport_ok": true,
+  "http_status": 200,
+  "provider_error_type": null,
+  "provider_error": null,
+  "model_switched": true,
+  "attempts": [
+   {
+    "attempt_no": 1,
+    "attempt_id": "att_22c536f81282",
+    "sent": true,
+    "confirmed": true,
+    "http_status": 200,
+    "error_class": null,
+    "error": null,
+    "latency_ms": 8.7
+   }
+  ],
+  "network_retries": 2,
+  "note": null
+ },
+ "cost": {
+  "usage_known": true,
+  "input_tokens": 299,
+  "output_tokens": 9,
+  "reasoning_tokens": null,
+  "cache_read_tokens": null,
+  "cache_write_tokens": null,
+  "latency_ms": 8.9,
+  "http_attempts": 1,
+  "possibly_billed_unconfirmed": 0,
+  "prompt_digest": "11de91c2ed081e6d",
+  "config_digest": "70b6049ddeb69a19"
+ },
+ "task_input_digest": "11de91c2ed081e6d153d9a3c12307be81601e5df9650893f3e0884410670f57a",
+ "reuse_key": "cce09cb921fcde79b43db3382a031ca707d47bb2ec4481fddb4f32795e340234",
+ "recorded_at": "2026-10-12T14:33:27Z"
+}

@@ -29,11 +29,14 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
+import re
 import threading
 import time
 import urllib.parse
 import uuid
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Any, Protocol
 
 import httpx
@@ -290,3 +293,458 @@ class StubModelClient:
         self.calls.append(call)
         return ModelResponse(content=content, raw_text=call.raw_text or "", model=self.model, call_id=call.call_id,
                              usage_reported=False, model_requested=self.model, endpoint_kind="STUB")
+
+
+# ===================================================================================== phase 6A: research calls
+# A research call is not a decision: one request (plus a fixed number of network retries), the provider's answer
+# saved as returned, and its outcome classified on the call axis only — no JSON forcing, no re-asking, no rule
+# fallback. Parsing and scoring happen later, on the saved record (formal_lab_eval.research).
+
+OFFICIAL_HOSTS = {"openai": "api.openai.com", "anthropic": "api.anthropic.com"}
+OFFICIAL_BASE = {"openai": "https://api.openai.com/v1", "anthropic": "https://api.anthropic.com"}
+ANTHROPIC_VERSION = "2023-06-01"
+LOOPBACK_HOSTS = {"127.0.0.1", "localhost", "::1"}
+SETTING_PREFIX = "FAL_"
+_MODEL_GONE = ("model_not_found", "not found", "does not exist", "not exist", "unavailable", "not available",
+               "no available", "not supported", "no such model")
+
+
+def read_setting(name: str, *, env_file: Path | None = None) -> str | None:
+    """A setting for the model-call adapters, by name — the only place research credentials are read. Only `FAL_*`
+    names are accepted, so a provider's own environment variable (e.g. ANTHROPIC_API_KEY) is never used."""
+    if not name.startswith(SETTING_PREFIX):
+        raise InvalidInput(f"setting {name!r} is not a {SETTING_PREFIX}* setting; research adapters read no other names")
+    if os.environ.get(name):
+        return os.environ[name]
+    candidates = [env_file] if env_file else [p / ".env" for p in (Path.cwd(), *Path.cwd().parents[:3])]
+    for path in candidates:
+        if path is not None and path.is_file():
+            for line in path.read_text().splitlines():
+                m = re.match(r"^\s*(?:export\s+)?([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)$", line)
+                if m and m.group(1) == name:
+                    return m.group(2).strip().strip('"').strip("'") or None
+            return None
+    return None
+
+
+def route_of(provider: str, url: str) -> str:
+    host = urllib.parse.urlsplit(url).hostname or ""
+    if host in LOOPBACK_HOSTS:
+        return "LOOPBACK_TEST"
+    if host == OFFICIAL_HOSTS.get(provider):
+        return "OFFICIAL_NATIVE"
+    return "COMPATIBLE_RELAY"
+
+
+def sha256_text(obj: Any) -> str:
+    data = obj if isinstance(obj, str) else json.dumps(obj, sort_keys=True, ensure_ascii=False, default=str)
+    return hashlib.sha256(data.encode()).hexdigest()
+
+
+@dataclass
+class ResearchRequest:
+    user: str
+    system: str | None = None
+    params: dict[str, Any] = field(default_factory=dict)  # sampling parameters, sent verbatim
+    response_schema: dict[str, Any] | None = None  # optional structured output (OpenAI); research default: none
+
+
+@dataclass
+class ResearchBudget:
+    """Study-wide limits, checked before every call and every HTTP attempt. Counters are rebuilt from the study's
+    ledger on resume, so a resumed study never regains what it already spent."""
+
+    max_calls: int
+    max_http_attempts: int
+    max_total_output_tokens: int | None = None
+    calls: int = 0
+    http_attempts: int = 0
+    output_tokens: int = 0
+    possibly_billed: int = 0
+    unknown_usage_calls: int = 0
+
+    def check_call(self) -> str | None:
+        if self.calls >= self.max_calls:
+            return f"call budget exhausted ({self.calls}/{self.max_calls})"
+        if self.max_total_output_tokens is not None and self.output_tokens >= self.max_total_output_tokens:
+            return f"output-token budget exhausted ({self.output_tokens}/{self.max_total_output_tokens})"
+        return None
+
+    def check_attempt(self) -> str | None:
+        if self.http_attempts >= self.max_http_attempts:
+            return f"HTTP-attempt budget exhausted ({self.http_attempts}/{self.max_http_attempts})"
+        return None
+
+
+class _Malformed(ValueError):
+    pass
+
+
+@dataclass
+class _Parsed:
+    visible_text: str | None
+    finish_reason: str | None
+    finish_class: str
+    refusal: str | None
+    tool_calls: list[dict[str, Any]]
+    reasoning: str
+    model: str | None
+    response_id: str | None
+    usage: dict[str, int | None]
+    usage_known: bool
+
+
+class _ResearchAdapter:
+    provider = ""
+    api = ""
+    api_version = ""
+
+    def __init__(self, *, base_url: str, api_key: str, model: str, timeout_s: float = 120.0,
+                 transport: httpx.BaseTransport | None = None):
+        self.base_url = base_url.rstrip("/")
+        self.model = model
+        self.secret = api_key
+        loopback = (urllib.parse.urlsplit(self.base_url).hostname or "") in LOOPBACK_HOSTS
+        self._client = httpx.Client(timeout=httpx.Timeout(timeout_s, connect=10.0), transport=transport,
+                                    headers=self.auth_headers(api_key), trust_env=not loopback)
+
+    url = ""
+
+    @property
+    def endpoint(self) -> str:
+        return public_endpoint(self.url)
+
+    def auth_headers(self, key: str) -> dict[str, str]:
+        raise NotImplementedError
+
+    def body(self, req: ResearchRequest) -> dict[str, Any]:
+        raise NotImplementedError
+
+    def parse(self, data: dict[str, Any]) -> _Parsed:
+        raise NotImplementedError
+
+    def error_type(self, data: Any) -> str | None:
+        err = data.get("error") if isinstance(data, dict) else None
+        if isinstance(err, dict):
+            return str(err.get("type") or err.get("code") or "") or None
+        return None
+
+    def send(self, body: dict[str, Any]) -> httpx.Response:
+        return self._client.post(self.url, json=body)
+
+    def close(self) -> None:
+        self._client.close()
+
+
+class OpenAIChatAdapter(_ResearchAdapter):
+    """Chat Completions (official api.openai.com or an OpenAI-compatible relay): the message content, the explicit
+    `message.refusal` field, `finish_reason` (stop / length / content_filter / tool_calls) and usage as reported."""
+
+    provider, api, api_version = "openai", "openai.chat.completions", "v1"
+
+    @property
+    def url(self) -> str:  # type: ignore[override]
+        return f"{self.base_url}/chat/completions"
+
+    def auth_headers(self, key: str) -> dict[str, str]:
+        return {"Authorization": f"Bearer {key}"}
+
+    def body(self, req: ResearchRequest) -> dict[str, Any]:
+        messages = ([{"role": "system", "content": req.system}] if req.system else []) + \
+            [{"role": "user", "content": req.user}]
+        body: dict[str, Any] = {"model": self.model, "messages": messages, **req.params}
+        if req.response_schema is not None:
+            body["response_format"] = {"type": "json_schema",
+                                       "json_schema": {"name": "answer", "strict": True, "schema": req.response_schema}}
+        return body
+
+    def parse(self, data: dict[str, Any]) -> _Parsed:
+        try:
+            choice = data["choices"][0]
+            msg = choice.get("message") or {}
+        except (KeyError, IndexError, TypeError) as exc:
+            raise _Malformed("no choices[0].message in the body") from exc
+        content = msg.get("content")
+        if isinstance(content, list):  # some relays return content parts
+            content = "".join(p.get("text", "") for p in content if isinstance(p, dict))
+        finish = choice.get("finish_reason")
+        refusal = msg.get("refusal") or None
+        fclass = {"stop": "STOP", "length": "LENGTH", "content_filter": "CONTENT_FILTER", "tool_calls": "TOOL_USE",
+                  "function_call": "TOOL_USE"}.get(str(finish), "OTHER" if finish else "UNKNOWN")
+        if refusal:
+            fclass = "REFUSAL"
+        tools = [{"name": (t.get("function") or {}).get("name"), "arguments_chars":
+                  len((t.get("function") or {}).get("arguments") or "")} for t in msg.get("tool_calls") or []]
+        reasoning = "SUMMARY_ONLY" if (msg.get("reasoning_content") or msg.get("reasoning")) else "NOT_EXPOSED"
+        usage = data.get("usage") or {}
+        details = usage.get("completion_tokens_details") or {}
+        cached = (usage.get("prompt_tokens_details") or {}).get("cached_tokens")
+        known = isinstance(usage.get("prompt_tokens"), int) and isinstance(usage.get("completion_tokens"), int)
+        return _Parsed(visible_text=content if isinstance(content, str) else None, finish_reason=finish,
+                       finish_class=fclass, refusal=refusal, tool_calls=tools, reasoning=reasoning,
+                       model=data.get("model"), response_id=data.get("id"),
+                       usage={"input": usage.get("prompt_tokens"), "output": usage.get("completion_tokens"),
+                              "reasoning": details.get("reasoning_tokens"), "cache_read": cached, "cache_write": None},
+                       usage_known=known)
+
+
+class AnthropicMessagesAdapter(_ResearchAdapter):
+    """The native Messages API: text blocks, `stop_reason` (end_turn / max_tokens / refusal / tool_use / pause_turn),
+    thinking blocks recorded only as a provider summary (never as raw reasoning), usage as reported."""
+
+    provider, api, api_version = "anthropic", "anthropic.messages", ANTHROPIC_VERSION
+
+    @property
+    def url(self) -> str:  # type: ignore[override]
+        return f"{self.base_url}/messages" if self.base_url.endswith("/v1") else f"{self.base_url}/v1/messages"
+
+    def auth_headers(self, key: str) -> dict[str, str]:
+        return {"x-api-key": key, "anthropic-version": ANTHROPIC_VERSION}
+
+    def body(self, req: ResearchRequest) -> dict[str, Any]:
+        body: dict[str, Any] = {"model": self.model, "messages": [{"role": "user", "content": req.user}],
+                                **req.params}
+        body.setdefault("max_tokens", 1024)  # required by the Messages API
+        if req.system:
+            body["system"] = req.system
+        return body
+
+    def parse(self, data: dict[str, Any]) -> _Parsed:
+        blocks = data.get("content")
+        if data.get("type") != "message" or not isinstance(blocks, list):
+            raise _Malformed("not a Messages API message")
+        texts = [b.get("text", "") for b in blocks if isinstance(b, dict) and b.get("type") == "text"]
+        thinking = any(isinstance(b, dict) and b.get("type") in ("thinking", "redacted_thinking") for b in blocks)
+        tools = [{"name": b.get("name"), "input_chars": len(json.dumps(b.get("input") or {}))}
+                 for b in blocks if isinstance(b, dict) and b.get("type") == "tool_use"]
+        stop = data.get("stop_reason")
+        fclass = {"end_turn": "STOP", "stop_sequence": "STOP", "max_tokens": "LENGTH", "refusal": "REFUSAL",
+                  "tool_use": "TOOL_USE", "pause_turn": "PAUSE"}.get(str(stop), "OTHER" if stop else "UNKNOWN")
+        usage = data.get("usage") or {}
+        known = isinstance(usage.get("input_tokens"), int) and isinstance(usage.get("output_tokens"), int)
+        return _Parsed(visible_text="".join(texts) if texts else None, finish_reason=stop, finish_class=fclass,
+                       refusal="stop_reason=refusal" if stop == "refusal" else None, tool_calls=tools,
+                       reasoning="SUMMARY_ONLY" if thinking else "NOT_EXPOSED", model=data.get("model"),
+                       response_id=data.get("id"),
+                       usage={"input": usage.get("input_tokens"), "output": usage.get("output_tokens"),
+                              "reasoning": (usage.get("output_tokens_details") or {}).get("thinking_tokens"),
+                              "cache_read": usage.get("cache_read_input_tokens"),
+                              "cache_write": usage.get("cache_creation_input_tokens")},
+                       usage_known=known)
+
+
+def research_adapter(cfg: Any, *, transport: httpx.BaseTransport | None = None, timeout_s: float = 120.0,
+                     setting: Any = read_setting) -> tuple[_ResearchAdapter | None, str | None]:
+    """The adapter for a study's ProviderConfig, or (None, why) when no authorized endpoint / credential is set.
+    The declared route must be what the endpoint host is — a relay is never recorded as an official endpoint."""
+    family = cfg.provider if cfg.provider in OFFICIAL_HOSTS else ("openai" if cfg.api.startswith("openai") else "anthropic")
+    base = cfg.base_url or (setting(cfg.base_url_setting) if cfg.base_url_setting else None)
+    if not base and str(cfg.route) == "OFFICIAL_NATIVE":
+        base = OFFICIAL_BASE[family]
+    if not base:
+        return None, f"no endpoint configured ({cfg.base_url_setting or 'base_url'} is empty)"
+    actual = route_of(family, base)
+    if actual != str(cfg.route):
+        raise InvalidInput(f"provider {cfg.provider_config_id}: declared route {cfg.route} but {public_endpoint(base)} "
+                           f"is {actual}")
+    key = setting(cfg.api_key_setting) if cfg.api_key_setting else ("loopback-test" if actual == "LOOPBACK_TEST"
+                                                                     else None)
+    if not key:
+        return None, f"no authorized credential configured ({cfg.api_key_setting or 'api_key_setting'} is empty)"
+    cls = OpenAIChatAdapter if cfg.api == "openai.chat.completions" else AnthropicMessagesAdapter
+    return cls(base_url=base, api_key=key, model=cfg.model, timeout_s=timeout_s, transport=transport), None
+
+
+@dataclass
+class ResearchCallResult:
+    call: Any  # CallIdentity
+    raw: Any  # RawAnswer
+    status: Any  # CallStatus
+    cost: Any  # CostRecord
+
+
+def _now() -> str:
+    return time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+
+
+def research_call(adapter: _ResearchAdapter | None, req: ResearchRequest, *, provider_config_id: str, route: str,
+                  budget: ResearchBudget, cancel: threading.Event | None = None, network_retries: int = 2,
+                  backoff_s: float = 0.5, max_backoff_s: float = 8.0, blocked_reason: str | None = None,
+                  provider: str | None = None, api: str | None = None, model: str | None = None) -> ResearchCallResult:
+    """One research call. Cancellation and the budget are checked before anything is sent; only transport faults,
+    lost responses, 429 and 5xx are retried (a fixed number of times); a refusal or any other answer is returned as
+    it came. Every HTTP attempt is recorded; an attempt that was sent but got no response counts as possibly billed."""
+    from formal_lab_contracts.research import (
+        AttemptRecord,
+        CallIdentity,
+        CallStatus,
+        CostRecord,
+        RawAnswer,
+    )
+
+    secret = adapter.secret if adapter is not None else ""
+
+    def redact(text: Any, limit: int = 500) -> str:
+        s = str(text)
+        if secret:
+            s = s.replace(secret, "[REDACTED]")
+        return s[:limit]
+
+    params = dict(req.params)
+    started = _now()
+    prompt_digest = sha256_text({"system": req.system, "user": req.user})
+    identity = {"provider": adapter.provider if adapter else (provider or "unknown"),
+                "provider_config_id": provider_config_id,
+                "api": adapter.api if adapter else (api or "unknown"),
+                "api_version": adapter.api_version if adapter else "n/a",
+                "endpoint": adapter.endpoint if adapter else "n/a", "route": route, "endpoint_kind": "PROVIDER",
+                "model_requested": adapter.model if adapter else (model or "unknown"), "started_at": started,
+                "params": params, "params_digest": sha256_text(params)[:16]}
+    config_digest = sha256_text({k: identity[k] for k in ("provider", "api", "api_version", "endpoint", "route",
+                                                          "model_requested", "params")})[:16]
+    attempts: list[AttemptRecord] = []
+    t_all = time.perf_counter()
+
+    def finish(outcome: str, *, raw: dict[str, Any] | None = None, parsed: _Parsed | None = None,
+               http_status: int | None = None, etype: str | None = None, error: str | None = None,
+               note: str | None = None, endpoint_kind: str = "PROVIDER", request_id: str | None = None
+               ) -> ResearchCallResult:
+        model_returned = parsed.model if parsed else None
+        switched = bool(model_returned) and model_returned != identity["model_requested"] \
+            and not str(model_returned).startswith(f"{identity['model_requested']}-")
+        if not model_returned:
+            mid = "UNKNOWN"  # the response named no model: unknown, wherever it came from
+        elif endpoint_kind == "PROTOCOL_TEST" or route == "LOOPBACK_TEST":
+            mid = "TEST_SERVICE"
+        else:
+            mid = "CONFIRMED_BY_PROVIDER" if route == "OFFICIAL_NATIVE" else "RELAY_REPORTED"
+        call = CallIdentity(**{**identity, "endpoint_kind": endpoint_kind, "model_returned": model_returned,
+                               "model_switched": switched, "model_identity": mid,
+                               "response_id": parsed.response_id if parsed else None, "request_id": request_id,
+                               "finished_at": _now()})
+        rawans = RawAnswer(**(raw or {}))
+        usage = parsed.usage if parsed else {}
+        known = bool(parsed and parsed.usage_known)
+        if parsed is not None:
+            if known:
+                budget.output_tokens += int(usage.get("output") or 0)
+            else:
+                budget.unknown_usage_calls += 1
+        sent_unconfirmed = sum(1 for a in attempts if a.sent and not a.confirmed)
+        status = CallStatus(outcome=outcome, transport_ok=any(a.confirmed for a in attempts),
+                            http_status=http_status, provider_error_type=etype, provider_error=error,
+                            model_switched=switched, attempts=attempts, network_retries=network_retries, note=note)
+        cost = CostRecord(usage_known=known, input_tokens=usage.get("input") if known else None,
+                          output_tokens=usage.get("output") if known else None,
+                          reasoning_tokens=usage.get("reasoning") if known else None,
+                          cache_read_tokens=usage.get("cache_read") if known else None,
+                          cache_write_tokens=usage.get("cache_write") if known else None,
+                          latency_ms=round((time.perf_counter() - t_all) * 1000, 1), http_attempts=len(attempts),
+                          possibly_billed_unconfirmed=sent_unconfirmed, prompt_digest=prompt_digest[:16],
+                          config_digest=config_digest)
+        return ResearchCallResult(call=call, raw=rawans, status=status, cost=cost)
+
+    if adapter is None:
+        return finish("BLOCKED_NO_CREDENTIAL", note=blocked_reason or "no authorized endpoint", endpoint_kind="NONE")
+    if cancel is not None and cancel.is_set():
+        return finish("CANCELLED", note="cancelled before sending")
+    reason = budget.check_call()
+    if reason:
+        return finish("BUDGET_EXHAUSTED", note=reason)
+    budget.calls += 1
+    body = adapter.body(req)
+    delay, last = backoff_s, ("TRANSPORT_ERROR", None, None, None)
+    for n in range(1, network_retries + 2):
+        if n > 1:
+            wait = min(last[3] if last[3] is not None else delay, max_backoff_s)
+            if cancel is not None and cancel.wait(wait):
+                return finish("CANCELLED", note=f"cancelled after {n - 1} attempt(s); last {last[0]}",
+                              http_status=last[1])
+            if cancel is None:
+                time.sleep(wait)
+            delay = min(delay * 2, max_backoff_s)
+        reason = budget.check_attempt()
+        if reason:
+            return finish("BUDGET_EXHAUSTED", note=f"{reason}; last {last[0]}" if n > 1 else reason,
+                          http_status=last[1])
+        budget.http_attempts += 1
+        aid, t0 = f"att_{uuid.uuid4().hex[:12]}", time.perf_counter()
+
+        def record(sent: bool, confirmed: bool, cls: str | None, err: str | None = None, code: int | None = None,
+                   aid: str = aid, t0: float = t0, n: int = n) -> None:
+            attempts.append(AttemptRecord(attempt_no=n, attempt_id=aid, sent=sent, confirmed=confirmed,
+                                          http_status=code, error_class=cls, error=redact(err) if err else None,
+                                          latency_ms=round((time.perf_counter() - t0) * 1000, 1)))
+
+        try:
+            resp = adapter.send(body)
+        except (httpx.ConnectError, httpx.ConnectTimeout, httpx.PoolTimeout) as exc:
+            record(False, False, "TRANSPORT_ERROR", f"{type(exc).__name__}: {exc}")
+            last = ("TRANSPORT_ERROR", None, None, None)
+            continue
+        except (httpx.ReadTimeout, httpx.WriteTimeout, httpx.RemoteProtocolError, httpx.ReadError,
+                httpx.WriteError) as exc:
+            record(True, False, "UNCERTAIN", f"{type(exc).__name__}: {exc}")
+            budget.possibly_billed += 1
+            last = ("UNCERTAIN", None, None, None)
+            continue
+        except httpx.HTTPError as exc:
+            record(False, False, "TRANSPORT_ERROR", f"{type(exc).__name__}: {exc}")
+            last = ("TRANSPORT_ERROR", None, None, None)
+            continue
+        code = resp.status_code
+        kind = "PROTOCOL_TEST" if resp.headers.get(ENDPOINT_HEADER) == "protocol-test" else "PROVIDER"
+        request_id = resp.headers.get("request-id") or resp.headers.get("x-request-id")
+        text = redact(resp.text, 20000)
+        try:
+            data = json.loads(text)
+        except json.JSONDecodeError:
+            data = None
+        if code < 400:
+            record(True, True, None, code=code)
+            if not isinstance(data, dict):
+                return finish("MALFORMED_RESPONSE", raw={"body_text": text}, http_status=code, endpoint_kind=kind,
+                              request_id=request_id, note="HTTP success, but the body is not JSON")
+            try:
+                parsed = adapter.parse(data)
+            except _Malformed as exc:
+                return finish("MALFORMED_RESPONSE", raw={"body": data}, http_status=code, endpoint_kind=kind,
+                              request_id=request_id, note=f"HTTP success, not the {adapter.api} protocol: {exc}")
+            visible = parsed.visible_text
+            raw = {"body": data, "visible_text": visible, "finish_reason": parsed.finish_reason,
+                   "finish_class": parsed.finish_class, "refusal": parsed.refusal,
+                   "truncated": parsed.finish_class == "LENGTH", "tool_calls": parsed.tool_calls,
+                   "reasoning": parsed.reasoning}
+            if parsed.refusal or parsed.finish_class in ("REFUSAL", "CONTENT_FILTER"):
+                outcome = "CONTENT_REFUSAL"
+            elif parsed.finish_class == "LENGTH":
+                outcome = "TRUNCATED"
+            elif not (visible or "").strip():
+                outcome = "EMPTY_CONTENT"
+            else:
+                outcome = "ANSWERED"
+            return finish(outcome, raw=raw, parsed=parsed, http_status=code, endpoint_kind=kind,
+                          request_id=request_id)
+        etype = adapter.error_type(data)
+        gone = code not in (401, 403, 429) and any(g in text.lower() for g in _MODEL_GONE) and "model" in text.lower()
+        record(True, True, f"HTTP_{code}", text, code)
+        if code in (401, 403):
+            return finish("AUTH_ERROR", http_status=code, etype=etype, error=redact(text), endpoint_kind=kind,
+                          request_id=request_id, note="authentication / permission — not a content refusal")
+        if code == 429 or code >= 500 or code in (408, 409, 425):
+            if gone and code >= 500:
+                return finish("MODEL_UNAVAILABLE", http_status=code, etype=etype, error=redact(text),
+                              endpoint_kind=kind, request_id=request_id)
+            ra = resp.headers.get("retry-after")
+            retry_after = float(ra) if ra and ra.replace(".", "", 1).isdigit() else None
+            last = ("RATE_LIMITED" if code == 429 else "PROVIDER_ERROR", code, (etype, redact(text), kind, request_id),
+                    retry_after)
+            continue
+        return finish("MODEL_UNAVAILABLE" if gone else "REQUEST_REJECTED", http_status=code, etype=etype,
+                      error=redact(text), endpoint_kind=kind, request_id=request_id)
+    outcome, code, extra = last[0], last[1], last[2]
+    if extra is not None:
+        etype, err, kind, request_id = extra
+        return finish(outcome, http_status=code, etype=etype, error=err, endpoint_kind=kind, request_id=request_id,
+                      note=f"after {len(attempts)} attempt(s) with {network_retries} fixed retries")
+    return finish(outcome, note=f"after {len(attempts)} attempt(s) with {network_retries} fixed retries")

@@ -29,9 +29,18 @@ def _zip_case(mutate=None) -> bytes:
     return buf.getvalue()
 
 
+def _fresh_project(stack, name: str) -> str:
+    """The integration database outlives a session: drop leftovers of this test (projects cascade to their runs,
+    so the case's recorded observation run can be imported again)."""
+    for prj in stack.get("/projects"):
+        if prj["name"] == name:
+            stack.client.delete(f"/projects/{prj['id']}")
+    return stack.post("/projects", json={"name": name})["id"]
+
+
 @pytest.mark.skipif(not (CASE / "case.json").exists(), reason="the orders-p2-speed case is not built")
 def test_research_case_import_provenance_and_export(stack):
-    pid = stack.post("/projects", json={"name": "research-it"})["id"]
+    pid = _fresh_project(stack, "research-it")
 
     detail = stack.post(f"/projects/{pid}/research/cases", content=_zip_case(),
                         headers={"content-type": "application/zip"}, expect=201)
@@ -67,7 +76,7 @@ def test_research_case_import_provenance_and_export(stack):
 
 @pytest.mark.skipif(not (CASE / "case.json").exists(), reason="the orders-p2-speed case is not built")
 def test_import_rejects_a_tampered_case(stack):
-    pid = stack.post("/projects", json={"name": "research-it-bad"})["id"]
+    pid = _fresh_project(stack, "research-it-bad")
 
     def tamper(data: bytes) -> bytes:
         return data.replace(b'"timing-model-deviation"', b'"tampered-family"')  # digest no longer matches
@@ -76,3 +85,40 @@ def test_import_rejects_a_tampered_case(stack):
                           headers={"content-type": "application/zip"})
     assert r.status_code in (400, 422), (r.status_code, r.text)
     assert "CASE_DIGEST_MISMATCH" in r.text
+
+
+STUDY = ROOT / "research" / "studies" / "p6a-protocol"
+STUDY_RESULTS = ROOT / "research" / "results" / "p6a-protocol"
+
+
+def _zip_study(tamper: bool = False) -> bytes:
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
+        zf.writestr("study.json", (STUDY / "study.json").read_bytes())
+        for p in sorted(STUDY_RESULTS.rglob("*")):
+            if not p.is_file():
+                continue
+            data = p.read_bytes()
+            if tamper and p.parent.name == "responses" and p.name.startswith("orders-deviation.ptest-openai.S.r1"):
+                data = data.replace(b"p1", b"p9")  # an answer edited after it was recorded
+            zf.writestr(f"results/{p.relative_to(STUDY_RESULTS).as_posix()}", data)
+    return buf.getvalue()
+
+
+@pytest.mark.skipif(not (STUDY_RESULTS / "ledger.jsonl").exists(), reason="p6a-protocol results not produced")
+def test_research_study_import_shows_units_and_raw_answers(stack):
+    pid = _fresh_project(stack, "study-it")
+    d = stack.post(f"/projects/{pid}/research/studies", content=_zip_study(),
+                   headers={"content-type": "application/zip"}, expect=201)
+    assert d["units"] == 24 and d["tracks"] == ["implementation_conformance", "synthetic_representation"]
+    by = {u["unit_id"]: u for u in d["unit_summaries"]}
+    refused = "orders-deviation.ptest-anthropic.S.r0"
+    assert by[refused]["outcome"] == "CONTENT_REFUSAL" and by[refused]["behavior"] == "REFUSED"
+    unit = stack.get(f"/research/studies/{d['id']}/units/{refused}")
+    assert unit["response"]["raw"]["refusal"] and unit["evaluation"]["behavior_label"] == "REFUSED"
+    again = stack.post(f"/projects/{pid}/research/studies", content=_zip_study(),
+                       headers={"content-type": "application/zip"}, expect=201)
+    assert [s["id"] for s in stack.get(f"/projects/{pid}/research/studies")] == [again["id"]]  # replaced
+    r = stack.client.post(f"/projects/{pid}/research/studies", content=_zip_study(tamper=True),
+                          headers={"content-type": "application/zip"})
+    assert r.status_code in (400, 422) and "changed after it was recorded" in r.text

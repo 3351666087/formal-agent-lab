@@ -196,6 +196,53 @@ export const researchCase = (id: string) => get<ResearchCaseDetail>(`/research/c
 export const modelVersionResearch = (vid: string) => get<ResearchLink[]>(`/model-versions/${vid}/research`);
 export const runResearch = (rid: string) => get<ResearchLink[]>(`/runs/${rid}/research`);
 
+// ------------------------------------------------------------------ research studies (phase 6A)
+export interface StudyUnitSummary {
+  unit_id: string; track: string; task_id: string; provider_config_id: string; assistance_mode: string;
+  representation_id: string; replicate: number; sampling_index: number; outcome: string; http_status: number | null;
+  route: string; model_requested: string; model_returned: string | null; model_identity: string;
+  model_switched: boolean; output_tokens: number | null; usage_known: boolean; latency_ms: number;
+  http_attempts: number; possibly_billed: number; recorded_at: string; behavior: string | null;
+  answer_status: string | null; program_correspondence: string | null;
+}
+export interface StudyMetric {
+  value: number | null; status: string; n: number; missing: number; not_applicable: number;
+  ci: { low: number; high: number } | null; missing_reason: string | null;
+}
+export interface StudyConditionRow {
+  condition: string; planned: number; outcomes: Record<string, number>; behaviors: Record<string, number>;
+  metrics: Record<string, StudyMetric>; cost: Record<string, number>; identity: Record<string, number>;
+}
+export interface StudyComparison {
+  vary: string; a: string; b: string; note?: string | null; not_applicable?: string; n_pairs?: number;
+  unpaired?: number; mean_diff_b_minus_a?: number | null; reading_note?: string; comparability_note?: string;
+}
+export interface StudyReport {
+  study_id: string; title: string; primary_metric: string; rubric: [string, string]; replicates: number;
+  tracks: Record<string, { planned: number; conditions: StudyConditionRow[]; comparisons: StudyComparison[];
+    outcomes: Record<string, number> }>;
+  not_run: { task_id: string; mode: string; reason: string }[];
+  ledger: { responses: number; evaluations: number; calls: number; http_attempts: number; possibly_billed: number };
+  notes: string[];
+}
+export interface ResearchStudySummary {
+  id: string; project_id: string; study_id: string; title: string; study_digest: string; units: number;
+  imported_at: string; tracks: string[];
+}
+export interface ResearchStudyDetail extends ResearchStudySummary {
+  study: Record<string, unknown>; report: StudyReport; unit_summaries: StudyUnitSummary[];
+}
+export interface StudyUnitDetail {
+  unit_id: string; track: string; outcome: string; behavior: string | null;
+  response: { call: Record<string, unknown>; raw: Record<string, unknown>; status: Record<string, unknown>;
+    cost: Record<string, unknown>; experiment: Record<string, unknown> };
+  evaluation: Record<string, unknown> | null; history: { sampling_index: number; outcome: string; at: string }[];
+}
+export const researchStudies = (pid: string) => get<ResearchStudySummary[]>(`/projects/${pid}/research/studies`);
+export const researchStudy = (id: string) => get<ResearchStudyDetail>(`/research/studies/${id}`);
+export const researchStudyUnit = (id: string, unit: string) =>
+  get<StudyUnitDetail>(`/research/studies/${id}/units/${encodeURIComponent(unit)}`);
+
 export type { TraceEvent };
 
 export const TERMINAL = new Set(["SUCCEEDED", "FAILED", "CANCELLED", "BUDGET_EXHAUSTED"]);

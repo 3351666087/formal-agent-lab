@@ -2,14 +2,14 @@
   "format": "checks@3",
   "compatible_with": "checks@2",
   "suite": "research",
-  "generated_at": "2026-10-12T13:30:11Z",
+  "generated_at": "2026-10-12T14:33:47Z",
   "source_revision": {
-    "commit": "8d80e34ce2c59c27612620637d7008b19f0d1ed2",
+    "commit": "985510f59798939cdff271c77d0a34d811f127fd",
     "worktree": {
-      "sha256": "4fa75dca80d912315371614091fce06a54d4ccdb5f97c022bbe80bbca484224b",
+      "sha256": "62c6e4f05d74215ba437312d37fc4f8727afc12e19b17e045d681f08c18b3d27",
       "clean": false,
-      "changed_bytes": 46244,
-      "untracked_files": 2,
+      "changed_bytes": 92619,
+      "untracked_files": 29,
       "excluded_outputs": [
         "docs/execution/evidence/",
         "docs/handoff/",
@@ -20,16 +20,16 @@
     }
   },
   "config": {
-    "sha256": "b2782b93b72020ba31b49a77eca7f227d513b93aee719d0c2b07a74bda7b4daa",
+    "sha256": "731fc8f2c535c8412538e2386a8f464cf46bb43400253ee5a9cd60c30a856d45",
     "parts": {
-      "checks": "3acc76b895dcf22da218f02780a625b41c6c6c443f8fbe5e991414c499f5e670",
+      "checks": "ccca6783b6f2d485343e41fffcbe060e96f99ee17e8d0d6aff28bc76f71dd887",
       "uv.lock": "4d3a54f797927fbc03bbb772f4386cf437468e023d39b23ec94d38c045f04ced",
       "pnpm-lock.yaml": "02d23c074a75bccfaea1ed4ff51272ba3d6cbb724e8012366c8d18e9bb0a7c3a",
       "deploy/compose/services.dev.yaml": "4c876045f15d5bd972c517e7de2d3626cd252d1842797f0152f596f7d8ea9ce0",
       "deploy/compose/docker-compose.yaml": "ff4c34cae068cc6dacd4db7f4273887ff6c2bb0b3b84938a7b8969488bfb20ff"
     }
   },
-  "command": "python scripts/check_runner.py --suite research --group p5a,p5b",
+  "command": "python scripts/check_runner.py --suite research --group p5a,p5b,p6a",
   "environment": {
     "os": "Ubuntu 24.04.4 LTS",
     "arch": "aarch64",
@@ -46,16 +46,16 @@
     "cpus": 4,
     "memory_gib": {
       "MemTotal": 5.77,
-      "MemAvailable": 3.27
+      "MemAvailable": 3.29
     },
     "load_avg": [
-      0.18,
-      0.24,
-      0.16
+      0.42,
+      0.77,
+      0.91
     ],
     "disk_free_gib": {
-      "host (repository filesystem)": 9.8,
-      "docker (/var/lib/docker)": 13.0
+      "host (repository filesystem)": 9.3,
+      "docker (/var/lib/docker)": 16.9
     },
     "concurrency": 1,
     "note": "checks run one at a time; heavy checks ask disk_guard first"
@@ -64,29 +64,30 @@
     "cpus": 4,
     "memory_gib": {
       "MemTotal": 5.77,
-      "MemAvailable": 3.2
+      "MemAvailable": 3.27
     },
     "load_avg": [
-      0.18,
-      0.24,
-      0.16
+      0.62,
+      0.76,
+      0.9
     ],
     "disk_free_gib": {
-      "host (repository filesystem)": 9.8,
-      "docker (/var/lib/docker)": 13.0
+      "host (repository filesystem)": 9.3,
+      "docker (/var/lib/docker)": 16.9
     },
     "concurrency": 1,
     "note": "checks run one at a time; heavy checks ask disk_guard first"
   },
   "run": {
-    "started_at": "2026-10-12T13:30:07Z",
-    "finished_at": "2026-10-12T13:30:11Z",
-    "duration_s": 4.5,
+    "started_at": "2026-10-12T14:32:47Z",
+    "finished_at": "2026-10-12T14:33:47Z",
+    "duration_s": 60.9,
     "full": false,
     "selection": {
       "group": [
         "p5a",
-        "p5b"
+        "p5b",
+        "p6a"
       ],
       "only": [],
       "skip": []
@@ -95,21 +96,27 @@
       "p5a-unit",
       "p5a-case",
       "p5b-unit",
-      "p5b-case"
+      "p5b-case",
+      "p6a-unit",
+      "p6a-protocol",
+      "p6a-real"
     ],
-    "commit": "8d80e34ce2c59c27612620637d7008b19f0d1ed2",
-    "worktree_sha256": "4fa75dca80d912315371614091fce06a54d4ccdb5f97c022bbe80bbca484224b",
-    "nonce": "667391862abd49af876fb79d85a7d7ef",
+    "commit": "985510f59798939cdff271c77d0a34d811f127fd",
+    "worktree_sha256": "62c6e4f05d74215ba437312d37fc4f8727afc12e19b17e045d681f08c18b3d27",
+    "nonce": "dcf0cfdcc5fb4a8e90ee04437d943980",
     "acceptance_nonce": null,
     "results": {
       "p5a-unit": "PASS",
       "p5a-case": "PASS",
       "p5b-unit": "PASS",
-      "p5b-case": "PASS"
+      "p5b-case": "PASS",
+      "p6a-unit": "PASS",
+      "p6a-protocol": "PASS",
+      "p6a-real": "PASS"
     }
   },
   "summary": {
-    "PASS": 4,
+    "PASS": 7,
     "FAIL": 0,
     "BLOCKED": 0,
     "NOT_RUN": 0,
@@ -119,7 +126,7 @@
   "groups": {
     "p5a": "PASS",
     "p5b": "PASS",
-    "p6a": "NO_CHECKS",
+    "p6a": "PASS",
     "p6b": "NO_CHECKS",
     "p7": "NO_CHECKS"
   },
@@ -136,13 +143,12 @@
   "selected_passed": true,
   "overall_complete": false,
   "unmet": [
-    "p6a=NO_CHECKS",
     "p6b=NO_CHECKS",
     "p7=NO_CHECKS"
   ],
   "aggregation": "only results produced and verified by this invocation count; a partial selection is never complete; results from another commit, work tree or configuration are inherited and ignored",
   "timing": {
-    "this_run_s": 4.5,
+    "this_run_s": 60.9,
     "last_full_run_s": null,
     "last_full_run_at": null,
     "partial_runs": [
@@ -225,6 +231,44 @@
           "p5a-case": "PASS",
           "p5b-unit": "PASS",
           "p5b-case": "PASS"
+        }
+      },
+      {
+        "started_at": "2026-10-12T14:10:33Z",
+        "duration_s": 56.4,
+        "selection": {
+          "group": [
+            "p6a"
+          ],
+          "only": [],
+          "skip": []
+        },
+        "results": {
+          "p6a-unit": "PASS",
+          "p6a-protocol": "PASS",
+          "p6a-real": "PASS"
+        }
+      },
+      {
+        "started_at": "2026-10-12T14:32:47Z",
+        "duration_s": 60.9,
+        "selection": {
+          "group": [
+            "p5a",
+            "p5b",
+            "p6a"
+          ],
+          "only": [],
+          "skip": []
+        },
+        "results": {
+          "p5a-unit": "PASS",
+          "p5a-case": "PASS",
+          "p5b-unit": "PASS",
+          "p5b-case": "PASS",
+          "p6a-unit": "PASS",
+          "p6a-protocol": "PASS",
+          "p6a-real": "PASS"
         }
       }
     ]
@@ -364,6 +408,70 @@
         "p5b-unit": "PASS",
         "p5b-case": "PASS"
       }
+    },
+    {
+      "started_at": "2026-10-12T14:10:33Z",
+      "finished_at": "2026-10-12T14:11:29Z",
+      "duration_s": 56.4,
+      "full": false,
+      "selection": {
+        "group": [
+          "p6a"
+        ],
+        "only": [],
+        "skip": []
+      },
+      "checks": [
+        "p6a-unit",
+        "p6a-protocol",
+        "p6a-real"
+      ],
+      "commit": "985510f59798939cdff271c77d0a34d811f127fd",
+      "worktree_sha256": "d3f272f557e1065005301b7856377b403d9a25816706fea1cae5c59850c980d8",
+      "nonce": "f0047c78cd964ec1af67b4c9c8e79188",
+      "acceptance_nonce": null,
+      "results": {
+        "p6a-unit": "PASS",
+        "p6a-protocol": "PASS",
+        "p6a-real": "PASS"
+      }
+    },
+    {
+      "started_at": "2026-10-12T14:32:47Z",
+      "finished_at": "2026-10-12T14:33:47Z",
+      "duration_s": 60.9,
+      "full": false,
+      "selection": {
+        "group": [
+          "p5a",
+          "p5b",
+          "p6a"
+        ],
+        "only": [],
+        "skip": []
+      },
+      "checks": [
+        "p5a-unit",
+        "p5a-case",
+        "p5b-unit",
+        "p5b-case",
+        "p6a-unit",
+        "p6a-protocol",
+        "p6a-real"
+      ],
+      "commit": "985510f59798939cdff271c77d0a34d811f127fd",
+      "worktree_sha256": "62c6e4f05d74215ba437312d37fc4f8727afc12e19b17e045d681f08c18b3d27",
+      "nonce": "dcf0cfdcc5fb4a8e90ee04437d943980",
+      "acceptance_nonce": null,
+      "results": {
+        "p5a-unit": "PASS",
+        "p5a-case": "PASS",
+        "p5b-unit": "PASS",
+        "p5b-case": "PASS",
+        "p6a-unit": "PASS",
+        "p6a-protocol": "PASS",
+        "p6a-real": "PASS"
+      }
     }
   ],
   "checks": [
@@ -387,29 +495,29 @@
       "assertions_from": null,
       "trigger": null,
       "result": "PASS",
-      "reason": "14 passed in 1.11s",
-      "summary": "14 passed in 1.11s",
+      "reason": "14 passed in 3.04s",
+      "summary": "14 passed in 3.04s",
       "condition": null,
-      "checked_commit": "8d80e34ce2c59c27612620637d7008b19f0d1ed2",
-      "worktree_sha256": "4fa75dca80d912315371614091fce06a54d4ccdb5f97c022bbe80bbca484224b",
+      "checked_commit": "985510f59798939cdff271c77d0a34d811f127fd",
+      "worktree_sha256": "62c6e4f05d74215ba437312d37fc4f8727afc12e19b17e045d681f08c18b3d27",
       "worktree_clean": false,
-      "config_sha256": "b2782b93b72020ba31b49a77eca7f227d513b93aee719d0c2b07a74bda7b4daa",
-      "run_nonce": "667391862abd49af876fb79d85a7d7ef",
-      "started_at": "2026-10-12T13:30:07Z",
-      "finished_at": "2026-10-12T13:30:08Z",
-      "duration_s": 1.6,
+      "config_sha256": "731fc8f2c535c8412538e2386a8f464cf46bb43400253ee5a9cd60c30a856d45",
+      "run_nonce": "dcf0cfdcc5fb4a8e90ee04437d943980",
+      "started_at": "2026-10-12T14:32:47Z",
+      "finished_at": "2026-10-12T14:32:51Z",
+      "duration_s": 4.5,
       "attempts": [
         {
           "attempt": 1,
-          "started_at": "2026-10-12T13:30:07Z",
-          "finished_at": "2026-10-12T13:30:08Z",
-          "duration_s": 1.6,
+          "started_at": "2026-10-12T14:32:47Z",
+          "finished_at": "2026-10-12T14:32:51Z",
+          "duration_s": 4.5,
           "exit_code": 0,
           "result": "PASS",
-          "reason": "14 passed in 1.11s",
-          "log": "docs/execution/evidence/research/checks/logs/p5a-unit/20261012T133007Z-attempt-1.log",
-          "summary": "14 passed in 1.11s",
-          "nonce": "dcb05d7f9c3a4c02a5716db993532b6f",
+          "reason": "14 passed in 3.04s",
+          "log": "docs/execution/evidence/research/checks/logs/p5a-unit/20261012T143247Z-attempt-1.log",
+          "summary": "14 passed in 3.04s",
+          "nonce": "3d43b8aac8a4485fa57071f714e492f4",
           "structured_result": null,
           "assertions": [],
           "produced": [],
@@ -420,7 +528,7 @@
             "deselected": 0,
             "errors": 0,
             "skip_reasons": [],
-            "line": "14 passed in 1.11s"
+            "line": "14 passed in 3.04s"
           }
         }
       ],
@@ -430,6 +538,13 @@
       "inherited": false,
       "this_run": true,
       "history": [
+        {
+          "result": "PASS",
+          "checked_commit": "8d80e34ce2c59c27612620637d7008b19f0d1ed2",
+          "finished_at": "2026-10-12T13:30:08Z",
+          "duration_s": 1.6,
+          "attempts": 1
+        },
         {
           "result": "PASS",
           "checked_commit": "8d80e34ce2c59c27612620637d7008b19f0d1ed2",
@@ -478,27 +593,27 @@
       "reason": "[p5a-case] PASS: 7 required assertion(s) hold",
       "summary": "[p5a-case] PASS: 7 required assertion(s) hold",
       "condition": null,
-      "checked_commit": "8d80e34ce2c59c27612620637d7008b19f0d1ed2",
-      "worktree_sha256": "4fa75dca80d912315371614091fce06a54d4ccdb5f97c022bbe80bbca484224b",
+      "checked_commit": "985510f59798939cdff271c77d0a34d811f127fd",
+      "worktree_sha256": "62c6e4f05d74215ba437312d37fc4f8727afc12e19b17e045d681f08c18b3d27",
       "worktree_clean": false,
-      "config_sha256": "b2782b93b72020ba31b49a77eca7f227d513b93aee719d0c2b07a74bda7b4daa",
-      "run_nonce": "667391862abd49af876fb79d85a7d7ef",
-      "started_at": "2026-10-12T13:30:08Z",
-      "finished_at": "2026-10-12T13:30:09Z",
-      "duration_s": 0.9,
+      "config_sha256": "731fc8f2c535c8412538e2386a8f464cf46bb43400253ee5a9cd60c30a856d45",
+      "run_nonce": "dcf0cfdcc5fb4a8e90ee04437d943980",
+      "started_at": "2026-10-12T14:32:51Z",
+      "finished_at": "2026-10-12T14:32:54Z",
+      "duration_s": 2.6,
       "attempts": [
         {
           "attempt": 1,
-          "started_at": "2026-10-12T13:30:08Z",
-          "finished_at": "2026-10-12T13:30:09Z",
-          "duration_s": 0.9,
+          "started_at": "2026-10-12T14:32:51Z",
+          "finished_at": "2026-10-12T14:32:54Z",
+          "duration_s": 2.6,
           "exit_code": 0,
           "result": "PASS",
           "reason": "[p5a-case] PASS: 7 required assertion(s) hold",
-          "log": "docs/execution/evidence/research/checks/logs/p5a-case/20261012T133008Z-attempt-1.log",
+          "log": "docs/execution/evidence/research/checks/logs/p5a-case/20261012T143251Z-attempt-1.log",
           "summary": "[p5a-case] PASS: 7 required assertion(s) hold",
-          "nonce": "a315bca282234a9aa5136b8976cdca1b",
-          "structured_result": "docs/execution/evidence/research/checks/logs/p5a-case/20261012T133008Z-attempt-1.result.json",
+          "nonce": "ee97c562f8984c6f94caa0cb518413dd",
+          "structured_result": "docs/execution/evidence/research/checks/logs/p5a-case/20261012T143251Z-attempt-1.result.json",
           "assertions": [
             {
               "id": "case_validates",
@@ -547,7 +662,7 @@
             {
               "path": "docs/execution/evidence/research/p5a/case.json",
               "exists": true,
-              "sha256": "7eee296005d42b23f9e01bc030ffa842846d589d898762b9d9aae086a850aeed",
+              "sha256": "a96d26c1237ee280d078e27f71385145001f71c0dbaeb109288af7fe19848e6c",
               "fresh": true
             }
           ],
@@ -558,7 +673,7 @@
         {
           "path": "docs/execution/evidence/research/p5a/case.json",
           "exists": true,
-          "sha256": "7eee296005d42b23f9e01bc030ffa842846d589d898762b9d9aae086a850aeed",
+          "sha256": "a96d26c1237ee280d078e27f71385145001f71c0dbaeb109288af7fe19848e6c",
           "fresh": true
         }
       ],
@@ -567,6 +682,13 @@
       "inherited": false,
       "this_run": true,
       "history": [
+        {
+          "result": "PASS",
+          "checked_commit": "8d80e34ce2c59c27612620637d7008b19f0d1ed2",
+          "finished_at": "2026-10-12T13:30:09Z",
+          "duration_s": 0.9,
+          "attempts": 1
+        },
         {
           "result": "PASS",
           "checked_commit": "8d80e34ce2c59c27612620637d7008b19f0d1ed2",
@@ -610,29 +732,29 @@
       "assertions_from": null,
       "trigger": null,
       "result": "PASS",
-      "reason": "6 passed, 1 warning in 1.04s",
-      "summary": "6 passed, 1 warning in 1.04s",
+      "reason": "6 passed, 1 warning in 3.21s",
+      "summary": "6 passed, 1 warning in 3.21s",
       "condition": null,
-      "checked_commit": "8d80e34ce2c59c27612620637d7008b19f0d1ed2",
-      "worktree_sha256": "4fa75dca80d912315371614091fce06a54d4ccdb5f97c022bbe80bbca484224b",
+      "checked_commit": "985510f59798939cdff271c77d0a34d811f127fd",
+      "worktree_sha256": "62c6e4f05d74215ba437312d37fc4f8727afc12e19b17e045d681f08c18b3d27",
       "worktree_clean": false,
-      "config_sha256": "b2782b93b72020ba31b49a77eca7f227d513b93aee719d0c2b07a74bda7b4daa",
-      "run_nonce": "667391862abd49af876fb79d85a7d7ef",
-      "started_at": "2026-10-12T13:30:09Z",
-      "finished_at": "2026-10-12T13:30:10Z",
-      "duration_s": 1.5,
+      "config_sha256": "731fc8f2c535c8412538e2386a8f464cf46bb43400253ee5a9cd60c30a856d45",
+      "run_nonce": "dcf0cfdcc5fb4a8e90ee04437d943980",
+      "started_at": "2026-10-12T14:32:54Z",
+      "finished_at": "2026-10-12T14:32:58Z",
+      "duration_s": 4.5,
       "attempts": [
         {
           "attempt": 1,
-          "started_at": "2026-10-12T13:30:09Z",
-          "finished_at": "2026-10-12T13:30:10Z",
-          "duration_s": 1.5,
+          "started_at": "2026-10-12T14:32:54Z",
+          "finished_at": "2026-10-12T14:32:58Z",
+          "duration_s": 4.5,
           "exit_code": 0,
           "result": "PASS",
-          "reason": "6 passed, 1 warning in 1.04s",
-          "log": "docs/execution/evidence/research/checks/logs/p5b-unit/20261012T133009Z-attempt-1.log",
-          "summary": "6 passed, 1 warning in 1.04s",
-          "nonce": "27d47ba9b37c422b96a49de14247b721",
+          "reason": "6 passed, 1 warning in 3.21s",
+          "log": "docs/execution/evidence/research/checks/logs/p5b-unit/20261012T143254Z-attempt-1.log",
+          "summary": "6 passed, 1 warning in 3.21s",
+          "nonce": "baa969cd3f414b67b4acf2bda5c40126",
           "structured_result": null,
           "assertions": [],
           "produced": [],
@@ -643,7 +765,7 @@
             "deselected": 0,
             "errors": 0,
             "skip_reasons": [],
-            "line": "6 passed, 1 warning in 1.04s"
+            "line": "6 passed, 1 warning in 3.21s"
           }
         }
       ],
@@ -653,6 +775,13 @@
       "inherited": false,
       "this_run": true,
       "history": [
+        {
+          "result": "PASS",
+          "checked_commit": "8d80e34ce2c59c27612620637d7008b19f0d1ed2",
+          "finished_at": "2026-10-12T13:30:10Z",
+          "duration_s": 1.5,
+          "attempts": 1
+        },
         {
           "result": "PASS",
           "checked_commit": "8d80e34ce2c59c27612620637d7008b19f0d1ed2",
@@ -694,27 +823,27 @@
       "reason": "[p5b-case] PASS: 8 required assertion(s) hold",
       "summary": "[p5b-case] PASS: 8 required assertion(s) hold",
       "condition": null,
-      "checked_commit": "8d80e34ce2c59c27612620637d7008b19f0d1ed2",
-      "worktree_sha256": "4fa75dca80d912315371614091fce06a54d4ccdb5f97c022bbe80bbca484224b",
+      "checked_commit": "985510f59798939cdff271c77d0a34d811f127fd",
+      "worktree_sha256": "62c6e4f05d74215ba437312d37fc4f8727afc12e19b17e045d681f08c18b3d27",
       "worktree_clean": false,
-      "config_sha256": "b2782b93b72020ba31b49a77eca7f227d513b93aee719d0c2b07a74bda7b4daa",
-      "run_nonce": "667391862abd49af876fb79d85a7d7ef",
-      "started_at": "2026-10-12T13:30:10Z",
-      "finished_at": "2026-10-12T13:30:11Z",
-      "duration_s": 0.5,
+      "config_sha256": "731fc8f2c535c8412538e2386a8f464cf46bb43400253ee5a9cd60c30a856d45",
+      "run_nonce": "dcf0cfdcc5fb4a8e90ee04437d943980",
+      "started_at": "2026-10-12T14:32:58Z",
+      "finished_at": "2026-10-12T14:33:00Z",
+      "duration_s": 2.1,
       "attempts": [
         {
           "attempt": 1,
-          "started_at": "2026-10-12T13:30:10Z",
-          "finished_at": "2026-10-12T13:30:11Z",
-          "duration_s": 0.5,
+          "started_at": "2026-10-12T14:32:58Z",
+          "finished_at": "2026-10-12T14:33:00Z",
+          "duration_s": 2.1,
           "exit_code": 0,
           "result": "PASS",
           "reason": "[p5b-case] PASS: 8 required assertion(s) hold",
-          "log": "docs/execution/evidence/research/checks/logs/p5b-case/20261012T133010Z-attempt-1.log",
+          "log": "docs/execution/evidence/research/checks/logs/p5b-case/20261012T143258Z-attempt-1.log",
           "summary": "[p5b-case] PASS: 8 required assertion(s) hold",
-          "nonce": "ab350e58190544e9a0a9b41a276c34ad",
-          "structured_result": "docs/execution/evidence/research/checks/logs/p5b-case/20261012T133010Z-attempt-1.result.json",
+          "nonce": "159d0ace57634a2aa5c7dae9c7dda65c",
+          "structured_result": "docs/execution/evidence/research/checks/logs/p5b-case/20261012T143258Z-attempt-1.result.json",
           "assertions": [
             {
               "id": "case_validates",
@@ -769,7 +898,7 @@
             {
               "path": "docs/execution/evidence/research/p5b/case.json",
               "exists": true,
-              "sha256": "2e29386f836137c52026418dd273c85740d385f8ccb89e6e97d550d997e5f94c",
+              "sha256": "f009c427f454de05a55a071b3274e9338941b2f5a809ea1c304ae08198d36a25",
               "fresh": true
             }
           ],
@@ -780,7 +909,7 @@
         {
           "path": "docs/execution/evidence/research/p5b/case.json",
           "exists": true,
-          "sha256": "2e29386f836137c52026418dd273c85740d385f8ccb89e6e97d550d997e5f94c",
+          "sha256": "f009c427f454de05a55a071b3274e9338941b2f5a809ea1c304ae08198d36a25",
           "fresh": true
         }
       ],
@@ -789,6 +918,13 @@
       "inherited": false,
       "this_run": true,
       "history": [
+        {
+          "result": "PASS",
+          "checked_commit": "8d80e34ce2c59c27612620637d7008b19f0d1ed2",
+          "finished_at": "2026-10-12T13:30:11Z",
+          "duration_s": 0.5,
+          "attempts": 1
+        },
         {
           "result": "PASS",
           "checked_commit": "8d80e34ce2c59c27612620637d7008b19f0d1ed2",
@@ -801,6 +937,419 @@
           "checked_commit": "8d80e34ce2c59c27612620637d7008b19f0d1ed2",
           "finished_at": "2026-10-12T13:24:56Z",
           "duration_s": 0.6,
+          "attempts": 1
+        }
+      ]
+    },
+    {
+      "id": "p6a-unit",
+      "group": "p6a",
+      "title": "研究调用与评测（单元）：两种提供方协议的合法回答、HTTP 成功内的可见拒绝/内容过滤、空内容、截断、格式无效、模型变化/未命名、401/403/429/5xx/529、请求被拒/模型不可用、响应丢失（可能计费）、预算与取消在发送前检查、不读提供方环境变量、路由与主机一致、密钥不落盘；研究定义校验（参考答案不得进入任务输入）、答案轴、两个评分器、输出上限与复用键",
+      "command": "uv run --frozen pytest -p no:cacheprovider -q packages/strategies/tests packages/evaluation/tests/test_research_study.py",
+      "tasks": [
+        "P6A-01",
+        "P6A-02"
+      ],
+      "evidence": [],
+      "requires": null,
+      "profile": "local-lite",
+      "kind": "mandatory",
+      "retries": 0,
+      "heavy_gib": 0.0,
+      "produces": [],
+      "protocol": false,
+      "assertions_from": null,
+      "trigger": null,
+      "result": "PASS",
+      "reason": "55 passed in 19.75s",
+      "summary": "55 passed in 19.75s",
+      "condition": null,
+      "checked_commit": "985510f59798939cdff271c77d0a34d811f127fd",
+      "worktree_sha256": "62c6e4f05d74215ba437312d37fc4f8727afc12e19b17e045d681f08c18b3d27",
+      "worktree_clean": false,
+      "config_sha256": "731fc8f2c535c8412538e2386a8f464cf46bb43400253ee5a9cd60c30a856d45",
+      "run_nonce": "dcf0cfdcc5fb4a8e90ee04437d943980",
+      "started_at": "2026-10-12T14:33:00Z",
+      "finished_at": "2026-10-12T14:33:22Z",
+      "duration_s": 22.5,
+      "attempts": [
+        {
+          "attempt": 1,
+          "started_at": "2026-10-12T14:33:00Z",
+          "finished_at": "2026-10-12T14:33:22Z",
+          "duration_s": 22.5,
+          "exit_code": 0,
+          "result": "PASS",
+          "reason": "55 passed in 19.75s",
+          "log": "docs/execution/evidence/research/checks/logs/p6a-unit/20261012T143300Z-attempt-1.log",
+          "summary": "55 passed in 19.75s",
+          "nonce": "3e13a8c68fea42f3bed6d25fb27e1420",
+          "structured_result": null,
+          "assertions": [],
+          "produced": [],
+          "pytest": {
+            "passed": 55,
+            "failed": 0,
+            "skipped": 0,
+            "deselected": 0,
+            "errors": 0,
+            "skip_reasons": [],
+            "line": "55 passed in 19.75s"
+          }
+        }
+      ],
+      "evidence_files": [],
+      "first_failure": null,
+      "flaky": false,
+      "inherited": false,
+      "this_run": true,
+      "history": [
+        {
+          "result": "PASS",
+          "checked_commit": "985510f59798939cdff271c77d0a34d811f127fd",
+          "finished_at": "2026-10-12T14:11:03Z",
+          "duration_s": 30.4,
+          "attempts": 1
+        }
+      ]
+    },
+    {
+      "id": "p6a-protocol",
+      "group": "p6a",
+      "title": "协议服务端到端（不是模型）：研究 p6a-protocol 全部 24 个单元逐一脚本化——各类调用结果与评分标签、原始先存后评、两轴分离、程序对应评分、合成任务 N/A、无模型回答记 MISSING、两条实验线不合并、未实现模式 NOT_RUN、配对比较；预算在发送前检查且恢复后不回补、取消在发送前检查、恢复复用已答单元并对未答单元新采样、重新评分不调用、密钥不落盘",
+      "command": "uv run --frozen python scripts/p6a_protocol_evidence.py",
+      "tasks": [
+        "P6A-01",
+        "P6A-02"
+      ],
+      "evidence": [],
+      "requires": null,
+      "profile": "local-lite",
+      "kind": "mandatory",
+      "retries": 0,
+      "heavy_gib": 0.0,
+      "produces": [
+        "docs/execution/evidence/research/p6a/protocol.json"
+      ],
+      "protocol": true,
+      "assertions_from": null,
+      "trigger": null,
+      "result": "PASS",
+      "reason": "[p6a-protocol] PASS: 23 required assertion(s) hold",
+      "summary": "[p6a-protocol] PASS: 23 required assertion(s) hold",
+      "condition": null,
+      "checked_commit": "985510f59798939cdff271c77d0a34d811f127fd",
+      "worktree_sha256": "62c6e4f05d74215ba437312d37fc4f8727afc12e19b17e045d681f08c18b3d27",
+      "worktree_clean": false,
+      "config_sha256": "731fc8f2c535c8412538e2386a8f464cf46bb43400253ee5a9cd60c30a856d45",
+      "run_nonce": "dcf0cfdcc5fb4a8e90ee04437d943980",
+      "started_at": "2026-10-12T14:33:22Z",
+      "finished_at": "2026-10-12T14:33:43Z",
+      "duration_s": 21.0,
+      "attempts": [
+        {
+          "attempt": 1,
+          "started_at": "2026-10-12T14:33:22Z",
+          "finished_at": "2026-10-12T14:33:43Z",
+          "duration_s": 21.0,
+          "exit_code": 0,
+          "result": "PASS",
+          "reason": "[p6a-protocol] PASS: 23 required assertion(s) hold",
+          "log": "docs/execution/evidence/research/checks/logs/p6a-protocol/20261012T143322Z-attempt-1.log",
+          "summary": "[p6a-protocol] PASS: 23 required assertion(s) hold",
+          "nonce": "3903c712d8524e6cb60b3d100fe96955",
+          "structured_result": "docs/execution/evidence/research/checks/logs/p6a-protocol/20261012T143322Z-attempt-1.result.json",
+          "assertions": [
+            {
+              "id": "every_unit_scripted",
+              "required": true,
+              "holds": true,
+              "detail": "24 planned units"
+            },
+            {
+              "id": "no_silent_drop",
+              "required": true,
+              "holds": true,
+              "detail": "24 response record(s), 24 evaluation(s) for 24 planned units"
+            },
+            {
+              "id": "outcomes_and_labels_as_scripted",
+              "required": true,
+              "holds": true,
+              "detail": "mismatches: {}"
+            },
+            {
+              "id": "raw_saved_before_scoring",
+              "required": true,
+              "holds": true,
+              "detail": "every response event precedes its evaluation event in the ledger"
+            },
+            {
+              "id": "two_axes_apart",
+              "required": true,
+              "holds": true,
+              "detail": "lamp-ir-json.ptest-anthropic.S.r1: call TRUNCATED, answer INVALID_JSON"
+            },
+            {
+              "id": "refusal_not_retried",
+              "required": true,
+              "holds": true,
+              "detail": "attempts 1, refusal 'stop_reason=refusal'"
+            },
+            {
+              "id": "content_filter_is_a_refusal",
+              "required": true,
+              "holds": true,
+              "detail": "finish_reason content_filter → CONTENT_REFUSAL / CONTENT_FILTER"
+            },
+            {
+              "id": "auth_error_is_not_a_refusal",
+              "required": true,
+              "holds": true,
+              "detail": "AUTH_ERROR / 401"
+            },
+            {
+              "id": "lost_response_possibly_billed",
+              "required": true,
+              "holds": true,
+              "detail": "a dropped attempt, then an answer on a new attempt"
+            },
+            {
+              "id": "model_identity_recorded",
+              "required": true,
+              "holds": true,
+              "detail": "switched protocol-test-other; unnamed → UNKNOWN"
+            },
+            {
+              "id": "reasoning_never_raw",
+              "required": true,
+              "holds": true,
+              "detail": "a thinking block is a summary only"
+            },
+            {
+              "id": "program_grounded_scoring",
+              "required": true,
+              "holds": true,
+              "detail": "slow[p2] corresponds with the recorded run; slow[p1] deviates"
+            },
+            {
+              "id": "synthetic_program_not_applicable",
+              "required": true,
+              "holds": true,
+              "detail": "never filled in as a pass"
+            },
+            {
+              "id": "no_answer_is_missing_not_zero",
+              "required": true,
+              "holds": true,
+              "detail": "4 unit(s) without a model answer: correct = MISSING"
+            },
+            {
+              "id": "tracks_never_pooled",
+              "required": true,
+              "holds": true,
+              "detail": "tracks ['implementation_conformance', 'synthetic_representation']"
+            },
+            {
+              "id": "unimplemented_mode_not_run",
+              "required": true,
+              "holds": true,
+              "detail": "4 (task, ASSISTED) conditions listed NOT_RUN"
+            },
+            {
+              "id": "paired_comparisons",
+              "required": true,
+              "holds": true,
+              "detail": "['assistance', 'provider', 'representation']"
+            },
+            {
+              "id": "rescoring_makes_no_call",
+              "required": true,
+              "holds": true,
+              "detail": "score without --force reuses every evaluation; --force recomputes; no HTTP request either way"
+            },
+            {
+              "id": "budget_checked_before_sending",
+              "required": true,
+              "holds": true,
+              "detail": "3 request(s) sent, 21 unit(s) BUDGET_EXHAUSTED"
+            },
+            {
+              "id": "budget_not_regained_on_resume",
+              "required": true,
+              "holds": true,
+              "detail": "the resumed study rebuilt its counters from the ledger and sent nothing"
+            },
+            {
+              "id": "cancel_checked_before_sending",
+              "required": true,
+              "holds": true,
+              "detail": "6 request(s) for 4 units (one 500×3, one 401), 20 unit(s) CANCELLED unsent"
+            },
+            {
+              "id": "resume_reuses_answers",
+              "required": true,
+              "holds": true,
+              "detail": "reused 2, sent 22; the two failed units were called again as new samples"
+            },
+            {
+              "id": "credential_never_written",
+              "required": true,
+              "holds": true,
+              "detail": "files containing the test key: []"
+            }
+          ],
+          "produced": [
+            {
+              "path": "docs/execution/evidence/research/p6a/protocol.json",
+              "exists": true,
+              "sha256": "cdd5c63361d0cf28f0c3ef976276e948298b598e75f7e85b9b9d2d6f42479f50",
+              "fresh": true
+            }
+          ],
+          "pytest": null
+        }
+      ],
+      "evidence_files": [
+        {
+          "path": "docs/execution/evidence/research/p6a/protocol.json",
+          "exists": true,
+          "sha256": "cdd5c63361d0cf28f0c3ef976276e948298b598e75f7e85b9b9d2d6f42479f50",
+          "fresh": true
+        }
+      ],
+      "first_failure": null,
+      "flaky": false,
+      "inherited": false,
+      "this_run": true,
+      "history": [
+        {
+          "result": "PASS",
+          "checked_commit": "985510f59798939cdff271c77d0a34d811f127fd",
+          "finished_at": "2026-10-12T14:11:24Z",
+          "duration_s": 20.4,
+          "attempts": 1
+        }
+      ]
+    },
+    {
+      "id": "p6a-real",
+      "group": "p6a",
+      "title": "真实端点最小调用（普通业务任务，已配置且已授权额度）：未配置凭据则 BLOCKED；记录路由（中转不记为官方）、返回模型身份、原始响应体、用量与预算；已保存的真实回答在重跑时复用而不重复购买；密钥不落盘",
+      "command": "uv run --frozen python scripts/p6a_real_evidence.py",
+      "tasks": [
+        "P6A-01"
+      ],
+      "evidence": [],
+      "requires": null,
+      "profile": "local-lite",
+      "kind": "mandatory",
+      "retries": 0,
+      "heavy_gib": 0.0,
+      "produces": [
+        "docs/execution/evidence/research/p6a/real-endpoint.json"
+      ],
+      "protocol": true,
+      "assertions_from": null,
+      "trigger": null,
+      "result": "PASS",
+      "reason": "[p6a-real] PASS: 7 required assertion(s) hold",
+      "summary": "[p6a-real] PASS: 7 required assertion(s) hold",
+      "condition": null,
+      "checked_commit": "985510f59798939cdff271c77d0a34d811f127fd",
+      "worktree_sha256": "62c6e4f05d74215ba437312d37fc4f8727afc12e19b17e045d681f08c18b3d27",
+      "worktree_clean": false,
+      "config_sha256": "731fc8f2c535c8412538e2386a8f464cf46bb43400253ee5a9cd60c30a856d45",
+      "run_nonce": "dcf0cfdcc5fb4a8e90ee04437d943980",
+      "started_at": "2026-10-12T14:33:43Z",
+      "finished_at": "2026-10-12T14:33:47Z",
+      "duration_s": 3.6,
+      "attempts": [
+        {
+          "attempt": 1,
+          "started_at": "2026-10-12T14:33:43Z",
+          "finished_at": "2026-10-12T14:33:47Z",
+          "duration_s": 3.6,
+          "exit_code": 0,
+          "result": "PASS",
+          "reason": "[p6a-real] PASS: 7 required assertion(s) hold",
+          "log": "docs/execution/evidence/research/checks/logs/p6a-real/20261012T143343Z-attempt-1.log",
+          "summary": "[p6a-real] PASS: 7 required assertion(s) hold",
+          "nonce": "d9823d1a2bb54782b02c3f5f3041f3f7",
+          "structured_result": "docs/execution/evidence/research/checks/logs/p6a-real/20261012T143343Z-attempt-1.result.json",
+          "assertions": [
+            {
+              "id": "every_unit_recorded",
+              "required": true,
+              "holds": true,
+              "detail": "6/6 units"
+            },
+            {
+              "id": "real_model_answer_recorded",
+              "required": true,
+              "holds": true,
+              "detail": "4 model-produced response(s) from a real route: [('COMPATIBLE_RELAY', 'claude-opus-5-5'), ('COMPATIBLE_RELAY', 'gpt-6-astra')]"
+            },
+            {
+              "id": "raw_body_persisted",
+              "required": true,
+              "holds": true,
+              "detail": "the provider body as returned"
+            },
+            {
+              "id": "identity_recorded",
+              "required": true,
+              "holds": true,
+              "detail": "each real answer names its identity status"
+            },
+            {
+              "id": "relay_never_recorded_as_official",
+              "required": true,
+              "holds": true,
+              "detail": "a relay route stays COMPATIBLE_RELAY"
+            },
+            {
+              "id": "within_budget",
+              "required": true,
+              "holds": true,
+              "detail": "10 call(s) ≤ 12"
+            },
+            {
+              "id": "credential_never_written",
+              "required": true,
+              "holds": true,
+              "detail": "files containing a configured credential: []"
+            }
+          ],
+          "produced": [
+            {
+              "path": "docs/execution/evidence/research/p6a/real-endpoint.json",
+              "exists": true,
+              "sha256": "87bdd2a701162197379ec0ee62188ae400998a9a309059e543ee0fa1b40824d0",
+              "fresh": true
+            }
+          ],
+          "pytest": null
+        }
+      ],
+      "evidence_files": [
+        {
+          "path": "docs/execution/evidence/research/p6a/real-endpoint.json",
+          "exists": true,
+          "sha256": "87bdd2a701162197379ec0ee62188ae400998a9a309059e543ee0fa1b40824d0",
+          "fresh": true
+        }
+      ],
+      "first_failure": null,
+      "flaky": false,
+      "inherited": false,
+      "this_run": true,
+      "history": [
+        {
+          "result": "PASS",
+          "checked_commit": "985510f59798939cdff271c77d0a34d811f127fd",
+          "finished_at": "2026-10-12T14:11:29Z",
+          "duration_s": 5.6,
           "attempts": 1
         }
       ]

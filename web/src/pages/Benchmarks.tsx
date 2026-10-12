@@ -1,16 +1,18 @@
 import { useMemo, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Link, useNavigate, useParams } from "react-router";
-import { get, post, type MatrixReport, type MatrixSummary, type Scenario, type Strategy } from "../api";
+import { get, post, researchStudies, type MatrixReport, type MatrixSummary, type Scenario, type Strategy } from "../api";
 import { Icon } from "../icons";
 import { Empty, fmtNum, fmtTime, InlineError, KV, Loading, Modal, QueryState, StatusBadge, PageHead } from "../ui";
 import { ReportV2, V2Fields } from "../components/MatrixV2";
+import { StudyView } from "../components/StudyView";
 
 export function BenchmarksPage() {
   const { pid, mid } = useParams();
   const navigate = useNavigate();
   const matrices = useQuery({ queryKey: ["matrices", pid], queryFn: () => get<MatrixSummary[]>(`/projects/${pid}/matrices`),
     refetchInterval: 4000 });
+  const studies = useQuery({ queryKey: ["research-studies", pid], queryFn: () => researchStudies(pid!) });
   const [creating, setCreating] = useState(false);
   return (
     <>
@@ -33,8 +35,21 @@ export function BenchmarksPage() {
               </div>
             )}
           </QueryState>
+          <div className="card-head" style={{ borderTop: "1px solid var(--border)" }}><h2 className="grow">研究评测</h2></div>
+          <QueryState q={studies} empty={<Empty title="还没有导入研究" hint="fal research study import research/studies/<id> --project <项目>" />}>
+            {(list) => (
+              <div className="nav" style={{ padding: 6 }}>
+                {list.map((st) => (
+                  <Link key={st.id} to={`/p/${pid}/benchmarks/${st.id}`} className={st.id === mid ? "active" : ""}>
+                    <span className="ellipsis" style={{ flex: 1 }}>{st.title}</span>
+                    <span className="badge info">{st.study_id}</span><span className="num">{st.units}</span>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </QueryState>
         </div>
-        {mid ? (matrices.data?.find((m) => m.id === mid)?.spec.version === 2
+        {mid?.startsWith("rs_") ? <StudyView key={mid} sid={mid} /> : mid ? (matrices.data?.find((m) => m.id === mid)?.spec.version === 2
           ? <ReportV2 key={mid} mid={mid} pid={pid!} /> : <Report key={mid} mid={mid} pid={pid!} />)
           : <div className="card"><Empty title="选择一个矩阵查看对比报告" /></div>}
       </div>

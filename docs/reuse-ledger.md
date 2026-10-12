@@ -173,3 +173,11 @@
 
 - **CBMC**（<https://github.com/diffblue/cbmc>，Apache-2.0 等）：任务书列为按语言条件启用的 Verifier/子进程工具，**仅当实际案例是适合它的 C 程序片段时**采用。Phase 5 的订单与隔离案例均为 Python，故本轮**未安装、未链接、未作为依赖**；若 Phase 7 引入 C 案例再固定版本、源码摘要、断言与展开界限并记入本表。
 - **平台内部复用**：5B 的隔离夹具只经业务服务 `create_app` 与 Starlette 中间件接入（授权层），复用 5A 的研究协议、`validate_case`、`decide_correspondence` 与 `scripts/research_check.py`；授权令牌仅为本地测试租户的夹具标识，非真实凭据。
+
+## 7. 阶段六 A（Phase 6A）复用
+
+- **无新增第三方依赖**：`uv.lock` 未变。研究调用沿用 `httpx`（已有）直接实现 OpenAI Chat Completions 与 Anthropic Messages 两种协议的最小适配，未引入任何提供方 SDK。
+- **Inspect AI**（`inspect-ai==0.3.269`，MIT，已在 Phase 2 引入并固定于 `packages/evaluation`）：本轮**未用于研究调用与评分**。原因：研究记录必须保留提供方原始响应体、显式拒绝字段、`finish_reason` 原值、逐次 HTTP 尝试与可能计费的未确认请求，并把调用轴与回答轴分开；Inspect 的模型提供方把这些归一化进 `ModelOutput`，其评测运行器又会成为第二套调度系统。借鉴的只是概念：`ResearchEvaluation` 的“值 + 解析答案 + 说明 + 元数据”形状对应 Inspect `Score`（value / answer / explanation / metadata），便于以后导出为 Inspect 日志；既有 `formal_lab_eval.inspect_adapter` 保持不变。
+- **方法参考**：抽象核查思想（Kroening ICCAD'07）继续体现在程序对应评分：`orders.deviation-diagnosis@1` 把模型回答的修订应用到信念模型，再以记录的程序运行回放核验，而不是对照参考答案。
+- **平台内部复用**：分项统计复用 `formal_lab_eval.stats`（`aggregate`、`paired_compare`、Wilson / bootstrap 区间、精确 Wilcoxon）；`MetricDefinition` / `MetricResult` 契约；5A 的 `replay_items` / `decide_correspondence`；Phase 4A 的协议测试服务（扩展到 Anthropic Messages 协议与研究行为）；`scripts/research_check.py`。
+- **CBMC**：仍未使用（案例为 Python）。

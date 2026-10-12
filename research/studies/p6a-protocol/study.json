@@ -1,0 +1,293 @@
+{
+ "protocol": "fal-research-study/v1",
+ "study_id": "p6a-protocol",
+ "title": "Phase 6A protocol validation (loopback test service, not a model)",
+ "purpose": "validate research calls, raw-first records, the two result axes, scoring, reuse and the two-track report against scripted provider behaviours",
+ "tasks": [
+  {
+   "task_id": "orders-deviation",
+   "track": "implementation_conformance",
+   "case_id": "orders-p2-speed",
+   "case_version": 1,
+   "representation_id": "brief-md",
+   "representation_version": 1,
+   "purpose": "explain why a formal model of a local order-processing service mispredicts the real service, by proposing one revision of a model constant (software model verification)",
+   "inputs": [
+    "inputs/orders-brief.md"
+   ],
+   "assisted_inputs": [
+    "assistance/orders-candidates.json"
+   ],
+   "question": "Which single revision of one boolean model constant indexed by station would make the model agree with the recorded run? Give the constant, the station and the new value.",
+   "answer_format": "json",
+   "answer_schema": {
+    "type": "object",
+    "properties": {
+     "constant": {
+      "type": "string"
+     },
+     "station": {
+      "type": "string"
+     },
+     "value": {
+      "type": "boolean"
+     },
+     "rationale": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "constant",
+     "station",
+     "value"
+    ],
+    "additionalProperties": false
+   },
+   "reference": "reference/orders-deviation.json",
+   "scorer_id": "orders.deviation-diagnosis",
+   "scorer_version": "1",
+   "bound": {
+    "recorded_steps": 26
+   },
+   "split": "acceptance"
+  },
+  {
+   "task_id": "lamp-ir-json",
+   "track": "synthetic_representation",
+   "representation_id": "ir-json",
+   "representation_version": 1,
+   "purpose": "solve a small, harmless planning problem stated in a given representation (a study of how the representation of the same problem affects answers)",
+   "inputs": [
+    "inputs/lamp.ir.json"
+   ],
+   "assisted_inputs": [],
+   "question": "Starting from the initial state, find a plan with the fewest actions that makes the goal `three_toggles` true, using at most 6 actions. Say whether the goal is reachable and give the plan as action names in order.",
+   "answer_format": "json",
+   "answer_schema": {
+    "type": "object",
+    "properties": {
+     "reachable": {
+      "type": "boolean"
+     },
+     "plan": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "rationale": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "reachable",
+     "plan"
+    ],
+    "additionalProperties": false
+   },
+   "reference": "reference/lamp.json",
+   "scorer_id": "synthetic.shortest-plan",
+   "scorer_version": "1",
+   "bound": {
+    "max_actions": 6
+   },
+   "split": "acceptance"
+  },
+  {
+   "task_id": "lamp-prose",
+   "track": "synthetic_representation",
+   "representation_id": "prose",
+   "representation_version": 1,
+   "purpose": "solve a small, harmless planning problem stated in a given representation (a study of how the representation of the same problem affects answers)",
+   "inputs": [
+    "inputs/lamp.prose.md"
+   ],
+   "assisted_inputs": [],
+   "question": "Starting from the initial state, find a plan with the fewest actions that makes the goal `three_toggles` true, using at most 6 actions. Say whether the goal is reachable and give the plan as action names in order.",
+   "answer_format": "json",
+   "answer_schema": {
+    "type": "object",
+    "properties": {
+     "reachable": {
+      "type": "boolean"
+     },
+     "plan": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "rationale": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "reachable",
+     "plan"
+    ],
+    "additionalProperties": false
+   },
+   "reference": "reference/lamp.json",
+   "scorer_id": "synthetic.shortest-plan",
+   "scorer_version": "1",
+   "bound": {
+    "max_actions": 6
+   },
+   "split": "acceptance"
+  },
+  {
+   "task_id": "shortcut-ir-json",
+   "track": "synthetic_representation",
+   "representation_id": "ir-json",
+   "representation_version": 1,
+   "purpose": "solve a small, harmless planning problem stated in a given representation (a study of how the representation of the same problem affects answers)",
+   "inputs": [
+    "inputs/shortcut.ir.json"
+   ],
+   "assisted_inputs": [],
+   "question": "Starting from the initial state, find a plan with the fewest actions that makes the goal `arrived` true, using at most 4 actions. Say whether the goal is reachable and give the plan as action names in order.",
+   "answer_format": "json",
+   "answer_schema": {
+    "type": "object",
+    "properties": {
+     "reachable": {
+      "type": "boolean"
+     },
+     "plan": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "rationale": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "reachable",
+     "plan"
+    ],
+    "additionalProperties": false
+   },
+   "reference": "reference/shortcut.json",
+   "scorer_id": "synthetic.shortest-plan",
+   "scorer_version": "1",
+   "bound": {
+    "max_actions": 4
+   },
+   "split": "acceptance"
+  },
+  {
+   "task_id": "shortcut-prose",
+   "track": "synthetic_representation",
+   "representation_id": "prose",
+   "representation_version": 1,
+   "purpose": "solve a small, harmless planning problem stated in a given representation (a study of how the representation of the same problem affects answers)",
+   "inputs": [
+    "inputs/shortcut.prose.md"
+   ],
+   "assisted_inputs": [],
+   "question": "Starting from the initial state, find a plan with the fewest actions that makes the goal `arrived` true, using at most 4 actions. Say whether the goal is reachable and give the plan as action names in order.",
+   "answer_format": "json",
+   "answer_schema": {
+    "type": "object",
+    "properties": {
+     "reachable": {
+      "type": "boolean"
+     },
+     "plan": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "rationale": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "reachable",
+     "plan"
+    ],
+    "additionalProperties": false
+   },
+   "reference": "reference/shortcut.json",
+   "scorer_id": "synthetic.shortest-plan",
+   "scorer_version": "1",
+   "bound": {
+    "max_actions": 4
+   },
+   "split": "acceptance"
+  }
+ ],
+ "providers": [
+  {
+   "provider_config_id": "ptest-openai",
+   "provider": "protocol-test",
+   "api": "openai.chat.completions",
+   "api_version": "v1",
+   "route": "LOOPBACK_TEST",
+   "base_url_setting": "FAL_PTEST_BASE_URL",
+   "api_key_setting": "FAL_PTEST_API_KEY",
+   "model": "protocol-test-v1",
+   "params": {
+    "max_tokens": 512
+   },
+   "comparability_note": "the loopback protocol test service — not a model"
+  },
+  {
+   "provider_config_id": "ptest-anthropic",
+   "provider": "protocol-test",
+   "api": "anthropic.messages",
+   "api_version": "2023-06-01",
+   "route": "LOOPBACK_TEST",
+   "base_url_setting": "FAL_PTEST_BASE_URL",
+   "api_key_setting": "FAL_PTEST_API_KEY",
+   "model": "protocol-test-v1",
+   "params": {
+    "max_tokens": 512
+   },
+   "comparability_note": "the loopback protocol test service — not a model"
+  }
+ ],
+ "assistance_modes": [
+  "STATIC_UNASSISTED",
+  "ASSISTED"
+ ],
+ "replicates": 2,
+ "rubric_id": "fal-research-rubric",
+ "rubric_version": "1",
+ "primary_metric": "correct",
+ "secondary_metrics": [
+  "format_valid",
+  "refused",
+  "responded",
+  "program_corresponds",
+  "output_tokens"
+ ],
+ "limits": {
+  "max_calls": 60,
+  "max_http_attempts": 120,
+  "max_output_tokens_per_call": 512,
+  "network_retries": 2
+ },
+ "missing_policy": "every planned unit keeps a record; units without a model-produced response are MISSING in the model metrics (never 0 or 1) and counted by call outcome over the planned denominator; a refusal is never retried; only transport faults, lost responses, 429 and 5xx are retried (fixed allowance); on resume an unanswered unit is called again as a new sample",
+ "comparisons": [
+  {
+   "vary": "provider",
+   "a": "ptest-openai",
+   "b": "ptest-anthropic",
+   "note": "two protocol shapes of the same test service: a machinery check, not a model comparison"
+  },
+  {
+   "vary": "representation",
+   "a": "ir-json",
+   "b": "prose"
+  },
+  {
+   "vary": "assistance",
+   "a": "STATIC_UNASSISTED",
+   "b": "ASSISTED"
+  }
+ ]
+}

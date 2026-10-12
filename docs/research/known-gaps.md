@@ -28,6 +28,16 @@ Phase 7 confirms closure of K01–K03 across the track.
 | **K06** | the base order service has no per-tenant authentication; tenant isolation is only enforced by the phase-5B research fixture, not by the default service | the default service is not a secure multi-tenant product; isolation is a *research fixture* property, clearly separated from the default startup path | by design — 5B studies the authorization component, not a claim that the shipped service isolates tenants; a production isolation layer is out of scope |
 | **K07** | the isolation abstraction covers read/write as one `access(subject, tenant)` action over a fixed 2×2 grant; concurrency, token strength/transport, and partial-read leakage not visible in stored state are not modelled | the correspondence covers the recorded attempts only; a cross-tenant request whose effect is not observable in the tenant's state stays UNKNOWN (demonstrated) | the uncovered semantics are declared in the case (`uncovered_semantics`); phase 7 may widen the model if a case needs it |
 
+## Opened in 6A
+
+| id | gap | effect | plan |
+|---|---|---|---|
+| **K08** | both real models were reached only through a third-party relay (`COMPATIBLE_RELAY`, api.uheapi.com): the returned model names are the relay's report; the official Anthropic route is BLOCKED (no `FAL_ANTHROPIC_API_KEY`), and there is no official OpenAI credential | the real results verify the adapters end to end and give an engineering reading, but support **no** formal provider comparison (`provider_comparison_supported: false` in the evidence) | add official credentials (git-ignored `.env`) and re-run `p6a-real` / the 6B studies on `OFFICIAL_NATIVE` routes |
+| **K09** | the relay route for Claude Opus 5.5 changed during the session: 503 "no available accounts", then 404 "not supported by any configured account in this group", then answered — all kept in the ledger history | route instability is a result, not hidden: earlier samples of those units remain recorded; the pre-registered call cap was raised once (8 → 12) with the reason written into the study | none needed beyond recording; a stable official route removes it |
+| **K10** | an unflagged refusal written as prose is not detected heuristically | it is scored `INVALID_FORMAT` with the visible text kept, never `REFUSED` | 6B scorers may classify it explicitly |
+| **K11** | token accounting differs by provider: Anthropic `input_tokens` excludes prompt-cache reads / writes (the relay applied caching once: 2 input + 1293 cache-write tokens), OpenAI `prompt_tokens` includes cached tokens; the relay reported no reasoning tokens for GPT-6 Astra; the first two Claude records predate the cache-write / thinking-token mapping (their raw bodies hold the full usage) | cost figures are recorded as reported, not equated across providers | keep comparing from the raw usage when it matters |
+| **K12** | studies run locally (a sequential runner with a durable ledger); the platform imports results read-only — Temporal does not schedule studies | no platform-side pause / resume of a study; resume is the local runner's (ledger-based, budget not regained) | phase 7 may move study execution behind the platform if long studies need it |
+
 ## Original research-goal coverage (5A + 5B)
 
 | goal | coverage |

@@ -152,3 +152,130 @@ task inputs **explicitly**; the full research case is never sent to a model.
 - **No free-text execution** — model answers this phase are to-be-verified analysis products only; no component
   translates free text into executable instructions. Domain tasks keep their real purpose, safety property and
   necessary context.
+
+## Phase 6A: provider calls, raw answers and evaluation
+
+6A lets one reviewed task be sent to several provider models, records exactly what came back, and hands the answer to
+an independent scorer. The platform, verifiers, evidence and program instances stay local; model inference is online.
+The developer (coding) model and the models under test are different identities: every unit records the provider and
+the model the response names.
+
+### Protocols (independently versioned, in `formal_lab_contracts.research`; schemas in `contracts/research/`)
+
+| Protocol | Type | Holds |
+|---|---|---|
+| `fal-research-response/v1` | `ResearchResponse` | `experiment` (study / unit / track / case / task digest / representation / replicate / assistance / sampling id), `call` (provider, api + version, endpoint without credentials, `route`, what answered, model requested / returned, `model_switched`, `model_identity`, provider response id, request id, times, the sampling `params` exactly as sent), `raw` (the provider body as returned or its text, visible text, `finish_reason` as written and its `finish_class`, the explicit refusal field, truncation, tool-call summary, `reasoning` availability), `status` (the call outcome, HTTP status, provider error type and text, every HTTP attempt with sent / confirmed), `cost` (usage known?, input / output / reasoning / cache-read / cache-write tokens as reported, latency, attempts, possibly-billed unconfirmed attempts, prompt and config digests), `task_input_digest`, `reuse_key` |
+| `fal-research-study/v1` | `ResearchStudy` | tasks (track, case, representation, the real purpose, input files, assisted inputs, question, answer format / schema, reference file, scorer id + version, bound, split), providers (`ProviderConfig`: provider, api, declared route, endpoint / credential *setting names*, model, params, comparability note), assistance modes, replicates, rubric, primary + secondary metrics, limits (calls, HTTP attempts, output tokens per call / total, fixed network retries), missing policy, pre-registered comparisons |
+| `fal-research-evaluation/v1` | `ResearchEvaluation` | the answer axis (`answer_status`), the parsed answer, the behaviour label, refusal status, model-internal and program-correspondence results, per-unit `MetricResult`s, the scorer's explanation, the response / reference / dependency digests and the scoring reuse key — a small static-task record that fabricates no step, world state or execution success |
+
+### Two result axes, stable classes
+
+**Call axis** (`CallOutcome`): `ANSWERED`, `TRUNCATED` (stopped at the output limit; the partial answer is kept),
+`CONTENT_REFUSAL` (a refusal or content filter signalled *inside an HTTP success*), `EMPTY_CONTENT`,
+`MALFORMED_RESPONSE` (HTTP success, not the provider protocol), `AUTH_ERROR` (401 / 403 — never a content refusal),
+`RATE_LIMITED`, `PROVIDER_ERROR` (5xx / overloaded), `REQUEST_REJECTED`, `MODEL_UNAVAILABLE`, `TRANSPORT_ERROR` (never
+reached the provider), `UNCERTAIN` (sent, no response: possibly billed), `BUDGET_EXHAUSTED`, `CANCELLED`,
+`BLOCKED_NO_CREDENTIAL` (the last three: nothing sent). A model change (`model_switched`) and an unnamed model
+(`model_identity = UNKNOWN`) are recorded on every response. Only `ANSWERED / TRUNCATED / CONTENT_REFUSAL /
+EMPTY_CONTENT` count as responses the model produced (`MODEL_PRODUCED`).
+
+**Answer axis** (`AnswerStatus`, parsed *after* the raw record is saved): `VALID` (the whole text is the JSON object,
+or exactly one fenced JSON block), `INVALID_JSON`, `SCHEMA_VIOLATION`, `TYPE_ERROR`, `EMPTY`, `NO_ANSWER`. A parse
+failure stays reviewable; a failed call is never overwritten by a rule fallback (the planners' `RULE_FALLBACK` label is
+unchanged and is not a research path). Internal reasoning a provider does not expose is `NOT_EXPOSED`; a provider
+thinking block is `SUMMARY_ONLY`, never raw reasoning. An unflagged refusal written as prose is *not* detected by
+heuristics in 6A: it appears as `INVALID_FORMAT` with the visible text kept for review (6B scorers may classify it).
+
+### Adapters, routes and credentials (`formal_lab_strategies.model_clients`)
+
+`research_adapter(ProviderConfig, *, setting=read_setting) -> (adapter | None, why)` builds `OpenAIChatAdapter`
+(`openai.chat.completions`: content, `message.refusal`, `finish_reason`, usage) or `AnthropicMessagesAdapter`
+(`anthropic.messages`, `anthropic-version: 2023-06-01`: text blocks, `stop_reason` incl. `refusal` / `max_tokens`,
+thinking as summary, usage incl. cache writes and thinking tokens). `route_of(provider, url)` classifies the endpoint
+host: `api.openai.com` / `api.anthropic.com` → `OFFICIAL_NATIVE`, loopback → `LOOPBACK_TEST`, anything else →
+`COMPATIBLE_RELAY`; a study whose declared route disagrees with the host is refused. `read_setting(name)` is the only
+place a research credential is read and accepts only `FAL_*` names (environment, then the git-ignored `.env`) — a
+provider's own variable such as `ANTHROPIC_API_KEY` is never used. No response, prompt, evaluation, report or export
+contains a credential (a gateway that echoes one is redacted; the checks scan every written file).
+
+`research_call(adapter, ResearchRequest, *, budget, cancel, network_retries, …) -> ResearchCallResult`: cancellation
+and the `ResearchBudget` (calls, HTTP attempts, output tokens) are checked before anything is sent; only connect
+failures, lost responses, 429 and 5xx are retried, a fixed number of times; a refusal or any answer is returned as it
+came; every attempt is recorded. Model calls, HTTP attempts and possibly-billed unconfirmed requests are counted apart.
+
+### Studies, reuse and resume (`formal_lab_eval.research`)
+
+`load_study` (validates files, scorers, comparisons; rejects a reference that is, or is a copy of, a task input),
+`plan_units` (task × provider × assistance × replicate; a mode a task does not define is listed NOT_RUN),
+`render` (system prompt with the task's real purpose and format; the inputs; assisted inputs only in ASSISTED),
+`cap_params` (enforces the study's per-call output cap, recorded as sent), `run_study`, `score_study`, `build_report`.
+Results live in `research/results/<study_id>/`: `ledger.jsonl`, `responses/<unit>--<n>.json` (written before any
+parsing), `prompts/<digest>.json` (exactly what was sent), `evaluations/`, `report.json` / `report.md`.
+
+- **Response reuse key** — source case + version, task id + digest (question, format, schema, representation, purpose,
+  bound, input-file digests), provider (provider, api + version, route, resolved endpoint, model, params, credential
+  *setting name* — on a relay the key selects the account group), assistance mode + assisted-input digests, replicate.
+  On resume a unit is reused only if its latest response is one the provider made (`MODEL_PRODUCED` or a malformed
+  body) under the same key; anything else (failure, unavailable model, rejected request, cancellation, budget, blocked)
+  is called again as a new sample (`sampling_index` + 1) and the earlier record stays in the ledger. Budget counters are
+  rebuilt from the ledger, so a resumed study never regains spent calls. A cached response keeps the model identity and
+  time it was recorded with; it is never relabelled as a newer model.
+- **Scoring reuse key** — response digest + scorer id / version + reference sha256 (the reference pins its own
+  dependencies' digests) + rubric + answer format / schema. `score_study` reuses evaluations with the same key and
+  never calls a model; `--force` recomputes.
+
+### Scoring interface (6B registers here)
+
+`formal_lab_eval.research_scorers`: a scorer has `scorer_id`, `version` and
+`score(parsed, reference, *, repo_root, truncated) -> ScoreOutcome(behavior, model_internal, program_correspondence,
+explanation, dependencies)`. Register in-process with `register_scorer(...)`, or ship it in a package under the entry-
+point group `formal_lab.research_scorers` (an instance, a class or a list); a task names it by `scorer_id` +
+`scorer_version`. The runner owns the call axis and parsing: a scorer only ever receives a parsed answer the model
+actually produced, plus its own reference file (never shown to the model). Built-ins:
+`orders.deviation-diagnosis@1` (applies the proposed constant revision to the belief model and replays the *recorded
+program run* — CORRESPONDS = correct; the expected revision is reported alongside, not used as the criterion) and
+`synthetic.shortest-plan@1` (replays the plan on the reference interpreter, compares with the breadth-first shortest
+plan; program correspondence is `NOT_APPLICABLE`, never filled in as a pass).
+
+Per-unit metrics (rubric `fal-research-rubric@1`): `correct` (primary; refusals, empty and invalid answers count as
+not correct; units without a model-produced response are MISSING — never 0, never 1), `format_valid`, `refused`,
+`responded` (NOT_APPLICABLE for units never sent), `program_corresponds` (implementation track only), `output_tokens`
+(unknown usage MISSING), `latency_ms`. Aggregates reuse `formal_lab_eval.stats` (Wilson / bootstrap intervals, paired
+comparisons with the exact Wilcoxon test only when ≥ 6 non-zero differences).
+
+### Reports and comparisons
+
+`build_report` reports each track separately — never one pooled success rate — with, per condition (provider ·
+assistance · representation), the planned denominator, counts of every call outcome and behaviour label, metric
+aggregates with n / missing / not-applicable, confirmed tokens, unknown-usage calls, possibly-billed attempts and the
+identity (route / identity status / requested → returned). Pre-registered paired comparisons vary one dimension at a
+time: provider (key: task, assistance, replicate), assistance (task, provider, replicate), representation (same
+reference problem, provider, assistance, replicate). A provider comparison records both parameter sets and their
+comparability notes and states that equal parameter names do not mean equal compute and that a fixed seed on a real
+API does not reproduce an answer. A comparison with no planned units on one side in a track is marked not applicable.
+
+### Entry points
+
+```bash
+uv run --frozen fal research study plan|run|score|report research/studies/<study_id>
+uv run --frozen fal research study show research/studies/<study_id> --unit <unit_id>
+uv run --frozen fal research study import research/studies/<study_id> --project <project>   # Web: 基准对比 → 研究评测
+make research-check ARGS="--group p6a"
+```
+
+The platform imports study results read-only (`POST /projects/{pid}/research/studies`, `GET …/research/studies`,
+`GET /research/studies/{id}`, `GET /research/studies/{id}/units/{unit_id}`), re-checking every response file against
+the digest the ledger recorded. Studies run locally from the host (the checker owns acceptance); they are not a second
+scheduler, and Temporal does not run them.
+
+### Studies registered in 6A
+
+| Study | Track(s) | Providers | Purpose |
+|---|---|---|---|
+| `p6a-protocol` | both | the loopback protocol test service, OpenAI and Anthropic protocol shapes (not a model) | 24 scripted units through every call and answer class; budget, cancel, resume, rescoring |
+| `p6a-real` | implementation_conformance | GPT-6 Astra and Claude Opus 5.5 through the configured relay (`COMPATIBLE_RELAY`); Claude Opus 5.5 native (`OFFICIAL_NATIVE`, blocked without `FAL_ANTHROPIC_API_KEY`) | the minimal ordinary-business call within the authorized test quota |
+
+The ordinary-business task (`orders-deviation`) gives the model the belief model's mechanics, the instance and the
+recorded run's differences of case `orders-p2-speed` — every number quoted from the case — and asks for one constant
+revision; the operating condition that caused the deviation (the answer) is only in the scorer's reference. Synthetic
+tasks are a lamp counter and a short route (`formal_lab_model.samples`), each as model IR JSON and as fixed prose.

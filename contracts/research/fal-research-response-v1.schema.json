@@ -1,0 +1,713 @@
+{
+  "$defs": {
+    "AssistanceMode": {
+      "enum": [
+        "STATIC_UNASSISTED",
+        "ASSISTED"
+      ],
+      "title": "AssistanceMode",
+      "type": "string"
+    },
+    "AttemptRecord": {
+      "additionalProperties": false,
+      "properties": {
+        "attempt_id": {
+          "title": "Attempt Id",
+          "type": "string"
+        },
+        "attempt_no": {
+          "minimum": 1,
+          "title": "Attempt No",
+          "type": "integer"
+        },
+        "confirmed": {
+          "description": "a complete HTTP response arrived for this attempt",
+          "title": "Confirmed",
+          "type": "boolean"
+        },
+        "error": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "redacted, truncated",
+          "title": "Error"
+        },
+        "error_class": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Error Class"
+        },
+        "http_status": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Http Status"
+        },
+        "latency_ms": {
+          "default": 0.0,
+          "title": "Latency Ms",
+          "type": "number"
+        },
+        "sent": {
+          "title": "Sent",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "attempt_no",
+        "attempt_id",
+        "sent",
+        "confirmed"
+      ],
+      "title": "AttemptRecord",
+      "type": "object"
+    },
+    "CallIdentity": {
+      "additionalProperties": false,
+      "properties": {
+        "api": {
+          "description": "openai.chat.completions / anthropic.messages",
+          "minLength": 1,
+          "title": "Api",
+          "type": "string"
+        },
+        "api_version": {
+          "minLength": 1,
+          "title": "Api Version",
+          "type": "string"
+        },
+        "endpoint": {
+          "description": "scheme://host/path — no credentials, no query",
+          "title": "Endpoint",
+          "type": "string"
+        },
+        "endpoint_kind": {
+          "description": "what answered, from the answer itself: PROVIDER / PROTOCOL_TEST / STUB",
+          "title": "Endpoint Kind",
+          "type": "string"
+        },
+        "finished_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Finished At"
+        },
+        "model_identity": {
+          "$ref": "#/$defs/ModelIdentityStatus"
+        },
+        "model_requested": {
+          "title": "Model Requested",
+          "type": "string"
+        },
+        "model_returned": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model Returned"
+        },
+        "model_switched": {
+          "default": false,
+          "title": "Model Switched",
+          "type": "boolean"
+        },
+        "params": {
+          "additionalProperties": true,
+          "description": "exactly the sampling parameters sent",
+          "title": "Params",
+          "type": "object"
+        },
+        "params_digest": {
+          "title": "Params Digest",
+          "type": "string"
+        },
+        "provider": {
+          "description": "openai / anthropic / protocol-test / stub",
+          "minLength": 1,
+          "title": "Provider",
+          "type": "string"
+        },
+        "provider_config_id": {
+          "minLength": 1,
+          "title": "Provider Config Id",
+          "type": "string"
+        },
+        "request_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "the provider's request id header, when sent",
+          "title": "Request Id"
+        },
+        "response_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "the provider's response id",
+          "title": "Response Id"
+        },
+        "route": {
+          "$ref": "#/$defs/Route"
+        },
+        "started_at": {
+          "title": "Started At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "provider",
+        "provider_config_id",
+        "api",
+        "api_version",
+        "endpoint",
+        "route",
+        "endpoint_kind",
+        "model_requested",
+        "model_identity",
+        "started_at",
+        "params_digest"
+      ],
+      "title": "CallIdentity",
+      "type": "object"
+    },
+    "CallOutcome": {
+      "description": "The call axis — one stable class per call. Kept apart from how the answer is parsed and scored.",
+      "enum": [
+        "ANSWERED",
+        "TRUNCATED",
+        "CONTENT_REFUSAL",
+        "EMPTY_CONTENT",
+        "MALFORMED_RESPONSE",
+        "AUTH_ERROR",
+        "RATE_LIMITED",
+        "PROVIDER_ERROR",
+        "REQUEST_REJECTED",
+        "MODEL_UNAVAILABLE",
+        "TRANSPORT_ERROR",
+        "UNCERTAIN",
+        "BUDGET_EXHAUSTED",
+        "CANCELLED",
+        "BLOCKED_NO_CREDENTIAL"
+      ],
+      "title": "CallOutcome",
+      "type": "string"
+    },
+    "CallStatus": {
+      "additionalProperties": false,
+      "properties": {
+        "attempts": {
+          "items": {
+            "$ref": "#/$defs/AttemptRecord"
+          },
+          "title": "Attempts",
+          "type": "array"
+        },
+        "http_status": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Http Status"
+        },
+        "model_switched": {
+          "default": false,
+          "title": "Model Switched",
+          "type": "boolean"
+        },
+        "network_retries": {
+          "description": "the fixed retry allowance the call ran with",
+          "minimum": 0,
+          "title": "Network Retries",
+          "type": "integer"
+        },
+        "note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Note"
+        },
+        "outcome": {
+          "$ref": "#/$defs/CallOutcome"
+        },
+        "provider_error": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Provider Error"
+        },
+        "provider_error_type": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Provider Error Type"
+        },
+        "transport_ok": {
+          "title": "Transport Ok",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "outcome",
+        "transport_ok",
+        "network_retries"
+      ],
+      "title": "CallStatus",
+      "type": "object"
+    },
+    "CostRecord": {
+      "additionalProperties": false,
+      "properties": {
+        "cache_read_tokens": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Cache Read Tokens"
+        },
+        "cache_write_tokens": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "prompt-cache writes (Anthropic cache_creation_input_tokens); input_tokens is as the provider counts it",
+          "title": "Cache Write Tokens"
+        },
+        "config_digest": {
+          "title": "Config Digest",
+          "type": "string"
+        },
+        "http_attempts": {
+          "minimum": 0,
+          "title": "Http Attempts",
+          "type": "integer"
+        },
+        "input_tokens": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Input Tokens"
+        },
+        "latency_ms": {
+          "default": 0.0,
+          "title": "Latency Ms",
+          "type": "number"
+        },
+        "output_tokens": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Output Tokens"
+        },
+        "possibly_billed_unconfirmed": {
+          "description": "attempts sent without a confirmed response",
+          "minimum": 0,
+          "title": "Possibly Billed Unconfirmed",
+          "type": "integer"
+        },
+        "prompt_digest": {
+          "title": "Prompt Digest",
+          "type": "string"
+        },
+        "reasoning_tokens": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reasoning Tokens"
+        },
+        "usage_known": {
+          "title": "Usage Known",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "usage_known",
+        "http_attempts",
+        "possibly_billed_unconfirmed",
+        "prompt_digest",
+        "config_digest"
+      ],
+      "title": "CostRecord",
+      "type": "object"
+    },
+    "ExperimentIdentity": {
+      "additionalProperties": false,
+      "properties": {
+        "assistance_mode": {
+          "$ref": "#/$defs/AssistanceMode"
+        },
+        "case_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Case Id"
+        },
+        "case_version": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Case Version"
+        },
+        "replicate_id": {
+          "minimum": 0,
+          "title": "Replicate Id",
+          "type": "integer"
+        },
+        "representation_id": {
+          "minLength": 1,
+          "title": "Representation Id",
+          "type": "string"
+        },
+        "sampling_id": {
+          "description": "a new id for every fresh sample (a resample is a new one)",
+          "minLength": 1,
+          "title": "Sampling Id",
+          "type": "string"
+        },
+        "study_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:@/-]{0,254}$",
+          "title": "Study Id",
+          "type": "string"
+        },
+        "task_digest": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Task Digest",
+          "type": "string"
+        },
+        "task_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:@/-]{0,254}$",
+          "title": "Task Id",
+          "type": "string"
+        },
+        "track": {
+          "$ref": "#/$defs/Track"
+        },
+        "unit_id": {
+          "minLength": 1,
+          "title": "Unit Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "study_id",
+        "unit_id",
+        "track",
+        "task_id",
+        "task_digest",
+        "representation_id",
+        "replicate_id",
+        "assistance_mode",
+        "sampling_id"
+      ],
+      "title": "ExperimentIdentity",
+      "type": "object"
+    },
+    "FinishClass": {
+      "enum": [
+        "STOP",
+        "LENGTH",
+        "REFUSAL",
+        "CONTENT_FILTER",
+        "TOOL_USE",
+        "PAUSE",
+        "OTHER",
+        "UNKNOWN"
+      ],
+      "title": "FinishClass",
+      "type": "string"
+    },
+    "ModelIdentityStatus": {
+      "enum": [
+        "CONFIRMED_BY_PROVIDER",
+        "RELAY_REPORTED",
+        "TEST_SERVICE",
+        "STUB",
+        "UNKNOWN"
+      ],
+      "title": "ModelIdentityStatus",
+      "type": "string"
+    },
+    "RawAnswer": {
+      "additionalProperties": false,
+      "properties": {
+        "body": {
+          "default": null,
+          "description": "the provider's JSON body as returned (when it is JSON)",
+          "title": "Body"
+        },
+        "body_text": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "the body as text when it is not JSON",
+          "title": "Body Text"
+        },
+        "finish_class": {
+          "$ref": "#/$defs/FinishClass",
+          "default": "UNKNOWN"
+        },
+        "finish_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "exactly as the provider wrote it",
+          "title": "Finish Reason"
+        },
+        "reasoning": {
+          "$ref": "#/$defs/ReasoningAvailability",
+          "default": "NOT_EXPOSED"
+        },
+        "refusal": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "the provider's explicit refusal field / signal",
+          "title": "Refusal"
+        },
+        "tool_calls": {
+          "items": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "title": "Tool Calls",
+          "type": "array"
+        },
+        "truncated": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Truncated"
+        },
+        "visible_text": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Visible Text"
+        }
+      },
+      "title": "RawAnswer",
+      "type": "object"
+    },
+    "ReasoningAvailability": {
+      "enum": [
+        "NOT_EXPOSED",
+        "SUMMARY_ONLY"
+      ],
+      "title": "ReasoningAvailability",
+      "type": "string"
+    },
+    "ResearchResponse": {
+      "additionalProperties": false,
+      "description": "The raw record of one research call, persisted before anything parses or scores it.",
+      "properties": {
+        "call": {
+          "$ref": "#/$defs/CallIdentity"
+        },
+        "cost": {
+          "$ref": "#/$defs/CostRecord"
+        },
+        "experiment": {
+          "$ref": "#/$defs/ExperimentIdentity"
+        },
+        "protocol": {
+          "const": "fal-research-response/v1",
+          "default": "fal-research-response/v1",
+          "title": "Protocol",
+          "type": "string"
+        },
+        "raw": {
+          "$ref": "#/$defs/RawAnswer"
+        },
+        "recorded_at": {
+          "title": "Recorded At",
+          "type": "string"
+        },
+        "reuse_key": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Reuse Key",
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/$defs/CallStatus"
+        },
+        "task_input_digest": {
+          "description": "sha256 of exactly what was sent (system + user)",
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Task Input Digest",
+          "type": "string"
+        }
+      },
+      "required": [
+        "experiment",
+        "call",
+        "raw",
+        "status",
+        "cost",
+        "task_input_digest",
+        "reuse_key",
+        "recorded_at"
+      ],
+      "title": "ResearchResponse",
+      "type": "object"
+    },
+    "Route": {
+      "description": "How the request reached a model, declared in the study and checked against the endpoint host at call time.",
+      "enum": [
+        "OFFICIAL_NATIVE",
+        "COMPATIBLE_RELAY",
+        "LOOPBACK_TEST",
+        "STUB"
+      ],
+      "title": "Route",
+      "type": "string"
+    },
+    "Track": {
+      "description": "The two experiment lines of phases 5–7, counted apart.",
+      "enum": [
+        "implementation_conformance",
+        "synthetic_representation"
+      ],
+      "title": "Track",
+      "type": "string"
+    }
+  },
+  "$id": "https://formal-lab.dev/fal-research-response/v1",
+  "$ref": "#/$defs/ResearchResponse",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "fal-research-response/v1"
+}

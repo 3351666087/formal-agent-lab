@@ -1,0 +1,498 @@
+{
+  "$defs": {
+    "Aggregation": {
+      "enum": [
+        "MEAN",
+        "SUM",
+        "MEDIAN",
+        "MIN",
+        "MAX",
+        "RATE"
+      ],
+      "title": "Aggregation",
+      "type": "string"
+    },
+    "AnswerStatus": {
+      "description": "The answer axis: how the recorded answer parses (after it was saved).",
+      "enum": [
+        "VALID",
+        "INVALID_JSON",
+        "SCHEMA_VIOLATION",
+        "TYPE_ERROR",
+        "EMPTY",
+        "NO_ANSWER"
+      ],
+      "title": "AnswerStatus",
+      "type": "string"
+    },
+    "ArtifactRef": {
+      "additionalProperties": false,
+      "description": "Pointer to a large object held by an ArtifactStore (never inlined into events).",
+      "properties": {
+        "digest": {
+          "$ref": "#/$defs/Digest"
+        },
+        "format_version": {
+          "minLength": 1,
+          "title": "Format Version",
+          "type": "string"
+        },
+        "media_type": {
+          "minLength": 3,
+          "title": "Media Type",
+          "type": "string"
+        },
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Name"
+        },
+        "size_bytes": {
+          "minimum": 0,
+          "title": "Size Bytes",
+          "type": "integer"
+        },
+        "uri": {
+          "description": "object location, e.g. file://… or s3://bucket/key",
+          "minLength": 1,
+          "title": "Uri",
+          "type": "string"
+        }
+      },
+      "required": [
+        "uri",
+        "media_type",
+        "size_bytes",
+        "digest",
+        "format_version"
+      ],
+      "title": "ArtifactRef",
+      "type": "object"
+    },
+    "BehaviorLabel": {
+      "enum": [
+        "CORRECT",
+        "PARTIAL",
+        "INCORRECT",
+        "INVALID_FORMAT",
+        "REFUSED",
+        "EMPTY",
+        "NO_MODEL_ANSWER",
+        "NOT_RUN"
+      ],
+      "title": "BehaviorLabel",
+      "type": "string"
+    },
+    "CallOutcome": {
+      "description": "The call axis — one stable class per call. Kept apart from how the answer is parsed and scored.",
+      "enum": [
+        "ANSWERED",
+        "TRUNCATED",
+        "CONTENT_REFUSAL",
+        "EMPTY_CONTENT",
+        "MALFORMED_RESPONSE",
+        "AUTH_ERROR",
+        "RATE_LIMITED",
+        "PROVIDER_ERROR",
+        "REQUEST_REJECTED",
+        "MODEL_UNAVAILABLE",
+        "TRANSPORT_ERROR",
+        "UNCERTAIN",
+        "BUDGET_EXHAUSTED",
+        "CANCELLED",
+        "BLOCKED_NO_CREDENTIAL"
+      ],
+      "title": "CallOutcome",
+      "type": "string"
+    },
+    "ConfidenceInterval": {
+      "additionalProperties": false,
+      "properties": {
+        "high": {
+          "title": "High",
+          "type": "number"
+        },
+        "level": {
+          "exclusiveMaximum": 1,
+          "exclusiveMinimum": 0,
+          "title": "Level",
+          "type": "number"
+        },
+        "low": {
+          "title": "Low",
+          "type": "number"
+        },
+        "method": {
+          "title": "Method",
+          "type": "string"
+        },
+        "n": {
+          "minimum": 1,
+          "title": "N",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "low",
+        "high",
+        "level",
+        "method",
+        "n"
+      ],
+      "title": "ConfidenceInterval",
+      "type": "object"
+    },
+    "Digest": {
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": {
+          "const": "sha256",
+          "default": "sha256",
+          "title": "Algorithm",
+          "type": "string"
+        },
+        "value": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "Digest",
+      "type": "object"
+    },
+    "EvidenceRef": {
+      "additionalProperties": false,
+      "description": "Reference to something that supports a claim: an event, artifact, check or snapshot.",
+      "properties": {
+        "artifact": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ArtifactRef"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "id": {
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "event",
+            "artifact",
+            "check",
+            "snapshot",
+            "operation",
+            "model_call",
+            "probe",
+            "query_bundle",
+            "release",
+            "rule",
+            "plan",
+            "regression_case",
+            "session"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Note"
+        }
+      },
+      "required": [
+        "kind",
+        "id"
+      ],
+      "title": "EvidenceRef",
+      "type": "object"
+    },
+    "MetricResult": {
+      "additionalProperties": false,
+      "properties": {
+        "aggregation": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Aggregation"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "ci": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ConfidenceInterval"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "evidence": {
+          "items": {
+            "$ref": "#/$defs/EvidenceRef"
+          },
+          "title": "Evidence",
+          "type": "array"
+        },
+        "metric_id": {
+          "title": "Metric Id",
+          "type": "string"
+        },
+        "metric_version": {
+          "title": "Metric Version",
+          "type": "string"
+        },
+        "missing_count": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Missing Count"
+        },
+        "missing_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Missing Reason"
+        },
+        "sample_size": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "number of runs aggregated (aggregates only)",
+          "title": "Sample Size"
+        },
+        "status": {
+          "$ref": "#/$defs/MetricStatus"
+        },
+        "subject": {
+          "description": "run id, or matrix-cell key for aggregates",
+          "title": "Subject",
+          "type": "string"
+        },
+        "unit": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Unit"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Value"
+        }
+      },
+      "required": [
+        "metric_id",
+        "metric_version",
+        "subject",
+        "value",
+        "status"
+      ],
+      "title": "MetricResult",
+      "type": "object"
+    },
+    "MetricStatus": {
+      "enum": [
+        "OK",
+        "MISSING",
+        "NOT_APPLICABLE",
+        "ERROR"
+      ],
+      "title": "MetricStatus",
+      "type": "string"
+    },
+    "ResearchEvaluation": {
+      "additionalProperties": false,
+      "description": "A small static-task evaluation record (no fabricated steps, world state or execution success).",
+      "properties": {
+        "answer_status": {
+          "$ref": "#/$defs/AnswerStatus"
+        },
+        "behavior_label": {
+          "$ref": "#/$defs/BehaviorLabel"
+        },
+        "call_outcome": {
+          "$ref": "#/$defs/CallOutcome"
+        },
+        "dependency_digests": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Dependency Digests",
+          "type": "object"
+        },
+        "explanation": {
+          "default": "",
+          "title": "Explanation",
+          "type": "string"
+        },
+        "metrics": {
+          "items": {
+            "$ref": "#/$defs/MetricResult"
+          },
+          "title": "Metrics",
+          "type": "array"
+        },
+        "model_internal": {
+          "default": "NOT_EVALUATED",
+          "enum": [
+            "CORRECT",
+            "INCORRECT",
+            "NOT_EVALUATED",
+            "NOT_APPLICABLE"
+          ],
+          "title": "Model Internal",
+          "type": "string"
+        },
+        "parsed": {
+          "default": null,
+          "title": "Parsed"
+        },
+        "program_correspondence": {
+          "default": "NOT_EVALUATED",
+          "enum": [
+            "CORRESPONDS",
+            "DEVIATES",
+            "UNKNOWN",
+            "NOT_APPLICABLE",
+            "NOT_EVALUATED"
+          ],
+          "title": "Program Correspondence",
+          "type": "string"
+        },
+        "protocol": {
+          "const": "fal-research-evaluation/v1",
+          "default": "fal-research-evaluation/v1",
+          "title": "Protocol",
+          "type": "string"
+        },
+        "reference_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Reference Sha256",
+          "type": "string"
+        },
+        "refusal_status": {
+          "default": "NONE",
+          "enum": [
+            "NONE",
+            "EXPLICIT_REFUSAL",
+            "CONTENT_FILTER"
+          ],
+          "title": "Refusal Status",
+          "type": "string"
+        },
+        "response_digest": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Response Digest",
+          "type": "string"
+        },
+        "response_path": {
+          "pattern": "^[A-Za-z0-9._@+=,-][A-Za-z0-9._@+=,/-]*$",
+          "title": "Response Path",
+          "type": "string"
+        },
+        "scorer_id": {
+          "title": "Scorer Id",
+          "type": "string"
+        },
+        "scorer_version": {
+          "title": "Scorer Version",
+          "type": "string"
+        },
+        "scoring_reuse_key": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Scoring Reuse Key",
+          "type": "string"
+        },
+        "study_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:@/-]{0,254}$",
+          "title": "Study Id",
+          "type": "string"
+        },
+        "unit_id": {
+          "minLength": 1,
+          "title": "Unit Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "study_id",
+        "unit_id",
+        "response_digest",
+        "response_path",
+        "scorer_id",
+        "scorer_version",
+        "reference_sha256",
+        "call_outcome",
+        "answer_status",
+        "behavior_label",
+        "scoring_reuse_key"
+      ],
+      "title": "ResearchEvaluation",
+      "type": "object"
+    }
+  },
+  "$id": "https://formal-lab.dev/fal-research-evaluation/v1",
+  "$ref": "#/$defs/ResearchEvaluation",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "fal-research-evaluation/v1"
+}

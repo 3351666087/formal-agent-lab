@@ -359,6 +359,36 @@ class ResearchConformanceRow(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
 
+class ResearchStudyRow(Base):
+    """An imported research study's results (phase 6A): definition, report and a per-unit summary."""
+
+    __tablename__ = "research_studies"
+    __table_args__ = (UniqueConstraint("project_id", "study_id", name="uq_research_study"),)
+    id: Mapped[str] = mapped_column(String(40), primary_key=True)
+    project_id: Mapped[str] = mapped_column(ForeignKey("projects.id", ondelete="CASCADE"), index=True)
+    study_id: Mapped[str] = mapped_column(String(120))
+    title: Mapped[str] = mapped_column(Text)
+    study_digest: Mapped[str] = mapped_column(String(64))
+    study: Mapped[dict[str, Any]] = mapped_column(JsonType, doc="ResearchStudy (fal-research-study/v1)")
+    report: Mapped[dict[str, Any]] = mapped_column(JsonType)
+    units: Mapped[list[Any]] = mapped_column(JsonType, doc="per-unit summary: the two result axes")
+    imported_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+
+class ResearchStudyUnitRow(Base):
+    """One planned unit of an imported study: its latest raw response record and its evaluation."""
+
+    __tablename__ = "research_study_units"
+    study_row_id: Mapped[str] = mapped_column(ForeignKey("research_studies.id", ondelete="CASCADE"), primary_key=True)
+    unit_id: Mapped[str] = mapped_column(String(255), primary_key=True)
+    track: Mapped[str] = mapped_column(String(40))
+    outcome: Mapped[str] = mapped_column(String(32))
+    behavior: Mapped[str | None] = mapped_column(String(32))
+    response: Mapped[dict[str, Any]] = mapped_column(JsonType, doc="ResearchResponse (fal-research-response/v1)")
+    evaluation: Mapped[dict[str, Any] | None] = mapped_column(JsonType, doc="ResearchEvaluation")
+    history: Mapped[list[Any]] = mapped_column(JsonType, doc="earlier samples of this unit (outcome, time)")
+
+
 class PluginRow(Base):
     __tablename__ = "plugin_catalog"
     plugin_id: Mapped[str] = mapped_column(String(200), primary_key=True)

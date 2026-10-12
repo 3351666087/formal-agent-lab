@@ -41,7 +41,17 @@ from .db import (
     session_scope,
 )
 from .orchestration import TemporalOrchestrator
-from .services import catalog, governance, modeling, operations, probabilistic, research, runs, scenarios
+from .services import (
+    catalog,
+    governance,
+    modeling,
+    operations,
+    probabilistic,
+    research,
+    research_studies,
+    runs,
+    scenarios,
+)
 from .services.common import artifact_store, get_or_404
 from .services.events import list_events, to_trace_event
 from .settings import get_settings
@@ -620,6 +630,26 @@ def _routes(app: FastAPI) -> None:
     @app.get(f"{API}/runs/{{run_id}}/research")
     async def run_research(run_id: str):
         return jsonable_encoder(await db(lambda s: research.conformance_for_run(s, run_id)))
+
+    # ------------------------------------------------------------------ research studies (phase 6A, read-only import)
+    @app.post(f"{API}/projects/{{project_id}}/research/studies", status_code=201)
+    async def import_research_study(project_id: str, request: Request):
+        data = await request.body()
+        if not data:
+            raise HTTPException(status_code=400, detail="empty body: POST study.json + results/ as a zip")
+        return jsonable_encoder(await db(lambda s: research_studies.import_study(s, project_id, data)))
+
+    @app.get(f"{API}/projects/{{project_id}}/research/studies")
+    async def list_research_studies(project_id: str):
+        return jsonable_encoder(await db(lambda s: research_studies.list_studies(s, project_id)))
+
+    @app.get(f"{API}/research/studies/{{rs_id}}")
+    async def get_research_study(rs_id: str):
+        return jsonable_encoder(await db(lambda s: research_studies.study_detail(s, rs_id)))
+
+    @app.get(f"{API}/research/studies/{{rs_id}}/units/{{unit_id}}")
+    async def get_research_study_unit(rs_id: str, unit_id: str):
+        return jsonable_encoder(await db(lambda s: research_studies.study_unit(s, rs_id, unit_id)))
 
     # ------------------------------------------------------------------ participant access (phase 4A, A2)
     @app.post(f"{API}/runs/{{run_id}}/participants/{{actor_id}}/access", status_code=201)

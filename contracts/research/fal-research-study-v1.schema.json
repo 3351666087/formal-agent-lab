@@ -1,0 +1,486 @@
+{
+  "$defs": {
+    "AssistanceMode": {
+      "enum": [
+        "STATIC_UNASSISTED",
+        "ASSISTED"
+      ],
+      "title": "AssistanceMode",
+      "type": "string"
+    },
+    "ProviderConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "api": {
+          "enum": [
+            "openai.chat.completions",
+            "anthropic.messages"
+          ],
+          "title": "Api",
+          "type": "string"
+        },
+        "api_key_setting": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "settings name of the credential (never its value)",
+          "title": "Api Key Setting"
+        },
+        "api_version": {
+          "minLength": 1,
+          "title": "Api Version",
+          "type": "string"
+        },
+        "base_url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "literal endpoint (loopback / official default)",
+          "title": "Base Url"
+        },
+        "base_url_setting": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "settings name holding the endpoint",
+          "title": "Base Url Setting"
+        },
+        "comparability_note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Comparability Note"
+        },
+        "model": {
+          "minLength": 1,
+          "title": "Model",
+          "type": "string"
+        },
+        "params": {
+          "additionalProperties": true,
+          "description": "sampling parameters sent verbatim",
+          "title": "Params",
+          "type": "object"
+        },
+        "provider": {
+          "enum": [
+            "openai",
+            "anthropic",
+            "protocol-test"
+          ],
+          "title": "Provider",
+          "type": "string"
+        },
+        "provider_config_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:@/-]{0,254}$",
+          "title": "Provider Config Id",
+          "type": "string"
+        },
+        "route": {
+          "$ref": "#/$defs/Route",
+          "description": "declared; the runner checks it against the endpoint host before sending"
+        }
+      },
+      "required": [
+        "provider_config_id",
+        "provider",
+        "api",
+        "api_version",
+        "route",
+        "model"
+      ],
+      "title": "ProviderConfig",
+      "type": "object"
+    },
+    "ResearchStudy": {
+      "additionalProperties": false,
+      "properties": {
+        "assistance_modes": {
+          "items": {
+            "$ref": "#/$defs/AssistanceMode"
+          },
+          "minItems": 1,
+          "title": "Assistance Modes",
+          "type": "array"
+        },
+        "comparisons": {
+          "items": {
+            "$ref": "#/$defs/StudyComparison"
+          },
+          "title": "Comparisons",
+          "type": "array"
+        },
+        "limits": {
+          "$ref": "#/$defs/StudyLimits"
+        },
+        "missing_policy": {
+          "minLength": 1,
+          "title": "Missing Policy",
+          "type": "string"
+        },
+        "primary_metric": {
+          "minLength": 1,
+          "title": "Primary Metric",
+          "type": "string"
+        },
+        "protocol": {
+          "const": "fal-research-study/v1",
+          "default": "fal-research-study/v1",
+          "title": "Protocol",
+          "type": "string"
+        },
+        "providers": {
+          "items": {
+            "$ref": "#/$defs/ProviderConfig"
+          },
+          "minItems": 1,
+          "title": "Providers",
+          "type": "array"
+        },
+        "purpose": {
+          "minLength": 1,
+          "title": "Purpose",
+          "type": "string"
+        },
+        "replicates": {
+          "description": "independent samples per condition",
+          "minimum": 1,
+          "title": "Replicates",
+          "type": "integer"
+        },
+        "rubric_id": {
+          "minLength": 1,
+          "title": "Rubric Id",
+          "type": "string"
+        },
+        "rubric_version": {
+          "minLength": 1,
+          "title": "Rubric Version",
+          "type": "string"
+        },
+        "secondary_metrics": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Secondary Metrics",
+          "type": "array"
+        },
+        "study_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:@/-]{0,254}$",
+          "title": "Study Id",
+          "type": "string"
+        },
+        "tasks": {
+          "items": {
+            "$ref": "#/$defs/StudyTask"
+          },
+          "minItems": 1,
+          "title": "Tasks",
+          "type": "array"
+        },
+        "title": {
+          "minLength": 1,
+          "title": "Title",
+          "type": "string"
+        }
+      },
+      "required": [
+        "study_id",
+        "title",
+        "purpose",
+        "tasks",
+        "providers",
+        "assistance_modes",
+        "replicates",
+        "rubric_id",
+        "rubric_version",
+        "primary_metric",
+        "limits",
+        "missing_policy"
+      ],
+      "title": "ResearchStudy",
+      "type": "object"
+    },
+    "Route": {
+      "description": "How the request reached a model, declared in the study and checked against the endpoint host at call time.",
+      "enum": [
+        "OFFICIAL_NATIVE",
+        "COMPATIBLE_RELAY",
+        "LOOPBACK_TEST",
+        "STUB"
+      ],
+      "title": "Route",
+      "type": "string"
+    },
+    "StudyComparison": {
+      "additionalProperties": false,
+      "properties": {
+        "a": {
+          "title": "A",
+          "type": "string"
+        },
+        "b": {
+          "title": "B",
+          "type": "string"
+        },
+        "note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Note"
+        },
+        "vary": {
+          "enum": [
+            "provider",
+            "representation",
+            "assistance"
+          ],
+          "title": "Vary",
+          "type": "string"
+        }
+      },
+      "required": [
+        "vary",
+        "a",
+        "b"
+      ],
+      "title": "StudyComparison",
+      "type": "object"
+    },
+    "StudyLimits": {
+      "additionalProperties": false,
+      "properties": {
+        "max_calls": {
+          "minimum": 0,
+          "title": "Max Calls",
+          "type": "integer"
+        },
+        "max_http_attempts": {
+          "minimum": 0,
+          "title": "Max Http Attempts",
+          "type": "integer"
+        },
+        "max_output_tokens_per_call": {
+          "minimum": 1,
+          "title": "Max Output Tokens Per Call",
+          "type": "integer"
+        },
+        "max_total_output_tokens": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Max Total Output Tokens"
+        },
+        "network_retries": {
+          "description": "fixed per call; a refusal is never retried",
+          "maximum": 5,
+          "minimum": 0,
+          "title": "Network Retries",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "max_calls",
+        "max_http_attempts",
+        "max_output_tokens_per_call",
+        "network_retries"
+      ],
+      "title": "StudyLimits",
+      "type": "object"
+    },
+    "StudyTask": {
+      "additionalProperties": false,
+      "properties": {
+        "answer_format": {
+          "default": "json",
+          "enum": [
+            "json",
+            "free_text"
+          ],
+          "title": "Answer Format",
+          "type": "string"
+        },
+        "answer_schema": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Answer Schema"
+        },
+        "assisted_inputs": {
+          "description": "added only in ASSISTED mode",
+          "items": {
+            "pattern": "^[A-Za-z0-9._@+=,-][A-Za-z0-9._@+=,/-]*$",
+            "type": "string"
+          },
+          "title": "Assisted Inputs",
+          "type": "array"
+        },
+        "bound": {
+          "additionalProperties": true,
+          "title": "Bound",
+          "type": "object"
+        },
+        "case_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Case Id"
+        },
+        "case_version": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Case Version"
+        },
+        "inputs": {
+          "description": "study-relative files the model may see",
+          "items": {
+            "pattern": "^[A-Za-z0-9._@+=,-][A-Za-z0-9._@+=,/-]*$",
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Inputs",
+          "type": "array"
+        },
+        "purpose": {
+          "description": "the real purpose, kept in the task (never disguised)",
+          "minLength": 1,
+          "title": "Purpose",
+          "type": "string"
+        },
+        "question": {
+          "minLength": 1,
+          "title": "Question",
+          "type": "string"
+        },
+        "reference": {
+          "description": "scorer-only evidence; never sent to a model",
+          "pattern": "^[A-Za-z0-9._@+=,-][A-Za-z0-9._@+=,/-]*$",
+          "title": "Reference",
+          "type": "string"
+        },
+        "representation_id": {
+          "minLength": 1,
+          "title": "Representation Id",
+          "type": "string"
+        },
+        "representation_version": {
+          "default": 1,
+          "minimum": 1,
+          "title": "Representation Version",
+          "type": "integer"
+        },
+        "scorer_id": {
+          "minLength": 1,
+          "title": "Scorer Id",
+          "type": "string"
+        },
+        "scorer_version": {
+          "minLength": 1,
+          "title": "Scorer Version",
+          "type": "string"
+        },
+        "split": {
+          "default": "acceptance",
+          "enum": [
+            "dev",
+            "acceptance"
+          ],
+          "title": "Split",
+          "type": "string"
+        },
+        "task_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:@/-]{0,254}$",
+          "title": "Task Id",
+          "type": "string"
+        },
+        "track": {
+          "$ref": "#/$defs/Track"
+        }
+      },
+      "required": [
+        "task_id",
+        "track",
+        "representation_id",
+        "purpose",
+        "inputs",
+        "question",
+        "reference",
+        "scorer_id",
+        "scorer_version"
+      ],
+      "title": "StudyTask",
+      "type": "object"
+    },
+    "Track": {
+      "description": "The two experiment lines of phases 5–7, counted apart.",
+      "enum": [
+        "implementation_conformance",
+        "synthetic_representation"
+      ],
+      "title": "Track",
+      "type": "string"
+    }
+  },
+  "$id": "https://formal-lab.dev/fal-research-study/v1",
+  "$ref": "#/$defs/ResearchStudy",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "fal-research-study/v1"
+}

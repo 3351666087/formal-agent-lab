@@ -1,0 +1,134 @@
+{
+ "protocol": "fal-research-study/v1",
+ "study_id": "p6a-real",
+ "title": "Phase 6A minimal real calls (ordinary business task)",
+ "purpose": "verify the provider adapters against real endpoints with the minimal ordinary-business task, within the configured and authorized test quota (relay test keys given by the user on 2026-10-12; the first two GPT samples in the ledger were made earlier with the previously configured relay key and are kept as history; the call cap was raised from 8 to 12 on 2026-10-12 at the user's request to retry Claude Opus 5.5 after the relay answered 503 'no available accounts' and then 404 'model not supported' for it)",
+ "tasks": [
+  {
+   "task_id": "orders-deviation",
+   "track": "implementation_conformance",
+   "case_id": "orders-p2-speed",
+   "case_version": 1,
+   "representation_id": "brief-md",
+   "representation_version": 1,
+   "purpose": "explain why a formal model of a local order-processing service mispredicts the real service, by proposing one revision of a model constant (software model verification)",
+   "inputs": [
+    "inputs/orders-brief.md"
+   ],
+   "assisted_inputs": [
+    "assistance/orders-candidates.json"
+   ],
+   "question": "Which single revision of one boolean model constant indexed by station would make the model agree with the recorded run? Give the constant, the station and the new value.",
+   "answer_format": "json",
+   "answer_schema": {
+    "type": "object",
+    "properties": {
+     "constant": {
+      "type": "string"
+     },
+     "station": {
+      "type": "string"
+     },
+     "value": {
+      "type": "boolean"
+     },
+     "rationale": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "constant",
+     "station",
+     "value"
+    ],
+    "additionalProperties": false
+   },
+   "reference": "reference/orders-deviation.json",
+   "scorer_id": "orders.deviation-diagnosis",
+   "scorer_version": "1",
+   "bound": {
+    "recorded_steps": 26
+   },
+   "split": "acceptance"
+  }
+ ],
+ "providers": [
+  {
+   "provider_config_id": "gpt-6-astra-relay",
+   "provider": "openai",
+   "api": "openai.chat.completions",
+   "api_version": "v1",
+   "route": "COMPATIBLE_RELAY",
+   "base_url_setting": "FAL_RESEARCH_RELAY_BASE_URL",
+   "api_key_setting": "FAL_RESEARCH_GPT_API_KEY",
+   "model": "gpt-6-astra",
+   "params": {
+    "max_completion_tokens": 6000
+   },
+   "comparability_note": "OpenAI-compatible protocol through the relay: the returned model name is the relay's report and cannot be verified as OpenAI's own"
+  },
+  {
+   "provider_config_id": "claude-opus-5-5-relay",
+   "provider": "anthropic",
+   "api": "anthropic.messages",
+   "api_version": "2023-06-01",
+   "route": "COMPATIBLE_RELAY",
+   "base_url_setting": "FAL_RESEARCH_RELAY_BASE_URL",
+   "api_key_setting": "FAL_RESEARCH_CLAUDE_API_KEY",
+   "model": "claude-opus-5-5",
+   "params": {
+    "max_tokens": 6000
+   },
+   "comparability_note": "the native Messages protocol through the relay: stop_reason / refusal semantics are kept, but the returned model name is the relay's report"
+  },
+  {
+   "provider_config_id": "claude-opus-5-5-native",
+   "provider": "anthropic",
+   "api": "anthropic.messages",
+   "api_version": "2023-06-01",
+   "route": "OFFICIAL_NATIVE",
+   "api_key_setting": "FAL_ANTHROPIC_API_KEY",
+   "model": "claude-opus-5-5",
+   "params": {
+    "max_tokens": 6000
+   },
+   "comparability_note": "native Messages API at api.anthropic.com; needs FAL_ANTHROPIC_API_KEY (a provider's own environment variable is never read)"
+  }
+ ],
+ "assistance_modes": [
+  "STATIC_UNASSISTED",
+  "ASSISTED"
+ ],
+ "replicates": 1,
+ "rubric_id": "fal-research-rubric",
+ "rubric_version": "1",
+ "primary_metric": "correct",
+ "secondary_metrics": [
+  "format_valid",
+  "refused",
+  "responded",
+  "program_corresponds",
+  "output_tokens"
+ ],
+ "limits": {
+  "max_calls": 12,
+  "max_http_attempts": 24,
+  "max_output_tokens_per_call": 6000,
+  "max_total_output_tokens": 48000,
+  "network_retries": 1
+ },
+ "missing_policy": "every planned unit keeps a record; units without a model-produced response are MISSING in the model metrics (never 0 or 1) and counted by call outcome over the planned denominator; a refusal is never retried; only transport faults, lost responses, 429 and 5xx are retried (fixed allowance); on resume an unanswered unit is called again as a new sample",
+ "comparisons": [
+  {
+   "vary": "provider",
+   "a": "gpt-6-astra-relay",
+   "b": "claude-opus-5-5-relay",
+   "note": "both through the same relay: identities are relay-reported, so this is an engineering reading of two routes, not a verified provider comparison"
+  },
+  {
+   "vary": "assistance",
+   "a": "STATIC_UNASSISTED",
+   "b": "ASSISTED"
+  }
+ ]
+}

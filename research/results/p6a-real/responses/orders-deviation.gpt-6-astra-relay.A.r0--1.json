@@ -1,0 +1,106 @@
+{
+ "protocol": "fal-research-response/v1",
+ "experiment": {
+  "study_id": "p6a-real",
+  "unit_id": "orders-deviation.gpt-6-astra-relay.A.r0",
+  "track": "implementation_conformance",
+  "case_id": "orders-p2-speed",
+  "case_version": 1,
+  "task_id": "orders-deviation",
+  "task_digest": "6bb3600f6f20e0c7f0c5b9cde33512ea9893459bc57dc94526aab9e5e8307689",
+  "representation_id": "brief-md",
+  "replicate_id": 0,
+  "assistance_mode": "ASSISTED",
+  "sampling_id": "orders-deviation.gpt-6-astra-relay.A.r0#1"
+ },
+ "call": {
+  "provider": "openai",
+  "provider_config_id": "gpt-6-astra-relay",
+  "api": "openai.chat.completions",
+  "api_version": "v1",
+  "endpoint": "https://api.uheapi.com/v1/chat/completions",
+  "route": "COMPATIBLE_RELAY",
+  "endpoint_kind": "PROVIDER",
+  "model_requested": "gpt-6-astra",
+  "model_returned": "gpt-6-astra",
+  "model_switched": false,
+  "model_identity": "RELAY_REPORTED",
+  "response_id": "resp_0fca74e487529b58016acceb7382e08190bd3f6ca927c95031",
+  "request_id": "277d093a-f1e1-4365-82a8-8b9d23f97600, 0b8d8fff-b18d-464c-9233-cf826697d443",
+  "started_at": "2026-10-12T14:15:14Z",
+  "finished_at": "2026-10-12T14:15:20Z",
+  "params": {
+   "max_completion_tokens": 6000
+  },
+  "params_digest": "c119fe2938dd9a86"
+ },
+ "raw": {
+  "body": {
+   "id": "resp_0fca74e487529b58016acceb7382e08190bd3f6ca927c95031",
+   "object": "chat.completion",
+   "created": 1791814520,
+   "model": "gpt-6-astra",
+   "choices": [
+    {
+     "index": 0,
+     "message": {
+      "role": "assistant",
+      "content": "{\"constant\":\"slow\",\"station\":\"p2\",\"value\":true,\"rationale\":\"Order o2 runs on p2, and its reported remaining time decreases only on every other tick: it stays at 4 on the first tick and is still processing with 1 remaining at step 25. Setting slow[p2] to true matches this behavior while preserving the matching progress on p1.\"}"
+     },
+     "finish_reason": "stop"
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 5238,
+    "completion_tokens": 83,
+    "total_tokens": 5321
+   },
+   "service_tier": "default"
+  },
+  "body_text": null,
+  "visible_text": "{\"constant\":\"slow\",\"station\":\"p2\",\"value\":true,\"rationale\":\"Order o2 runs on p2, and its reported remaining time decreases only on every other tick: it stays at 4 on the first tick and is still processing with 1 remaining at step 25. Setting slow[p2] to true matches this behavior while preserving the matching progress on p1.\"}",
+  "finish_reason": "stop",
+  "finish_class": "STOP",
+  "refusal": null,
+  "truncated": false,
+  "tool_calls": [],
+  "reasoning": "NOT_EXPOSED"
+ },
+ "status": {
+  "outcome": "ANSWERED",
+  "transport_ok": true,
+  "http_status": 200,
+  "provider_error_type": null,
+  "provider_error": null,
+  "model_switched": false,
+  "attempts": [
+   {
+    "attempt_no": 1,
+    "attempt_id": "att_07ac3228c0e9",
+    "sent": true,
+    "confirmed": true,
+    "http_status": 200,
+    "error_class": null,
+    "error": null,
+    "latency_ms": 6751.2
+   }
+  ],
+  "network_retries": 1,
+  "note": null
+ },
+ "cost": {
+  "usage_known": true,
+  "input_tokens": 5238,
+  "output_tokens": 83,
+  "reasoning_tokens": null,
+  "cache_read_tokens": null,
+  "latency_ms": 6759.8,
+  "http_attempts": 1,
+  "possibly_billed_unconfirmed": 0,
+  "prompt_digest": "5f77be9bc95adf15",
+  "config_digest": "3a71fd838802d132"
+ },
+ "task_input_digest": "5f77be9bc95adf15dab11d54a225455be3cc930046e6cf3ed09dbb37ca38c2fb",
+ "reuse_key": "d7afc49d470407b0f5386273a27bd4d4e00c574fe4921c99732565bf4901bc7a",
+ "recorded_at": "2026-10-12T14:15:20Z"
+}

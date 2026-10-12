@@ -10,6 +10,11 @@ the digests of its relevant trees and configuration), the formal model (ModelRef
 by sha256) and, from phase 6, the provider model that is asked to work on a task input. A conformance result records,
 apart from each other: the model-internal conclusion, the program's own regression result, and whether the two
 correspond within a declared scope. A single passing regression never stands for semantic equivalence.
+
+Phase 6A adds `fal-research-response/v1` (the raw record of one provider call: experiment and call identity, the raw
+answer, the call outcome, cost — persisted before parsing), `fal-research-study/v1` (a pre-registered study: tasks,
+providers, assistance modes, replicates, limits, primary metric) and `fal-research-evaluation/v1` (the answer axis and
+the scores of one response, kept apart from the call axis).
 """
 
 from __future__ import annotations
@@ -18,13 +23,13 @@ import argparse
 import json
 from enum import StrEnum
 from pathlib import Path
-from typing import Annotated, Literal
+from typing import Annotated, Any, Literal
 
 from pydantic import AfterValidator, BaseModel, Field
 from pydantic.json_schema import models_json_schema
 
 from .common import ArtifactRef, ContractModel, Identifier, Name
-from .objects import ModelRef
+from .objects import MetricResult, ModelRef
 
 CASE_PROTOCOL = "fal-research-case/v1"
 CONFORMANCE_PROTOCOL = "fal-conformance-result/v1"
@@ -306,7 +311,289 @@ class ConformanceResult(ContractModel):
     tools: list[ToolIdentity] = Field(min_length=1)
 
 
-PROTOCOLS: dict[str, type[BaseModel]] = {CASE_PROTOCOL: ResearchCase, CONFORMANCE_PROTOCOL: ConformanceResult}
+# ---------------------------------------------------------------- phase 6A: research responses, studies, evaluations
+RESPONSE_PROTOCOL = "fal-research-response/v1"
+STUDY_PROTOCOL = "fal-research-study/v1"
+EVALUATION_PROTOCOL = "fal-research-evaluation/v1"
+
+
+class AssistanceMode(StrEnum):
+    STATIC_UNASSISTED = "STATIC_UNASSISTED"  # the specification and the question only
+    ASSISTED = "ASSISTED"  # plus recorded assistance (a candidate set, validation feedback …) — never "independent"
+
+
+class Route(StrEnum):
+    """How the request reached a model, declared in the study and checked against the endpoint host at call time."""
+
+    OFFICIAL_NATIVE = "OFFICIAL_NATIVE"  # the provider's own API (api.openai.com / api.anthropic.com)
+    COMPATIBLE_RELAY = "COMPATIBLE_RELAY"  # a third-party gateway speaking a provider protocol: identity not verifiable
+    LOOPBACK_TEST = "LOOPBACK_TEST"  # the local protocol test service — not a model
+    STUB = "STUB"
+
+
+class CallOutcome(StrEnum):
+    """The call axis — one stable class per call. Kept apart from how the answer is parsed and scored."""
+
+    ANSWERED = "ANSWERED"  # HTTP success, visible answer, normal stop
+    TRUNCATED = "TRUNCATED"  # HTTP success, stopped at the output-token limit (the partial answer is kept)
+    CONTENT_REFUSAL = "CONTENT_REFUSAL"  # HTTP success, the provider signals a refusal / content filter
+    EMPTY_CONTENT = "EMPTY_CONTENT"  # HTTP success, no visible text and no refusal signal
+    MALFORMED_RESPONSE = "MALFORMED_RESPONSE"  # HTTP success, but the body is not the provider protocol
+    AUTH_ERROR = "AUTH_ERROR"  # 401 / 403 — never a content refusal
+    RATE_LIMITED = "RATE_LIMITED"  # 429 after the fixed retries
+    PROVIDER_ERROR = "PROVIDER_ERROR"  # 5xx / overloaded after the fixed retries
+    REQUEST_REJECTED = "REQUEST_REJECTED"  # other 4xx (invalid request / parameter)
+    MODEL_UNAVAILABLE = "MODEL_UNAVAILABLE"  # the provider says the requested model does not exist / is not available
+    TRANSPORT_ERROR = "TRANSPORT_ERROR"  # never reached the provider (connect error)
+    UNCERTAIN = "UNCERTAIN"  # sent, but no response arrived — it may have been billed
+    BUDGET_EXHAUSTED = "BUDGET_EXHAUSTED"  # not sent: a study limit was reached
+    CANCELLED = "CANCELLED"  # not sent / aborted between attempts
+    BLOCKED_NO_CREDENTIAL = "BLOCKED_NO_CREDENTIAL"  # not sent: no authorized endpoint / credential configured
+
+
+MODEL_PRODUCED: frozenset[str] = frozenset({"ANSWERED", "TRUNCATED", "CONTENT_REFUSAL", "EMPTY_CONTENT"})
+"""Outcomes where the model itself produced the response — the only ones that count toward a model's scores."""
+
+
+class FinishClass(StrEnum):
+    STOP = "STOP"
+    LENGTH = "LENGTH"
+    REFUSAL = "REFUSAL"
+    CONTENT_FILTER = "CONTENT_FILTER"
+    TOOL_USE = "TOOL_USE"
+    PAUSE = "PAUSE"
+    OTHER = "OTHER"
+    UNKNOWN = "UNKNOWN"
+
+
+class ModelIdentityStatus(StrEnum):
+    CONFIRMED_BY_PROVIDER = "CONFIRMED_BY_PROVIDER"  # official route, the response names the model
+    RELAY_REPORTED = "RELAY_REPORTED"  # a relay names a model: recorded, not independently verifiable
+    TEST_SERVICE = "TEST_SERVICE"  # the protocol test service (not a model)
+    STUB = "STUB"
+    UNKNOWN = "UNKNOWN"  # the response named no model
+
+
+class ExperimentIdentity(ContractModel):
+    study_id: Identifier
+    unit_id: str = Field(min_length=1)
+    track: Track
+    case_id: str | None = None
+    case_version: int | None = Field(default=None, ge=1)
+    task_id: Identifier
+    task_digest: str = Field(pattern=SHA256)
+    representation_id: str = Field(min_length=1)
+    replicate_id: int = Field(ge=0)
+    assistance_mode: AssistanceMode
+    sampling_id: str = Field(min_length=1, description="a new id for every fresh sample (a resample is a new one)")
+
+
+class CallIdentity(ContractModel):
+    provider: str = Field(min_length=1, description="openai / anthropic / protocol-test / stub")
+    provider_config_id: str = Field(min_length=1)
+    api: str = Field(min_length=1, description="openai.chat.completions / anthropic.messages")
+    api_version: str = Field(min_length=1)
+    endpoint: str = Field(description="scheme://host/path — no credentials, no query")
+    route: Route
+    endpoint_kind: str = Field(description="what answered, from the answer itself: PROVIDER / PROTOCOL_TEST / STUB")
+    model_requested: str
+    model_returned: str | None = None
+    model_switched: bool = False
+    model_identity: ModelIdentityStatus
+    response_id: str | None = Field(default=None, description="the provider's response id")
+    request_id: str | None = Field(default=None, description="the provider's request id header, when sent")
+    started_at: str
+    finished_at: str | None = None
+    params: dict[str, Any] = Field(default_factory=dict, description="exactly the sampling parameters sent")
+    params_digest: str
+
+
+class ReasoningAvailability(StrEnum):
+    NOT_EXPOSED = "NOT_EXPOSED"  # the provider exposes no internal reasoning: none is inferred
+    SUMMARY_ONLY = "SUMMARY_ONLY"  # a provider-written summary exists; it is not the raw reasoning
+
+
+class RawAnswer(ContractModel):
+    body: Any = Field(default=None, description="the provider's JSON body as returned (when it is JSON)")
+    body_text: str | None = Field(default=None, description="the body as text when it is not JSON")
+    visible_text: str | None = None
+    finish_reason: str | None = Field(default=None, description="exactly as the provider wrote it")
+    finish_class: FinishClass = FinishClass.UNKNOWN
+    refusal: str | None = Field(default=None, description="the provider's explicit refusal field / signal")
+    truncated: bool | None = None
+    tool_calls: list[dict[str, Any]] = Field(default_factory=list)
+    reasoning: ReasoningAvailability = ReasoningAvailability.NOT_EXPOSED
+
+
+class AttemptRecord(ContractModel):
+    attempt_no: int = Field(ge=1)
+    attempt_id: str
+    sent: bool
+    confirmed: bool = Field(description="a complete HTTP response arrived for this attempt")
+    http_status: int | None = None
+    error_class: str | None = None
+    error: str | None = Field(default=None, description="redacted, truncated")
+    latency_ms: float = 0.0
+
+
+class CallStatus(ContractModel):
+    outcome: CallOutcome
+    transport_ok: bool
+    http_status: int | None = None
+    provider_error_type: str | None = None
+    provider_error: str | None = None
+    model_switched: bool = False
+    attempts: list[AttemptRecord] = Field(default_factory=list)
+    network_retries: int = Field(ge=0, description="the fixed retry allowance the call ran with")
+    note: str | None = None
+
+
+class CostRecord(ContractModel):
+    usage_known: bool
+    input_tokens: int | None = None
+    output_tokens: int | None = None
+    reasoning_tokens: int | None = None
+    cache_read_tokens: int | None = None
+    cache_write_tokens: int | None = Field(default=None, description="prompt-cache writes (Anthropic "
+                                           "cache_creation_input_tokens); input_tokens is as the provider counts it")
+    latency_ms: float = 0.0
+    http_attempts: int = Field(ge=0)
+    possibly_billed_unconfirmed: int = Field(ge=0, description="attempts sent without a confirmed response")
+    prompt_digest: str
+    config_digest: str
+
+
+class ResearchResponse(ContractModel):
+    """The raw record of one research call, persisted before anything parses or scores it."""
+
+    protocol: Literal["fal-research-response/v1"] = RESPONSE_PROTOCOL
+    experiment: ExperimentIdentity
+    call: CallIdentity
+    raw: RawAnswer
+    status: CallStatus
+    cost: CostRecord
+    task_input_digest: str = Field(pattern=SHA256, description="sha256 of exactly what was sent (system + user)")
+    reuse_key: str = Field(pattern=SHA256)
+    recorded_at: str
+
+
+class ProviderConfig(ContractModel):
+    provider_config_id: Identifier
+    provider: Literal["openai", "anthropic", "protocol-test"]
+    api: Literal["openai.chat.completions", "anthropic.messages"]
+    api_version: str = Field(min_length=1)
+    route: Route = Field(description="declared; the runner checks it against the endpoint host before sending")
+    base_url: str | None = Field(default=None, description="literal endpoint (loopback / official default)")
+    base_url_setting: str | None = Field(default=None, description="settings name holding the endpoint")
+    api_key_setting: str | None = Field(default=None, description="settings name of the credential (never its value)")
+    model: str = Field(min_length=1)
+    params: dict[str, Any] = Field(default_factory=dict, description="sampling parameters sent verbatim")
+    comparability_note: str | None = None
+
+
+class StudyTask(ContractModel):
+    task_id: Identifier
+    track: Track
+    case_id: str | None = None
+    case_version: int | None = Field(default=None, ge=1)
+    representation_id: str = Field(min_length=1)
+    representation_version: int = Field(default=1, ge=1)
+    purpose: str = Field(min_length=1, description="the real purpose, kept in the task (never disguised)")
+    inputs: list[RelPath] = Field(min_length=1, description="study-relative files the model may see")
+    assisted_inputs: list[RelPath] = Field(default_factory=list, description="added only in ASSISTED mode")
+    question: str = Field(min_length=1)
+    answer_format: Literal["json", "free_text"] = "json"
+    answer_schema: dict[str, Any] | None = None
+    reference: RelPath = Field(description="scorer-only evidence; never sent to a model")
+    scorer_id: str = Field(min_length=1)
+    scorer_version: str = Field(min_length=1)
+    bound: dict[str, Any] = Field(default_factory=dict)
+    split: Literal["dev", "acceptance"] = "acceptance"
+
+
+class StudyLimits(ContractModel):
+    max_calls: int = Field(ge=0)
+    max_http_attempts: int = Field(ge=0)
+    max_output_tokens_per_call: int = Field(ge=1)
+    max_total_output_tokens: int | None = Field(default=None, ge=1)
+    network_retries: int = Field(ge=0, le=5, description="fixed per call; a refusal is never retried")
+
+
+class StudyComparison(ContractModel):
+    vary: Literal["provider", "representation", "assistance"]
+    a: str
+    b: str
+    note: str | None = None
+
+
+class ResearchStudy(ContractModel):
+    protocol: Literal["fal-research-study/v1"] = STUDY_PROTOCOL
+    study_id: Identifier
+    title: str = Field(min_length=1)
+    purpose: str = Field(min_length=1)
+    tasks: list[StudyTask] = Field(min_length=1)
+    providers: list[ProviderConfig] = Field(min_length=1)
+    assistance_modes: list[AssistanceMode] = Field(min_length=1)
+    replicates: int = Field(ge=1, description="independent samples per condition")
+    rubric_id: str = Field(min_length=1)
+    rubric_version: str = Field(min_length=1)
+    primary_metric: str = Field(min_length=1)
+    secondary_metrics: list[str] = Field(default_factory=list)
+    limits: StudyLimits
+    missing_policy: str = Field(min_length=1)
+    comparisons: list[StudyComparison] = Field(default_factory=list)
+
+
+class AnswerStatus(StrEnum):
+    """The answer axis: how the recorded answer parses (after it was saved)."""
+
+    VALID = "VALID"
+    INVALID_JSON = "INVALID_JSON"
+    SCHEMA_VIOLATION = "SCHEMA_VIOLATION"
+    TYPE_ERROR = "TYPE_ERROR"
+    EMPTY = "EMPTY"
+    NO_ANSWER = "NO_ANSWER"  # the call produced no visible answer to parse
+
+
+class BehaviorLabel(StrEnum):
+    CORRECT = "CORRECT"
+    PARTIAL = "PARTIAL"
+    INCORRECT = "INCORRECT"
+    INVALID_FORMAT = "INVALID_FORMAT"
+    REFUSED = "REFUSED"
+    EMPTY = "EMPTY"
+    NO_MODEL_ANSWER = "NO_MODEL_ANSWER"  # transport / auth / limit / budget / cancel / blocked: not the model's doing
+    NOT_RUN = "NOT_RUN"
+
+
+class ResearchEvaluation(ContractModel):
+    """A small static-task evaluation record (no fabricated steps, world state or execution success)."""
+
+    protocol: Literal["fal-research-evaluation/v1"] = EVALUATION_PROTOCOL
+    study_id: Identifier
+    unit_id: str = Field(min_length=1)
+    response_digest: str = Field(pattern=SHA256)
+    response_path: RelPath
+    scorer_id: str
+    scorer_version: str
+    reference_sha256: str = Field(pattern=SHA256)
+    dependency_digests: dict[str, str] = Field(default_factory=dict)
+    call_outcome: CallOutcome
+    answer_status: AnswerStatus
+    parsed: Any = None
+    behavior_label: BehaviorLabel
+    refusal_status: Literal["NONE", "EXPLICIT_REFUSAL", "CONTENT_FILTER"] = "NONE"
+    model_internal: Literal["CORRECT", "INCORRECT", "NOT_EVALUATED", "NOT_APPLICABLE"] = "NOT_EVALUATED"
+    program_correspondence: Literal["CORRESPONDS", "DEVIATES", "UNKNOWN", "NOT_APPLICABLE", "NOT_EVALUATED"] = \
+        "NOT_EVALUATED"
+    metrics: list[MetricResult] = Field(default_factory=list)
+    explanation: str = ""
+    scoring_reuse_key: str = Field(pattern=SHA256)
+
+
+PROTOCOLS: dict[str, type[BaseModel]] = {CASE_PROTOCOL: ResearchCase, CONFORMANCE_PROTOCOL: ConformanceResult,
+                                         RESPONSE_PROTOCOL: ResearchResponse, STUDY_PROTOCOL: ResearchStudy,
+                                         EVALUATION_PROTOCOL: ResearchEvaluation}
 
 
 def write_schemas(out: Path) -> list[Path]:

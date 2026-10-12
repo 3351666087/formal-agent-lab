@@ -1,0 +1,200 @@
+{
+ "semantic_profile": "deterministic_finite_v1",
+ "name": "lamp-counter",
+ "enums": [],
+ "entity_sets": [],
+ "constants": [],
+ "state": [
+  {
+   "name": "on",
+   "type": {
+    "kind": "bool"
+   },
+   "index": [],
+   "initial": {
+    "default": false,
+    "cells": []
+   },
+   "observable": true
+  },
+  {
+   "name": "toggles",
+   "type": {
+    "kind": "int",
+    "min": 0,
+    "max": 3
+   },
+   "index": [],
+   "initial": {
+    "default": 0,
+    "cells": []
+   },
+   "observable": true
+  }
+ ],
+ "actions": [
+  {
+   "name": "toggle",
+   "params": [],
+   "precondition": {
+    "op": "const",
+    "value": true
+   },
+   "effects": [
+    {
+     "kind": "assign",
+     "target": {
+      "var": "on",
+      "index": []
+     },
+     "value": {
+      "op": "not",
+      "args": [
+       {
+        "op": "var",
+        "name": "on",
+        "index": []
+       }
+      ]
+     }
+    },
+    {
+     "kind": "assign",
+     "target": {
+      "var": "toggles",
+      "index": []
+     },
+     "value": {
+      "op": "add",
+      "args": [
+       {
+        "op": "var",
+        "name": "toggles",
+        "index": []
+       },
+       {
+        "op": "const",
+        "value": 1
+       }
+      ]
+     }
+    }
+   ],
+   "cost": 1,
+   "timeout_seconds": 30.0,
+   "retry": "RECONCILE_THEN_RETRY"
+  },
+  {
+   "name": "reset",
+   "params": [],
+   "precondition": {
+    "op": "gt",
+    "args": [
+     {
+      "op": "var",
+      "name": "toggles",
+      "index": []
+     },
+     {
+      "op": "const",
+      "value": 0
+     }
+    ]
+   },
+   "effects": [
+    {
+     "kind": "assign",
+     "target": {
+      "var": "toggles",
+      "index": []
+     },
+     "value": {
+      "op": "const",
+      "value": 0
+     }
+    },
+    {
+     "kind": "assign",
+     "target": {
+      "var": "on",
+      "index": []
+     },
+     "value": {
+      "op": "const",
+      "value": false
+     }
+    }
+   ],
+   "cost": 1,
+   "timeout_seconds": 30.0,
+   "retry": "RECONCILE_THEN_RETRY"
+  }
+ ],
+ "properties": [
+  {
+   "id": "lit",
+   "kind": "goal",
+   "expr": {
+    "op": "var",
+    "name": "on",
+    "index": []
+   }
+  },
+  {
+   "id": "three_toggles",
+   "kind": "goal",
+   "expr": {
+    "op": "eq",
+    "args": [
+     {
+      "op": "var",
+      "name": "toggles",
+      "index": []
+     },
+     {
+      "op": "const",
+      "value": 3
+     }
+    ]
+   }
+  },
+  {
+   "id": "few_toggles",
+   "kind": "invariant",
+   "expr": {
+    "op": "le",
+    "args": [
+     {
+      "op": "var",
+      "name": "toggles",
+      "index": []
+     },
+     {
+      "op": "const",
+      "value": 2
+     }
+    ]
+   }
+  },
+  {
+   "id": "never_four",
+   "kind": "invariant",
+   "expr": {
+    "op": "le",
+    "args": [
+     {
+      "op": "var",
+      "name": "toggles",
+      "index": []
+     },
+     {
+      "op": "const",
+      "value": 3
+     }
+    ]
+   }
+  }
+ ],
+ "features": [],
+ "objectives": []
+}

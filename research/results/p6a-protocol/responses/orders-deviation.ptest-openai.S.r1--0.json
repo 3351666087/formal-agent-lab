@@ -1,0 +1,105 @@
+{
+ "protocol": "fal-research-response/v1",
+ "experiment": {
+  "study_id": "p6a-protocol",
+  "unit_id": "orders-deviation.ptest-openai.S.r1",
+  "track": "implementation_conformance",
+  "case_id": "orders-p2-speed",
+  "case_version": 1,
+  "task_id": "orders-deviation",
+  "task_digest": "6bb3600f6f20e0c7f0c5b9cde33512ea9893459bc57dc94526aab9e5e8307689",
+  "representation_id": "brief-md",
+  "replicate_id": 1,
+  "assistance_mode": "STATIC_UNASSISTED",
+  "sampling_id": "orders-deviation.ptest-openai.S.r1#0"
+ },
+ "call": {
+  "provider": "openai",
+  "provider_config_id": "ptest-openai",
+  "api": "openai.chat.completions",
+  "api_version": "v1",
+  "endpoint": "http://127.0.0.1:38007/v1/chat/completions",
+  "route": "LOOPBACK_TEST",
+  "endpoint_kind": "PROTOCOL_TEST",
+  "model_requested": "protocol-test-v1",
+  "model_returned": "protocol-test-v1",
+  "model_switched": false,
+  "model_identity": "TEST_SERVICE",
+  "response_id": "ptest_00002",
+  "request_id": null,
+  "started_at": "2026-10-12T14:33:25Z",
+  "finished_at": "2026-10-12T14:33:25Z",
+  "params": {
+   "max_tokens": 512
+  },
+  "params_digest": "76faa9c2bf0081a9"
+ },
+ "raw": {
+  "body": {
+   "id": "ptest_00002",
+   "object": "chat.completion",
+   "choices": [
+    {
+     "index": 0,
+     "message": {
+      "role": "assistant",
+      "content": "{\"constant\": \"slow\", \"station\": \"p1\", \"value\": true}"
+     },
+     "finish_reason": "stop"
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 776,
+    "completion_tokens": 13,
+    "total_tokens": 789
+   },
+   "model": "protocol-test-v1"
+  },
+  "body_text": null,
+  "visible_text": "{\"constant\": \"slow\", \"station\": \"p1\", \"value\": true}",
+  "finish_reason": "stop",
+  "finish_class": "STOP",
+  "refusal": null,
+  "truncated": false,
+  "tool_calls": [],
+  "reasoning": "NOT_EXPOSED"
+ },
+ "status": {
+  "outcome": "ANSWERED",
+  "transport_ok": true,
+  "http_status": 200,
+  "provider_error_type": null,
+  "provider_error": null,
+  "model_switched": false,
+  "attempts": [
+   {
+    "attempt_no": 1,
+    "attempt_id": "att_e7233b00d117",
+    "sent": true,
+    "confirmed": true,
+    "http_status": 200,
+    "error_class": null,
+    "error": null,
+    "latency_ms": 3.5
+   }
+  ],
+  "network_retries": 2,
+  "note": null
+ },
+ "cost": {
+  "usage_known": true,
+  "input_tokens": 776,
+  "output_tokens": 13,
+  "reasoning_tokens": null,
+  "cache_read_tokens": null,
+  "cache_write_tokens": null,
+  "latency_ms": 3.7,
+  "http_attempts": 1,
+  "possibly_billed_unconfirmed": 0,
+  "prompt_digest": "33597b486fe6e7a3",
+  "config_digest": "70b6049ddeb69a19"
+ },
+ "task_input_digest": "33597b486fe6e7a3f9ff387978a8adbdc3c5ba336b6a76a045f0a956d58c00bb",
+ "reuse_key": "8b0ef28a580c65c69522641e3e13d7b27761e0b0b9d8e40843cc86feca2c0789",
+ "recorded_at": "2026-10-12T14:33:25Z"
+}

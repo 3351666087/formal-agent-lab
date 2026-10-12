@@ -1,0 +1,39 @@
+# Order service: a formal model that mispredicts the real service
+
+## The service and its model (belief model `local-order-service` version 1)
+A local order-processing service handles orders on processing stations p1, p2. Its formal
+model (deterministic, finite) has the actions reserve(o), enqueue(o), start(o, st), tick() and restock(sku):
+
+- start(o, st): the head of the queue starts on a free station; its remaining processing time is set to the
+  order's processing time.
+- tick(): logical time advances by 1 and every processing order advances — its remaining time decreases by 1,
+  except on a station whose constant slow[st] is true, which advances only on every other tick (when tick_parity
+  is true). An order whose remaining time runs out completes and leaves its station.
+
+Model constants: sku_of[order], qty[order], arrive_at[order], due[order] (instance data) and slow[station]
+(boolean — "a slow station advances processing only on every other tick (hidden-reality hook)"). In this model version slow is false for every station.
+
+## Instance (case `deviation`, seed 1)
+| order | processing time | arrives at | due | sku | qty |
+|---|---|---|---|---|---|
+| o1 | 1 | 0 | 6 | a | 2 |
+| o2 | 4 | 0 | 7 | b | 1 |
+| o3 | 1 | 0 | 9 | a | 3 |
+| o4 | 2 | 2 | 11 | b | 2 |
+| o5 | 2 | 3 | 12 | a | 1 |
+| o6 | 2 | 4 | 14 | b | 3 |
+
+## The recorded run on the real service, replayed on the model
+Actions in order: 1 reserve(o1), 2 enqueue(o1), 3 start(o1, p1), 4 reserve(o2), 5 enqueue(o2), 6 start(o2, p2), 7 reserve(o3), 8 enqueue(o3), 9 tick(), 10 start(o3, p1), 11 tick(), 12 reserve(o4), 13 enqueue(o4), 14 start(o4, p1), 15 tick(), 16 reserve(o5), 17 enqueue(o5), 18 tick(), 19 start(o5, p1), 20 reserve(o6), 21 enqueue(o6), 22 tick(), 23 tick(), 24 start(o6, p1), 25 tick(), 26 tick().
+
+Where the model's prediction and the service's reported state differ (every other compared field matches):
+
+| step | action | location | model predicted | service reported |
+|---|---|---|---|---|
+| 9 | tick() | remaining[o2] | 3 | 4 |
+| 15 | tick() | remaining[o2] | 2 | 3 |
+| 22 | tick() | remaining[o2] | 1 | 2 |
+| 25 | tick() | done_at[o2] | 7 | 0 |
+| 25 | tick() | on[o2,p2] | False | True |
+| 25 | tick() | remaining[o2] | 0 | 1 |
+| 25 | tick() | status[o2] | completed | processing |

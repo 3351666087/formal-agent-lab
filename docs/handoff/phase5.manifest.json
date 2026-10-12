@@ -2,14 +2,14 @@
   "format": "phase-handoff/v1",
   "phase": "5",
   "part": "5A (案例、模型与证据基础)",
-  "generated_at": "2026-10-12T13:30:11.939946+00:00",
+  "generated_at": "2026-10-12T14:33:48.923382+00:00",
   "source_revision": {
-    "commit": "8d80e34ce2c59c27612620637d7008b19f0d1ed2",
+    "commit": "985510f59798939cdff271c77d0a34d811f127fd",
     "worktree": {
-      "sha256": "4fa75dca80d912315371614091fce06a54d4ccdb5f97c022bbe80bbca484224b",
+      "sha256": "62c6e4f05d74215ba437312d37fc4f8727afc12e19b17e045d681f08c18b3d27",
       "clean": false,
-      "changed_bytes": 46244,
-      "untracked_files": 2,
+      "changed_bytes": 92619,
+      "untracked_files": 29,
       "excluded_outputs": [
         "docs/execution/evidence/",
         "docs/handoff/",
@@ -19,7 +19,7 @@
       ]
     }
   },
-  "handoff_revision_parent": "8d80e34ce2c59c27612620637d7008b19f0d1ed2",
+  "handoff_revision_parent": "985510f59798939cdff271c77d0a34d811f127fd",
   "developer_models": [
     "claude-opus-5-5",
     "claude-opus-4-8"
@@ -59,7 +59,7 @@
     "examples/local-order-service",
     "examples/subprocess-env"
   ],
-  "config_digest": "b2782b93b72020ba31b49a77eca7f227d513b93aee719d0c2b07a74bda7b4daa",
+  "config_digest": "731fc8f2c535c8412538e2386a8f464cf46bb43400253ee5a9cd60c30a856d45",
   "commands": {
     "research_check": "make research-check ARGS=\"--group p5a,p5b\"",
     "build_case_5a": "uv run --frozen python scripts/p5a_orders_case.py",
@@ -68,16 +68,16 @@
     "validate_offline": "uv run --frozen fal research validate research/cases/orders-tenant-isolation --repo .",
     "import_to_platform": "uv run --frozen fal research import research/cases/orders-tenant-isolation --project <id>"
   },
-  "check_command": "python scripts/check_runner.py --suite research --group p5a,p5b",
+  "check_command": "python scripts/check_runner.py --suite research --group p5a,p5b,p6a",
   "check_groups": {
     "p5a": "PASS",
     "p5b": "PASS",
-    "p6a": "NO_CHECKS",
+    "p6a": "PASS",
     "p6b": "NO_CHECKS",
     "p7": "NO_CHECKS"
   },
   "check_summary": {
-    "PASS": 4,
+    "PASS": 7,
     "FAIL": 0,
     "BLOCKED": 0,
     "NOT_RUN": 0,

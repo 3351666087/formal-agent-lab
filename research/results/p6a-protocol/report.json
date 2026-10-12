@@ -1,0 +1,1472 @@
+{
+ "study_id": "p6a-protocol",
+ "title": "Phase 6A protocol validation (loopback test service, not a model)",
+ "generated_at": "2026-10-12T14:33:34Z",
+ "results_dir": "/Users/null3351/Code/formal-agent-lab/research/results/p6a-protocol",
+ "primary_metric": "correct",
+ "rubric": [
+  "fal-research-rubric",
+  "1"
+ ],
+ "replicates": 2,
+ "limits": {
+  "max_calls": 60,
+  "max_http_attempts": 120,
+  "max_output_tokens_per_call": 512,
+  "max_total_output_tokens": null,
+  "network_retries": 2
+ },
+ "missing_policy": "every planned unit keeps a record; units without a model-produced response are MISSING in the model metrics (never 0 or 1) and counted by call outcome over the planned denominator; a refusal is never retried; only transport faults, lost responses, 429 and 5xx are retried (fixed allowance); on resume an unanswered unit is called again as a new sample",
+ "tracks": {
+  "implementation_conformance": {
+   "conditions": [
+    {
+     "condition": "ptest-anthropic · ASSISTED · brief-md",
+     "planned": 2,
+     "outcomes": {
+      "ANSWERED": 1,
+      "PROVIDER_ERROR": 1
+     },
+     "behaviors": {
+      "CORRECT": 1,
+      "NO_MODEL_ANSWER": 1
+     },
+     "metrics": {
+      "correct": {
+       "value": 1.0,
+       "status": "OK",
+       "n": 1,
+       "missing": 1,
+       "not_applicable": 0,
+       "ci": {
+        "low": 0.20654931437723745,
+        "high": 1.0,
+        "level": 0.95,
+        "method": "Wilson score interval",
+        "n": 1
+       },
+       "missing_reason": null
+      },
+      "format_valid": {
+       "value": 1.0,
+       "status": "OK",
+       "n": 1,
+       "missing": 1,
+       "not_applicable": 0,
+       "ci": {
+        "low": 0.20654931437723745,
+        "high": 1.0,
+        "level": 0.95,
+        "method": "Wilson score interval",
+        "n": 1
+       },
+       "missing_reason": null
+      },
+      "refused": {
+       "value": 0.0,
+       "status": "OK",
+       "n": 1,
+       "missing": 1,
+       "not_applicable": 0,
+       "ci": {
+        "low": 0.0,
+        "high": 0.7934506856227626,
+        "level": 0.95,
+        "method": "Wilson score interval",
+        "n": 1
+       },
+       "missing_reason": null
+      },
+      "responded": {
+       "value": 0.5,
+       "status": "OK",
+       "n": 2,
+       "missing": 0,
+       "not_applicable": 0,
+       "ci": {
+        "low": 0.09453120573423074,
+        "high": 0.9054687942657693,
+        "level": 0.95,
+        "method": "Wilson score interval",
+        "n": 2
+       },
+       "missing_reason": null
+      },
+      "program_corresponds": {
+       "value": 1.0,
+       "status": "OK",
+       "n": 1,
+       "missing": 1,
+       "not_applicable": 0,
+       "ci": {
+        "low": 0.20654931437723745,
+        "high": 1.0,
+        "level": 0.95,
+        "method": "Wilson score interval",
+        "n": 1
+       },
+       "missing_reason": null
+      },
+      "output_tokens": {
+       "value": 13.0,
+       "status": "OK",
+       "n": 1,
+       "missing": 1,
+       "not_applicable": 0,
+       "ci": null,
+       "missing_reason": null
+      },
+      "latency_ms": {
+       "value": 1026.75,
+       "status": "OK",
+       "n": 2,
+       "missing": 0,
+       "not_applicable": 0,
+       "ci": null,
+       "missing_reason": null
+      }
+     },
+     "cost": {
+      "calls_sent": 2,
+      "http_attempts": 5,
+      "confirmed_input_tokens": 725,
+      "confirmed_output_tokens": 13,
+      "usage_unknown_calls": 1,
+      "possibly_billed_unconfirmed": 1
+     },
+     "identity": {
+      "LOOPBACK_TEST/TEST_SERVICE: requested protocol-test-v1, returned protocol-test-v1": 1,
+      "LOOPBACK_TEST/UNKNOWN: requested protocol-test-v1, returned None": 1
+     }
+    },
+    {
+     "condition": "ptest-anthropic · STATIC_UNASSISTED · brief-md",
+     "planned": 2,
+     "outcomes": {
+      "CONTENT_REFUSAL": 1,
+      "ANSWERED": 1
+     },
+     "behaviors": {
+      "REFUSED": 1,
+      "CORRECT": 1
+     },
+     "metrics": {
+      "correct": {
+       "value": 0.5,
+       "status": "OK",
+       "n": 2,
+       "missing": 0,
+       "not_applicable": 0,
+       "ci": {
+        "low": 0.09453120573423074,
+        "high": 0.9054687942657693,
+        "level": 0.95,
+        "method": "Wilson score interval",
+        "n": 2
+       },
+       "missing_reason": null
+      },
+      "format_valid": {
+       "value": 1.0,
+       "status": "OK",
+       "n": 1,
+       "missing": 1,
+       "not_applicable": 0,
+       "ci": {
+        "low": 0.20654931437723745,
+        "high": 1.0,
+        "level": 0.95,
+        "method": "Wilson score interval",
+        "n": 1
+       },
+       "missing_reason": null
+      },
+      "refused": {
+       "value": 0.5,
+       "status": "OK",
+       "n": 2,
+       "missing": 0,
+       "not_applicable": 0,
+       "ci": {
+        "low": 0.09453120573423074,
+        "high": 0.9054687942657693,
+        "level": 0.95,
+        "method": "Wilson score interval",
+        "n": 2
+       },
+       "missing_reason": null
+      },
+      "responded": {
+       "value": 1.0,
+       "status": "OK",
+       "n": 2,
+       "missing": 0,
+       "not_applicable": 0,
+       "ci": {
+        "low": 0.3423802275066532,
+        "high": 1.0,
+        "level": 0.95,
+        "method": "Wilson score interval",
+        "n": 2
+       },
+       "missing_reason": null
+      },
+      "program_corresponds": {
+       "value": 1.0,
+       "status": "OK",
+       "n": 1,
+       "missing": 1,
+       "not_applicable": 0,
+       "ci": {
+        "low": 0.20654931437723745,
+        "high": 1.0,
+        "level": 0.95,
+        "method": "Wilson score interval",
+        "n": 1
+       },
+       "missing_reason": null
+      },
+      "output_tokens": {
+       "value": 6.5,
+       "status": "OK",
+       "n": 2,
+       "missing": 0,
+       "not_applicable": 0,
+       "ci": null,
+       "missing_reason": null
+      },
+      "latency_ms": {
+       "value": 20.75,
+       "status": "OK",
+       "n": 2,
+       "missing": 0,
+       "not_applicable": 0,
+       "ci": null,
+       "missing_reason": null
+      }
+     },
+     "cost": {
+      "calls_sent": 2,
+      "http_attempts": 3,
+      "confirmed_input_tokens": 1244,
+      "confirmed_output_tokens": 13,
+      "usage_unknown_calls": 0,
+      "possibly_billed_unconfirmed": 0
+     },
+     "identity": {
+      "LOOPBACK_TEST/TEST_SERVICE: requested protocol-test-v1, returned protocol-test-v1": 2
+     }
+    },
+    {
+     "condition": "ptest-openai · ASSISTED · brief-md",
+     "planned": 2,
+     "outcomes": {
+      "ANSWERED": 2
+     },
+     "behaviors": {
+      "CORRECT": 1,
+      "INVALID_FORMAT": 1
+     },
+     "metrics": {
+      "correct": {
+       "value": 0.5,
+       "status": "OK",
+       "n": 2,
+       "missing": 0,
+       "not_applicable": 0,
+       "ci": {
+        "low": 0.09453120573423074,
+        "high": 0.9054687942657693,
+        "level": 0.95,
+        "method": "Wilson score interval",
+        "n": 2
+       },
+       "missing_reason": null
+      },
+      "format_valid": {
+       "value": 0.5,
+       "status": "OK",
+       "n": 2,
+       "missing": 0,
+       "not_applicable": 0,
+       "ci": {
+        "low": 0.09453120573423074,
+        "high": 0.9054687942657693,
+        "level": 0.95,
+        "method": "Wilson score interval",
+        "n": 2
+       },
+       "missing_reason": null
+      },
+      "refused": {
+       "value": 0.0,
+       "status": "OK",
+       "n": 2,
+       "missing": 0,
+       "not_applicable": 0,
+       "ci": {
+        "low": 0.0,
+        "high": 0.6576197724933468,
+        "level": 0.95,
+        "method": "Wilson score interval",
+        "n": 2
+       },
+       "missing_reason": null
+      },
+      "responded": {
+       "value": 1.0,
+       "status": "OK",
+       "n": 2,
+       "missing": 0,
+       "not_applicable": 0,
+       "ci": {
+        "low": 0.3423802275066532,
+        "high": 1.0,
+        "level": 0.95,
+        "method": "Wilson score interval",
+        "n": 2
+       },
+       "missing_reason": null
+      },
+      "program_corresponds": {
+       "value": 1.0,
+       "status": "OK",
+       "n": 1,
+       "missing": 1,
+       "not_applicable": 0,
+       "ci": {
+        "low": 0.20654931437723745,
+        "high": 1.0,
+        "level": 0.95,
+        "method": "Wilson score interval",
+        "n": 1
+       },
+       "missing_reason": null
+      },
+      "output_tokens": {
+       "value": 12.0,
+       "status": "OK",
+       "n": 2,
+       "missing": 0,
+       "not_applicable": 0,
+       "ci": null,
+       "missing_reason": null
+      },
+      "latency_ms": {
+       "value": 3.1,
+       "status": "OK",
+       "n": 2,
+       "missing": 0,
+       "not_applicable": 0,
+       "ci": null,
+       "missing_reason": null
+      }
+     },
+     "cost": {
+      "calls_sent": 2,
+      "http_attempts": 2,
+      "confirmed_input_tokens": 1756,
+      "confirmed_output_tokens": 24,
+      "usage_unknown_calls": 0,
+      "possibly_billed_unconfirmed": 0
+     },
+     "identity": {
+      "LOOPBACK_TEST/TEST_SERVICE: requested protocol-test-v1, returned protocol-test-v1": 2
+     }
+    },
+    {
+     "condition": "ptest-openai · STATIC_UNASSISTED · brief-md",
+     "planned": 2,
+     "outcomes": {
+      "ANSWERED": 2
+     },
+     "behaviors": {
+      "CORRECT": 1,
+      "INCORRECT": 1
+     },
+     "metrics": {
+      "correct": {
+       "value": 0.5,
+       "status": "OK",
+       "n": 2,
+       "missing": 0,
+       "not_applicable": 0,
+       "ci": {
+        "low": 0.09453120573423074,
+        "high": 0.9054687942657693,
+        "level": 0.95,
+        "method": "Wilson score interval",
+        "n": 2
+       },
+       "missing_reason": null
+      },
+      "format_valid": {
+       "value": 1.0,
+       "status": "OK",
+       "n": 2,
+       "missing": 0,
+       "not_applicable": 0,
+       "ci": {
+        "low": 0.3423802275066532,
+        "high": 1.0,
+        "level": 0.95,
+        "method": "Wilson score interval",
+        "n": 2
+       },
+       "missing_reason": null
+      },
+      "refused": {
+       "value": 0.0,
+       "status": "OK",
+       "n": 2,
+       "missing": 0,
+       "not_applicable": 0,
+       "ci": {
+        "low": 0.0,
+        "high": 0.6576197724933468,
+        "level": 0.95,
+        "method": "Wilson score interval",
+        "n": 2
+       },
+       "missing_reason": null
+      },
+      "responded": {
+       "value": 1.0,
+       "status": "OK",
+       "n": 2,
+       "missing": 0,
+       "not_applicable": 0,
+       "ci": {
+        "low": 0.3423802275066532,
+        "high": 1.0,
+        "level": 0.95,
+        "method": "Wilson score interval",
+        "n": 2
+       },
+       "missing_reason": null
+      },
+      "program_corresponds": {
+       "value": 0.5,
+       "status": "OK",
+       "n": 2,
+       "missing": 0,
+       "not_applicable": 0,
+       "ci": {
+        "low": 0.09453120573423074,
+        "high": 0.9054687942657693,
+        "level": 0.95,
+        "method": "Wilson score interval",
+        "n": 2
+       },
+       "missing_reason": null
+      },
+      "output_tokens": {
+       "value": 13.0,
+       "status": "OK",
+       "n": 2,
+       "missing": 0,
+       "not_applicable": 0,
+       "ci": null,
+       "missing_reason": null
+      },
+      "latency_ms": {
+       "value": 12.799999999999999,
+       "status": "OK",
+       "n": 2,
+       "missing": 0,
+       "not_applicable": 0,
+       "ci": null,
+       "missing_reason": null
+      }
+     },
+     "cost": {
+      "calls_sent": 2,
+      "http_attempts": 2,
+      "confirmed_input_tokens": 1552,
+      "confirmed_output_tokens": 26,
+      "usage_unknown_calls": 0,
+      "possibly_billed_unconfirmed": 0
+     },
+     "identity": {
+      "LOOPBACK_TEST/TEST_SERVICE: requested protocol-test-v1, returned protocol-test-v1": 2
+     }
+    }
+   ],
+   "comparisons": [
+    {
+     "vary": "provider",
+     "note": "two protocol shapes of the same test service: a machinery check, not a model comparison",
+     "metric_id": "correct",
+     "a": "ptest-openai",
+     "b": "ptest-anthropic",
+     "n_pairs": 3,
+     "mean_diff_b_minus_a": 0.0,
+     "ci": {
+      "low": -1.0,
+      "high": 1.0,
+      "level": 0.95,
+      "method": "percentile bootstrap of the mean paired difference (5000 resamples, seed 20260926)",
+      "n": 3
+     },
+     "better": null,
+     "test": {
+      "reported": false,
+      "n_nonzero": 2,
+      "reason": "significance not reported: 2 non-zero paired differences < 6 (exact two-sided p cannot reach 0.05)"
+     },
+     "unpaired": 1,
+     "pairs": [
+      {
+       "key": [
+        "orders-deviation",
+        "ASSISTED",
+        0
+       ],
+       "a": 1.0,
+       "b": 1.0,
+       "diff": 0.0
+      },
+      {
+       "key": [
+        "orders-deviation",
+        "STATIC_UNASSISTED",
+        0
+       ],
+       "a": 1.0,
+       "b": 0.0,
+       "diff": -1.0
+      },
+      {
+       "key": [
+        "orders-deviation",
+        "STATIC_UNASSISTED",
+        1
+       ],
+       "a": 0.0,
+       "b": 1.0,
+       "diff": 1.0
+      }
+     ],
+     "unpaired_detail": [
+      {
+       "key": [
+        "orders-deviation",
+        "ASSISTED",
+        1
+       ],
+       "missing": "b",
+       "a": "present",
+       "b": "MISSING: no model-produced response (PROVIDER_ERROR)"
+      }
+     ],
+     "reading": "ENGINEERING",
+     "reading_note": "engineering reading: fewer than 6 complete pairs or non-zero differences — a direction, not a significance claim",
+     "comparability": {
+      "ptest-openai": {
+       "route": "LOOPBACK_TEST",
+       "model": "protocol-test-v1",
+       "params": {
+        "max_tokens": 512
+       },
+       "note": "the loopback protocol test service — not a model"
+      },
+      "ptest-anthropic": {
+       "route": "LOOPBACK_TEST",
+       "model": "protocol-test-v1",
+       "params": {
+        "max_tokens": 512
+       },
+       "note": "the loopback protocol test service — not a model"
+      }
+     },
+     "comparability_note": "parameters are recorded, not equated: equal names (e.g. two 'high' settings) do not mean equal compute, and a fixed seed on a real API does not reproduce an answer"
+    },
+    {
+     "vary": "representation",
+     "a": "ir-json",
+     "b": "prose",
+     "note": null,
+     "not_applicable": "this track plans no unit with representation = ir-json"
+    },
+    {
+     "vary": "assistance",
+     "note": null,
+     "metric_id": "correct",
+     "a": "STATIC_UNASSISTED",
+     "b": "ASSISTED",
+     "n_pairs": 3,
+     "mean_diff_b_minus_a": 0.3333333333333333,
+     "ci": {
+      "low": 0.0,
+      "high": 1.0,
+      "level": 0.95,
+      "method": "percentile bootstrap of the mean paired difference (5000 resamples, seed 20260926)",
+      "n": 3
+     },
+     "better": "ASSISTED",
+     "test": {
+      "reported": false,
+      "n_nonzero": 1,
+      "reason": "significance not reported: 1 non-zero paired differences < 6 (exact two-sided p cannot reach 0.05)"
+     },
+     "unpaired": 1,
+     "pairs": [
+      {
+       "key": [
+        "orders-deviation",
+        "ptest-anthropic",
+        0
+       ],
+       "a": 0.0,
+       "b": 1.0,
+       "diff": 1.0
+      },
+      {
+       "key": [
+        "orders-deviation",
+        "ptest-openai",
+        0
+       ],
+       "a": 1.0,
+       "b": 1.0,
+       "diff": 0.0
+      },
+      {
+       "key": [
+        "orders-deviation",
+        "ptest-openai",
+        1
+       ],
+       "a": 0.0,
+       "b": 0.0,
+       "diff": 0.0
+      }
+     ],
+     "unpaired_detail": [
+      {
+       "key": [
+        "orders-deviation",
+        "ptest-anthropic",
+        1
+       ],
+       "missing": "b",
+       "a": "present",
+       "b": "MISSING: no model-produced response (PROVIDER_ERROR)"
+      }
+     ],
+     "reading": "ENGINEERING",
+     "reading_note": "engineering reading: fewer than 6 complete pairs or non-zero differences — a direction, not a significance claim"
+    }
+   ],
+   "outcomes": {
+    "ANSWERED": 6,
+    "PROVIDER_ERROR": 1,
+    "CONTENT_REFUSAL": 1
+   },
+   "planned": 8
+  },
+  "synthetic_representation": {
+   "conditions": [
+    {
+     "condition": "ptest-anthropic · STATIC_UNASSISTED · ir-json",
+     "planned": 4,
+     "outcomes": {
+      "EMPTY_CONTENT": 1,
+      "TRUNCATED": 1,
+      "ANSWERED": 1,
+      "MODEL_UNAVAILABLE": 1
+     },
+     "behaviors": {
+      "EMPTY": 1,
+      "INVALID_FORMAT": 2,
+      "NO_MODEL_ANSWER": 1
+     },
+     "metrics": {
+      "correct": {
+       "value": 0.0,
+       "status": "OK",
+       "n": 3,
+       "missing": 1,
+       "not_applicable": 0,
+       "ci": {
+        "low": 0.0,
+        "high": 0.5614970317550454,
+        "level": 0.95,
+        "method": "Wilson score interval",
+        "n": 3
+       },
+       "missing_reason": null
+      },
+      "format_valid": {
+       "value": 0.0,
+       "status": "OK",
+       "n": 2,
+       "missing": 2,
+       "not_applicable": 0,
+       "ci": {
+        "low": 0.0,
+        "high": 0.6576197724933468,
+        "level": 0.95,
+        "method": "Wilson score interval",
+        "n": 2
+       },
+       "missing_reason": null
+      },
+      "refused": {
+       "value": 0.0,
+       "status": "OK",
+       "n": 3,
+       "missing": 1,
+       "not_applicable": 0,
+       "ci": {
+        "low": 0.0,
+        "high": 0.5614970317550454,
+        "level": 0.95,
+        "method": "Wilson score interval",
+        "n": 3
+       },
+       "missing_reason": null
+      },
+      "responded": {
+       "value": 0.75,
+       "status": "OK",
+       "n": 4,
+       "missing": 0,
+       "not_applicable": 0,
+       "ci": {
+        "low": 0.300641842582402,
+        "high": 0.9544127391902995,
+        "level": 0.95,
+        "method": "Wilson score interval",
+        "n": 4
+       },
+       "missing_reason": null
+      },
+      "program_corresponds": {
+       "value": null,
+       "status": "MISSING",
+       "n": 0,
+       "missing": 0,
+       "not_applicable": 4,
+       "ci": null,
+       "missing_reason": "no observed values (0 missing, 4 not applicable of 4 runs)"
+      },
+      "output_tokens": {
+       "value": 9.666666666666666,
+       "status": "OK",
+       "n": 3,
+       "missing": 1,
+       "not_applicable": 0,
+       "ci": {
+        "low": 0.0,
+        "high": 21.0,
+        "level": 0.95,
+        "method": "percentile bootstrap of the mean (5000 resamples, seed 20260926)",
+        "n": 3
+       },
+       "missing_reason": null
+      },
+      "latency_ms": {
+       "value": 19.0,
+       "status": "OK",
+       "n": 4,
+       "missing": 0,
+       "not_applicable": 0,
+       "ci": {
+        "low": 4.050000000000001,
+        "high": 40.4,
+        "level": 0.95,
+        "method": "percentile bootstrap of the mean (5000 resamples, seed 20260926)",
+        "n": 4
+       },
+       "missing_reason": null
+      }
+     },
+     "cost": {
+      "calls_sent": 4,
+      "http_attempts": 4,
+      "confirmed_input_tokens": 2263,
+      "confirmed_output_tokens": 29,
+      "usage_unknown_calls": 1,
+      "possibly_billed_unconfirmed": 0
+     },
+     "identity": {
+      "LOOPBACK_TEST/TEST_SERVICE: requested protocol-test-v1, returned protocol-test-v1": 2,
+      "LOOPBACK_TEST/UNKNOWN: requested protocol-test-v1, returned None": 2
+     }
+    },
+    {
+     "condition": "ptest-anthropic · STATIC_UNASSISTED · prose",
+     "planned": 4,
+     "outcomes": {
+      "AUTH_ERROR": 1,
+      "ANSWERED": 2,
+      "MALFORMED_RESPONSE": 1
+     },
+     "behaviors": {
+      "NO_MODEL_ANSWER": 2,
+      "INCORRECT": 1,
+      "CORRECT": 1
+     },
+     "metrics": {
+      "correct": {
+       "value": 0.5,
+       "status": "OK",
+       "n": 2,
+       "missing": 2,
+       "not_applicable": 0,
+       "ci": {
+        "low": 0.09453120573423074,
+        "high": 0.9054687942657693,
+        "level": 0.95,
+        "method": "Wilson score interval",
+        "n": 2
+       },
+       "missing_reason": null
+      },
+      "format_valid": {
+       "value": 1.0,
+       "status": "OK",
+       "n": 2,
+       "missing": 2,
+       "not_applicable": 0,
+       "ci": {
+        "low": 0.3423802275066532,
+        "high": 1.0,
+        "level": 0.95,
+        "method": "Wilson score interval",
+        "n": 2
+       },
+       "missing_reason": null
+      },
+      "refused": {
+       "value": 0.0,
+       "status": "OK",
+       "n": 2,
+       "missing": 2,
+       "not_applicable": 0,
+       "ci": {
+        "low": 0.0,
+        "high": 0.6576197724933468,
+        "level": 0.95,
+        "method": "Wilson score interval",
+        "n": 2
+       },
+       "missing_reason": null
+      },
+      "responded": {
+       "value": 0.5,
+       "status": "OK",
+       "n": 4,
+       "missing": 0,
+       "not_applicable": 0,
+       "ci": {
+        "low": 0.15003898915214958,
+        "high": 0.8499610108478504,
+        "level": 0.95,
+        "method": "Wilson score interval",
+        "n": 4
+       },
+       "missing_reason": null
+      },
+      "program_corresponds": {
+       "value": null,
+       "status": "MISSING",
+       "n": 0,
+       "missing": 0,
+       "not_applicable": 4,
+       "ci": null,
+       "missing_reason": "no observed values (0 missing, 4 not applicable of 4 runs)"
+      },
+      "output_tokens": {
+       "value": 9.0,
+       "status": "OK",
+       "n": 2,
+       "missing": 2,
+       "not_applicable": 0,
+       "ci": null,
+       "missing_reason": null
+      },
+      "latency_ms": {
+       "value": 9.05,
+       "status": "OK",
+       "n": 4,
+       "missing": 0,
+       "not_applicable": 0,
+       "ci": {
+        "low": 4.35,
+        "high": 15.575000000000001,
+        "level": 0.95,
+        "method": "percentile bootstrap of the mean (5000 resamples, seed 20260926)",
+        "n": 4
+       },
+       "missing_reason": null
+      }
+     },
+     "cost": {
+      "calls_sent": 4,
+      "http_attempts": 4,
+      "confirmed_input_tokens": 329,
+      "confirmed_output_tokens": 18,
+      "usage_unknown_calls": 2,
+      "possibly_billed_unconfirmed": 0
+     },
+     "identity": {
+      "LOOPBACK_TEST/UNKNOWN: requested protocol-test-v1, returned None": 2,
+      "LOOPBACK_TEST/TEST_SERVICE: requested protocol-test-v1, returned protocol-test-v1": 2
+     }
+    },
+    {
+     "condition": "ptest-openai · STATIC_UNASSISTED · ir-json",
+     "planned": 4,
+     "outcomes": {
+      "ANSWERED": 4
+     },
+     "behaviors": {
+      "CORRECT": 2,
+      "PARTIAL": 1,
+      "INVALID_FORMAT": 1
+     },
+     "metrics": {
+      "correct": {
+       "value": 0.5,
+       "status": "OK",
+       "n": 4,
+       "missing": 0,
+       "not_applicable": 0,
+       "ci": {
+        "low": 0.15003898915214958,
+        "high": 0.8499610108478504,
+        "level": 0.95,
+        "method": "Wilson score interval",
+        "n": 4
+       },
+       "missing_reason": null
+      },
+      "format_valid": {
+       "value": 0.75,
+       "status": "OK",
+       "n": 4,
+       "missing": 0,
+       "not_applicable": 0,
+       "ci": {
+        "low": 0.300641842582402,
+        "high": 0.9544127391902995,
+        "level": 0.95,
+        "method": "Wilson score interval",
+        "n": 4
+       },
+       "missing_reason": null
+      },
+      "refused": {
+       "value": 0.0,
+       "status": "OK",
+       "n": 4,
+       "missing": 0,
+       "not_applicable": 0,
+       "ci": {
+        "low": 0.0,
+        "high": 0.4898908364545972,
+        "level": 0.95,
+        "method": "Wilson score interval",
+        "n": 4
+       },
+       "missing_reason": null
+      },
+      "responded": {
+       "value": 1.0,
+       "status": "OK",
+       "n": 4,
+       "missing": 0,
+       "not_applicable": 0,
+       "ci": {
+        "low": 0.5101091635454027,
+        "high": 1.0,
+        "level": 0.95,
+        "method": "Wilson score interval",
+        "n": 4
+       },
+       "missing_reason": null
+      },
+      "program_corresponds": {
+       "value": null,
+       "status": "MISSING",
+       "n": 0,
+       "missing": 0,
+       "not_applicable": 4,
+       "ci": null,
+       "missing_reason": "no observed values (0 missing, 4 not applicable of 4 runs)"
+      },
+      "output_tokens": {
+       "value": 13.25,
+       "status": "OK",
+       "n": 4,
+       "missing": 0,
+       "not_applicable": 0,
+       "ci": {
+        "low": 10.0,
+        "high": 16.75,
+        "level": 0.95,
+        "method": "percentile bootstrap of the mean (5000 resamples, seed 20260926)",
+        "n": 4
+       },
+       "missing_reason": null
+      },
+      "latency_ms": {
+       "value": 57.6,
+       "status": "OK",
+       "n": 4,
+       "missing": 0,
+       "not_applicable": 0,
+       "ci": {
+        "low": 4.95,
+        "high": 150.0,
+        "level": 0.95,
+        "method": "percentile bootstrap of the mean (5000 resamples, seed 20260926)",
+        "n": 4
+       },
+       "missing_reason": null
+      }
+     },
+     "cost": {
+      "calls_sent": 4,
+      "http_attempts": 4,
+      "confirmed_input_tokens": 3566,
+      "confirmed_output_tokens": 53,
+      "usage_unknown_calls": 0,
+      "possibly_billed_unconfirmed": 0
+     },
+     "identity": {
+      "LOOPBACK_TEST/TEST_SERVICE: requested protocol-test-v1, returned protocol-test-v1": 4
+     }
+    },
+    {
+     "condition": "ptest-openai · STATIC_UNASSISTED · prose",
+     "planned": 4,
+     "outcomes": {
+      "ANSWERED": 3,
+      "CONTENT_REFUSAL": 1
+     },
+     "behaviors": {
+      "CORRECT": 1,
+      "INVALID_FORMAT": 1,
+      "REFUSED": 1,
+      "INCORRECT": 1
+     },
+     "metrics": {
+      "correct": {
+       "value": 0.25,
+       "status": "OK",
+       "n": 4,
+       "missing": 0,
+       "not_applicable": 0,
+       "ci": {
+        "low": 0.0455872608097006,
+        "high": 0.699358157417598,
+        "level": 0.95,
+        "method": "Wilson score interval",
+        "n": 4
+       },
+       "missing_reason": null
+      },
+      "format_valid": {
+       "value": 0.6666666666666666,
+       "status": "OK",
+       "n": 3,
+       "missing": 1,
+       "not_applicable": 0,
+       "ci": {
+        "low": 0.20765960080204782,
+        "high": 0.9385080552796038,
+        "level": 0.95,
+        "method": "Wilson score interval",
+        "n": 3
+       },
+       "missing_reason": null
+      },
+      "refused": {
+       "value": 0.25,
+       "status": "OK",
+       "n": 4,
+       "missing": 0,
+       "not_applicable": 0,
+       "ci": {
+        "low": 0.0455872608097006,
+        "high": 0.699358157417598,
+        "level": 0.95,
+        "method": "Wilson score interval",
+        "n": 4
+       },
+       "missing_reason": null
+      },
+      "responded": {
+       "value": 1.0,
+       "status": "OK",
+       "n": 4,
+       "missing": 0,
+       "not_applicable": 0,
+       "ci": {
+        "low": 0.5101091635454027,
+        "high": 1.0,
+        "level": 0.95,
+        "method": "Wilson score interval",
+        "n": 4
+       },
+       "missing_reason": null
+      },
+      "program_corresponds": {
+       "value": null,
+       "status": "MISSING",
+       "n": 0,
+       "missing": 0,
+       "not_applicable": 4,
+       "ci": null,
+       "missing_reason": "no observed values (0 missing, 4 not applicable of 4 runs)"
+      },
+      "output_tokens": {
+       "value": 8.25,
+       "status": "OK",
+       "n": 4,
+       "missing": 0,
+       "not_applicable": 0,
+       "ci": {
+        "low": 2.5,
+        "high": 12.75,
+        "level": 0.95,
+        "method": "percentile bootstrap of the mean (5000 resamples, seed 20260926)",
+        "n": 4
+       },
+       "missing_reason": null
+      },
+      "latency_ms": {
+       "value": 10.05,
+       "status": "OK",
+       "n": 4,
+       "missing": 0,
+       "not_applicable": 0,
+       "ci": {
+        "low": 8.850000000000001,
+        "high": 11.25,
+        "level": 0.95,
+        "method": "percentile bootstrap of the mean (5000 resamples, seed 20260926)",
+        "n": 4
+       },
+       "missing_reason": null
+      }
+     },
+     "cost": {
+      "calls_sent": 4,
+      "http_attempts": 4,
+      "confirmed_input_tokens": 1234,
+      "confirmed_output_tokens": 33,
+      "usage_unknown_calls": 0,
+      "possibly_billed_unconfirmed": 0
+     },
+     "identity": {
+      "LOOPBACK_TEST/TEST_SERVICE: requested protocol-test-v1, returned protocol-test-v1": 3,
+      "LOOPBACK_TEST/TEST_SERVICE: requested protocol-test-v1, returned protocol-test-other": 1
+     }
+    }
+   ],
+   "comparisons": [
+    {
+     "vary": "provider",
+     "note": "two protocol shapes of the same test service: a machinery check, not a model comparison",
+     "metric_id": "correct",
+     "a": "ptest-openai",
+     "b": "ptest-anthropic",
+     "n_pairs": 5,
+     "mean_diff_b_minus_a": -0.2,
+     "ci": {
+      "low": -0.8,
+      "high": 0.4,
+      "level": 0.95,
+      "method": "percentile bootstrap of the mean paired difference (5000 resamples, seed 20260926)",
+      "n": 5
+     },
+     "better": "ptest-openai",
+     "test": {
+      "reported": false,
+      "n_nonzero": 3,
+      "reason": "significance not reported: 3 non-zero paired differences < 6 (exact two-sided p cannot reach 0.05)"
+     },
+     "unpaired": 3,
+     "pairs": [
+      {
+       "key": [
+        "lamp-ir-json",
+        "STATIC_UNASSISTED",
+        0
+       ],
+       "a": 1.0,
+       "b": 0.0,
+       "diff": -1.0
+      },
+      {
+       "key": [
+        "lamp-ir-json",
+        "STATIC_UNASSISTED",
+        1
+       ],
+       "a": 0.0,
+       "b": 0.0,
+       "diff": 0.0
+      },
+      {
+       "key": [
+        "lamp-prose",
+        "STATIC_UNASSISTED",
+        1
+       ],
+       "a": 0.0,
+       "b": 0.0,
+       "diff": 0.0
+      },
+      {
+       "key": [
+        "shortcut-ir-json",
+        "STATIC_UNASSISTED",
+        0
+       ],
+       "a": 1.0,
+       "b": 0.0,
+       "diff": -1.0
+      },
+      {
+       "key": [
+        "shortcut-prose",
+        "STATIC_UNASSISTED",
+        1
+       ],
+       "a": 0.0,
+       "b": 1.0,
+       "diff": 1.0
+      }
+     ],
+     "unpaired_detail": [
+      {
+       "key": [
+        "lamp-prose",
+        "STATIC_UNASSISTED",
+        0
+       ],
+       "missing": "b",
+       "a": "present",
+       "b": "MISSING: no model-produced response (AUTH_ERROR)"
+      },
+      {
+       "key": [
+        "shortcut-ir-json",
+        "STATIC_UNASSISTED",
+        1
+       ],
+       "missing": "b",
+       "a": "present",
+       "b": "MISSING: no model-produced response (MODEL_UNAVAILABLE)"
+      },
+      {
+       "key": [
+        "shortcut-prose",
+        "STATIC_UNASSISTED",
+        0
+       ],
+       "missing": "b",
+       "a": "present",
+       "b": "MISSING: no model-produced response (MALFORMED_RESPONSE)"
+      }
+     ],
+     "reading": "ENGINEERING",
+     "reading_note": "engineering reading: fewer than 6 complete pairs or non-zero differences — a direction, not a significance claim",
+     "comparability": {
+      "ptest-openai": {
+       "route": "LOOPBACK_TEST",
+       "model": "protocol-test-v1",
+       "params": {
+        "max_tokens": 512
+       },
+       "note": "the loopback protocol test service — not a model"
+      },
+      "ptest-anthropic": {
+       "route": "LOOPBACK_TEST",
+       "model": "protocol-test-v1",
+       "params": {
+        "max_tokens": 512
+       },
+       "note": "the loopback protocol test service — not a model"
+      }
+     },
+     "comparability_note": "parameters are recorded, not equated: equal names (e.g. two 'high' settings) do not mean equal compute, and a fixed seed on a real API does not reproduce an answer"
+    },
+    {
+     "vary": "representation",
+     "note": null,
+     "metric_id": "correct",
+     "a": "ir-json",
+     "b": "prose",
+     "n_pairs": 5,
+     "mean_diff_b_minus_a": -0.2,
+     "ci": {
+      "low": -0.6,
+      "high": 0.0,
+      "level": 0.95,
+      "method": "percentile bootstrap of the mean paired difference (5000 resamples, seed 20260926)",
+      "n": 5
+     },
+     "better": "ir-json",
+     "test": {
+      "reported": false,
+      "n_nonzero": 1,
+      "reason": "significance not reported: 1 non-zero paired differences < 6 (exact two-sided p cannot reach 0.05)"
+     },
+     "unpaired": 3,
+     "pairs": [
+      {
+       "key": [
+        "reference/lamp.json",
+        "ptest-anthropic",
+        "STATIC_UNASSISTED",
+        1
+       ],
+       "a": 0.0,
+       "b": 0.0,
+       "diff": 0.0
+      },
+      {
+       "key": [
+        "reference/lamp.json",
+        "ptest-openai",
+        "STATIC_UNASSISTED",
+        0
+       ],
+       "a": 1.0,
+       "b": 1.0,
+       "diff": 0.0
+      },
+      {
+       "key": [
+        "reference/lamp.json",
+        "ptest-openai",
+        "STATIC_UNASSISTED",
+        1
+       ],
+       "a": 0.0,
+       "b": 0.0,
+       "diff": 0.0
+      },
+      {
+       "key": [
+        "reference/shortcut.json",
+        "ptest-openai",
+        "STATIC_UNASSISTED",
+        0
+       ],
+       "a": 1.0,
+       "b": 0.0,
+       "diff": -1.0
+      },
+      {
+       "key": [
+        "reference/shortcut.json",
+        "ptest-openai",
+        "STATIC_UNASSISTED",
+        1
+       ],
+       "a": 0.0,
+       "b": 0.0,
+       "diff": 0.0
+      }
+     ],
+     "unpaired_detail": [
+      {
+       "key": [
+        "reference/lamp.json",
+        "ptest-anthropic",
+        "STATIC_UNASSISTED",
+        0
+       ],
+       "missing": "b",
+       "a": "present",
+       "b": "MISSING: no model-produced response (AUTH_ERROR)"
+      },
+      {
+       "key": [
+        "reference/shortcut.json",
+        "ptest-anthropic",
+        "STATIC_UNASSISTED",
+        0
+       ],
+       "missing": "b",
+       "a": "present",
+       "b": "MISSING: no model-produced response (MALFORMED_RESPONSE)"
+      },
+      {
+       "key": [
+        "reference/shortcut.json",
+        "ptest-anthropic",
+        "STATIC_UNASSISTED",
+        1
+       ],
+       "missing": "a",
+       "a": "MISSING: no model-produced response (MODEL_UNAVAILABLE)",
+       "b": "present"
+      }
+     ],
+     "reading": "ENGINEERING",
+     "reading_note": "engineering reading: fewer than 6 complete pairs or non-zero differences — a direction, not a significance claim"
+    },
+    {
+     "vary": "assistance",
+     "a": "STATIC_UNASSISTED",
+     "b": "ASSISTED",
+     "note": null,
+     "not_applicable": "this track plans no unit with assistance = ASSISTED"
+    }
+   ],
+   "outcomes": {
+    "EMPTY_CONTENT": 1,
+    "TRUNCATED": 1,
+    "ANSWERED": 10,
+    "MODEL_UNAVAILABLE": 1,
+    "AUTH_ERROR": 1,
+    "MALFORMED_RESPONSE": 1,
+    "CONTENT_REFUSAL": 1
+   },
+   "planned": 16
+  }
+ },
+ "not_run": [
+  {
+   "task_id": "lamp-ir-json",
+   "mode": "ASSISTED",
+   "reason": "the task defines no assistance material"
+  },
+  {
+   "task_id": "lamp-prose",
+   "mode": "ASSISTED",
+   "reason": "the task defines no assistance material"
+  },
+  {
+   "task_id": "shortcut-ir-json",
+   "mode": "ASSISTED",
+   "reason": "the task defines no assistance material"
+  },
+  {
+   "task_id": "shortcut-prose",
+   "mode": "ASSISTED",
+   "reason": "the task defines no assistance material"
+  }
+ ],
+ "ledger": {
+  "responses": 24,
+  "evaluations": 48,
+  "calls": 24,
+  "http_attempts": 28,
+  "possibly_billed": 1
+ },
+ "notes": [
+  "the two experiment lines are reported apart and never pooled into one success rate",
+  "model scores count only responses the model produced; transport / auth / limit / budget / cancel / blocked units are MISSING (never 0, never 1); refusals and invalid answers count as not correct",
+  "a relay route reports a model name it cannot prove; conclusions about a provider's model need a route whose identity is verifiable",
+  "tasks: lamp-ir-json, lamp-prose, orders-deviation, shortcut-ir-json, shortcut-prose"
+ ]
+}

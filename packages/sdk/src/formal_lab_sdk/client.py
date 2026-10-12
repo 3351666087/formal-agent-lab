@@ -300,6 +300,20 @@ class Client:
     def run_research(self, run_id: str) -> list[dict[str, Any]]:
         return self.get(f"/runs/{run_id}/research")
 
+    def import_research_study(self, project_id: str, data: bytes) -> dict[str, Any]:
+        """Import a study's results (zip: study.json + results/), read-only, for the Web UI."""
+        return self._request("POST", f"/projects/{project_id}/research/studies", content=data,
+                             headers={"content-type": "application/zip"})
+
+    def research_studies(self, project_id: str) -> list[dict[str, Any]]:
+        return self.get(f"/projects/{project_id}/research/studies")
+
+    def research_study(self, rs_id: str) -> dict[str, Any]:
+        return self.get(f"/research/studies/{rs_id}")
+
+    def research_study_unit(self, rs_id: str, unit_id: str) -> dict[str, Any]:
+        return self.get(f"/research/studies/{rs_id}/units/{unit_id}")
+
     def create_matrix(self, project_id: str, *, scenarios: list[str], strategies: list[str], seeds: list[int],
                       budgets: list[dict] | None = None, name: str | None = None) -> dict[str, Any]:
         return self.post(f"/projects/{project_id}/matrices", {"scenarios": scenarios, "strategies": strategies,

@@ -1,0 +1,189 @@
+{
+ "semantic_profile": "deterministic_finite_v1",
+ "name": "shortcut",
+ "enums": [],
+ "entity_sets": [],
+ "constants": [],
+ "state": [
+  {
+   "name": "pos",
+   "type": {
+    "kind": "int",
+    "min": 0,
+    "max": 3
+   },
+   "index": [],
+   "initial": {
+    "default": 0,
+    "cells": []
+   },
+   "observable": true
+  },
+  {
+   "name": "rides",
+   "type": {
+    "kind": "int",
+    "min": 0,
+    "max": 3
+   },
+   "index": [],
+   "initial": {
+    "default": 0,
+    "cells": []
+   },
+   "observable": true
+  }
+ ],
+ "actions": [
+  {
+   "name": "express",
+   "params": [],
+   "precondition": {
+    "op": "eq",
+    "args": [
+     {
+      "op": "var",
+      "name": "pos",
+      "index": []
+     },
+     {
+      "op": "const",
+      "value": 0
+     }
+    ]
+   },
+   "effects": [
+    {
+     "kind": "assign",
+     "target": {
+      "var": "pos",
+      "index": []
+     },
+     "value": {
+      "op": "const",
+      "value": 3
+     }
+    },
+    {
+     "kind": "assign",
+     "target": {
+      "var": "rides",
+      "index": []
+     },
+     "value": {
+      "op": "add",
+      "args": [
+       {
+        "op": "var",
+        "name": "rides",
+        "index": []
+       },
+       {
+        "op": "const",
+        "value": 1
+       }
+      ]
+     }
+    }
+   ],
+   "cost": 10,
+   "timeout_seconds": 30.0,
+   "retry": "RECONCILE_THEN_RETRY"
+  },
+  {
+   "name": "walk",
+   "params": [],
+   "precondition": {
+    "op": "lt",
+    "args": [
+     {
+      "op": "var",
+      "name": "pos",
+      "index": []
+     },
+     {
+      "op": "const",
+      "value": 3
+     }
+    ]
+   },
+   "effects": [
+    {
+     "kind": "assign",
+     "target": {
+      "var": "pos",
+      "index": []
+     },
+     "value": {
+      "op": "add",
+      "args": [
+       {
+        "op": "var",
+        "name": "pos",
+        "index": []
+       },
+       {
+        "op": "const",
+        "value": 1
+       }
+      ]
+     }
+    }
+   ],
+   "cost": 1,
+   "timeout_seconds": 30.0,
+   "retry": "RECONCILE_THEN_RETRY"
+  }
+ ],
+ "properties": [
+  {
+   "id": "arrived",
+   "kind": "goal",
+   "expr": {
+    "op": "eq",
+    "args": [
+     {
+      "op": "var",
+      "name": "pos",
+      "index": []
+     },
+     {
+      "op": "const",
+      "value": 3
+     }
+    ]
+   }
+  }
+ ],
+ "features": [],
+ "objectives": [
+  {
+   "id": "fare",
+   "label": "fare",
+   "unit": "coins",
+   "direction": "minimize",
+   "terms": [
+    {
+     "kind": "action_cost",
+     "weight": 1
+    }
+   ]
+  },
+  {
+   "id": "rides_taken",
+   "unit": "rides",
+   "direction": "minimize",
+   "terms": [
+    {
+     "kind": "terminal",
+     "expr": {
+      "op": "var",
+      "name": "rides",
+      "index": []
+     },
+     "weight": 1
+    }
+   ]
+  }
+ ]
+}

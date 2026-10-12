@@ -896,6 +896,80 @@ def research_export(rc_id: str, output: Path = typer.Option(None, "-o", help="wr
     typer.echo(f"wrote {out} ({len(data)} bytes)")
 
 
+# ---------------------------------------------------------------------------- research studies (phase 6A)
+study_app = typer.Typer(no_args_is_help=True,
+                        help="pre-registered research studies (fal-research-study/v1): plan, run, score, report, show")
+research_app.add_typer(study_app, name="study")
+
+
+def _study_main(args: list[str]) -> None:
+    try:
+        from formal_lab_eval.research import main as study_main
+    except ImportError as exc:  # the SDK does not depend on the evaluation package
+        raise typer.BadParameter("research studies need the formal-lab-evaluation package installed") from exc
+    raise typer.Exit(study_main(args))
+
+
+def _results_arg(results: Path | None) -> list[str]:
+    return ["--results", str(results)] if results else []
+
+
+@study_app.command("plan")
+def study_plan(study_dir: Path):
+    """The planned units (task × provider × assistance × replicate) and the conditions that are not run."""
+    _study_main(["plan", str(study_dir)])
+
+
+@study_app.command("run")
+def study_run(study_dir: Path, results: Path = typer.Option(None, help="results dir (default research/results/<id>)")):
+    """Call the providers for every unit not yet answered (saved answers are reused), then score and report."""
+    _study_main(["run", str(study_dir), *_results_arg(results)])
+
+
+@study_app.command("score")
+def study_score(study_dir: Path, results: Path = typer.Option(None), force: bool = typer.Option(False, "--force")):
+    """Re-score the saved responses (no model call); --force recomputes reusable evaluations too."""
+    _study_main(["score", str(study_dir), *_results_arg(results), *(["--force"] if force else [])])
+
+
+@study_app.command("report")
+def study_report(study_dir: Path, results: Path = typer.Option(None)):
+    _study_main(["report", str(study_dir), *_results_arg(results)])
+
+
+@study_app.command("show")
+def study_show(study_dir: Path, unit: str = typer.Option(..., help="unit id"), results: Path = typer.Option(None)):
+    """One unit's raw response record and its evaluation."""
+    _study_main(["show", str(study_dir), "--unit", unit, *_results_arg(results)])
+
+
+@study_app.command("import")
+def study_import(study_dir: Path, project: str = typer.Option(..., help="project id or name"),
+                 results: Path = typer.Option(None, help="results dir (default research/results/<study_id>)"),
+                 api: str = API):
+    """Upload a study's results to the platform (read-only) so the Web UI shows every unit and its raw answer."""
+    import io
+    import zipfile
+
+    study_doc = json.loads((study_dir / "study.json").read_text())
+    res = results or study_dir.resolve().parents[1] / "results" / study_doc["study_id"]
+    if not (res / "ledger.jsonl").is_file():
+        raise typer.BadParameter(f"no results at {res} — run the study first")
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
+        zf.write(study_dir / "study.json", "study.json")
+        for p in sorted(res.rglob("*")):
+            if p.is_file():
+                zf.write(p, (Path("results") / p.relative_to(res)).as_posix())
+    try:
+        c = _client(api)
+        out = c.import_research_study(_project(c, project), buf.getvalue())
+    except FormalLabError as exc:
+        _fail(exc)
+        return
+    typer.echo(f"imported {out['study_id']} as {out['id']}: {out['units']} unit(s), tracks {out['tracks']}")
+
+
 def main() -> None:
     try:
         app()

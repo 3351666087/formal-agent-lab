@@ -1,0 +1,791 @@
+{
+ "study_id": "p6a-real",
+ "title": "Phase 6A minimal real calls (ordinary business task)",
+ "generated_at": "2026-10-12T14:33:46Z",
+ "results_dir": "/Users/null3351/Code/formal-agent-lab/research/results/p6a-real",
+ "primary_metric": "correct",
+ "rubric": [
+  "fal-research-rubric",
+  "1"
+ ],
+ "replicates": 1,
+ "limits": {
+  "max_calls": 12,
+  "max_http_attempts": 24,
+  "max_output_tokens_per_call": 6000,
+  "max_total_output_tokens": 48000,
+  "network_retries": 1
+ },
+ "missing_policy": "every planned unit keeps a record; units without a model-produced response are MISSING in the model metrics (never 0 or 1) and counted by call outcome over the planned denominator; a refusal is never retried; only transport faults, lost responses, 429 and 5xx are retried (fixed allowance); on resume an unanswered unit is called again as a new sample",
+ "tracks": {
+  "implementation_conformance": {
+   "conditions": [
+    {
+     "condition": "claude-opus-5-5-native · ASSISTED · brief-md",
+     "planned": 1,
+     "outcomes": {
+      "BLOCKED_NO_CREDENTIAL": 1
+     },
+     "behaviors": {
+      "NOT_RUN": 1
+     },
+     "metrics": {
+      "correct": {
+       "value": null,
+       "status": "MISSING",
+       "n": 0,
+       "missing": 1,
+       "not_applicable": 0,
+       "ci": null,
+       "missing_reason": "no observed values (1 missing, 0 not applicable of 1 runs)"
+      },
+      "format_valid": {
+       "value": null,
+       "status": "MISSING",
+       "n": 0,
+       "missing": 1,
+       "not_applicable": 0,
+       "ci": null,
+       "missing_reason": "no observed values (1 missing, 0 not applicable of 1 runs)"
+      },
+      "refused": {
+       "value": null,
+       "status": "MISSING",
+       "n": 0,
+       "missing": 1,
+       "not_applicable": 0,
+       "ci": null,
+       "missing_reason": "no observed values (1 missing, 0 not applicable of 1 runs)"
+      },
+      "responded": {
+       "value": null,
+       "status": "MISSING",
+       "n": 0,
+       "missing": 0,
+       "not_applicable": 1,
+       "ci": null,
+       "missing_reason": "no observed values (0 missing, 1 not applicable of 1 runs)"
+      },
+      "program_corresponds": {
+       "value": null,
+       "status": "MISSING",
+       "n": 0,
+       "missing": 1,
+       "not_applicable": 0,
+       "ci": null,
+       "missing_reason": "no observed values (1 missing, 0 not applicable of 1 runs)"
+      },
+      "output_tokens": {
+       "value": null,
+       "status": "MISSING",
+       "n": 0,
+       "missing": 1,
+       "not_applicable": 0,
+       "ci": null,
+       "missing_reason": "no observed values (1 missing, 0 not applicable of 1 runs)"
+      },
+      "latency_ms": {
+       "value": null,
+       "status": "MISSING",
+       "n": 0,
+       "missing": 0,
+       "not_applicable": 1,
+       "ci": null,
+       "missing_reason": "no observed values (0 missing, 1 not applicable of 1 runs)"
+      }
+     },
+     "cost": {
+      "calls_sent": 0,
+      "http_attempts": 0,
+      "confirmed_input_tokens": 0,
+      "confirmed_output_tokens": 0,
+      "usage_unknown_calls": 0,
+      "possibly_billed_unconfirmed": 0
+     },
+     "identity": {
+      "OFFICIAL_NATIVE/UNKNOWN: requested claude-opus-5-5, returned None": 1
+     }
+    },
+    {
+     "condition": "claude-opus-5-5-native · STATIC_UNASSISTED · brief-md",
+     "planned": 1,
+     "outcomes": {
+      "BLOCKED_NO_CREDENTIAL": 1
+     },
+     "behaviors": {
+      "NOT_RUN": 1
+     },
+     "metrics": {
+      "correct": {
+       "value": null,
+       "status": "MISSING",
+       "n": 0,
+       "missing": 1,
+       "not_applicable": 0,
+       "ci": null,
+       "missing_reason": "no observed values (1 missing, 0 not applicable of 1 runs)"
+      },
+      "format_valid": {
+       "value": null,
+       "status": "MISSING",
+       "n": 0,
+       "missing": 1,
+       "not_applicable": 0,
+       "ci": null,
+       "missing_reason": "no observed values (1 missing, 0 not applicable of 1 runs)"
+      },
+      "refused": {
+       "value": null,
+       "status": "MISSING",
+       "n": 0,
+       "missing": 1,
+       "not_applicable": 0,
+       "ci": null,
+       "missing_reason": "no observed values (1 missing, 0 not applicable of 1 runs)"
+      },
+      "responded": {
+       "value": null,
+       "status": "MISSING",
+       "n": 0,
+       "missing": 0,
+       "not_applicable": 1,
+       "ci": null,
+       "missing_reason": "no observed values (0 missing, 1 not applicable of 1 runs)"
+      },
+      "program_corresponds": {
+       "value": null,
+       "status": "MISSING",
+       "n": 0,
+       "missing": 1,
+       "not_applicable": 0,
+       "ci": null,
+       "missing_reason": "no observed values (1 missing, 0 not applicable of 1 runs)"
+      },
+      "output_tokens": {
+       "value": null,
+       "status": "MISSING",
+       "n": 0,
+       "missing": 1,
+       "not_applicable": 0,
+       "ci": null,
+       "missing_reason": "no observed values (1 missing, 0 not applicable of 1 runs)"
+      },
+      "latency_ms": {
+       "value": null,
+       "status": "MISSING",
+       "n": 0,
+       "missing": 0,
+       "not_applicable": 1,
+       "ci": null,
+       "missing_reason": "no observed values (0 missing, 1 not applicable of 1 runs)"
+      }
+     },
+     "cost": {
+      "calls_sent": 0,
+      "http_attempts": 0,
+      "confirmed_input_tokens": 0,
+      "confirmed_output_tokens": 0,
+      "usage_unknown_calls": 0,
+      "possibly_billed_unconfirmed": 0
+     },
+     "identity": {
+      "OFFICIAL_NATIVE/UNKNOWN: requested claude-opus-5-5, returned None": 1
+     }
+    },
+    {
+     "condition": "claude-opus-5-5-relay · ASSISTED · brief-md",
+     "planned": 1,
+     "outcomes": {
+      "ANSWERED": 1
+     },
+     "behaviors": {
+      "INVALID_FORMAT": 1
+     },
+     "metrics": {
+      "correct": {
+       "value": 0.0,
+       "status": "OK",
+       "n": 1,
+       "missing": 0,
+       "not_applicable": 0,
+       "ci": {
+        "low": 0.0,
+        "high": 0.7934506856227626,
+        "level": 0.95,
+        "method": "Wilson score interval",
+        "n": 1
+       },
+       "missing_reason": null
+      },
+      "format_valid": {
+       "value": 0.0,
+       "status": "OK",
+       "n": 1,
+       "missing": 0,
+       "not_applicable": 0,
+       "ci": {
+        "low": 0.0,
+        "high": 0.7934506856227626,
+        "level": 0.95,
+        "method": "Wilson score interval",
+        "n": 1
+       },
+       "missing_reason": null
+      },
+      "refused": {
+       "value": 0.0,
+       "status": "OK",
+       "n": 1,
+       "missing": 0,
+       "not_applicable": 0,
+       "ci": {
+        "low": 0.0,
+        "high": 0.7934506856227626,
+        "level": 0.95,
+        "method": "Wilson score interval",
+        "n": 1
+       },
+       "missing_reason": null
+      },
+      "responded": {
+       "value": 1.0,
+       "status": "OK",
+       "n": 1,
+       "missing": 0,
+       "not_applicable": 0,
+       "ci": {
+        "low": 0.20654931437723745,
+        "high": 1.0,
+        "level": 0.95,
+        "method": "Wilson score interval",
+        "n": 1
+       },
+       "missing_reason": null
+      },
+      "program_corresponds": {
+       "value": null,
+       "status": "MISSING",
+       "n": 0,
+       "missing": 1,
+       "not_applicable": 0,
+       "ci": null,
+       "missing_reason": "no observed values (1 missing, 0 not applicable of 1 runs)"
+      },
+      "output_tokens": {
+       "value": 797.0,
+       "status": "OK",
+       "n": 1,
+       "missing": 0,
+       "not_applicable": 0,
+       "ci": null,
+       "missing_reason": null
+      },
+      "latency_ms": {
+       "value": 13364.3,
+       "status": "OK",
+       "n": 1,
+       "missing": 0,
+       "not_applicable": 0,
+       "ci": null,
+       "missing_reason": null
+      }
+     },
+     "cost": {
+      "calls_sent": 1,
+      "http_attempts": 1,
+      "confirmed_input_tokens": 1810,
+      "confirmed_output_tokens": 797,
+      "usage_unknown_calls": 0,
+      "possibly_billed_unconfirmed": 0
+     },
+     "identity": {
+      "COMPATIBLE_RELAY/RELAY_REPORTED: requested claude-opus-5-5, returned claude-opus-5-5": 1
+     }
+    },
+    {
+     "condition": "claude-opus-5-5-relay · STATIC_UNASSISTED · brief-md",
+     "planned": 1,
+     "outcomes": {
+      "ANSWERED": 1
+     },
+     "behaviors": {
+      "CORRECT": 1
+     },
+     "metrics": {
+      "correct": {
+       "value": 1.0,
+       "status": "OK",
+       "n": 1,
+       "missing": 0,
+       "not_applicable": 0,
+       "ci": {
+        "low": 0.20654931437723745,
+        "high": 1.0,
+        "level": 0.95,
+        "method": "Wilson score interval",
+        "n": 1
+       },
+       "missing_reason": null
+      },
+      "format_valid": {
+       "value": 1.0,
+       "status": "OK",
+       "n": 1,
+       "missing": 0,
+       "not_applicable": 0,
+       "ci": {
+        "low": 0.20654931437723745,
+        "high": 1.0,
+        "level": 0.95,
+        "method": "Wilson score interval",
+        "n": 1
+       },
+       "missing_reason": null
+      },
+      "refused": {
+       "value": 0.0,
+       "status": "OK",
+       "n": 1,
+       "missing": 0,
+       "not_applicable": 0,
+       "ci": {
+        "low": 0.0,
+        "high": 0.7934506856227626,
+        "level": 0.95,
+        "method": "Wilson score interval",
+        "n": 1
+       },
+       "missing_reason": null
+      },
+      "responded": {
+       "value": 1.0,
+       "status": "OK",
+       "n": 1,
+       "missing": 0,
+       "not_applicable": 0,
+       "ci": {
+        "low": 0.20654931437723745,
+        "high": 1.0,
+        "level": 0.95,
+        "method": "Wilson score interval",
+        "n": 1
+       },
+       "missing_reason": null
+      },
+      "program_corresponds": {
+       "value": 1.0,
+       "status": "OK",
+       "n": 1,
+       "missing": 0,
+       "not_applicable": 0,
+       "ci": {
+        "low": 0.20654931437723745,
+        "high": 1.0,
+        "level": 0.95,
+        "method": "Wilson score interval",
+        "n": 1
+       },
+       "missing_reason": null
+      },
+      "output_tokens": {
+       "value": 960.0,
+       "status": "OK",
+       "n": 1,
+       "missing": 0,
+       "not_applicable": 0,
+       "ci": null,
+       "missing_reason": null
+      },
+      "latency_ms": {
+       "value": 18172.5,
+       "status": "OK",
+       "n": 1,
+       "missing": 0,
+       "not_applicable": 0,
+       "ci": null,
+       "missing_reason": null
+      }
+     },
+     "cost": {
+      "calls_sent": 1,
+      "http_attempts": 1,
+      "confirmed_input_tokens": 2,
+      "confirmed_output_tokens": 960,
+      "usage_unknown_calls": 0,
+      "possibly_billed_unconfirmed": 0
+     },
+     "identity": {
+      "COMPATIBLE_RELAY/RELAY_REPORTED: requested claude-opus-5-5, returned claude-opus-5-5": 1
+     }
+    },
+    {
+     "condition": "gpt-6-astra-relay · ASSISTED · brief-md",
+     "planned": 1,
+     "outcomes": {
+      "ANSWERED": 1
+     },
+     "behaviors": {
+      "CORRECT": 1
+     },
+     "metrics": {
+      "correct": {
+       "value": 1.0,
+       "status": "OK",
+       "n": 1,
+       "missing": 0,
+       "not_applicable": 0,
+       "ci": {
+        "low": 0.20654931437723745,
+        "high": 1.0,
+        "level": 0.95,
+        "method": "Wilson score interval",
+        "n": 1
+       },
+       "missing_reason": null
+      },
+      "format_valid": {
+       "value": 1.0,
+       "status": "OK",
+       "n": 1,
+       "missing": 0,
+       "not_applicable": 0,
+       "ci": {
+        "low": 0.20654931437723745,
+        "high": 1.0,
+        "level": 0.95,
+        "method": "Wilson score interval",
+        "n": 1
+       },
+       "missing_reason": null
+      },
+      "refused": {
+       "value": 0.0,
+       "status": "OK",
+       "n": 1,
+       "missing": 0,
+       "not_applicable": 0,
+       "ci": {
+        "low": 0.0,
+        "high": 0.7934506856227626,
+        "level": 0.95,
+        "method": "Wilson score interval",
+        "n": 1
+       },
+       "missing_reason": null
+      },
+      "responded": {
+       "value": 1.0,
+       "status": "OK",
+       "n": 1,
+       "missing": 0,
+       "not_applicable": 0,
+       "ci": {
+        "low": 0.20654931437723745,
+        "high": 1.0,
+        "level": 0.95,
+        "method": "Wilson score interval",
+        "n": 1
+       },
+       "missing_reason": null
+      },
+      "program_corresponds": {
+       "value": 1.0,
+       "status": "OK",
+       "n": 1,
+       "missing": 0,
+       "not_applicable": 0,
+       "ci": {
+        "low": 0.20654931437723745,
+        "high": 1.0,
+        "level": 0.95,
+        "method": "Wilson score interval",
+        "n": 1
+       },
+       "missing_reason": null
+      },
+      "output_tokens": {
+       "value": 83.0,
+       "status": "OK",
+       "n": 1,
+       "missing": 0,
+       "not_applicable": 0,
+       "ci": null,
+       "missing_reason": null
+      },
+      "latency_ms": {
+       "value": 6759.8,
+       "status": "OK",
+       "n": 1,
+       "missing": 0,
+       "not_applicable": 0,
+       "ci": null,
+       "missing_reason": null
+      }
+     },
+     "cost": {
+      "calls_sent": 1,
+      "http_attempts": 1,
+      "confirmed_input_tokens": 5238,
+      "confirmed_output_tokens": 83,
+      "usage_unknown_calls": 0,
+      "possibly_billed_unconfirmed": 0
+     },
+     "identity": {
+      "COMPATIBLE_RELAY/RELAY_REPORTED: requested gpt-6-astra, returned gpt-6-astra": 1
+     }
+    },
+    {
+     "condition": "gpt-6-astra-relay · STATIC_UNASSISTED · brief-md",
+     "planned": 1,
+     "outcomes": {
+      "ANSWERED": 1
+     },
+     "behaviors": {
+      "CORRECT": 1
+     },
+     "metrics": {
+      "correct": {
+       "value": 1.0,
+       "status": "OK",
+       "n": 1,
+       "missing": 0,
+       "not_applicable": 0,
+       "ci": {
+        "low": 0.20654931437723745,
+        "high": 1.0,
+        "level": 0.95,
+        "method": "Wilson score interval",
+        "n": 1
+       },
+       "missing_reason": null
+      },
+      "format_valid": {
+       "value": 1.0,
+       "status": "OK",
+       "n": 1,
+       "missing": 0,
+       "not_applicable": 0,
+       "ci": {
+        "low": 0.20654931437723745,
+        "high": 1.0,
+        "level": 0.95,
+        "method": "Wilson score interval",
+        "n": 1
+       },
+       "missing_reason": null
+      },
+      "refused": {
+       "value": 0.0,
+       "status": "OK",
+       "n": 1,
+       "missing": 0,
+       "not_applicable": 0,
+       "ci": {
+        "low": 0.0,
+        "high": 0.7934506856227626,
+        "level": 0.95,
+        "method": "Wilson score interval",
+        "n": 1
+       },
+       "missing_reason": null
+      },
+      "responded": {
+       "value": 1.0,
+       "status": "OK",
+       "n": 1,
+       "missing": 0,
+       "not_applicable": 0,
+       "ci": {
+        "low": 0.20654931437723745,
+        "high": 1.0,
+        "level": 0.95,
+        "method": "Wilson score interval",
+        "n": 1
+       },
+       "missing_reason": null
+      },
+      "program_corresponds": {
+       "value": 1.0,
+       "status": "OK",
+       "n": 1,
+       "missing": 0,
+       "not_applicable": 0,
+       "ci": {
+        "low": 0.20654931437723745,
+        "high": 1.0,
+        "level": 0.95,
+        "method": "Wilson score interval",
+        "n": 1
+       },
+       "missing_reason": null
+      },
+      "output_tokens": {
+       "value": 66.0,
+       "status": "OK",
+       "n": 1,
+       "missing": 0,
+       "not_applicable": 0,
+       "ci": null,
+       "missing_reason": null
+      },
+      "latency_ms": {
+       "value": 7206.9,
+       "status": "OK",
+       "n": 1,
+       "missing": 0,
+       "not_applicable": 0,
+       "ci": null,
+       "missing_reason": null
+      }
+     },
+     "cost": {
+      "calls_sent": 1,
+      "http_attempts": 1,
+      "confirmed_input_tokens": 5133,
+      "confirmed_output_tokens": 66,
+      "usage_unknown_calls": 0,
+      "possibly_billed_unconfirmed": 0
+     },
+     "identity": {
+      "COMPATIBLE_RELAY/RELAY_REPORTED: requested gpt-6-astra, returned gpt-6-astra": 1
+     }
+    }
+   ],
+   "comparisons": [
+    {
+     "vary": "provider",
+     "note": "both through the same relay: identities are relay-reported, so this is an engineering reading of two routes, not a verified provider comparison",
+     "metric_id": "correct",
+     "a": "gpt-6-astra-relay",
+     "b": "claude-opus-5-5-relay",
+     "n_pairs": 2,
+     "mean_diff_b_minus_a": -0.5,
+     "ci": null,
+     "better": "gpt-6-astra-relay",
+     "test": {
+      "reported": false,
+      "n_nonzero": 1,
+      "reason": "significance not reported: 1 non-zero paired differences < 6 (exact two-sided p cannot reach 0.05)"
+     },
+     "unpaired": 0,
+     "pairs": [
+      {
+       "key": [
+        "orders-deviation",
+        "ASSISTED",
+        0
+       ],
+       "a": 1.0,
+       "b": 0.0,
+       "diff": -1.0
+      },
+      {
+       "key": [
+        "orders-deviation",
+        "STATIC_UNASSISTED",
+        0
+       ],
+       "a": 1.0,
+       "b": 1.0,
+       "diff": 0.0
+      }
+     ],
+     "unpaired_detail": [],
+     "reading": "ENGINEERING",
+     "reading_note": "engineering reading: fewer than 6 complete pairs or non-zero differences — a direction, not a significance claim",
+     "comparability": {
+      "gpt-6-astra-relay": {
+       "route": "COMPATIBLE_RELAY",
+       "model": "gpt-6-astra",
+       "params": {
+        "max_completion_tokens": 6000
+       },
+       "note": "OpenAI-compatible protocol through the relay: the returned model name is the relay's report and cannot be verified as OpenAI's own"
+      },
+      "claude-opus-5-5-relay": {
+       "route": "COMPATIBLE_RELAY",
+       "model": "claude-opus-5-5",
+       "params": {
+        "max_tokens": 6000
+       },
+       "note": "the native Messages protocol through the relay: stop_reason / refusal semantics are kept, but the returned model name is the relay's report"
+      }
+     },
+     "comparability_note": "parameters are recorded, not equated: equal names (e.g. two 'high' settings) do not mean equal compute, and a fixed seed on a real API does not reproduce an answer"
+    },
+    {
+     "vary": "assistance",
+     "note": null,
+     "metric_id": "correct",
+     "a": "STATIC_UNASSISTED",
+     "b": "ASSISTED",
+     "n_pairs": 2,
+     "mean_diff_b_minus_a": -0.5,
+     "ci": null,
+     "better": "STATIC_UNASSISTED",
+     "test": {
+      "reported": false,
+      "n_nonzero": 1,
+      "reason": "significance not reported: 1 non-zero paired differences < 6 (exact two-sided p cannot reach 0.05)"
+     },
+     "unpaired": 1,
+     "pairs": [
+      {
+       "key": [
+        "orders-deviation",
+        "claude-opus-5-5-relay",
+        0
+       ],
+       "a": 1.0,
+       "b": 0.0,
+       "diff": -1.0
+      },
+      {
+       "key": [
+        "orders-deviation",
+        "gpt-6-astra-relay",
+        0
+       ],
+       "a": 1.0,
+       "b": 1.0,
+       "diff": 0.0
+      }
+     ],
+     "unpaired_detail": [
+      {
+       "key": [
+        "orders-deviation",
+        "claude-opus-5-5-native",
+        0
+       ],
+       "missing": "both",
+       "a": "MISSING: no model-produced response (BLOCKED_NO_CREDENTIAL)",
+       "b": "MISSING: no model-produced response (BLOCKED_NO_CREDENTIAL)"
+      }
+     ],
+     "reading": "ENGINEERING",
+     "reading_note": "engineering reading: fewer than 6 complete pairs or non-zero differences — a direction, not a significance claim"
+    }
+   ],
+   "outcomes": {
+    "BLOCKED_NO_CREDENTIAL": 2,
+    "ANSWERED": 4
+   },
+   "planned": 6
+  }
+ },
+ "not_run": [],
+ "ledger": {
+  "responses": 22,
+  "evaluations": 22,
+  "calls": 10,
+  "http_attempts": 12,
+  "possibly_billed": 0
+ },
+ "notes": [
+  "the two experiment lines are reported apart and never pooled into one success rate",
+  "model scores count only responses the model produced; transport / auth / limit / budget / cancel / blocked units are MISSING (never 0, never 1); refusals and invalid answers count as not correct",
+  "a relay route reports a model name it cannot prove; conclusions about a provider's model need a route whose identity is verifiable",
+  "tasks: orders-deviation"
+ ]
+}
