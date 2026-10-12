@@ -1,0 +1,150 @@
+{
+ "protocol": "fal-conformance-result/v1",
+ "case": {
+  "case_id": "ratelimit-token-bucket",
+  "case_version": 1,
+  "definition_digest": "d6573aff1c028a39cf6536f73c11c23e69d2dea8444405e3082586bac4ddd18d"
+ },
+ "model": {
+  "package_id": "ratelimit-token-bucket",
+  "version": 1,
+  "digest": {
+   "algorithm": "sha256",
+   "value": "fa6a8e24d880dc8b789585085a8dd6411cf3dd51035396ac54b63f8466857c3c"
+  }
+ },
+ "software": {
+  "revision": "d6a8459b370eadc23d008e6ed70d054f807a4478",
+  "trees": [
+   {
+    "path": "examples/local-order-service",
+    "git_tree": "a72fad33b44f6874256dd220f76a10b045773b0c"
+   }
+  ],
+  "config_sha256": "7906a752734c5d6c3b9f9587adb610b692981892df36be7c1a3bc8125a9ced19"
+ },
+ "property_id": "within_capacity",
+ "property_digest": "0454371a8850af4954d7ea692ca06e9f4198763ab6240b8d58619a8efd89003b",
+ "bound": {
+  "max_steps": 10,
+  "timeout_ms": 30000,
+  "inputs": "capacity 3, refill 2, the fixed 8-op run"
+ },
+ "assumptions": [
+  "finite abstraction: one bucket, integer token count 0..2·capacity, a fixed operation sequence",
+  "the capped specification is the reference; the program is the system under test"
+ ],
+ "model_conclusion": {
+  "verdict": "NO_WITNESS_WITHIN_BOUND",
+  "query": "INVARIANT_VIOLATION(within_capacity)",
+  "explanation": "the capped specification admits no state above capacity within the bound",
+  "artifact_id": "check-capacity",
+  "artifact_sha256": "f2c214c047e6866a7501d7dd5076ea593a94acfe9e072621991b15c2df9bc6fd"
+ },
+ "program_regression": {
+  "status": "PASS",
+  "summary": "4/4 passed at d6a8459b370e",
+  "artifact_id": "regression",
+  "artifact_sha256": "9dfb73ee5a6f4da479ba8f437ea512acfaeef50396345629369373df9c736fad"
+ },
+ "program_observations": [
+  {
+   "artifact_id": "obs-fix",
+   "sha256": "6e8fd250d6dbbbf4ad22dc416fec5988c49dea3503a15ec2c015b2cbc7ed80ca",
+   "summary": "capped: 8 operations"
+  }
+ ],
+ "items": [
+  {
+   "step": 0,
+   "action": "refill()",
+   "element": "tokens",
+   "predicted": 2,
+   "observed": 2,
+   "status": "MATCH",
+   "evidence": "after refill: tokens=2"
+  },
+  {
+   "step": 1,
+   "action": "refill()",
+   "element": "tokens",
+   "predicted": 3,
+   "observed": 3,
+   "status": "MATCH",
+   "evidence": "after refill: tokens=3"
+  },
+  {
+   "step": 2,
+   "action": "take()",
+   "element": "tokens",
+   "predicted": 2,
+   "observed": 2,
+   "status": "MATCH",
+   "evidence": "after take: tokens=2"
+  },
+  {
+   "step": 3,
+   "action": "take()",
+   "element": "tokens",
+   "predicted": 1,
+   "observed": 1,
+   "status": "MATCH",
+   "evidence": "after take: tokens=1"
+  },
+  {
+   "step": 4,
+   "action": "refill()",
+   "element": "tokens",
+   "predicted": 3,
+   "observed": 3,
+   "status": "MATCH",
+   "evidence": "after refill: tokens=3"
+  },
+  {
+   "step": 5,
+   "action": "take()",
+   "element": "tokens",
+   "predicted": 2,
+   "observed": 2,
+   "status": "MATCH",
+   "evidence": "after take: tokens=2"
+  },
+  {
+   "step": 6,
+   "action": "take()",
+   "element": "tokens",
+   "predicted": 1,
+   "observed": 1,
+   "status": "MATCH",
+   "evidence": "after take: tokens=1"
+  },
+  {
+   "step": 7,
+   "action": "take()",
+   "element": "tokens",
+   "predicted": 0,
+   "observed": 0,
+   "status": "MATCH",
+   "evidence": "after take: tokens=0"
+  }
+ ],
+ "counterexample": null,
+ "correspondence": "CORRESPONDS",
+ "correspondence_note": "all 8 compared field(s) match within the declared scope",
+ "scope": "the 8 operations of the recorded capped run; agreement is not a semantic-equivalence proof",
+ "counts": {
+  "MATCH": 8
+ },
+ "tools": [
+  {
+   "name": "formal_lab_example_orders.research_ratelimit.derive_items",
+   "version": "0.4.0",
+   "digest": null
+  },
+  {
+   "name": "formal_lab_runtime.research.decide_correspondence",
+   "version": "0.4.0",
+   "digest": null
+  }
+ ]
+}

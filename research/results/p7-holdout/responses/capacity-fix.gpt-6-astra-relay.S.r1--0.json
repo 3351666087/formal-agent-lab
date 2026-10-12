@@ -1,0 +1,110 @@
+{
+ "protocol": "fal-research-response/v1",
+ "experiment": {
+  "study_id": "p7-holdout",
+  "unit_id": "capacity-fix.gpt-6-astra-relay.S.r1",
+  "track": "implementation_conformance",
+  "case_id": "ratelimit-token-bucket",
+  "case_version": 1,
+  "task_id": "capacity-fix",
+  "task_digest": "0444d52e94363fe85e69534e8ea74013da2ebad0c1f08a58b77ed0356fba4a4e",
+  "representation_id": "transcript",
+  "replicate_id": 1,
+  "assistance_mode": "STATIC_UNASSISTED",
+  "sampling_id": "capacity-fix.gpt-6-astra-relay.S.r1#0"
+ },
+ "call": {
+  "provider": "openai",
+  "provider_config_id": "gpt-6-astra-relay",
+  "api": "openai.chat.completions",
+  "api_version": "v1",
+  "endpoint": "https://api.uheapi.com/v1/chat/completions",
+  "route": "COMPATIBLE_RELAY",
+  "endpoint_kind": "PROVIDER",
+  "model_requested": "gpt-6-astra",
+  "model_returned": "gpt-6-astra",
+  "model_switched": false,
+  "model_identity": "RELAY_REPORTED",
+  "response_id": "resp_0abbb0e45d22ea9e016acd04156324819a8a24002e27839262",
+  "request_id": "68e71ac2-91d0-457d-b047-6d361124f96f, 0d541f85-94f6-434a-93f3-58917bbde5a2",
+  "started_at": "2026-10-12T16:00:20Z",
+  "finished_at": "2026-10-12T16:00:23Z",
+  "params": {
+   "max_completion_tokens": 4000
+  },
+  "params_digest": "b81a859f21882cee"
+ },
+ "raw": {
+  "body": {
+   "id": "resp_0abbb0e45d22ea9e016acd04156324819a8a24002e27839262",
+   "object": "chat.completion",
+   "created": 1791820823,
+   "model": "gpt-6-astra",
+   "choices": [
+    {
+     "index": 0,
+     "message": {
+      "role": "assistant",
+      "content": "{\"within_capacity\":true,\"first_overflow\":null,\"rationale\":\"All recorded token counts are at most the capacity of 3.\"}"
+     },
+     "finish_reason": "stop"
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 4782,
+    "completion_tokens": 33,
+    "total_tokens": 4815,
+    "prompt_tokens_details": {
+     "cached_tokens": 4608
+    }
+   },
+   "service_tier": "default"
+  },
+  "body_text": null,
+  "visible_text": "{\"within_capacity\":true,\"first_overflow\":null,\"rationale\":\"All recorded token counts are at most the capacity of 3.\"}",
+  "finish_reason": "stop",
+  "finish_class": "STOP",
+  "refusal": null,
+  "truncated": false,
+  "tool_calls": [],
+  "reasoning": "NOT_EXPOSED"
+ },
+ "status": {
+  "outcome": "ANSWERED",
+  "transport_ok": true,
+  "http_status": 200,
+  "provider_error_type": null,
+  "provider_error": null,
+  "model_switched": false,
+  "attempts": [
+   {
+    "attempt_no": 1,
+    "attempt_id": "att_d6a1bfdf16b4",
+    "sent": true,
+    "confirmed": true,
+    "http_status": 200,
+    "error_class": null,
+    "error": null,
+    "latency_ms": 3384.3
+   }
+  ],
+  "network_retries": 1,
+  "note": null
+ },
+ "cost": {
+  "usage_known": true,
+  "input_tokens": 4782,
+  "output_tokens": 33,
+  "reasoning_tokens": null,
+  "cache_read_tokens": 4608,
+  "cache_write_tokens": null,
+  "latency_ms": 3384.7,
+  "http_attempts": 1,
+  "possibly_billed_unconfirmed": 0,
+  "prompt_digest": "75bc540f636fa483",
+  "config_digest": "63701bce4779dc43"
+ },
+ "task_input_digest": "75bc540f636fa48337e6103f5ec64c7a8053e48f0fe7535ac8fe0f42233139ae",
+ "reuse_key": "53af4e6c4f2e78d5b729fe7bb06974fcf9042176967b3197fb0c233f971e5010",
+ "recorded_at": "2026-10-12T16:00:23Z"
+}

@@ -1,0 +1,107 @@
+{
+ "protocol": "fal-research-response/v1",
+ "experiment": {
+  "study_id": "p7-holdout",
+  "unit_id": "capacity-defect.gpt-6-astra-relay.S.r0",
+  "track": "implementation_conformance",
+  "case_id": "ratelimit-token-bucket",
+  "case_version": 1,
+  "task_id": "capacity-defect",
+  "task_digest": "bf8e03984bed8f4ad93007f1f2f13e956866813bcc111c742303a9cc8d5463f1",
+  "representation_id": "transcript",
+  "replicate_id": 0,
+  "assistance_mode": "STATIC_UNASSISTED",
+  "sampling_id": "capacity-defect.gpt-6-astra-relay.S.r0#0"
+ },
+ "call": {
+  "provider": "openai",
+  "provider_config_id": "gpt-6-astra-relay",
+  "api": "openai.chat.completions",
+  "api_version": "v1",
+  "endpoint": "https://api.uheapi.com/v1/chat/completions",
+  "route": "COMPATIBLE_RELAY",
+  "endpoint_kind": "PROVIDER",
+  "model_requested": "gpt-6-astra",
+  "model_returned": "gpt-6-astra",
+  "model_switched": false,
+  "model_identity": "RELAY_REPORTED",
+  "response_id": "resp_0510b104988b78cf016acd03fc254087d0ba0644598122c827",
+  "request_id": "b4706274-38e4-48fa-8bcb-f9b63f00977c, 3c9ea125-fd66-4085-8980-d7ca39f11e34",
+  "started_at": "2026-10-12T15:59:51Z",
+  "finished_at": "2026-10-12T16:00:00Z",
+  "params": {
+   "max_completion_tokens": 4000
+  },
+  "params_digest": "b81a859f21882cee"
+ },
+ "raw": {
+  "body": {
+   "id": "resp_0510b104988b78cf016acd03fc254087d0ba0644598122c827",
+   "object": "chat.completion",
+   "created": 1791820800,
+   "model": "gpt-6-astra",
+   "choices": [
+    {
+     "index": 0,
+     "message": {
+      "role": "assistant",
+      "content": "{\"within_capacity\":false,\"first_overflow\":1,\"rationale\":\"At step 1, the bucket held 4 tokens, exceeding its capacity of 3. Step 0 held 2 tokens, so step 1 was the first overflow.\"}"
+     },
+     "finish_reason": "stop"
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 4782,
+    "completion_tokens": 56,
+    "total_tokens": 4838
+   },
+   "service_tier": "default"
+  },
+  "body_text": null,
+  "visible_text": "{\"within_capacity\":false,\"first_overflow\":1,\"rationale\":\"At step 1, the bucket held 4 tokens, exceeding its capacity of 3. Step 0 held 2 tokens, so step 1 was the first overflow.\"}",
+  "finish_reason": "stop",
+  "finish_class": "STOP",
+  "refusal": null,
+  "truncated": false,
+  "tool_calls": [],
+  "reasoning": "NOT_EXPOSED"
+ },
+ "status": {
+  "outcome": "ANSWERED",
+  "transport_ok": true,
+  "http_status": 200,
+  "provider_error_type": null,
+  "provider_error": null,
+  "model_switched": false,
+  "attempts": [
+   {
+    "attempt_no": 1,
+    "attempt_id": "att_de785f9ce63b",
+    "sent": true,
+    "confirmed": true,
+    "http_status": 200,
+    "error_class": null,
+    "error": null,
+    "latency_ms": 8237.0
+   }
+  ],
+  "network_retries": 1,
+  "note": null
+ },
+ "cost": {
+  "usage_known": true,
+  "input_tokens": 4782,
+  "output_tokens": 56,
+  "reasoning_tokens": null,
+  "cache_read_tokens": null,
+  "cache_write_tokens": null,
+  "latency_ms": 8237.1,
+  "http_attempts": 1,
+  "possibly_billed_unconfirmed": 0,
+  "prompt_digest": "89f6fe1d35b583b4",
+  "config_digest": "63701bce4779dc43"
+ },
+ "task_input_digest": "89f6fe1d35b583b44d0a5db663e6d4e97614e79b125f9bd233307cd949f991dc",
+ "reuse_key": "056c6cb24792cc435bc92f1c7d7250add050302e3aa73b443a058b20b2ac015d",
+ "recorded_at": "2026-10-12T16:00:00Z"
+}

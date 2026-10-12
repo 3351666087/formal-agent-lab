@@ -133,6 +133,25 @@ echo "web: http://127.0.0.1:${FAL_WEB_PORT:-8080}   CLI: .venv/bin/fal --help"
 """
 
 
+def _research_data_reference(rev: str) -> dict:
+    """Phase 7: the offline manifest explicitly references the research data (cases, studies, results, rubric). The
+    data travels with the pinned source tree, not inside the image tar, so an offline recheck (scripts/p7_reproduce.py)
+    validates the committed cases and reads the committed results without any image or network access."""
+    import hashlib
+
+    dirs = ["research/cases", "research/studies", "research/results", "research/rubric"]
+    out = {"note": "research data lives in the pinned source tree at this revision; recheck with "
+                   "`make research-check` (offline case/protocol checks) or scripts/p7_reproduce.py", "source_revision": rev}
+    for d in dirs:
+        root = ROOT / d
+        files = sorted(p for p in root.rglob("*") if p.is_file()) if root.exists() else []
+        h = hashlib.sha256()
+        for f in files:
+            h.update(str(f.relative_to(ROOT)).encode() + b"\0" + f.read_bytes())
+        out[d] = {"files": len(files), "sha256": h.hexdigest() if files else None}
+    return out
+
+
 def build(verify: bool) -> Path:
     t0 = time.time()
     print(sh(sys.executable, "scripts/disk_guard.py", "--need", "8", "--label", "offline bundle", "--trim").strip())
@@ -222,6 +241,7 @@ def build(verify: bool) -> Path:
             "license": {"spdx": "Apache-2.0", "files": ["LICENSE", "NOTICE"]},
             "model_weights": [],
         },
+        "research_data": _research_data_reference(rev),
         "not_included": {
             "model_weights": "none needed: LLM strategies call a remote OpenAI-compatible endpoint; rule and Z3 "
                              "strategies need no model. Without FAL_LLM_API_KEY the LLM strategy is unavailable "

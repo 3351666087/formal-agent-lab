@@ -1,0 +1,126 @@
+{
+ "protocol": "fal-research-response/v1",
+ "experiment": {
+  "study_id": "p7-holdout",
+  "unit_id": "capacity-fix.claude-opus-5-5-relay.S.r0",
+  "track": "implementation_conformance",
+  "case_id": "ratelimit-token-bucket",
+  "case_version": 1,
+  "task_id": "capacity-fix",
+  "task_digest": "0444d52e94363fe85e69534e8ea74013da2ebad0c1f08a58b77ed0356fba4a4e",
+  "representation_id": "transcript",
+  "replicate_id": 0,
+  "assistance_mode": "STATIC_UNASSISTED",
+  "sampling_id": "capacity-fix.claude-opus-5-5-relay.S.r0#0"
+ },
+ "call": {
+  "provider": "anthropic",
+  "provider_config_id": "claude-opus-5-5-relay",
+  "api": "anthropic.messages",
+  "api_version": "2023-06-01",
+  "endpoint": "https://api.uheapi.com/v1/messages",
+  "route": "COMPATIBLE_RELAY",
+  "endpoint_kind": "PROVIDER",
+  "model_requested": "claude-opus-5-5",
+  "model_returned": "claude-opus-5-5",
+  "model_switched": false,
+  "model_identity": "RELAY_REPORTED",
+  "response_id": "msg_011Cfxd22Ur2r8Mv3KuPsZ3y",
+  "request_id": "8b739cc4-3bdb-4975-b30a-18a8adf1235b, 422a6643-03a7-4af3-ac49-cbd9154f9a53, 6d00c698-fd27-4762-8f4a-9494e72bf0d7",
+  "started_at": "2026-10-12T16:00:23Z",
+  "finished_at": "2026-10-12T16:00:29Z",
+  "params": {
+   "max_tokens": 4000
+  },
+  "params_digest": "a9c88df19b23301d"
+ },
+ "raw": {
+  "body": {
+   "model": "claude-opus-5-5",
+   "id": "msg_011Cfxd22Ur2r8Mv3KuPsZ3y",
+   "type": "message",
+   "role": "assistant",
+   "content": [
+    {
+     "type": "thinking",
+     "thinking": "",
+     "signature": "CAQS7AYKEAgSGAI4AUIIdGhpbmtpbmcSDI1B+DPrfqs9ze0GaRoMYDvsI70IICZwylkyIjAV7OfY3Z/Q7Uq0KrQb/F1Hc9R9B69Ak1VAsUlQeb+tdFlV0sTdzZLgnoR5M0qMcqsqiQaEDrJUIGpGZM2TlfMcDldKBjoKBqklwT3EFu2c3zGDcVbRxeg1TnHsWD+uYoIvDQzc0ZRiyxYON02MOoZmfLpze8O/R5Uncw2094AchlU6hCXjh7snfCJtdlbjv6xM/wR6JhTv6FoYiZK4BylQaifGyUap79JR1X8Bbk1uxo/+/tsNANinxlKSvVM4Zwavko9ryBH2D3grafHtLTIZfD1zmgejwK6fqpk3hJ4aifdO+nLO6f/7aXoDEVGYVY/JyYAj4KudKdTl3OoNvfpPUn6TDfVuTzlO4iNTV9KiDRLa54Zj65gebtvB7TB7P2/RJgt+iXhLzp5gX13S3c3G1I+te9UKcBl7lu+L2s5gu74JevwrY2T2bwQmLtOoPm5jpbYiyxvwsSpZEvpWvDurBMgRF/AWjpmwZUQJlW2T3gOnOjkYRzqAnAUWXfCVgUhqNAfP+6qQn7t+xpktOi3BgHpfsruQ9sl4x4RnHulWBo1Cma/q8o2uyM80cO5U0YCuzdHr4KkXwcm0zdi00+SWMaiAOq494KAPeYEkFs6H2XNRZT5wvTWQA+sgXYDgShcg5/RfNn2OqIzxTlCSi4CJPibriz7DUkt5aYE9s2DyWlkpfEAXVaxvv251xMcstymRVMSiuXyG9LkZq016hlf6v10//laa8Nb/JNYHaqNlUK4hQpgz905v0wcxBANUsNAszuoMjXL+fjbBAhw3E/UCinZAEU9nEmbIzoz36VuucquHA6bI3TXcsJraR79akKkNFvkAaWo1dUKc5WH/mdJzjYtgEjWj1ZYFt71PrWUGVI16h4VsFCTroprGAMut9ukibQ+3Mj4WgNzmjWnsg6tIsE9CTYHcDU+6cVJKHekgMV+rHY38zh7AQFdL25G8p3QOJBi5vLhlKODbD1NcSedTPPFhWwIgIhZOe5lK8UsWyBXeBgdHYlSkEJZimW1TCb7C2hUYehBxO+yJBZWk7PXcG1xu0slHpYpdEj8ZM9eI1Uvtrl50cGGkaqq8SX+joyrOHdRwI3hhgj1E/n0YAQ=="
+    },
+    {
+     "type": "text",
+     "text": "{\"within_capacity\": true, \"first_overflow\": null, \"rationale\": \"With capacity 3, the recorded token counts after each step are 2, 3, 2, 1, 3, 2, 1, 0. None exceeds 3, so the invariant tokens <= cap holds at every step. The refills match a capped refill of 2: 0->2 at step 0, 2->3 at step 1 (capped from 4), and 1->3 at step 4. Each take was granted only when tokens > 0 and lowered the count by one.\"}"
+    }
+   ],
+   "container": null,
+   "stop_reason": "end_turn",
+   "stop_sequence": null,
+   "stop_details": null,
+   "usage": {
+    "input_tokens": 1237,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 0,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 0
+    },
+    "output_tokens": 275,
+    "output_tokens_details": {
+     "thinking_tokens": 104
+    },
+    "service_tier": "standard",
+    "inference_geo": "global"
+   },
+   "input_transformations": [],
+   "diagnostics": null,
+   "context_management": {
+    "applied_edits": []
+   }
+  },
+  "body_text": null,
+  "visible_text": "{\"within_capacity\": true, \"first_overflow\": null, \"rationale\": \"With capacity 3, the recorded token counts after each step are 2, 3, 2, 1, 3, 2, 1, 0. None exceeds 3, so the invariant tokens <= cap holds at every step. The refills match a capped refill of 2: 0->2 at step 0, 2->3 at step 1 (capped from 4), and 1->3 at step 4. Each take was granted only when tokens > 0 and lowered the count by one.\"}",
+  "finish_reason": "end_turn",
+  "finish_class": "STOP",
+  "refusal": null,
+  "truncated": false,
+  "tool_calls": [],
+  "reasoning": "SUMMARY_ONLY"
+ },
+ "status": {
+  "outcome": "ANSWERED",
+  "transport_ok": true,
+  "http_status": 200,
+  "provider_error_type": null,
+  "provider_error": null,
+  "model_switched": false,
+  "attempts": [
+   {
+    "attempt_no": 1,
+    "attempt_id": "att_8bcb26e40ffa",
+    "sent": true,
+    "confirmed": true,
+    "http_status": 200,
+    "error_class": null,
+    "error": null,
+    "latency_ms": 6064.2
+   }
+  ],
+  "network_retries": 1,
+  "note": null
+ },
+ "cost": {
+  "usage_known": true,
+  "input_tokens": 1237,
+  "output_tokens": 275,
+  "reasoning_tokens": 104,
+  "cache_read_tokens": 0,
+  "cache_write_tokens": 0,
+  "latency_ms": 6064.9,
+  "http_attempts": 1,
+  "possibly_billed_unconfirmed": 0,
+  "prompt_digest": "75bc540f636fa483",
+  "config_digest": "15d16b2d5d3e43a7"
+ },
+ "task_input_digest": "75bc540f636fa48337e6103f5ec64c7a8053e48f0fe7535ac8fe0f42233139ae",
+ "reuse_key": "790661ff73a288cb035c65005309968cd5d0196ce98749bdc405e8c48b8dfa01",
+ "recorded_at": "2026-10-12T16:00:29Z"
+}

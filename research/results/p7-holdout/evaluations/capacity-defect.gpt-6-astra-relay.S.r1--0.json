@@ -1,0 +1,131 @@
+{
+ "protocol": "fal-research-evaluation/v1",
+ "study_id": "p7-holdout",
+ "unit_id": "capacity-defect.gpt-6-astra-relay.S.r1",
+ "response_digest": "74ba07b6fcbd0b5a24db1888fc8f96042dc1176c7c9810139cc87dcccfc6d64a",
+ "response_path": "responses/capacity-defect.gpt-6-astra-relay.S.r1--0.json",
+ "scorer_id": "ratelimit.capacity-judgment",
+ "scorer_version": "1",
+ "reference_sha256": "037b6ab333f0cdf22777837c6d4e746710b456c566429e715c8b9cf67463394f",
+ "dependency_digests": {
+  "observation": "af185baaf92f09e851cafe707716cef5ae6e822f7dd044facf125a4c018db474",
+  "conformance": "e733cce4d5ed92df47ea3facfd5fe873d77b1c74ec705f0775e81ca5c54f7e93"
+ },
+ "call_outcome": "ANSWERED",
+ "answer_status": "VALID",
+ "parsed": {
+  "within_capacity": false,
+  "first_overflow": 1,
+  "rationale": "At step 1, the bucket held 4 tokens, exceeding its capacity of 3."
+ },
+ "behavior_label": "CORRECT",
+ "refusal_status": "NONE",
+ "model_internal": "CORRECT",
+ "program_correspondence": "CORRESPONDS",
+ "metrics": [
+  {
+   "metric_id": "correct",
+   "metric_version": "1",
+   "subject": "capacity-defect.gpt-6-astra-relay.S.r1",
+   "value": 1.0,
+   "status": "OK",
+   "missing_reason": null,
+   "unit": "rate",
+   "sample_size": null,
+   "missing_count": null,
+   "aggregation": null,
+   "ci": null,
+   "evidence": []
+  },
+  {
+   "metric_id": "format_valid",
+   "metric_version": "1",
+   "subject": "capacity-defect.gpt-6-astra-relay.S.r1",
+   "value": 1.0,
+   "status": "OK",
+   "missing_reason": null,
+   "unit": "rate",
+   "sample_size": null,
+   "missing_count": null,
+   "aggregation": null,
+   "ci": null,
+   "evidence": []
+  },
+  {
+   "metric_id": "refused",
+   "metric_version": "1",
+   "subject": "capacity-defect.gpt-6-astra-relay.S.r1",
+   "value": 0.0,
+   "status": "OK",
+   "missing_reason": null,
+   "unit": "rate",
+   "sample_size": null,
+   "missing_count": null,
+   "aggregation": null,
+   "ci": null,
+   "evidence": []
+  },
+  {
+   "metric_id": "responded",
+   "metric_version": "1",
+   "subject": "capacity-defect.gpt-6-astra-relay.S.r1",
+   "value": 1.0,
+   "status": "OK",
+   "missing_reason": null,
+   "unit": "rate",
+   "sample_size": null,
+   "missing_count": null,
+   "aggregation": null,
+   "ci": null,
+   "evidence": []
+  },
+  {
+   "metric_id": "program_corresponds",
+   "metric_version": "1",
+   "subject": "capacity-defect.gpt-6-astra-relay.S.r1",
+   "value": 1.0,
+   "status": "OK",
+   "missing_reason": null,
+   "unit": "rate",
+   "sample_size": null,
+   "missing_count": null,
+   "aggregation": null,
+   "ci": null,
+   "evidence": []
+  },
+  {
+   "metric_id": "output_tokens",
+   "metric_version": "1",
+   "subject": "capacity-defect.gpt-6-astra-relay.S.r1",
+   "value": 39.0,
+   "status": "OK",
+   "missing_reason": null,
+   "unit": "tokens",
+   "sample_size": null,
+   "missing_count": null,
+   "aggregation": null,
+   "ci": null,
+   "evidence": []
+  },
+  {
+   "metric_id": "latency_ms",
+   "metric_version": "1",
+   "subject": "capacity-defect.gpt-6-astra-relay.S.r1",
+   "value": 4210.0,
+   "status": "OK",
+   "missing_reason": null,
+   "unit": "ms",
+   "sample_size": null,
+   "missing_count": null,
+   "aggregation": null,
+   "ci": null,
+   "evidence": []
+  }
+ ],
+ "rubric_signals": {
+  "identifies_overflow_step": true,
+  "states_capacity": true
+ },
+ "explanation": "model said within_capacity=False; the recorded uncapped run exceeded capacity at step 1 (capacity 3); the case conformance verdict is DEVIATES",
+ "scoring_reuse_key": "779394d93496cd18454c010c3c0ff972f26a646217d284bbaf96f0176a75e0e0"
+}

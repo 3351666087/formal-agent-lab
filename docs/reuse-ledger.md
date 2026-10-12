@@ -188,3 +188,9 @@
 - **程序—模型对应**：隔离判断评分器复用 5B 的记录观测与 `fal-conformance-result/v1` 判据（`orders.isolation-judgment@1` 以记录运行为准，不读模型自述）；合成评分复用 6A 的 `synthetic.shortest-plan@1` 与参考解释器。
 - **方法参考**：Inspect 的自定义/多评分器思想继续仅作概念借鉴（本阶段未用 LLM judge，也未用评测生成器搜索改变提供方接受行为的提示）；`ResearchEvaluation` 的 rubric_signals 为记录项，非裁定。
 - **CBMC**：仍未使用（案例为 Python）。新增语言/语义支持按实际案例需求单列，未声称“调用一个工具”对所有软件模型有效。
+
+## 9. 阶段七（Phase 7）复用
+
+- **无新增第三方依赖**：`uv.lock` 未变。K01-K03 在原位置修复（`packages/domain-mal` 的 gate/admission/config、`packages/domain-broker` 的 CheckBasis、`web/src/components/Steps.tsx`）；令牌桶保留案例复用确定性有限模型 IR、Z3、5A/5B 的研究案例与对应协议、6A/6B 的研究调用/评分/报告机制。
+- **方法参考**：抽象反例具体核查（Kroening ICCAD'07）继续体现在程序对应评分；Inspect 的任务/评分器接口仅作概念借鉴，本阶段未引入其代码。CBMC 仍未使用（案例均为 Python/有限程序）；按语言条件启用的接入仍为未来按实际需求的单列项。
+- **复现与发行**：复用 `scripts/release.py`、`scripts/offline_bundle.py`（后者的清单新增 `research_data` 引用，携带案例/研究/结果/判据的摘要与源码修订）；离线复核 `scripts/p7_reproduce.py` 只用已有结果，不调用模型、不联网。凭据仅在运行环境（git 忽略的 `.env`），不进入交付包。

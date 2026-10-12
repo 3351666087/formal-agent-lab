@@ -1,0 +1,172 @@
+{
+  "machine": {
+    "arch": "aarch64",
+    "python": "3.12.3",
+    "system": "Linux"
+  },
+  "offline_recheck": {
+    "cases": {
+      "orders-p2-speed": {
+        "valid_offline": true,
+        "warnings": [
+          "SOFTWARE_NOT_VERIFIED_HERE"
+        ],
+        "conformance": [
+          {
+            "id": "conf-v1",
+            "stored": "DEVIATES",
+            "rederived": null,
+            "match": true
+          },
+          {
+            "id": "conf-v2",
+            "stored": "CORRESPONDS",
+            "rederived": null,
+            "match": true
+          }
+        ]
+      },
+      "orders-tenant-isolation": {
+        "valid_offline": true,
+        "warnings": [
+          "SOFTWARE_NOT_VERIFIED_HERE"
+        ],
+        "conformance": [
+          {
+            "id": "conf-defect",
+            "stored": "DEVIATES",
+            "rederived": "DEVIATES",
+            "match": true
+          },
+          {
+            "id": "conf-fix",
+            "stored": "CORRESPONDS",
+            "rederived": "CORRESPONDS",
+            "match": true
+          },
+          {
+            "id": "conf-partial",
+            "stored": "UNKNOWN",
+            "rederived": "UNKNOWN",
+            "match": true
+          }
+        ]
+      },
+      "ratelimit-token-bucket": {
+        "valid_offline": true,
+        "warnings": [
+          "SOFTWARE_NOT_VERIFIED_HERE"
+        ],
+        "conformance": [
+          {
+            "id": "conf-defect",
+            "stored": "DEVIATES",
+            "rederived": "DEVIATES",
+            "match": true
+          },
+          {
+            "id": "conf-fix",
+            "stored": "CORRESPONDS",
+            "rederived": "CORRESPONDS",
+            "match": true
+          }
+        ]
+      }
+    },
+    "studies": {
+      "p6a-protocol": {
+        "tracks": {
+          "implementation_conformance": {
+            "ANSWERED": 6,
+            "PROVIDER_ERROR": 1,
+            "CONTENT_REFUSAL": 1
+          },
+          "synthetic_representation": {
+            "EMPTY_CONTENT": 1,
+            "TRUNCATED": 1,
+            "ANSWERED": 10,
+            "MODEL_UNAVAILABLE": 1,
+            "AUTH_ERROR": 1,
+            "MALFORMED_RESPONSE": 1,
+            "CONTENT_REFUSAL": 1
+          }
+        },
+        "ledger": {
+          "responses": 24,
+          "evaluations": 48,
+          "calls": 24,
+          "http_attempts": 28,
+          "possibly_billed": 1
+        }
+      },
+      "p6a-real": {
+        "tracks": {
+          "implementation_conformance": {
+            "BLOCKED_NO_CREDENTIAL": 2,
+            "ANSWERED": 4
+          }
+        },
+        "ledger": {
+          "responses": 26,
+          "evaluations": 26,
+          "calls": 10,
+          "http_attempts": 12,
+          "possibly_billed": 0
+        }
+      },
+      "p6b-eval": {
+        "tracks": {
+          "implementation_conformance": {
+            "ANSWERED": 8
+          },
+          "synthetic_representation": {
+            "ANSWERED": 16
+          }
+        },
+        "ledger": {
+          "responses": 24,
+          "evaluations": 24,
+          "calls": 24,
+          "http_attempts": 25,
+          "possibly_billed": 0
+        }
+      },
+      "p7-holdout": {
+        "tracks": {
+          "implementation_conformance": {
+            "ANSWERED": 8
+          }
+        },
+        "ledger": {
+          "responses": 8,
+          "evaluations": 8,
+          "calls": 8,
+          "http_attempts": 8,
+          "possibly_billed": 0
+        }
+      }
+    }
+  },
+  "network": {
+    "needed_for_this_recheck": false,
+    "needed_once_for": "the first dependency pull (uv sync) on a truly empty machine",
+    "resampling_path": "fal research study run — new online calls, needs the user's API credentials and quota; not exercised here"
+  },
+  "commands": [
+    "uv sync --frozen",
+    "make research-check ARGS=\"--group p5a,p5b,p7\" (offline case/protocol checks)",
+    "uv run --frozen python scripts/p7_reproduce.py"
+  ],
+  "cleanup": "the fresh copy is a temporary directory, removed on exit; only files this run created are touched",
+  "reproduction_mode": "automated_clean_room_offline (same agent); independent_human_reproduction is PENDING",
+  "conclusion": {
+    "offline_recheck_passes": true,
+    "uses_only_existing_results": true,
+    "makes_no_model_call": true,
+    "offline_readable": true
+  },
+  "produced_at": {
+    "commit": "d6a8459b370eadc23d008e6ed70d054f807a4478",
+    "dirty": true
+  }
+}

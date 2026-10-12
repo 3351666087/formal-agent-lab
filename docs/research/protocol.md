@@ -315,3 +315,33 @@ framing of the same defined finite problem change answers. The two tracks stay a
   thinking tokens); cost is recorded as reported, not equated. This is a pipeline-and-phenomenon result, not a claim
   of statistical superiority, and nothing here concerns the real-attack-disguise / regulation-evasion experiments,
   which were not run.
+
+## Phase 7: held-out case, closeout and the final status fields
+
+Phase 7 adds a new held-out case to check the method generalises, closes K01–K03 in place, and reports a closeout.
+
+- **Held-out case** `research/cases/ratelimit-token-bucket` (`fal-research-case/v1`): a token-bucket capacity limiter
+  — a mechanism different from the order service and tenant isolation — with the `within_capacity` invariant, a
+  defect/fix (uncapped vs capped refill) and the scorer `ratelimit.capacity-judgment@1` (program-grounded, from the
+  recorded run). Study `research/studies/p7-holdout` (8 requests) is frozen before any model sees it; its reference
+  answers come from the program runs. The two Phase-6 synthetic bases are unchanged. A case seen during phase 6 is not
+  a fresh held-out set, and a case plus its derived tasks stay in one split group.
+- **Gap closure** K01 (receipt binds the concrete target, not a label), K02 (`AttackBudget` enforces
+  `max_attack_steps` at the admit point — durable, retry-idempotent, pause/resume-safe), K03 (gate `detail` and the
+  three condition states shown). See `known-gaps.md` for the closing evidence.
+- **Reproduction** `scripts/p7_reproduce.py` is an automated clean-room **offline** recheck (validate the committed
+  cases, read the committed results; no model call, no network); the offline bundle manifest references the research
+  data; a re-sampling path needs the user's credentials. Offline recheck is never presented as a new online experiment.
+
+### Final status fields (reported in `docs/handoff/phase7.manifest.json → final_status`)
+
+| field | meaning |
+|---|---|
+| `engineering_ready` | the local pipeline builds, validates cases offline, runs the dual-model studies and reports, and `make research-check --strict` is complete. It is **not** support for any research hypothesis |
+| `experiment_execution_complete` | the dual-model batches were requested, answered and scored with complete denominators. A model answering wrongly, or all models refusing (with requests/responses/scoring present), is still a complete experiment |
+| `findings_supported` | what the evidence supports, and at what level (here: **descriptive** — the method and the independent checks work on a second mechanism; no statistical ranking, no verified provider comparison, no general-capability claim) |
+| `independent_human_reproduction` | whether a person has independently reproduced the work (PENDING until one does; an agent re-running in a clean directory is only automated reproduction) |
+| `original_adviser_scope_complete` | **false** while the original adviser scope's disguised-attack / regulation-evasion experiment is not done; only the adviser can accept an adjusted scope — an agent cannot on their behalf |
+
+Engineering passing does not mean a hypothesis is supported, and models being all wrong does not mean the experiment
+is incomplete — the fields are reported independently.

@@ -1,0 +1,126 @@
+{
+ "protocol": "fal-research-response/v1",
+ "experiment": {
+  "study_id": "p7-holdout",
+  "unit_id": "capacity-fix.claude-opus-5-5-relay.S.r1",
+  "track": "implementation_conformance",
+  "case_id": "ratelimit-token-bucket",
+  "case_version": 1,
+  "task_id": "capacity-fix",
+  "task_digest": "0444d52e94363fe85e69534e8ea74013da2ebad0c1f08a58b77ed0356fba4a4e",
+  "representation_id": "transcript",
+  "replicate_id": 1,
+  "assistance_mode": "STATIC_UNASSISTED",
+  "sampling_id": "capacity-fix.claude-opus-5-5-relay.S.r1#0"
+ },
+ "call": {
+  "provider": "anthropic",
+  "provider_config_id": "claude-opus-5-5-relay",
+  "api": "anthropic.messages",
+  "api_version": "2023-06-01",
+  "endpoint": "https://api.uheapi.com/v1/messages",
+  "route": "COMPATIBLE_RELAY",
+  "endpoint_kind": "PROVIDER",
+  "model_requested": "claude-opus-5-5",
+  "model_returned": "claude-opus-5-5",
+  "model_switched": false,
+  "model_identity": "RELAY_REPORTED",
+  "response_id": "msg_011Cfxd2ScRjUTynz3SuSwHb",
+  "request_id": "01853eac-f1bf-4dd8-b798-d72e748fc70e, 84e0f008-8ab1-4229-9097-d6a5c83cd391, 1592d2f2-5733-42f8-b946-3b6ccf7e83cf",
+  "started_at": "2026-10-12T16:00:29Z",
+  "finished_at": "2026-10-12T16:00:35Z",
+  "params": {
+   "max_tokens": 4000
+  },
+  "params_digest": "a9c88df19b23301d"
+ },
+ "raw": {
+  "body": {
+   "model": "claude-opus-5-5",
+   "id": "msg_011Cfxd2ScRjUTynz3SuSwHb",
+   "type": "message",
+   "role": "assistant",
+   "content": [
+    {
+     "type": "thinking",
+     "thinking": "",
+     "signature": "CAQSjgcKEAgSGAI4AUIIdGhpbmtpbmcSDBTpbouSfYYSmP7w1xoMLhmLRs+yzzW3O2xZIjAhXj1N16WN9WAXQThe9Ps5u74noAnpffxpKHNtVZGbiRijvQdMZTTGVnBkq3L0N14qqwZTXrDFdtJG5lqb2bcFeDlSGgujwzDFkrr/A1cTKSRfsFTbEmsTtts8yTG53lqS65ivaR68b4zEodsQV0rYUq4U6FCqBsyfgfg1oZVFfpR9INdrofyW293wnF0elTBcj8LS/cdFoz9tZsTXPIThAMomE4brRxdjnoys4em+kGs21i68Q5JugZE1QTV93e/kCV4dx1BNrr0wHbAFcsE3KGef1MgPnJ7vGr2QX0PDxRROjvjkggeyqtd2DUnxiYE0zk90mDkyJ7jVahMloNovm1bKWXsmVIxY3Fay29PEfnrG73t601AioFmIovKwZj2Hx0FxKNwF0A2qOUzAzzHsds7rE0Gj4PzZXMacOpsA/W8KLtYtk6PEXfCdecxonpd+OO+TXPBBjcCsKONnHP1jhCpRHBwRZ1dSA0v5KmUG+NAdrU20A3ZOHtSQLN3IEmIjBK/3xOSCxCphz4O6ipee9LbuyfefSi/NUylQQgyUpHrVF+lB+xaVBbqQm3KE+otGGT/XyYWEDIAHQK6CIEzyWurA0Tjbvbe7+zzK0/rkW/cd2Ogl4ibKlLWyKZn/Va/MPpLlU2U8JJzMDPw5mXV4RMcNTb6c0pgpyGK7fvrO8RiJbtRYYLu7cpxa2byHfjo8A4eTiWrkKN69LQrCIEIsYCC2HFwBPb9C6GQKzNWTgNuBX/01zgvq8dYX7NJEuY7pT4Q5B/9sWr2UoAjhpxVwtARG4cEpjVbOfY/+cknLtjWZvlcsZCxiIqsb27TMrAMZhhbK02Xfw0K6u48fZl4HcQR9eqjw5Alf3GiV7O270Ng2jNzBKX59yIn8T3964Dci2MgOMEa29TAZ2WuepXmVNfjix+MeFhe1mMZxnzRnoOJu25VfkrIJLi5rIe2N6tCcrgUNXWl2Q4LHnqSbyPc8HaJ7fVEC6PPs/H5OqnQ3EdsLXvPq2vmIhOyrEWWcfpNHYbJpRL9z59Ohp9XTSaRhM+Sn/Udsi5QEs7ddpucjfX4DmuZTCsH1l0A8546S5fsTBXSrqK6HmFjXdqIz6rPl/TcII8Zth/1v5yLtxzFaA3ZllNiZivq9qVMmrgZeGAE="
+    },
+    {
+     "type": "text",
+     "text": "{\"within_capacity\": true, \"first_overflow\": null, \"rationale\": \"Capacity is 3, and the token count never goes above it at any step (2, 3, 2, 1, 3, 2, 1, 0). The run implies a refill amount of 2 (0→2 at step 0). At step 1, 2+2=4 is capped to 3, so the fix is working. At step 4, 1+2=3 sits exactly at capacity. All takes ran with tokens > 0 and were correctly granted.\"}"
+    }
+   ],
+   "container": null,
+   "stop_reason": "end_turn",
+   "stop_sequence": null,
+   "stop_details": null,
+   "usage": {
+    "input_tokens": 1237,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 0,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 0
+    },
+    "output_tokens": 297,
+    "output_tokens_details": {
+     "thinking_tokens": 133
+    },
+    "service_tier": "standard",
+    "inference_geo": "global"
+   },
+   "input_transformations": [],
+   "diagnostics": null,
+   "context_management": {
+    "applied_edits": []
+   }
+  },
+  "body_text": null,
+  "visible_text": "{\"within_capacity\": true, \"first_overflow\": null, \"rationale\": \"Capacity is 3, and the token count never goes above it at any step (2, 3, 2, 1, 3, 2, 1, 0). The run implies a refill amount of 2 (0→2 at step 0). At step 1, 2+2=4 is capped to 3, so the fix is working. At step 4, 1+2=3 sits exactly at capacity. All takes ran with tokens > 0 and were correctly granted.\"}",
+  "finish_reason": "end_turn",
+  "finish_class": "STOP",
+  "refusal": null,
+  "truncated": false,
+  "tool_calls": [],
+  "reasoning": "SUMMARY_ONLY"
+ },
+ "status": {
+  "outcome": "ANSWERED",
+  "transport_ok": true,
+  "http_status": 200,
+  "provider_error_type": null,
+  "provider_error": null,
+  "model_switched": false,
+  "attempts": [
+   {
+    "attempt_no": 1,
+    "attempt_id": "att_ae281f1f78b3",
+    "sent": true,
+    "confirmed": true,
+    "http_status": 200,
+    "error_class": null,
+    "error": null,
+    "latency_ms": 6113.0
+   }
+  ],
+  "network_retries": 1,
+  "note": null
+ },
+ "cost": {
+  "usage_known": true,
+  "input_tokens": 1237,
+  "output_tokens": 297,
+  "reasoning_tokens": 133,
+  "cache_read_tokens": 0,
+  "cache_write_tokens": 0,
+  "latency_ms": 6113.3,
+  "http_attempts": 1,
+  "possibly_billed_unconfirmed": 0,
+  "prompt_digest": "75bc540f636fa483",
+  "config_digest": "15d16b2d5d3e43a7"
+ },
+ "task_input_digest": "75bc540f636fa48337e6103f5ec64c7a8053e48f0fe7535ac8fe0f42233139ae",
+ "reuse_key": "f9d9b8b4580e39489f87f7fb8c5b4b8eb900b3d14d485ce3697585353e60a8d8",
+ "recorded_at": "2026-10-12T16:00:35Z"
+}

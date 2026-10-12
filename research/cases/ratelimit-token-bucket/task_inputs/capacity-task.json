@@ -1,0 +1,281 @@
+{
+ "capacity": 3,
+ "mechanism": "# Mechanism: token-bucket capacity limiter (phase-7 held-out case)\n\nA finite, in-process program (no network), different in mechanism from the order service and the tenant-isolation\nfixture.\n\n- **Subject.** A caller driving the limiter through a fixed operation sequence (`refill`, `take`). It controls only\n  which operation runs next; it cannot set the token count directly.\n- **Resource.** One bucket holding an integer token count between 0 and twice the capacity.\n- **Capability.** `take()` spends one token when any remain (else it is denied); `refill()` adds the refill amount.\n- **Trust boundary.** The capacity cap is enforced inside `refill`; the caller cannot bypass it. The defect is a\n  missing cap in that one place.\n- **Action.** `take` (precondition: tokens > 0; effect: tokens − 1) and `refill` (secure effect: tokens ←\n  min(capacity, tokens + refill)).\n- **Property.** `within_capacity` (invariant): the bucket is never above its capacity (`tokens ≤ cap`). Machine-checked\n  on the finite model.\n- **Oracle.** The real program's token count after each operation, read independently; the capped specification is the\n  model. A recorded run above capacity is a violation.\n",
+ "model": {
+  "compiled": [],
+  "contract_version": "formal-lab-contracts/v2",
+  "created_at": "2026-10-12T15:59:42.944310Z",
+  "digest": {
+   "algorithm": "sha256",
+   "value": "fa6a8e24d880dc8b789585085a8dd6411cf3dd51035396ac54b63f8466857c3c"
+  },
+  "extensions": {},
+  "frontend": {
+   "plugin_id": "formal-lab.frontend.ir-json",
+   "version": "1.0.0"
+  },
+  "package_id": "ratelimit-token-bucket",
+  "payload": {
+   "ir": {
+    "actions": [
+     {
+      "cost": 1,
+      "description": null,
+      "effects": [
+       {
+        "kind": "assign",
+        "target": {
+         "index": [],
+         "var": "tokens"
+        },
+        "value": {
+         "args": [
+          {
+           "index": [],
+           "name": "tokens",
+           "op": "var"
+          },
+          {
+           "domain": null,
+           "op": "const",
+           "value": 1
+          }
+         ],
+         "op": "sub"
+        }
+       }
+      ],
+      "label": "取令牌",
+      "name": "take",
+      "params": [],
+      "precondition": {
+       "args": [
+        {
+         "index": [],
+         "name": "tokens",
+         "op": "var"
+        },
+        {
+         "domain": null,
+         "op": "const",
+         "value": 0
+        }
+       ],
+       "op": "gt"
+      },
+      "retry": "RECONCILE_THEN_RETRY",
+      "timeout_seconds": 30.0
+     },
+     {
+      "cost": 1,
+      "description": null,
+      "effects": [
+       {
+        "condition": {
+         "args": [
+          {
+           "args": [
+            {
+             "index": [],
+             "name": "tokens",
+             "op": "var"
+            },
+            {
+             "index": [],
+             "name": "refill_amt",
+             "op": "var"
+            }
+           ],
+           "op": "add"
+          },
+          {
+           "index": [],
+           "name": "cap",
+           "op": "var"
+          }
+         ],
+         "op": "le"
+        },
+        "kind": "when",
+        "otherwise": [],
+        "then": [
+         {
+          "kind": "assign",
+          "target": {
+           "index": [],
+           "var": "tokens"
+          },
+          "value": {
+           "args": [
+            {
+             "index": [],
+             "name": "tokens",
+             "op": "var"
+            },
+            {
+             "index": [],
+             "name": "refill_amt",
+             "op": "var"
+            }
+           ],
+           "op": "add"
+          }
+         }
+        ]
+       },
+       {
+        "condition": {
+         "args": [
+          {
+           "args": [
+            {
+             "index": [],
+             "name": "tokens",
+             "op": "var"
+            },
+            {
+             "index": [],
+             "name": "refill_amt",
+             "op": "var"
+            }
+           ],
+           "op": "add"
+          },
+          {
+           "index": [],
+           "name": "cap",
+           "op": "var"
+          }
+         ],
+         "op": "gt"
+        },
+        "kind": "when",
+        "otherwise": [],
+        "then": [
+         {
+          "kind": "assign",
+          "target": {
+           "index": [],
+           "var": "tokens"
+          },
+          "value": {
+           "index": [],
+           "name": "cap",
+           "op": "var"
+          }
+         }
+        ]
+       }
+      ],
+      "label": "补充（封顶）",
+      "name": "refill",
+      "params": [],
+      "precondition": {
+       "domain": null,
+       "op": "const",
+       "value": true
+      },
+      "retry": "RECONCILE_THEN_RETRY",
+      "timeout_seconds": 30.0
+     }
+    ],
+    "constants": [
+     {
+      "description": null,
+      "index": [],
+      "name": "cap",
+      "type": {
+       "kind": "int",
+       "max": 6,
+       "min": 0
+      },
+      "value": {
+       "cells": [],
+       "default": 3
+      }
+     },
+     {
+      "description": null,
+      "index": [],
+      "name": "refill_amt",
+      "type": {
+       "kind": "int",
+       "max": 6,
+       "min": 0
+      },
+      "value": {
+       "cells": [],
+       "default": 2
+      }
+     }
+    ],
+    "description": "Secure specification of a token-bucket capacity limiter: refill never raises the bucket above its capacity.",
+    "entity_sets": [],
+    "enums": [],
+    "features": [],
+    "name": "ratelimit-token-bucket",
+    "objectives": [],
+    "properties": [
+     {
+      "description": null,
+      "expr": {
+       "args": [
+        {
+         "index": [],
+         "name": "tokens",
+         "op": "var"
+        },
+        {
+         "index": [],
+         "name": "cap",
+         "op": "var"
+        }
+       ],
+       "op": "le"
+      },
+      "id": "within_capacity",
+      "kind": "invariant",
+      "label": "不超容量"
+     }
+    ],
+    "semantic_profile": "deterministic_finite_v1",
+    "state": [
+     {
+      "description": null,
+      "index": [],
+      "initial": {
+       "cells": [],
+       "default": 0
+      },
+      "label": "令牌数",
+      "name": "tokens",
+      "observable": true,
+      "type": {
+       "kind": "int",
+       "max": 6,
+       "min": 0
+      }
+     }
+    ]
+   },
+   "kind": "fal-ir"
+  },
+  "semantic_profile": "deterministic_finite_v1",
+  "source": {
+   "artifact": null,
+   "author": null,
+   "format": "fal-ir-json/v1",
+   "origin": "examples/local-order-service/research_ratelimit.py",
+   "parent_version": null,
+   "text": "{\n  \"semantic_profile\": \"deterministic_finite_v1\",\n  \"name\": \"ratelimit-token-bucket\",\n  \"description\": \"Secure specification of a token-bucket capacity limiter: refill never raises the bucket above its capacity.\",\n  \"enums\": [],\n  \"entity_sets\": [],\n  \"constants\": [\n    {\n      \"name\": \"cap\",\n      \"type\": {\n        \"kind\": \"int\",\n        \"min\": 0,\n        \"max\": 6\n      },\n      \"index\": [],\n      \"value\": {\n        \"default\": 3,\n        \"cells\": []\n      },\n      \"description\": null\n    },\n    {\n      \"name\": \"refill_amt\",\n      \"type\": {\n        \"kind\": \"int\",\n        \"min\": 0,\n        \"max\": 6\n      },\n      \"index\": [],\n      \"value\": {\n        \"default\": 2,\n        \"cells\": []\n      },\n      \"description\": null\n    }\n  ],\n  \"state\": [\n    {\n      \"name\": \"tokens\",\n      \"type\": {\n        \"kind\": \"int\",\n        \"min\": 0,\n        \"max\": 6\n      },\n      \"index\": [],\n      \"initial\": {\n        \"default\": 0,\n        \"cells\": []\n      },\n      \"label\": \"令牌数\",\n      \"description\": null,\n      \"observable\": true\n    }\n  ],\n  \"actions\": [\n    {\n      \"name\": \"take\",\n      \"params\": [],\n      \"precondition\": {\n        \"op\": \"gt\",\n        \"args\": [\n          {\n            \"op\": \"var\",\n            \"name\": \"tokens\",\n            \"index\": []\n          },\n          {\n            \"op\": \"const\",\n            \"value\": 0,\n            \"domain\": null\n          }\n        ]\n      },\n      \"effects\": [\n        {\n          \"kind\": \"assign\",\n          \"target\": {\n            \"var\": \"tokens\",\n            \"index\": []\n          },\n          \"value\": {\n            \"op\": \"sub\",\n            \"args\": [\n              {\n                \"op\": \"var\",\n                \"name\": \"tokens\",\n                \"index\": []\n              },\n              {\n                \"op\": \"const\",\n                \"value\": 1,\n                \"domain\": null\n              }\n            ]\n          }\n        }\n      ],\n      \"cost\": 1,\n      \"label\": \"取令牌\",\n      \"description\": null,\n      \"timeout_seconds\": 30.0,\n      \"retry\": \"RECONCILE_THEN_RETRY\"\n    },\n    {\n      \"name\": \"refill\",\n      \"params\": [],\n      \"precondition\": {\n        \"op\": \"const\",\n        \"value\": true,\n        \"domain\": null\n      },\n      \"effects\": [\n        {\n          \"kind\": \"when\",\n          \"condition\": {\n            \"op\": \"le\",\n            \"args\": [\n              {\n                \"op\": \"add\",\n                \"args\": [\n                  {\n                    \"op\": \"var\",\n                    \"name\": \"tokens\",\n                    \"index\": []\n                  },\n                  {\n                    \"op\": \"var\",\n                    \"name\": \"refill_amt\",\n                    \"index\": []\n                  }\n                ]\n              },\n              {\n                \"op\": \"var\",\n                \"name\": \"cap\",\n                \"index\": []\n              }\n            ]\n          },\n          \"then\": [\n            {\n              \"kind\": \"assign\",\n              \"target\": {\n                \"var\": \"tokens\",\n                \"index\": []\n              },\n              \"value\": {\n                \"op\": \"add\",\n                \"args\": [\n                  {\n                    \"op\": \"var\",\n                    \"name\": \"tokens\",\n                    \"index\": []\n                  },\n                  {\n                    \"op\": \"var\",\n                    \"name\": \"refill_amt\",\n                    \"index\": []\n                  }\n                ]\n              }\n            }\n          ],\n          \"otherwise\": []\n        },\n        {\n          \"kind\": \"when\",\n          \"condition\": {\n            \"op\": \"gt\",\n            \"args\": [\n              {\n                \"op\": \"add\",\n                \"args\": [\n                  {\n                    \"op\": \"var\",\n                    \"name\": \"tokens\",\n                    \"index\": []\n                  },\n                  {\n                    \"op\": \"var\",\n                    \"name\": \"refill_amt\",\n                    \"index\": []\n                  }\n                ]\n              },\n              {\n                \"op\": \"var\",\n                \"name\": \"cap\",\n                \"index\": []\n              }\n            ]\n          },\n          \"then\": [\n            {\n              \"kind\": \"assign\",\n              \"target\": {\n                \"var\": \"tokens\",\n                \"index\": []\n              },\n              \"value\": {\n                \"op\": \"var\",\n                \"name\": \"cap\",\n                \"index\": []\n              }\n            }\n          ],\n          \"otherwise\": []\n        }\n      ],\n      \"cost\": 1,\n      \"label\": \"补充（封顶）\",\n      \"description\": null,\n      \"timeout_seconds\": 30.0,\n      \"retry\": \"RECONCILE_THEN_RETRY\"\n    }\n  ],\n  \"properties\": [\n    {\n      \"id\": \"within_capacity\",\n      \"kind\": \"invariant\",\n      \"expr\": {\n        \"op\": \"le\",\n        \"args\": [\n          {\n            \"op\": \"var\",\n            \"name\": \"tokens\",\n            \"index\": []\n          },\n          {\n            \"op\": \"var\",\n            \"name\": \"cap\",\n            \"index\": []\n          }\n        ]\n      },\n      \"label\": \"不超容量\",\n      \"description\": null\n    }\n  ],\n  \"features\": [],\n  \"objectives\": []\n}"
+  },
+  "version": 1
+ },
+ "property": {
+  "digest": "0454371a8850af4954d7ea692ca06e9f4198763ab6240b8d58619a8efd89003b",
+  "id": "within_capacity",
+  "kind": "invariant"
+ },
+ "question": "Did the limiter stay within its capacity on the recorded run?",
+ "refill": 2
+}

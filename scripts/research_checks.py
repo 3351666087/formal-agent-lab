@@ -63,6 +63,19 @@ RESEARCH_CHECKS = [
           "授权额度内运行真实批次；缺中转凭据则 BLOCKED；密钥不落盘",
           f"{PY} scripts/p6b_evidence.py", ["P6B-01", "P6B-02"], protocol=True,
           produces=[f"{EV}/p6b/eval.json"]),
+    # ------------------------------------------------------------------ P7 held-out case, gap closure, closeout
+    Check("p7-unit", "p7",
+          "缺口关闭与新机制（单元）：K01 凭据绑定实际目标（同名不同目标不可沿用）、K02 攻击步预算在准入处执行（一次准入一单位、"
+          "重试不重计、暂停/恢复不回补）、K03 门控三态与 detail 的真实记录；令牌桶保留案例的缺陷越容量/修复封顶/不变式成立",
+          f"{PYTEST} packages/domain-mal/tests/test_admission.py "
+          "examples/local-order-service/tests/test_research_ratelimit.py", ["P7-01", "P7-02"]),
+    Check("p7-case", "p7",
+          "保留案例端到端：令牌桶案例通过校验、从记录运行离线重算对应（缺陷 DEVIATES / 修复 CORRESPONDS）、离线读取成立",
+          f"{PY} scripts/p7_case_check.py", ["P7-01"], protocol=True, produces=[f"{EV}/p7/case.json"]),
+    Check("p7-holdout", "p7",
+          "保留案例双模型冻结批次：先协议服务脚本化确认字段/评分/成本上限/泄漏防护（2 任务 × 2 模型 × 2 重复 = 8 单元），"
+          "再在授权额度内运行真实批次；缺中转凭据则 BLOCKED；密钥不落盘",
+          f"{PY} scripts/p7_evidence.py", ["P7-01"], protocol=True, produces=[f"{EV}/p7/holdout.json"]),
 ]
 
 # every check must live in a declared group

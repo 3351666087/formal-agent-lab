@@ -1,0 +1,320 @@
+{
+ "protocol": "fal-research-case/v1",
+ "identity": {
+  "case_id": "ratelimit-token-bucket",
+  "case_version": 1,
+  "track": "implementation_conformance",
+  "mechanism_family": "rate-limit-capacity",
+  "title": "Token-bucket capacity limiter (phase-7 held-out case)",
+  "purpose": "Verify that a token-bucket limiter respects its capacity, as a new held-out case with a mechanism different from the order service — to check the method generalises."
+ },
+ "software": {
+  "repository": "https://github.com/3351666087/formal-agent-lab",
+  "license": "Apache-2.0",
+  "revision": "d6a8459b370eadc23d008e6ed70d054f807a4478",
+  "trees": [
+   {
+    "path": "examples/local-order-service",
+    "git_tree": "a72fad33b44f6874256dd220f76a10b045773b0c"
+   }
+  ],
+  "config_sha256": "7906a752734c5d6c3b9f9587adb610b692981892df36be7c1a3bc8125a9ced19",
+  "build_dependencies": [],
+  "runtime_dependencies": [],
+  "variant": "own_test_variant",
+  "variant_note": "the phase-7 token-bucket research fixture (research_ratelimit.py), a finite in-process program; defect/fix is one line of refill (uncapped vs capped)"
+ },
+ "comparison": {
+  "before": {
+   "present": true,
+   "revision": "d6a8459b370eadc23d008e6ed70d054f807a4478",
+   "artifact_ids": [
+    "obs-defect"
+   ],
+   "absent_reason": null
+  },
+  "after": {
+   "present": true,
+   "revision": "d6a8459b370eadc23d008e6ed70d054f807a4478",
+   "artifact_ids": [
+    "obs-fix",
+    "regression"
+   ],
+   "absent_reason": null
+  },
+  "change_basis": "the refill operation: uncapped (defect, adds with no cap) vs capped (fix, min(capacity, …))",
+  "regression_test_source": "examples/local-order-service/tests/test_research_ratelimit.py"
+ },
+ "models": [
+  {
+   "label": "secure-spec",
+   "role": "reference",
+   "model_ref": {
+    "package_id": "ratelimit-token-bucket",
+    "version": 1,
+    "digest": {
+     "algorithm": "sha256",
+     "value": "fa6a8e24d880dc8b789585085a8dd6411cf3dd51035396ac54b63f8466857c3c"
+    }
+   },
+   "artifact_id": "model",
+   "semantic_profile": "deterministic_finite_v1",
+   "properties": [
+    {
+     "property_id": "within_capacity",
+     "kind": "invariant",
+     "digest": "0454371a8850af4954d7ea692ca06e9f4198763ab6240b8d58619a8efd89003b",
+     "summary": "the bucket is never above its capacity: tokens <= cap"
+    }
+   ],
+   "bounds": {
+    "max_steps": 10,
+    "timeout_ms": 30000,
+    "inputs": "capacity 3, refill 2, the fixed 8-op run"
+   },
+   "assumptions": [
+    "finite abstraction: one bucket, integer token count 0..2·capacity, a fixed operation sequence",
+    "the capped specification is the reference; the program is the system under test"
+   ],
+   "uncovered_semantics": [
+    "concurrency between callers",
+    "wall-clock refill timing (the model steps are logical)"
+   ]
+  }
+ ],
+ "correspondence": [
+  {
+   "program": {
+    "component": "refill",
+    "path": "examples/local-order-service/src/formal_lab_example_orders/research_ratelimit.py",
+    "symbol": "TokenBucket.refill"
+   },
+   "model": {
+    "kind": "action",
+    "name": "refill"
+   },
+   "relation": "MEASURED",
+   "evidence_artifact_ids": [
+    "obs-defect",
+    "obs-fix"
+   ],
+   "note": "the program's refill vs the model's capped refill"
+  },
+  {
+   "program": {
+    "component": "token count",
+    "path": "examples/local-order-service/src/formal_lab_example_orders/research_ratelimit.py",
+    "symbol": "TokenBucket.tokens"
+   },
+   "model": {
+    "kind": "state",
+    "name": "tokens"
+   },
+   "relation": "MEASURED",
+   "evidence_artifact_ids": [
+    "obs-defect"
+   ],
+   "note": "the observed token count after each operation"
+  },
+  {
+   "program": {
+    "component": "capacity",
+    "path": "examples/local-order-service/src/formal_lab_example_orders/research_ratelimit.py",
+    "symbol": "TokenBucket.capacity"
+   },
+   "model": {
+    "kind": "constant",
+    "name": "cap"
+   },
+   "relation": "MANUAL_REVIEW",
+   "evidence_artifact_ids": [],
+   "note": "the bucket capacity is the model constant cap"
+  }
+ ],
+ "validation": {
+  "criteria": [
+   {
+    "id": "c-defect-deviates",
+    "text": "the uncapped variant exceeds capacity (deviates)"
+   },
+   {
+    "id": "c-fix-corresponds",
+    "text": "the capped variant stays within capacity (corresponds)"
+   },
+   {
+    "id": "c-regression",
+    "text": "the fixture's own tests pass at this revision"
+   }
+  ],
+  "fixture_ids": [
+   "fixture-config"
+  ],
+  "observation_ids": [
+   "obs-defect",
+   "obs-fix"
+  ],
+  "model_check_ids": [
+   "check-capacity"
+  ],
+  "regression_ids": [
+   "regression"
+  ],
+  "conformance_ids": [
+   "conf-defect",
+   "conf-fix"
+  ],
+  "reference_ids": [
+   "reference"
+  ],
+  "task_input_ids": [
+   "task-input"
+  ]
+ },
+ "reproduction": {
+  "environment": "Colima VM; an in-process finite program (no network); Z3 verifier",
+  "reset": "each run starts a fresh TokenBucket",
+  "cleanup": "none (in-process)",
+  "seeds": [],
+  "nondeterminism": [
+   "none: a fixed operation sequence, deterministic program"
+  ],
+  "commands": [
+   {
+    "command": "python scripts/p7_holdout_case.py",
+    "purpose": "build and validate this case"
+   },
+   {
+    "command": "pytest examples/local-order-service/tests/test_research_ratelimit.py",
+    "purpose": "program regression"
+   }
+  ],
+  "prerequisites": [
+   "uv sync --frozen",
+   "the order-service example installed in the project venv"
+  ]
+ },
+ "artifacts": [
+  {
+   "id": "model",
+   "role": "model",
+   "path": "models/capacity.package.json",
+   "sha256": "24a9acdbdbf002816076bf7ec62c2421560947fc0230955ee554fb6b3e29386c",
+   "media_type": "application/json",
+   "side": "none",
+   "revision": null,
+   "description": "secure specification: refill never raises the bucket above its capacity",
+   "stored": null
+  },
+  {
+   "id": "check-capacity",
+   "role": "model_check",
+   "path": "model_checks/within_capacity.qb.json",
+   "sha256": "f2c214c047e6866a7501d7dd5076ea593a94acfe9e072621991b15c2df9bc6fd",
+   "media_type": "application/json",
+   "side": "none",
+   "revision": null,
+   "description": "INVARIANT_VIOLATION(within_capacity): NO_WITNESS_WITHIN_BOUND",
+   "stored": null
+  },
+  {
+   "id": "fixture-config",
+   "role": "fixture",
+   "path": "fixtures/limiter.json",
+   "sha256": "f8c65d1a431e9c62336388ba9f7b365db64dea4cc7f3e4aa7c06b30867b67cd8",
+   "media_type": "application/json",
+   "side": "both",
+   "revision": "d6a8459b370eadc23d008e6ed70d054f807a4478",
+   "description": "the fixed capacity, refill amount and operation sequence (held out)",
+   "stored": null
+  },
+  {
+   "id": "mechanism",
+   "role": "source",
+   "path": "MECHANISM.md",
+   "sha256": "335c2b87e498062e1c1227ca7089c6908c286966f5263d8962692dad00c6da82",
+   "media_type": "text/markdown",
+   "side": "both",
+   "revision": "d6a8459b370eadc23d008e6ed70d054f807a4478",
+   "description": "one-page mechanism note (subject/resource/capability/trust-boundary/action/property/oracle)",
+   "stored": null
+  },
+  {
+   "id": "obs-defect",
+   "role": "observation",
+   "path": "observations/uncapped.json",
+   "sha256": "af185baaf92f09e851cafe707716cef5ae6e822f7dd044facf125a4c018db474",
+   "media_type": "application/json",
+   "side": "before",
+   "revision": "d6a8459b370eadc23d008e6ed70d054f807a4478",
+   "description": "defect variant: refill ignores capacity",
+   "stored": null
+  },
+  {
+   "id": "obs-fix",
+   "role": "observation",
+   "path": "observations/capped.json",
+   "sha256": "6e8fd250d6dbbbf4ad22dc416fec5988c49dea3503a15ec2c015b2cbc7ed80ca",
+   "media_type": "application/json",
+   "side": "after",
+   "revision": "d6a8459b370eadc23d008e6ed70d054f807a4478",
+   "description": "fix variant: refill caps at capacity",
+   "stored": null
+  },
+  {
+   "id": "regression",
+   "role": "regression",
+   "path": "regression/ratelimit-junit.xml",
+   "sha256": "9dfb73ee5a6f4da479ba8f437ea512acfaeef50396345629369373df9c736fad",
+   "media_type": "application/xml",
+   "side": "both",
+   "revision": "d6a8459b370eadc23d008e6ed70d054f807a4478",
+   "description": "pytest test_research_ratelimit.py: 4/4 passed",
+   "stored": null
+  },
+  {
+   "id": "task-input",
+   "role": "task_input",
+   "path": "task_inputs/capacity-task.json",
+   "sha256": "2a641e25b6d5fc7e17613c76fcc3ae3762286bb156a6af793534ce8e8425636c",
+   "media_type": "application/json",
+   "side": "none",
+   "revision": null,
+   "description": "phase-6 task material: model + property + mechanism only (no reference answers)",
+   "stored": null
+  },
+  {
+   "id": "conf-defect",
+   "role": "conformance",
+   "path": "conformance/defect.result.json",
+   "sha256": "e733cce4d5ed92df47ea3facfd5fe873d77b1c74ec705f0775e81ca5c54f7e93",
+   "media_type": "application/json",
+   "side": "none",
+   "revision": null,
+   "description": "uncapped: DEVIATES",
+   "stored": null
+  },
+  {
+   "id": "conf-fix",
+   "role": "conformance",
+   "path": "conformance/fix.result.json",
+   "sha256": "9ea63e340d85731d6f371085f885f7bb38e10671b819b7c1272a510e43b20c51",
+   "media_type": "application/json",
+   "side": "none",
+   "revision": null,
+   "description": "capped: CORRESPONDS",
+   "stored": null
+  },
+  {
+   "id": "reference",
+   "role": "reference",
+   "path": "reference/expected.json",
+   "sha256": "df6dfaa5a5e5fa6d3fac7644cd9f4059f92e8d10f160183a4a9d599662a84249",
+   "media_type": "application/json",
+   "side": "none",
+   "revision": null,
+   "description": "expected correspondence verdicts (defect DEVIATES, fix CORRESPONDS)",
+   "stored": null
+  }
+ ],
+ "case_digest": "f32bbc9467a316dbebb377d3ab0105c286030454274e01b7419c5ab9cb580091"
+}

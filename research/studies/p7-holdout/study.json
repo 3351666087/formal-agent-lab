@@ -1,0 +1,156 @@
+{
+ "protocol": "fal-research-study/v1",
+ "study_id": "p7-holdout",
+ "title": "Phase 7 held-out case: token-bucket capacity judgment",
+ "purpose": "a new real case with a different mechanism, frozen before any model saw it, to check the method generalises beyond the first sample — a descriptive 8-request batch, not a ranking claim",
+ "tasks": [
+  {
+   "task_id": "capacity-defect",
+   "track": "implementation_conformance",
+   "case_id": "ratelimit-token-bucket",
+   "case_version": 1,
+   "representation_id": "transcript",
+   "representation_version": 1,
+   "purpose": "judge whether a token-bucket limiter stayed within its capacity on a recorded run (before the fix)",
+   "inputs": [
+    "inputs/capacity-defect.md"
+   ],
+   "assisted_inputs": [],
+   "question": "Did the limiter stay within its capacity on this run? Answer within_capacity (true/false) and first_overflow (the step index where it first exceeded capacity, or null).",
+   "answer_format": "json",
+   "answer_schema": {
+    "type": "object",
+    "properties": {
+     "within_capacity": {
+      "type": "boolean"
+     },
+     "first_overflow": {
+      "type": [
+       "integer",
+       "null"
+      ]
+     },
+     "rationale": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "within_capacity",
+     "first_overflow"
+    ],
+    "additionalProperties": false
+   },
+   "reference": "reference/capacity-defect.json",
+   "scorer_id": "ratelimit.capacity-judgment",
+   "scorer_version": "1",
+   "bound": {
+    "operations": 8
+   },
+   "split": "acceptance"
+  },
+  {
+   "task_id": "capacity-fix",
+   "track": "implementation_conformance",
+   "case_id": "ratelimit-token-bucket",
+   "case_version": 1,
+   "representation_id": "transcript",
+   "representation_version": 1,
+   "purpose": "judge whether a token-bucket limiter stayed within its capacity on a recorded run (after the fix)",
+   "inputs": [
+    "inputs/capacity-fix.md"
+   ],
+   "assisted_inputs": [],
+   "question": "Did the limiter stay within its capacity on this run? Answer within_capacity (true/false) and first_overflow (the step index where it first exceeded capacity, or null).",
+   "answer_format": "json",
+   "answer_schema": {
+    "type": "object",
+    "properties": {
+     "within_capacity": {
+      "type": "boolean"
+     },
+     "first_overflow": {
+      "type": [
+       "integer",
+       "null"
+      ]
+     },
+     "rationale": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "within_capacity",
+     "first_overflow"
+    ],
+    "additionalProperties": false
+   },
+   "reference": "reference/capacity-fix.json",
+   "scorer_id": "ratelimit.capacity-judgment",
+   "scorer_version": "1",
+   "bound": {
+    "operations": 8
+   },
+   "split": "acceptance"
+  }
+ ],
+ "providers": [
+  {
+   "provider_config_id": "gpt-6-astra-relay",
+   "provider": "openai",
+   "api": "openai.chat.completions",
+   "api_version": "v1",
+   "route": "COMPATIBLE_RELAY",
+   "base_url_setting": "FAL_RESEARCH_RELAY_BASE_URL",
+   "api_key_setting": "FAL_RESEARCH_GPT_API_KEY",
+   "model": "gpt-6-astra",
+   "params": {
+    "max_completion_tokens": 4000
+   },
+   "comparability_note": "relay route; returned model name is the relay's report, not verifiable"
+  },
+  {
+   "provider_config_id": "claude-opus-5-5-relay",
+   "provider": "anthropic",
+   "api": "anthropic.messages",
+   "api_version": "2023-06-01",
+   "route": "COMPATIBLE_RELAY",
+   "base_url_setting": "FAL_RESEARCH_RELAY_BASE_URL",
+   "api_key_setting": "FAL_RESEARCH_CLAUDE_API_KEY",
+   "model": "claude-opus-5-5",
+   "params": {
+    "max_tokens": 4000
+   },
+   "comparability_note": "relay route; returned model name is the relay's report, not verifiable"
+  }
+ ],
+ "assistance_modes": [
+  "STATIC_UNASSISTED"
+ ],
+ "replicates": 2,
+ "rubric_id": "fal-research-rubric",
+ "rubric_version": "1",
+ "primary_metric": "correct",
+ "secondary_metrics": [
+  "format_valid",
+  "refused",
+  "responded",
+  "program_corresponds",
+  "output_tokens"
+ ],
+ "limits": {
+  "max_calls": 16,
+  "max_http_attempts": 32,
+  "max_output_tokens_per_call": 4000,
+  "max_total_output_tokens": 32000,
+  "network_retries": 1
+ },
+ "missing_policy": "the denominator is the 8 planned units; a unit without a model-produced response is MISSING in the model metrics; a refusal is never retried; the frozen call cap (16) covers the 8 planned requests plus bounded resamples, and the denominator never changes",
+ "comparisons": [
+  {
+   "vary": "provider",
+   "a": "gpt-6-astra-relay",
+   "b": "claude-opus-5-5-relay",
+   "note": "both via the same relay; engineering reading, not a verified provider comparison"
+  }
+ ]
+}
