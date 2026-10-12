@@ -26,6 +26,14 @@ RESEARCH_CHECKS = [
           "普通业务样例端到端：委托案例通过校验、从记录运行重算对应得到参考判定（信念 DEVIATES / 修订 CORRESPONDS）、离线读取成立",
           f"{PY} scripts/p5a_case_check.py", ["P5A-01", "P5A-02"], protocol=True,
           produces=[f"{EV}/p5a/case.json"]),
+    # ------------------------------------------------------------------ P5B implementation-level isolation case
+    Check("p5b-unit", "p5b",
+          "隔离授权夹具回归：未知主体拒绝、同租户正常、缺陷变体跨租户可达、修复变体拒绝；对应判定三类分支（偏离/对应/证据不足）",
+          f"{PYTEST} examples/local-order-service/tests/test_research_isolation.py", ["P5B-01", "P5B-02"]),
+    Check("p5b-case", "p5b",
+          "实现级隔离案例端到端：案例通过校验、从记录观测离线重算三类对应（缺陷 DEVIATES / 修复 CORRESPONDS / 证据不足 UNKNOWN）、离线读取成立",
+          f"{PY} scripts/p5b_case_check.py", ["P5B-01", "P5B-02"], protocol=True,
+          produces=[f"{EV}/p5b/case.json"]),
 ]
 
 # every check must live in a declared group

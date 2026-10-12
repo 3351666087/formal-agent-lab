@@ -161,3 +161,15 @@
 - **CybORG 4.0**（git `8c3c50ca`，MIT，未修改、不分发）：从 D5 的脚本基线扩展为平台环境 `formal-lab.env.cage4`，仍经独立 venv `~/.venvs/fal-cage` 的类型化子进程调用（`packages/environment-cage/src/formal_lab_env_cage/_worker.py`）。
 - **模型端点**：沿用 A3 的 `formal_lab_strategies.decision` 与 OpenAI 兼容客户端；端点地址与密钥只在 git 忽略的 `.env`。
 - **平台内部复用**：B3 的发行检查沿用 `scripts/release.py` 与 A5 的安装 / 回放流程；本地交付名映射到 `scripts/doctor.py` 已有配置（`DELIVERY`）。
+
+## 6. 阶段五（Phase 5）复用
+
+- **无新增第三方代码或依赖**：5A/5B 只用既有 Z3、参考解释器、程序回归与本地订单服务；`uv.lock` 未变。研究案例/对应协议、校验与隔离夹具均为本仓自有代码。
+- **方法参考（仅概念，未采用其代码）**：
+
+  | 方法 | 概念 | 本轮自实现位置 |
+  |---|---|---|
+  | Kroening, *Formal Verification at Higher Levels of Abstraction*（ICCAD'07，<https://www.kroening.com/papers/iccad2007.pdf>） | 用独立的程序观测核查抽象结论；先确认模型反例是否对应具体行为，确认抽象误差后才精化 | `fal-conformance-result/v1` 三层分离与 `formal_lab_runtime.research.decide_correspondence`（`UNCONFIRMED`/`SPURIOUS` 区分）；经验对应不称完整语义等价 |
+
+- **CBMC**（<https://github.com/diffblue/cbmc>，Apache-2.0 等）：任务书列为按语言条件启用的 Verifier/子进程工具，**仅当实际案例是适合它的 C 程序片段时**采用。Phase 5 的订单与隔离案例均为 Python，故本轮**未安装、未链接、未作为依赖**；若 Phase 7 引入 C 案例再固定版本、源码摘要、断言与展开界限并记入本表。
+- **平台内部复用**：5B 的隔离夹具只经业务服务 `create_app` 与 Starlette 中间件接入（授权层），复用 5A 的研究协议、`validate_case`、`decide_correspondence` 与 `scripts/research_check.py`；授权令牌仅为本地测试租户的夹具标识，非真实凭据。

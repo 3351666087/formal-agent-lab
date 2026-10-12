@@ -107,3 +107,48 @@ by `scripts/p5a_orders_case.py`:
   revised model **CORRESPONDS**; the program regression PASSes; the bounded model conclusion is recorded as-is.
 
 This case validates the **generic** protocol only; 5B provides domain properties.
+
+## Implementation-level case (5B): tenant/object access isolation
+
+`research/cases/orders-tenant-isolation/` — a software **safety** property (tenant isolation) made observable on the
+real order service, built and validated by `scripts/p5b_isolation_case.py`. Defensive software verification on local
+test tenants; the oracle reads real HTTP results and real stored state (through each tenant's own authorized
+principal), never a self-reported success.
+
+- **Software under study**: `examples/local-order-service` plus the phase-5B authorization research fixture
+  `research_isolation.py` — a per-tenant authorization layer over the business API, **separate from the default
+  startup path** (the ordinary examples are unchanged). The base service has only a coarse global write token and open
+  reads, so a tenant is a path segment, not an authenticated principal; the fixture supplies the missing object-level
+  authorization. The one-page mechanism note (subject / resource / capability / trust boundary / action / property /
+  oracle) is the case's `source` artifact `MECHANISM.md`.
+- **Defect/fix variant** (`comparison.before`/`after`, same revision): one configuration flag on the authorization
+  component — `authenticate_only` omits the object-level tenant-grant check (defect); `per_tenant` enforces it (fix).
+  A project-owned isolated variant, not a fabricated upstream CVE.
+- **Model**: one secure specification (`orders-tenant-isolation`, `tenant_isolation` invariant: `forall s,t:
+  accessed[s][t] -> grant[s][t]`). Z3 `INVARIANT_VIOLATION` → `NO_WITNESS_WITHIN_BOUND` (the spec admits no violation).
+- **Three result classes**, each a real recorded observation replayed against the secure model:
+  defect observation → **DEVIATES** (a subject reached another tenant; a real, observed model/program gap), fix
+  observation → **CORRESPONDS**, and a cross-tenant write the business layer rejects (no state change) → **UNKNOWN**
+  (insufficient evidence). A single passing regression is not a semantic-equivalence proof; an unconfirmed model path
+  is not auto-registered as a real defect.
+
+## Phase 6 handoff contract (what a provider model may be given)
+
+Phase 6 runs provider-model inference over an online API, counted apart from the developer (coding) models. It chooses
+task inputs **explicitly**; the full research case is never sent to a model.
+
+- **Task material (model-readable)** — the `task_input` artifacts only: for `orders-p2-speed`, the belief model + the
+  property + the fixture; for `orders-tenant-isolation`, the secure-spec model + `tenant_isolation` + the mechanism
+  note + the grant table. No reference answers, no conformance results, no oracle data.
+- **Reference answers (provider-invisible)** — the `reference` artifact (expected correspondence verdicts). Validation
+  rejects a reference answer that is also, or is byte-identical to, a task input (`REFERENCE_IN_TASK_INPUT`).
+- **Independent scoring interface** — program verification reuses the local regression entry
+  (`fal-conformance-result/v1` via `replay_conformance` / `derive_items` + `decide_correspondence` and the case's own
+  regression tests). The oracle does not depend on a model scoring its own answer; where the same state machine is used
+  to build both a model and an "independent oracle", that shared source is disclosed in the case.
+- **Candidate set / feedback policy** — recorded per study in phase 6; a task that supplies existing assistance
+  (candidate set, validation feedback) is labelled as such and is **not** read as the model's independent reasoning. A
+  "no-assist static analysis" task supplies only the task material above.
+- **No free-text execution** — model answers this phase are to-be-verified analysis products only; no component
+  translates free text into executable instructions. Domain tasks keep their real purpose, safety property and
+  necessary context.

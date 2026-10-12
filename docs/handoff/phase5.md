@@ -60,22 +60,81 @@ uv run --frozen fal research conformance research/cases/orders-p2-speed --model 
 uv run --frozen fal research import research/cases/orders-p2-speed --project <id>
 ```
 
-## What 5B can use directly
+## 5B — an implementation-level software safety case (complete)
+
+5B delivers one implementation-level **access-isolation** case, observed on the real order service, with a defect/fix
+regression and a model↔program correspondence report. Defensive software verification on local test tenants; the
+oracle reads real state, never a self-reported success.
+
+### P5B-01 · the isolation case
+
+- **Finding first.** The base service has only a coarse global write token and open reads — a tenant is a path segment
+  and a SQLite file, not an authenticated principal (so "tenant URL ≠ user authentication", as the mentor's question
+  anticipated).
+- **Research fixture** `examples/local-order-service/.../research_isolation.py`, **separate from the default startup
+  path** (the ordinary examples are unchanged): a per-tenant authorization layer over the business API with a
+  defect/fix configuration flag — `authenticate_only` omits the object-level tenant-grant check (defect), `per_tenant`
+  enforces it (fix). The one-page mechanism note (subject / resource / capability / trust boundary / action / property
+  / oracle) is the case's `MECHANISM.md`.
+- **Model + property.** One secure specification `orders-tenant-isolation` with the `tenant_isolation` invariant
+  (`forall s,t: accessed[s][t] -> grant[s][t]`); Z3 `INVARIANT_VIOLATION` → `NO_WITNESS_WITHIN_BOUND`.
+- **Case** `research/cases/orders-tenant-isolation/` built and validated by `scripts/p5b_isolation_case.py`: each key
+  action has a real operation + independently-read observation (the owner reads its own state back); a request whose
+  outcome is not observable stays UNKNOWN; program-side reference answers are kept out of the task input.
+
+### P5B-02 · defect/fix regression, correspondence, Phase 6 material
+
+- **Three result classes**, each a real recorded observation replayed against the secure model: defect → **DEVIATES**
+  (a subject reached another tenant, confirmed by the owner's read), fix → **CORRESPONDS**, and a cross-tenant write the
+  business layer rejects (no state change) → **UNKNOWN** (insufficient evidence). Model conclusion, program regression
+  and correspondence are kept apart; a passing regression is not a semantic-equivalence proof; the UNKNOWN case is not
+  registered as a real defect.
+- **Regression** `examples/local-order-service/tests/test_research_isolation.py` (6 tests): unknown principal refused,
+  same-tenant access works in both variants, defect allows cross-tenant, fix denies, and the three correspondence
+  branches on crafted observations.
+- **Phase 6 material** registered in `../research/protocol.md#phase-6-handoff-contract-what-a-provider-model-may-be-given`:
+  the `task_input` artifact (model + property + mechanism + grants, no answers) vs the provider-invisible `reference`
+  artifact; scoring reuses `fal-conformance-result/v1` and the case's own regression; no component turns free text into
+  execution.
+
+### Entry points (5B)
+
+```bash
+make research-check ARGS="--group p5b"                   # p5b-unit (6) + p5b-case (8 assertions)
+uv run --frozen python scripts/p5b_isolation_case.py     # (re)build + validate the isolation case
+python -m formal_lab_example_orders.research_isolation --mode per_tenant   # run the fixture
+uv run --frozen fal research validate research/cases/orders-tenant-isolation --repo .
+```
+
+### K01 / K02 status
+
+5B's isolation case reuses **neither** K01 (MAL issuer / target reachability) nor K02 (attack-step budget), so both
+stay **OPEN** with their phase-4 impact unchanged — not fixed, not worsened; phase 7 closes them in `packages/domain-mal`.
+5B opens K06 (the base service has no per-tenant auth; isolation is a research-fixture property, by design) and K07
+(the isolation abstraction folds read/write into one access over a fixed 2×2 grant). Details in `../research/known-gaps.md`.
+
+## What 6A can use directly
 
 See `phase5.manifest.json → interfaces_for_5b` for the full list. In short: the two contracts protocols; the runtime
-`load_case` / `validate_case` / `replay_conformance` / `decide_correspondence` (+ digest helpers); the platform
-`services/research.py` and its endpoints; the SDK `Client.*research*` methods and the `fal research` CLI; the check
-registry `scripts/research_checks.py` (add p5b checks there); and the two Web tabs. v1 contracts are frozen; add v2
-incrementally and keep old replay bundles readable.
+`load_case` / `validate_case` / `replay_conformance` / `derive_items` / `decide_correspondence` (+ digest helpers); the
+platform `services/research.py` and its endpoints; the SDK `Client.*research*` methods and the `fal research` CLI; the
+check registry `scripts/research_checks.py` (add p6a checks there); the two Web tabs; and, for an access-isolation task,
+`research_isolation.run_access_probes` / `derive_items`. Phase 6 task inputs and the scoring boundary are in
+`phase5.manifest.json → phase6_handoff` and `../research/protocol.md`. v1 contracts are frozen; add v2 incrementally and
+keep old replay bundles readable.
 
 ## Known gaps
 
-K01–K03 carried from phase 4 (recorded, not reopened; 5B judges K01/K02 for its path, phase 7 confirms closure). K04:
-the bounded model conclusion for the ordinary case is `UNKNOWN` (the checker times out at the case bound while the run
+K01–K03 carried from phase 4 stay **OPEN** (5B reused neither K01 nor K02's path; phase 7 closes them). K04: the
+bounded model conclusion for `orders-p2-speed` is `UNKNOWN` (the checker times out at the case bound while the run
 completes) — expected, and exactly why the program-observation layer is kept separate. K05: the platform verifies case
-digests and identities offline but not software tree digests (no checkout). Details in `../research/known-gaps.md`.
+digests and identities offline but not software tree digests (no checkout). K06/K07: opened in 5B (see above). Details
+in `../research/known-gaps.md`.
 
-## 5B
+## Phase 6
 
-Next file: `05B_opus4_8_software_models.md`. CBMC is a 5B per-language conditional, not a 5A prerequisite. 5B provides
-domain properties and software models; 5A marks only the generic foundation complete.
+Next file: `06A_opus5_5_evaluation_foundation.md`. CBMC stays a per-language conditional (the 5A/5B cases are Python),
+not installed this phase. Phase 6 runs provider-model inference over an online API (counted apart from the developer
+models), choosing task inputs explicitly per the handoff contract in `../research/protocol.md`. Phase 5 is complete: a
+rebuildable, checkable program–model case holds for each of a timing deviation and an access-isolation property — this
+is not a claim of general attack-modelling capability.

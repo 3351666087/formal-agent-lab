@@ -3,7 +3,7 @@
  "case": {
   "case_id": "orders-tenant-isolation",
   "case_version": 1,
-  "definition_digest": "061a218366ff7afe2031d5aeb46b406567586d03804ca7f37e42337d61ffe383"
+  "definition_digest": "92f0a13f010e51f41292e7c9cd91156ff182b066357490bcc596554386af8101"
  },
  "model": {
   "package_id": "orders-tenant-isolation",
@@ -14,11 +14,11 @@
   }
  },
  "software": {
-  "revision": "842e468a928ccdfdf3a5a3129f34096431a39240",
+  "revision": "8d80e34ce2c59c27612620637d7008b19f0d1ed2",
   "trees": [
    {
     "path": "examples/local-order-service",
-    "git_tree": "4cb1ef763faa9b255aac2a7b48916714493511f4"
+    "git_tree": "c3e97356391763a153d4ca9f11233f76e2f4cd82"
    }
   ],
   "config_sha256": "84ccdfe1068d67dd1250a2b37a7ceb71aa7df5caaabb4eee1e37fa7d6722b7a4"
@@ -39,18 +39,18 @@
   "query": "INVARIANT_VIOLATION(tenant_isolation)",
   "explanation": "the secure specification admits no state violating the invariant within the bound",
   "artifact_id": "check-isolation",
-  "artifact_sha256": "b8b2846e94eef6432d2148519cc336d9d5c9dc743d20877e4031dcfcc1e7e315"
+  "artifact_sha256": "d9ce07715d87d7a872e32e9b23e40809b6979bce41cf682469ab4109cc3ea852"
  },
  "program_regression": {
   "status": "PASS",
-  "summary": "6/6 passed at 842e468a928c",
+  "summary": "6/6 passed at 8d80e34ce2c5",
   "artifact_id": "regression",
-  "artifact_sha256": "017cbe954e78dbe9cee2e0ea45e0e9b0b5e7f4f1aeef50d1e76ce4c0894bee0c"
+  "artifact_sha256": "b2156b12427a6d21b172e3c2b55bc7b03bd4a4e133b740881ebfc6a6538977c5"
  },
  "program_observations": [
   {
    "artifact_id": "obs-partial",
-   "sha256": "a019cdbeb8f359a064f901f0f932b08e7754e4d2a0bdb932e0e5825ae5a452a3",
+   "sha256": "7cc19ad7ba6e5c1846870b2b7f1155859b017361e5e943ffd5692c83627e3b72",
    "summary": "authenticate_only/partial: 1 attempt(s)"
   }
  ],
@@ -60,17 +60,17 @@
    "action": "write alpha->globex:write(rejected)",
    "element": "accessed[alpha][globex]",
    "predicted": false,
-   "observed": true,
-   "status": "DIFFERENT",
-   "evidence": "operation APPLIED, owner-read revision 2"
+   "observed": null,
+   "status": "UNKNOWN",
+   "evidence": "authorization allowed the request through but business status=REJECTED; no state change observed → not classifiable"
   }
  ],
  "counterexample": null,
- "correspondence": "DEVIATES",
- "correspondence_note": "1 field(s) differ between the model's prediction and the program",
+ "correspondence": "UNKNOWN",
+ "correspondence_note": "1 field(s) could not be compared (not observed fresh)",
  "scope": "the 1 recorded access attempt(s) of the authenticate_only variant, over subjects × tenants in the grant table; agreement on these attempts is not a semantic-equivalence proof",
  "counts": {
-  "DIFFERENT": 1
+  "UNKNOWN": 1
  },
  "tools": [
   {

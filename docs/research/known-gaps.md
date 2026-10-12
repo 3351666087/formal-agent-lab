@@ -3,14 +3,15 @@
 Carried forward and extended by each phase. An unverified capability is marked *planned* or *not run*, never implied to
 work.
 
-## Carried from phase 4 (recorded, not reopened in 5A)
+## Carried from phase 4 (recorded)
 
-| id | gap | where it bites | status in 5A |
+| id | gap | where it bites | status after 5B |
 |---|---|---|---|
-| **K01** | 目标性质与凭据错配 — a target property and the issued credential can disagree | phase-4B MAL issuer / target reachability | recorded; **5B** judges whether K01 affects its real path |
-| **K02** | `LabPolicy.max_attack_steps` 未执行 — the policy field is declared but not enforced in the loop | phase-4B lab-controlled operating conditions | recorded; **5B** judges whether K02 affects its real path |
-| **K03** | 门控详情未显示 `detail` — a gate decision's `detail` is not surfaced in the UI | phase-4B gate display | recorded; UI-only, no effect on 5A correspondence |
+| **K01** | 目标性质与凭据错配 — a target property and the issued credential can disagree | phase-4B MAL issuer / target reachability | **OPEN** — 5B's implementation case is tenant/object access isolation on the order service and does **not** reuse the MAL issuer / target-reachability path, so K01 was not exercised and is unchanged; phase 7 closes it in `packages/domain-mal` |
+| **K02** | `LabPolicy.max_attack_steps` 未执行 — the policy field is declared but not enforced in the loop | phase-4B lab-controlled operating conditions | **OPEN** — 5B does not run the MAL attack loop or a step budget, so K02 was not exercised; it is unchanged. The budget invariant (consumed quota is not regained across pause/resume) remains a phase-4A runtime property; 5B adds no new budget path. Phase 7 closes it |
+| **K03** | 门控详情未显示 `detail` — a gate decision's `detail` is not surfaced in the UI | phase-4B gate display | **OPEN** — UI-only; no effect on 5A/5B correspondence; general closure |
 
+5B reuses neither K01 nor K02's path, so both stay OPEN with their phase-4 impact unchanged (not fixed, not worsened).
 Phase 7 confirms closure of K01–K03 across the track.
 
 ## Opened in 5A
@@ -19,6 +20,22 @@ Phase 7 confirms closure of K01–K03 across the track.
 |---|---|---|---|
 | **K04** | the bounded model conclusion for the ordinary case is `UNKNOWN` (Z3 times out at the case bound) while the recorded run does complete | the model-internal layer is inconclusive at that bound; the correspondence layer carries the decisive comparison | *expected and instructive* — it is exactly why independent program observation is kept as its own layer; a decisive verdict needs a smaller bound or a stronger checker, recorded as-is, not forced |
 | **K05** | the platform validates an imported case **offline** (digests, identities, separation) but does not recompute software **tree digests** (it has no checkout) | a case imported to the platform is trusted for its tree digests; those are verified by `fal research validate --repo` and the research check on a checkout | acceptable for 5A; 5B/7 may add a server-side revision check if a checkout is provisioned |
+
+## Opened in 5B
+
+| id | gap | effect | plan |
+|---|---|---|---|
+| **K06** | the base order service has no per-tenant authentication; tenant isolation is only enforced by the phase-5B research fixture, not by the default service | the default service is not a secure multi-tenant product; isolation is a *research fixture* property, clearly separated from the default startup path | by design — 5B studies the authorization component, not a claim that the shipped service isolates tenants; a production isolation layer is out of scope |
+| **K07** | the isolation abstraction covers read/write as one `access(subject, tenant)` action over a fixed 2×2 grant; concurrency, token strength/transport, and partial-read leakage not visible in stored state are not modelled | the correspondence covers the recorded attempts only; a cross-tenant request whose effect is not observable in the tenant's state stays UNKNOWN (demonstrated) | the uncovered semantics are declared in the case (`uncovered_semantics`); phase 7 may widen the model if a case needs it |
+
+## Original research-goal coverage (5A + 5B)
+
+| goal | coverage |
+|---|---|
+| an implementation-level software **safety** property observable on the real local service, with clear subject capabilities and action semantics | **done (5B)** — `orders-tenant-isolation`: subject/resource/capability/trust-boundary/action/property/oracle in `MECHANISM.md`; observed on the running fixture over real SQLite |
+| defect/fix independent regression + model↔program correspondence, three result classes | **done (5B)** — defect **DEVIATES**, fix **CORRESPONDS**, rejected-write **UNKNOWN**; model conclusion, program regression and correspondence kept apart |
+| oracle reads real state, never a self-reported success | **done (5B)** — each outcome read back through the tenant's own authorized principal; unobservable → UNKNOWN |
+| phase-6 task material vs reference-answer boundary | **done (5A+5B)** — `task_input` (model + property + fixture/mechanism) vs `reference` (expected verdicts), separation enforced on import |
 
 ## Original research-goal coverage (5A)
 
