@@ -1,0 +1,687 @@
+{
+ "graph": {
+  "nodes": [
+   {
+    "full_name": "internet:initialAccess",
+    "asset": "internet",
+    "step": "initialAccess",
+    "type": "or",
+    "existence_status": false,
+    "parents": [],
+    "children": [
+     "containerHost:execution",
+     "browserStore:credentialAccess"
+    ],
+    "ttc": null,
+    "auto": false,
+    "blocked": false
+   },
+   {
+    "full_name": "phishing:initialAccess",
+    "asset": "phishing",
+    "step": "initialAccess",
+    "type": "or",
+    "existence_status": false,
+    "parents": [],
+    "children": [
+     "dmzWeb:execution",
+     "iotDevice:execution"
+    ],
+    "ttc": null,
+    "auto": false,
+    "blocked": false
+   },
+   {
+    "full_name": "supplychain:initialAccess",
+    "asset": "supplychain",
+    "step": "initialAccess",
+    "type": "or",
+    "existence_status": false,
+    "parents": [],
+    "children": [
+     "containerHost:execution",
+     "workstation:exploitPublicApp",
+     "memoryDump:credentialAccess"
+    ],
+    "ttc": null,
+    "auto": false,
+    "blocked": false
+   },
+   {
+    "full_name": "vpnGateway:initialAccess",
+    "asset": "vpnGateway",
+    "step": "initialAccess",
+    "type": "or",
+    "existence_status": false,
+    "parents": [],
+    "children": [
+     "workstation:exploitPublicApp",
+     "iotDevice:execution",
+     "memoryDump:credentialAccess",
+     "tokenCache:credentialAccess"
+    ],
+    "ttc": null,
+    "auto": false,
+    "blocked": false
+   },
+   {
+    "full_name": "wifiGuest:initialAccess",
+    "asset": "wifiGuest",
+    "step": "initialAccess",
+    "type": "or",
+    "existence_status": false,
+    "parents": [],
+    "children": [
+     "workstation:exploitPublicApp",
+     "dmzWeb:execution",
+     "kerberoast:credentialAccess"
+    ],
+    "ttc": null,
+    "auto": false,
+    "blocked": false
+   },
+   {
+    "full_name": "exposedApi:initialAccess",
+    "asset": "exposedApi",
+    "step": "initialAccess",
+    "type": "or",
+    "existence_status": false,
+    "parents": [],
+    "children": [
+     "dmzWeb:execution",
+     "iotDevice:execution",
+     "ciRunner:exploitPublicApp"
+    ],
+    "ttc": null,
+    "auto": false,
+    "blocked": false
+   },
+   {
+    "full_name": "containerHost:execution",
+    "asset": "containerHost",
+    "step": "execution",
+    "type": "or",
+    "existence_status": false,
+    "parents": [
+     "supplychain:initialAccess",
+     "internet:initialAccess"
+    ],
+    "children": [
+     "sshKey:credentialAccess",
+     "vpnSession:authenticate",
+     "rdpLogin:authenticate"
+    ],
+    "ttc": null,
+    "auto": false,
+    "blocked": false
+   },
+   {
+    "full_name": "workstation:exploitPublicApp",
+    "asset": "workstation",
+    "step": "exploitPublicApp",
+    "type": "or",
+    "existence_status": false,
+    "parents": [
+     "wifiGuest:initialAccess",
+     "vpnGateway:initialAccess",
+     "supplychain:initialAccess"
+    ],
+    "children": [],
+    "ttc": null,
+    "auto": false,
+    "blocked": false
+   },
+   {
+    "full_name": "dmzWeb:execution",
+    "asset": "dmzWeb",
+    "step": "execution",
+    "type": "or",
+    "existence_status": false,
+    "parents": [
+     "wifiGuest:initialAccess",
+     "exposedApi:initialAccess",
+     "phishing:initialAccess"
+    ],
+    "children": [
+     "sshKey:credentialAccess",
+     "dbLogin:authenticate",
+     "apiToken:authenticate",
+     "ssoLogin:authenticate"
+    ],
+    "ttc": null,
+    "auto": false,
+    "blocked": false
+   },
+   {
+    "full_name": "iotDevice:execution",
+    "asset": "iotDevice",
+    "step": "execution",
+    "type": "or",
+    "existence_status": false,
+    "parents": [
+     "phishing:initialAccess",
+     "exposedApi:initialAccess",
+     "vpnGateway:initialAccess"
+    ],
+    "children": [
+     "sshKey:credentialAccess",
+     "vpnSession:authenticate"
+    ],
+    "ttc": null,
+    "auto": false,
+    "blocked": false
+   },
+   {
+    "full_name": "ciRunner:exploitPublicApp",
+    "asset": "ciRunner",
+    "step": "exploitPublicApp",
+    "type": "or",
+    "existence_status": false,
+    "parents": [
+     "exposedApi:initialAccess"
+    ],
+    "children": [],
+    "ttc": null,
+    "auto": false,
+    "blocked": false
+   },
+   {
+    "full_name": "sshKey:credentialAccess",
+    "asset": "sshKey",
+    "step": "credentialAccess",
+    "type": "or",
+    "existence_status": false,
+    "parents": [
+     "iotDevice:execution",
+     "containerHost:execution",
+     "dmzWeb:execution"
+    ],
+    "children": [
+     "backupHost:lateralMovement",
+     "fileServer:lateralMovement"
+    ],
+    "ttc": null,
+    "auto": false,
+    "blocked": false
+   },
+   {
+    "full_name": "browserStore:credentialAccess",
+    "asset": "browserStore",
+    "step": "credentialAccess",
+    "type": "or",
+    "existence_status": false,
+    "parents": [
+     "internet:initialAccess"
+    ],
+    "children": [
+     "apiToken:authenticate"
+    ],
+    "ttc": null,
+    "auto": false,
+    "blocked": false
+   },
+   {
+    "full_name": "memoryDump:credentialAccess",
+    "asset": "memoryDump",
+    "step": "credentialAccess",
+    "type": "or",
+    "existence_status": false,
+    "parents": [
+     "supplychain:initialAccess",
+     "vpnGateway:initialAccess"
+    ],
+    "children": [
+     "ssoLogin:authenticate",
+     "printServer:lateralMovement",
+     "monitoringHost:lateralMovement"
+    ],
+    "ttc": null,
+    "auto": false,
+    "blocked": false
+   },
+   {
+    "full_name": "kerberoast:credentialAccess",
+    "asset": "kerberoast",
+    "step": "credentialAccess",
+    "type": "or",
+    "existence_status": false,
+    "parents": [
+     "wifiGuest:initialAccess"
+    ],
+    "children": [],
+    "ttc": null,
+    "auto": false,
+    "blocked": false
+   },
+   {
+    "full_name": "tokenCache:credentialAccess",
+    "asset": "tokenCache",
+    "step": "credentialAccess",
+    "type": "or",
+    "existence_status": false,
+    "parents": [
+     "vpnGateway:initialAccess"
+    ],
+    "children": [
+     "dbLogin:authenticate",
+     "rdpLogin:authenticate"
+    ],
+    "ttc": null,
+    "auto": false,
+    "blocked": false
+   },
+   {
+    "full_name": "dbLogin:authenticate",
+    "asset": "dbLogin",
+    "step": "authenticate",
+    "type": "and",
+    "existence_status": false,
+    "parents": [
+     "dmzWeb:execution",
+     "tokenCache:credentialAccess"
+    ],
+    "children": [
+     "jumpHost:lateralMovement",
+     "backupHost:lateralMovement",
+     "monitoringHost:lateralMovement",
+     "localAdmin:privilegeEscalation",
+     "hypervisor:privilegeEscalation",
+     "secretsManager:privilegeEscalation"
+    ],
+    "ttc": null,
+    "auto": false,
+    "blocked": false
+   },
+   {
+    "full_name": "vpnSession:authenticate",
+    "asset": "vpnSession",
+    "step": "authenticate",
+    "type": "and",
+    "existence_status": false,
+    "parents": [
+     "containerHost:execution",
+     "iotDevice:execution"
+    ],
+    "children": [
+     "localAdmin:privilegeEscalation"
+    ],
+    "ttc": null,
+    "auto": false,
+    "blocked": false
+   },
+   {
+    "full_name": "rdpLogin:authenticate",
+    "asset": "rdpLogin",
+    "step": "authenticate",
+    "type": "and",
+    "existence_status": false,
+    "parents": [
+     "containerHost:execution",
+     "tokenCache:credentialAccess"
+    ],
+    "children": [
+     "printServer:lateralMovement",
+     "fileServer:lateralMovement",
+     "domainAdmin:privilegeEscalation"
+    ],
+    "ttc": null,
+    "auto": false,
+    "blocked": false
+   },
+   {
+    "full_name": "apiToken:authenticate",
+    "asset": "apiToken",
+    "step": "authenticate",
+    "type": "and",
+    "existence_status": false,
+    "parents": [
+     "browserStore:credentialAccess",
+     "dmzWeb:execution"
+    ],
+    "children": [],
+    "ttc": null,
+    "auto": false,
+    "blocked": false
+   },
+   {
+    "full_name": "ssoLogin:authenticate",
+    "asset": "ssoLogin",
+    "step": "authenticate",
+    "type": "and",
+    "existence_status": false,
+    "parents": [
+     "memoryDump:credentialAccess",
+     "dmzWeb:execution"
+    ],
+    "children": [
+     "fileServer:lateralMovement",
+     "hypervisor:privilegeEscalation",
+     "secretsManager:privilegeEscalation"
+    ],
+    "ttc": null,
+    "auto": false,
+    "blocked": false
+   },
+   {
+    "full_name": "jumpHost:lateralMovement",
+    "asset": "jumpHost",
+    "step": "lateralMovement",
+    "type": "or",
+    "existence_status": false,
+    "parents": [
+     "dbLogin:authenticate"
+    ],
+    "children": [
+     "domainAdmin:privilegeEscalation",
+     "serviceAccount:privilegeEscalation",
+     "shareMount:collection",
+     "mailArchive:collection"
+    ],
+    "ttc": null,
+    "auto": false,
+    "blocked": false
+   },
+   {
+    "full_name": "printServer:lateralMovement",
+    "asset": "printServer",
+    "step": "lateralMovement",
+    "type": "or",
+    "existence_status": false,
+    "parents": [
+     "rdpLogin:authenticate",
+     "memoryDump:credentialAccess"
+    ],
+    "children": [
+     "vaultRead:collection"
+    ],
+    "ttc": null,
+    "auto": false,
+    "blocked": false
+   },
+   {
+    "full_name": "backupHost:lateralMovement",
+    "asset": "backupHost",
+    "step": "lateralMovement",
+    "type": "or",
+    "existence_status": false,
+    "parents": [
+     "sshKey:credentialAccess",
+     "dbLogin:authenticate"
+    ],
+    "children": [],
+    "ttc": null,
+    "auto": false,
+    "blocked": false
+   },
+   {
+    "full_name": "monitoringHost:lateralMovement",
+    "asset": "monitoringHost",
+    "step": "lateralMovement",
+    "type": "or",
+    "existence_status": false,
+    "parents": [
+     "memoryDump:credentialAccess",
+     "dbLogin:authenticate"
+    ],
+    "children": [],
+    "ttc": null,
+    "auto": false,
+    "blocked": false
+   },
+   {
+    "full_name": "fileServer:lateralMovement",
+    "asset": "fileServer",
+    "step": "lateralMovement",
+    "type": "or",
+    "existence_status": false,
+    "parents": [
+     "sshKey:credentialAccess",
+     "rdpLogin:authenticate",
+     "ssoLogin:authenticate"
+    ],
+    "children": [
+     "serviceAccount:privilegeEscalation",
+     "dbReplica:collection",
+     "codeRepo:collection",
+     "mailArchive:collection"
+    ],
+    "ttc": null,
+    "auto": false,
+    "blocked": false
+   },
+   {
+    "full_name": "localAdmin:privilegeEscalation",
+    "asset": "localAdmin",
+    "step": "privilegeEscalation",
+    "type": "and",
+    "existence_status": false,
+    "parents": [
+     "dbLogin:authenticate",
+     "vpnSession:authenticate"
+    ],
+    "children": [],
+    "ttc": null,
+    "auto": false,
+    "blocked": false
+   },
+   {
+    "full_name": "hypervisor:privilegeEscalation",
+    "asset": "hypervisor",
+    "step": "privilegeEscalation",
+    "type": "and",
+    "existence_status": false,
+    "parents": [
+     "dbLogin:authenticate",
+     "ssoLogin:authenticate"
+    ],
+    "children": [
+     "dbReplica:collection"
+    ],
+    "ttc": null,
+    "auto": false,
+    "blocked": false
+   },
+   {
+    "full_name": "domainAdmin:privilegeEscalation",
+    "asset": "domainAdmin",
+    "step": "privilegeEscalation",
+    "type": "and",
+    "existence_status": false,
+    "parents": [
+     "rdpLogin:authenticate",
+     "jumpHost:lateralMovement"
+    ],
+    "children": [],
+    "ttc": null,
+    "auto": false,
+    "blocked": false
+   },
+   {
+    "full_name": "serviceAccount:privilegeEscalation",
+    "asset": "serviceAccount",
+    "step": "privilegeEscalation",
+    "type": "and",
+    "existence_status": false,
+    "parents": [
+     "jumpHost:lateralMovement",
+     "fileServer:lateralMovement"
+    ],
+    "children": [
+     "vaultRead:collection"
+    ],
+    "ttc": null,
+    "auto": false,
+    "blocked": false
+   },
+   {
+    "full_name": "secretsManager:privilegeEscalation",
+    "asset": "secretsManager",
+    "step": "privilegeEscalation",
+    "type": "and",
+    "existence_status": false,
+    "parents": [
+     "dbLogin:authenticate",
+     "ssoLogin:authenticate"
+    ],
+    "children": [
+     "vaultRead:collection"
+    ],
+    "ttc": null,
+    "auto": false,
+    "blocked": false
+   },
+   {
+    "full_name": "dbReplica:collection",
+    "asset": "dbReplica",
+    "step": "collection",
+    "type": "or",
+    "existence_status": false,
+    "parents": [
+     "fileServer:lateralMovement",
+     "hypervisor:privilegeEscalation"
+    ],
+    "children": [],
+    "ttc": null,
+    "auto": false,
+    "blocked": false
+   },
+   {
+    "full_name": "shareMount:collection",
+    "asset": "shareMount",
+    "step": "collection",
+    "type": "or",
+    "existence_status": false,
+    "parents": [
+     "jumpHost:lateralMovement"
+    ],
+    "children": [
+     "crownData:exfiltrate"
+    ],
+    "ttc": null,
+    "auto": false,
+    "blocked": false
+   },
+   {
+    "full_name": "vaultRead:collection",
+    "asset": "vaultRead",
+    "step": "collection",
+    "type": "or",
+    "existence_status": false,
+    "parents": [
+     "serviceAccount:privilegeEscalation",
+     "secretsManager:privilegeEscalation",
+     "printServer:lateralMovement"
+    ],
+    "children": [
+     "crownData:exfiltrate"
+    ],
+    "ttc": null,
+    "auto": false,
+    "blocked": false
+   },
+   {
+    "full_name": "codeRepo:collection",
+    "asset": "codeRepo",
+    "step": "collection",
+    "type": "or",
+    "existence_status": false,
+    "parents": [
+     "fileServer:lateralMovement"
+    ],
+    "children": [
+     "crownData:exfiltrate"
+    ],
+    "ttc": null,
+    "auto": false,
+    "blocked": false
+   },
+   {
+    "full_name": "mailArchive:collection",
+    "asset": "mailArchive",
+    "step": "collection",
+    "type": "or",
+    "existence_status": false,
+    "parents": [
+     "fileServer:lateralMovement",
+     "jumpHost:lateralMovement"
+    ],
+    "children": [
+     "crownData:exfiltrate"
+    ],
+    "ttc": null,
+    "auto": false,
+    "blocked": false
+   },
+   {
+    "full_name": "crownData:exfiltrate",
+    "asset": "crownData",
+    "step": "exfiltrate",
+    "type": "or",
+    "existence_status": false,
+    "parents": [
+     "vaultRead:collection",
+     "mailArchive:collection",
+     "codeRepo:collection",
+     "shareMount:collection"
+    ],
+    "children": [],
+    "ttc": null,
+    "auto": false,
+    "blocked": false
+   }
+  ],
+  "assets": [],
+  "associations": [],
+  "counts": {
+   "scale": 3,
+   "tiers": 7,
+   "nodes": 37,
+   "reachable": 37,
+   "and_steps": 10,
+   "realistic": true
+  },
+  "defenses_enabled": true,
+  "model_name": "ent-1013"
+ },
+ "entry": [
+  "internet:initialAccess",
+  "phishing:initialAccess",
+  "supplychain:initialAccess",
+  "vpnGateway:initialAccess",
+  "wifiGuest:initialAccess",
+  "exposedApi:initialAccess"
+ ],
+ "goal": "crownData:exfiltrate",
+ "hardenable": [
+  "apiToken:authenticate",
+  "backupHost:lateralMovement",
+  "browserStore:credentialAccess",
+  "ciRunner:exploitPublicApp",
+  "codeRepo:collection",
+  "containerHost:execution",
+  "dbLogin:authenticate",
+  "dbReplica:collection",
+  "dmzWeb:execution",
+  "domainAdmin:privilegeEscalation",
+  "fileServer:lateralMovement",
+  "hypervisor:privilegeEscalation",
+  "iotDevice:execution",
+  "jumpHost:lateralMovement",
+  "kerberoast:credentialAccess",
+  "localAdmin:privilegeEscalation",
+  "mailArchive:collection",
+  "memoryDump:credentialAccess",
+  "monitoringHost:lateralMovement",
+  "printServer:lateralMovement",
+  "rdpLogin:authenticate",
+  "secretsManager:privilegeEscalation",
+  "serviceAccount:privilegeEscalation",
+  "shareMount:collection",
+  "sshKey:credentialAccess",
+  "ssoLogin:authenticate",
+  "tokenCache:credentialAccess",
+  "vaultRead:collection",
+  "vpnSession:authenticate",
+  "workstation:exploitPublicApp"
+ ]
+}

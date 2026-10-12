@@ -46,14 +46,18 @@ ALLOWED: dict[str, set[str]] = {
     "formal_lab_env": {"formal_lab_contracts", "formal_lab_model"},
     "formal_lab_strategies": {"formal_lab_contracts", "formal_lab_model"},
     "formal_lab_runtime": {"formal_lab_contracts", "formal_lab_model"},
-    "formal_lab_eval": {"formal_lab_contracts", "formal_lab_runtime", "formal_lab_strategies", "formal_lab_sdk"},
+    # research scorers build a model package (formal_lab_model, a lower layer) to verify a plan / answer against the
+    # Z3 engine — a downward dependency, not an inversion
+    "formal_lab_eval": {"formal_lab_contracts", "formal_lab_model", "formal_lab_runtime", "formal_lab_strategies",
+                        "formal_lab_sdk"},
     # the probabilistic-check endpoint is the one place that calls the PRISM-games extension (lazily)
     "formal_lab_api": {"formal_lab_contracts", "formal_lab_model", "formal_lab_runtime", "formal_lab_eval",
                        "formal_lab_solver_prism"},
     "formal_lab_orchestrator": {"formal_lab_contracts", "formal_lab_api"},
     # model-core via the optional [offline] extra; runtime only lazily, for `fal query replay --offline` (needs the
     # engine and a verifier plugin installed)
-    "formal_lab_sdk": {"formal_lab_contracts", "formal_lab_model", "formal_lab_runtime"},
+    # the `fal research study` CLI command delegates to the eval research runner (CLI is the top orchestration layer)
+    "formal_lab_sdk": {"formal_lab_contracts", "formal_lab_model", "formal_lab_runtime", "formal_lab_eval"},
     # the example is a plugin package: it may use the engines it declares in its pyproject
     "formal_lab_example_scheduling": {"formal_lab_contracts", "formal_lab_model", "formal_lab_eval",
                                       "formal_lab_runtime", "formal_lab_solver_z3", "formal_lab_env",
@@ -145,7 +149,9 @@ def test_main_path_has_no_external_executors(pkg):
                 offenders.append(f"{rel}: {bad}")
         if "httpx" in imports and not rel.endswith("formal_lab_strategies/model_clients.py"):
             offenders.append(f"{rel}: network client outside the model client")
-    allowed_git = "packages/runtime/src/formal_lab_runtime/manifest.py"  # reads `git rev-parse` for provenance only
+    # these read `git rev-parse` for provenance only (manifest hash; research case tree digests) — not the step engine
+    allowed_git = ("packages/runtime/src/formal_lab_runtime/manifest.py",
+                   "packages/runtime/src/formal_lab_runtime/research.py")
     offenders = [o for o in offenders if not o.startswith(allowed_git)]
     assert not offenders, "\n".join(offenders)
 

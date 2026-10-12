@@ -379,10 +379,11 @@ class AttackGraphAnalysisScorer:
         answer = reference["answer"]["value"]  # wrapped {"value": …} so it cannot leak into the task input
         deps = {"ground_truth": sha256_bytes(json.dumps({"k": kind, "a": answer, "g": reference.get("graph_digest")},
                                                         sort_keys=True).encode())}
-        fields = {"shortest_cost": "cost", "reachability": "reachable", "min_defense": "count", "step_enabled": "enabled"}
+        fields = {"shortest_cost": "cost", "reachability": "reachable", "min_defense": "count",
+                  "step_enabled": "enabled", "reach_from_entry": "reachable", "chokepoints": "count"}
         key = fields[kind]
         got = parsed.get(key) if isinstance(parsed, dict) else None
-        if kind in ("shortest_cost", "min_defense"):
+        if kind in ("shortest_cost", "min_defense", "chokepoints"):
             got = None if got is None else (int(got) if str(got).lstrip("-").isdigit() else got)
         correct = got == answer
         rationale = str(parsed.get("rationale", "")).lower() if isinstance(parsed, dict) else ""

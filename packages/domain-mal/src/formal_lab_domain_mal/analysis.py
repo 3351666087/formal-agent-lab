@@ -126,6 +126,76 @@ def generate(seed: int, *, layers: int = 4, width: int = 3, p_and: float = 0.35)
                        hardenable=hardenable, seed=seed, meta=meta)
 
 
+# a realistic enterprise attack surface: named tiers with MITRE-ATT&CK-style tactic labels, used purely as abstract
+# graph nodes for defensive analysis (no operational detail). AND-joins model real conjunctive controls (MFA needs a
+# password AND a token; privileged access needs credentials AND a network path).
+_TIERS = [
+    ("perimeter", ["internet", "phishing", "supplychain", "vpnGateway", "wifiGuest", "exposedApi"],
+     ("initialAccess",), "or"),
+    ("foothold", ["dmzWeb", "mailClient", "workstation", "ciRunner", "containerHost", "iotDevice"],
+     ("execution", "exploitPublicApp"), "or"),
+    ("credential", ["browserStore", "memoryDump", "kerberoast", "configSecret", "sshKey", "tokenCache"],
+     ("credentialAccess",), "or"),
+    ("auth", ["ssoLogin", "rdpLogin", "apiToken", "vpnSession", "dbLogin"], ("authenticate",), "and"),
+    ("lateral", ["appServer", "fileServer", "jumpHost", "backupHost", "monitoringHost", "printServer"],
+     ("lateralMovement",), "or"),
+    ("escalation", ["localAdmin", "domainAdmin", "serviceAccount", "hypervisor", "secretsManager"],
+     ("privilegeEscalation",), "and"),
+    ("collection", ["dbReplica", "shareMount", "vaultRead", "mailArchive", "codeRepo"], ("collection",), "or"),
+]
+
+
+def generate_enterprise(seed: int, *, scale: int = 2) -> AttackGraph:
+    """A larger, realistic multi-tier enterprise attack graph (perimeter → foothold → credential → auth → lateral →
+    privilege escalation → collection → the crown-jewel data store), with conjunctive controls as AND-joins and a
+    broad attack surface (several hosts per tier, multiple paths). `scale` multiplies the hosts per tier. The step
+    labels are ATT&CK-style tactic names used only as abstract graph nodes for defensive analysis."""
+    rng = random.Random(seed * 131 + 7)
+    nodes: dict[str, dict[str, Any]] = {}
+
+    def add(fn: str, typ: str, parents: list[str]) -> None:
+        nodes[fn] = {"full_name": fn, "asset": fn.split(":")[0], "step": fn.split(":")[1], "type": typ,
+                     "existence_status": False, "parents": parents, "children": [], "ttc": None, "auto": False,
+                     "blocked": False}
+
+    tier_steps: list[list[str]] = []
+    for ti, (_tier, hosts, verbs, join) in enumerate(_TIERS):
+        picks = hosts if ti == 0 else rng.sample(hosts, min(len(hosts), 2 + scale))
+        this: list[str] = []
+        pool = [s for prev in tier_steps[max(0, ti - 2):] for s in prev]
+        for h in picks:
+            fn = f"{h}:{rng.choice(verbs)}"
+            if ti == 0:
+                add(fn, "or", [])
+            else:
+                k = min(len(pool), (2 if join == "and" else rng.randint(1, 3)))
+                parents = rng.sample(pool, max(1, k))
+                typ = "and" if (join == "and" and len(parents) >= 2) else "or"
+                add(fn, typ, parents)
+            this.append(fn)
+        tier_steps.append(this)
+
+    goal = "crownData:exfiltrate"
+    gk = min(len(tier_steps[-1]), 1 + scale)
+    add(goal, "or", rng.sample(tier_steps[-1], max(1, gk)))
+    for fn, n in nodes.items():
+        for p in n["parents"]:
+            nodes[p]["children"].append(fn)
+
+    entry = tier_steps[0]
+    R = reachable(nodes, entry)
+    if goal not in R:
+        frontier = sorted(R - set(entry)) or entry
+        nodes[goal]["parents"] = [frontier[-1]]
+        nodes[frontier[-1]]["children"].append(goal)
+        R = reachable(nodes, entry)
+    hardenable = sorted((R - set(entry)) - {goal})
+    meta = {"scale": scale, "tiers": len(_TIERS), "nodes": len(nodes), "reachable": len(R),
+            "and_steps": sum(1 for n in nodes.values() if n["type"] == "and"), "realistic": True}
+    return AttackGraph(graph_id=f"ent-{seed:04d}", nodes=list(nodes.values()), entry=entry, goal=goal,
+                       hardenable=hardenable, seed=seed, meta=meta)
+
+
 def package(ag: AttackGraph, *, initial_hardened: list[str] | None = None) -> Any:
     from .frontend import package_from_graph
 

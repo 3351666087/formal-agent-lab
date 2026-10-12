@@ -31,6 +31,8 @@ SCHEMAS = {
     "reachability": _schema({"reachable": {"type": "boolean"}, "rationale": {"type": "string"}}, ["reachable"]),
     "min_defense": _schema({"count": {"type": "integer"}, "rationale": {"type": "string"}}, ["count"]),
     "step_enabled": _schema({"enabled": {"type": "boolean"}, "rationale": {"type": "string"}}, ["enabled"]),
+    "reach_from_entry": _schema({"reachable": {"type": "boolean"}, "rationale": {"type": "string"}}, ["reachable"]),
+    "chokepoints": _schema({"count": {"type": "integer"}, "rationale": {"type": "string"}}, ["count"]),
 }
 
 
@@ -49,9 +51,17 @@ def _graph_md(ag) -> str:  # a structured, readable rendering of the formal mode
     return "\n".join(lines) + "\n"
 
 
-def build(n_graphs: int, reps: int) -> None:
-    from formal_lab_domain_mal.analysis import generate, ground_truth, reachable, step_enabled
+def build(n_graphs: int, reps: int, *, enterprise: bool = False, scale: int = 3) -> None:
+    global STUDY
+    from formal_lab_domain_mal.analysis import (
+        generate,
+        generate_enterprise,
+        ground_truth,
+        reachable,
+        step_enabled,
+    )
 
+    STUDY = ROOT / "research" / "studies" / ("cyber-enterprise" if enterprise else "cyber-attackgraph")
     for sub in ("graphs", "inputs", "reference"):
         (STUDY / sub).mkdir(parents=True, exist_ok=True)
     tasks, gts = [], {}
@@ -60,7 +70,7 @@ def build(n_graphs: int, reps: int) -> None:
     for i in range(n_graphs):
         seed = 1000 + i
         layers, width = SIZES[i % len(SIZES)]
-        ag = generate(seed, layers=layers, width=width)
+        ag = generate_enterprise(seed, scale=scale) if enterprise else generate(seed, layers=layers, width=width)
         gt = ground_truth(ag, verify_z3=True)
         gts[ag.graph_id] = gt
         (STUDY / "graphs" / f"{ag.graph_id}.json").write_text(
@@ -110,6 +120,23 @@ def build(n_graphs: int, reps: int) -> None:
                 "Give the smallest number of steps to block so the target is unreachable.",
                 "AND/OR min-cut search, Z3-confirmed")
 
+        # OFFENSE — the attacker is limited to a single foothold; can they still reach the target from it alone?
+        if len(ag.entry) > 1:
+            ex = rng.choice(ag.entry)
+            reach_ex = ag.goal in reachable(nodes, [ex])
+            add("reach_from_entry", f"\n## Attacker constraint\nThe attacker has only ONE foothold available: `{ex}`. "
+                "The other footholds cannot be used.\n\n## Question\nFrom that single foothold alone, can the attacker "
+                "reach the target?\n", reach_ex, f"Answer whether the attacker can reach the target using only `{ex}`.",
+                "single-entry reachability oracle")
+
+        # DEFENSE — single points of failure: how many individual steps, if blocked alone, make the target unreachable?
+        chokepoints = sum(1 for h in ag.hardenable if ag.goal not in reachable(nodes, ag.entry, frozenset([h])))
+        add("chokepoints", "\n## Question\nA single point of failure is one step that, if the defender blocks it on its "
+            "own, makes the target unreachable. How many of the steps (excluding footholds and the target) are single "
+            "points of failure?\n", chokepoints,
+            "Give the number of steps that each, blocked alone, make the target unreachable.",
+            "per-step reachability oracle")
+
         # step-enabled: pick an AND step if any (harder), build a partial compromised set missing 0 or 1 parent
         cands = [fn for fn, n in nodes.items() if n["parents"] and n["type"] == "and"] or \
                 [fn for fn, n in nodes.items() if n["parents"]]
@@ -133,12 +160,17 @@ def build(n_graphs: int, reps: int) -> None:
          "params": {"max_tokens": 3000}, "comparability_note": "relay route; identity is relay-reported"}]
     planned = len(tasks) * len(providers) * reps
     study = {
-        "study_id": "cyber-attackgraph",
-        "title": "Defensive attack-graph analysis (verifier-grounded)",
-        "purpose": "hard, machine-checked security-analyst questions over formal AND/OR attack-graph models — shortest "
-                   "attack path, reachability under deployed defences, minimum defence cut, step enablement. Ground "
-                   "truth is the Z3 verifier / model semantics, so answers are objectively right or wrong and the "
-                   "tasks discriminate rather than everyone scoring 100%.",
+        "study_id": "cyber-enterprise" if enterprise else "cyber-attackgraph",
+        "title": ("Enterprise attack-surface analysis (verifier-grounded)" if enterprise
+                  else "Defensive attack-graph analysis (verifier-grounded)"),
+        "purpose": ("hard, machine-checked security-analyst questions over large, realistic multi-tier enterprise "
+                    "attack graphs (perimeter → foothold → credential → auth → lateral → privilege escalation → "
+                    "collection → crown-jewel data; ~30-40 nodes, conjunctive controls as AND-joins, broad attack "
+                    "surface). Ground truth is the Z3 verifier / model semantics." if enterprise else
+                    "hard, machine-checked security-analyst questions over formal AND/OR attack-graph models — shortest "
+                    "attack path, reachability under deployed defences, minimum defence cut, step enablement. Ground "
+                    "truth is the Z3 verifier / model semantics, so answers are objectively right or wrong and the "
+                    "tasks discriminate rather than everyone scoring 100%."),
         "tasks": tasks, "providers": providers, "assistance_modes": ["STATIC_UNASSISTED"], "replicates": reps,
         "rubric_id": "fal-research-rubric", "rubric_version": "1", "primary_metric": "correct",
         "secondary_metrics": ["format_valid", "refused", "responded", "program_corresponds", "output_tokens"],
@@ -155,7 +187,7 @@ def build(n_graphs: int, reps: int) -> None:
     kinds: dict[str, int] = {}
     for t in tasks:
         kinds[t["task_id"].rsplit("-", 1)[1]] = kinds.get(t["task_id"].rsplit("-", 1)[1], 0) + 1
-    print(f"cyber-attackgraph: {n_graphs} graphs, {len(tasks)} tasks {kinds}, {len(providers)} models × {reps} reps "
+    print(f"{study["study_id"]}: {n_graphs} graphs, {len(tasks)} tasks {kinds}, {len(providers)} models × {reps} reps "
           f"= {planned} planned units")
 
 
@@ -163,5 +195,7 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--graphs", type=int, default=42)
     ap.add_argument("--reps", type=int, default=3)
+    ap.add_argument("--enterprise", action="store_true", help="large realistic multi-tier enterprise graphs")
+    ap.add_argument("--scale", type=int, default=3, help="hosts per tier (enterprise mode)")
     args = ap.parse_args()
-    build(args.graphs, args.reps)
+    build(args.graphs, args.reps, enterprise=args.enterprise, scale=args.scale)
