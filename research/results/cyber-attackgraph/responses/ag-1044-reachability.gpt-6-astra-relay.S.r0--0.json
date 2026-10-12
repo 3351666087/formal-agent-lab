@@ -1,0 +1,107 @@
+{
+ "protocol": "fal-research-response/v1",
+ "experiment": {
+  "study_id": "cyber-attackgraph",
+  "unit_id": "ag-1044-reachability.gpt-6-astra-relay.S.r0",
+  "track": "formal_model_analysis",
+  "case_id": null,
+  "case_version": null,
+  "task_id": "ag-1044-reachability",
+  "task_digest": "f6a405673526a75a621ed59b1fb647caa6b6848ebd002b2ac39215c39498bfa6",
+  "representation_id": "steplist",
+  "replicate_id": 0,
+  "assistance_mode": "STATIC_UNASSISTED",
+  "sampling_id": "ag-1044-reachability.gpt-6-astra-relay.S.r0#0"
+ },
+ "call": {
+  "provider": "openai",
+  "provider_config_id": "gpt-6-astra-relay",
+  "api": "openai.chat.completions",
+  "api_version": "v1",
+  "endpoint": "https://api.uheapi.com/v1/chat/completions",
+  "route": "COMPATIBLE_RELAY",
+  "endpoint_kind": "PROVIDER",
+  "model_requested": "gpt-6-astra",
+  "model_returned": "gpt-6-astra",
+  "model_switched": false,
+  "model_identity": "RELAY_REPORTED",
+  "response_id": "resp_0bcf4951e2a32d7f016acd32f6bdcc819595721326e6cc1511",
+  "request_id": "6d2a17de-e9bd-47ae-b22f-b2fedfe5d8f7, f4b63713-0e1a-4e47-9477-4aab85f2112c",
+  "started_at": "2026-10-12T19:20:21Z",
+  "finished_at": "2026-10-12T19:20:26Z",
+  "params": {
+   "max_completion_tokens": 3000
+  },
+  "params_digest": "813038d95bea64de"
+ },
+ "raw": {
+  "body": {
+   "id": "resp_0bcf4951e2a32d7f016acd32f6bdcc819595721326e6cc1511",
+   "object": "chat.completion",
+   "created": 1791832826,
+   "model": "gpt-6-astra",
+   "choices": [
+    {
+     "index": 0,
+     "message": {
+      "role": "assistant",
+      "content": "{\"reachable\":true,\"rationale\":\"From edge0:reach, both h1_1:obtain and h1_2:traverse are reachable. h1_1:obtain enables h2_0:obtain, so both parents of the AND step h3_0:pivot are reachable. That step enables crown:obtain through its OR condition without using the blocked h2_2:escalate.\"}"
+     },
+     "finish_reason": "stop"
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 4694,
+    "completion_tokens": 94,
+    "total_tokens": 4788
+   },
+   "service_tier": "default"
+  },
+  "body_text": null,
+  "visible_text": "{\"reachable\":true,\"rationale\":\"From edge0:reach, both h1_1:obtain and h1_2:traverse are reachable. h1_1:obtain enables h2_0:obtain, so both parents of the AND step h3_0:pivot are reachable. That step enables crown:obtain through its OR condition without using the blocked h2_2:escalate.\"}",
+  "finish_reason": "stop",
+  "finish_class": "STOP",
+  "refusal": null,
+  "truncated": false,
+  "tool_calls": [],
+  "reasoning": "NOT_EXPOSED"
+ },
+ "status": {
+  "outcome": "ANSWERED",
+  "transport_ok": true,
+  "http_status": 200,
+  "provider_error_type": null,
+  "provider_error": null,
+  "model_switched": false,
+  "attempts": [
+   {
+    "attempt_no": 1,
+    "attempt_id": "att_8259d5d1180f",
+    "sent": true,
+    "confirmed": true,
+    "http_status": 200,
+    "error_class": null,
+    "error": null,
+    "latency_ms": 4617.9
+   }
+  ],
+  "network_retries": 2,
+  "note": null
+ },
+ "cost": {
+  "usage_known": true,
+  "input_tokens": 4694,
+  "output_tokens": 94,
+  "reasoning_tokens": null,
+  "cache_read_tokens": null,
+  "cache_write_tokens": null,
+  "latency_ms": 4618.1,
+  "http_attempts": 1,
+  "possibly_billed_unconfirmed": 0,
+  "prompt_digest": "16bd463b46ab64aa",
+  "config_digest": "687a29ef8fc767e7"
+ },
+ "task_input_digest": "16bd463b46ab64aab5ccb32830f15d2fdc21b1ade9aff7db8a0eff6f2a39235c",
+ "reuse_key": "8c61181867bdf2cb5e7d0b47b12b3ef553a587ff1a287c2053fcf0241e48a892",
+ "recorded_at": "2026-10-12T19:20:26Z"
+}

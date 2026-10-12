@@ -1,0 +1,110 @@
+{
+ "protocol": "fal-research-response/v1",
+ "experiment": {
+  "study_id": "cyber-attackgraph",
+  "unit_id": "ag-1046-reachability.gpt-6-astra-relay.S.r1",
+  "track": "formal_model_analysis",
+  "case_id": null,
+  "case_version": null,
+  "task_id": "ag-1046-reachability",
+  "task_digest": "c835475d7cff9e0b01debc744a01ca5dac862100dbe03396a4fe26a68d846018",
+  "representation_id": "steplist",
+  "replicate_id": 1,
+  "assistance_mode": "STATIC_UNASSISTED",
+  "sampling_id": "ag-1046-reachability.gpt-6-astra-relay.S.r1#0"
+ },
+ "call": {
+  "provider": "openai",
+  "provider_config_id": "gpt-6-astra-relay",
+  "api": "openai.chat.completions",
+  "api_version": "v1",
+  "endpoint": "https://api.uheapi.com/v1/chat/completions",
+  "route": "COMPATIBLE_RELAY",
+  "endpoint_kind": "PROVIDER",
+  "model_requested": "gpt-6-astra",
+  "model_returned": "gpt-6-astra",
+  "model_switched": false,
+  "model_identity": "RELAY_REPORTED",
+  "response_id": "resp_020cf7c0790b86b5016acd348a823887d09b1a6165d1f302e8",
+  "request_id": "b1c5e1ec-20ec-44d7-890e-3e4a76011594, fab06f1c-5a69-4312-8598-1024e4a9aac2",
+  "started_at": "2026-10-12T19:27:05Z",
+  "finished_at": "2026-10-12T19:27:09Z",
+  "params": {
+   "max_completion_tokens": 3000
+  },
+  "params_digest": "813038d95bea64de"
+ },
+ "raw": {
+  "body": {
+   "id": "resp_020cf7c0790b86b5016acd348a823887d09b1a6165d1f302e8",
+   "object": "chat.completion",
+   "created": 1791833229,
+   "model": "gpt-6-astra",
+   "choices": [
+    {
+     "index": 0,
+     "message": {
+      "role": "assistant",
+      "content": "{\"reachable\":false,\"rationale\":\"The target requires h4_1:traverse or h4_2:traverse. h4_1:traverse depends solely on blocked h2_3:reach. h4_2:traverse depends solely on h2_0:obtain, which depends solely on blocked h1_0:access. Both routes to crown:obtain are therefore unreachable.\"}"
+     },
+     "finish_reason": "stop"
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 4892,
+    "completion_tokens": 91,
+    "total_tokens": 4983,
+    "prompt_tokens_details": {
+     "cached_tokens": 4736
+    }
+   },
+   "service_tier": "default"
+  },
+  "body_text": null,
+  "visible_text": "{\"reachable\":false,\"rationale\":\"The target requires h4_1:traverse or h4_2:traverse. h4_1:traverse depends solely on blocked h2_3:reach. h4_2:traverse depends solely on h2_0:obtain, which depends solely on blocked h1_0:access. Both routes to crown:obtain are therefore unreachable.\"}",
+  "finish_reason": "stop",
+  "finish_class": "STOP",
+  "refusal": null,
+  "truncated": false,
+  "tool_calls": [],
+  "reasoning": "NOT_EXPOSED"
+ },
+ "status": {
+  "outcome": "ANSWERED",
+  "transport_ok": true,
+  "http_status": 200,
+  "provider_error_type": null,
+  "provider_error": null,
+  "model_switched": false,
+  "attempts": [
+   {
+    "attempt_no": 1,
+    "attempt_id": "att_843cd89cdf39",
+    "sent": true,
+    "confirmed": true,
+    "http_status": 200,
+    "error_class": null,
+    "error": null,
+    "latency_ms": 3681.3
+   }
+  ],
+  "network_retries": 2,
+  "note": null
+ },
+ "cost": {
+  "usage_known": true,
+  "input_tokens": 4892,
+  "output_tokens": 91,
+  "reasoning_tokens": null,
+  "cache_read_tokens": 4736,
+  "cache_write_tokens": null,
+  "latency_ms": 3681.5,
+  "http_attempts": 1,
+  "possibly_billed_unconfirmed": 0,
+  "prompt_digest": "bece9167a5f1e0a9",
+  "config_digest": "687a29ef8fc767e7"
+ },
+ "task_input_digest": "bece9167a5f1e0a945adb394b4247397f1a46501e91a13bbf1c2f50404c7c6ec",
+ "reuse_key": "799d841bf8f61f90dea3ae01b19782e680c9f4b1f4ab2ed8b7df02f9502004f7",
+ "recorded_at": "2026-10-12T19:27:09Z"
+}

@@ -1,0 +1,110 @@
+{
+ "protocol": "fal-research-response/v1",
+ "experiment": {
+  "study_id": "cyber-attackgraph",
+  "unit_id": "ag-1029-step_enabled.gpt-6-astra-relay.S.r1",
+  "track": "formal_model_analysis",
+  "case_id": null,
+  "case_version": null,
+  "task_id": "ag-1029-step_enabled",
+  "task_digest": "c5399c34c47b8abcdd1ef30afb5fa4e0637d299202c7f9b625eb6f9d35e60a1c",
+  "representation_id": "steplist",
+  "replicate_id": 1,
+  "assistance_mode": "STATIC_UNASSISTED",
+  "sampling_id": "ag-1029-step_enabled.gpt-6-astra-relay.S.r1#0"
+ },
+ "call": {
+  "provider": "openai",
+  "provider_config_id": "gpt-6-astra-relay",
+  "api": "openai.chat.completions",
+  "api_version": "v1",
+  "endpoint": "https://api.uheapi.com/v1/chat/completions",
+  "route": "COMPATIBLE_RELAY",
+  "endpoint_kind": "PROVIDER",
+  "model_requested": "gpt-6-astra",
+  "model_returned": "gpt-6-astra",
+  "model_switched": false,
+  "model_identity": "RELAY_REPORTED",
+  "response_id": "resp_0472dbc555ef19a4016acd2ad9ff348198be1351440db6a56d",
+  "request_id": "04d402c5-4975-4700-90cd-fbc8947d077b, e6c2739a-8a55-4d32-9906-5c044ca40600",
+  "started_at": "2026-10-12T18:45:44Z",
+  "finished_at": "2026-10-12T18:45:49Z",
+  "params": {
+   "max_completion_tokens": 3000
+  },
+  "params_digest": "813038d95bea64de"
+ },
+ "raw": {
+  "body": {
+   "id": "resp_0472dbc555ef19a4016acd2ad9ff348198be1351440db6a56d",
+   "object": "chat.completion",
+   "created": 1791830749,
+   "model": "gpt-6-astra",
+   "choices": [
+    {
+     "index": 0,
+     "message": {
+      "role": "assistant",
+      "content": "{\"enabled\":false,\"rationale\":\"h2_2:reach requires all three parents to be reached. edge0:reach and h1_0:obtain are compromised, but h1_2:escalate has not been reached. Although h1_2:escalate is enabled, it must be taken before h2_2:reach is enabled.\"}"
+     },
+     "finish_reason": "stop"
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 4731,
+    "completion_tokens": 82,
+    "total_tokens": 4813,
+    "prompt_tokens_details": {
+     "cached_tokens": 4608
+    }
+   },
+   "service_tier": "default"
+  },
+  "body_text": null,
+  "visible_text": "{\"enabled\":false,\"rationale\":\"h2_2:reach requires all three parents to be reached. edge0:reach and h1_0:obtain are compromised, but h1_2:escalate has not been reached. Although h1_2:escalate is enabled, it must be taken before h2_2:reach is enabled.\"}",
+  "finish_reason": "stop",
+  "finish_class": "STOP",
+  "refusal": null,
+  "truncated": false,
+  "tool_calls": [],
+  "reasoning": "NOT_EXPOSED"
+ },
+ "status": {
+  "outcome": "ANSWERED",
+  "transport_ok": true,
+  "http_status": 200,
+  "provider_error_type": null,
+  "provider_error": null,
+  "model_switched": false,
+  "attempts": [
+   {
+    "attempt_no": 1,
+    "attempt_id": "att_07af9e46d842",
+    "sent": true,
+    "confirmed": true,
+    "http_status": 200,
+    "error_class": null,
+    "error": null,
+    "latency_ms": 4130.3
+   }
+  ],
+  "network_retries": 2,
+  "note": null
+ },
+ "cost": {
+  "usage_known": true,
+  "input_tokens": 4731,
+  "output_tokens": 82,
+  "reasoning_tokens": null,
+  "cache_read_tokens": 4608,
+  "cache_write_tokens": null,
+  "latency_ms": 4130.4,
+  "http_attempts": 1,
+  "possibly_billed_unconfirmed": 0,
+  "prompt_digest": "8e48fa17defa936b",
+  "config_digest": "687a29ef8fc767e7"
+ },
+ "task_input_digest": "8e48fa17defa936b52e2aa93c6b2419013bc5b2086a84e0c9d7ac5eb597cd360",
+ "reuse_key": "107d040015d9e4eee646c9617ba29a7850108afcc63b1f2ebe6e54fe127363bc",
+ "recorded_at": "2026-10-12T18:45:49Z"
+}

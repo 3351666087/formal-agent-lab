@@ -1,0 +1,113 @@
+{
+ "protocol": "fal-research-response/v1",
+ "experiment": {
+  "study_id": "cyber-attackgraph",
+  "unit_id": "ag-1022-step_enabled.gpt-6-astra-relay.S.r1",
+  "track": "formal_model_analysis",
+  "case_id": null,
+  "case_version": null,
+  "task_id": "ag-1022-step_enabled",
+  "task_digest": "fdbf8a8c6c3d99de950802359338001e3fbd655bf2655ef14b35f4f3ba9c6790",
+  "representation_id": "steplist",
+  "replicate_id": 1,
+  "assistance_mode": "STATIC_UNASSISTED",
+  "sampling_id": "ag-1022-step_enabled.gpt-6-astra-relay.S.r1#0"
+ },
+ "call": {
+  "provider": "openai",
+  "provider_config_id": "gpt-6-astra-relay",
+  "api": "openai.chat.completions",
+  "api_version": "v1",
+  "endpoint": "https://api.uheapi.com/v1/chat/completions",
+  "route": "COMPATIBLE_RELAY",
+  "endpoint_kind": "PROVIDER",
+  "model_requested": "gpt-6-astra",
+  "model_returned": "gpt-6-astra",
+  "model_switched": false,
+  "model_identity": "RELAY_REPORTED",
+  "response_id": "resp_0d3b3005c32f6833016acd2628d2c88193b336000ec4ee5163",
+  "request_id": "159ea5e4-94f0-4159-9f8f-5dcd2bfc5a13, 992ca8c1-25b0-4049-9de7-c1fe0a5966b0",
+  "started_at": "2026-10-12T18:25:44Z",
+  "finished_at": "2026-10-12T18:25:50Z",
+  "params": {
+   "max_completion_tokens": 3000
+  },
+  "params_digest": "813038d95bea64de"
+ },
+ "raw": {
+  "body": {
+   "id": "resp_0d3b3005c32f6833016acd2628d2c88193b336000ec4ee5163",
+   "object": "chat.completion",
+   "created": 1791829550,
+   "model": "gpt-6-astra",
+   "choices": [
+    {
+     "index": 0,
+     "message": {
+      "role": "assistant",
+      "content": "{\"enabled\":false,\"rationale\":\"h1_1:access requires all three parents to be reached. The current state includes edge0:reach and edge1:reach, but not edge2:reach. Although edge2:reach is an entry foothold, it has not yet been compromised in the stated current state.\"}"
+     },
+     "finish_reason": "stop"
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 4916,
+    "completion_tokens": 95,
+    "total_tokens": 5011,
+    "prompt_tokens_details": {
+     "cached_tokens": 4736
+    },
+    "completion_tokens_details": {
+     "reasoning_tokens": 22
+    }
+   },
+   "service_tier": "default"
+  },
+  "body_text": null,
+  "visible_text": "{\"enabled\":false,\"rationale\":\"h1_1:access requires all three parents to be reached. The current state includes edge0:reach and edge1:reach, but not edge2:reach. Although edge2:reach is an entry foothold, it has not yet been compromised in the stated current state.\"}",
+  "finish_reason": "stop",
+  "finish_class": "STOP",
+  "refusal": null,
+  "truncated": false,
+  "tool_calls": [],
+  "reasoning": "NOT_EXPOSED"
+ },
+ "status": {
+  "outcome": "ANSWERED",
+  "transport_ok": true,
+  "http_status": 200,
+  "provider_error_type": null,
+  "provider_error": null,
+  "model_switched": false,
+  "attempts": [
+   {
+    "attempt_no": 1,
+    "attempt_id": "att_81930a13b901",
+    "sent": true,
+    "confirmed": true,
+    "http_status": 200,
+    "error_class": null,
+    "error": null,
+    "latency_ms": 6168.6
+   }
+  ],
+  "network_retries": 2,
+  "note": null
+ },
+ "cost": {
+  "usage_known": true,
+  "input_tokens": 4916,
+  "output_tokens": 95,
+  "reasoning_tokens": 22,
+  "cache_read_tokens": 4736,
+  "cache_write_tokens": null,
+  "latency_ms": 6170.1,
+  "http_attempts": 1,
+  "possibly_billed_unconfirmed": 0,
+  "prompt_digest": "e7afaf2ba573cb01",
+  "config_digest": "687a29ef8fc767e7"
+ },
+ "task_input_digest": "e7afaf2ba573cb018756eda5c48225f62de2f0a0e61e296d138ccb21b38e88be",
+ "reuse_key": "28c4879a184e1c20188f48e3ab167999ac15c77c0418e82998407d4724d0f30b",
+ "recorded_at": "2026-10-12T18:25:50Z"
+}

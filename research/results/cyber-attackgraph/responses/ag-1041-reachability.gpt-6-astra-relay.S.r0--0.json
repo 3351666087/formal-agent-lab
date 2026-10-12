@@ -1,0 +1,107 @@
+{
+ "protocol": "fal-research-response/v1",
+ "experiment": {
+  "study_id": "cyber-attackgraph",
+  "unit_id": "ag-1041-reachability.gpt-6-astra-relay.S.r0",
+  "track": "formal_model_analysis",
+  "case_id": null,
+  "case_version": null,
+  "task_id": "ag-1041-reachability",
+  "task_digest": "593930195b602279d80d8f053b64ea97d0fd0c5fda754a7d3d22b59e591df1ac",
+  "representation_id": "steplist",
+  "replicate_id": 0,
+  "assistance_mode": "STATIC_UNASSISTED",
+  "sampling_id": "ag-1041-reachability.gpt-6-astra-relay.S.r0#0"
+ },
+ "call": {
+  "provider": "openai",
+  "provider_config_id": "gpt-6-astra-relay",
+  "api": "openai.chat.completions",
+  "api_version": "v1",
+  "endpoint": "https://api.uheapi.com/v1/chat/completions",
+  "route": "COMPATIBLE_RELAY",
+  "endpoint_kind": "PROVIDER",
+  "model_requested": "gpt-6-astra",
+  "model_returned": "gpt-6-astra",
+  "model_switched": false,
+  "model_identity": "RELAY_REPORTED",
+  "response_id": "resp_013378e688859988016acd313a997c819a878160ee681569ed",
+  "request_id": "6d00e9ba-e413-4b4c-b5f1-63e555a9689b, e13d9682-2c85-4787-8fae-63ec08ed7c7a",
+  "started_at": "2026-10-12T19:12:57Z",
+  "finished_at": "2026-10-12T19:13:01Z",
+  "params": {
+   "max_completion_tokens": 3000
+  },
+  "params_digest": "813038d95bea64de"
+ },
+ "raw": {
+  "body": {
+   "id": "resp_013378e688859988016acd313a997c819a878160ee681569ed",
+   "object": "chat.completion",
+   "created": 1791832381,
+   "model": "gpt-6-astra",
+   "choices": [
+    {
+     "index": 0,
+     "message": {
+      "role": "assistant",
+      "content": "{\"reachable\":false,\"rationale\":\"Blocking h2_2:traverse makes h4_1:obtain unreachable because it is its only parent. It also makes h4_2:escalate unreachable because that AND step requires h2_2:traverse. Neither parent of crown:obtain is reachable, so the target is unreachable.\"}"
+     },
+     "finish_reason": "stop"
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 4790,
+    "completion_tokens": 78,
+    "total_tokens": 4868
+   },
+   "service_tier": "default"
+  },
+  "body_text": null,
+  "visible_text": "{\"reachable\":false,\"rationale\":\"Blocking h2_2:traverse makes h4_1:obtain unreachable because it is its only parent. It also makes h4_2:escalate unreachable because that AND step requires h2_2:traverse. Neither parent of crown:obtain is reachable, so the target is unreachable.\"}",
+  "finish_reason": "stop",
+  "finish_class": "STOP",
+  "refusal": null,
+  "truncated": false,
+  "tool_calls": [],
+  "reasoning": "NOT_EXPOSED"
+ },
+ "status": {
+  "outcome": "ANSWERED",
+  "transport_ok": true,
+  "http_status": 200,
+  "provider_error_type": null,
+  "provider_error": null,
+  "model_switched": false,
+  "attempts": [
+   {
+    "attempt_no": 1,
+    "attempt_id": "att_183afebb934c",
+    "sent": true,
+    "confirmed": true,
+    "http_status": 200,
+    "error_class": null,
+    "error": null,
+    "latency_ms": 4105.7
+   }
+  ],
+  "network_retries": 2,
+  "note": null
+ },
+ "cost": {
+  "usage_known": true,
+  "input_tokens": 4790,
+  "output_tokens": 78,
+  "reasoning_tokens": null,
+  "cache_read_tokens": null,
+  "cache_write_tokens": null,
+  "latency_ms": 4106.1,
+  "http_attempts": 1,
+  "possibly_billed_unconfirmed": 0,
+  "prompt_digest": "e1fa052961d523df",
+  "config_digest": "687a29ef8fc767e7"
+ },
+ "task_input_digest": "e1fa052961d523dfd733d9a567f2e935701598ff1b211b4e082ca0ee36fcb65f",
+ "reuse_key": "92a841838e96c94353c9022a8bd9af24c0c07ba5cbb7c5cc1d2bb620e8d99bb2",
+ "recorded_at": "2026-10-12T19:13:01Z"
+}

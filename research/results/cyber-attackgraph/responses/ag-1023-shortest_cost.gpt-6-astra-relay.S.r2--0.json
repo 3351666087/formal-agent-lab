@@ -1,0 +1,110 @@
+{
+ "protocol": "fal-research-response/v1",
+ "experiment": {
+  "study_id": "cyber-attackgraph",
+  "unit_id": "ag-1023-shortest_cost.gpt-6-astra-relay.S.r2",
+  "track": "formal_model_analysis",
+  "case_id": null,
+  "case_version": null,
+  "task_id": "ag-1023-shortest_cost",
+  "task_digest": "6db883aa6a58451b6b29a2f8700f3da73bab7962688ab9af8c55f76c3ec510b1",
+  "representation_id": "steplist",
+  "replicate_id": 2,
+  "assistance_mode": "STATIC_UNASSISTED",
+  "sampling_id": "ag-1023-shortest_cost.gpt-6-astra-relay.S.r2#0"
+ },
+ "call": {
+  "provider": "openai",
+  "provider_config_id": "gpt-6-astra-relay",
+  "api": "openai.chat.completions",
+  "api_version": "v1",
+  "endpoint": "https://api.uheapi.com/v1/chat/completions",
+  "route": "COMPATIBLE_RELAY",
+  "endpoint_kind": "PROVIDER",
+  "model_requested": "gpt-6-astra",
+  "model_returned": "gpt-6-astra",
+  "model_switched": false,
+  "model_identity": "RELAY_REPORTED",
+  "response_id": "resp_0197c07abc1e8f52016acd2651d848819885cdf26496d6f8de",
+  "request_id": "1bf38386-6625-4985-a376-e53d4b9ef7d7, 19a97c45-056b-4579-8bec-147a966132d9",
+  "started_at": "2026-10-12T18:26:25Z",
+  "finished_at": "2026-10-12T18:26:30Z",
+  "params": {
+   "max_completion_tokens": 3000
+  },
+  "params_digest": "813038d95bea64de"
+ },
+ "raw": {
+  "body": {
+   "id": "resp_0197c07abc1e8f52016acd2651d848819885cdf26496d6f8de",
+   "object": "chat.completion",
+   "created": 1791829590,
+   "model": "gpt-6-astra",
+   "choices": [
+    {
+     "index": 0,
+     "message": {
+      "role": "assistant",
+      "content": "{\"cost\":4,\"rationale\":\"Entry footholds are already reached and cost no attack steps. A shortest sequence is h2_0:obtain → h4_2:traverse → h5_0:reach → crown:obtain. Each OR dependency is satisfied by the preceding step (starting from edge0:reach). Neither parent of the target can be reached in fewer than three performed steps, so including the target step the minimum is four.\"}"
+     },
+     "finish_reason": "stop"
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 4875,
+    "completion_tokens": 99,
+    "total_tokens": 4974,
+    "prompt_tokens_details": {
+     "cached_tokens": 4736
+    }
+   },
+   "service_tier": "default"
+  },
+  "body_text": null,
+  "visible_text": "{\"cost\":4,\"rationale\":\"Entry footholds are already reached and cost no attack steps. A shortest sequence is h2_0:obtain → h4_2:traverse → h5_0:reach → crown:obtain. Each OR dependency is satisfied by the preceding step (starting from edge0:reach). Neither parent of the target can be reached in fewer than three performed steps, so including the target step the minimum is four.\"}",
+  "finish_reason": "stop",
+  "finish_class": "STOP",
+  "refusal": null,
+  "truncated": false,
+  "tool_calls": [],
+  "reasoning": "NOT_EXPOSED"
+ },
+ "status": {
+  "outcome": "ANSWERED",
+  "transport_ok": true,
+  "http_status": 200,
+  "provider_error_type": null,
+  "provider_error": null,
+  "model_switched": false,
+  "attempts": [
+   {
+    "attempt_no": 1,
+    "attempt_id": "att_4cb5e848bfa1",
+    "sent": true,
+    "confirmed": true,
+    "http_status": 200,
+    "error_class": null,
+    "error": null,
+    "latency_ms": 5925.8
+   }
+  ],
+  "network_retries": 2,
+  "note": null
+ },
+ "cost": {
+  "usage_known": true,
+  "input_tokens": 4875,
+  "output_tokens": 99,
+  "reasoning_tokens": null,
+  "cache_read_tokens": 4736,
+  "cache_write_tokens": null,
+  "latency_ms": 5926.4,
+  "http_attempts": 1,
+  "possibly_billed_unconfirmed": 0,
+  "prompt_digest": "18b40dcb3e1c3cc3",
+  "config_digest": "687a29ef8fc767e7"
+ },
+ "task_input_digest": "18b40dcb3e1c3cc30b4eb00ba9bc5097fab603c1821bc5ed16a2b5dafbdf0283",
+ "reuse_key": "4039277d11d2e72a5f5e0e89f9a8acb807457efa4071ef4cdea03f5d2e7ebb6b",
+ "recorded_at": "2026-10-12T18:26:30Z"
+}

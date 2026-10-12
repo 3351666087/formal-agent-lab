@@ -1,0 +1,113 @@
+{
+ "protocol": "fal-research-response/v1",
+ "experiment": {
+  "study_id": "cyber-attackgraph",
+  "unit_id": "ag-1027-step_enabled.gpt-6-astra-relay.S.r1",
+  "track": "formal_model_analysis",
+  "case_id": null,
+  "case_version": null,
+  "task_id": "ag-1027-step_enabled",
+  "task_digest": "c912c94deb53c593f5e028d700616a106736476e18af02f3e993cd09b430888d",
+  "representation_id": "steplist",
+  "replicate_id": 1,
+  "assistance_mode": "STATIC_UNASSISTED",
+  "sampling_id": "ag-1027-step_enabled.gpt-6-astra-relay.S.r1#0"
+ },
+ "call": {
+  "provider": "openai",
+  "provider_config_id": "gpt-6-astra-relay",
+  "api": "openai.chat.completions",
+  "api_version": "v1",
+  "endpoint": "https://api.uheapi.com/v1/chat/completions",
+  "route": "COMPATIBLE_RELAY",
+  "endpoint_kind": "PROVIDER",
+  "model_requested": "gpt-6-astra",
+  "model_returned": "gpt-6-astra",
+  "model_switched": false,
+  "model_identity": "RELAY_REPORTED",
+  "response_id": "resp_0973ccf719ee68df016acd294117d881a1bc78f6e62f6f0707",
+  "request_id": "4fdd7f53-2a84-4f63-b5bd-809b74954bad, a93e638e-a72b-4aca-8289-8c389eeac3f2, 9b23472f-666c-4499-9970-9b9e73de711d",
+  "started_at": "2026-10-12T18:38:56Z",
+  "finished_at": "2026-10-12T18:39:02Z",
+  "params": {
+   "max_completion_tokens": 3000
+  },
+  "params_digest": "813038d95bea64de"
+ },
+ "raw": {
+  "body": {
+   "id": "resp_0973ccf719ee68df016acd294117d881a1bc78f6e62f6f0707",
+   "object": "chat.completion",
+   "created": 1791830342,
+   "model": "gpt-6-astra",
+   "choices": [
+    {
+     "index": 0,
+     "message": {
+      "role": "assistant",
+      "content": "{\"enabled\":true,\"rationale\":\"h3_0:reach is an AND step requiring h1_2:traverse, h2_1:access, and h2_2:obtain. Both h2_1:access and h2_2:obtain are already compromised, and h1_2:traverse is enabled because edge0:reach and edge1:reach are entry footholds.\"}"
+     },
+     "finish_reason": "stop"
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 4853,
+    "completion_tokens": 156,
+    "total_tokens": 5009,
+    "prompt_tokens_details": {
+     "cached_tokens": 3840
+    },
+    "completion_tokens_details": {
+     "reasoning_tokens": 62
+    }
+   },
+   "service_tier": "default"
+  },
+  "body_text": null,
+  "visible_text": "{\"enabled\":true,\"rationale\":\"h3_0:reach is an AND step requiring h1_2:traverse, h2_1:access, and h2_2:obtain. Both h2_1:access and h2_2:obtain are already compromised, and h1_2:traverse is enabled because edge0:reach and edge1:reach are entry footholds.\"}",
+  "finish_reason": "stop",
+  "finish_class": "STOP",
+  "refusal": null,
+  "truncated": false,
+  "tool_calls": [],
+  "reasoning": "NOT_EXPOSED"
+ },
+ "status": {
+  "outcome": "ANSWERED",
+  "transport_ok": true,
+  "http_status": 200,
+  "provider_error_type": null,
+  "provider_error": null,
+  "model_switched": false,
+  "attempts": [
+   {
+    "attempt_no": 1,
+    "attempt_id": "att_72740432d9e8",
+    "sent": true,
+    "confirmed": true,
+    "http_status": 200,
+    "error_class": null,
+    "error": null,
+    "latency_ms": 5779.5
+   }
+  ],
+  "network_retries": 2,
+  "note": null
+ },
+ "cost": {
+  "usage_known": true,
+  "input_tokens": 4853,
+  "output_tokens": 156,
+  "reasoning_tokens": 62,
+  "cache_read_tokens": 3840,
+  "cache_write_tokens": null,
+  "latency_ms": 5779.6,
+  "http_attempts": 1,
+  "possibly_billed_unconfirmed": 0,
+  "prompt_digest": "ec3c9d94adb2d237",
+  "config_digest": "687a29ef8fc767e7"
+ },
+ "task_input_digest": "ec3c9d94adb2d2373c6bc02b61f817676a44e781d5090ca1755a4dd515105369",
+ "reuse_key": "fd29cbdb72c7856c2578a5f2eda92f612ca3c33c7dba37caa83c291faad405ad",
+ "recorded_at": "2026-10-12T18:39:02Z"
+}

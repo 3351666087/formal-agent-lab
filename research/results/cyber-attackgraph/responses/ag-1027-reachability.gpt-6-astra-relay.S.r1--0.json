@@ -1,0 +1,110 @@
+{
+ "protocol": "fal-research-response/v1",
+ "experiment": {
+  "study_id": "cyber-attackgraph",
+  "unit_id": "ag-1027-reachability.gpt-6-astra-relay.S.r1",
+  "track": "formal_model_analysis",
+  "case_id": null,
+  "case_version": null,
+  "task_id": "ag-1027-reachability",
+  "task_digest": "dab25c9cdef299a4cbeb3769736aa190a8e23ce4e9816f1a980e92e3957ac495",
+  "representation_id": "steplist",
+  "replicate_id": 1,
+  "assistance_mode": "STATIC_UNASSISTED",
+  "sampling_id": "ag-1027-reachability.gpt-6-astra-relay.S.r1#0"
+ },
+ "call": {
+  "provider": "openai",
+  "provider_config_id": "gpt-6-astra-relay",
+  "api": "openai.chat.completions",
+  "api_version": "v1",
+  "endpoint": "https://api.uheapi.com/v1/chat/completions",
+  "route": "COMPATIBLE_RELAY",
+  "endpoint_kind": "PROVIDER",
+  "model_requested": "gpt-6-astra",
+  "model_returned": "gpt-6-astra",
+  "model_switched": false,
+  "model_identity": "RELAY_REPORTED",
+  "response_id": "resp_0c08d0cfe6c889ff016acd28ee8060819fb369b8831f3f2304",
+  "request_id": "6814ac59-dfd7-4c38-ae62-760a69f243c3, 6147bc3e-4c04-4227-aacf-2b336befd89c, f02493de-5fde-4d0b-b794-43098215ab8e, a76fd90b-32f2-4e78-84fd-cfa56231dc28",
+  "started_at": "2026-10-12T18:37:33Z",
+  "finished_at": "2026-10-12T18:37:40Z",
+  "params": {
+   "max_completion_tokens": 3000
+  },
+  "params_digest": "813038d95bea64de"
+ },
+ "raw": {
+  "body": {
+   "id": "resp_0c08d0cfe6c889ff016acd28ee8060819fb369b8831f3f2304",
+   "object": "chat.completion",
+   "created": 1791830260,
+   "model": "gpt-6-astra",
+   "choices": [
+    {
+     "index": 0,
+     "message": {
+      "role": "assistant",
+      "content": "{\"reachable\":true,\"rationale\":\"Blocking h3_1:obtain does not block the route through h3_0:reach. The entry footholds reach h1_0:reach, h1_1:obtain, and h1_2:traverse, satisfying all parents of h2_1:access and reaching h2_2:obtain. These satisfy all three parents of h3_0:reach, which reaches h5_0:reach and then crown:obtain.\"}"
+     },
+     "finish_reason": "stop"
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 4848,
+    "completion_tokens": 111,
+    "total_tokens": 4959,
+    "prompt_tokens_details": {
+     "cached_tokens": 4736
+    }
+   },
+   "service_tier": "default"
+  },
+  "body_text": null,
+  "visible_text": "{\"reachable\":true,\"rationale\":\"Blocking h3_1:obtain does not block the route through h3_0:reach. The entry footholds reach h1_0:reach, h1_1:obtain, and h1_2:traverse, satisfying all parents of h2_1:access and reaching h2_2:obtain. These satisfy all three parents of h3_0:reach, which reaches h5_0:reach and then crown:obtain.\"}",
+  "finish_reason": "stop",
+  "finish_class": "STOP",
+  "refusal": null,
+  "truncated": false,
+  "tool_calls": [],
+  "reasoning": "NOT_EXPOSED"
+ },
+ "status": {
+  "outcome": "ANSWERED",
+  "transport_ok": true,
+  "http_status": 200,
+  "provider_error_type": null,
+  "provider_error": null,
+  "model_switched": false,
+  "attempts": [
+   {
+    "attempt_no": 1,
+    "attempt_id": "att_7b90c10a9eed",
+    "sent": true,
+    "confirmed": true,
+    "http_status": 200,
+    "error_class": null,
+    "error": null,
+    "latency_ms": 6891.4
+   }
+  ],
+  "network_retries": 2,
+  "note": null
+ },
+ "cost": {
+  "usage_known": true,
+  "input_tokens": 4848,
+  "output_tokens": 111,
+  "reasoning_tokens": null,
+  "cache_read_tokens": 4736,
+  "cache_write_tokens": null,
+  "latency_ms": 6891.5,
+  "http_attempts": 1,
+  "possibly_billed_unconfirmed": 0,
+  "prompt_digest": "8cb5a886f676f0b6",
+  "config_digest": "687a29ef8fc767e7"
+ },
+ "task_input_digest": "8cb5a886f676f0b6f78063748cef4c3bc5e4ad827049560be98abb02e57464b5",
+ "reuse_key": "8d182e14ce7559d403260f1caceb1758fca53f568210052f259e390227a8d1ce",
+ "recorded_at": "2026-10-12T18:37:40Z"
+}

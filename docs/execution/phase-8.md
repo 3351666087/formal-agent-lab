@@ -14,7 +14,9 @@
 
 ## 8.2 · 大规模真实双模型批次
 
-- [ ] **P8-02** 在授权额度内运行一次上千单元的真实 GPT+Claude 批次，每一步都是验证器判定的难题，分模型/分题型报告正确率与一致性，并导入平台可视化。
+- [x] **P8-02** 在授权额度内运行一次上千单元的真实 GPT+Claude 批次，每一步都是验证器判定的难题，分模型/分题型报告正确率与一致性，并导入平台可视化。
+  - 证据：real 1098-unit dual-model batch complete (~2.2h, 1098/1098 model-produced, 0 possibly-billed-unconfirmed). Results discriminate: step_enabled is the hard kind (GPT 0.86 / Opus 0.88, real AND/OR errors), both perfect on min_defense (min-cut) and near-perfect on shortest_cost; Claude Opus 5.5 declined 22 security-framed tasks (stop_reason refusal, 16 reachability + 6 step_enabled, 97.7% on answered), GPT-6 refused none. No ranking claim (relay identity, paired diff ~0.02). report.md + evidence cyber/run.json; manifest regenerated; handoff docs/handoff/phase8.md
+  - 实现：`research/results/cyber-attackgraph/report.md`、`docs/execution/evidence/research/cyber/run.json`、`docs/handoff/phase8.md`
 
 ~48 图 × 4 题型 × 2 模型 × 3 重复 ≈ 1100+ 真实调用（`scripts/cyber_run.py`，可续跑：已保存答案复用）。报告分题型（最短代价/可达性/最小割/步骤使能）与分模型正确率、程序对应（与验证器一致率）、输出 token；中转身份不可核验，不做已核验的厂商对比。导入订单项目的研究评测，网页 `基准对比` 可见每个单元的原始回答与评分依据。
 

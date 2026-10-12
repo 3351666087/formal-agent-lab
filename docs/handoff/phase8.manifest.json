@@ -2,9 +2,9 @@
   "format": "phase-handoff/v1",
   "phase": "8",
   "part": "defensive attack-graph analysis — verifier-grounded cyber study and the large real batch",
-  "generated_at": "2026-10-12T18:14:36.255043+00:00",
+  "generated_at": "2026-10-12T19:33:07.689470+00:00",
   "self_initiated": "expansion requested by the user: more/harder cases, a substantial cyber domain, and a large real batch where every step is worthy of a frontier model",
-  "handoff_revision": "2b44b7b52c4854839d5f47904689ea4baf04cd43",
+  "handoff_revision": "686e0c74500426f4911761d214436c111018e53c",
   "mechanism": {
     "what": "abstract AND/OR attack graphs (entry footholds → intermediate steps → target), the standard object of defensive attack-graph / threat-model analysis; steps are abstract graph nodes, not operational exploitation instructions",
     "module": "packages/domain-mal/src/formal_lab_domain_mal/analysis.py",
@@ -47,12 +47,99 @@
     "scorer_verified_on_loopback": true
   },
   "real_batch": {
-    "status": "RUNNING_OR_NOT_RUN",
+    "status": "COMPLETE",
     "command": "uv run --frozen python scripts/cyber_run.py (resumable)",
-    "planned": null,
-    "model_produced": null,
-    "budget": null,
-    "conditions": [],
+    "planned": 1098,
+    "model_produced": 1098,
+    "budget": {
+      "max_calls": 1138,
+      "max_http_attempts": 2276,
+      "max_total_output_tokens": 3414000,
+      "calls": 1098,
+      "http_attempts": 1101,
+      "output_tokens": 259761,
+      "possibly_billed": 0,
+      "unknown_usage_calls": 0
+    },
+    "conditions": [
+      {
+        "condition": "claude-opus-5-5-relay · STATIC_UNASSISTED · steplist",
+        "planned": 549,
+        "correct": {
+          "value": 0.9380692167577414,
+          "status": "OK",
+          "n": 549,
+          "missing": 0,
+          "not_applicable": 0,
+          "ci": {
+            "low": 0.9147042011064014,
+            "high": 0.9553463212007637,
+            "level": 0.95,
+            "method": "Wilson score interval",
+            "n": 549
+          },
+          "missing_reason": null
+        },
+        "program_corresponds": {
+          "value": 0.9772296015180265,
+          "status": "OK",
+          "n": 527,
+          "missing": 22,
+          "not_applicable": 0,
+          "ci": {
+            "low": 0.9606249256454282,
+            "high": 0.9869272891296834,
+            "level": 0.95,
+            "method": "Wilson score interval",
+            "n": 527
+          },
+          "missing_reason": null
+        },
+        "behaviors": {
+          "CORRECT": 515,
+          "REFUSED": 22,
+          "INCORRECT": 12
+        }
+      },
+      {
+        "condition": "gpt-6-astra-relay · STATIC_UNASSISTED · steplist",
+        "planned": 549,
+        "correct": {
+          "value": 0.9617486338797814,
+          "status": "OK",
+          "n": 549,
+          "missing": 0,
+          "not_applicable": 0,
+          "ci": {
+            "low": 0.9422330897681936,
+            "high": 0.9748471905015208,
+            "level": 0.95,
+            "method": "Wilson score interval",
+            "n": 549
+          },
+          "missing_reason": null
+        },
+        "program_corresponds": {
+          "value": 0.9617486338797814,
+          "status": "OK",
+          "n": 549,
+          "missing": 0,
+          "not_applicable": 0,
+          "ci": {
+            "low": 0.9422330897681936,
+            "high": 0.9748471905015208,
+            "level": 0.95,
+            "method": "Wilson score interval",
+            "n": 549
+          },
+          "missing_reason": null
+        },
+        "behaviors": {
+          "CORRECT": 528,
+          "INCORRECT": 21
+        }
+      }
+    ],
     "evidence": [
       "research/results/cyber-attackgraph/report.md",
       "docs/execution/evidence/research/cyber/run.json"
@@ -64,7 +151,7 @@
   ],
   "tasks": {
     "P8-01": "study, scorer, check — DONE",
-    "P8-02": "the real ~1098-unit dual-model batch — RUNNING/PENDING"
+    "P8-02": "the real ~1098-unit dual-model batch — DONE"
   },
   "related": [
     "docs/handoff/phase7.md",

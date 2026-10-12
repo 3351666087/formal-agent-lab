@@ -1,0 +1,110 @@
+{
+ "protocol": "fal-research-response/v1",
+ "experiment": {
+  "study_id": "cyber-attackgraph",
+  "unit_id": "ag-1034-reachability.gpt-6-astra-relay.S.r2",
+  "track": "formal_model_analysis",
+  "case_id": null,
+  "case_version": null,
+  "task_id": "ag-1034-reachability",
+  "task_digest": "263c0184b2b89a354f7f060ea9e05c091c8b095449fdde241d47f8c43746f084",
+  "representation_id": "steplist",
+  "replicate_id": 2,
+  "assistance_mode": "STATIC_UNASSISTED",
+  "sampling_id": "ag-1034-reachability.gpt-6-astra-relay.S.r2#0"
+ },
+ "call": {
+  "provider": "openai",
+  "provider_config_id": "gpt-6-astra-relay",
+  "api": "openai.chat.completions",
+  "api_version": "v1",
+  "endpoint": "https://api.uheapi.com/v1/chat/completions",
+  "route": "COMPATIBLE_RELAY",
+  "endpoint_kind": "PROVIDER",
+  "model_requested": "gpt-6-astra",
+  "model_returned": "gpt-6-astra",
+  "model_switched": false,
+  "model_identity": "RELAY_REPORTED",
+  "response_id": "resp_0f4a7b052e84965a016acd2d21c34087d2af00f563ddabf5aa",
+  "request_id": "c29a4022-3de5-4c6f-87e8-172838c240c7, e3a998aa-9ac9-4a95-b74c-cb96993825da, 015db8d6-4630-4c77-9d3c-2ae8a2aaa7ac, b4b3dc4a-15a3-4a60-a9df-d913e0092f08",
+  "started_at": "2026-10-12T18:55:29Z",
+  "finished_at": "2026-10-12T18:55:35Z",
+  "params": {
+   "max_completion_tokens": 3000
+  },
+  "params_digest": "813038d95bea64de"
+ },
+ "raw": {
+  "body": {
+   "id": "resp_0f4a7b052e84965a016acd2d21c34087d2af00f563ddabf5aa",
+   "object": "chat.completion",
+   "created": 1791831335,
+   "model": "gpt-6-astra",
+   "choices": [
+    {
+     "index": 0,
+     "message": {
+      "role": "assistant",
+      "content": "{\"reachable\":true,\"rationale\":\"The defences leave h1_2:reach reachable from edge0:reach. Therefore all parents of the AND step h2_2:reach (h1_2:reach, edge2:reach, and edge1:reach) are reachable. This enables h4_0:pivot and then crown:obtain, bypassing both blocked steps.\"}"
+     },
+     "finish_reason": "stop"
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 4856,
+    "completion_tokens": 86,
+    "total_tokens": 4942,
+    "prompt_tokens_details": {
+     "cached_tokens": 4736
+    }
+   },
+   "service_tier": "default"
+  },
+  "body_text": null,
+  "visible_text": "{\"reachable\":true,\"rationale\":\"The defences leave h1_2:reach reachable from edge0:reach. Therefore all parents of the AND step h2_2:reach (h1_2:reach, edge2:reach, and edge1:reach) are reachable. This enables h4_0:pivot and then crown:obtain, bypassing both blocked steps.\"}",
+  "finish_reason": "stop",
+  "finish_class": "STOP",
+  "refusal": null,
+  "truncated": false,
+  "tool_calls": [],
+  "reasoning": "NOT_EXPOSED"
+ },
+ "status": {
+  "outcome": "ANSWERED",
+  "transport_ok": true,
+  "http_status": 200,
+  "provider_error_type": null,
+  "provider_error": null,
+  "model_switched": false,
+  "attempts": [
+   {
+    "attempt_no": 1,
+    "attempt_id": "att_fe5b93ff73e6",
+    "sent": true,
+    "confirmed": true,
+    "http_status": 200,
+    "error_class": null,
+    "error": null,
+    "latency_ms": 6170.7
+   }
+  ],
+  "network_retries": 2,
+  "note": null
+ },
+ "cost": {
+  "usage_known": true,
+  "input_tokens": 4856,
+  "output_tokens": 86,
+  "reasoning_tokens": null,
+  "cache_read_tokens": 4736,
+  "cache_write_tokens": null,
+  "latency_ms": 6171.5,
+  "http_attempts": 1,
+  "possibly_billed_unconfirmed": 0,
+  "prompt_digest": "2d4cf986f9d618f3",
+  "config_digest": "687a29ef8fc767e7"
+ },
+ "task_input_digest": "2d4cf986f9d618f3c1f48e47534dbb1664824d6c5a920af3be88553a9c4aa6da",
+ "reuse_key": "5079dad0d9cf29722faf4db9e5d1ffde109f87363a276942b25ca1556b40146e",
+ "recorded_at": "2026-10-12T18:55:35Z"
+}
