@@ -9,7 +9,7 @@ import os
 
 from check_runner import Check
 
-RESEARCH_GROUPS = ["p5a", "p5b", "p6a", "p6b", "p7"]
+RESEARCH_GROUPS = ["p5a", "p5b", "p6a", "p6b", "p7", "p8"]
 
 PYTEST = "uv run --frozen pytest -p no:cacheprovider -q"
 PY = "uv run --frozen python"

@@ -2,7 +2,7 @@
 
 Study `p6a-real` · primary metric `correct` · rubric fal-research-rubric@1 · 1 replicate(s) per condition
 
-Ledger: 28 response record(s), 10 call(s), 12 HTTP attempt(s), 0 possibly billed unconfirmed attempt(s).
+Ledger: 30 response record(s), 10 call(s), 12 HTTP attempt(s), 0 possibly billed unconfirmed attempt(s).
 
 ## Track `implementation_conformance` — 6 planned unit(s)
 
