@@ -330,6 +330,40 @@ class IsolationJudgmentScorer:
             deps, signals)
 
 
+# ----------------------------------------------------------------- ratelimit.capacity-judgment@1 (phase 7 held-out)
+class CapacityJudgmentScorer:
+    """The answer judges whether a token-bucket limiter kept within its capacity on a recorded run (phase-7 held-out
+    case). Truth is read from the recorded observation (any observed token count above capacity is a violation);
+    program correspondence is the case's conformance verdict. The model's `within_capacity` is scored against that."""
+
+    scorer_id = "ratelimit.capacity-judgment"
+    version = "1"
+
+    def score(self, parsed: Any, reference: dict[str, Any], *, repo_root: Path, truncated: bool) -> ScoreOutcome:
+        obs_bytes = _evidence(repo_root, reference["observation"])
+        conf_bytes = _evidence(repo_root, reference["conformance"])
+        observation = json.loads(obs_bytes)
+        conformance = json.loads(conf_bytes)
+        deps = {"observation": sha256_bytes(obs_bytes), "conformance": sha256_bytes(conf_bytes)}
+        cap = observation["capacity"]
+        overflow = next((s["index"] for s in observation["steps"] if s["observed_tokens"] > cap), None)
+        truth_holds = overflow is None
+        corr = conformance["correspondence"]
+        program = "CORRESPONDS" if (corr == "CORRESPONDS") == truth_holds else "UNKNOWN"
+        model_holds = parsed.get("within_capacity")
+        correct = model_holds is truth_holds
+        rationale = str(parsed.get("rationale", "")).lower()
+        signals = {"identifies_overflow_step": None if truth_holds else (parsed.get("first_overflow") == overflow),
+                   "states_capacity": str(cap) in rationale or "capacity" in rationale}
+        exp = "stayed within capacity" if truth_holds else f"exceeded capacity at step {overflow}"
+        return ScoreOutcome(
+            "CORRECT" if correct else "INCORRECT", "CORRECT" if correct else "INCORRECT",
+            program if correct else "DEVIATES",
+            f"model said within_capacity={model_holds}; the recorded {observation['mode']} run {exp} "
+            f"(capacity {cap}); the case conformance verdict is {corr}", deps, signals)
+
+
 register_scorer(DeviationDiagnosisScorer())
 register_scorer(ShortestPlanScorer())
 register_scorer(IsolationJudgmentScorer())
+register_scorer(CapacityJudgmentScorer())
