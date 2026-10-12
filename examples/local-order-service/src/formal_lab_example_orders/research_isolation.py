@@ -193,9 +193,10 @@ def run_access_probes(base_url: str, *, mode: str, scenario: str = "standard") -
 
         order = "o1"
         if scenario == "partial":
-            # alpha (granted acme) attempts a WRITE on globex; reserve an order that is not in 'submitted' state after a
-            # tick, so the business layer rejects it regardless of authorization → outcome not classifiable
-            c.post("/t/globex/operations", json=_op_body("pre-tick", "tick", {}), headers=hdr["bravo"])
+            # the owner reserves the order first, so a second reserve of it fails its 'submitted' precondition; alpha
+            # (granted acme) then attempts that same reserve on globex: the authorization layer lets the request
+            # through, but the business layer rejects it, so no state changes → the outcome is not classifiable
+            c.post("/t/globex/operations", json=_op_body("owner-reserve", "reserve", {"o": order}), headers=hdr["bravo"])
             resp = c.post("/t/globex/operations", json=_op_body("x-write", "reserve", {"o": order}),
                           headers=hdr["alpha"])
             allowed, note = observed_write(resp, "globex", "bravo")

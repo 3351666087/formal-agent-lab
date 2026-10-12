@@ -1,0 +1,256 @@
+{
+ "grants": {
+  "alpha": [
+   "acme"
+  ],
+  "bravo": [
+   "globex"
+  ]
+ },
+ "mechanism": "# Mechanism: tenant/object access isolation on the order service\n\nOne page, written before modelling. Scope: the local order service (examples/local-order-service) with the phase-5B\nauthorization research fixture (`research_isolation.py`), on local test tenants only.\n\n- **Subject.** A client identified by a bearer token. The fixture knows two principals: `alpha` (token fixt-alpha,\n  granted tenant `acme`) and `bravo` (token fixt-bravo, granted tenant `globex`). The program identifies the subject\n  by looking the bearer token up in the authorization layer; an unknown or missing token is 401. Initial permission =\n  the principal's grant set. Known information = its own token and the tenant ids in the URL space.\n- **Resource.** A tenant's business state (orders, stock, operations), one SQLite file per tenant, owned by the tenant.\n  Fixed synthetic instances (the `normal` case, seed 1). Relevant state: whether a request reads or changes a tenant's\n  stored values.\n- **Capability.** The subject can issue the local HTTP API (`/t/{tenant}/state`, `/operations`, `/admin/*`, …) with any\n  tenant id and body it chooses — the tenant id and request body are controllable input. It cannot forge another\n  tenant's server-side grant record, cannot read the SQLite files directly, and cannot change the authorization layer:\n  those are uncontrollable program facts.\n- **Trust boundary.** The tenant id and bearer token in each request need server-side validation. The judgement is made\n  by the authorization layer (`research_isolation.create_isolation_app`'s middleware) before the request reaches the\n  business route. The business layer itself does not re-check tenant ownership.\n- **Action.** `access(subject, tenant)` maps to one HTTP request to `/t/{tenant}/…`. Precondition (secure): the subject\n  is granted that tenant. Failure result: 401 (unknown principal) or 403 (not granted). Success: the business route\n  runs and the tenant's state/observation may change (write) or be returned (read).\n- **Property.** `tenant_isolation` (invariant): no access by a subject to a tenant succeeds unless the subject is\n  granted that tenant — `forall s,t: accessed[s][t] -> grant[s][t]`. Machine-checkable on the finite model; the expr\n  digest is recorded in the case.\n- **Oracle.** Independent of the subject under test: the real HTTP status, and the tenant's stored state read back\n  through that tenant's own authorized principal (did a cross-tenant write actually land? did a cross-tenant read\n  actually return the other tenant's values?). A request the oracle cannot classify (e.g. the authorization layer let\n  it through but the business layer rejected it for an unrelated precondition, so no state changed) stays UNKNOWN.\n",
+ "model": {
+  "compiled": [],
+  "contract_version": "formal-lab-contracts/v2",
+  "created_at": "2026-10-12T13:22:17.922850Z",
+  "digest": {
+   "algorithm": "sha256",
+   "value": "78352991b2b6d5a6a765883e557feae3b8edadb5889b71632923d7751601f74d"
+  },
+  "extensions": {},
+  "frontend": {
+   "plugin_id": "formal-lab.frontend.ir-json",
+   "version": "1.0.0"
+  },
+  "package_id": "orders-tenant-isolation",
+  "payload": {
+   "ir": {
+    "actions": [
+     {
+      "cost": 1,
+      "description": null,
+      "effects": [
+       {
+        "kind": "assign",
+        "target": {
+         "index": [
+          {
+           "name": "s",
+           "op": "ref"
+          },
+          {
+           "name": "t",
+           "op": "ref"
+          }
+         ],
+         "var": "accessed"
+        },
+        "value": {
+         "domain": null,
+         "op": "const",
+         "value": true
+        }
+       }
+      ],
+      "label": "访问租户",
+      "name": "access",
+      "params": [
+       {
+        "name": "s",
+        "type": {
+         "kind": "entity",
+         "set": "subjects"
+        }
+       },
+       {
+        "name": "t",
+        "type": {
+         "kind": "entity",
+         "set": "tenants"
+        }
+       }
+      ],
+      "precondition": {
+       "index": [
+        {
+         "name": "s",
+         "op": "ref"
+        },
+        {
+         "name": "t",
+         "op": "ref"
+        }
+       ],
+       "name": "grant",
+       "op": "var"
+      },
+      "retry": "RECONCILE_THEN_RETRY",
+      "timeout_seconds": 30.0
+     }
+    ],
+    "constants": [
+     {
+      "description": "the fixed grant table: which subject may use which tenant",
+      "index": [
+       "subjects",
+       "tenants"
+      ],
+      "name": "grant",
+      "type": {
+       "kind": "bool"
+      },
+      "value": {
+       "cells": [
+        {
+         "index": [
+          "alpha",
+          "acme"
+         ],
+         "value": true
+        },
+        {
+         "index": [
+          "alpha",
+          "globex"
+         ],
+         "value": false
+        },
+        {
+         "index": [
+          "bravo",
+          "acme"
+         ],
+         "value": false
+        },
+        {
+         "index": [
+          "bravo",
+          "globex"
+         ],
+         "value": true
+        }
+       ],
+       "default": false
+      }
+     }
+    ],
+    "description": "Secure specification of tenant/object access isolation: an access succeeds only when the subject is granted the tenant.",
+    "entity_sets": [
+     {
+      "description": null,
+      "label": "主体",
+      "members": [
+       "alpha",
+       "bravo"
+      ],
+      "name": "subjects"
+     },
+     {
+      "description": null,
+      "label": "租户",
+      "members": [
+       "acme",
+       "globex"
+      ],
+      "name": "tenants"
+     }
+    ],
+    "enums": [],
+    "features": [],
+    "name": "orders-tenant-isolation",
+    "objectives": [],
+    "properties": [
+     {
+      "description": null,
+      "expr": {
+       "body": {
+        "body": {
+         "args": [
+          {
+           "index": [
+            {
+             "name": "s",
+             "op": "ref"
+            },
+            {
+             "name": "t",
+             "op": "ref"
+            }
+           ],
+           "name": "accessed",
+           "op": "var"
+          },
+          {
+           "index": [
+            {
+             "name": "s",
+             "op": "ref"
+            },
+            {
+             "name": "t",
+             "op": "ref"
+            }
+           ],
+           "name": "grant",
+           "op": "var"
+          }
+         ],
+         "op": "implies"
+        },
+        "default": null,
+        "domain": "tenants",
+        "op": "forall",
+        "var": "t",
+        "where": null
+       },
+       "default": null,
+       "domain": "subjects",
+       "op": "forall",
+       "var": "s",
+       "where": null
+      },
+      "id": "tenant_isolation",
+      "kind": "invariant",
+      "label": "租户隔离"
+     }
+    ],
+    "semantic_profile": "deterministic_finite_v1",
+    "state": [
+     {
+      "description": "set when an access by the subject to the tenant succeeds",
+      "index": [
+       "subjects",
+       "tenants"
+      ],
+      "initial": {
+       "cells": [],
+       "default": false
+      },
+      "label": "已成功访问",
+      "name": "accessed",
+      "observable": true,
+      "type": {
+       "kind": "bool"
+      }
+     }
+    ]
+   },
+   "kind": "fal-ir"
+  },
+  "semantic_profile": "deterministic_finite_v1",
+  "source": {
+   "artifact": null,
+   "author": null,
+   "format": "fal-ir-json/v1",
+   "origin": "examples/local-order-service/research_isolation.py",
+   "parent_version": null,
+   "text": "{\n  \"semantic_profile\": \"deterministic_finite_v1\",\n  \"name\": \"orders-tenant-isolation\",\n  \"description\": \"Secure specification of tenant/object access isolation: an access succeeds only when the subject is granted the tenant.\",\n  \"enums\": [],\n  \"entity_sets\": [\n    {\n      \"name\": \"subjects\",\n      \"members\": [\n        \"alpha\",\n        \"bravo\"\n      ],\n      \"label\": \"主体\",\n      \"description\": null\n    },\n    {\n      \"name\": \"tenants\",\n      \"members\": [\n        \"acme\",\n        \"globex\"\n      ],\n      \"label\": \"租户\",\n      \"description\": null\n    }\n  ],\n  \"constants\": [\n    {\n      \"name\": \"grant\",\n      \"type\": {\n        \"kind\": \"bool\"\n      },\n      \"index\": [\n        \"subjects\",\n        \"tenants\"\n      ],\n      \"value\": {\n        \"default\": false,\n        \"cells\": [\n          {\n            \"index\": [\n              \"alpha\",\n              \"acme\"\n            ],\n            \"value\": true\n          },\n          {\n            \"index\": [\n              \"alpha\",\n              \"globex\"\n            ],\n            \"value\": false\n          },\n          {\n            \"index\": [\n              \"bravo\",\n              \"acme\"\n            ],\n            \"value\": false\n          },\n          {\n            \"index\": [\n              \"bravo\",\n              \"globex\"\n            ],\n            \"value\": true\n          }\n        ]\n      },\n      \"description\": \"the fixed grant table: which subject may use which tenant\"\n    }\n  ],\n  \"state\": [\n    {\n      \"name\": \"accessed\",\n      \"type\": {\n        \"kind\": \"bool\"\n      },\n      \"index\": [\n        \"subjects\",\n        \"tenants\"\n      ],\n      \"initial\": {\n        \"default\": false,\n        \"cells\": []\n      },\n      \"label\": \"已成功访问\",\n      \"description\": \"set when an access by the subject to the tenant succeeds\",\n      \"observable\": true\n    }\n  ],\n  \"actions\": [\n    {\n      \"name\": \"access\",\n      \"params\": [\n        {\n          \"name\": \"s\",\n          \"type\": {\n            \"kind\": \"entity\",\n            \"set\": \"subjects\"\n          }\n        },\n        {\n          \"name\": \"t\",\n          \"type\": {\n            \"kind\": \"entity\",\n            \"set\": \"tenants\"\n          }\n        }\n      ],\n      \"precondition\": {\n        \"op\": \"var\",\n        \"name\": \"grant\",\n        \"index\": [\n          {\n            \"op\": \"ref\",\n            \"name\": \"s\"\n          },\n          {\n            \"op\": \"ref\",\n            \"name\": \"t\"\n          }\n        ]\n      },\n      \"effects\": [\n        {\n          \"kind\": \"assign\",\n          \"target\": {\n            \"var\": \"accessed\",\n            \"index\": [\n              {\n                \"op\": \"ref\",\n                \"name\": \"s\"\n              },\n              {\n                \"op\": \"ref\",\n                \"name\": \"t\"\n              }\n            ]\n          },\n          \"value\": {\n            \"op\": \"const\",\n            \"value\": true,\n            \"domain\": null\n          }\n        }\n      ],\n      \"cost\": 1,\n      \"label\": \"访问租户\",\n      \"description\": null,\n      \"timeout_seconds\": 30.0,\n      \"retry\": \"RECONCILE_THEN_RETRY\"\n    }\n  ],\n  \"properties\": [\n    {\n      \"id\": \"tenant_isolation\",\n      \"kind\": \"invariant\",\n      \"expr\": {\n        \"op\": \"forall\",\n        \"var\": \"s\",\n        \"domain\": \"subjects\",\n        \"where\": null,\n        \"body\": {\n          \"op\": \"forall\",\n          \"var\": \"t\",\n          \"domain\": \"tenants\",\n          \"where\": null,\n          \"body\": {\n            \"op\": \"implies\",\n            \"args\": [\n              {\n                \"op\": \"var\",\n                \"name\": \"accessed\",\n                \"index\": [\n                  {\n                    \"op\": \"ref\",\n                    \"name\": \"s\"\n                  },\n                  {\n                    \"op\": \"ref\",\n                    \"name\": \"t\"\n                  }\n                ]\n              },\n              {\n                \"op\": \"var\",\n                \"name\": \"grant\",\n                \"index\": [\n                  {\n                    \"op\": \"ref\",\n                    \"name\": \"s\"\n                  },\n                  {\n                    \"op\": \"ref\",\n                    \"name\": \"t\"\n                  }\n                ]\n              }\n            ]\n          },\n          \"default\": null\n        },\n        \"default\": null\n      },\n      \"label\": \"租户隔离\",\n      \"description\": null\n    }\n  ],\n  \"features\": [],\n  \"objectives\": []\n}"
+  },
+  "version": 1
+ },
+ "property": {
+  "digest": "f601328336a3d7d9043ced1438fcfa719cf9722f4a86f0f87798b3b2a95a1634",
+  "id": "tenant_isolation",
+  "kind": "invariant"
+ },
+ "question": "Does the authorization component enforce tenant isolation on every access?"
+}

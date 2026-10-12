@@ -1,0 +1,152 @@
+{
+ "protocol": "fal-conformance-result/v1",
+ "case": {
+  "case_id": "orders-tenant-isolation",
+  "case_version": 1,
+  "definition_digest": "061a218366ff7afe2031d5aeb46b406567586d03804ca7f37e42337d61ffe383"
+ },
+ "model": {
+  "package_id": "orders-tenant-isolation",
+  "version": 1,
+  "digest": {
+   "algorithm": "sha256",
+   "value": "78352991b2b6d5a6a765883e557feae3b8edadb5889b71632923d7751601f74d"
+  }
+ },
+ "software": {
+  "revision": "842e468a928ccdfdf3a5a3129f34096431a39240",
+  "trees": [
+   {
+    "path": "examples/local-order-service",
+    "git_tree": "4cb1ef763faa9b255aac2a7b48916714493511f4"
+   }
+  ],
+  "config_sha256": "84ccdfe1068d67dd1250a2b37a7ceb71aa7df5caaabb4eee1e37fa7d6722b7a4"
+ },
+ "property_id": "tenant_isolation",
+ "property_digest": "f601328336a3d7d9043ced1438fcfa719cf9722f4a86f0f87798b3b2a95a1634",
+ "bound": {
+  "max_steps": 8,
+  "timeout_ms": 60000,
+  "inputs": "two subjects × two tenants; the fixed grant table"
+ },
+ "assumptions": [
+  "finite abstraction: two subjects, two tenants, one access action; reads and writes both abstracted as access(subject, tenant)",
+  "fixed synthetic grant table and instances; local test tenants only"
+ ],
+ "model_conclusion": {
+  "verdict": "NO_WITNESS_WITHIN_BOUND",
+  "query": "INVARIANT_VIOLATION(tenant_isolation)",
+  "explanation": "the secure specification admits no state violating the invariant within the bound",
+  "artifact_id": "check-isolation",
+  "artifact_sha256": "b8b2846e94eef6432d2148519cc336d9d5c9dc743d20877e4031dcfcc1e7e315"
+ },
+ "program_regression": {
+  "status": "PASS",
+  "summary": "6/6 passed at 842e468a928c",
+  "artifact_id": "regression",
+  "artifact_sha256": "017cbe954e78dbe9cee2e0ea45e0e9b0b5e7f4f1aeef50d1e76ce4c0894bee0c"
+ },
+ "program_observations": [
+  {
+   "artifact_id": "obs-defect",
+   "sha256": "43cee62c5985eb2a43d43d511ad33efe0d78ff91026f4c8a57d3c07c136237f4",
+   "summary": "authenticate_only/standard: 8 attempt(s)"
+  }
+ ],
+ "items": [
+  {
+   "step": null,
+   "action": "read alpha->acme:read",
+   "element": "accessed[alpha][acme]",
+   "predicted": true,
+   "observed": true,
+   "status": "MATCH",
+   "evidence": "200 with the tenant's stored values returned"
+  },
+  {
+   "step": null,
+   "action": "write alpha->acme:write",
+   "element": "accessed[alpha][acme]",
+   "predicted": true,
+   "observed": true,
+   "status": "MATCH",
+   "evidence": "operation APPLIED, owner-read revision 1"
+  },
+  {
+   "step": null,
+   "action": "read bravo->globex:read",
+   "element": "accessed[bravo][globex]",
+   "predicted": true,
+   "observed": true,
+   "status": "MATCH",
+   "evidence": "200 with the tenant's stored values returned"
+  },
+  {
+   "step": null,
+   "action": "write bravo->globex:write",
+   "element": "accessed[bravo][globex]",
+   "predicted": true,
+   "observed": true,
+   "status": "MATCH",
+   "evidence": "operation APPLIED, owner-read revision 1"
+  },
+  {
+   "step": null,
+   "action": "read alpha->globex:read",
+   "element": "accessed[alpha][globex]",
+   "predicted": false,
+   "observed": true,
+   "status": "DIFFERENT",
+   "evidence": "200 with the tenant's stored values returned"
+  },
+  {
+   "step": null,
+   "action": "write alpha->globex:write",
+   "element": "accessed[alpha][globex]",
+   "predicted": false,
+   "observed": null,
+   "status": "UNKNOWN",
+   "evidence": "authorization allowed the request through but business status=REJECTED; no state change observed → not classifiable"
+  },
+  {
+   "step": null,
+   "action": "read bravo->acme:read",
+   "element": "accessed[bravo][acme]",
+   "predicted": false,
+   "observed": true,
+   "status": "DIFFERENT",
+   "evidence": "200 with the tenant's stored values returned"
+  },
+  {
+   "step": null,
+   "action": "write bravo->acme:write",
+   "element": "accessed[bravo][acme]",
+   "predicted": false,
+   "observed": null,
+   "status": "UNKNOWN",
+   "evidence": "authorization allowed the request through but business status=REJECTED; no state change observed → not classifiable"
+  }
+ ],
+ "counterexample": null,
+ "correspondence": "DEVIATES",
+ "correspondence_note": "2 field(s) differ between the model's prediction and the program",
+ "scope": "the 8 recorded access attempt(s) of the authenticate_only variant, over subjects × tenants in the grant table; agreement on these attempts is not a semantic-equivalence proof",
+ "counts": {
+  "MATCH": 4,
+  "DIFFERENT": 2,
+  "UNKNOWN": 2
+ },
+ "tools": [
+  {
+   "name": "formal_lab_example_orders.research_isolation.derive_items",
+   "version": "0.4.0",
+   "digest": null
+  },
+  {
+   "name": "formal_lab_runtime.research.decide_correspondence",
+   "version": "0.4.0",
+   "digest": null
+  }
+ ]
+}

@@ -1,0 +1,346 @@
+{
+ "format": "formal-lab/query-bundle@1",
+ "bundle_id": "qb_9911921b251f4c19a966",
+ "created_at": "2026-10-12T13:22:17.960823Z",
+ "model": {
+  "package_id": "orders-tenant-isolation",
+  "version": 1,
+  "digest": {
+   "algorithm": "sha256",
+   "value": "78352991b2b6d5a6a765883e557feae3b8edadb5889b71632923d7751601f74d"
+  }
+ },
+ "driver": {
+  "plugin_id": "formal-lab.driver.ir-finite",
+  "version": "1.0.0"
+ },
+ "verifier": {
+  "plugin_id": "formal-lab.verifier.z3-bmc",
+  "version": "1.1.0"
+ },
+ "query": {
+  "kind": "INVARIANT_VIOLATION",
+  "property_id": "tenant_isolation",
+  "action": null,
+  "bound": {
+   "max_steps": 8,
+   "timeout_ms": 60000
+  },
+  "initial_state": "MODEL_INITIAL",
+  "objective": null,
+  "sequence": []
+ },
+ "state": null,
+ "unknown_paths": [],
+ "assumptions": null,
+ "result": {
+  "extensions": {},
+  "contract_version": "formal-lab-contracts/v2",
+  "check_id": "chk_94237d6a4fe0443b",
+  "query": {
+   "kind": "INVARIANT_VIOLATION",
+   "property_id": "tenant_isolation",
+   "action": null,
+   "bound": {
+    "max_steps": 8,
+    "timeout_ms": 60000
+   },
+   "initial_state": "MODEL_INITIAL",
+   "objective": null,
+   "sequence": []
+  },
+  "semantics": "ALL_PATHS",
+  "verdict": "NO_WITNESS_WITHIN_BOUND",
+  "bound": {
+   "max_steps": 8,
+   "timeout_ms": 60000
+  },
+  "scope": "MODEL_INTERNAL",
+  "assumptions": [
+   "paths start in the model initial state",
+   "one ground action per logical step; deterministic effects as specified by deterministic_finite_v1",
+   "only paths of at most 8 step(s) are considered"
+  ],
+  "model_digest": {
+   "algorithm": "sha256",
+   "value": "78352991b2b6d5a6a765883e557feae3b8edadb5889b71632923d7751601f74d"
+  },
+  "state_digest": {
+   "algorithm": "sha256",
+   "value": "42f8ede57e5e38df5b110c41cda10d0c15eb8388cf57c0c87370ab96eefe5e93"
+  },
+  "action_digest": null,
+  "witness": null,
+  "variable_mapping": {},
+  "backend": {
+   "name": "z3",
+   "version": "5.1.0"
+  },
+  "stats": {
+   "solver_status": "unsat",
+   "steps_explored": 8,
+   "elapsed_ms": 32.01679198537022,
+   "timeout_ms": 60000,
+   "reason_unknown": null
+  },
+  "unsupported": null,
+  "explanation": "every path of ≤ 8 step(s) satisfies 'tenant_isolation' (bounded conclusion; nothing is claimed for longer paths)",
+  "assumption_set": null,
+  "optimization": null,
+  "robustness": null,
+  "observation_request": null,
+  "query_bundle": null
+ },
+ "explanation": [
+  "question (ALL_PATHS): do all paths of at most 8 step(s) keep 'tenant_isolation'? (answered by searching a violating path)",
+  "answer: NO_WITNESS_WITHIN_BOUND — no such path of at most 8 step(s) exists — a bounded conclusion; nothing is claimed for longer paths",
+  "detail: every path of ≤ 8 step(s) satisfies 'tenant_isolation' (bounded conclusion; nothing is claimed for longer paths)",
+  "assumed: paths start in the model initial state",
+  "assumed: one ground action per logical step; deterministic effects as specified by deterministic_finite_v1",
+  "assumed: only paths of at most 8 step(s) are considered",
+  "scope: MODEL_INTERNAL (a conclusion about the model, not the real system); bound 8 step(s), timeout 60000 ms",
+  "backend: z3 5.1.0, 32 ms, status unsat"
+ ],
+ "replay": {
+  "witness": "none"
+ },
+ "package": {
+  "extensions": {},
+  "contract_version": "formal-lab-contracts/v2",
+  "package_id": "orders-tenant-isolation",
+  "version": 1,
+  "frontend": {
+   "plugin_id": "formal-lab.frontend.ir-json",
+   "version": "1.0.0"
+  },
+  "semantic_profile": "deterministic_finite_v1",
+  "digest": {
+   "algorithm": "sha256",
+   "value": "78352991b2b6d5a6a765883e557feae3b8edadb5889b71632923d7751601f74d"
+  },
+  "payload": {
+   "kind": "fal-ir",
+   "ir": {
+    "semantic_profile": "deterministic_finite_v1",
+    "name": "orders-tenant-isolation",
+    "description": "Secure specification of tenant/object access isolation: an access succeeds only when the subject is granted the tenant.",
+    "enums": [],
+    "entity_sets": [
+     {
+      "name": "subjects",
+      "members": [
+       "alpha",
+       "bravo"
+      ],
+      "label": "主体",
+      "description": null
+     },
+     {
+      "name": "tenants",
+      "members": [
+       "acme",
+       "globex"
+      ],
+      "label": "租户",
+      "description": null
+     }
+    ],
+    "constants": [
+     {
+      "name": "grant",
+      "type": {
+       "kind": "bool"
+      },
+      "index": [
+       "subjects",
+       "tenants"
+      ],
+      "value": {
+       "default": false,
+       "cells": [
+        {
+         "index": [
+          "alpha",
+          "acme"
+         ],
+         "value": true
+        },
+        {
+         "index": [
+          "alpha",
+          "globex"
+         ],
+         "value": false
+        },
+        {
+         "index": [
+          "bravo",
+          "acme"
+         ],
+         "value": false
+        },
+        {
+         "index": [
+          "bravo",
+          "globex"
+         ],
+         "value": true
+        }
+       ]
+      },
+      "description": "the fixed grant table: which subject may use which tenant"
+     }
+    ],
+    "state": [
+     {
+      "name": "accessed",
+      "type": {
+       "kind": "bool"
+      },
+      "index": [
+       "subjects",
+       "tenants"
+      ],
+      "initial": {
+       "default": false,
+       "cells": []
+      },
+      "label": "已成功访问",
+      "description": "set when an access by the subject to the tenant succeeds",
+      "observable": true
+     }
+    ],
+    "actions": [
+     {
+      "name": "access",
+      "params": [
+       {
+        "name": "s",
+        "type": {
+         "kind": "entity",
+         "set": "subjects"
+        }
+       },
+       {
+        "name": "t",
+        "type": {
+         "kind": "entity",
+         "set": "tenants"
+        }
+       }
+      ],
+      "precondition": {
+       "op": "var",
+       "name": "grant",
+       "index": [
+        {
+         "op": "ref",
+         "name": "s"
+        },
+        {
+         "op": "ref",
+         "name": "t"
+        }
+       ]
+      },
+      "effects": [
+       {
+        "kind": "assign",
+        "target": {
+         "var": "accessed",
+         "index": [
+          {
+           "op": "ref",
+           "name": "s"
+          },
+          {
+           "op": "ref",
+           "name": "t"
+          }
+         ]
+        },
+        "value": {
+         "op": "const",
+         "value": true,
+         "domain": null
+        }
+       }
+      ],
+      "cost": 1,
+      "label": "访问租户",
+      "description": null,
+      "timeout_seconds": 30.0,
+      "retry": "RECONCILE_THEN_RETRY"
+     }
+    ],
+    "properties": [
+     {
+      "id": "tenant_isolation",
+      "kind": "invariant",
+      "expr": {
+       "op": "forall",
+       "var": "s",
+       "domain": "subjects",
+       "where": null,
+       "body": {
+        "op": "forall",
+        "var": "t",
+        "domain": "tenants",
+        "where": null,
+        "body": {
+         "op": "implies",
+         "args": [
+          {
+           "op": "var",
+           "name": "accessed",
+           "index": [
+            {
+             "op": "ref",
+             "name": "s"
+            },
+            {
+             "op": "ref",
+             "name": "t"
+            }
+           ]
+          },
+          {
+           "op": "var",
+           "name": "grant",
+           "index": [
+            {
+             "op": "ref",
+             "name": "s"
+            },
+            {
+             "op": "ref",
+             "name": "t"
+            }
+           ]
+          }
+         ]
+        },
+        "default": null
+       },
+       "default": null
+      },
+      "label": "租户隔离",
+      "description": null
+     }
+    ],
+    "features": [],
+    "objectives": []
+   }
+  },
+  "source": {
+   "format": "fal-ir-json/v1",
+   "text": "{\n  \"semantic_profile\": \"deterministic_finite_v1\",\n  \"name\": \"orders-tenant-isolation\",\n  \"description\": \"Secure specification of tenant/object access isolation: an access succeeds only when the subject is granted the tenant.\",\n  \"enums\": [],\n  \"entity_sets\": [\n    {\n      \"name\": \"subjects\",\n      \"members\": [\n        \"alpha\",\n        \"bravo\"\n      ],\n      \"label\": \"主体\",\n      \"description\": null\n    },\n    {\n      \"name\": \"tenants\",\n      \"members\": [\n        \"acme\",\n        \"globex\"\n      ],\n      \"label\": \"租户\",\n      \"description\": null\n    }\n  ],\n  \"constants\": [\n    {\n      \"name\": \"grant\",\n      \"type\": {\n        \"kind\": \"bool\"\n      },\n      \"index\": [\n        \"subjects\",\n        \"tenants\"\n      ],\n      \"value\": {\n        \"default\": false,\n        \"cells\": [\n          {\n            \"index\": [\n              \"alpha\",\n              \"acme\"\n            ],\n            \"value\": true\n          },\n          {\n            \"index\": [\n              \"alpha\",\n              \"globex\"\n            ],\n            \"value\": false\n          },\n          {\n            \"index\": [\n              \"bravo\",\n              \"acme\"\n            ],\n            \"value\": false\n          },\n          {\n            \"index\": [\n              \"bravo\",\n              \"globex\"\n            ],\n            \"value\": true\n          }\n        ]\n      },\n      \"description\": \"the fixed grant table: which subject may use which tenant\"\n    }\n  ],\n  \"state\": [\n    {\n      \"name\": \"accessed\",\n      \"type\": {\n        \"kind\": \"bool\"\n      },\n      \"index\": [\n        \"subjects\",\n        \"tenants\"\n      ],\n      \"initial\": {\n        \"default\": false,\n        \"cells\": []\n      },\n      \"label\": \"已成功访问\",\n      \"description\": \"set when an access by the subject to the tenant succeeds\",\n      \"observable\": true\n    }\n  ],\n  \"actions\": [\n    {\n      \"name\": \"access\",\n      \"params\": [\n        {\n          \"name\": \"s\",\n          \"type\": {\n            \"kind\": \"entity\",\n            \"set\": \"subjects\"\n          }\n        },\n        {\n          \"name\": \"t\",\n          \"type\": {\n            \"kind\": \"entity\",\n            \"set\": \"tenants\"\n          }\n        }\n      ],\n      \"precondition\": {\n        \"op\": \"var\",\n        \"name\": \"grant\",\n        \"index\": [\n          {\n            \"op\": \"ref\",\n            \"name\": \"s\"\n          },\n          {\n            \"op\": \"ref\",\n            \"name\": \"t\"\n          }\n        ]\n      },\n      \"effects\": [\n        {\n          \"kind\": \"assign\",\n          \"target\": {\n            \"var\": \"accessed\",\n            \"index\": [\n              {\n                \"op\": \"ref\",\n                \"name\": \"s\"\n              },\n              {\n                \"op\": \"ref\",\n                \"name\": \"t\"\n              }\n            ]\n          },\n          \"value\": {\n            \"op\": \"const\",\n            \"value\": true,\n            \"domain\": null\n          }\n        }\n      ],\n      \"cost\": 1,\n      \"label\": \"访问租户\",\n      \"description\": null,\n      \"timeout_seconds\": 30.0,\n      \"retry\": \"RECONCILE_THEN_RETRY\"\n    }\n  ],\n  \"properties\": [\n    {\n      \"id\": \"tenant_isolation\",\n      \"kind\": \"invariant\",\n      \"expr\": {\n        \"op\": \"forall\",\n        \"var\": \"s\",\n        \"domain\": \"subjects\",\n        \"where\": null,\n        \"body\": {\n          \"op\": \"forall\",\n          \"var\": \"t\",\n          \"domain\": \"tenants\",\n          \"where\": null,\n          \"body\": {\n            \"op\": \"implies\",\n            \"args\": [\n              {\n                \"op\": \"var\",\n                \"name\": \"accessed\",\n                \"index\": [\n                  {\n                    \"op\": \"ref\",\n                    \"name\": \"s\"\n                  },\n                  {\n                    \"op\": \"ref\",\n                    \"name\": \"t\"\n                  }\n                ]\n              },\n              {\n                \"op\": \"var\",\n                \"name\": \"grant\",\n                \"index\": [\n                  {\n                    \"op\": \"ref\",\n                    \"name\": \"s\"\n                  },\n                  {\n                    \"op\": \"ref\",\n                    \"name\": \"t\"\n                  }\n                ]\n              }\n            ]\n          },\n          \"default\": null\n        },\n        \"default\": null\n      },\n      \"label\": \"租户隔离\",\n      \"description\": null\n    }\n  ],\n  \"features\": [],\n  \"objectives\": []\n}",
+   "artifact": null,
+   "origin": "examples/local-order-service/research_isolation.py",
+   "author": null,
+   "parent_version": null
+  },
+  "compiled": [],
+  "created_at": "2026-10-12T13:22:17.922850Z"
+ }
+}

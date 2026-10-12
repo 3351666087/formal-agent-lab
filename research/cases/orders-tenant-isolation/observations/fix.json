@@ -1,0 +1,86 @@
+{
+ "attempts": [
+  {
+   "access": "read",
+   "granted": true,
+   "id": "alpha->acme:read",
+   "observed_allowed": true,
+   "oracle": "200 with the tenant's stored values returned",
+   "status": 200,
+   "subject": "alpha",
+   "tenant": "acme"
+  },
+  {
+   "access": "write",
+   "granted": true,
+   "id": "alpha->acme:write",
+   "observed_allowed": true,
+   "oracle": "operation APPLIED, owner-read revision 1",
+   "status": 200,
+   "subject": "alpha",
+   "tenant": "acme"
+  },
+  {
+   "access": "read",
+   "granted": true,
+   "id": "bravo->globex:read",
+   "observed_allowed": true,
+   "oracle": "200 with the tenant's stored values returned",
+   "status": 200,
+   "subject": "bravo",
+   "tenant": "globex"
+  },
+  {
+   "access": "write",
+   "granted": true,
+   "id": "bravo->globex:write",
+   "observed_allowed": true,
+   "oracle": "operation APPLIED, owner-read revision 1",
+   "status": 200,
+   "subject": "bravo",
+   "tenant": "globex"
+  },
+  {
+   "access": "read",
+   "granted": false,
+   "id": "alpha->globex:read",
+   "observed_allowed": false,
+   "oracle": "authorization denied (403)",
+   "status": 403,
+   "subject": "alpha",
+   "tenant": "globex"
+  },
+  {
+   "access": "write",
+   "granted": false,
+   "id": "alpha->globex:write",
+   "observed_allowed": false,
+   "oracle": "authorization denied (403)",
+   "status": 403,
+   "subject": "alpha",
+   "tenant": "globex"
+  },
+  {
+   "access": "read",
+   "granted": false,
+   "id": "bravo->acme:read",
+   "observed_allowed": false,
+   "oracle": "authorization denied (403)",
+   "status": 403,
+   "subject": "bravo",
+   "tenant": "acme"
+  },
+  {
+   "access": "write",
+   "granted": false,
+   "id": "bravo->acme:write",
+   "observed_allowed": false,
+   "oracle": "authorization denied (403)",
+   "status": 403,
+   "subject": "bravo",
+   "tenant": "acme"
+  }
+ ],
+ "mode": "per_tenant",
+ "scenario": "standard"
+}

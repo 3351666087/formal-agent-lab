@@ -1,0 +1,356 @@
+{
+ "protocol": "fal-research-case/v1",
+ "identity": {
+  "case_id": "orders-tenant-isolation",
+  "case_version": 1,
+  "track": "implementation_conformance",
+  "mechanism_family": "access-control-isolation",
+  "title": "Order service: tenant/object access isolation",
+  "purpose": "Verify that the authorization component isolates tenants on the real order service: a subject may use a tenant only when granted. Defensive software verification on local test tenants; the oracle reads real state, never a self-reported success."
+ },
+ "software": {
+  "repository": "https://github.com/3351666087/formal-agent-lab",
+  "license": "Apache-2.0",
+  "revision": "842e468a928ccdfdf3a5a3129f34096431a39240",
+  "trees": [
+   {
+    "path": "examples/local-order-service",
+    "git_tree": "4cb1ef763faa9b255aac2a7b48916714493511f4"
+   }
+  ],
+  "config_sha256": "84ccdfe1068d67dd1250a2b37a7ceb71aa7df5caaabb4eee1e37fa7d6722b7a4",
+  "build_dependencies": [],
+  "runtime_dependencies": [],
+  "variant": "own_test_variant",
+  "variant_note": "the order service plus the phase-5B authorization research fixture (research_isolation.py), separate from the default startup path; defect/fix is one configuration flag (authenticate_only vs per_tenant) on the authorization component"
+ },
+ "comparison": {
+  "before": {
+   "present": true,
+   "revision": "842e468a928ccdfdf3a5a3129f34096431a39240",
+   "artifact_ids": [
+    "obs-defect",
+    "obs-partial"
+   ],
+   "absent_reason": null
+  },
+  "after": {
+   "present": true,
+   "revision": "842e468a928ccdfdf3a5a3129f34096431a39240",
+   "artifact_ids": [
+    "obs-fix",
+    "regression"
+   ],
+   "absent_reason": null
+  },
+  "change_basis": "configuration: the authorization mode — authenticate_only omits the object-level tenant grant check (defect); per_tenant enforces it (fix)",
+  "regression_test_source": "examples/local-order-service/tests/test_research_isolation.py"
+ },
+ "models": [
+  {
+   "label": "secure-spec",
+   "role": "reference",
+   "model_ref": {
+    "package_id": "orders-tenant-isolation",
+    "version": 1,
+    "digest": {
+     "algorithm": "sha256",
+     "value": "78352991b2b6d5a6a765883e557feae3b8edadb5889b71632923d7751601f74d"
+    }
+   },
+   "artifact_id": "model",
+   "semantic_profile": "deterministic_finite_v1",
+   "properties": [
+    {
+     "property_id": "tenant_isolation",
+     "kind": "invariant",
+     "digest": "f601328336a3d7d9043ced1438fcfa719cf9722f4a86f0f87798b3b2a95a1634",
+     "summary": "no access succeeds unless the subject is granted the tenant: forall s,t: accessed[s][t] -> grant[s][t]"
+    }
+   ],
+   "bounds": {
+    "max_steps": 8,
+    "timeout_ms": 60000,
+    "inputs": "two subjects × two tenants; the fixed grant table"
+   },
+   "assumptions": [
+    "finite abstraction: two subjects, two tenants, one access action; reads and writes both abstracted as access(subject, tenant)",
+    "fixed synthetic grant table and instances; local test tenants only"
+   ],
+   "uncovered_semantics": [
+    "concurrency between requests",
+    "token/credential strength and transport",
+    "partial-read leakage that is not visible in the tenant's stored state (kept UNKNOWN, not asserted)"
+   ]
+  }
+ ],
+ "correspondence": [
+  {
+   "program": {
+    "component": "authorization layer",
+    "path": "examples/local-order-service/src/formal_lab_example_orders/research_isolation.py",
+    "symbol": "create_isolation_app.Authorization.dispatch"
+   },
+   "model": {
+    "kind": "action",
+    "name": "access"
+   },
+   "relation": "MEASURED",
+   "evidence_artifact_ids": [
+    "obs-defect",
+    "obs-fix"
+   ],
+   "note": "the per-request authorization decision is the model action's precondition grant[s][t]"
+  },
+  {
+   "program": {
+    "component": "grant table",
+    "path": "examples/local-order-service/src/formal_lab_example_orders/research_isolation.py",
+    "symbol": "PRINCIPALS"
+   },
+   "model": {
+    "kind": "constant",
+    "name": "grant"
+   },
+   "relation": "MANUAL_REVIEW",
+   "evidence_artifact_ids": [],
+   "note": "the principal→tenant grants are the model constant grant[subject][tenant]"
+  },
+  {
+   "program": {
+    "component": "tenant store",
+    "path": "examples/local-order-service/src/formal_lab_example_orders/service.py",
+    "symbol": "store"
+   },
+   "model": {
+    "kind": "state",
+    "name": "accessed"
+   },
+   "relation": "MEASURED",
+   "evidence_artifact_ids": [
+    "obs-defect"
+   ],
+   "note": "a landed cross-tenant write / returned read, read back by the tenant's owner, is accessed"
+  }
+ ],
+ "validation": {
+  "criteria": [
+   {
+    "id": "c-defect-deviates",
+    "text": "the defect variant lets a subject reach another tenant"
+   },
+   {
+    "id": "c-fix-corresponds",
+    "text": "the fix variant denies the cross-tenant access"
+   },
+   {
+    "id": "c-partial-unknown",
+    "text": "a request the business layer rejects stays UNKNOWN"
+   },
+   {
+    "id": "c-regression",
+    "text": "same-tenant access keeps working in both variants"
+   }
+  ],
+  "fixture_ids": [
+   "fixture-config"
+  ],
+  "observation_ids": [
+   "obs-defect",
+   "obs-fix",
+   "obs-partial"
+  ],
+  "model_check_ids": [
+   "check-isolation"
+  ],
+  "regression_ids": [
+   "regression"
+  ],
+  "conformance_ids": [
+   "conf-defect",
+   "conf-fix",
+   "conf-partial"
+  ],
+  "reference_ids": [
+   "reference"
+  ],
+  "task_input_ids": [
+   "task-input"
+  ]
+ },
+ "reproduction": {
+  "environment": "Colima VM; the isolation fixture as a uvicorn subprocess over real SQLite; Z3 verifier",
+  "reset": "each tenant reset by its own authorized principal (POST /t/{tenant}/admin/reset)",
+  "cleanup": "the fixture subprocess is terminated and its data dir removed",
+  "seeds": [
+   1
+  ],
+  "nondeterminism": [
+   "none in scope: fixed grants, fixed instances, local subprocess"
+  ],
+  "commands": [
+   {
+    "command": "python scripts/p5b_isolation_case.py",
+    "purpose": "build and validate this case"
+   },
+   {
+    "command": "pytest examples/local-order-service/tests/test_research_isolation.py",
+    "purpose": "program regression"
+   },
+   {
+    "command": "python -m formal_lab_example_orders.research_isolation --mode per_tenant",
+    "purpose": "run the fixture"
+   }
+  ],
+  "prerequisites": [
+   "uv sync --frozen",
+   "the order-service example installed in the project venv"
+  ]
+ },
+ "artifacts": [
+  {
+   "id": "model",
+   "role": "model",
+   "path": "models/orders-tenant-isolation.package.json",
+   "sha256": "a37d432b4399220886106f69848c9485f339f5bcc63a9d93b69265e492e64619",
+   "media_type": "application/json",
+   "side": "none",
+   "revision": null,
+   "description": "secure specification: an access succeeds only when the subject is granted the tenant",
+   "stored": null
+  },
+  {
+   "id": "check-isolation",
+   "role": "model_check",
+   "path": "model_checks/tenant_isolation.qb.json",
+   "sha256": "b8b2846e94eef6432d2148519cc336d9d5c9dc743d20877e4031dcfcc1e7e315",
+   "media_type": "application/json",
+   "side": "none",
+   "revision": null,
+   "description": "INVARIANT_VIOLATION(tenant_isolation): NO_WITNESS_WITHIN_BOUND",
+   "stored": null
+  },
+  {
+   "id": "fixture-config",
+   "role": "fixture",
+   "path": "fixtures/authorization.json",
+   "sha256": "2d7971bd3fe9e8afc958353d9f7cf33aa4f2731934f35303151db265d266e803",
+   "media_type": "application/json",
+   "side": "both",
+   "revision": "842e468a928ccdfdf3a5a3129f34096431a39240",
+   "description": "the fixed grant table and principals (local test tenants only)",
+   "stored": null
+  },
+  {
+   "id": "mechanism",
+   "role": "source",
+   "path": "MECHANISM.md",
+   "sha256": "a56cef1a3deb6f206c261d7d6819b54499982474c3af981f3f62363fe69fcee2",
+   "media_type": "text/markdown",
+   "side": "both",
+   "revision": "842e468a928ccdfdf3a5a3129f34096431a39240",
+   "description": "one-page mechanism note (subject/resource/capability/trust-boundary/action)",
+   "stored": null
+  },
+  {
+   "id": "obs-defect",
+   "role": "observation",
+   "path": "observations/defect.json",
+   "sha256": "43cee62c5985eb2a43d43d511ad33efe0d78ff91026f4c8a57d3c07c136237f4",
+   "media_type": "application/json",
+   "side": "before",
+   "revision": "842e468a928ccdfdf3a5a3129f34096431a39240",
+   "description": "authenticate_only variant: recorded access attempts + independent oracle",
+   "stored": null
+  },
+  {
+   "id": "obs-fix",
+   "role": "observation",
+   "path": "observations/fix.json",
+   "sha256": "441dbd9d6e4d7d957b85052923be2beb5b23cc74815ea1ffd90853235b857bcc",
+   "media_type": "application/json",
+   "side": "after",
+   "revision": "842e468a928ccdfdf3a5a3129f34096431a39240",
+   "description": "per_tenant variant: recorded access attempts + independent oracle",
+   "stored": null
+  },
+  {
+   "id": "obs-partial",
+   "role": "observation",
+   "path": "observations/partial.json",
+   "sha256": "a019cdbeb8f359a064f901f0f932b08e7754e4d2a0bdb932e0e5825ae5a452a3",
+   "media_type": "application/json",
+   "side": "before",
+   "revision": "842e468a928ccdfdf3a5a3129f34096431a39240",
+   "description": "authenticate_only: a cross-tenant write the business layer rejects (not classifiable)",
+   "stored": null
+  },
+  {
+   "id": "regression",
+   "role": "regression",
+   "path": "regression/isolation-junit.xml",
+   "sha256": "017cbe954e78dbe9cee2e0ea45e0e9b0b5e7f4f1aeef50d1e76ce4c0894bee0c",
+   "media_type": "application/xml",
+   "side": "both",
+   "revision": "842e468a928ccdfdf3a5a3129f34096431a39240",
+   "description": "pytest test_research_isolation.py: 6/6 passed",
+   "stored": null
+  },
+  {
+   "id": "task-input",
+   "role": "task_input",
+   "path": "task_inputs/isolation-task.json",
+   "sha256": "28c6930994b205cb8300437d8038689c47c54c0fac054bb6f9944992eeaf3351",
+   "media_type": "application/json",
+   "side": "none",
+   "revision": null,
+   "description": "phase-6 task material: model + property + mechanism + grants only (no reference answers)",
+   "stored": null
+  },
+  {
+   "id": "conf-defect",
+   "role": "conformance",
+   "path": "conformance/defect.result.json",
+   "sha256": "3059cf3b5e5f9cadfb63348c0ca0b95797abdd06155934cb981282a92982f46a",
+   "media_type": "application/json",
+   "side": "none",
+   "revision": null,
+   "description": "defect: DEVIATES",
+   "stored": null
+  },
+  {
+   "id": "conf-fix",
+   "role": "conformance",
+   "path": "conformance/fix.result.json",
+   "sha256": "f4ab7bb3238f4c6ca908b3204426d66e7dad2fe912aa69c5a952ecb5a1e66914",
+   "media_type": "application/json",
+   "side": "none",
+   "revision": null,
+   "description": "fix: CORRESPONDS",
+   "stored": null
+  },
+  {
+   "id": "conf-partial",
+   "role": "conformance",
+   "path": "conformance/partial.result.json",
+   "sha256": "b5aa0e2562498ea271d924a857737f8439cc3f4cdb616fa271baedcd1f9384f6",
+   "media_type": "application/json",
+   "side": "none",
+   "revision": null,
+   "description": "partial: DEVIATES",
+   "stored": null
+  },
+  {
+   "id": "reference",
+   "role": "reference",
+   "path": "reference/expected.json",
+   "sha256": "a62e522a22d1f4a19d37bbf428e33450a9be490b927ca34ea824e730656bedc8",
+   "media_type": "application/json",
+   "side": "none",
+   "revision": null,
+   "description": "expected correspondence verdicts (defect DEVIATES, fix CORRESPONDS, partial UNKNOWN)",
+   "stored": null
+  }
+ ],
+ "case_digest": "b9627528b62207a1995b21a83d438a6f56a67881081f957bb27f3df889d8fa2b"
+}
