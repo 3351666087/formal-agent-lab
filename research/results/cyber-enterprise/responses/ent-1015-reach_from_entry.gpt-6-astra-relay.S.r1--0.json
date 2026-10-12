@@ -1,0 +1,110 @@
+{
+ "protocol": "fal-research-response/v1",
+ "experiment": {
+  "study_id": "cyber-enterprise",
+  "unit_id": "ent-1015-reach_from_entry.gpt-6-astra-relay.S.r1",
+  "track": "formal_model_analysis",
+  "case_id": null,
+  "case_version": null,
+  "task_id": "ent-1015-reach_from_entry",
+  "task_digest": "4de02fffab8a2411ba8bf18369a250b12a2435e6d11e82f17920afe655199d78",
+  "representation_id": "steplist",
+  "replicate_id": 1,
+  "assistance_mode": "STATIC_UNASSISTED",
+  "sampling_id": "ent-1015-reach_from_entry.gpt-6-astra-relay.S.r1#0"
+ },
+ "call": {
+  "provider": "openai",
+  "provider_config_id": "gpt-6-astra-relay",
+  "api": "openai.chat.completions",
+  "api_version": "v1",
+  "endpoint": "https://api.uheapi.com/v1/chat/completions",
+  "route": "COMPATIBLE_RELAY",
+  "endpoint_kind": "PROVIDER",
+  "model_requested": "gpt-6-astra",
+  "model_returned": "gpt-6-astra",
+  "model_switched": false,
+  "model_identity": "RELAY_REPORTED",
+  "response_id": "resp_030d45e224351212016acd52fbf7f88193a9db3a82240b628d",
+  "request_id": "1e07ce25-0beb-4771-aed6-fca310d55f01, 2bfb8715-1fe4-43ae-bb8e-4bbef0b4b8e3, 27d1aee2-d081-4caa-af45-07d84646c432",
+  "started_at": "2026-10-12T21:36:59Z",
+  "finished_at": "2026-10-12T21:37:03Z",
+  "params": {
+   "max_completion_tokens": 3000
+  },
+  "params_digest": "813038d95bea64de"
+ },
+ "raw": {
+  "body": {
+   "id": "resp_030d45e224351212016acd52fbf7f88193a9db3a82240b628d",
+   "object": "chat.completion",
+   "created": 1791841022,
+   "model": "gpt-6-astra",
+   "choices": [
+    {
+     "index": 0,
+     "message": {
+      "role": "assistant",
+      "content": "{\"reachable\":true,\"rationale\":\"A valid path is internet:initialAccess → containerHost:exploitPublicApp → memoryDump:credentialAccess → appServer:lateralMovement → codeRepo:collection → crownData:exfiltrate. Every step along this path is OR, so its preceding reachable parent suffices. No other foothold is needed.\"}"
+     },
+     "finish_reason": "stop"
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 5220,
+    "completion_tokens": 77,
+    "total_tokens": 5297,
+    "prompt_tokens_details": {
+     "cached_tokens": 4992
+    }
+   },
+   "service_tier": "default"
+  },
+  "body_text": null,
+  "visible_text": "{\"reachable\":true,\"rationale\":\"A valid path is internet:initialAccess → containerHost:exploitPublicApp → memoryDump:credentialAccess → appServer:lateralMovement → codeRepo:collection → crownData:exfiltrate. Every step along this path is OR, so its preceding reachable parent suffices. No other foothold is needed.\"}",
+  "finish_reason": "stop",
+  "finish_class": "STOP",
+  "refusal": null,
+  "truncated": false,
+  "tool_calls": [],
+  "reasoning": "NOT_EXPOSED"
+ },
+ "status": {
+  "outcome": "ANSWERED",
+  "transport_ok": true,
+  "http_status": 200,
+  "provider_error_type": null,
+  "provider_error": null,
+  "model_switched": false,
+  "attempts": [
+   {
+    "attempt_no": 1,
+    "attempt_id": "att_15db3536d0e9",
+    "sent": true,
+    "confirmed": true,
+    "http_status": 200,
+    "error_class": null,
+    "error": null,
+    "latency_ms": 3643.0
+   }
+  ],
+  "network_retries": 2,
+  "note": null
+ },
+ "cost": {
+  "usage_known": true,
+  "input_tokens": 5220,
+  "output_tokens": 77,
+  "reasoning_tokens": null,
+  "cache_read_tokens": 4992,
+  "cache_write_tokens": null,
+  "latency_ms": 3643.2,
+  "http_attempts": 1,
+  "possibly_billed_unconfirmed": 0,
+  "prompt_digest": "b0824b5c71bb2fde",
+  "config_digest": "687a29ef8fc767e7"
+ },
+ "task_input_digest": "b0824b5c71bb2fdece778f367d064b8eb8c83a8c96e5bf8fc8b87ba1041e5da7",
+ "reuse_key": "20edf99f3daade2b5a4e561007b32b018e12a4a979d6cf6904cb63a59cd4bef3",
+ "recorded_at": "2026-10-12T21:37:03Z"
+}

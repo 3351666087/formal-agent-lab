@@ -1,0 +1,113 @@
+{
+ "protocol": "fal-research-response/v1",
+ "experiment": {
+  "study_id": "cyber-enterprise",
+  "unit_id": "ent-1016-chokepoints.gpt-6-astra-relay.S.r1",
+  "track": "formal_model_analysis",
+  "case_id": null,
+  "case_version": null,
+  "task_id": "ent-1016-chokepoints",
+  "task_digest": "3ac90b9580bae328a2eb9ca76545b640d6a2784af96e0e85a24879a3d7111315",
+  "representation_id": "steplist",
+  "replicate_id": 1,
+  "assistance_mode": "STATIC_UNASSISTED",
+  "sampling_id": "ent-1016-chokepoints.gpt-6-astra-relay.S.r1#0"
+ },
+ "call": {
+  "provider": "openai",
+  "provider_config_id": "gpt-6-astra-relay",
+  "api": "openai.chat.completions",
+  "api_version": "v1",
+  "endpoint": "https://api.uheapi.com/v1/chat/completions",
+  "route": "COMPATIBLE_RELAY",
+  "endpoint_kind": "PROVIDER",
+  "model_requested": "gpt-6-astra",
+  "model_returned": "gpt-6-astra",
+  "model_switched": false,
+  "model_identity": "RELAY_REPORTED",
+  "response_id": "resp_059645c74bae6773016acd54a55df887d1859453125f5c73be",
+  "request_id": "6148964d-351e-4fd9-a470-e06e319c788d, 52e1b45d-42fa-4d6a-b143-0549beb01862",
+  "started_at": "2026-10-12T21:44:04Z",
+  "finished_at": "2026-10-12T21:44:11Z",
+  "params": {
+   "max_completion_tokens": 3000
+  },
+  "params_digest": "813038d95bea64de"
+ },
+ "raw": {
+  "body": {
+   "id": "resp_059645c74bae6773016acd54a55df887d1859453125f5c73be",
+   "object": "chat.completion",
+   "created": 1791841450,
+   "model": "gpt-6-astra",
+   "choices": [
+    {
+     "index": 0,
+     "message": {
+      "role": "assistant",
+      "content": "{\"count\":0,\"rationale\":\"Two routes to the target have no shared non-entry steps. One reaches tokenCache:credentialAccess from supplychain:initialAccess, then fileServer:lateralMovement and codeRepo:collection. Another reaches mailClient:execution from internet:initialAccess and iotDevice:exploitPublicApp from exposedApi:initialAccess, satisfying dbLogin:authenticate; dbLogin reaches both printServer:lateralMovement and monitoringHost:lateralMovement, satisfying hypervisor:privilegeEscalation and then dbReplica:collection. Both collections independently reach the target. Blocking any one eligible step leaves at least one route intact.\"}"
+     },
+     "finish_reason": "stop"
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 5286,
+    "completion_tokens": 189,
+    "total_tokens": 5475,
+    "prompt_tokens_details": {
+     "cached_tokens": 5120
+    },
+    "completion_tokens_details": {
+     "reasoning_tokens": 52
+    }
+   },
+   "service_tier": "default"
+  },
+  "body_text": null,
+  "visible_text": "{\"count\":0,\"rationale\":\"Two routes to the target have no shared non-entry steps. One reaches tokenCache:credentialAccess from supplychain:initialAccess, then fileServer:lateralMovement and codeRepo:collection. Another reaches mailClient:execution from internet:initialAccess and iotDevice:exploitPublicApp from exposedApi:initialAccess, satisfying dbLogin:authenticate; dbLogin reaches both printServer:lateralMovement and monitoringHost:lateralMovement, satisfying hypervisor:privilegeEscalation and then dbReplica:collection. Both collections independently reach the target. Blocking any one eligible step leaves at least one route intact.\"}",
+  "finish_reason": "stop",
+  "finish_class": "STOP",
+  "refusal": null,
+  "truncated": false,
+  "tool_calls": [],
+  "reasoning": "NOT_EXPOSED"
+ },
+ "status": {
+  "outcome": "ANSWERED",
+  "transport_ok": true,
+  "http_status": 200,
+  "provider_error_type": null,
+  "provider_error": null,
+  "model_switched": false,
+  "attempts": [
+   {
+    "attempt_no": 1,
+    "attempt_id": "att_1be0749fc237",
+    "sent": true,
+    "confirmed": true,
+    "http_status": 200,
+    "error_class": null,
+    "error": null,
+    "latency_ms": 6257.5
+   }
+  ],
+  "network_retries": 2,
+  "note": null
+ },
+ "cost": {
+  "usage_known": true,
+  "input_tokens": 5286,
+  "output_tokens": 189,
+  "reasoning_tokens": 52,
+  "cache_read_tokens": 5120,
+  "cache_write_tokens": null,
+  "latency_ms": 6257.6,
+  "http_attempts": 1,
+  "possibly_billed_unconfirmed": 0,
+  "prompt_digest": "1d63e10a9a5ff31e",
+  "config_digest": "687a29ef8fc767e7"
+ },
+ "task_input_digest": "1d63e10a9a5ff31e1024426f84d38ab227bc4c76c6e3ed06f90c93a64fcf67e3",
+ "reuse_key": "56687b0f66a4cd4d525f672d27be28e84b342039a7a323fd297a6f463848786c",
+ "recorded_at": "2026-10-12T21:44:11Z"
+}

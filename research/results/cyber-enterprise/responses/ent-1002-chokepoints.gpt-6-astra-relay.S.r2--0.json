@@ -1,0 +1,113 @@
+{
+ "protocol": "fal-research-response/v1",
+ "experiment": {
+  "study_id": "cyber-enterprise",
+  "unit_id": "ent-1002-chokepoints.gpt-6-astra-relay.S.r2",
+  "track": "formal_model_analysis",
+  "case_id": null,
+  "case_version": null,
+  "task_id": "ent-1002-chokepoints",
+  "task_digest": "7594e0740c7da7004f759a953b9303fc1ed0d6d18024a4739ca5abd7eeb9d216",
+  "representation_id": "steplist",
+  "replicate_id": 2,
+  "assistance_mode": "STATIC_UNASSISTED",
+  "sampling_id": "ent-1002-chokepoints.gpt-6-astra-relay.S.r2#0"
+ },
+ "call": {
+  "provider": "openai",
+  "provider_config_id": "gpt-6-astra-relay",
+  "api": "openai.chat.completions",
+  "api_version": "v1",
+  "endpoint": "https://api.uheapi.com/v1/chat/completions",
+  "route": "COMPATIBLE_RELAY",
+  "endpoint_kind": "PROVIDER",
+  "model_requested": "gpt-6-astra",
+  "model_returned": "gpt-6-astra",
+  "model_switched": false,
+  "model_identity": "RELAY_REPORTED",
+  "response_id": "resp_091e5b971d025afd016acd40922f808194a8be10325c71fa6d",
+  "request_id": "01b2c2a0-29ee-4d38-b5f1-3878286c92cc, 508dd8d4-6fd6-4918-b611-b89d9a5df362, 8c35028a-a22a-46ac-97b8-0fd57946ca02, 3917c0bc-22c8-468c-8fae-0ced46f7ac92",
+  "started_at": "2026-10-12T20:18:24Z",
+  "finished_at": "2026-10-12T20:18:33Z",
+  "params": {
+   "max_completion_tokens": 3000
+  },
+  "params_digest": "813038d95bea64de"
+ },
+ "raw": {
+  "body": {
+   "id": "resp_091e5b971d025afd016acd40922f808194a8be10325c71fa6d",
+   "object": "chat.completion",
+   "created": 1791836313,
+   "model": "gpt-6-astra",
+   "choices": [
+    {
+     "index": 0,
+     "message": {
+      "role": "assistant",
+      "content": "{\"count\":0,\"rationale\":\"Two routes to the target have no shared intermediate steps: internet:initialAccess → iotDevice:exploitPublicApp → configSecret:credentialAccess → fileServer:lateralMovement → dbReplica:collection → crownData:exfiltrate; and exposedApi:initialAccess → dmzWeb:execution → browserStore:credentialAccess → jumpHost:lateralMovement → shareMount:collection → crownData:exfiltrate. Every intermediate step on these routes is OR, so either route independently reaches the target. Blocking any single step other than a foothold or the target leaves at least one route intact.\"}"
+     },
+     "finish_reason": "stop"
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 5180,
+    "completion_tokens": 169,
+    "total_tokens": 5349,
+    "prompt_tokens_details": {
+     "cached_tokens": 4992
+    },
+    "completion_tokens_details": {
+     "reasoning_tokens": 32
+    }
+   },
+   "service_tier": "default"
+  },
+  "body_text": null,
+  "visible_text": "{\"count\":0,\"rationale\":\"Two routes to the target have no shared intermediate steps: internet:initialAccess → iotDevice:exploitPublicApp → configSecret:credentialAccess → fileServer:lateralMovement → dbReplica:collection → crownData:exfiltrate; and exposedApi:initialAccess → dmzWeb:execution → browserStore:credentialAccess → jumpHost:lateralMovement → shareMount:collection → crownData:exfiltrate. Every intermediate step on these routes is OR, so either route independently reaches the target. Blocking any single step other than a foothold or the target leaves at least one route intact.\"}",
+  "finish_reason": "stop",
+  "finish_class": "STOP",
+  "refusal": null,
+  "truncated": false,
+  "tool_calls": [],
+  "reasoning": "NOT_EXPOSED"
+ },
+ "status": {
+  "outcome": "ANSWERED",
+  "transport_ok": true,
+  "http_status": 200,
+  "provider_error_type": null,
+  "provider_error": null,
+  "model_switched": false,
+  "attempts": [
+   {
+    "attempt_no": 1,
+    "attempt_id": "att_22ff4aea34ac",
+    "sent": true,
+    "confirmed": true,
+    "http_status": 200,
+    "error_class": null,
+    "error": null,
+    "latency_ms": 8710.7
+   }
+  ],
+  "network_retries": 2,
+  "note": null
+ },
+ "cost": {
+  "usage_known": true,
+  "input_tokens": 5180,
+  "output_tokens": 169,
+  "reasoning_tokens": 32,
+  "cache_read_tokens": 4992,
+  "cache_write_tokens": null,
+  "latency_ms": 8711.6,
+  "http_attempts": 1,
+  "possibly_billed_unconfirmed": 0,
+  "prompt_digest": "06a694e0521b7744",
+  "config_digest": "687a29ef8fc767e7"
+ },
+ "task_input_digest": "06a694e0521b77448814e0d15b616259d74845b469dd9a75d04612bb7295e1c1",
+ "reuse_key": "0af6fe7807a76d0011f1bb56860300bf0a9b9567c37caccfb9523e6fd73cbaf7",
+ "recorded_at": "2026-10-12T20:18:33Z"
+}

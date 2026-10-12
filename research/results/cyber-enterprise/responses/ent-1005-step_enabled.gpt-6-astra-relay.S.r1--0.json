@@ -1,0 +1,110 @@
+{
+ "protocol": "fal-research-response/v1",
+ "experiment": {
+  "study_id": "cyber-enterprise",
+  "unit_id": "ent-1005-step_enabled.gpt-6-astra-relay.S.r1",
+  "track": "formal_model_analysis",
+  "case_id": null,
+  "case_version": null,
+  "task_id": "ent-1005-step_enabled",
+  "task_digest": "e2eeb0c30257dc760e2990a4c8bfe61f5d8bf61dd572a96ba0ac4799dd2f8840",
+  "representation_id": "steplist",
+  "replicate_id": 1,
+  "assistance_mode": "STATIC_UNASSISTED",
+  "sampling_id": "ent-1005-step_enabled.gpt-6-astra-relay.S.r1#0"
+ },
+ "call": {
+  "provider": "openai",
+  "provider_config_id": "gpt-6-astra-relay",
+  "api": "openai.chat.completions",
+  "api_version": "v1",
+  "endpoint": "https://api.uheapi.com/v1/chat/completions",
+  "route": "COMPATIBLE_RELAY",
+  "endpoint_kind": "PROVIDER",
+  "model_requested": "gpt-6-astra",
+  "model_returned": "gpt-6-astra",
+  "model_switched": false,
+  "model_identity": "RELAY_REPORTED",
+  "response_id": "resp_0465f3d5b4d62494016acd44ff66ec81909920eaf6e37fd565",
+  "request_id": "51731c44-8174-4794-a1da-1139ff52d5a6, 3989d712-ea1f-4d51-87e0-e8f340a55b4e, 48101424-fe33-4e34-83f4-7709c72c65fd, 2002cbb1-5ba2-4b4e-b0eb-56fb31ac8e83",
+  "started_at": "2026-10-12T20:37:18Z",
+  "finished_at": "2026-10-12T20:37:21Z",
+  "params": {
+   "max_completion_tokens": 3000
+  },
+  "params_digest": "813038d95bea64de"
+ },
+ "raw": {
+  "body": {
+   "id": "resp_0465f3d5b4d62494016acd44ff66ec81909920eaf6e37fd565",
+   "object": "chat.completion",
+   "created": 1791837441,
+   "model": "gpt-6-astra",
+   "choices": [
+    {
+     "index": 0,
+     "message": {
+      "role": "assistant",
+      "content": "{\"enabled\":false,\"rationale\":\"domainAdmin:privilegeEscalation requires both dbLogin:authenticate and apiToken:authenticate to have been reached. Only dbLogin:authenticate is already compromised; apiToken:authenticate has not been reached, so the step is not enabled next.\"}"
+     },
+     "finish_reason": "stop"
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 5196,
+    "completion_tokens": 63,
+    "total_tokens": 5259,
+    "prompt_tokens_details": {
+     "cached_tokens": 4992
+    }
+   },
+   "service_tier": "default"
+  },
+  "body_text": null,
+  "visible_text": "{\"enabled\":false,\"rationale\":\"domainAdmin:privilegeEscalation requires both dbLogin:authenticate and apiToken:authenticate to have been reached. Only dbLogin:authenticate is already compromised; apiToken:authenticate has not been reached, so the step is not enabled next.\"}",
+  "finish_reason": "stop",
+  "finish_class": "STOP",
+  "refusal": null,
+  "truncated": false,
+  "tool_calls": [],
+  "reasoning": "NOT_EXPOSED"
+ },
+ "status": {
+  "outcome": "ANSWERED",
+  "transport_ok": true,
+  "http_status": 200,
+  "provider_error_type": null,
+  "provider_error": null,
+  "model_switched": false,
+  "attempts": [
+   {
+    "attempt_no": 1,
+    "attempt_id": "att_0a386142ab1c",
+    "sent": true,
+    "confirmed": true,
+    "http_status": 200,
+    "error_class": null,
+    "error": null,
+    "latency_ms": 2950.1
+   }
+  ],
+  "network_retries": 2,
+  "note": null
+ },
+ "cost": {
+  "usage_known": true,
+  "input_tokens": 5196,
+  "output_tokens": 63,
+  "reasoning_tokens": null,
+  "cache_read_tokens": 4992,
+  "cache_write_tokens": null,
+  "latency_ms": 2950.4,
+  "http_attempts": 1,
+  "possibly_billed_unconfirmed": 0,
+  "prompt_digest": "b850786322ab0f09",
+  "config_digest": "687a29ef8fc767e7"
+ },
+ "task_input_digest": "b850786322ab0f0952367cdc274315b4093a1630e04359d70ddc5e4db2e99260",
+ "reuse_key": "eb3b1f5dd3cc4068040d14f7ee2e66e71324dc0147b2df33e0fbc8143f10c7fe",
+ "recorded_at": "2026-10-12T20:37:21Z"
+}

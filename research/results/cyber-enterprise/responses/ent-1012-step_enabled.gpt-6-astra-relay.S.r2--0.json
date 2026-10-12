@@ -1,0 +1,110 @@
+{
+ "protocol": "fal-research-response/v1",
+ "experiment": {
+  "study_id": "cyber-enterprise",
+  "unit_id": "ent-1012-step_enabled.gpt-6-astra-relay.S.r2",
+  "track": "formal_model_analysis",
+  "case_id": null,
+  "case_version": null,
+  "task_id": "ent-1012-step_enabled",
+  "task_digest": "75d2a17287d45a8c76630c715702bc0d6827875d83a918c152ae3353955cf117",
+  "representation_id": "steplist",
+  "replicate_id": 2,
+  "assistance_mode": "STATIC_UNASSISTED",
+  "sampling_id": "ent-1012-step_enabled.gpt-6-astra-relay.S.r2#0"
+ },
+ "call": {
+  "provider": "openai",
+  "provider_config_id": "gpt-6-astra-relay",
+  "api": "openai.chat.completions",
+  "api_version": "v1",
+  "endpoint": "https://api.uheapi.com/v1/chat/completions",
+  "route": "COMPATIBLE_RELAY",
+  "endpoint_kind": "PROVIDER",
+  "model_requested": "gpt-6-astra",
+  "model_returned": "gpt-6-astra",
+  "model_switched": false,
+  "model_identity": "RELAY_REPORTED",
+  "response_id": "resp_01e8fe7bb0028be8016acd4fe5d1708196ba274ba6f6f6da90",
+  "request_id": "6bcb5641-f49d-435f-9132-b555280a485d, 23945409-aa75-46ed-8923-033c6359dbe3, 9bf01388-2fd2-429b-87ee-02b335ff0b82",
+  "started_at": "2026-10-12T21:23:48Z",
+  "finished_at": "2026-10-12T21:23:52Z",
+  "params": {
+   "max_completion_tokens": 3000
+  },
+  "params_digest": "813038d95bea64de"
+ },
+ "raw": {
+  "body": {
+   "id": "resp_01e8fe7bb0028be8016acd4fe5d1708196ba274ba6f6f6da90",
+   "object": "chat.completion",
+   "created": 1791840232,
+   "model": "gpt-6-astra",
+   "choices": [
+    {
+     "index": 0,
+     "message": {
+      "role": "assistant",
+      "content": "{\"enabled\":false,\"rationale\":\"hypervisor:privilegeEscalation is an AND step requiring both printServer:lateralMovement and jumpHost:lateralMovement. Only printServer:lateralMovement is currently compromised; jumpHost:lateralMovement has not been reached.\"}"
+     },
+     "finish_reason": "stop"
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 5199,
+    "completion_tokens": 59,
+    "total_tokens": 5258,
+    "prompt_tokens_details": {
+     "cached_tokens": 4864
+    }
+   },
+   "service_tier": "default"
+  },
+  "body_text": null,
+  "visible_text": "{\"enabled\":false,\"rationale\":\"hypervisor:privilegeEscalation is an AND step requiring both printServer:lateralMovement and jumpHost:lateralMovement. Only printServer:lateralMovement is currently compromised; jumpHost:lateralMovement has not been reached.\"}",
+  "finish_reason": "stop",
+  "finish_class": "STOP",
+  "refusal": null,
+  "truncated": false,
+  "tool_calls": [],
+  "reasoning": "NOT_EXPOSED"
+ },
+ "status": {
+  "outcome": "ANSWERED",
+  "transport_ok": true,
+  "http_status": 200,
+  "provider_error_type": null,
+  "provider_error": null,
+  "model_switched": false,
+  "attempts": [
+   {
+    "attempt_no": 1,
+    "attempt_id": "att_ab46c172a447",
+    "sent": true,
+    "confirmed": true,
+    "http_status": 200,
+    "error_class": null,
+    "error": null,
+    "latency_ms": 3275.2
+   }
+  ],
+  "network_retries": 2,
+  "note": null
+ },
+ "cost": {
+  "usage_known": true,
+  "input_tokens": 5199,
+  "output_tokens": 59,
+  "reasoning_tokens": null,
+  "cache_read_tokens": 4864,
+  "cache_write_tokens": null,
+  "latency_ms": 3275.5,
+  "http_attempts": 1,
+  "possibly_billed_unconfirmed": 0,
+  "prompt_digest": "6a3e1ad94afc4a32",
+  "config_digest": "687a29ef8fc767e7"
+ },
+ "task_input_digest": "6a3e1ad94afc4a32874cec0a8f2691a5a96f0e8518b44878a235a7b17df1cfad",
+ "reuse_key": "da521c0408377d6608a053021300a8bf361caf0ad648fc1349ee0f0be61e5093",
+ "recorded_at": "2026-10-12T21:23:52Z"
+}

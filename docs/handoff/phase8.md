@@ -78,3 +78,35 @@ make research-check ARGS="--group p8"
 uv run --frozen python scripts/cyber_run.py        # resumable real batch
 uv run --frozen python scripts/handoff_phase8.py   # regenerate the manifest from the committed report
 ```
+
+## Enterprise attack surface, offense + defence (added after feedback)
+
+The first graphs were too small and the questions defence-heavy. `research/studies/cyber-enterprise` uses large,
+realistic multi-tier graphs (`generate_enterprise`, ~37 nodes, 10 AND-joins, 30+ defendable steps) and balances
+attacker and defender questions. Real batch: **720 units** (20 graphs × 6 kinds × 2 strong models × 3 reps), in a
+dedicated security project **攻击图安全分析（防御）**.
+
+| model | correct | answered-only | refused |
+|---|---|---|---|
+| GPT-6 Astra | 0.97 | 0.97 | 0 |
+| Claude Opus 5.5 | 0.93 | 0.985 | 19 |
+
+Per kind (correct rate; OFF = attacker-side, DEF = defender-side):
+
+| side · kind | GPT-6 | Opus-5.5 |
+|---|---|---|
+| OFF · `shortest_cost` (min attack cost) | 1.00 | 1.00 |
+| OFF · `reach_from_entry` (reach from one foothold) | 1.00 | 0.97 |
+| DEF · `reachability` (under deployed defences) | 1.00 | 0.97 |
+| DEF · `min_defense` (min-cut) | **0.98** | **0.92** |
+| DEF · `chokepoints` (single points of failure) | 1.00 | 1.00 |
+| NEU · `step_enabled` (AND/OR enablement) | **0.83** | **0.75** |
+
+Findings on the realistic attack surface:
+1. **Scaling the graph made the defence min-cut genuinely hard** — on the small graphs both scored 1.00 on
+   `min_defense`; at ~37 nodes both make real errors (Opus 0.92, GPT 0.98). The attack surface matters.
+2. **`step_enabled` is still the hardest** (0.75–0.83) — precise AND-vs-OR reasoning on a specific step, not the
+   optimisation questions, is where frontier models slip.
+3. **Claude Opus 5.5's safety layer refused 19/360 (5%)**, concentrated on `step_enabled` (15) — a safety-vs-analysis
+   tension on security-framed formal tasks; GPT-6 refused none. On what it answered, Opus was 98.5%. Reported, not hidden.
+4. No ranking claim: relay-reported identity, paired difference small.

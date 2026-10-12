@@ -1,0 +1,107 @@
+{
+ "protocol": "fal-research-response/v1",
+ "experiment": {
+  "study_id": "cyber-enterprise",
+  "unit_id": "ent-1016-reachability.gpt-6-astra-relay.S.r0",
+  "track": "formal_model_analysis",
+  "case_id": null,
+  "case_version": null,
+  "task_id": "ent-1016-reachability",
+  "task_digest": "aa89ba365408da9bb35ad97fdc65e8c494b4a8ee31b7d07169b2cc72d400223b",
+  "representation_id": "steplist",
+  "replicate_id": 0,
+  "assistance_mode": "STATIC_UNASSISTED",
+  "sampling_id": "ent-1016-reachability.gpt-6-astra-relay.S.r0#0"
+ },
+ "call": {
+  "provider": "openai",
+  "provider_config_id": "gpt-6-astra-relay",
+  "api": "openai.chat.completions",
+  "api_version": "v1",
+  "endpoint": "https://api.uheapi.com/v1/chat/completions",
+  "route": "COMPATIBLE_RELAY",
+  "endpoint_kind": "PROVIDER",
+  "model_requested": "gpt-6-astra",
+  "model_returned": "gpt-6-astra",
+  "model_switched": false,
+  "model_identity": "RELAY_REPORTED",
+  "response_id": "resp_071d76463e6dc41e016acd53ff53b481909a8f30c6ee7f7aee",
+  "request_id": "20296651-dddd-40c5-a65e-1e09839efacd, f682c130-5dbc-454e-b77d-dae3d64472d8",
+  "started_at": "2026-10-12T21:41:18Z",
+  "finished_at": "2026-10-12T21:41:22Z",
+  "params": {
+   "max_completion_tokens": 3000
+  },
+  "params_digest": "813038d95bea64de"
+ },
+ "raw": {
+  "body": {
+   "id": "resp_071d76463e6dc41e016acd53ff53b481909a8f30c6ee7f7aee",
+   "object": "chat.completion",
+   "created": 1791841282,
+   "model": "gpt-6-astra",
+   "choices": [
+    {
+     "index": 0,
+     "message": {
+      "role": "assistant",
+      "content": "{\"reachable\":true,\"rationale\":\"supplychain:initialAccess is an entry foothold and reaches tokenCache:credentialAccess. This reaches fileServer:lateralMovement, which reaches codeRepo:collection, which reaches crownData:exfiltrate. All steps along this route are OR steps, and none is blocked by the deployed defences.\"}"
+     },
+     "finish_reason": "stop"
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 5290,
+    "completion_tokens": 75,
+    "total_tokens": 5365
+   },
+   "service_tier": "default"
+  },
+  "body_text": null,
+  "visible_text": "{\"reachable\":true,\"rationale\":\"supplychain:initialAccess is an entry foothold and reaches tokenCache:credentialAccess. This reaches fileServer:lateralMovement, which reaches codeRepo:collection, which reaches crownData:exfiltrate. All steps along this route are OR steps, and none is blocked by the deployed defences.\"}",
+  "finish_reason": "stop",
+  "finish_class": "STOP",
+  "refusal": null,
+  "truncated": false,
+  "tool_calls": [],
+  "reasoning": "NOT_EXPOSED"
+ },
+ "status": {
+  "outcome": "ANSWERED",
+  "transport_ok": true,
+  "http_status": 200,
+  "provider_error_type": null,
+  "provider_error": null,
+  "model_switched": false,
+  "attempts": [
+   {
+    "attempt_no": 1,
+    "attempt_id": "att_285ae8ba3f62",
+    "sent": true,
+    "confirmed": true,
+    "http_status": 200,
+    "error_class": null,
+    "error": null,
+    "latency_ms": 4118.1
+   }
+  ],
+  "network_retries": 2,
+  "note": null
+ },
+ "cost": {
+  "usage_known": true,
+  "input_tokens": 5290,
+  "output_tokens": 75,
+  "reasoning_tokens": null,
+  "cache_read_tokens": null,
+  "cache_write_tokens": null,
+  "latency_ms": 4118.3,
+  "http_attempts": 1,
+  "possibly_billed_unconfirmed": 0,
+  "prompt_digest": "580393224045c2c6",
+  "config_digest": "687a29ef8fc767e7"
+ },
+ "task_input_digest": "580393224045c2c6c6d7f61558851d1f51de0eeffac90e9369abb83d96049072",
+ "reuse_key": "ec5969dce543328fa1555d075ee9ab9b07eba345dc27256fba816add5f686ab8",
+ "recorded_at": "2026-10-12T21:41:22Z"
+}

@@ -1,0 +1,130 @@
+{
+ "protocol": "fal-research-evaluation/v1",
+ "study_id": "cyber-enterprise",
+ "unit_id": "ent-1009-min_defense.gpt-6-astra-relay.S.r2",
+ "response_digest": "1e47c564768219a195706ba7892921092b903cf7f2ad5a3ca8d9d2003a251db7",
+ "response_path": "responses/ent-1009-min_defense.gpt-6-astra-relay.S.r2--0.json",
+ "scorer_id": "attackgraph.analysis",
+ "scorer_version": "1",
+ "reference_sha256": "8ee1fba3686266c435b84f819ed5321686e366f1866b81afa319b907c3f28df5",
+ "dependency_digests": {
+  "ground_truth": "44811696ab4b319538ed5f8cccc56d1b47847fcfb1378de56f9ca1725bc56e6c"
+ },
+ "call_outcome": "ANSWERED",
+ "answer_status": "VALID",
+ "parsed": {
+  "count": 3,
+  "rationale": "Block browserStore:credentialAccess, tokenCache:credentialAccess, and backupHost:lateralMovement. These disable appServer and dbLogin (therefore domainAdmin and dbReplica), printServer (therefore hypervisor), and secretsManager. Consequently all four parents of the target—shareMount, vaultRead, dbReplica, and codeRepo—are unreachable. At least three blocks are necessary because three attack derivations have disjoint blockable step sets: {browserStore, appServer, codeRepo}, supported by phishing; {tokenCache, printServer, shareMount}, supported by vpnGateway; and {iotDevice, memoryDump, ssoLogin, backupHost, jumpHost, secretsManager, vaultRead}, supported by supplychain. Each derivation satisfies all AND dependencies and independently reaches the target, so each requires a distinct block."
+ },
+ "behavior_label": "CORRECT",
+ "refusal_status": "NONE",
+ "model_internal": "CORRECT",
+ "program_correspondence": "CORRESPONDS",
+ "metrics": [
+  {
+   "metric_id": "correct",
+   "metric_version": "1",
+   "subject": "ent-1009-min_defense.gpt-6-astra-relay.S.r2",
+   "value": 1.0,
+   "status": "OK",
+   "missing_reason": null,
+   "unit": "rate",
+   "sample_size": null,
+   "missing_count": null,
+   "aggregation": null,
+   "ci": null,
+   "evidence": []
+  },
+  {
+   "metric_id": "format_valid",
+   "metric_version": "1",
+   "subject": "ent-1009-min_defense.gpt-6-astra-relay.S.r2",
+   "value": 1.0,
+   "status": "OK",
+   "missing_reason": null,
+   "unit": "rate",
+   "sample_size": null,
+   "missing_count": null,
+   "aggregation": null,
+   "ci": null,
+   "evidence": []
+  },
+  {
+   "metric_id": "refused",
+   "metric_version": "1",
+   "subject": "ent-1009-min_defense.gpt-6-astra-relay.S.r2",
+   "value": 0.0,
+   "status": "OK",
+   "missing_reason": null,
+   "unit": "rate",
+   "sample_size": null,
+   "missing_count": null,
+   "aggregation": null,
+   "ci": null,
+   "evidence": []
+  },
+  {
+   "metric_id": "responded",
+   "metric_version": "1",
+   "subject": "ent-1009-min_defense.gpt-6-astra-relay.S.r2",
+   "value": 1.0,
+   "status": "OK",
+   "missing_reason": null,
+   "unit": "rate",
+   "sample_size": null,
+   "missing_count": null,
+   "aggregation": null,
+   "ci": null,
+   "evidence": []
+  },
+  {
+   "metric_id": "program_corresponds",
+   "metric_version": "1",
+   "subject": "ent-1009-min_defense.gpt-6-astra-relay.S.r2",
+   "value": 1.0,
+   "status": "OK",
+   "missing_reason": null,
+   "unit": "rate",
+   "sample_size": null,
+   "missing_count": null,
+   "aggregation": null,
+   "ci": null,
+   "evidence": []
+  },
+  {
+   "metric_id": "output_tokens",
+   "metric_version": "1",
+   "subject": "ent-1009-min_defense.gpt-6-astra-relay.S.r2",
+   "value": 355.0,
+   "status": "OK",
+   "missing_reason": null,
+   "unit": "tokens",
+   "sample_size": null,
+   "missing_count": null,
+   "aggregation": null,
+   "ci": null,
+   "evidence": []
+  },
+  {
+   "metric_id": "latency_ms",
+   "metric_version": "1",
+   "subject": "ent-1009-min_defense.gpt-6-astra-relay.S.r2",
+   "value": 14324.2,
+   "status": "OK",
+   "missing_reason": null,
+   "unit": "ms",
+   "sample_size": null,
+   "missing_count": null,
+   "aggregation": null,
+   "ci": null,
+   "evidence": []
+  }
+ ],
+ "rubric_signals": {
+  "answered_field": true,
+  "explains": true,
+  "cites_structure": true
+ },
+ "explanation": "min_defense: model answered 3, the verifier-checked answer is 3",
+ "scoring_reuse_key": "6240f61d4158184697d560c5ed2ae2225f15b0a8a1ad5e5a48e15569a95b8fd4"
+}

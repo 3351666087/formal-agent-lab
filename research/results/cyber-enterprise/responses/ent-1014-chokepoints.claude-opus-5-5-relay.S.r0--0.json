@@ -1,0 +1,126 @@
+{
+ "protocol": "fal-research-response/v1",
+ "experiment": {
+  "study_id": "cyber-enterprise",
+  "unit_id": "ent-1014-chokepoints.claude-opus-5-5-relay.S.r0",
+  "track": "formal_model_analysis",
+  "case_id": null,
+  "case_version": null,
+  "task_id": "ent-1014-chokepoints",
+  "task_digest": "489b6e8241cf81c592679686c38d70a5036de248f8c70cdb845fc799fdd407f2",
+  "representation_id": "steplist",
+  "replicate_id": 0,
+  "assistance_mode": "STATIC_UNASSISTED",
+  "sampling_id": "ent-1014-chokepoints.claude-opus-5-5-relay.S.r0#0"
+ },
+ "call": {
+  "provider": "anthropic",
+  "provider_config_id": "claude-opus-5-5-relay",
+  "api": "anthropic.messages",
+  "api_version": "2023-06-01",
+  "endpoint": "https://api.uheapi.com/v1/messages",
+  "route": "COMPATIBLE_RELAY",
+  "endpoint_kind": "PROVIDER",
+  "model_requested": "claude-opus-5-5",
+  "model_returned": "claude-opus-5-5",
+  "model_switched": false,
+  "model_identity": "RELAY_REPORTED",
+  "response_id": "msg_011Cfy4NaMiXApnE6qoUDCKh",
+  "request_id": "4e05e688-f6ca-409e-a196-c759e3c5535f, 3b6d1558-3e0b-4a6c-b586-107d1796483b, b145f41d-ed09-4b99-8d6a-8b32f90b115c",
+  "started_at": "2026-10-12T21:32:52Z",
+  "finished_at": "2026-10-12T21:33:01Z",
+  "params": {
+   "max_tokens": 3000
+  },
+  "params_digest": "0b180aa065dd3ec9"
+ },
+ "raw": {
+  "body": {
+   "model": "claude-opus-5-5",
+   "id": "msg_011Cfy4NaMiXApnE6qoUDCKh",
+   "type": "message",
+   "role": "assistant",
+   "content": [
+    {
+     "type": "thinking",
+     "thinking": "",
+     "signature": "CAQS8AcKEAgSGAI4AUIIdGhpbmtpbmcSDOerW0IYO4ZoAZLruBoMFGChmuZdCeGMwlElIjDMVMC40ByyidJR3Z2h6v3f2TkozXJbJBr1BmlX/iQz9/s6eXdm0t572rc94lZ/3aEqjQdNSG6Q6TH5u6mcIxu1mJqGn26nI4yIw18IcOTRLJZp5AGAy5G9s/8PhML8tjJp2Avd7f9Pl/LcehtbSuqniPmbH9Z6lzkIyLTYiM/k7rrFPr0bHL/6dmpHYzSwqhf6wDne5m3mGgjFxWtmMapsvKT1B/SBejRUWt3DvYtbR0rz4br7R+97paCOB+lc7+wGRfo1CV6iEiy49RKCsibbfKCKZ4JxuGwxWjL+uG46Vhm5nKvh8Ab/5iU+PWy0Qu6e432HgBHCs8Inn5Fhp44mgqt/qjKxrz/UxbodwF4zJVpsvliF6kbFR46wYM16VHIR6qpYGbm8bQM+hQQKxcGPmrYAOwNTIszM3EHK0ppfrPJbs1XpwsojBQjv5WM5BQCXn238JTbBGQiZQE2SxySoEoXEgat/usBRZ9YlES4iw3BEFy8zuFp/xDdHbVHmhbm554B6Lr3WpshYT9im4jkRrATAMuipm1zdEzz73Ya8MjoBAIBC93rk7tZua4Cl7QZpbkT6Qnoy8Q61b4haQt4rYOF4751qRJM5PEtMkPOs+UBkoN2ZLH0qNwSmt8hCfe6HyJY+iRu76K9f4V4AMrm/sKR75C0xzByq+XlKYyxx7750046/JHbf9yQRPVH68Zj8syJ2wL5/9yj75S6jLlj3tjl2OUxEclOeXZMLFCvdJPGfA7yfDlYk4DenJJxMP+RJST+p6MR2JWUUrVyBirgDLsnX/yReV9D4Cnk2PD6d5TOSFx2d3FjYV9gflui0KBrGySxno48sPJHNns1aJzCixPQX3w4g3N2aJboAvNf+BqHvqhKwLzGBi4sf2g8qxzFGGwK/6TgM/B3IdRMMcAfYeju4CIqB51/X/S6LwKMw2SgzkOXy+vFQPBYrqxH1AxqNr5WBeKn8HE1aoNT095OaoE27NkAGujyUwsMZRjrBJhexyGklGjL7zX2f/8TE+I8mindLLz68W0ubUSE2sYl5g3mgmt7O4m02qGEZNen4U7yW/H2HTm4Nym5yYy7h/WLZWli9nrUlNfT++BcPfZMueAn8VmMNDkI+HsVaEL61YhKjXZU8sQich2pKMTF0rIqBXfBT3ade6a3EdnkF9JbxAPpkYa70QnqL1kb+o2I9JDs2jZ+SDfNUltCd/dZv27GHYTW1PSzjsUCUnI5sS8wIFhMxJEyZe+SpvVJI5Fma54dtfw5V8hROcb9VMJvZZw4YAQ=="
+    },
+    {
+     "type": "text",
+     "text": "{\"count\": 0, \"rationale\": \"The target is an OR over dbReplica, mailArchive, shareMount and codeRepo, so at least two independent routes must be checked. Route 1: wifiGuest (entry) -> kerberoast -> jumpHost -> mailArchive -> target. Route 2: backupHost is OR-reachable through tokenCache (from internet) and also through browserStore (from exposedApi). backupHost then reaches the target via dbReplica and also via shareMount. Route 1 and Route 2 share no non-foothold step. Within Route 2, backupHost has two independent parents. Blocking any single step therefore leaves at least one route open. Blocking jumpHost or kerberoast still leaves backupHost -> dbReplica/shareMount. Blocking backupHost, tokenCache or browserStore still leaves jumpHost -> mailArchive and jumpHost -> dbReplica. Blocking mailArchive, dbReplica or shareMount individually also leaves another collection step reachable. No single step is a chokepoint.\"}"
+    }
+   ],
+   "container": null,
+   "stop_reason": "end_turn",
+   "stop_sequence": null,
+   "stop_details": null,
+   "usage": {
+    "input_tokens": 2230,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 0,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 0
+    },
+    "output_tokens": 500,
+    "output_tokens_details": {
+     "thinking_tokens": 148
+    },
+    "service_tier": "standard",
+    "inference_geo": "global"
+   },
+   "input_transformations": [],
+   "diagnostics": null,
+   "context_management": {
+    "applied_edits": []
+   }
+  },
+  "body_text": null,
+  "visible_text": "{\"count\": 0, \"rationale\": \"The target is an OR over dbReplica, mailArchive, shareMount and codeRepo, so at least two independent routes must be checked. Route 1: wifiGuest (entry) -> kerberoast -> jumpHost -> mailArchive -> target. Route 2: backupHost is OR-reachable through tokenCache (from internet) and also through browserStore (from exposedApi). backupHost then reaches the target via dbReplica and also via shareMount. Route 1 and Route 2 share no non-foothold step. Within Route 2, backupHost has two independent parents. Blocking any single step therefore leaves at least one route open. Blocking jumpHost or kerberoast still leaves backupHost -> dbReplica/shareMount. Blocking backupHost, tokenCache or browserStore still leaves jumpHost -> mailArchive and jumpHost -> dbReplica. Blocking mailArchive, dbReplica or shareMount individually also leaves another collection step reachable. No single step is a chokepoint.\"}",
+  "finish_reason": "end_turn",
+  "finish_class": "STOP",
+  "refusal": null,
+  "truncated": false,
+  "tool_calls": [],
+  "reasoning": "SUMMARY_ONLY"
+ },
+ "status": {
+  "outcome": "ANSWERED",
+  "transport_ok": true,
+  "http_status": 200,
+  "provider_error_type": null,
+  "provider_error": null,
+  "model_switched": false,
+  "attempts": [
+   {
+    "attempt_no": 1,
+    "attempt_id": "att_54ba489bea04",
+    "sent": true,
+    "confirmed": true,
+    "http_status": 200,
+    "error_class": null,
+    "error": null,
+    "latency_ms": 8859.8
+   }
+  ],
+  "network_retries": 2,
+  "note": null
+ },
+ "cost": {
+  "usage_known": true,
+  "input_tokens": 2230,
+  "output_tokens": 500,
+  "reasoning_tokens": 148,
+  "cache_read_tokens": 0,
+  "cache_write_tokens": 0,
+  "latency_ms": 8860.0,
+  "http_attempts": 1,
+  "possibly_billed_unconfirmed": 0,
+  "prompt_digest": "b3f4a71cee12e46a",
+  "config_digest": "86ace4f8cabdce4b"
+ },
+ "task_input_digest": "b3f4a71cee12e46ae27a6a154a2c2872f8f61d6534ba18465844bfca97b86b9f",
+ "reuse_key": "600468496353376a6cc853a7541fa663b43d52ebe063baf411c82bea26c29bfa",
+ "recorded_at": "2026-10-12T21:33:01Z"
+}

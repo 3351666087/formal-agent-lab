@@ -1,0 +1,110 @@
+{
+ "protocol": "fal-research-response/v1",
+ "experiment": {
+  "study_id": "cyber-enterprise",
+  "unit_id": "ent-1001-chokepoints.gpt-6-astra-relay.S.r0",
+  "track": "formal_model_analysis",
+  "case_id": null,
+  "case_version": null,
+  "task_id": "ent-1001-chokepoints",
+  "task_digest": "f86a5e4502b4303dd4872df8d532fd6831018b8684152b2c956d07c6a6ad28f1",
+  "representation_id": "steplist",
+  "replicate_id": 0,
+  "assistance_mode": "STATIC_UNASSISTED",
+  "sampling_id": "ent-1001-chokepoints.gpt-6-astra-relay.S.r0#0"
+ },
+ "call": {
+  "provider": "openai",
+  "provider_config_id": "gpt-6-astra-relay",
+  "api": "openai.chat.completions",
+  "api_version": "v1",
+  "endpoint": "https://api.uheapi.com/v1/chat/completions",
+  "route": "COMPATIBLE_RELAY",
+  "endpoint_kind": "PROVIDER",
+  "model_requested": "gpt-6-astra",
+  "model_returned": "gpt-6-astra",
+  "model_switched": false,
+  "model_identity": "RELAY_REPORTED",
+  "response_id": "resp_00a0aa0d96e04ec2016acd3f9e1c08819a9ac37368c5ee0943",
+  "request_id": "9ffadcf6-3423-4960-a2ce-42f2bfaa84ca, cb885dbb-a840-4248-b118-885a378afe88",
+  "started_at": "2026-10-12T20:14:20Z",
+  "finished_at": "2026-10-12T20:14:28Z",
+  "params": {
+   "max_completion_tokens": 3000
+  },
+  "params_digest": "813038d95bea64de"
+ },
+ "raw": {
+  "body": {
+   "id": "resp_00a0aa0d96e04ec2016acd3f9e1c08819a9ac37368c5ee0943",
+   "object": "chat.completion",
+   "created": 1791836068,
+   "model": "gpt-6-astra",
+   "choices": [
+    {
+     "index": 0,
+     "message": {
+      "role": "assistant",
+      "content": "{\"count\":0,\"rationale\":\"Two routes to the target have no intermediate steps in common: wifiGuest:initialAccess → memoryDump:credentialAccess → appServer:lateralMovement → codeRepo:collection → crownData:exfiltrate, and supplychain:initialAccess → configSecret:credentialAccess → jumpHost:lateralMovement → shareMount:collection → crownData:exfiltrate. Every intermediate step on these routes is OR, so each route is independently sufficient. Blocking any one eligible step leaves at least one route intact.\"}"
+     },
+     "finish_reason": "stop"
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 5296,
+    "completion_tokens": 143,
+    "total_tokens": 5439,
+    "completion_tokens_details": {
+     "reasoning_tokens": 27
+    }
+   },
+   "service_tier": "default"
+  },
+  "body_text": null,
+  "visible_text": "{\"count\":0,\"rationale\":\"Two routes to the target have no intermediate steps in common: wifiGuest:initialAccess → memoryDump:credentialAccess → appServer:lateralMovement → codeRepo:collection → crownData:exfiltrate, and supplychain:initialAccess → configSecret:credentialAccess → jumpHost:lateralMovement → shareMount:collection → crownData:exfiltrate. Every intermediate step on these routes is OR, so each route is independently sufficient. Blocking any one eligible step leaves at least one route intact.\"}",
+  "finish_reason": "stop",
+  "finish_class": "STOP",
+  "refusal": null,
+  "truncated": false,
+  "tool_calls": [],
+  "reasoning": "NOT_EXPOSED"
+ },
+ "status": {
+  "outcome": "ANSWERED",
+  "transport_ok": true,
+  "http_status": 200,
+  "provider_error_type": null,
+  "provider_error": null,
+  "model_switched": false,
+  "attempts": [
+   {
+    "attempt_no": 1,
+    "attempt_id": "att_c23cab7c9b00",
+    "sent": true,
+    "confirmed": true,
+    "http_status": 200,
+    "error_class": null,
+    "error": null,
+    "latency_ms": 7635.4
+   }
+  ],
+  "network_retries": 2,
+  "note": null
+ },
+ "cost": {
+  "usage_known": true,
+  "input_tokens": 5296,
+  "output_tokens": 143,
+  "reasoning_tokens": 27,
+  "cache_read_tokens": null,
+  "cache_write_tokens": null,
+  "latency_ms": 7636.3,
+  "http_attempts": 1,
+  "possibly_billed_unconfirmed": 0,
+  "prompt_digest": "1a5d7dd1bd59792b",
+  "config_digest": "687a29ef8fc767e7"
+ },
+ "task_input_digest": "1a5d7dd1bd59792b7d73590f22a4684fc89a0a0794df67f7d25166a17cc2e278",
+ "reuse_key": "565200c677912c3b7b7f80a993e690c4211e040f82e28a61267b2d82bed0132d",
+ "recorded_at": "2026-10-12T20:14:28Z"
+}

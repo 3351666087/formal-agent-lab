@@ -1,0 +1,107 @@
+{
+ "protocol": "fal-research-response/v1",
+ "experiment": {
+  "study_id": "cyber-enterprise",
+  "unit_id": "ent-1007-step_enabled.gpt-6-astra-relay.S.r0",
+  "track": "formal_model_analysis",
+  "case_id": null,
+  "case_version": null,
+  "task_id": "ent-1007-step_enabled",
+  "task_digest": "fc1f671a24eb8eaabdb6fcae8e821f9fe14e3257f9f78a0d063b0cbd66e043d5",
+  "representation_id": "steplist",
+  "replicate_id": 0,
+  "assistance_mode": "STATIC_UNASSISTED",
+  "sampling_id": "ent-1007-step_enabled.gpt-6-astra-relay.S.r0#0"
+ },
+ "call": {
+  "provider": "openai",
+  "provider_config_id": "gpt-6-astra-relay",
+  "api": "openai.chat.completions",
+  "api_version": "v1",
+  "endpoint": "https://api.uheapi.com/v1/chat/completions",
+  "route": "COMPATIBLE_RELAY",
+  "endpoint_kind": "PROVIDER",
+  "model_requested": "gpt-6-astra",
+  "model_returned": "gpt-6-astra",
+  "model_switched": false,
+  "model_identity": "RELAY_REPORTED",
+  "response_id": "resp_027503650d946176016acd4884f954819b914ae145ba01756c",
+  "request_id": "b2a7e210-c9b0-4d2d-abc9-081e907efa4f, 5c1faec0-83db-44d7-8505-364feb64e7de",
+  "started_at": "2026-10-12T20:52:18Z",
+  "finished_at": "2026-10-12T20:52:23Z",
+  "params": {
+   "max_completion_tokens": 3000
+  },
+  "params_digest": "813038d95bea64de"
+ },
+ "raw": {
+  "body": {
+   "id": "resp_027503650d946176016acd4884f954819b914ae145ba01756c",
+   "object": "chat.completion",
+   "created": 1791838343,
+   "model": "gpt-6-astra",
+   "choices": [
+    {
+     "index": 0,
+     "message": {
+      "role": "assistant",
+      "content": "{\"enabled\":false,\"rationale\":\"hypervisor:privilegeEscalation requires both dbLogin:authenticate and printServer:lateralMovement to be reached. Only dbLogin:authenticate is already compromised; printServer:lateralMovement has not been reached, so the step is not enabled next.\"}"
+     },
+     "finish_reason": "stop"
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 5274,
+    "completion_tokens": 64,
+    "total_tokens": 5338
+   },
+   "service_tier": "default"
+  },
+  "body_text": null,
+  "visible_text": "{\"enabled\":false,\"rationale\":\"hypervisor:privilegeEscalation requires both dbLogin:authenticate and printServer:lateralMovement to be reached. Only dbLogin:authenticate is already compromised; printServer:lateralMovement has not been reached, so the step is not enabled next.\"}",
+  "finish_reason": "stop",
+  "finish_class": "STOP",
+  "refusal": null,
+  "truncated": false,
+  "tool_calls": [],
+  "reasoning": "NOT_EXPOSED"
+ },
+ "status": {
+  "outcome": "ANSWERED",
+  "transport_ok": true,
+  "http_status": 200,
+  "provider_error_type": null,
+  "provider_error": null,
+  "model_switched": false,
+  "attempts": [
+   {
+    "attempt_no": 1,
+    "attempt_id": "att_91802052149e",
+    "sent": true,
+    "confirmed": true,
+    "http_status": 200,
+    "error_class": null,
+    "error": null,
+    "latency_ms": 4739.2
+   }
+  ],
+  "network_retries": 2,
+  "note": null
+ },
+ "cost": {
+  "usage_known": true,
+  "input_tokens": 5274,
+  "output_tokens": 64,
+  "reasoning_tokens": null,
+  "cache_read_tokens": null,
+  "cache_write_tokens": null,
+  "latency_ms": 4739.3,
+  "http_attempts": 1,
+  "possibly_billed_unconfirmed": 0,
+  "prompt_digest": "5590aca2b6a7bd14",
+  "config_digest": "687a29ef8fc767e7"
+ },
+ "task_input_digest": "5590aca2b6a7bd14ef21e771ecd2a32cbf2b15d4f752fef7f918257fc6654018",
+ "reuse_key": "dc994ce5bdb34962468cf2d620db15f579b0899b2a57983b256c711cade04f6d",
+ "recorded_at": "2026-10-12T20:52:23Z"
+}

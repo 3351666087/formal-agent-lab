@@ -1,0 +1,113 @@
+{
+ "protocol": "fal-research-response/v1",
+ "experiment": {
+  "study_id": "cyber-enterprise",
+  "unit_id": "ent-1000-chokepoints.gpt-6-astra-relay.S.r1",
+  "track": "formal_model_analysis",
+  "case_id": null,
+  "case_version": null,
+  "task_id": "ent-1000-chokepoints",
+  "task_digest": "4b084fd13a0f26e16e2b7fb548808b6a5fa39c1579be117dbf433aae7cbceee8",
+  "representation_id": "steplist",
+  "replicate_id": 1,
+  "assistance_mode": "STATIC_UNASSISTED",
+  "sampling_id": "ent-1000-chokepoints.gpt-6-astra-relay.S.r1#0"
+ },
+ "call": {
+  "provider": "openai",
+  "provider_config_id": "gpt-6-astra-relay",
+  "api": "openai.chat.completions",
+  "api_version": "v1",
+  "endpoint": "https://api.uheapi.com/v1/chat/completions",
+  "route": "COMPATIBLE_RELAY",
+  "endpoint_kind": "PROVIDER",
+  "model_requested": "gpt-6-astra",
+  "model_returned": "gpt-6-astra",
+  "model_switched": false,
+  "model_identity": "RELAY_REPORTED",
+  "response_id": "resp_027f08f4d9161e69016acd3e376de8819b8d6e92f0d0e4fe94",
+  "request_id": "f364b3c2-3b77-4cb7-919d-d35624ede003, be03c2f6-6d5e-4da6-98f1-c96d26bd47f4",
+  "started_at": "2026-10-12T20:08:22Z",
+  "finished_at": "2026-10-12T20:08:26Z",
+  "params": {
+   "max_completion_tokens": 3000
+  },
+  "params_digest": "813038d95bea64de"
+ },
+ "raw": {
+  "body": {
+   "id": "resp_027f08f4d9161e69016acd3e376de8819b8d6e92f0d0e4fe94",
+   "object": "chat.completion",
+   "created": 1791835706,
+   "model": "gpt-6-astra",
+   "choices": [
+    {
+     "index": 0,
+     "message": {
+      "role": "assistant",
+      "content": "{\"count\":0,\"rationale\":\"Two routes to the target have no intermediate steps in common: internet:initialAccess → browserStore:credentialAccess → fileServer:lateralMovement → codeRepo:collection → crownData:exfiltrate, and wifiGuest:initialAccess → containerHost:execution → tokenCache:credentialAccess → printServer:lateralMovement → mailArchive:collection → crownData:exfiltrate. Every intermediate step on these routes is OR, so either route suffices. Blocking any single step other than a foothold or the target leaves at least one route reachable.\"}"
+     },
+     "finish_reason": "stop"
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 5172,
+    "completion_tokens": 149,
+    "total_tokens": 5321,
+    "prompt_tokens_details": {
+     "cached_tokens": 4992
+    },
+    "completion_tokens_details": {
+     "reasoning_tokens": 23
+    }
+   },
+   "service_tier": "default"
+  },
+  "body_text": null,
+  "visible_text": "{\"count\":0,\"rationale\":\"Two routes to the target have no intermediate steps in common: internet:initialAccess → browserStore:credentialAccess → fileServer:lateralMovement → codeRepo:collection → crownData:exfiltrate, and wifiGuest:initialAccess → containerHost:execution → tokenCache:credentialAccess → printServer:lateralMovement → mailArchive:collection → crownData:exfiltrate. Every intermediate step on these routes is OR, so either route suffices. Blocking any single step other than a foothold or the target leaves at least one route reachable.\"}",
+  "finish_reason": "stop",
+  "finish_class": "STOP",
+  "refusal": null,
+  "truncated": false,
+  "tool_calls": [],
+  "reasoning": "NOT_EXPOSED"
+ },
+ "status": {
+  "outcome": "ANSWERED",
+  "transport_ok": true,
+  "http_status": 200,
+  "provider_error_type": null,
+  "provider_error": null,
+  "model_switched": false,
+  "attempts": [
+   {
+    "attempt_no": 1,
+    "attempt_id": "att_1e6aa6348ffb",
+    "sent": true,
+    "confirmed": true,
+    "http_status": 200,
+    "error_class": null,
+    "error": null,
+    "latency_ms": 4537.3
+   }
+  ],
+  "network_retries": 2,
+  "note": null
+ },
+ "cost": {
+  "usage_known": true,
+  "input_tokens": 5172,
+  "output_tokens": 149,
+  "reasoning_tokens": 23,
+  "cache_read_tokens": 4992,
+  "cache_write_tokens": null,
+  "latency_ms": 4537.4,
+  "http_attempts": 1,
+  "possibly_billed_unconfirmed": 0,
+  "prompt_digest": "dc05a653d042dbcc",
+  "config_digest": "687a29ef8fc767e7"
+ },
+ "task_input_digest": "dc05a653d042dbcc5f3efaf96a08549a0bc5642fdb662c74b42bdf532e8a8efa",
+ "reuse_key": "21187af131cec09890b54ce571ce230291b2c0627d4a778190f93fb7d89f0077",
+ "recorded_at": "2026-10-12T20:08:26Z"
+}
