@@ -48,10 +48,11 @@ RelPath = Annotated[str, Field(pattern=REL_PATH), AfterValidator(_no_parent)]
 
 
 class Track(StrEnum):
-    """The two experiment lines of phases 5–7, counted apart."""
+    """The experiment lines, counted apart."""
 
     IMPLEMENTATION_CONFORMANCE = "implementation_conformance"  # software model verification with its real purpose
     SYNTHETIC_REPRESENTATION = "synthetic_representation"  # fixed, reviewed synthetic problems (representation study)
+    FORMAL_MODEL_ANALYSIS = "formal_model_analysis"  # phase 8: hard analysis of a formal model, Z3-ground-truthed
 
 
 class ArtifactRole(StrEnum):

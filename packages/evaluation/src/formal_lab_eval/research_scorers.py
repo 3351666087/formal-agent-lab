@@ -363,7 +363,39 @@ class CapacityJudgmentScorer:
             f"(capacity {cap}); the case conformance verdict is {corr}", deps, signals)
 
 
+# --------------------------------------------------------------- attackgraph.analysis@1 (phase 8, verifier-grounded)
+class AttackGraphAnalysisScorer:
+    """Hard defensive attack-graph analysis questions whose ground truth is the Z3 verifier / model semantics, not a
+    human opinion (phase 8): shortest attack-path cost, target reachability under a deployed defence set, the minimum
+    number of defences that cut every path (AND/OR min-cut), and whether a derived step is enabled. The model's answer
+    is scored against the machine-checked truth stored in the reference; `program_correspondence` records whether the
+    answer agrees with the verifier."""
+
+    scorer_id = "attackgraph.analysis"
+    version = "1"
+
+    def score(self, parsed: Any, reference: dict[str, Any], *, repo_root: Path, truncated: bool) -> ScoreOutcome:
+        kind = reference["question_kind"]
+        answer = reference["answer"]["value"]  # wrapped {"value": …} so it cannot leak into the task input
+        deps = {"ground_truth": sha256_bytes(json.dumps({"k": kind, "a": answer, "g": reference.get("graph_digest")},
+                                                        sort_keys=True).encode())}
+        fields = {"shortest_cost": "cost", "reachability": "reachable", "min_defense": "count", "step_enabled": "enabled"}
+        key = fields[kind]
+        got = parsed.get(key) if isinstance(parsed, dict) else None
+        if kind in ("shortest_cost", "min_defense"):
+            got = None if got is None else (int(got) if str(got).lstrip("-").isdigit() else got)
+        correct = got == answer
+        rationale = str(parsed.get("rationale", "")).lower() if isinstance(parsed, dict) else ""
+        signals = {"answered_field": got is not None,
+                   "explains": len(rationale) > 40,
+                   "cites_structure": any(w in rationale for w in ("and", "or", "parent", "path", "cut", "reach"))}
+        verdict = "CORRECT" if correct else "INCORRECT"
+        return ScoreOutcome(verdict, verdict, "CORRESPONDS" if correct else "DEVIATES",
+                            f"{kind}: model answered {got!r}, the verifier-checked answer is {answer!r}", deps, signals)
+
+
 register_scorer(DeviationDiagnosisScorer())
 register_scorer(ShortestPlanScorer())
 register_scorer(IsolationJudgmentScorer())
 register_scorer(CapacityJudgmentScorer())
+register_scorer(AttackGraphAnalysisScorer())

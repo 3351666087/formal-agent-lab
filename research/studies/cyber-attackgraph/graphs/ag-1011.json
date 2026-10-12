@@ -1,0 +1,351 @@
+{
+ "graph": {
+  "nodes": [
+   {
+    "full_name": "edge0:reach",
+    "asset": "edge0",
+    "step": "reach",
+    "type": "or",
+    "existence_status": false,
+    "parents": [],
+    "children": [
+     "h1_0:escalate",
+     "h1_1:access",
+     "h1_2:access",
+     "h2_0:reach",
+     "h2_1:obtain",
+     "h2_2:pivot"
+    ],
+    "ttc": null,
+    "auto": false,
+    "blocked": false
+   },
+   {
+    "full_name": "edge1:reach",
+    "asset": "edge1",
+    "step": "reach",
+    "type": "or",
+    "existence_status": false,
+    "parents": [],
+    "children": [
+     "h1_0:escalate",
+     "h1_1:access",
+     "h1_2:access",
+     "h2_0:reach"
+    ],
+    "ttc": null,
+    "auto": false,
+    "blocked": false
+   },
+   {
+    "full_name": "h1_0:escalate",
+    "asset": "h1_0",
+    "step": "escalate",
+    "type": "and",
+    "existence_status": false,
+    "parents": [
+     "edge0:reach",
+     "edge1:reach"
+    ],
+    "children": [
+     "h2_2:pivot",
+     "h3_0:traverse",
+     "h3_2:traverse"
+    ],
+    "ttc": null,
+    "auto": false,
+    "blocked": false
+   },
+   {
+    "full_name": "h1_1:access",
+    "asset": "h1_1",
+    "step": "access",
+    "type": "and",
+    "existence_status": false,
+    "parents": [
+     "edge1:reach",
+     "edge0:reach"
+    ],
+    "children": [
+     "h2_1:obtain",
+     "h2_2:pivot",
+     "h3_2:traverse"
+    ],
+    "ttc": null,
+    "auto": false,
+    "blocked": false
+   },
+   {
+    "full_name": "h1_2:access",
+    "asset": "h1_2",
+    "step": "access",
+    "type": "or",
+    "existence_status": false,
+    "parents": [
+     "edge1:reach",
+     "edge0:reach"
+    ],
+    "children": [
+     "h3_0:traverse"
+    ],
+    "ttc": null,
+    "auto": false,
+    "blocked": false
+   },
+   {
+    "full_name": "h2_0:reach",
+    "asset": "h2_0",
+    "step": "reach",
+    "type": "or",
+    "existence_status": false,
+    "parents": [
+     "edge1:reach",
+     "edge0:reach"
+    ],
+    "children": [
+     "h3_0:traverse",
+     "h3_1:access",
+     "h3_2:traverse",
+     "h4_0:escalate",
+     "h4_1:obtain"
+    ],
+    "ttc": null,
+    "auto": false,
+    "blocked": false
+   },
+   {
+    "full_name": "h2_1:obtain",
+    "asset": "h2_1",
+    "step": "obtain",
+    "type": "or",
+    "existence_status": false,
+    "parents": [
+     "h1_1:access",
+     "edge0:reach"
+    ],
+    "children": [
+     "h4_2:escalate"
+    ],
+    "ttc": null,
+    "auto": false,
+    "blocked": false
+   },
+   {
+    "full_name": "h2_2:pivot",
+    "asset": "h2_2",
+    "step": "pivot",
+    "type": "or",
+    "existence_status": false,
+    "parents": [
+     "edge0:reach",
+     "h1_0:escalate",
+     "h1_1:access"
+    ],
+    "children": [],
+    "ttc": null,
+    "auto": false,
+    "blocked": false
+   },
+   {
+    "full_name": "h3_0:traverse",
+    "asset": "h3_0",
+    "step": "traverse",
+    "type": "and",
+    "existence_status": false,
+    "parents": [
+     "h1_0:escalate",
+     "h1_2:access",
+     "h2_0:reach"
+    ],
+    "children": [
+     "h4_1:obtain",
+     "h5_0:pivot"
+    ],
+    "ttc": null,
+    "auto": false,
+    "blocked": false
+   },
+   {
+    "full_name": "h3_1:access",
+    "asset": "h3_1",
+    "step": "access",
+    "type": "or",
+    "existence_status": false,
+    "parents": [
+     "h2_0:reach"
+    ],
+    "children": [
+     "h5_0:pivot",
+     "h5_1:obtain"
+    ],
+    "ttc": null,
+    "auto": false,
+    "blocked": false
+   },
+   {
+    "full_name": "h3_2:traverse",
+    "asset": "h3_2",
+    "step": "traverse",
+    "type": "and",
+    "existence_status": false,
+    "parents": [
+     "h1_0:escalate",
+     "h1_1:access",
+     "h2_0:reach"
+    ],
+    "children": [
+     "h4_1:obtain",
+     "h5_2:traverse"
+    ],
+    "ttc": null,
+    "auto": false,
+    "blocked": false
+   },
+   {
+    "full_name": "h4_0:escalate",
+    "asset": "h4_0",
+    "step": "escalate",
+    "type": "or",
+    "existence_status": false,
+    "parents": [
+     "h2_0:reach"
+    ],
+    "children": [],
+    "ttc": null,
+    "auto": false,
+    "blocked": false
+   },
+   {
+    "full_name": "h4_1:obtain",
+    "asset": "h4_1",
+    "step": "obtain",
+    "type": "and",
+    "existence_status": false,
+    "parents": [
+     "h3_0:traverse",
+     "h3_2:traverse",
+     "h2_0:reach"
+    ],
+    "children": [
+     "h5_1:obtain"
+    ],
+    "ttc": null,
+    "auto": false,
+    "blocked": false
+   },
+   {
+    "full_name": "h4_2:escalate",
+    "asset": "h4_2",
+    "step": "escalate",
+    "type": "or",
+    "existence_status": false,
+    "parents": [
+     "h2_1:obtain"
+    ],
+    "children": [],
+    "ttc": null,
+    "auto": false,
+    "blocked": false
+   },
+   {
+    "full_name": "h5_0:pivot",
+    "asset": "h5_0",
+    "step": "pivot",
+    "type": "and",
+    "existence_status": false,
+    "parents": [
+     "h3_1:access",
+     "h3_0:traverse"
+    ],
+    "children": [
+     "crown:obtain"
+    ],
+    "ttc": null,
+    "auto": false,
+    "blocked": false
+   },
+   {
+    "full_name": "h5_1:obtain",
+    "asset": "h5_1",
+    "step": "obtain",
+    "type": "and",
+    "existence_status": false,
+    "parents": [
+     "h4_1:obtain",
+     "h3_1:access"
+    ],
+    "children": [
+     "crown:obtain"
+    ],
+    "ttc": null,
+    "auto": false,
+    "blocked": false
+   },
+   {
+    "full_name": "h5_2:traverse",
+    "asset": "h5_2",
+    "step": "traverse",
+    "type": "or",
+    "existence_status": false,
+    "parents": [
+     "h3_2:traverse"
+    ],
+    "children": [
+     "crown:obtain"
+    ],
+    "ttc": null,
+    "auto": false,
+    "blocked": false
+   },
+   {
+    "full_name": "crown:obtain",
+    "asset": "crown",
+    "step": "obtain",
+    "type": "or",
+    "existence_status": false,
+    "parents": [
+     "h5_0:pivot",
+     "h5_2:traverse",
+     "h5_1:obtain"
+    ],
+    "children": [],
+    "ttc": null,
+    "auto": false,
+    "blocked": false
+   }
+  ],
+  "assets": [],
+  "associations": [],
+  "counts": {
+   "layers": 6,
+   "width": 3,
+   "nodes": 18,
+   "reachable": 18,
+   "and_steps": 7
+  },
+  "defenses_enabled": true,
+  "model_name": "ag-1011"
+ },
+ "entry": [
+  "edge0:reach",
+  "edge1:reach"
+ ],
+ "goal": "crown:obtain",
+ "hardenable": [
+  "h1_0:escalate",
+  "h1_1:access",
+  "h1_2:access",
+  "h2_0:reach",
+  "h2_1:obtain",
+  "h2_2:pivot",
+  "h3_0:traverse",
+  "h3_1:access",
+  "h3_2:traverse",
+  "h4_0:escalate",
+  "h4_1:obtain",
+  "h4_2:escalate",
+  "h5_0:pivot",
+  "h5_1:obtain",
+  "h5_2:traverse"
+ ]
+}

@@ -8,6 +8,7 @@ import { Empty, fmtTime, Json, KV, Modal, QueryState, Tabs } from "../ui";
 const TRACK: Record<string, string> = {
   implementation_conformance: "实现一致性（软件案例）",
   synthetic_representation: "合成表示（无害合成任务）",
+  formal_model_analysis: "形式模型分析（攻击图，验证器判定）",
 };
 const OUTCOME_TONE: Record<string, string> = {
   ANSWERED: "ok", TRUNCATED: "warn", CONTENT_REFUSAL: "warn", EMPTY_CONTENT: "warn", UNCERTAIN: "warn",
