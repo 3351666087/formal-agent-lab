@@ -1,0 +1,126 @@
+{
+ "protocol": "fal-research-response/v1",
+ "experiment": {
+  "study_id": "p6b-eval",
+  "unit_id": "isolation-fix.claude-opus-5-5-relay.S.r1",
+  "track": "implementation_conformance",
+  "case_id": "orders-tenant-isolation",
+  "case_version": 1,
+  "task_id": "isolation-fix",
+  "task_digest": "6919cc73b6b34b2c8fb012e7a30f3e4ea2c993a36d0d582fc7f0a2777685f075",
+  "representation_id": "transcript",
+  "replicate_id": 1,
+  "assistance_mode": "STATIC_UNASSISTED",
+  "sampling_id": "isolation-fix.claude-opus-5-5-relay.S.r1#0"
+ },
+ "call": {
+  "provider": "anthropic",
+  "provider_config_id": "claude-opus-5-5-relay",
+  "api": "anthropic.messages",
+  "api_version": "2023-06-01",
+  "endpoint": "https://api.uheapi.com/v1/messages",
+  "route": "COMPATIBLE_RELAY",
+  "endpoint_kind": "PROVIDER",
+  "model_requested": "claude-opus-5-5",
+  "model_returned": "claude-opus-5-5",
+  "model_switched": false,
+  "model_identity": "RELAY_REPORTED",
+  "response_id": "msg_011Cfxa2mMSg39MQzUBVAWq5",
+  "request_id": "aebb04a4-b7b0-4986-9163-7cfa6e2e8047, 9d82173d-ba80-48f0-9045-ccecf10070ed, 5de3833f-4859-48a1-888f-d0b16aac6bbc",
+  "started_at": "2026-10-12T15:21:14Z",
+  "finished_at": "2026-10-12T15:21:22Z",
+  "params": {
+   "max_tokens": 6000
+  },
+  "params_digest": "450ab2fbb3eb390c"
+ },
+ "raw": {
+  "body": {
+   "model": "claude-opus-5-5",
+   "id": "msg_011Cfxa2mMSg39MQzUBVAWq5",
+   "type": "message",
+   "role": "assistant",
+   "content": [
+    {
+     "type": "thinking",
+     "thinking": "",
+     "signature": "CAQSowYKEAgSGAI4AUIIdGhpbmtpbmcSDELus8uBl8if+S7jrhoM1xm/KT+n6sBPhKiEIjAz8Px1IPSzWsu1nQsVsIuwcLJQ2WIpBRJtLx/V9+TQtv4BPBjrXYtWuI7unOPgKoAqwAVsHYCq5L36WBaLyUvnKkfHs40W3sg1XvMYG017i4JubyNAlRLaWnDfu1EWjM4my5EC++hWHcMSAmId2B1U0DfAUsM8CV7uV8bDSgx2GI6aZHZR4JioZP20k/GwBXNnQySOVw94TgscKf5tVqVfF/Zj6Is5T/NK8+ybYtnpBryWZhJcXpNiMb29/rLCsKeuX09dJ3r7kRtUsq3WCMGX7UZEGwxfTZpQE/gR9LOl4urvwlwntqbdI2yejQcVtFU85b5mKGZMGdh6BehNeCUXK0k+x53ysb8Byg3Hxc/x1pi/7Dfuk2E4QG9Uf0iT+GquqrmzzCYix4nbdi60eGZqPgcup3f3qSufCgX1XMHRiUnsfM7oDs2yQR0FcwwWhYsH3xExpWPuuXDfQfJBix5MN2z4JRE1jKRbCrk3ICIQ067/F5wN4bQp8h6WP1zcAk1VdD2pi9dpc67RK615NZF5PRnkc+2IloTGkg2Ld562AXg8Oj+kCuk3grLc195JQiRri7JDBDEYBQYHDm3IhJUvfKnqbiB/Hg0yoZA8JAdaf6oLrJqByE6TIrmwWgOefkS6jgFKV6MwvRUkEyK85604Sqq8q1CsHyCET8aQTeUEF4v4hK/ms8aaZ3XnsHsoWxu8Cfg6iNS36fMIFkLQMga16UxUy/LeBaBscleJTY4CeMX1dN0KFT4lFApjiZwf6Q4pofs7FhR3szVMQZGNcresIm6kONj68cbvKur5H/jd7d6MtAUaZX1tqOzjoQ4s3JoGnnnP/pzA3hYtvynrzgp410vr1F4gmPzbHYfbyXVrh8MJ+qNNF1unr+Lpkwd/Ti9JkwFTVKf2s58VZQbRcMfUj38QJ3txowq3liwjsiDygf8XI1MlSkFB+SRaUnJWts0ufmCvWtAQDFS8CJngKcg+Z3OuwJmmlk7nTH8VN5zhoRJYNRgB"
+    },
+    {
+     "type": "text",
+     "text": "{\"isolation_holds\": true, \"violations\": [], \"assumptions\": \"Grant table as stated in the mechanism page: alpha is granted only acme, and bravo is granted only globex. The recorded HTTP statuses and state read-backs are taken as accurate oracle observations. A 403 response means the authorization layer refused the request before the business route ran, so no read data was returned and no write landed. The run covers only the eight listed requests on local test tenants (normal case, seed 1). Paths other than /t/{tenant}/state and /operations, such as /admin/*, were not exercised, so no claim is made about them. No request was UNKNOWN.\", \"rationale\": \"The invariant is forall s,t: accessed[s][t] -> grant[s][t]. Only four requests succeeded with 200: alpha reading acme, alpha writing acme, bravo reading globex and bravo writing globex. In each case the principal is granted that tenant, so the invariant holds for all of them. All four cross-tenant attempts were refused with 403 and did not succeed: alpha reading and writing globex, and bravo reading and writing acme. No request succeeded without a grant, so tenant isolation held on this run and there are no violations.\"}"
+    }
+   ],
+   "container": null,
+   "stop_reason": "end_turn",
+   "stop_sequence": null,
+   "stop_details": null,
+   "usage": {
+    "input_tokens": 2060,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 0,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 0
+    },
+    "output_tokens": 454,
+    "output_tokens_details": {
+     "thinking_tokens": 59
+    },
+    "service_tier": "standard",
+    "inference_geo": "global"
+   },
+   "input_transformations": [],
+   "diagnostics": null,
+   "context_management": {
+    "applied_edits": []
+   }
+  },
+  "body_text": null,
+  "visible_text": "{\"isolation_holds\": true, \"violations\": [], \"assumptions\": \"Grant table as stated in the mechanism page: alpha is granted only acme, and bravo is granted only globex. The recorded HTTP statuses and state read-backs are taken as accurate oracle observations. A 403 response means the authorization layer refused the request before the business route ran, so no read data was returned and no write landed. The run covers only the eight listed requests on local test tenants (normal case, seed 1). Paths other than /t/{tenant}/state and /operations, such as /admin/*, were not exercised, so no claim is made about them. No request was UNKNOWN.\", \"rationale\": \"The invariant is forall s,t: accessed[s][t] -> grant[s][t]. Only four requests succeeded with 200: alpha reading acme, alpha writing acme, bravo reading globex and bravo writing globex. In each case the principal is granted that tenant, so the invariant holds for all of them. All four cross-tenant attempts were refused with 403 and did not succeed: alpha reading and writing globex, and bravo reading and writing acme. No request succeeded without a grant, so tenant isolation held on this run and there are no violations.\"}",
+  "finish_reason": "end_turn",
+  "finish_class": "STOP",
+  "refusal": null,
+  "truncated": false,
+  "tool_calls": [],
+  "reasoning": "SUMMARY_ONLY"
+ },
+ "status": {
+  "outcome": "ANSWERED",
+  "transport_ok": true,
+  "http_status": 200,
+  "provider_error_type": null,
+  "provider_error": null,
+  "model_switched": false,
+  "attempts": [
+   {
+    "attempt_no": 1,
+    "attempt_id": "att_5a34b24e8961",
+    "sent": true,
+    "confirmed": true,
+    "http_status": 200,
+    "error_class": null,
+    "error": null,
+    "latency_ms": 9024.6
+   }
+  ],
+  "network_retries": 1,
+  "note": null
+ },
+ "cost": {
+  "usage_known": true,
+  "input_tokens": 2060,
+  "output_tokens": 454,
+  "reasoning_tokens": 59,
+  "cache_read_tokens": 0,
+  "cache_write_tokens": 0,
+  "latency_ms": 9024.9,
+  "http_attempts": 1,
+  "possibly_billed_unconfirmed": 0,
+  "prompt_digest": "3ad2ecd32059c857",
+  "config_digest": "1f058f3e15e36b97"
+ },
+ "task_input_digest": "3ad2ecd32059c857df1afdaad6a9fcc3f117482bfbdc74893991f9fdd4f544e4",
+ "reuse_key": "2ed2ece522764b519fbccb610d47b96249b55c65055807068ab8ae62a3a57bae",
+ "recorded_at": "2026-10-12T15:21:22Z"
+}

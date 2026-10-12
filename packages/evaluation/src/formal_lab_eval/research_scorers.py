@@ -43,6 +43,25 @@ class ScoreOutcome:
     program_correspondence: str  # CORRESPONDS / DEVIATES / UNKNOWN / NOT_APPLICABLE / NOT_EVALUATED
     explanation: str
     dependencies: dict[str, str] = field(default_factory=dict)
+    signals: dict[str, Any] = field(default_factory=dict)  # recorded-only heuristic rubric signals (not adjudicated)
+
+
+def rubric_digest(doc: dict[str, Any]) -> str:
+    return hashlib.sha256(json.dumps({k: v for k, v in doc.items() if k != "digest"}, sort_keys=True,
+                                     ensure_ascii=False).encode()).hexdigest()
+
+
+def load_rubric(repo_root: Path, rubric_id: str, version: str) -> dict[str, Any]:
+    """The frozen rubric (version + self-digest); the digest is recomputed and checked, so an edit needs a new file."""
+    path = repo_root / "research" / "rubric" / f"{rubric_id}-{version}.json"
+    if not path.is_file():
+        raise InvalidInput(f"no rubric {rubric_id}@{version} at {path}")
+    doc = json.loads(path.read_text())
+    if doc.get("digest") != rubric_digest(doc):
+        raise InvalidInput(f"rubric {rubric_id}@{version} digest mismatch: it was edited without a new version")
+    if (doc.get("rubric_id"), str(doc.get("version"))) != (rubric_id, version):
+        raise InvalidInput(f"rubric file names {doc.get('rubric_id')}@{doc.get('version')}, not {rubric_id}@{version}")
+    return doc
 
 
 class ResearchScorer(Protocol):
@@ -260,5 +279,57 @@ class ShortestPlanScorer:
                             f"{shortest}", deps)
 
 
+# ----------------------------------------------------------------- orders.isolation-judgment@1 (implementation)
+_SCOPE_WORDS = ("recorded", "observed", "within", "scope", "grant", "attempts", "assume", "assumption", "cannot "
+                "conclude", "only the")
+_RISK_WORDS = ("cross-tenant", "cross tenant", "another tenant", "other tenant", "unauthori", "not granted",
+               "isolation", "leak", "access control")
+
+
+class IsolationJudgmentScorer:
+    """The answer judges whether tenant isolation held on a recorded run of the order service (phase-5B case). Truth
+    is read from the recorded observation (an ungranted access that returned another tenant's data is a violation);
+    program correspondence is the 5B conformance verdict (DEVIATES = violated, CORRESPONDS = held). The model's
+    `isolation_holds` is scored against that; naming a correct violation and stating scope / the risk are recorded as
+    heuristic signals only (no human review, never promoted to a pass)."""
+
+    scorer_id = "orders.isolation-judgment"
+    version = "1"
+
+    def score(self, parsed: Any, reference: dict[str, Any], *, repo_root: Path, truncated: bool) -> ScoreOutcome:
+        obs_bytes = _evidence(repo_root, reference["observation"])
+        conf_bytes = _evidence(repo_root, reference["conformance"])
+        observation = json.loads(obs_bytes)
+        conformance = json.loads(conf_bytes)
+        deps = {"observation": sha256_bytes(obs_bytes), "conformance": sha256_bytes(conf_bytes)}
+        # truth from the recorded run: an ungranted access that was allowed (returned the tenant's data) is a violation
+        violations = [{"subject": a["subject"], "tenant": a["tenant"], "access": a["access"]}
+                      for a in observation["attempts"] if not a["granted"] and a["observed_allowed"] is True]
+        truth_holds = not violations
+        corr = conformance["correspondence"]  # the independent 5B program oracle
+        program = "CORRESPONDS" if (corr == "CORRESPONDS") == truth_holds else "UNKNOWN"
+        model_holds = parsed.get("isolation_holds")
+        model_violations = {(v.get("subject"), v.get("tenant")) for v in (parsed.get("violations") or [])
+                            if isinstance(v, dict)}
+        truth_pairs = {(v["subject"], v["tenant"]) for v in violations}
+        rationale = " ".join(str(parsed.get(k, "")) for k in ("rationale", "assumptions")).lower()
+        signals = {
+            "violation_identified": None if truth_holds else bool(model_violations & truth_pairs),
+            "no_false_violation": (not (model_violations - truth_pairs)) if model_violations else None,
+            "states_scope": any(w in rationale for w in _SCOPE_WORDS),
+            "names_isolation_risk": any(w in rationale for w in _RISK_WORDS)}
+        correct = model_holds is truth_holds
+        exp = ("isolation holds (every ungranted access was denied)" if truth_holds
+               else f"isolation is violated: {truth_pairs} returned another tenant's data")
+        return ScoreOutcome(
+            "CORRECT" if correct else "INCORRECT", "CORRECT" if correct else "INCORRECT",
+            program if correct else "DEVIATES",
+            f"model said isolation_holds={model_holds}; the recorded {observation['mode']} run shows {exp}; the 5B "
+            f"conformance verdict is {corr}" + ("" if truth_holds or not model_violations
+                                                else f"; model named violations {sorted(model_violations)}"),
+            deps, signals)
+
+
 register_scorer(DeviationDiagnosisScorer())
 register_scorer(ShortestPlanScorer())
+register_scorer(IsolationJudgmentScorer())

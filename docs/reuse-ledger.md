@@ -181,3 +181,10 @@
 - **方法参考**：抽象核查思想（Kroening ICCAD'07）继续体现在程序对应评分：`orders.deviation-diagnosis@1` 把模型回答的修订应用到信念模型，再以记录的程序运行回放核验，而不是对照参考答案。
 - **平台内部复用**：分项统计复用 `formal_lab_eval.stats`（`aggregate`、`paired_compare`、Wilson / bootstrap 区间、精确 Wilcoxon）；`MetricDefinition` / `MetricResult` 契约；5A 的 `replay_items` / `decide_correspondence`；Phase 4A 的协议测试服务（扩展到 Anthropic Messages 协议与研究行为）；`scripts/research_check.py`。
 - **CBMC**：仍未使用（案例为 Python）。
+
+## 8. 阶段六 B（Phase 6B）复用
+
+- **无新增第三方依赖**：`uv.lock` 未变。6B 直接接入 6A 的提供方适配与评分接口，不替换 SDK/框架；分项统计复用 `formal_lab_eval.stats`。
+- **程序—模型对应**：隔离判断评分器复用 5B 的记录观测与 `fal-conformance-result/v1` 判据（`orders.isolation-judgment@1` 以记录运行为准，不读模型自述）；合成评分复用 6A 的 `synthetic.shortest-plan@1` 与参考解释器。
+- **方法参考**：Inspect 的自定义/多评分器思想继续仅作概念借鉴（本阶段未用 LLM judge，也未用评测生成器搜索改变提供方接受行为的提示）；`ResearchEvaluation` 的 rubric_signals 为记录项，非裁定。
+- **CBMC**：仍未使用（案例为 Python）。新增语言/语义支持按实际案例需求单列，未声称“调用一个工具”对所有软件模型有效。

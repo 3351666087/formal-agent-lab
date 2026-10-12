@@ -279,3 +279,39 @@ The ordinary-business task (`orders-deviation`) gives the model the belief model
 recorded run's differences of case `orders-p2-speed` — every number quoted from the case — and asks for one constant
 revision; the operating condition that caused the deviation (the answer) is only in the scorer's reference. Synthetic
 tasks are a lamp counter and a short route (`formal_lab_model.samples`), each as model IR JSON and as fixed prose.
+
+## Phase 6B: domain criteria, the dual-model experiment and its reading
+
+6B uses the Phase 5 program-grounded cases and the 6A entry points to ask, on a frozen batch: do the models understand
+and correctly analyse these formal models; which conclusions hold under independent verification; does the business
+framing of the same defined finite problem change answers. The two tracks stay apart and are never pooled.
+
+- **Frozen rubric** `research/rubric/fal-research-rubric-1.json` (version + self-digest, loaded and digest-checked by
+  `load_rubric`; the digest is recorded in every report). Six dimensions: formal correctness (deterministic verifier —
+  primary metric `correct`), program correspondence (the 5B observation / regression — `program_corresponds`,
+  NOT_APPLICABLE for synthetic), assumption & scope expression and observable safety judgment (heuristic signals,
+  recorded only — `rubric_signals` on the evaluation, never promoted to a pass), refusal appropriateness (the 6A
+  call/answer classification; REFERENCE_UNCERTAIN when the basis is insufficient), usefulness & cost (`output_tokens` /
+  `latency_ms` / `format_valid`). No LLM judge and no human review were used, so no dimension is marked expert-reviewed;
+  a provider-policy attribution would need a dated public policy basis and is not made.
+- **Program-grounded scorer** `orders.isolation-judgment@1`: the answer judges whether tenant isolation held on a
+  recorded run of the 5B case; truth comes from the recorded observation (an ungranted access that returned another
+  tenant's state is a violation) and program correspondence from the 5B conformance verdict — not from the reference
+  answer. Naming a correct violation and stating scope / the risk are recorded as heuristic signals only.
+- **Frozen study** `research/studies/p6b-eval/`: 6 conditions × 2 models × 2 replicates = 24 requests, all
+  `STATIC_UNASSISTED` (the assisted path is validated in 6A; the MAL hybrid's rule-filtered candidates are an assisted
+  condition and never counted as unassisted solving). The real case is `orders-tenant-isolation` with a before/after
+  pair (the defect and the fix variants, judged from a factual transcript of the recorded run — the grant table is
+  given, the verdict is not). The synthetic tasks are two base problems (a bounded counter, a short route) each in two
+  harmless business framings that share one reference (same sample IR digest and shortest answer, so the problems are
+  verified-equal and only the framing differs). `load_study` additionally rejects any task whose reference *answer*
+  appears in a task input (`ANSWER_LEAK`), proving no answer leakage.
+- **Reading of the real batch** (24/24 answered, both tracks): on this frozen engineering batch both models answered
+  every unit and were correct on every unit — the program-grounded isolation judgments and the small synthetic plans.
+  No representation sensitivity was observed at this difficulty (the two business framings gave the same answers). The
+  per-track provider comparison is 0.00 mean difference and is an **engineering reading** only: both models answered
+  through a relay (relay-reported identity, K08), the sample is tiny (clustered by case/problem), and the primary
+  metric was fixed before the run. GPT-6 Astra used far fewer output tokens than Claude Opus 5.5 (which emitted
+  thinking tokens); cost is recorded as reported, not equated. This is a pipeline-and-phenomenon result, not a claim
+  of statistical superiority, and nothing here concerns the real-attack-disguise / regulation-evasion experiments,
+  which were not run.

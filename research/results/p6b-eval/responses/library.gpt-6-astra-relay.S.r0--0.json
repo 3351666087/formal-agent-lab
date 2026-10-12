@@ -1,0 +1,110 @@
+{
+ "protocol": "fal-research-response/v1",
+ "experiment": {
+  "study_id": "p6b-eval",
+  "unit_id": "library.gpt-6-astra-relay.S.r0",
+  "track": "synthetic_representation",
+  "case_id": null,
+  "case_version": null,
+  "task_id": "library",
+  "task_digest": "60d5c5a44c8a924f9a26d08336ecd61196f5294f6f4df26470e07f4886d2029a",
+  "representation_id": "library",
+  "replicate_id": 0,
+  "assistance_mode": "STATIC_UNASSISTED",
+  "sampling_id": "library.gpt-6-astra-relay.S.r0#0"
+ },
+ "call": {
+  "provider": "openai",
+  "provider_config_id": "gpt-6-astra-relay",
+  "api": "openai.chat.completions",
+  "api_version": "v1",
+  "endpoint": "https://api.uheapi.com/v1/chat/completions",
+  "route": "COMPATIBLE_RELAY",
+  "endpoint_kind": "PROVIDER",
+  "model_requested": "gpt-6-astra",
+  "model_returned": "gpt-6-astra",
+  "model_switched": false,
+  "model_identity": "RELAY_REPORTED",
+  "response_id": "resp_0f16d35bfa75049e016accfb1908f881988983af5a640ace54",
+  "request_id": "62b0f578-27cf-4595-a402-1eecc0d4bec6, 603e8930-eba2-43d6-a2b0-b39da4ef0b10",
+  "started_at": "2026-10-12T15:21:59Z",
+  "finished_at": "2026-10-12T15:22:05Z",
+  "params": {
+   "max_completion_tokens": 6000
+  },
+  "params_digest": "c119fe2938dd9a86"
+ },
+ "raw": {
+  "body": {
+   "id": "resp_0f16d35bfa75049e016accfb1908f881988983af5a640ace54",
+   "object": "chat.completion",
+   "created": 1791818525,
+   "model": "gpt-6-astra",
+   "choices": [
+    {
+     "index": 0,
+     "message": {
+      "role": "assistant",
+      "content": "{\"reachable\":true,\"plan\":[\"toggle\",\"toggle\",\"toggle\"],\"rationale\":\"Three toggles increase the counter from 0 to 3. This is minimal because each toggle increases it by only 1, and reset cannot increase it. The plan uses 3 actions, within the limit of 6.\"}"
+     },
+     "finish_reason": "stop"
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 4426,
+    "completion_tokens": 97,
+    "total_tokens": 4523,
+    "completion_tokens_details": {
+     "reasoning_tokens": 27
+    }
+   },
+   "service_tier": "default"
+  },
+  "body_text": null,
+  "visible_text": "{\"reachable\":true,\"plan\":[\"toggle\",\"toggle\",\"toggle\"],\"rationale\":\"Three toggles increase the counter from 0 to 3. This is minimal because each toggle increases it by only 1, and reset cannot increase it. The plan uses 3 actions, within the limit of 6.\"}",
+  "finish_reason": "stop",
+  "finish_class": "STOP",
+  "refusal": null,
+  "truncated": false,
+  "tool_calls": [],
+  "reasoning": "NOT_EXPOSED"
+ },
+ "status": {
+  "outcome": "ANSWERED",
+  "transport_ok": true,
+  "http_status": 200,
+  "provider_error_type": null,
+  "provider_error": null,
+  "model_switched": false,
+  "attempts": [
+   {
+    "attempt_no": 1,
+    "attempt_id": "att_ed9448993083",
+    "sent": true,
+    "confirmed": true,
+    "http_status": 200,
+    "error_class": null,
+    "error": null,
+    "latency_ms": 6605.2
+   }
+  ],
+  "network_retries": 1,
+  "note": null
+ },
+ "cost": {
+  "usage_known": true,
+  "input_tokens": 4426,
+  "output_tokens": 97,
+  "reasoning_tokens": 27,
+  "cache_read_tokens": null,
+  "cache_write_tokens": null,
+  "latency_ms": 6605.3,
+  "http_attempts": 1,
+  "possibly_billed_unconfirmed": 0,
+  "prompt_digest": "e5390bf67aaa33cf",
+  "config_digest": "3a71fd838802d132"
+ },
+ "task_input_digest": "e5390bf67aaa33cf5288a85273aaa6a5a5b98c3ea06986245dba131ac9df11fd",
+ "reuse_key": "d2ca71393569828578517683871b2999b8b768a4753af6c36d7e436c30850adc",
+ "recorded_at": "2026-10-12T15:22:05Z"
+}

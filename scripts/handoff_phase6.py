@@ -34,8 +34,10 @@ def main() -> int:
     checks = load(EV / "checks" / "results.json")
     real = load(EV / "p6a" / "real-endpoint.json")
     protocol = load(EV / "p6a" / "protocol.json")
+    p6b_eval = load(EV / "p6b" / "eval.json")
     groups = checks.get("groups", {})
     p6a = groups.get("p6a") == "PASS"
+    p6b = groups.get("p6b") == "PASS"
     contracts = {v: json.loads((ROOT / "contracts" / v / "DIGEST.json").read_text()) for v in ("v1", "v2")}
     manifest = {
         "format": "phase-handoff/v1", "phase": "6", "part": "6A (双模型调用、原始回答与评测基础); 6B pending",
@@ -55,9 +57,21 @@ def main() -> int:
             "P6A-02": {"title": "研究任务入口、独立评分接口、两条实验线分开的矩阵与报告", "status": "PASS" if p6a else "IN_PROGRESS",
                        "evidence": ["docs/execution/evidence/research/p6a/protocol.json",
                                     "research/results/p6a-protocol/report.md"]},
+            "P6B-01": {"title": "冻结可核查的参考判据和双模型实验定义，证明无参考答案泄漏",
+                       "status": "PASS" if p6b else "IN_PROGRESS",
+                       "evidence": ["research/rubric/fal-research-rubric-1.json", "research/studies/p6b-eval/study.json",
+                                    "docs/execution/evidence/research/p6b/protocol.json"]},
+            "P6B-02": {"title": "在冻结条件下运行已授权批次，完整分母、可追溯评分、两轨分别呈现",
+                       "status": "PASS" if p6b else "IN_PROGRESS",
+                       "evidence": ["docs/execution/evidence/research/p6b/eval.json",
+                                    "research/results/p6b-eval/report.md"]},
         },
-        "phase6_complete": False,
-        "phase6_complete_note": "Phase 6 waits for 6B (domain evaluation); 6A delivers the generic foundation only",
+        "phase6_complete": bool(p6a and p6b),
+        "phase6_complete_note": ("6A + 6B delivered and validated; the real dual-model batch ran and was scored. The "
+                                 "provider comparison is engineering-only: both models answered through a relay "
+                                 "(relay-reported identity, K08), and the official routes are not configured, so no "
+                                 "verified provider comparison is drawn" if p6a and p6b
+                                 else "Phase 6 incomplete: see check_groups"),
         "check_command": checks.get("command"), "check_groups": groups, "check_summary": checks.get("summary"),
         "selected_passed": checks.get("selected_passed"), "overall_complete": checks.get("overall_complete"),
         "config_digest": (checks.get("config") or {}).get("sha256"),
@@ -90,13 +104,25 @@ def main() -> int:
         "protocol_validation": {"planned_units": protocol.get("planned_units"),
                                 "evidence": "docs/execution/evidence/research/p6a/protocol.json",
                                 "results": "research/results/p6a-protocol/"},
+        "phase6b": {
+            "study_id": "p6b-eval", "frozen_batch": "6 conditions × 2 models × 2 replicates = 24 requests",
+            "rubric": "research/rubric/fal-research-rubric-1.json (6 dimensions, version + self-digest)",
+            "rubric_digest": p6b_eval.get("rubric_digest"), "tracks": p6b_eval.get("tracks"),
+            "tally": p6b_eval.get("tally"), "budget": p6b_eval.get("budget"),
+            "conclusion": p6b_eval.get("conclusion"),
+            "scorers": ["orders.isolation-judgment@1 (program-grounded)", "synthetic.shortest-plan@1"],
+            "evidence": ["docs/execution/evidence/research/p6b/protocol.json",
+                         "docs/execution/evidence/research/p6b/eval.json"],
+            "results": "research/results/p6b-eval/", "study": "research/studies/p6b-eval/"},
         "commands": {
             "research_check": "make research-check ARGS=\"--group p6a\"",
             "build_studies": "uv run --frozen python scripts/p6a_studies.py",
             "run_study": "uv run --frozen fal research study run research/studies/<study_id>",
             "rescore": "uv run --frozen fal research study score research/studies/<study_id> [--force]",
             "import_to_platform": "uv run --frozen fal research study import research/studies/<study_id> "
-                                  "--project <project>"},
+                                  "--project <project>",
+            "build_6b_studies": "uv run --frozen python scripts/p6b_studies.py",
+            "run_6b_batch": "make research-check ARGS=\"--group p6b\""},
         "blocked": [
             {"item": "Claude Opus 5.5 on the official Anthropic route (OFFICIAL_NATIVE)",
              "reason": "no FAL_ANTHROPIC_API_KEY configured; the environment's ANTHROPIC_API_KEY is never read",
@@ -112,11 +138,17 @@ def main() -> int:
         "known_gaps": {"doc": "docs/research/known-gaps.md", "opened_in_6a": ["K08", "K09", "K10", "K11", "K12"],
                        "carried": {"K01": "OPEN", "K02": "OPEN", "K03": "OPEN"}},
         "handoff_docs": ["docs/handoff/phase6.md", "docs/handoff/phase6.manifest.json", "docs/research/protocol.md",
-                         "docs/research/known-gaps.md", "docs/execution/phase-6a.md", "docs/reuse-ledger.md"],
+                         "docs/research/known-gaps.md", "docs/execution/phase-6a.md", "docs/execution/phase-6b.md",
+                         "docs/reuse-ledger.md"],
+        "phase7_reproduce": ["research/studies/p6a-protocol", "research/studies/p6a-real",
+                             "research/studies/p6b-eval", "research/rubric/fal-research-rubric-1.json",
+                             "research/results/ (ledgers + raw responses + evaluations + reports)",
+                             "the 5A/5B cases the real tasks draw on; case-level split keeps a case and its derived "
+                             "tasks in one group — none of these are a fresh held-out set for Phase 7"],
     }
     MANIFEST.write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\n")
-    print(f"phase6 handoff: p6a {'PASS' if p6a else 'incomplete'}; real-endpoint "
-          f"{(real.get('conclusion') or {}).get('routes')}; phase 6 complete = False (6B pending)")
+    print(f"phase6 handoff: p6a {'PASS' if p6a else 'incomplete'} · p6b {'PASS' if p6b else 'incomplete'}; "
+          f"phase 6 complete = {bool(p6a and p6b)}; 6B provider comparison = engineering-only (relay)")
     return 0
 
 

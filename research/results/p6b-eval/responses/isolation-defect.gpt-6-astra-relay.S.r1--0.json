@@ -1,0 +1,107 @@
+{
+ "protocol": "fal-research-response/v1",
+ "experiment": {
+  "study_id": "p6b-eval",
+  "unit_id": "isolation-defect.gpt-6-astra-relay.S.r1",
+  "track": "implementation_conformance",
+  "case_id": "orders-tenant-isolation",
+  "case_version": 1,
+  "task_id": "isolation-defect",
+  "task_digest": "036a52fc844fcc5c12eb9dd6c0621f00888939079b2c6b619b4ed4b97d15130a",
+  "representation_id": "transcript",
+  "replicate_id": 1,
+  "assistance_mode": "STATIC_UNASSISTED",
+  "sampling_id": "isolation-defect.gpt-6-astra-relay.S.r1#0"
+ },
+ "call": {
+  "provider": "openai",
+  "provider_config_id": "gpt-6-astra-relay",
+  "api": "openai.chat.completions",
+  "api_version": "v1",
+  "endpoint": "https://api.uheapi.com/v1/chat/completions",
+  "route": "COMPATIBLE_RELAY",
+  "endpoint_kind": "PROVIDER",
+  "model_requested": "gpt-6-astra",
+  "model_returned": "gpt-6-astra",
+  "model_switched": false,
+  "model_identity": "RELAY_REPORTED",
+  "response_id": "resp_0ba8e793212861b2016accf9dcc7dc8198b01cee0a385470fb",
+  "request_id": "e0f4a38b-1de5-40d1-a7f2-420a55dff2e9, 9b9bd912-20c6-4554-99d6-85e77898310b",
+  "started_at": "2026-10-12T15:16:43Z",
+  "finished_at": "2026-10-12T15:16:52Z",
+  "params": {
+   "max_completion_tokens": 6000
+  },
+  "params_digest": "c119fe2938dd9a86"
+ },
+ "raw": {
+  "body": {
+   "id": "resp_0ba8e793212861b2016accf9dcc7dc8198b01cee0a385470fb",
+   "object": "chat.completion",
+   "created": 1791818212,
+   "model": "gpt-6-astra",
+   "choices": [
+    {
+     "index": 0,
+     "message": {
+      "role": "assistant",
+      "content": "{\n  \"isolation_holds\": false,\n  \"violations\": [\n    {\n      \"subject\": \"alpha\",\n      \"tenant\": \"globex\",\n      \"access\": \"read\"\n    },\n    {\n      \"subject\": \"bravo\",\n      \"tenant\": \"acme\",\n      \"access\": \"read\"\n    }\n  ],\n  \"assumptions\": \"The stated grants are complete: alpha is authorized only for acme, and bravo only for globex. The recorded responses accurately describe returned data and state changes. Under the specified oracle, cross-tenant writes rejected by business logic with no state change remain UNKNOWN despite HTTP 200 and are not listed as confirmed violations.\",\n  \"rationale\": \"Both cross-tenant reads returned the other tenant's stored order state to an unauthorized principal, directly violating tenant isolation. The successful reads and writes within each principal's granted tenant are authorized.\"\n}"
+     },
+     "finish_reason": "stop"
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 5285,
+    "completion_tokens": 189,
+    "total_tokens": 5474
+   },
+   "service_tier": "default"
+  },
+  "body_text": null,
+  "visible_text": "{\n  \"isolation_holds\": false,\n  \"violations\": [\n    {\n      \"subject\": \"alpha\",\n      \"tenant\": \"globex\",\n      \"access\": \"read\"\n    },\n    {\n      \"subject\": \"bravo\",\n      \"tenant\": \"acme\",\n      \"access\": \"read\"\n    }\n  ],\n  \"assumptions\": \"The stated grants are complete: alpha is authorized only for acme, and bravo only for globex. The recorded responses accurately describe returned data and state changes. Under the specified oracle, cross-tenant writes rejected by business logic with no state change remain UNKNOWN despite HTTP 200 and are not listed as confirmed violations.\",\n  \"rationale\": \"Both cross-tenant reads returned the other tenant's stored order state to an unauthorized principal, directly violating tenant isolation. The successful reads and writes within each principal's granted tenant are authorized.\"\n}",
+  "finish_reason": "stop",
+  "finish_class": "STOP",
+  "refusal": null,
+  "truncated": false,
+  "tool_calls": [],
+  "reasoning": "NOT_EXPOSED"
+ },
+ "status": {
+  "outcome": "ANSWERED",
+  "transport_ok": true,
+  "http_status": 200,
+  "provider_error_type": null,
+  "provider_error": null,
+  "model_switched": false,
+  "attempts": [
+   {
+    "attempt_no": 1,
+    "attempt_id": "att_1e4716ac7151",
+    "sent": true,
+    "confirmed": true,
+    "http_status": 200,
+    "error_class": null,
+    "error": null,
+    "latency_ms": 8745.5
+   }
+  ],
+  "network_retries": 1,
+  "note": null
+ },
+ "cost": {
+  "usage_known": true,
+  "input_tokens": 5285,
+  "output_tokens": 189,
+  "reasoning_tokens": null,
+  "cache_read_tokens": null,
+  "cache_write_tokens": null,
+  "latency_ms": 8748.8,
+  "http_attempts": 1,
+  "possibly_billed_unconfirmed": 0,
+  "prompt_digest": "829aabe7230d3389",
+  "config_digest": "3a71fd838802d132"
+ },
+ "task_input_digest": "829aabe7230d3389b37b7474dd5f119c025b0a9f622e6f3d86a6aff183b275ad",
+ "reuse_key": "061daa13798174acde1fd95aacf590f28a948bc90ba0c59b4f80aba48b7f1515",
+ "recorded_at": "2026-10-12T15:16:52Z"
+}

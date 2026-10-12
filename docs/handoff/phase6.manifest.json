@@ -2,14 +2,14 @@
   "format": "phase-handoff/v1",
   "phase": "6",
   "part": "6A (双模型调用、原始回答与评测基础); 6B pending",
-  "generated_at": "2026-10-12T14:33:48.441845+00:00",
+  "generated_at": "2026-10-12T15:29:05.203110+00:00",
   "source_revision": {
-    "commit": "985510f59798939cdff271c77d0a34d811f127fd",
+    "commit": "9d817686270f58a1473595efed3a4a37711a73e7",
     "worktree": {
-      "sha256": "62c6e4f05d74215ba437312d37fc4f8727afc12e19b17e045d681f08c18b3d27",
+      "sha256": "2d8f60df12e2322936364abcfdb266745f57fc7e648d8e54a7fdd36a49597104",
       "clean": false,
-      "changed_bytes": 92619,
-      "untracked_files": 29,
+      "changed_bytes": 31095,
+      "untracked_files": 16,
       "excluded_outputs": [
         "docs/execution/evidence/",
         "docs/handoff/",
@@ -19,7 +19,7 @@
       ]
     }
   },
-  "handoff_revision_parent": "985510f59798939cdff271c77d0a34d811f127fd",
+  "handoff_revision_parent": "9d817686270f58a1473595efed3a4a37711a73e7",
   "developer_models": [
     "claude-opus-5-5"
   ],
@@ -33,7 +33,7 @@
     "fal-conformance-result/v1": "08060a040810670a9a6a3c0756ac272d6c33d83f93cc9012f9e00656a210e838",
     "fal-research-response/v1": "d149f573f01a89cde180a96fd08bac7f003ee53fe3571471cd57c56dc6b836e0",
     "fal-research-study/v1": "6745606fef6a481287c68dd0f54e2929512f0f76af0b054eefb9865d7cffcc8c",
-    "fal-research-evaluation/v1": "669810d70e4682164a1b8c413b08c96566fe65cdfba9f9786de5bc3feb6f234b"
+    "fal-research-evaluation/v1": "447c0ca3cd8c8f0aa2f03347cb3c1ca491511d75f71e89aeb94ecebf3285296d"
   },
   "task_status": {
     "P6A-01": {
@@ -51,20 +51,37 @@
         "docs/execution/evidence/research/p6a/protocol.json",
         "research/results/p6a-protocol/report.md"
       ]
+    },
+    "P6B-01": {
+      "title": "冻结可核查的参考判据和双模型实验定义，证明无参考答案泄漏",
+      "status": "PASS",
+      "evidence": [
+        "research/rubric/fal-research-rubric-1.json",
+        "research/studies/p6b-eval/study.json",
+        "docs/execution/evidence/research/p6b/protocol.json"
+      ]
+    },
+    "P6B-02": {
+      "title": "在冻结条件下运行已授权批次，完整分母、可追溯评分、两轨分别呈现",
+      "status": "PASS",
+      "evidence": [
+        "docs/execution/evidence/research/p6b/eval.json",
+        "research/results/p6b-eval/report.md"
+      ]
     }
   },
-  "phase6_complete": false,
-  "phase6_complete_note": "Phase 6 waits for 6B (domain evaluation); 6A delivers the generic foundation only",
-  "check_command": "python scripts/check_runner.py --suite research --group p5a,p5b,p6a",
+  "phase6_complete": true,
+  "phase6_complete_note": "6A + 6B delivered and validated; the real dual-model batch ran and was scored. The provider comparison is engineering-only: both models answered through a relay (relay-reported identity, K08), and the official routes are not configured, so no verified provider comparison is drawn",
+  "check_command": "python scripts/check_runner.py --suite research --group p5a,p5b,p6a,p6b",
   "check_groups": {
     "p5a": "PASS",
     "p5b": "PASS",
     "p6a": "PASS",
-    "p6b": "NO_CHECKS",
+    "p6b": "PASS",
     "p7": "NO_CHECKS"
   },
   "check_summary": {
-    "PASS": 7,
+    "PASS": 9,
     "FAIL": 0,
     "BLOCKED": 0,
     "NOT_RUN": 0,
@@ -73,7 +90,7 @@
   },
   "selected_passed": true,
   "overall_complete": false,
-  "config_digest": "731fc8f2c535c8412538e2386a8f464cf46bb43400253ee5a9cd60c30a856d45",
+  "config_digest": "06eb8ef313a433a1780a2e2b05fd8bacafdddc1a06094ffd1fca19a958273ede",
   "where_answers_live": {
     "raw_response": "research/results/<study_id>/responses/<unit>--<n>.json (fal-research-response/v1: raw.body as the provider returned it, raw.visible_text, status, cost)",
     "sent_prompt": "research/results/<study_id>/prompts/<task_input_digest>.json",
@@ -194,7 +211,7 @@
             "reasoning_tokens": null,
             "http_attempts": 0,
             "possibly_billed_unconfirmed": 0,
-            "latency_ms": 0.2
+            "latency_ms": 0.1
           },
           {
             "usage_known": false,
@@ -203,7 +220,7 @@
             "reasoning_tokens": null,
             "http_attempts": 0,
             "possibly_billed_unconfirmed": 0,
-            "latency_ms": 0.1
+            "latency_ms": 0.0
           }
         ],
         "notes": [
@@ -233,12 +250,328 @@
     "evidence": "docs/execution/evidence/research/p6a/protocol.json",
     "results": "research/results/p6a-protocol/"
   },
+  "phase6b": {
+    "study_id": "p6b-eval",
+    "frozen_batch": "6 conditions × 2 models × 2 replicates = 24 requests",
+    "rubric": "research/rubric/fal-research-rubric-1.json (6 dimensions, version + self-digest)",
+    "rubric_digest": "cc7f1563549a97406570184339019611bf0bac148e5c006757ddda4189e13cb4",
+    "tracks": {
+      "implementation_conformance": {
+        "outcomes": {
+          "ANSWERED": 8
+        },
+        "conditions": [
+          {
+            "condition": "claude-opus-5-5-relay · STATIC_UNASSISTED · transcript",
+            "correct": {
+              "value": 1.0,
+              "status": "OK",
+              "n": 4,
+              "missing": 0,
+              "not_applicable": 0,
+              "ci": {
+                "low": 0.5101091635454027,
+                "high": 1.0,
+                "level": 0.95,
+                "method": "Wilson score interval",
+                "n": 4
+              },
+              "missing_reason": null
+            },
+            "behaviors": {
+              "CORRECT": 4
+            }
+          },
+          {
+            "condition": "gpt-6-astra-relay · STATIC_UNASSISTED · transcript",
+            "correct": {
+              "value": 1.0,
+              "status": "OK",
+              "n": 4,
+              "missing": 0,
+              "not_applicable": 0,
+              "ci": {
+                "low": 0.5101091635454027,
+                "high": 1.0,
+                "level": 0.95,
+                "method": "Wilson score interval",
+                "n": 4
+              },
+              "missing_reason": null
+            },
+            "behaviors": {
+              "CORRECT": 4
+            }
+          }
+        ],
+        "comparisons": [
+          {
+            "vary": "provider",
+            "a": "gpt-6-astra-relay",
+            "b": "claude-opus-5-5-relay",
+            "n_pairs": 4,
+            "mean_diff_b_minus_a": 0.0,
+            "reading_note": "engineering reading: fewer than 6 complete pairs or non-zero differences — a direction, not a significance claim"
+          },
+          {
+            "vary": "representation",
+            "a": "garage",
+            "b": "library",
+            "n_pairs": null,
+            "mean_diff_b_minus_a": null,
+            "reading_note": null
+          },
+          {
+            "vary": "representation",
+            "a": "courier",
+            "b": "approval",
+            "n_pairs": null,
+            "mean_diff_b_minus_a": null,
+            "reading_note": null
+          }
+        ]
+      },
+      "synthetic_representation": {
+        "outcomes": {
+          "ANSWERED": 16
+        },
+        "conditions": [
+          {
+            "condition": "claude-opus-5-5-relay · STATIC_UNASSISTED · approval",
+            "correct": {
+              "value": 1.0,
+              "status": "OK",
+              "n": 2,
+              "missing": 0,
+              "not_applicable": 0,
+              "ci": {
+                "low": 0.3423802275066532,
+                "high": 1.0,
+                "level": 0.95,
+                "method": "Wilson score interval",
+                "n": 2
+              },
+              "missing_reason": null
+            },
+            "behaviors": {
+              "CORRECT": 2
+            }
+          },
+          {
+            "condition": "claude-opus-5-5-relay · STATIC_UNASSISTED · courier",
+            "correct": {
+              "value": 1.0,
+              "status": "OK",
+              "n": 2,
+              "missing": 0,
+              "not_applicable": 0,
+              "ci": {
+                "low": 0.3423802275066532,
+                "high": 1.0,
+                "level": 0.95,
+                "method": "Wilson score interval",
+                "n": 2
+              },
+              "missing_reason": null
+            },
+            "behaviors": {
+              "CORRECT": 2
+            }
+          },
+          {
+            "condition": "claude-opus-5-5-relay · STATIC_UNASSISTED · garage",
+            "correct": {
+              "value": 1.0,
+              "status": "OK",
+              "n": 2,
+              "missing": 0,
+              "not_applicable": 0,
+              "ci": {
+                "low": 0.3423802275066532,
+                "high": 1.0,
+                "level": 0.95,
+                "method": "Wilson score interval",
+                "n": 2
+              },
+              "missing_reason": null
+            },
+            "behaviors": {
+              "CORRECT": 2
+            }
+          },
+          {
+            "condition": "claude-opus-5-5-relay · STATIC_UNASSISTED · library",
+            "correct": {
+              "value": 1.0,
+              "status": "OK",
+              "n": 2,
+              "missing": 0,
+              "not_applicable": 0,
+              "ci": {
+                "low": 0.3423802275066532,
+                "high": 1.0,
+                "level": 0.95,
+                "method": "Wilson score interval",
+                "n": 2
+              },
+              "missing_reason": null
+            },
+            "behaviors": {
+              "CORRECT": 2
+            }
+          },
+          {
+            "condition": "gpt-6-astra-relay · STATIC_UNASSISTED · approval",
+            "correct": {
+              "value": 1.0,
+              "status": "OK",
+              "n": 2,
+              "missing": 0,
+              "not_applicable": 0,
+              "ci": {
+                "low": 0.3423802275066532,
+                "high": 1.0,
+                "level": 0.95,
+                "method": "Wilson score interval",
+                "n": 2
+              },
+              "missing_reason": null
+            },
+            "behaviors": {
+              "CORRECT": 2
+            }
+          },
+          {
+            "condition": "gpt-6-astra-relay · STATIC_UNASSISTED · courier",
+            "correct": {
+              "value": 1.0,
+              "status": "OK",
+              "n": 2,
+              "missing": 0,
+              "not_applicable": 0,
+              "ci": {
+                "low": 0.3423802275066532,
+                "high": 1.0,
+                "level": 0.95,
+                "method": "Wilson score interval",
+                "n": 2
+              },
+              "missing_reason": null
+            },
+            "behaviors": {
+              "CORRECT": 2
+            }
+          },
+          {
+            "condition": "gpt-6-astra-relay · STATIC_UNASSISTED · garage",
+            "correct": {
+              "value": 1.0,
+              "status": "OK",
+              "n": 2,
+              "missing": 0,
+              "not_applicable": 0,
+              "ci": {
+                "low": 0.3423802275066532,
+                "high": 1.0,
+                "level": 0.95,
+                "method": "Wilson score interval",
+                "n": 2
+              },
+              "missing_reason": null
+            },
+            "behaviors": {
+              "CORRECT": 2
+            }
+          },
+          {
+            "condition": "gpt-6-astra-relay · STATIC_UNASSISTED · library",
+            "correct": {
+              "value": 1.0,
+              "status": "OK",
+              "n": 2,
+              "missing": 0,
+              "not_applicable": 0,
+              "ci": {
+                "low": 0.3423802275066532,
+                "high": 1.0,
+                "level": 0.95,
+                "method": "Wilson score interval",
+                "n": 2
+              },
+              "missing_reason": null
+            },
+            "behaviors": {
+              "CORRECT": 2
+            }
+          }
+        ],
+        "comparisons": [
+          {
+            "vary": "provider",
+            "a": "gpt-6-astra-relay",
+            "b": "claude-opus-5-5-relay",
+            "n_pairs": 8,
+            "mean_diff_b_minus_a": 0.0,
+            "reading_note": "engineering reading: fewer than 6 complete pairs or non-zero differences — a direction, not a significance claim"
+          },
+          {
+            "vary": "representation",
+            "a": "garage",
+            "b": "library",
+            "n_pairs": 4,
+            "mean_diff_b_minus_a": 0.0,
+            "reading_note": "engineering reading: fewer than 6 complete pairs or non-zero differences — a direction, not a significance claim"
+          },
+          {
+            "vary": "representation",
+            "a": "courier",
+            "b": "approval",
+            "n_pairs": 4,
+            "mean_diff_b_minus_a": 0.0,
+            "reading_note": "engineering reading: fewer than 6 complete pairs or non-zero differences — a direction, not a significance claim"
+          }
+        ]
+      }
+    },
+    "tally": {
+      "reused": 24
+    },
+    "budget": {
+      "max_calls": 40,
+      "max_http_attempts": 80,
+      "max_total_output_tokens": 120000,
+      "calls": 24,
+      "http_attempts": 25,
+      "output_tokens": 11145,
+      "possibly_billed": 0,
+      "unknown_usage_calls": 0
+    },
+    "conclusion": {
+      "real_answers_recorded": true,
+      "tracks_apart": true,
+      "provider_comparison_verified": false,
+      "why": "both real models answered through a relay (relay-reported identity); the official routes are not configured, so no verified provider comparison is drawn",
+      "offline_readable": true
+    },
+    "scorers": [
+      "orders.isolation-judgment@1 (program-grounded)",
+      "synthetic.shortest-plan@1"
+    ],
+    "evidence": [
+      "docs/execution/evidence/research/p6b/protocol.json",
+      "docs/execution/evidence/research/p6b/eval.json"
+    ],
+    "results": "research/results/p6b-eval/",
+    "study": "research/studies/p6b-eval/"
+  },
   "commands": {
     "research_check": "make research-check ARGS=\"--group p6a\"",
     "build_studies": "uv run --frozen python scripts/p6a_studies.py",
     "run_study": "uv run --frozen fal research study run research/studies/<study_id>",
     "rescore": "uv run --frozen fal research study score research/studies/<study_id> [--force]",
-    "import_to_platform": "uv run --frozen fal research study import research/studies/<study_id> --project <project>"
+    "import_to_platform": "uv run --frozen fal research study import research/studies/<study_id> --project <project>",
+    "build_6b_studies": "uv run --frozen python scripts/p6b_studies.py",
+    "run_6b_batch": "make research-check ARGS=\"--group p6b\""
   },
   "blocked": [
     {
@@ -278,6 +611,15 @@
     "docs/research/protocol.md",
     "docs/research/known-gaps.md",
     "docs/execution/phase-6a.md",
+    "docs/execution/phase-6b.md",
     "docs/reuse-ledger.md"
+  ],
+  "phase7_reproduce": [
+    "research/studies/p6a-protocol",
+    "research/studies/p6a-real",
+    "research/studies/p6b-eval",
+    "research/rubric/fal-research-rubric-1.json",
+    "research/results/ (ledgers + raw responses + evaluations + reports)",
+    "the 5A/5B cases the real tasks draw on; case-level split keeps a case and its derived tasks in one group — none of these are a fresh held-out set for Phase 7"
   ]
 }

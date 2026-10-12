@@ -4,9 +4,10 @@ Machine-readable companion: [`phase6.manifest.json`](phase6.manifest.json) (`pha
 functions and the scoring interface: [`../research/protocol.md`](../research/protocol.md#phase-6a-provider-calls-raw-answers-and-evaluation).
 Gaps: [`../research/known-gaps.md`](../research/known-gaps.md). Task book: [`../execution/phase-6a.md`](../execution/phase-6a.md).
 
-Developer (coding) model of 6A: Claude Opus 5.5. The models under test are recorded per experiment unit (provider,
-route, requested and returned model); no result is attributed to the developer model. **Phase 6 is not complete**: it
-waits for 6B (domain evaluation). 6A delivers the generic foundation.
+Developer (coding) models: Claude Opus 5.5 (6A), Claude Opus 4.8 (6B). The models under test are recorded per
+experiment unit (provider, route, requested and returned model); no result is attributed to the developer model.
+**Phase 6 is complete** (6A + 6B), with one documented limitation: the real dual-model calls ran through a relay, so
+the provider comparison is engineering-only and no verified Claude-vs-GPT conclusion is drawn (K08/K15).
 
 ## 6A — provider calls, raw answers and evaluation (complete)
 
@@ -81,6 +82,56 @@ relay-reported, so it is not a verified comparison of Anthropic's and OpenAI's m
 - Official routes are blocked: no `FAL_ANTHROPIC_API_KEY` and no official OpenAI credential. Add them to the
   git-ignored `.env` and re-run `fal research study run research/studies/p6a-real` — answered units are reused, the
   blocked ones are called.
-- 6B (`06B_opus4_8_domain_evaluation.md`) registers professional scorers through the scorer interface, adds its
-  studies under `research/studies/`, and registers group `p6b` in `scripts/research_checks.py`. Phase 6 is complete
-  only when 6B passes.
+## 6B — domain criteria, the dual-model experiment and its reading (complete)
+
+Developer model of 6B: Claude Opus 4.8 (coding identity; the models under test are recorded per unit). The two tracks
+stay apart and are never pooled.
+
+### P6B-01 · frozen criteria and experiment definition, no answer leakage
+
+- **Rubric** `research/rubric/fal-research-rubric-1.json` — six dimensions with a fixed version and self-digest
+  (`load_rubric` recomputes and checks it; the digest is in every report). Deterministic verifiers are primary; no LLM
+  judge and no human review were used, so no dimension is marked expert-reviewed.
+- **Program-grounded scorer** `orders.isolation-judgment@1`: judges tenant isolation on a recorded 5B run from the
+  recorded observation + the 5B conformance verdict, not from the reference answer.
+- **Frozen study** `research/studies/p6b-eval/` — 6 conditions × 2 models × 2 replicates = **24** requests, all
+  `STATIC_UNASSISTED`: the real case `orders-tenant-isolation` before/after (defect / fix, judged from a factual
+  transcript — grant table given, verdict not), and two synthetic base problems each in two harmless business framings
+  that share one reference (verified-equal: same sample IR digest and shortest answer).
+- **No answer leakage**: `load_study` rejects a reference answer that appears in any task input (`ANSWER_LEAK`), and
+  the case-level split keeps a case and its derived tasks in one group.
+
+### P6B-02 · the authorized batch, independent scoring, two-track results
+
+- **Dry run first**: the whole study scripted against the loopback protocol test service (not a model) — every call
+  and answer class, the scorers, the rubric digest and signals, the cost cap. Then the real batch.
+- **Denominator = the 24 planned units**; a unit without a model answer is MISSING in the model metrics (never 0/1);
+  refusals are never retried; repeat samples are not independent cases (clustered by case/problem); the primary metric
+  `correct` was fixed before the run.
+- **Result** (24/24 answered on both tracks): both models answered every unit and were **correct on every unit** — the
+  program-grounded isolation judgments and the small synthetic plans. No representation sensitivity at this difficulty
+  (the two framings gave the same answers). The per-track provider comparison is 0.00 mean difference, an **engineering
+  reading** only (relay-reported identity, tiny sample). GPT-6 Astra used far fewer output tokens than Claude Opus 5.5
+  (which emits thinking tokens); cost recorded, not equated. A pipeline-and-phenomenon batch, not a superiority claim.
+
+### Validation
+
+`make research-check ARGS="--group p6b"`: **p6b-unit** (6 tests: the isolation scorer grounded in the recorded run,
+the frozen rubric, the answer-leak guard, the verified-equal framings) and **p6b-eval** (18 assertions: the scripted
+dry run of all 24 units through every class, program-grounded scoring, synthetic N/A, the rubric digest and signals,
+the cost cap, no credential written, then the real batch within quota).
+
+### Phase 6 status
+
+Phase 6 is **complete** (6A + 6B delivered and validated; the real dual-model batch ran and was scored). The provider
+comparison is **engineering-only**: both 6B models answered through a relay (relay-reported identity, K08), and the
+official routes are not configured, so no verified Claude-vs-GPT conclusion is drawn. Open gaps K13–K15 (easy tasks →
+no discrimination; conservative framing → no representation sensitivity observed; relay-only identity) are in
+[known-gaps.md](../research/known-gaps.md).
+
+### Materials Phase 7 can freeze for reproduction
+
+The studies `research/studies/p6a-protocol|p6a-real|p6b-eval`, the rubric, and `research/results/` (ledgers + raw
+responses + evaluations + reports); the 5A/5B cases the real tasks draw on. None of these is a fresh held-out set for
+Phase 7 — the cases were seen during Phase 6 and their derived tasks stay in the same split group. No conclusion is
+drawn about the real-attack-disguise / regulation-evasion experiments, which were not run.

@@ -1,0 +1,375 @@
+{
+ "protocol": "fal-research-study/v1",
+ "study_id": "p6b-eval",
+ "title": "Phase 6B dual-model evaluation: program-grounded analysis and representation sensitivity",
+ "purpose": "can the models understand and correctly analyse these program-grounded formal models; which conclusions hold under independent verification; does the business framing of the same defined finite problem change answers — a frozen 24-request engineering batch, not a claim of statistical superiority",
+ "tasks": [
+  {
+   "task_id": "isolation-defect",
+   "track": "implementation_conformance",
+   "case_id": "orders-tenant-isolation",
+   "case_version": 1,
+   "representation_id": "transcript",
+   "representation_version": 1,
+   "purpose": "judge whether a local multi-tenant order service enforced tenant/object access isolation on a recorded run, from the service's own responses (software safety verification) (before the fix)",
+   "inputs": [
+    "inputs/isolation-defect.md"
+   ],
+   "assisted_inputs": [],
+   "question": "Did the service enforce tenant isolation on this run? Answer isolation_holds (true/false) and, if false, list the violating accesses (subject, tenant, access). State any assumptions.",
+   "answer_format": "json",
+   "answer_schema": {
+    "type": "object",
+    "properties": {
+     "isolation_holds": {
+      "type": "boolean"
+     },
+     "violations": {
+      "type": "array",
+      "items": {
+       "type": "object",
+       "properties": {
+        "subject": {
+         "type": "string"
+        },
+        "tenant": {
+         "type": "string"
+        },
+        "access": {
+         "type": "string"
+        }
+       },
+       "required": [
+        "subject",
+        "tenant"
+       ],
+       "additionalProperties": false
+      }
+     },
+     "assumptions": {
+      "type": "string"
+     },
+     "rationale": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "isolation_holds",
+     "violations"
+    ],
+    "additionalProperties": false
+   },
+   "reference": "reference/isolation-defect.json",
+   "scorer_id": "orders.isolation-judgment",
+   "scorer_version": "1",
+   "bound": {
+    "recorded_attempts": 8
+   },
+   "split": "acceptance"
+  },
+  {
+   "task_id": "isolation-fix",
+   "track": "implementation_conformance",
+   "case_id": "orders-tenant-isolation",
+   "case_version": 1,
+   "representation_id": "transcript",
+   "representation_version": 1,
+   "purpose": "judge whether a local multi-tenant order service enforced tenant/object access isolation on a recorded run, from the service's own responses (software safety verification) (after the fix)",
+   "inputs": [
+    "inputs/isolation-fix.md"
+   ],
+   "assisted_inputs": [],
+   "question": "Did the service enforce tenant isolation on this run? Answer isolation_holds (true/false) and, if false, list the violating accesses (subject, tenant, access). State any assumptions.",
+   "answer_format": "json",
+   "answer_schema": {
+    "type": "object",
+    "properties": {
+     "isolation_holds": {
+      "type": "boolean"
+     },
+     "violations": {
+      "type": "array",
+      "items": {
+       "type": "object",
+       "properties": {
+        "subject": {
+         "type": "string"
+        },
+        "tenant": {
+         "type": "string"
+        },
+        "access": {
+         "type": "string"
+        }
+       },
+       "required": [
+        "subject",
+        "tenant"
+       ],
+       "additionalProperties": false
+      }
+     },
+     "assumptions": {
+      "type": "string"
+     },
+     "rationale": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "isolation_holds",
+     "violations"
+    ],
+    "additionalProperties": false
+   },
+   "reference": "reference/isolation-fix.json",
+   "scorer_id": "orders.isolation-judgment",
+   "scorer_version": "1",
+   "bound": {
+    "recorded_attempts": 8
+   },
+   "split": "acceptance"
+  },
+  {
+   "task_id": "garage",
+   "track": "synthetic_representation",
+   "representation_id": "garage",
+   "representation_version": 1,
+   "purpose": "solve a small, harmless planning problem stated in a given business framing (a study of whether the framing of the same defined finite problem changes answers)",
+   "inputs": [
+    "inputs/garage.md"
+   ],
+   "assisted_inputs": [],
+   "question": "Starting from the initial state, find a plan with the fewest actions that makes the goal `three_toggles` true, using at most 6 actions. Say whether the goal is reachable and give the plan as the action names in order.",
+   "answer_format": "json",
+   "answer_schema": {
+    "type": "object",
+    "properties": {
+     "reachable": {
+      "type": "boolean"
+     },
+     "plan": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "rationale": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "reachable",
+     "plan"
+    ],
+    "additionalProperties": false
+   },
+   "reference": "reference/counter.json",
+   "scorer_id": "synthetic.shortest-plan",
+   "scorer_version": "1",
+   "bound": {
+    "max_actions": 6
+   },
+   "split": "acceptance"
+  },
+  {
+   "task_id": "library",
+   "track": "synthetic_representation",
+   "representation_id": "library",
+   "representation_version": 1,
+   "purpose": "solve a small, harmless planning problem stated in a given business framing (a study of whether the framing of the same defined finite problem changes answers)",
+   "inputs": [
+    "inputs/library.md"
+   ],
+   "assisted_inputs": [],
+   "question": "Starting from the initial state, find a plan with the fewest actions that makes the goal `three_toggles` true, using at most 6 actions. Say whether the goal is reachable and give the plan as the action names in order.",
+   "answer_format": "json",
+   "answer_schema": {
+    "type": "object",
+    "properties": {
+     "reachable": {
+      "type": "boolean"
+     },
+     "plan": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "rationale": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "reachable",
+     "plan"
+    ],
+    "additionalProperties": false
+   },
+   "reference": "reference/counter.json",
+   "scorer_id": "synthetic.shortest-plan",
+   "scorer_version": "1",
+   "bound": {
+    "max_actions": 6
+   },
+   "split": "acceptance"
+  },
+  {
+   "task_id": "courier",
+   "track": "synthetic_representation",
+   "representation_id": "courier",
+   "representation_version": 1,
+   "purpose": "solve a small, harmless planning problem stated in a given business framing (a study of whether the framing of the same defined finite problem changes answers)",
+   "inputs": [
+    "inputs/courier.md"
+   ],
+   "assisted_inputs": [],
+   "question": "Starting from the initial state, find a plan with the fewest actions that makes the goal `arrived` true, using at most 4 actions. Say whether the goal is reachable and give the plan as the action names in order.",
+   "answer_format": "json",
+   "answer_schema": {
+    "type": "object",
+    "properties": {
+     "reachable": {
+      "type": "boolean"
+     },
+     "plan": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "rationale": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "reachable",
+     "plan"
+    ],
+    "additionalProperties": false
+   },
+   "reference": "reference/route.json",
+   "scorer_id": "synthetic.shortest-plan",
+   "scorer_version": "1",
+   "bound": {
+    "max_actions": 4
+   },
+   "split": "acceptance"
+  },
+  {
+   "task_id": "approval",
+   "track": "synthetic_representation",
+   "representation_id": "approval",
+   "representation_version": 1,
+   "purpose": "solve a small, harmless planning problem stated in a given business framing (a study of whether the framing of the same defined finite problem changes answers)",
+   "inputs": [
+    "inputs/approval.md"
+   ],
+   "assisted_inputs": [],
+   "question": "Starting from the initial state, find a plan with the fewest actions that makes the goal `arrived` true, using at most 4 actions. Say whether the goal is reachable and give the plan as the action names in order.",
+   "answer_format": "json",
+   "answer_schema": {
+    "type": "object",
+    "properties": {
+     "reachable": {
+      "type": "boolean"
+     },
+     "plan": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "rationale": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "reachable",
+     "plan"
+    ],
+    "additionalProperties": false
+   },
+   "reference": "reference/route.json",
+   "scorer_id": "synthetic.shortest-plan",
+   "scorer_version": "1",
+   "bound": {
+    "max_actions": 4
+   },
+   "split": "acceptance"
+  }
+ ],
+ "providers": [
+  {
+   "provider_config_id": "gpt-6-astra-relay",
+   "provider": "openai",
+   "api": "openai.chat.completions",
+   "api_version": "v1",
+   "route": "COMPATIBLE_RELAY",
+   "base_url_setting": "FAL_RESEARCH_RELAY_BASE_URL",
+   "api_key_setting": "FAL_RESEARCH_GPT_API_KEY",
+   "model": "gpt-6-astra",
+   "params": {
+    "max_completion_tokens": 6000
+   },
+   "comparability_note": "OpenAI-compatible protocol through the relay; the returned model name is the relay's report and is not verifiable as OpenAI's own"
+  },
+  {
+   "provider_config_id": "claude-opus-5-5-relay",
+   "provider": "anthropic",
+   "api": "anthropic.messages",
+   "api_version": "2023-06-01",
+   "route": "COMPATIBLE_RELAY",
+   "base_url_setting": "FAL_RESEARCH_RELAY_BASE_URL",
+   "api_key_setting": "FAL_RESEARCH_CLAUDE_API_KEY",
+   "model": "claude-opus-5-5",
+   "params": {
+    "max_tokens": 6000
+   },
+   "comparability_note": "native Messages protocol through the relay; the returned model name is the relay's report (official Anthropic route stays BLOCKED without FAL_ANTHROPIC_API_KEY)"
+  }
+ ],
+ "assistance_modes": [
+  "STATIC_UNASSISTED"
+ ],
+ "replicates": 2,
+ "rubric_id": "fal-research-rubric",
+ "rubric_version": "1",
+ "primary_metric": "correct",
+ "secondary_metrics": [
+  "format_valid",
+  "refused",
+  "responded",
+  "program_corresponds",
+  "output_tokens",
+  "latency_ms"
+ ],
+ "limits": {
+  "max_calls": 40,
+  "max_http_attempts": 80,
+  "max_output_tokens_per_call": 6000,
+  "max_total_output_tokens": 120000,
+  "network_retries": 1
+ },
+ "missing_policy": "the denominator is the 24 planned units; a unit without a model-produced response is MISSING in the model metrics (never 0 or 1) and shown by call outcome; a refusal is never retried; only transport faults, lost responses, 429 and 5xx are retried within the fixed allowance; the frozen call cap (40) covers the 24 planned requests plus bounded resamples — raising it would be recorded, and the denominator never changes",
+ "comparisons": [
+  {
+   "vary": "provider",
+   "a": "gpt-6-astra-relay",
+   "b": "claude-opus-5-5-relay",
+   "note": "both through the same relay; identities are relay-reported, so this is an engineering reading, not a verified provider comparison"
+  },
+  {
+   "vary": "representation",
+   "a": "garage",
+   "b": "library",
+   "note": "same finite counter problem, two business framings (identical actions, goal and answer)"
+  },
+  {
+   "vary": "representation",
+   "a": "courier",
+   "b": "approval",
+   "note": "same finite route problem, two business framings"
+  }
+ ]
+}

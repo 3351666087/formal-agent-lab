@@ -1,0 +1,133 @@
+{
+ "protocol": "fal-research-response/v1",
+ "experiment": {
+  "study_id": "p6b-eval",
+  "unit_id": "isolation-defect.claude-opus-5-5-relay.S.r0",
+  "track": "implementation_conformance",
+  "case_id": "orders-tenant-isolation",
+  "case_version": 1,
+  "task_id": "isolation-defect",
+  "task_digest": "036a52fc844fcc5c12eb9dd6c0621f00888939079b2c6b619b4ed4b97d15130a",
+  "representation_id": "transcript",
+  "replicate_id": 0,
+  "assistance_mode": "STATIC_UNASSISTED",
+  "sampling_id": "isolation-defect.claude-opus-5-5-relay.S.r0#0"
+ },
+ "call": {
+  "provider": "anthropic",
+  "provider_config_id": "claude-opus-5-5-relay",
+  "api": "anthropic.messages",
+  "api_version": "2023-06-01",
+  "endpoint": "https://api.uheapi.com/v1/messages",
+  "route": "COMPATIBLE_RELAY",
+  "endpoint_kind": "PROVIDER",
+  "model_requested": "claude-opus-5-5",
+  "model_returned": "claude-opus-5-5",
+  "model_switched": false,
+  "model_identity": "RELAY_REPORTED",
+  "response_id": "msg_011CfxZt4ZPu4rhZs7jIeJ82",
+  "request_id": "e706b2e8-0904-4d5c-ab00-17a870f8aaa1, 69387128-0fa9-4cc4-8bfb-14acdae60b11",
+  "started_at": "2026-10-12T15:16:52Z",
+  "finished_at": "2026-10-12T15:19:39Z",
+  "params": {
+   "max_tokens": 6000
+  },
+  "params_digest": "450ab2fbb3eb390c"
+ },
+ "raw": {
+  "body": {
+   "id": "msg_011CfxZt4ZPu4rhZs7jIeJ82",
+   "type": "message",
+   "role": "assistant",
+   "model": "claude-opus-5-5",
+   "content": [
+    {
+     "type": "thinking",
+     "thinking": "The user is asking me to judge whether tenant isolation held. It did not. Alpha, granted acme only, read globex's state successfully: response 200 returning globex's data. That is a cross-tenant read. Bravo likewise read acme's state. The write requests returned 200 but business logic rejected them, so no state change occurred and the oracle cannot classify them, leaving them UNKNOWN. I define access as an HTTP request that succeeds when the business route runs. For the reads, the route ran and returned the tenant state, so isolation is clearly violated. For the writes, the route ran and returned 200 rather than 403, meaning the authorization layer did not deny, yet the operation was rejected by an unrelated business precondition, so I treat the state change as unconfirmed. I set isolation_holds to false, record the two confirmed read violations with subject and tenant, and describe the writes separately as a suspected authorization gap rather than a proven violation.",
+     "signature": "CAQSgxEKEAgRGAI4AUIIdGhpbmtpbmcSDB2Yc02zi6IO84ZE3hoMxOEeN9SBbqrix5/JIjCwVBqFA0hpjqNcVo/GZYwllP8tdtw2DMrxlLUGfgxxCnOczvun84GUA34E7hXFqW4qoBBBzrdPzr6DEe+Y8W4YNOfJxBeE+M0KhFMDDtm1SsdsUgKQQBvpuBAsmuUCI7uVITPe638iJ0F/PD2mMp5z8PYAntvP8U5vqRSVVadnDB8MwclYli7NjyOk72XDotWf8ecu0upMTdpyQqTGv1cPYeofKAuH24vwXHTjHeiyMt6cOpDLVWEUpZ2GL693znuxK5dgas3KS3H4Rn37oLXpQrFdRJiVSsbdQvZNWytnY8Xew4ZlcXGroq4O4KnCR95luro9u1asesHBpdkZIPXLGSv0Hv0xqZyz+63n37866cFtk73RLK/J64t++hIb4Y3luhvhCbl0oDWmnPOJsM6s8zrwCpBxc2V2oiaUHUT447lBgNtzQHIqwZtV2kvgZr3FrCIfXKwciuy1w6qRzmGL/aVrzSzhny6OIhIaL2oZPh4lGx9QMbFQ+AS17gXLd1KvlO6bS6yqEGX7fpnnodkMnUrrQwV4qEsNFWEgKVOZQcBcaq0oMPfFQgixV/IOJtxeerCH0GA1RjrxLdfwrURpd/jUTka5Mz05zeEMBQXJ7EbfG8Haf0lC8HrOKHKSsYQHln2VP0prnwP1XxAMaQB3vUXk65bZr42Dhp5WB+aOZKjeNXbd+Wk1OfkN+cO1EVRoIpnlnE3H8bh2jzKg9igwvW+XZse6FLxZaXEuNQFQB/05gZtrYjAZRoqfEwNxA+fqOORUn70eqi6m+g2NUO7p/5x5B3/f57AHT6np06wTheJjoaqelLWcUj+r3/K2BS3q4G8zSSM///ER9kxbr2NKVg5F22GzHlvQELsO6Hfu7N9IR4QivTYZepW8K8ZSRTJOym3x3cDX0RFYLViIZE7Lqdn6iIz9ppGTebg6A+0AcaPEunn4AlGTLlZ/9m7GueQMDaicGOixzyQYPN5Kx1u9omD2e8gFSxanbdCTmlhNSakDFJUMMJtIFfpCyUi9M1JfckpZA0tj115sg5bl02UhNAxKamlJGfNwmSnU6z8Ug0sOwkvjbwtw2q/eSmn/Vba6OS/0YY/CPFaA/M+xBr2AqW9pWSBqR+r5whHHILMatg85zvp3K2ZUh4T66LcfJvZGmk31oTrYlrg0IJCW/h68sNSbrje86o7voxbhkvDo3njnHtVxWWTclksDSlpu/eYrNXv7h1v6wlFQkueZ5Fcj8s7Seb+ZeWgbKoYEctfkHt8nuF51LMcrIULjOIYuYohSIlQrv3LxCYybohRm1pVRiv0A9YviOzyIyXgik/5ZcJM2c4T4z2kP05F/vTiFBuUk6P5H9ibazhFBSrQRiT7k5DmW85M/+qvBbCEFkmIGN2I7FFG3u6S6OkOay3X4xgulVIiLx1bxURVlSRbI3f2g0JawcInFN+FTTaxrwmlHQrbFnmrTeJpDAMlYDzlzHwIoRGuL2RxzE/QfcRWI3zEKqzLxt+/2EseMC7SaWMTe6MIINg/S/0NX/CYdnmiBeuT5qabvXnlUJOSSf73maSmcdf9+1rHIlllsLC3EQWXh4jGzvEcl3baWKSzAiy9DWxN6R9wiS2iSsZ/daF39cl9YpMmi2RasYUXJaoZxWgKCNzHNVWsbsppaPMcSwThR8flikERjCgQ0pg214k4Hc2hfuFCqwtoZ0hcBlp339/WZwQeaNKPoZckgkycRCmQj+MW6g6T2IvKFPMHJ2BZFocV2erALF2ypKbxF5XKn3hAYJ6l3njMVLeFDs0vnR06nWPP5XOcKsky+Xc7W8MZ1JHLiuBVh3gUCfzBXIyvBhd/ADJ+zKD2oePw2muBmRNLrUby++2MqEMKBCHK1qKxLG9Gsc+VinOwJkAQZiz6e1gfJnjIlaPHBv7vBRa0iyBRAXrQJngCplfyr88RCalFj+G7tV7+jZyVGM1d50OkpnYUCMZpygH4iREVm5icxQ3oGI9WYOWo+F4E7Mj0BYysxTIdsTRh70OwOCI81V85E9gxgEhwy+0PPzIWxF5/yzvN664YhSSB8HRb0AGk+0gl3AJqrdvr7/9BJOc6R1Co8cuIlNQfnB27ltethq8emrzYn75anL3Z5ej2PtlKRiQ7XglpeioM/CbESZeY1Hz7NBxqoc7GxcJh019VIz6EHh0aADKCNLJCSXt/Akxsnu/1uShXD1/A4LWsG7L5QLHdlx3lzFXvUuZXXZRFHqJeOALuJUn8UwqxPhyCwKbXUODUX5y+9uDweKm8D6N7/mLE/T8E+U5D5Ap6JxmdPJHLIy7cqNnsLIyLwjLmZ/9pHrrpl3Q+miAQyJY4kJ6UjOFJ0SpBW8UajuuXtBeYNL+F/4nnPG35x0j7y9M749ENdw2X4VsSPt+nZ/K15PwOnr5r/fBoS2W3hSNELchCbyY7xf/W5ZiwUNZ36gmSm7WbkejoPjeRwDE3SgkvVPuRsdfIi/kfdwHuHIEcJwDSqdjb+gJV+DiLAK5Wlunx0EkuV/UMGSQtfxFj8xsK3zYBZT+PXIXoO6BcNQaanF2/qQUNCUAhrO5/jwcG+MBP6v/tL4bRL0tsci8TCexrdGYkbSnM3oVOXd/pAYTK7xSPmtk9jxaD3PPwyo/t5XV/K+7qWP1rOZrFxp4uBRAlMXGTx1/wT24lXAm0c+8hpfvXqnimrqPfOVqTrSp7J83tTMLeIyecVkWL0TL9zhiyZBihqpYUjaD6Bbw7/QaPqL3gt3KvFqzMg+ZU70Qt4d1b6eHw0pyi7TOwRcLhqibLfequwiypruHbwTeOE6I35fJoOVelqSieCO9AlCyzHzCLDuMDasw1uG1trHMjMGAE="
+    },
+    {
+     "type": "text",
+     "text": "{\"isolation_holds\": false, \"violations\": [{\"subject\": \"alpha\", \"tenant\": \"globex\", \"access\": \"read — HTTP 200, globex's stored order state returned; alpha is granted acme only\"}, {\"subject\": \"bravo\", \"tenant\": \"acme\", \"access\": \"read — HTTP 200, acme's stored order state returned; bravo is granted globex only\"}, {\"subject\": \"alpha\", \"tenant\": \"globex\", \"access\": \"write — HTTP 200 (business precondition rejected, no state change; oracle UNKNOWN, counted because a denial should have been 403)\"}, {\"subject\": \"bravo\", \"tenant\": \"acme\", \"access\": \"write — HTTP 200 (business precondition rejected, no state change; oracle UNKNOWN, counted because a denial should have been 403)\"}], \"assumptions\": \"Grant table taken as given: alpha -> acme only, bravo -> globex only; both tokens valid, so 401 is not in play. A request reaching the business route with HTTP 200 is treated as access, since the trust boundary places the tenant check in the authorization middleware before the route and a denial there would be 403. The two cross-tenant writes are counted as violations on the HTTP-status oracle rather than the state oracle: the mechanism file marks them UNKNOWN for state change (business precondition rejected, nothing was written), but the response was 200 and not 403, so the authorization layer did not block them; if one insists on the state oracle alone, only the two cross-tenant reads are confirmed violations and isolation_holds is still false. 'responded 200' is read as a genuine service response, not a client-side artifact; stored-state read-backs are taken as reported.\", \"rationale\": \"The invariant tenant_isolation requires accessed[s][t] -> grant[s][t] for every subject and tenant. It is broken directly: alpha, granted only acme, sent a read to /t/globex/... and got 200 with globex's stored order state; bravo, granted only globex, read /t/acme/... and got 200 with acme's stored state. Both reads returned the other tenant's actual values, which the oracle classifies as a confirmed cross-tenant success, not an UNKNOWN. The four same-tenant requests (alpha on acme, bravo on globex, read and write) behaved correctly and show the fixture itself works, so the failure is specific to the tenant-id check: the middleware is not consulting the caller's grant set against the tenant in the URL, and the business layer deliberately does not re-check ownership. The cross-tenant writes reinforce the same picture — 200 instead of 403 means they passed the authorization layer and were stopped only incidentally by an unrelated business precondition, which is luck, not isolation. Isolation therefore does not hold on this run (this is the pre-fix behaviour).\"}"
+    }
+   ],
+   "stop_reason": "end_turn",
+   "stop_sequence": null,
+   "stop_details": null,
+   "context_management": {
+    "applied_edits": []
+   },
+   "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 1738,
+    "cache_read_input_tokens": 0,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 1738,
+     "ephemeral_1h_input_tokens": 0
+    },
+    "output_tokens": 2615,
+    "output_tokens_details": {
+     "thinking_tokens": 1694
+    },
+    "service_tier": "standard",
+    "inference_geo": "global"
+   }
+  },
+  "body_text": null,
+  "visible_text": "{\"isolation_holds\": false, \"violations\": [{\"subject\": \"alpha\", \"tenant\": \"globex\", \"access\": \"read — HTTP 200, globex's stored order state returned; alpha is granted acme only\"}, {\"subject\": \"bravo\", \"tenant\": \"acme\", \"access\": \"read — HTTP 200, acme's stored order state returned; bravo is granted globex only\"}, {\"subject\": \"alpha\", \"tenant\": \"globex\", \"access\": \"write — HTTP 200 (business precondition rejected, no state change; oracle UNKNOWN, counted because a denial should have been 403)\"}, {\"subject\": \"bravo\", \"tenant\": \"acme\", \"access\": \"write — HTTP 200 (business precondition rejected, no state change; oracle UNKNOWN, counted because a denial should have been 403)\"}], \"assumptions\": \"Grant table taken as given: alpha -> acme only, bravo -> globex only; both tokens valid, so 401 is not in play. A request reaching the business route with HTTP 200 is treated as access, since the trust boundary places the tenant check in the authorization middleware before the route and a denial there would be 403. The two cross-tenant writes are counted as violations on the HTTP-status oracle rather than the state oracle: the mechanism file marks them UNKNOWN for state change (business precondition rejected, nothing was written), but the response was 200 and not 403, so the authorization layer did not block them; if one insists on the state oracle alone, only the two cross-tenant reads are confirmed violations and isolation_holds is still false. 'responded 200' is read as a genuine service response, not a client-side artifact; stored-state read-backs are taken as reported.\", \"rationale\": \"The invariant tenant_isolation requires accessed[s][t] -> grant[s][t] for every subject and tenant. It is broken directly: alpha, granted only acme, sent a read to /t/globex/... and got 200 with globex's stored order state; bravo, granted only globex, read /t/acme/... and got 200 with acme's stored state. Both reads returned the other tenant's actual values, which the oracle classifies as a confirmed cross-tenant success, not an UNKNOWN. The four same-tenant requests (alpha on acme, bravo on globex, read and write) behaved correctly and show the fixture itself works, so the failure is specific to the tenant-id check: the middleware is not consulting the caller's grant set against the tenant in the URL, and the business layer deliberately does not re-check ownership. The cross-tenant writes reinforce the same picture — 200 instead of 403 means they passed the authorization layer and were stopped only incidentally by an unrelated business precondition, which is luck, not isolation. Isolation therefore does not hold on this run (this is the pre-fix behaviour).\"}",
+  "finish_reason": "end_turn",
+  "finish_class": "STOP",
+  "refusal": null,
+  "truncated": false,
+  "tool_calls": [],
+  "reasoning": "SUMMARY_ONLY"
+ },
+ "status": {
+  "outcome": "ANSWERED",
+  "transport_ok": true,
+  "http_status": 200,
+  "provider_error_type": null,
+  "provider_error": null,
+  "model_switched": false,
+  "attempts": [
+   {
+    "attempt_no": 1,
+    "attempt_id": "att_70df71af159a",
+    "sent": true,
+    "confirmed": true,
+    "http_status": 502,
+    "error_class": "HTTP_502",
+    "error": "{\"error\":{\"message\":\"Upstream request failed\",\"type\":\"upstream_error\"},\"type\":\"error\"}",
+    "latency_ms": 127511.1
+   },
+   {
+    "attempt_no": 2,
+    "attempt_id": "att_6665e73ca010",
+    "sent": true,
+    "confirmed": true,
+    "http_status": 200,
+    "error_class": null,
+    "error": null,
+    "latency_ms": 40949.1
+   }
+  ],
+  "network_retries": 1,
+  "note": null
+ },
+ "cost": {
+  "usage_known": true,
+  "input_tokens": 2,
+  "output_tokens": 2615,
+  "reasoning_tokens": 1694,
+  "cache_read_tokens": 0,
+  "cache_write_tokens": 1738,
+  "latency_ms": 168963.2,
+  "http_attempts": 2,
+  "possibly_billed_unconfirmed": 0,
+  "prompt_digest": "829aabe7230d3389",
+  "config_digest": "1f058f3e15e36b97"
+ },
+ "task_input_digest": "829aabe7230d3389b37b7474dd5f119c025b0a9f622e6f3d86a6aff183b275ad",
+ "reuse_key": "3aca9df76072ec9435d25b7a7bd82ca105a5c102612b2e5e8b715e2c16eb7b83",
+ "recorded_at": "2026-10-12T15:19:39Z"
+}

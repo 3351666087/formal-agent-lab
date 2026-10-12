@@ -1,0 +1,123 @@
+{
+ "protocol": "fal-research-response/v1",
+ "experiment": {
+  "study_id": "p6b-eval",
+  "unit_id": "isolation-defect.claude-opus-5-5-relay.S.r1",
+  "track": "implementation_conformance",
+  "case_id": "orders-tenant-isolation",
+  "case_version": 1,
+  "task_id": "isolation-defect",
+  "task_digest": "036a52fc844fcc5c12eb9dd6c0621f00888939079b2c6b619b4ed4b97d15130a",
+  "representation_id": "transcript",
+  "replicate_id": 1,
+  "assistance_mode": "STATIC_UNASSISTED",
+  "sampling_id": "isolation-defect.claude-opus-5-5-relay.S.r1#0"
+ },
+ "call": {
+  "provider": "anthropic",
+  "provider_config_id": "claude-opus-5-5-relay",
+  "api": "anthropic.messages",
+  "api_version": "2023-06-01",
+  "endpoint": "https://api.uheapi.com/v1/messages",
+  "route": "COMPATIBLE_RELAY",
+  "endpoint_kind": "PROVIDER",
+  "model_requested": "claude-opus-5-5",
+  "model_returned": "claude-opus-5-5",
+  "model_switched": false,
+  "model_identity": "RELAY_REPORTED",
+  "response_id": "msg_011CfxZwlt4flvgXfOVyxkYw",
+  "request_id": "b2b905cc-3970-42a4-b4df-4324517f6f0e, b9692b9d-49ce-463d-b291-9ee7fad4e39b",
+  "started_at": "2026-10-12T15:19:39Z",
+  "finished_at": "2026-10-12T15:20:50Z",
+  "params": {
+   "max_tokens": 6000
+  },
+  "params_digest": "450ab2fbb3eb390c"
+ },
+ "raw": {
+  "body": {
+   "id": "msg_011CfxZwlt4flvgXfOVyxkYw",
+   "type": "message",
+   "role": "assistant",
+   "model": "claude-opus-5-5",
+   "content": [
+    {
+     "type": "thinking",
+     "thinking": "The user is asking me to judge whether tenant isolation held across the recorded cross-tenant requests, and to report the verdict with the violating accesses, assumptions and rationale.\n\nLet me set out what the run shows. alpha reading globex returned 200 with globex's stored state, so the read reached the other tenant's data and returned it. bravo reading acme likewise returned 200 with acme's stored state. Both of these are unambiguous: a subject read a tenant it holds no grant for, and the response body carries that tenant's values. That is a violation of the property that no access by a subject to a tenant succeeds unless granted.\n\nThe two writes are different. alpha writing to globex returned 200, but the business layer rejected it for an unrelated precondition and no state changed. bravo writing to acme is the same shape. The oracle cannot classify these: the authorization layer evidently let the request through to the business route rather than returning 403, yet because no state changed there is no confirmed cross-tenant effect. Per the classification rule, such a request stays UNKNOWN, so I do not count it as a confirmed violation. I note in the assumptions that the 200 on those writes shows the authorization layer did not deny them, so if one treats admission at the authorization layer as the violation rather than a landed state change, they would also count. I keep them out of the violations list and record that reading in the assumptions and rationale.\n\nWhat remains is the verdict. Isolation did not hold.\n\nI keep to the material provided: the grant table where alpha holds a grant for acme and bravo holds a grant for globex, and the recorded run.\n\nThe user is asking me to produce a single JSON object with isolation_holds, violations, assumptions and rationale, and nothing else.\n\n{\"isolation_holds\": false, \"violations\": [{\"subject\": \"alpha\", \"tenant\": \"globex\", \"access\": \"read\"}, {\"subject\": \"bravo\", \"tenant\": \"acme\", \"access\": \"read\"}], \"assumptions\": [\"Grants are alpha->acme and bravo->globex only; any access to another tenant lacks a grant.\", \"Only the provided run and grant table are used as evidence.\", \"Per the classification rule, cross-tenant writes that returned 200 but changed no state remain UNKNOWN and are not counted as confirmed violations, even though a 403 would have been expected had the authorization layer denied them.\"], \"rationale\": \"Two cross-tenant reads succeeded: alpha read globex and bravo read acme, each returning 200 with the other tenant's stored state, which shows data from an ungranted tenant was disclosed. alpha writing to globex returned 200 but was rejected by the business layer for an unrelated precondition with no state change, and the same holds for bravo writing to acme, so those two remain UNKNOWN rather than confirmed violations. Because at least the two reads gave the requester another tenant's data with no grant, isolation did not hold.\"}",
+     "signature": "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"
+    },
+    {
+     "type": "text",
+     "text": "```json\n{\n  \"isolation_holds\": false,\n  \"violations\": [\n    {\n      \"subject\": \"alpha\",\n      \"tenant\": \"globex\",\n      \"access\": \"read\"\n    },\n    {\n      \"subject\": \"bravo\",\n      \"tenant\": \"acme\",\n      \"access\": \"read\"\n    }\n  ],\n  \"assumptions\": \"I take the grant table from the mechanism as given: alpha is granted acme only, bravo is granted globex only, and an access by a principal to a tenant it is not granted must be refused by the authorization middleware with 403 (401 for an unknown principal) so the business route never runs. I therefore read any 200 from a cross-tenant request as evidence that the middleware did not enforce the grant, and I treat a 200 read that returned the other tenant's stored values as a directly confirmed violation, since the oracle can see foreign data returned. The two cross-tenant writes (alpha->globex, bravo->acme) also returned 200 rather than 403, which likewise indicates the authorization layer admitted them, but the oracle cannot confirm that a cross-tenant write actually landed (the business layer rejected both and the tenant's stored state was read back unchanged), so per the stated oracle they are classified UNKNOWN and are not counted as confirmed violations. No other material was used, and I assume the recorded lines are complete and accurate for this run.\",\n  \"rationale\": \"The recorded run contradicts the tenant_isolation invariant forall s,t: accessed[s][t] -> grant[s][t]. The secure precondition for an access is that the subject holds a grant for the tenant; the failure result is 401/403 and the business route does not execute. Instead, alpha (granted acme only) sent a read to /t/globex and received 200 with globex's stored order state, and bravo (granted globex only) sent a read to /t/acme and received 200 with acme's stored order state. In both cases a non-granted subject obtained another tenant's business state, which is exactly the property the fixture is meant to enforce, so isolation does not hold on this run. The two cross-tenant write attempts returned 200 with the business logic rejecting the operation and no state change, which points at the same authorization gap but leaves the effect unverifiable from the service's own responses; they remain UNKNOWN and do not affect the verdict, which is already settled by the two confirmed cross-tenant reads. Note that this judgement concerns the pre-fix behaviour only: the defect sits in the authorization middleware, not in the business routes, which do not re-check tenant ownership.\"\n}\n```"
+    }
+   ],
+   "stop_reason": "end_turn",
+   "stop_sequence": null,
+   "stop_details": null,
+   "context_management": {
+    "applied_edits": []
+   },
+   "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 1738,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 0
+    },
+    "output_tokens": 4447,
+    "output_tokens_details": {
+     "thinking_tokens": 3616
+    },
+    "service_tier": "standard",
+    "inference_geo": "global"
+   }
+  },
+  "body_text": null,
+  "visible_text": "```json\n{\n  \"isolation_holds\": false,\n  \"violations\": [\n    {\n      \"subject\": \"alpha\",\n      \"tenant\": \"globex\",\n      \"access\": \"read\"\n    },\n    {\n      \"subject\": \"bravo\",\n      \"tenant\": \"acme\",\n      \"access\": \"read\"\n    }\n  ],\n  \"assumptions\": \"I take the grant table from the mechanism as given: alpha is granted acme only, bravo is granted globex only, and an access by a principal to a tenant it is not granted must be refused by the authorization middleware with 403 (401 for an unknown principal) so the business route never runs. I therefore read any 200 from a cross-tenant request as evidence that the middleware did not enforce the grant, and I treat a 200 read that returned the other tenant's stored values as a directly confirmed violation, since the oracle can see foreign data returned. The two cross-tenant writes (alpha->globex, bravo->acme) also returned 200 rather than 403, which likewise indicates the authorization layer admitted them, but the oracle cannot confirm that a cross-tenant write actually landed (the business layer rejected both and the tenant's stored state was read back unchanged), so per the stated oracle they are classified UNKNOWN and are not counted as confirmed violations. No other material was used, and I assume the recorded lines are complete and accurate for this run.\",\n  \"rationale\": \"The recorded run contradicts the tenant_isolation invariant forall s,t: accessed[s][t] -> grant[s][t]. The secure precondition for an access is that the subject holds a grant for the tenant; the failure result is 401/403 and the business route does not execute. Instead, alpha (granted acme only) sent a read to /t/globex and received 200 with globex's stored order state, and bravo (granted globex only) sent a read to /t/acme and received 200 with acme's stored order state. In both cases a non-granted subject obtained another tenant's business state, which is exactly the property the fixture is meant to enforce, so isolation does not hold on this run. The two cross-tenant write attempts returned 200 with the business logic rejecting the operation and no state change, which points at the same authorization gap but leaves the effect unverifiable from the service's own responses; they remain UNKNOWN and do not affect the verdict, which is already settled by the two confirmed cross-tenant reads. Note that this judgement concerns the pre-fix behaviour only: the defect sits in the authorization middleware, not in the business routes, which do not re-check tenant ownership.\"\n}\n```",
+  "finish_reason": "end_turn",
+  "finish_class": "STOP",
+  "refusal": null,
+  "truncated": false,
+  "tool_calls": [],
+  "reasoning": "SUMMARY_ONLY"
+ },
+ "status": {
+  "outcome": "ANSWERED",
+  "transport_ok": true,
+  "http_status": 200,
+  "provider_error_type": null,
+  "provider_error": null,
+  "model_switched": false,
+  "attempts": [
+   {
+    "attempt_no": 1,
+    "attempt_id": "att_7403d2545382",
+    "sent": true,
+    "confirmed": true,
+    "http_status": 200,
+    "error_class": null,
+    "error": null,
+    "latency_ms": 72324.0
+   }
+  ],
+  "network_retries": 1,
+  "note": null
+ },
+ "cost": {
+  "usage_known": true,
+  "input_tokens": 2,
+  "output_tokens": 4447,
+  "reasoning_tokens": 3616,
+  "cache_read_tokens": 1738,
+  "cache_write_tokens": 0,
+  "latency_ms": 72325.4,
+  "http_attempts": 1,
+  "possibly_billed_unconfirmed": 0,
+  "prompt_digest": "829aabe7230d3389",
+  "config_digest": "1f058f3e15e36b97"
+ },
+ "task_input_digest": "829aabe7230d3389b37b7474dd5f119c025b0a9f622e6f3d86a6aff183b275ad",
+ "reuse_key": "f5a02116fdb72645c18c811899b1f157cbdd79672dcd132b8906aa8c91de0a95",
+ "recorded_at": "2026-10-12T15:20:50Z"
+}

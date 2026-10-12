@@ -51,7 +51,7 @@ from formal_lab_strategies.model_clients import (
     sha256_text,
 )
 
-from .research_scorers import parse_answer, scorer_for, sha256_bytes
+from .research_scorers import load_rubric, parse_answer, scorer_for, sha256_bytes
 from .stats import aggregate, paired_compare
 
 # reused on resume: only a response the provider actually made (an answer, a refusal, an empty or a malformed body);
@@ -138,6 +138,20 @@ def load_study(study_dir: Path) -> ResearchStudy:
                 problems.append(f"comparison {c.vary}: {side!r} is not one of {sorted(known)}")
     if study.primary_metric not in METRIC_BY_ID:
         problems.append(f"primary metric {study.primary_metric} is not one of {sorted(METRIC_BY_ID)}")
+    try:
+        load_rubric(repo_root_of(study_dir), study.rubric_id, study.rubric_version)
+    except InvalidInput as exc:
+        problems.append(exc.message)
+    for t in study.tasks:  # P6B-01: the reference answer must not be reachable from the task inputs
+        ref = study_dir / t.reference
+        if ref.is_file():
+            answer = (json.loads(ref.read_text()) or {}).get("answer")
+            if answer is not None:
+                needle = json.dumps(answer, sort_keys=True, ensure_ascii=False)
+                seen = "\n".join((study_dir / rel).read_text() for rel in [*t.inputs, *t.assisted_inputs]
+                                 if (study_dir / rel).is_file())
+                if needle in seen or json.dumps(answer, ensure_ascii=False) in seen:
+                    problems.append(f"{t.task_id}: ANSWER_LEAK — the reference answer appears in a task input")
     if problems:
         raise InvalidInput("study does not validate: " + "; ".join(problems))
     return study
@@ -345,6 +359,7 @@ def evaluate(study_dir: Path, results_dir: Path, task: StudyTask, response: Rese
     synthetic = str(task.track) == "synthetic_representation"
     model_internal, program = "NOT_EVALUATED", "NOT_APPLICABLE" if synthetic else "NOT_EVALUATED"
     deps: dict[str, str] = {}
+    signals: dict[str, Any] = {}
     explanation = note
     if outcome in NOT_SENT:
         behavior, explanation = "NOT_RUN", f"not sent: {response.status.note or outcome}"
@@ -359,6 +374,7 @@ def evaluate(study_dir: Path, results_dir: Path, task: StudyTask, response: Rese
     else:
         so = scorer.score(parsed, reference, repo_root=repo_root_of(study_dir), truncated=outcome == "TRUNCATED")
         behavior, model_internal, deps, explanation = so.behavior, so.model_internal, so.dependencies, so.explanation
+        signals = so.signals
         program = "NOT_APPLICABLE" if synthetic else so.program_correspondence
         if outcome == "TRUNCATED":
             explanation += " (answer truncated at the output limit)"
@@ -392,7 +408,8 @@ def evaluate(study_dir: Path, results_dir: Path, task: StudyTask, response: Rese
                               reference_sha256=sha256_bytes(ref_bytes), dependency_digests=deps,
                               call_outcome=outcome, answer_status=status, parsed=parsed, behavior_label=behavior,
                               refusal_status=refusal, model_internal=model_internal, program_correspondence=program,
-                              metrics=metrics, explanation=explanation[:2000], scoring_reuse_key=key)
+                              metrics=metrics, rubric_signals=signals, explanation=explanation[:2000],
+                              scoring_reuse_key=key)
 
 
 def scoring_key(response_digest: str, task: StudyTask, reference_sha: str, rubric: tuple[str, str]) -> str:
@@ -469,6 +486,12 @@ def build_report(study_dir: Path, results_dir: Path) -> dict[str, Any]:
                                         "missing": notes["missing"], "not_applicable": notes["not_applicable"],
                                         "ci": agg.ci.model_dump() if agg.ci else None, "missing_reason":
                                         agg.missing_reason}
+            sig_keys = sorted({k for i in ids if i in evals for k in evals[i].rubric_signals})
+            signals = {}
+            for k in sig_keys:
+                vals = [evals[i].rubric_signals[k] for i in ids if i in evals and k in evals[i].rubric_signals
+                        and evals[i].rubric_signals[k] is not None]
+                signals[k] = {"true": sum(1 for v in vals if v), "n": len(vals)}
             rs = [responses[i] for i in ids if i in responses]
             cost = {"calls_sent": sum(1 for r in rs if r.cost.http_attempts),
                     "http_attempts": sum(r.cost.http_attempts for r in rs),
@@ -480,7 +503,7 @@ def build_report(study_dir: Path, results_dir: Path) -> dict[str, Any]:
                                f"returned {r.call.model_returned}" for r in rs)
             rows.append({"condition": cond, "planned": len(ids), "outcomes": dict(outcomes),
                          "behaviors": dict(behaviors), "metrics": metrics, "cost": cost,
-                         "identity": dict(identity)})
+                         "identity": dict(identity), "rubric_signals": signals})
         comparisons = []
         primary = METRIC_BY_ID[study.primary_metric]
         for c in study.comparisons:
@@ -521,6 +544,7 @@ def build_report(study_dir: Path, results_dir: Path) -> dict[str, Any]:
     report = {
         "study_id": study.study_id, "title": study.title, "generated_at": _now(), "results_dir": str(results_dir),
         "primary_metric": study.primary_metric, "rubric": [study.rubric_id, study.rubric_version],
+        "rubric_digest": load_rubric(repo_root_of(study_dir), study.rubric_id, study.rubric_version)["digest"],
         "replicates": study.replicates, "limits": study.limits.model_dump(), "missing_policy": study.missing_policy,
         "tracks": tracks, "not_run": not_run,
         "ledger": {"responses": sum(1 for e in events if e["event"] == "response"),
@@ -567,6 +591,12 @@ def to_markdown(report: dict[str, Any]) -> str:
                          f"{', '.join(f'{k} {v}' for k, v in sorted(row['behaviors'].items()))} | {cell('correct')} | "
                          f"{cell('format_valid')} | {cell('refused')} | {cell('program_corresponds')} | "
                          f"{cell('output_tokens')} | {'; '.join(row['identity'])} |")
+        sig = [row for row in t["conditions"] if row.get("rubric_signals")]
+        if sig:
+            lines += ["", "Rubric signals (heuristic, recorded only — not adjudicated, no human review):"]
+            for row in sig:
+                lines.append(f"- {row['condition']}: " + ", ".join(
+                    f"{k} {v['true']}/{v['n']}" for k, v in sorted(row["rubric_signals"].items())))
         for c in t["comparisons"]:
             if c.get("not_applicable"):
                 lines += ["", f"**Paired ({c['vary']}): {c['a']} vs {c['b']}** — not applicable: {c['not_applicable']}"]

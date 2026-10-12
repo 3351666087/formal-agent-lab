@@ -38,6 +38,14 @@ Phase 7 confirms closure of K01–K03 across the track.
 | **K11** | token accounting differs by provider: Anthropic `input_tokens` excludes prompt-cache reads / writes (the relay applied caching once: 2 input + 1293 cache-write tokens), OpenAI `prompt_tokens` includes cached tokens; the relay reported no reasoning tokens for GPT-6 Astra; the first two Claude records predate the cache-write / thinking-token mapping (their raw bodies hold the full usage) | cost figures are recorded as reported, not equated across providers | keep comparing from the raw usage when it matters |
 | **K12** | studies run locally (a sequential runner with a durable ledger); the platform imports results read-only — Temporal does not schedule studies | no platform-side pause / resume of a study; resume is the local runner's (ledger-based, budget not regained) | phase 7 may move study execution behind the platform if long studies need it |
 
+## Opened in 6B
+
+| id | gap | effect | plan |
+|---|---|---|---|
+| **K13** | the frozen 6B tasks are easy enough that both models scored 100% on all 24 units | the batch verifies the pipeline and shows no deviation, but does not discriminate the models or stress program-grounded analysis | Phase 7 (or a later study) can add harder cases built on the 5A/5B machinery; the scorers and study schema already support it |
+| **K14** | no representation sensitivity was observed because the two business framings share identical actions/goal/answer (only the narrative differs) | the representation comparison is conservative by construction; a framing that also changes surface information would be a *different* task, not an equivalence test | a graded set of framings (with verified-equal cores) is a Phase 7 option |
+| **K15** | both 6B models answered only through the relay; the per-track provider comparison is engineering-only (identity relay-reported) | no verified Claude-vs-GPT conclusion is drawn (same as K08) | configure the official routes and re-run |
+
 ## Original research-goal coverage (5A + 5B)
 
 | goal | coverage |

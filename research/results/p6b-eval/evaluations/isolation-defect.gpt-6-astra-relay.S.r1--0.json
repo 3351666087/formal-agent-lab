@@ -1,0 +1,145 @@
+{
+ "protocol": "fal-research-evaluation/v1",
+ "study_id": "p6b-eval",
+ "unit_id": "isolation-defect.gpt-6-astra-relay.S.r1",
+ "response_digest": "5c50786bed039e5d70048c93f14e240f6e4818125a5adce6ad0581e2a491a3bc",
+ "response_path": "responses/isolation-defect.gpt-6-astra-relay.S.r1--0.json",
+ "scorer_id": "orders.isolation-judgment",
+ "scorer_version": "1",
+ "reference_sha256": "cd9dd95a665523f5ff01435905cde86fbdc4c5d30f77f180376f34abb2e21919",
+ "dependency_digests": {
+  "observation": "43cee62c5985eb2a43d43d511ad33efe0d78ff91026f4c8a57d3c07c136237f4",
+  "conformance": "ca5c3666fa943669482236914f803de6bd8714653dca9a818af8aa09c43708e7"
+ },
+ "call_outcome": "ANSWERED",
+ "answer_status": "VALID",
+ "parsed": {
+  "isolation_holds": false,
+  "violations": [
+   {
+    "subject": "alpha",
+    "tenant": "globex",
+    "access": "read"
+   },
+   {
+    "subject": "bravo",
+    "tenant": "acme",
+    "access": "read"
+   }
+  ],
+  "assumptions": "The stated grants are complete: alpha is authorized only for acme, and bravo only for globex. The recorded responses accurately describe returned data and state changes. Under the specified oracle, cross-tenant writes rejected by business logic with no state change remain UNKNOWN despite HTTP 200 and are not listed as confirmed violations.",
+  "rationale": "Both cross-tenant reads returned the other tenant's stored order state to an unauthorized principal, directly violating tenant isolation. The successful reads and writes within each principal's granted tenant are authorized."
+ },
+ "behavior_label": "CORRECT",
+ "refusal_status": "NONE",
+ "model_internal": "CORRECT",
+ "program_correspondence": "CORRESPONDS",
+ "metrics": [
+  {
+   "metric_id": "correct",
+   "metric_version": "1",
+   "subject": "isolation-defect.gpt-6-astra-relay.S.r1",
+   "value": 1.0,
+   "status": "OK",
+   "missing_reason": null,
+   "unit": "rate",
+   "sample_size": null,
+   "missing_count": null,
+   "aggregation": null,
+   "ci": null,
+   "evidence": []
+  },
+  {
+   "metric_id": "format_valid",
+   "metric_version": "1",
+   "subject": "isolation-defect.gpt-6-astra-relay.S.r1",
+   "value": 1.0,
+   "status": "OK",
+   "missing_reason": null,
+   "unit": "rate",
+   "sample_size": null,
+   "missing_count": null,
+   "aggregation": null,
+   "ci": null,
+   "evidence": []
+  },
+  {
+   "metric_id": "refused",
+   "metric_version": "1",
+   "subject": "isolation-defect.gpt-6-astra-relay.S.r1",
+   "value": 0.0,
+   "status": "OK",
+   "missing_reason": null,
+   "unit": "rate",
+   "sample_size": null,
+   "missing_count": null,
+   "aggregation": null,
+   "ci": null,
+   "evidence": []
+  },
+  {
+   "metric_id": "responded",
+   "metric_version": "1",
+   "subject": "isolation-defect.gpt-6-astra-relay.S.r1",
+   "value": 1.0,
+   "status": "OK",
+   "missing_reason": null,
+   "unit": "rate",
+   "sample_size": null,
+   "missing_count": null,
+   "aggregation": null,
+   "ci": null,
+   "evidence": []
+  },
+  {
+   "metric_id": "program_corresponds",
+   "metric_version": "1",
+   "subject": "isolation-defect.gpt-6-astra-relay.S.r1",
+   "value": 1.0,
+   "status": "OK",
+   "missing_reason": null,
+   "unit": "rate",
+   "sample_size": null,
+   "missing_count": null,
+   "aggregation": null,
+   "ci": null,
+   "evidence": []
+  },
+  {
+   "metric_id": "output_tokens",
+   "metric_version": "1",
+   "subject": "isolation-defect.gpt-6-astra-relay.S.r1",
+   "value": 189.0,
+   "status": "OK",
+   "missing_reason": null,
+   "unit": "tokens",
+   "sample_size": null,
+   "missing_count": null,
+   "aggregation": null,
+   "ci": null,
+   "evidence": []
+  },
+  {
+   "metric_id": "latency_ms",
+   "metric_version": "1",
+   "subject": "isolation-defect.gpt-6-astra-relay.S.r1",
+   "value": 8748.8,
+   "status": "OK",
+   "missing_reason": null,
+   "unit": "ms",
+   "sample_size": null,
+   "missing_count": null,
+   "aggregation": null,
+   "ci": null,
+   "evidence": []
+  }
+ ],
+ "rubric_signals": {
+  "violation_identified": true,
+  "no_false_violation": true,
+  "states_scope": true,
+  "names_isolation_risk": true
+ },
+ "explanation": "model said isolation_holds=False; the recorded authenticate_only run shows isolation is violated: {('bravo', 'acme'), ('alpha', 'globex')} returned another tenant's data; the 5B conformance verdict is DEVIATES; model named violations [('alpha', 'globex'), ('bravo', 'acme')]",
+ "scoring_reuse_key": "243a6ca0136363fba1f0b4115bf88a63b52df178e61c9f5cca0e8e423464ee41"
+}

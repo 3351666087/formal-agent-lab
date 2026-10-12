@@ -1,0 +1,28 @@
+{
+ "case_id": "orders-tenant-isolation",
+ "variant": "defect",
+ "observation": {
+  "path": "research/cases/orders-tenant-isolation/observations/defect.json",
+  "sha256": "43cee62c5985eb2a43d43d511ad33efe0d78ff91026f4c8a57d3c07c136237f4"
+ },
+ "conformance": {
+  "path": "research/cases/orders-tenant-isolation/conformance/defect.result.json",
+  "sha256": "ca5c3666fa943669482236914f803de6bd8714653dca9a818af8aa09c43708e7"
+ },
+ "answer": {
+  "isolation_holds": false,
+  "violations": [
+   {
+    "subject": "alpha",
+    "tenant": "globex",
+    "access": "read"
+   },
+   {
+    "subject": "bravo",
+    "tenant": "acme",
+    "access": "read"
+   }
+  ]
+ },
+ "criterion": "isolation_holds must match the recorded run (an ungranted access that returned another tenant's state is a violation); program correspondence is the 5B conformance verdict"
+}

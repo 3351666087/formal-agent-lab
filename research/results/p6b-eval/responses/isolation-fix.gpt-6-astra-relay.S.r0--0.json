@@ -1,0 +1,107 @@
+{
+ "protocol": "fal-research-response/v1",
+ "experiment": {
+  "study_id": "p6b-eval",
+  "unit_id": "isolation-fix.gpt-6-astra-relay.S.r0",
+  "track": "implementation_conformance",
+  "case_id": "orders-tenant-isolation",
+  "case_version": 1,
+  "task_id": "isolation-fix",
+  "task_digest": "6919cc73b6b34b2c8fb012e7a30f3e4ea2c993a36d0d582fc7f0a2777685f075",
+  "representation_id": "transcript",
+  "replicate_id": 0,
+  "assistance_mode": "STATIC_UNASSISTED",
+  "sampling_id": "isolation-fix.gpt-6-astra-relay.S.r0#0"
+ },
+ "call": {
+  "provider": "openai",
+  "provider_config_id": "gpt-6-astra-relay",
+  "api": "openai.chat.completions",
+  "api_version": "v1",
+  "endpoint": "https://api.uheapi.com/v1/chat/completions",
+  "route": "COMPATIBLE_RELAY",
+  "endpoint_kind": "PROVIDER",
+  "model_requested": "gpt-6-astra",
+  "model_returned": "gpt-6-astra",
+  "model_switched": false,
+  "model_identity": "RELAY_REPORTED",
+  "response_id": "resp_058ece9344b6cb8b016accfad3aff487d095a14661b22a211c",
+  "request_id": "c3b60083-5e1b-4c49-97ff-febb7254c659, ea28de25-6d03-4cdf-bfb5-72074ff6644c",
+  "started_at": "2026-10-12T15:20:50Z",
+  "finished_at": "2026-10-12T15:20:57Z",
+  "params": {
+   "max_completion_tokens": 6000
+  },
+  "params_digest": "c119fe2938dd9a86"
+ },
+ "raw": {
+  "body": {
+   "id": "resp_058ece9344b6cb8b016accfad3aff487d095a14661b22a211c",
+   "object": "chat.completion",
+   "created": 1791818457,
+   "model": "gpt-6-astra",
+   "choices": [
+    {
+     "index": 0,
+     "message": {
+      "role": "assistant",
+      "content": "{\n  \"isolation_holds\": true,\n  \"violations\": [],\n  \"assumptions\": \"The stated grant table is authoritative: alpha is granted only acme, and bravo only globex. The recorded responses and state confirmations accurately describe the service's behavior. This judgment applies only to the recorded run.\",\n  \"rationale\": \"All successful reads and writes targeted the requesting principal's granted tenant. All four cross-tenant requests were refused with HTTP 403, so no recorded access succeeded without a tenant grant.\"\n}"
+     },
+     "finish_reason": "stop"
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 5355,
+    "completion_tokens": 112,
+    "total_tokens": 5467
+   },
+   "service_tier": "default"
+  },
+  "body_text": null,
+  "visible_text": "{\n  \"isolation_holds\": true,\n  \"violations\": [],\n  \"assumptions\": \"The stated grant table is authoritative: alpha is granted only acme, and bravo only globex. The recorded responses and state confirmations accurately describe the service's behavior. This judgment applies only to the recorded run.\",\n  \"rationale\": \"All successful reads and writes targeted the requesting principal's granted tenant. All four cross-tenant requests were refused with HTTP 403, so no recorded access succeeded without a tenant grant.\"\n}",
+  "finish_reason": "stop",
+  "finish_class": "STOP",
+  "refusal": null,
+  "truncated": false,
+  "tool_calls": [],
+  "reasoning": "NOT_EXPOSED"
+ },
+ "status": {
+  "outcome": "ANSWERED",
+  "transport_ok": true,
+  "http_status": 200,
+  "provider_error_type": null,
+  "provider_error": null,
+  "model_switched": false,
+  "attempts": [
+   {
+    "attempt_no": 1,
+    "attempt_id": "att_0797fc059959",
+    "sent": true,
+    "confirmed": true,
+    "http_status": 200,
+    "error_class": null,
+    "error": null,
+    "latency_ms": 7095.6
+   }
+  ],
+  "network_retries": 1,
+  "note": null
+ },
+ "cost": {
+  "usage_known": true,
+  "input_tokens": 5355,
+  "output_tokens": 112,
+  "reasoning_tokens": null,
+  "cache_read_tokens": null,
+  "cache_write_tokens": null,
+  "latency_ms": 7095.9,
+  "http_attempts": 1,
+  "possibly_billed_unconfirmed": 0,
+  "prompt_digest": "3ad2ecd32059c857",
+  "config_digest": "3a71fd838802d132"
+ },
+ "task_input_digest": "3ad2ecd32059c857df1afdaad6a9fcc3f117482bfbdc74893991f9fdd4f544e4",
+ "reuse_key": "1b6d2c8442752838796c2c12c346c2cfd16ef053b823ef8a49d6e28d0adc8448",
+ "recorded_at": "2026-10-12T15:20:57Z"
+}

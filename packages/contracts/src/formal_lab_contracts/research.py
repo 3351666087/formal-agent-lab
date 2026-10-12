@@ -587,6 +587,9 @@ class ResearchEvaluation(ContractModel):
     program_correspondence: Literal["CORRESPONDS", "DEVIATES", "UNKNOWN", "NOT_APPLICABLE", "NOT_EVALUATED"] = \
         "NOT_EVALUATED"
     metrics: list[MetricResult] = Field(default_factory=list)
+    rubric_signals: dict[str, Any] = Field(default_factory=dict, description="phase 6B: recorded-only heuristic rubric "
+                                           "signals (e.g. did the answer state scope / name the risk); not adjudicated, "
+                                           "no human review — never promoted to a pass")
     explanation: str = ""
     scoring_reuse_key: str = Field(pattern=SHA256)
 

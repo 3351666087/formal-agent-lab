@@ -1,0 +1,107 @@
+{
+ "protocol": "fal-research-response/v1",
+ "experiment": {
+  "study_id": "p6b-eval",
+  "unit_id": "isolation-defect.gpt-6-astra-relay.S.r0",
+  "track": "implementation_conformance",
+  "case_id": "orders-tenant-isolation",
+  "case_version": 1,
+  "task_id": "isolation-defect",
+  "task_digest": "036a52fc844fcc5c12eb9dd6c0621f00888939079b2c6b619b4ed4b97d15130a",
+  "representation_id": "transcript",
+  "replicate_id": 0,
+  "assistance_mode": "STATIC_UNASSISTED",
+  "sampling_id": "isolation-defect.gpt-6-astra-relay.S.r0#0"
+ },
+ "call": {
+  "provider": "openai",
+  "provider_config_id": "gpt-6-astra-relay",
+  "api": "openai.chat.completions",
+  "api_version": "v1",
+  "endpoint": "https://api.uheapi.com/v1/chat/completions",
+  "route": "COMPATIBLE_RELAY",
+  "endpoint_kind": "PROVIDER",
+  "model_requested": "gpt-6-astra",
+  "model_returned": "gpt-6-astra",
+  "model_switched": false,
+  "model_identity": "RELAY_REPORTED",
+  "response_id": "resp_02e580ba93e25a64016accf9d554fc8193817b4d0580f2b542",
+  "request_id": "b510720e-f0a8-43ed-a2e5-68369a30860c, 01b239e6-3ddc-4aa4-895f-6d227ce1fa56",
+  "started_at": "2026-10-12T15:16:35Z",
+  "finished_at": "2026-10-12T15:16:43Z",
+  "params": {
+   "max_completion_tokens": 6000
+  },
+  "params_digest": "c119fe2938dd9a86"
+ },
+ "raw": {
+  "body": {
+   "id": "resp_02e580ba93e25a64016accf9d554fc8193817b4d0580f2b542",
+   "object": "chat.completion",
+   "created": 1791818203,
+   "model": "gpt-6-astra",
+   "choices": [
+    {
+     "index": 0,
+     "message": {
+      "role": "assistant",
+      "content": "{\n  \"isolation_holds\": false,\n  \"violations\": [\n    {\n      \"subject\": \"alpha\",\n      \"tenant\": \"globex\",\n      \"access\": \"read\"\n    },\n    {\n      \"subject\": \"bravo\",\n      \"tenant\": \"acme\",\n      \"access\": \"read\"\n    }\n  ],\n  \"assumptions\": \"The stated grants are authoritative: alpha may access only acme, and bravo may access only globex. Per the supplied oracle, cross-tenant writes rejected by business logic without state changes remain UNKNOWN, despite HTTP 200, and are not listed as confirmed violations.\",\n  \"rationale\": \"Both cross-tenant reads returned HTTP 200 and the other tenant's stored order state, establishing unauthorized access. The successful accesses within each principal's granted tenant do not violate isolation.\"\n}"
+     },
+     "finish_reason": "stop"
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 5285,
+    "completion_tokens": 178,
+    "total_tokens": 5463
+   },
+   "service_tier": "default"
+  },
+  "body_text": null,
+  "visible_text": "{\n  \"isolation_holds\": false,\n  \"violations\": [\n    {\n      \"subject\": \"alpha\",\n      \"tenant\": \"globex\",\n      \"access\": \"read\"\n    },\n    {\n      \"subject\": \"bravo\",\n      \"tenant\": \"acme\",\n      \"access\": \"read\"\n    }\n  ],\n  \"assumptions\": \"The stated grants are authoritative: alpha may access only acme, and bravo may access only globex. Per the supplied oracle, cross-tenant writes rejected by business logic without state changes remain UNKNOWN, despite HTTP 200, and are not listed as confirmed violations.\",\n  \"rationale\": \"Both cross-tenant reads returned HTTP 200 and the other tenant's stored order state, establishing unauthorized access. The successful accesses within each principal's granted tenant do not violate isolation.\"\n}",
+  "finish_reason": "stop",
+  "finish_class": "STOP",
+  "refusal": null,
+  "truncated": false,
+  "tool_calls": [],
+  "reasoning": "NOT_EXPOSED"
+ },
+ "status": {
+  "outcome": "ANSWERED",
+  "transport_ok": true,
+  "http_status": 200,
+  "provider_error_type": null,
+  "provider_error": null,
+  "model_switched": false,
+  "attempts": [
+   {
+    "attempt_no": 1,
+    "attempt_id": "att_347d6a5977c7",
+    "sent": true,
+    "confirmed": true,
+    "http_status": 200,
+    "error_class": null,
+    "error": null,
+    "latency_ms": 8546.9
+   }
+  ],
+  "network_retries": 1,
+  "note": null
+ },
+ "cost": {
+  "usage_known": true,
+  "input_tokens": 5285,
+  "output_tokens": 178,
+  "reasoning_tokens": null,
+  "cache_read_tokens": null,
+  "cache_write_tokens": null,
+  "latency_ms": 8547.1,
+  "http_attempts": 1,
+  "possibly_billed_unconfirmed": 0,
+  "prompt_digest": "829aabe7230d3389",
+  "config_digest": "3a71fd838802d132"
+ },
+ "task_input_digest": "829aabe7230d3389b37b7474dd5f119c025b0a9f622e6f3d86a6aff183b275ad",
+ "reuse_key": "dbdc9171b15cf7096c0ecbc56ddddb22f28d53e47c624925164f487a61f64bbf",
+ "recorded_at": "2026-10-12T15:16:43Z"
+}

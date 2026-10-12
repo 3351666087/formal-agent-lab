@@ -52,6 +52,17 @@ RESEARCH_CHECKS = [
           "原始响应体、用量与预算；已保存的真实回答在重跑时复用而不重复购买；密钥不落盘",
           f"{PY} scripts/p6a_real_evidence.py", ["P6A-01"], protocol=True,
           produces=[f"{EV}/p6a/real-endpoint.json"]),
+    # ------------------------------------------------------------------ P6B domain criteria, dual-model experiment
+    Check("p6b-unit", "p6b",
+          "判据与任务（单元）：隔离判断评分器以记录运行为依据（信念对应/偏离、拒绝误报识别）、冻结 rubric 的版本与自摘要、"
+          "参考答案不得进入待测输入（ANSWER_LEAK）、两个业务表述编码同一个核验相等的有限问题",
+          f"{PYTEST} packages/evaluation/tests/test_research_6b.py", ["P6B-01", "P6B-02"]),
+    Check("p6b-eval", "p6b",
+          "冻结双模型实验：先用协议服务脚本化确认字段/评分/成本上限/泄漏防护（6 任务 × 2 模型 × 2 重复 = 24 单元，覆盖"
+          "正确/错误/拒绝/截断/格式无效/空；两轨不合并、程序对应基于 5B 记录、合成 N/A、rubric 摘要与信号记录），再在"
+          "授权额度内运行真实批次；缺中转凭据则 BLOCKED；密钥不落盘",
+          f"{PY} scripts/p6b_evidence.py", ["P6B-01", "P6B-02"], protocol=True,
+          produces=[f"{EV}/p6b/eval.json"]),
 ]
 
 # every check must live in a declared group
