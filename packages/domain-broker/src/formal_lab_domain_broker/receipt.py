@@ -49,6 +49,8 @@ class CheckBasis:
     scope: str  # e.g. MODEL_INTERNAL
     backend: str  # verifier plugin id@version
     bound: dict[str, Any] = field(default_factory=dict)
+    target_digest: str | None = None  # concrete identity of what was checked (not just property_id); a domain may
+    model_digest: str | None = None   # bind these so a name match cannot substitute for the real query (K01)
 
 
 @dataclass(frozen=True)

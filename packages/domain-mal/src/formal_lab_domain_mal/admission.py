@@ -57,6 +57,11 @@ def _target_security_covered(ctx: dict[str, Any]) -> bool | None:
     if receipt is None or tgt is None:
         return None
     basis = receipt.check_basis
+    # K01: the receipt must be about *this* target's concrete property (the step whose reachability breaks it),
+    # not merely a property_id label, and with a real positive verdict. A receipt whose basis carries no target
+    # digest, or a digest for a differently-targeted property, cannot authorise this step.
+    if basis.target_digest is None or basis.target_digest != tgt.target_digest():
+        return False
     return basis.property_id == tgt.property_id and basis.verdict in _POSITIVE
 
 
@@ -85,9 +90,10 @@ def mal_ruleset(*, version: int = 1) -> RuleSet:
                    note="coreLang 攻击步骤准入").released()
 
 
-def target_check_basis(*, property_id: str, verdict: str, scope: str, backend: str, bound: dict[str, Any]) -> CheckBasis:
+def target_check_basis(*, property_id: str, verdict: str, scope: str, backend: str, bound: dict[str, Any],
+                       target_digest: str | None = None, model_digest: str | None = None) -> CheckBasis:
     return CheckBasis(query_kind="GOAL_REACHABILITY", property_id=property_id, verdict=verdict, scope=scope,
-                      backend=backend, bound=bound)
+                      backend=backend, bound=bound, target_digest=target_digest, model_digest=model_digest)
 
 
 def issue_receipt(*, run_id: str, step: int, actor_id: str, operation_id: str, action_params: dict[str, Any],

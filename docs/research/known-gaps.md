@@ -5,14 +5,15 @@ work.
 
 ## Carried from phase 4 (recorded)
 
-| id | gap | where it bites | status after 5B |
+| id | gap | where it bites | status after 7 |
 |---|---|---|---|
-| **K01** | 目标性质与凭据错配 — a target property and the issued credential can disagree | phase-4B MAL issuer / target reachability | **OPEN** — 5B's implementation case is tenant/object access isolation on the order service and does **not** reuse the MAL issuer / target-reachability path, so K01 was not exercised and is unchanged; phase 7 closes it in `packages/domain-mal` |
-| **K02** | `LabPolicy.max_attack_steps` 未执行 — the policy field is declared but not enforced in the loop | phase-4B lab-controlled operating conditions | **OPEN** — 5B does not run the MAL attack loop or a step budget, so K02 was not exercised; it is unchanged. The budget invariant (consumed quota is not regained across pause/resume) remains a phase-4A runtime property; 5B adds no new budget path. Phase 7 closes it |
-| **K03** | 门控详情未显示 `detail` — a gate decision's `detail` is not surfaced in the UI | phase-4B gate display | **OPEN** — UI-only; no effect on 5A/5B correspondence; general closure |
+| **K01** | 目标性质与凭据错配 — a target property and the issued credential can disagree | phase-4B MAL issuer / target reachability | **CLOSED (phase 7)** — a receipt's check basis now binds the concrete target identity (`CheckBasis.target_digest` + `model_digest`, from `TargetSecurity.target_digest()` = sha256 of property_id + reach_forbidden + kind), and `admission._target_security_covered` requires that digest to match the scenario target — a `property_id` label alone, or a receipt with no target digest, cannot authorise the step. Proof: `test_k01_same_name_different_target_cannot_reuse_credential` (same label, different `reach_forbidden` → reuse denied, correct target admits) and `test_k01_a_receipt_without_a_target_digest_is_not_enough` |
+| **K02** | `LabPolicy.max_attack_steps` 未执行 — the policy field is declared but not enforced in the loop | phase-4B lab-controlled operating conditions | **CLOSED (phase 7)** — `gate.AttackBudget` enforces it at the admit point: one admitted governed action = one unit, the ledger is one file per run (shared across actors, durable across pause/resume), a retry of an already-admitted operation is not re-charged, and an over-budget governed action is DENIED with zero side effects. `max_attack_steps=1` admits exactly one. Proof: `test_k02_attack_budget_unit` and `test_k02_budget_of_one_admits_one_governed_action` (budget 1 → one compromise admitted, goal not reached; the ledger records one consumed unit) |
+| **K03** | 门控详情未显示 `detail` — a gate decision's `detail` is not surfaced in the UI | phase-4B gate display | **CLOSED (phase 7)** — `web/src/components/Steps.tsx` `ConditionLine` shows the `detail` and keeps observed/required, and distinguishes holds true (✓) / false (✕) / unknown (?, 未知 — a null `holds` is no longer shown as ✕) and a missing observation. Type-checked; the three-state data is real (`test_k03_gate_conditions_carry_the_three_states_with_detail`) |
 
-5B reuses neither K01 nor K02's path, so both stay OPEN with their phase-4 impact unchanged (not fixed, not worsened).
-Phase 7 confirms closure of K01–K03 across the track.
+K01–K03 are closed in their original locations (domain-mal gate/admission/config, the broker CheckBasis, and the
+Steps.tsx component). The attack-step budget is a runtime constraint (a durable ledger), not a UI number or an
+actor-prompt instruction.
 
 ## Opened in 5A
 

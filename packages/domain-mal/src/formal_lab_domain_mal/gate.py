@@ -47,13 +47,55 @@ DESCRIPTOR = PluginDescriptor(
     license="Apache-2.0", source="formal-lab-domain-mal")
 
 
+class AttackBudget:
+    """Durable enforcement of LabPolicy.max_attack_steps (K02). The unit is one *admitted governed action*; the
+    consumption point is a gate ADMIT (a DENY has zero side effects, so it consumes nothing). Distinct
+    operation_ids are counted, so a retry of an already-admitted operation does not consume again; the ledger is one
+    file per run shared by all actors, and because it is on disk a pause/resume reloads the spent count and cannot
+    regain quota. Budget is a runtime constraint here, not merely a UI number or an actor-prompt instruction."""
+
+    def __init__(self, path: Path | None, run_id: str, limit: int | None):
+        self.path = path
+        self.run_id = run_id
+        self.limit = limit
+        self._mem: list[str] = []  # fallback when no durable path (within one process only)
+
+    def _load(self) -> list[str]:
+        if self.path is None:
+            return list(self._mem)
+        if self.path.exists():
+            d = json.loads(self.path.read_text())
+            if d.get("run_id") == self.run_id:
+                return list(d.get("admitted", []))
+        return []
+
+    def _save(self, admitted: list[str]) -> None:
+        if self.path is None:
+            self._mem = admitted
+            return
+        tmp = self.path.with_name(self.path.name + ".tmp")
+        tmp.write_text(json.dumps({"run_id": self.run_id, "limit": self.limit, "admitted": admitted}))
+        tmp.replace(self.path)
+
+    def check_and_consume(self, operation_id: str) -> tuple[bool, int, int | None]:
+        """(allowed, used, limit). Idempotent per operation_id; consumes one unit for a new governed operation."""
+        admitted = self._load()
+        if operation_id in admitted:
+            return True, len(admitted), self.limit  # a retry of an already-admitted operation: not re-consumed
+        if self.limit is None or len(admitted) < self.limit:
+            admitted.append(operation_id)
+            self._save(admitted)
+            return True, len(admitted), self.limit
+        return False, len(admitted), self.limit
+
+
 class MalBrokerGate:
     descriptor = DESCRIPTOR
 
     def __init__(self, *, store: ReceiptStore, verifier: HmacVerifier, id_to_full: dict[str, str],
                  lab_policy: LabPolicy, target_security: TargetSecurity, role_allowed_actions: list[str],
                  service_identity: str | None = None, ruleset_version: int = 1,
-                 governed_action_types: list[str] | None = None):
+                 governed_action_types: list[str] | None = None, budget_dir: Path | None = None):
         self._store = store
         self._verifier = verifier
         self._rules = mal_ruleset(version=ruleset_version)
@@ -63,6 +105,7 @@ class MalBrokerGate:
         self._roles = role_allowed_actions
         self._service = service_identity
         self._governed = list(governed_action_types or ["compromise"])
+        self._budget_dir = Path(budget_dir) if budget_dir else None
 
     def paths(self, action):
         return []
@@ -89,6 +132,19 @@ class MalBrokerGate:
                              role_allowed_actions=self._roles, context=ctx)
         conditions = [ConditionCheck(name=r.kind, holds=r.holds, detail=r.detail[:200]) for r in decision.reasons]
         if decision.allowed:
+            # K02: the experiment's attack-step budget is enforced here, at the admit point, after the domain rules
+            # pass. An over-budget governed action is DENIED (zero side effects); a retry of an already-admitted
+            # operation is not charged again.
+            if request.action.action_type in self._governed and self._lab.max_attack_steps is not None:
+                path = (self._budget_dir / f"attack-budget-{request.run_id}.json") if self._budget_dir else None
+                budget = AttackBudget(path, request.run_id, self._lab.max_attack_steps)
+                ok, used, limit = budget.check_and_consume(request.operation_id)
+                cond = ConditionCheck(name="attack_budget", holds=ok, observed=used, required=limit,
+                                      detail=(f"{used}/{limit} governed actions admitted in this run" if ok
+                                              else f"attack-step budget exhausted ({used}/{limit})"))
+                conditions = [*conditions, cond]
+                if not ok:
+                    return GateResult(verdict="DENY", reason=cond.detail, conditions=conditions)
             return GateResult(verdict="ALLOW", reason="receipt verified: bindings, state revision, expiry and MAL "
                               "domain rules (LabPolicy / precondition / role / TargetSecurity) all hold",
                               conditions=conditions)
@@ -109,10 +165,12 @@ def create_mal_broker_gate(config: dict[str, Any] | None, services: Any) -> MalB
     id_to_full = {v: k for k, v in id_map.items()}
     lab = LabPolicy.from_dict(cfg.get("lab_policy", {}))
     tgt = TargetSecurity.from_dict(cfg["target_security"])
+    # the attack-step budget ledger lives next to the receipts (durable across pause/resume); None → in-memory only
+    budget_dir = Path(cfg["receipts_path"]).parent if cfg.get("receipts_path") else None
     return MalBrokerGate(store=store, verifier=HmacVerifier(keys), id_to_full=id_to_full, lab_policy=lab,
                          target_security=tgt, role_allowed_actions=cfg.get("role_allowed_actions", ["compromise"]),
                          service_identity=cfg.get("service_identity"),
-                         governed_action_types=cfg.get("governed_action_types"))
+                         governed_action_types=cfg.get("governed_action_types"), budget_dir=budget_dir)
 
 
 def _outside_scope(action_type: str, governed: list[str]):
@@ -214,7 +272,9 @@ class MalReceiptIssuer:
             return GateResult(verdict="DENY", reason=f"the target {self.target.property_id} is not reachable in the "
                               f"model (Z3 {verdict}); no receipt")
         basis = target_check_basis(property_id=self.target.property_id, verdict=verdict, scope="MODEL_INTERNAL",
-                                   backend="formal-lab.verifier.z3-bmc@1.1.0", bound=self.bound)
+                                   backend="formal-lab.verifier.z3-bmc@1.1.0", bound=self.bound,
+                                   target_digest=self.target.target_digest(),
+                                   model_digest=getattr(self.package.digest, "value", None))
         receipt = issue_for_context(
             execution, check_basis=basis,
             guarantee_scope=f"bounded reachability of {self.target.property_id}; compromise({step}) verified "

@@ -59,9 +59,12 @@ def _ctx(params, *, lab=None, tgt=None):
             "action_params": params, "id_to_full": {"secret__read": "secret:read", "net__eavesdrop": "net:eavesdrop"}}
 
 
-def _receipt_and_binding(signer, params, *, revision=5, property_id="secret-confidentiality", verdict="WITNESS"):
+def _receipt_and_binding(signer, params, *, revision=5, property_id="secret-confidentiality", verdict="WITNESS",
+                         reach_forbidden="secret:read"):
     basis = target_check_basis(property_id=property_id, verdict=verdict, scope="MODEL_INTERNAL", backend="z3",
-                               bound={"max_steps": 60})
+                               bound={"max_steps": 60},
+                               target_digest=TargetSecurity(property_id=property_id,
+                                                            reach_forbidden=reach_forbidden).target_digest())
     r = issue_receipt(run_id="r", step=6, actor_id="red", operation_id="op", action_params=params,
                       state_revision=revision, check_basis=basis, guarantee_scope="bounded reachability", signer=signer,
                       service_identity="mal-sim")
@@ -97,6 +100,87 @@ def test_target_security_mismatch_denies(issuer):
     r, b = _receipt_and_binding(signer, params, property_id="some-other-property")
     d = admit(r, b, verifier=verifier, rules=mal_ruleset(), role_allowed_actions=["compromise"], context=_ctx(params))
     assert not d.allowed and d.by_kind("target_security")[0].holds is False
+
+
+def test_k01_same_name_different_target_cannot_reuse_credential(issuer):
+    """K01: two targets share a property_id label but break on different steps. A receipt issued for one cannot
+    authorise the other (its check basis is bound to the concrete target, not the label); the correct target admits."""
+    signer, verifier = issuer
+    params = {"n": "secret__read"}
+    tgt_a = TargetSecurity(property_id="confidentiality", reach_forbidden="secret:read")
+    tgt_b = TargetSecurity(property_id="confidentiality", reach_forbidden="net:eavesdrop")  # same name, other target
+    assert tgt_a.target_digest() != tgt_b.target_digest()
+    r, b = _receipt_and_binding(signer, params, property_id="confidentiality", reach_forbidden="secret:read")
+    # reused under scenario B: the label matches but the concrete target does not → denied
+    deny = admit(r, b, verifier=verifier, rules=mal_ruleset(), role_allowed_actions=["compromise"],
+                 context=_ctx(params, tgt=tgt_b))
+    assert not deny.allowed and deny.by_kind("target_security")[0].holds is False
+    # the correct target still admits
+    ok = admit(r, b, verifier=verifier, rules=mal_ruleset(), role_allowed_actions=["compromise"],
+               context=_ctx(params, tgt=tgt_a))
+    assert ok.allowed and ok.by_kind("target_security")[0].holds is True
+
+
+def test_k01_a_receipt_without_a_target_digest_is_not_enough(issuer):
+    """A legacy receipt whose basis carries no target digest cannot satisfy the condition (a name match alone is
+    not the real query)."""
+    signer, verifier = issuer
+    params = {"n": "secret__read"}
+    basis = target_check_basis(property_id="secret-confidentiality", verdict="WITNESS", scope="MODEL_INTERNAL",
+                               backend="z3", bound={"max_steps": 60})  # no target_digest
+    r = issue_receipt(run_id="r", step=6, actor_id="red", operation_id="op", action_params=params, state_revision=5,
+                      check_basis=basis, guarantee_scope="bounded reachability", signer=signer,
+                      service_identity="mal-sim")
+    b = RequestBinding(run_id="r", step=6, actor_id="red", operation_id="op", action_type="compromise",
+                       action_params_digest=digest_params(params), current_revision=5, service_identity="mal-sim")
+    d = admit(r, b, verifier=verifier, rules=mal_ruleset(), role_allowed_actions=["compromise"], context=_ctx(params))
+    assert not d.allowed and d.by_kind("target_security")[0].holds is False
+
+
+def test_k03_gate_conditions_carry_the_three_states_with_detail(issuer):
+    """K03 (data): real admission decisions produce ConditionChecks with holds True and False, each with a detail,
+    and the contract permits holds=None (the 'unknown' state the UI must keep distinct from false)."""
+    from formal_lab_contracts import ConditionCheck
+
+    signer, verifier = issuer
+    allow = admit(*_receipt_and_binding(signer, {"n": "secret__read"}), verifier=verifier, rules=mal_ruleset(),
+                  role_allowed_actions=["compromise"], context=_ctx({"n": "secret__read"}))
+    ts = allow.by_kind("target_security")[0]
+    assert ts.holds is True and ts.detail  # true, with an explanation
+    lab = LabPolicy(allowed_assets=["app"], max_attack_steps=40)  # net out of bounds → false
+    deny = admit(*_receipt_and_binding(signer, {"n": "net__eavesdrop"}), verifier=verifier, rules=mal_ruleset(),
+                 role_allowed_actions=["compromise"], context=_ctx({"n": "net__eavesdrop"}, lab=lab))
+    lp = deny.by_kind("lab_policy")[0]
+    assert lp.holds is False and lp.detail  # false, with an explanation
+    # the 'unknown' state is a valid gate record (ConditionCheck.holds is bool | None); the UI renders it as 未知
+    assert ConditionCheck(name="x", holds=None, detail="the gate could not determine it").holds is None
+
+
+def test_k02_attack_budget_unit(tmp_path):
+    """K02 budget semantics: one admit = one unit; a retry of an admitted op is not re-charged; a reload (pause/
+    resume) keeps the spent count; limit None is unbounded."""
+    from formal_lab_domain_mal.gate import AttackBudget
+
+    p = tmp_path / "attack-budget.json"
+    b = AttackBudget(p, "run1", 1)
+    assert b.check_and_consume("op1") == (True, 1, 1)   # consumes the one unit
+    assert b.check_and_consume("op2") == (False, 1, 1)  # exhausted
+    assert b.check_and_consume("op1") == (True, 1, 1)   # retry of an admitted op: allowed, not re-charged
+    assert AttackBudget(p, "run1", 1).check_and_consume("op3") == (False, 1, 1)  # resume: quota not regained
+    unbounded = AttackBudget(tmp_path / "u.json", "r", None)
+    assert all(unbounded.check_and_consume(f"op{i}")[0] for i in range(5))
+
+
+def test_k02_budget_of_one_admits_one_governed_action(tmp_path, package):
+    """With max_attack_steps=1 only one compromise is admitted across the run (budget 40 reaches the goal; 1 cannot),
+    and the durable ledger records exactly one consumed unit."""
+    tgt = TargetSecurity(property_id="secret-confidentiality", reach_forbidden="secret:read")
+    out = gated_red_team(package, workdir=tmp_path, target_security=tgt,
+                         lab_policy=LabPolicy(allowed_assets=["app", "secret", "net"], max_attack_steps=1))
+    wr = out["with_receipts"]
+    assert wr["goal_reached"] is False  # one admitted compromise cannot reach the multi-step goal
+    ledger = json.loads((tmp_path / "attack-budget-run_mal_d2_admit.json").read_text())
+    assert ledger["limit"] == 1 and len(ledger["admitted"]) == 1  # exactly one governed action consumed the budget
 
 
 def test_gated_run_admits_with_receipts_and_denies_without(tmp_path, package):

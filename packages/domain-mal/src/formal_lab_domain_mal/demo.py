@@ -61,11 +61,14 @@ def gated_red_team(package: Any, *, workdir: str | Path, target_security: Target
     ks_path.write_text(json.dumps({"issuer-1": secret.hex()}))
     rc_path = work / "receipts.json"
     basis = target_check_basis(property_id=target_security.property_id, verdict="WITNESS", scope="MODEL_INTERNAL",
-                               backend="formal-lab.verifier.z3-bmc@1.1.0", bound={"max_steps": 60})
+                               backend="formal-lab.verifier.z3-bmc@1.1.0", bound={"max_steps": 60},
+                               target_digest=target_security.target_digest(),
+                               model_digest=getattr(package.digest, "value", None))
     issuer = {"plugin": ISSUER, "config": {
         "keystore_path": str(ks_path), "key_id": "issuer-1", "receipts_path": str(rc_path), "ttl_seconds": ttl_seconds,
         "basis": {"query_kind": basis.query_kind, "property_id": basis.property_id, "verdict": basis.verdict,
-                  "scope": basis.scope, "backend": basis.backend, "bound": basis.bound},
+                  "scope": basis.scope, "backend": basis.backend, "bound": basis.bound,
+                  "target_digest": basis.target_digest, "model_digest": basis.model_digest},
         "guarantee_scope": f"bounded reachability of {target_security.property_id}"}}
     run_id = "run_mal_d2_admit"
 

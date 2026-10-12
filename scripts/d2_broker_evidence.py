@@ -73,7 +73,9 @@ VERIFIER = HmacVerifier(KS)
 
 def _mk(params, *, revision=5, property_id="secret-confidentiality", verdict="WITNESS", ttl=300):
     basis = target_check_basis(property_id=property_id, verdict=verdict, scope="MODEL_INTERNAL",
-                               backend="formal-lab.verifier.z3-bmc@1.1.0", bound={"max_steps": 60})
+                               backend="formal-lab.verifier.z3-bmc@1.1.0", bound={"max_steps": 60},
+                               target_digest=TargetSecurity(property_id=property_id,
+                                                            reach_forbidden="secret:read").target_digest())
     r = issue_receipt(run_id="r", step=6, actor_id="red", operation_id="op", action_params=params,
                       state_revision=revision, check_basis=basis, guarantee_scope="bounded reachability", signer=SIGNER,
                       service_identity="mal-sim", ttl_seconds=ttl)

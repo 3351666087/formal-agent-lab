@@ -5,6 +5,23 @@ import type {
 import type { Labels } from "../labels";
 import { ComparisonBadge, EvidenceLegend, EvidenceTag, fmtValue, Json, KV, SourceBadge, VerdictBadge } from "../ui";
 
+// K03 (phase 7): one gate ConditionCheck, distinguishing holds true / false / unknown and a missing observation,
+// and showing the detail — observed/required are kept, and a null `holds` is never shown as a plain ✕.
+export function ConditionLine({ c }: { c: Record<string, any> }) {
+  const unknown = c.holds === null || c.holds === undefined;
+  const missing = c.observed === null || c.observed === undefined;
+  const mark = c.holds === true ? "✓" : c.holds === false ? "✕" : "?";
+  const tone = c.holds === true ? "ok" : c.holds === false ? "err" : "";
+  return (
+    <div className="muted" data-testid="gate-condition">
+      <span className={`badge ${tone}`} title={unknown ? "门控无法判定" : c.holds ? "成立" : "不成立"}>{mark}</span>{" "}
+      {c.name}：
+      {unknown ? "未知（门控无法判定）" : <>观测 {missing ? "缺失" : fmtValue(c.observed)}，要求 {fmtValue(c.required)}</>}
+      {c.detail ? <span className="small"> · {c.detail}</span> : null}
+    </div>
+  );
+}
+
 export interface StepData {
   step: number;
   events: TraceEvent[];
@@ -197,7 +214,7 @@ export function StepDetail({ data, labels }: { data: StepData; labels: Labels })
             <div key={d.decision_id} className="small stack" style={{ gap: 2 }}>
               <div><code>{d.gate.plugin_id}@{d.gate.version}</code> · {d.phase} · 取值 {d.values_source}{d.checked_at_revision !== null ? `（修订 ${d.checked_at_revision}）` : ""}</div>
               <div>{d.reason}</div>
-              {d.conditions?.map((c: Record<string, any>) => <div key={c.name} className="muted">{c.holds ? "✓" : "✕"} {c.name}：观测 {fmtValue(c.observed)}，要求 {c.required}</div>)}
+              {d.conditions?.map((c: Record<string, any>) => <ConditionLine key={c.name} c={c} />)}
             </div>))}
         </section>) : null}
       {pre && (

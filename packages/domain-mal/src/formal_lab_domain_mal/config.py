@@ -59,6 +59,16 @@ class TargetSecurity:
     kind: str = "confidentiality"  # confidentiality | integrity | availability
     label: str = ""
 
+    def target_digest(self) -> str:
+        """The concrete identity of the target property — the step whose reachability breaks it, not just the
+        property's name (K01): a receipt bound to this digest cannot be reused for a differently-targeted property
+        that merely shares a `property_id` label."""
+        import hashlib
+        import json
+
+        return hashlib.sha256(json.dumps({"property_id": self.property_id, "reach_forbidden": self.reach_forbidden,
+                                          "kind": self.kind}, sort_keys=True).encode()).hexdigest()
+
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
 
