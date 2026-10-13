@@ -1,0 +1,110 @@
+{
+ "protocol": "fal-research-response/v1",
+ "experiment": {
+  "study_id": "cyber-attackmodel",
+  "unit_id": "am-019-reachability.gpt-6-astra-relay.S.r2",
+  "track": "formal_model_analysis",
+  "case_id": null,
+  "case_version": null,
+  "task_id": "am-019-reachability",
+  "task_digest": "7af9e7191a5d2db43fea3a698a742357a7f664efe9d59d0a05a4b88ab1c0e30d",
+  "representation_id": "attackmodel",
+  "replicate_id": 2,
+  "assistance_mode": "STATIC_UNASSISTED",
+  "sampling_id": "am-019-reachability.gpt-6-astra-relay.S.r2#0"
+ },
+ "call": {
+  "provider": "openai",
+  "provider_config_id": "gpt-6-astra-relay",
+  "api": "openai.chat.completions",
+  "api_version": "v1",
+  "endpoint": "https://api.uheapi.com/v1/chat/completions",
+  "route": "COMPATIBLE_RELAY",
+  "endpoint_kind": "PROVIDER",
+  "model_requested": "gpt-6-astra",
+  "model_returned": "gpt-6-astra",
+  "model_switched": false,
+  "model_identity": "RELAY_REPORTED",
+  "response_id": "resp_0962ec7450dc4a94016acd9d674328819a86475509c34d3423",
+  "request_id": "582a33e4-3721-448c-a2a8-8667cc9673c1, ae47932a-19c8-45b1-8940-fd669a9b9b85",
+  "started_at": "2026-10-13T02:54:30Z",
+  "finished_at": "2026-10-13T02:54:39Z",
+  "params": {
+   "max_completion_tokens": 3500
+  },
+  "params_digest": "21ab5eec91a87948"
+ },
+ "raw": {
+  "body": {
+   "id": "resp_0962ec7450dc4a94016acd9d674328819a86475509c34d3423",
+   "object": "chat.completion",
+   "created": 1791860079,
+   "model": "gpt-6-astra",
+   "choices": [
+    {
+     "index": 0,
+     "message": {
+      "role": "assistant",
+      "content": "{\"reachable\":true,\"rationale\":\"A valid attack sequence is phish_workstation → pivot_internal → auth_appserver → kerberoast_dc → auth_dc → escalate_dc → dump_dbadmin_dc → auth_db → escalate_db → exfiltrate_db. Phishing supplies foothold_workstation and stolen_user; segmentation and user/admin MFA are not deployed, so the internal pivot and subsequent authentication steps are enabled. Compromising the domain controller supplies admin_dc and stolen_dbadmin. Although mfa_dbadmin is deployed, auth_db explicitly permits authentication when admin_dc is true. The deployed proxy and ADFS patches do not block this sequence, which reaches exfiltrated=true.\"}"
+     },
+     "finish_reason": "stop"
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 5566,
+    "completion_tokens": 184,
+    "total_tokens": 5750,
+    "completion_tokens_details": {
+     "reasoning_tokens": 40
+    }
+   },
+   "service_tier": "default"
+  },
+  "body_text": null,
+  "visible_text": "{\"reachable\":true,\"rationale\":\"A valid attack sequence is phish_workstation → pivot_internal → auth_appserver → kerberoast_dc → auth_dc → escalate_dc → dump_dbadmin_dc → auth_db → escalate_db → exfiltrate_db. Phishing supplies foothold_workstation and stolen_user; segmentation and user/admin MFA are not deployed, so the internal pivot and subsequent authentication steps are enabled. Compromising the domain controller supplies admin_dc and stolen_dbadmin. Although mfa_dbadmin is deployed, auth_db explicitly permits authentication when admin_dc is true. The deployed proxy and ADFS patches do not block this sequence, which reaches exfiltrated=true.\"}",
+  "finish_reason": "stop",
+  "finish_class": "STOP",
+  "refusal": null,
+  "truncated": false,
+  "tool_calls": [],
+  "reasoning": "NOT_EXPOSED"
+ },
+ "status": {
+  "outcome": "ANSWERED",
+  "transport_ok": true,
+  "http_status": 200,
+  "provider_error_type": null,
+  "provider_error": null,
+  "model_switched": false,
+  "attempts": [
+   {
+    "attempt_no": 1,
+    "attempt_id": "att_c6c0a7730988",
+    "sent": true,
+    "confirmed": true,
+    "http_status": 200,
+    "error_class": null,
+    "error": null,
+    "latency_ms": 8651.7
+   }
+  ],
+  "network_retries": 2,
+  "note": null
+ },
+ "cost": {
+  "usage_known": true,
+  "input_tokens": 5566,
+  "output_tokens": 184,
+  "reasoning_tokens": 40,
+  "cache_read_tokens": null,
+  "cache_write_tokens": null,
+  "latency_ms": 8651.9,
+  "http_attempts": 1,
+  "possibly_billed_unconfirmed": 0,
+  "prompt_digest": "36e4d5390fe129df",
+  "config_digest": "d7694eefe67a8c23"
+ },
+ "task_input_digest": "36e4d5390fe129dfaaae0fabdfe5c8a6303a1f86f952661ed22693711f15ee74",
+ "reuse_key": "93f5f3104993277c810866584f57b11edb65ebb60d8f82796392494fc0ebcc7c",
+ "recorded_at": "2026-10-13T02:54:39Z"
+}

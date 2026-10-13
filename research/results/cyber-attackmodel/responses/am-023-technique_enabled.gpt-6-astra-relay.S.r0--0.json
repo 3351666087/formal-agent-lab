@@ -1,0 +1,107 @@
+{
+ "protocol": "fal-research-response/v1",
+ "experiment": {
+  "study_id": "cyber-attackmodel",
+  "unit_id": "am-023-technique_enabled.gpt-6-astra-relay.S.r0",
+  "track": "formal_model_analysis",
+  "case_id": null,
+  "case_version": null,
+  "task_id": "am-023-technique_enabled",
+  "task_digest": "de325d4c6369dfb5b261b4fb728bbba7f6ace13e8bdf8b66639d96814ebcceba",
+  "representation_id": "attackmodel",
+  "replicate_id": 0,
+  "assistance_mode": "STATIC_UNASSISTED",
+  "sampling_id": "am-023-technique_enabled.gpt-6-astra-relay.S.r0#0"
+ },
+ "call": {
+  "provider": "openai",
+  "provider_config_id": "gpt-6-astra-relay",
+  "api": "openai.chat.completions",
+  "api_version": "v1",
+  "endpoint": "https://api.uheapi.com/v1/chat/completions",
+  "route": "COMPATIBLE_RELAY",
+  "endpoint_kind": "PROVIDER",
+  "model_requested": "gpt-6-astra",
+  "model_returned": "gpt-6-astra",
+  "model_switched": false,
+  "model_identity": "RELAY_REPORTED",
+  "response_id": "resp_017ec615f8b61616016acda134ebac819bbed7ac5e057e3e80",
+  "request_id": "97a9c438-fe74-40da-8d27-1f427a4dc249, f8442a4a-ffd8-4aba-aa12-70a8a0e9c1f2",
+  "started_at": "2026-10-13T03:10:43Z",
+  "finished_at": "2026-10-13T03:10:50Z",
+  "params": {
+   "max_completion_tokens": 3500
+  },
+  "params_digest": "21ab5eec91a87948"
+ },
+ "raw": {
+  "body": {
+   "id": "resp_017ec615f8b61616016acda134ebac819bbed7ac5e057e3e80",
+   "object": "chat.completion",
+   "created": 1791861050,
+   "model": "gpt-6-astra",
+   "choices": [
+    {
+     "index": 0,
+     "message": {
+      "role": "assistant",
+      "content": "{\"enabled\":false,\"rationale\":\"escalate_workstation requires foothold_workstation AND NOT patched_workstation. No defences are deployed, so patched_workstation is false, but foothold_workstation is also false in the current state. The required condition therefore does not hold.\"}"
+     },
+     "finish_reason": "stop"
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 5696,
+    "completion_tokens": 63,
+    "total_tokens": 5759
+   },
+   "service_tier": "default"
+  },
+  "body_text": null,
+  "visible_text": "{\"enabled\":false,\"rationale\":\"escalate_workstation requires foothold_workstation AND NOT patched_workstation. No defences are deployed, so patched_workstation is false, but foothold_workstation is also false in the current state. The required condition therefore does not hold.\"}",
+  "finish_reason": "stop",
+  "finish_class": "STOP",
+  "refusal": null,
+  "truncated": false,
+  "tool_calls": [],
+  "reasoning": "NOT_EXPOSED"
+ },
+ "status": {
+  "outcome": "ANSWERED",
+  "transport_ok": true,
+  "http_status": 200,
+  "provider_error_type": null,
+  "provider_error": null,
+  "model_switched": false,
+  "attempts": [
+   {
+    "attempt_no": 1,
+    "attempt_id": "att_66a8b3885d6d",
+    "sent": true,
+    "confirmed": true,
+    "http_status": 200,
+    "error_class": null,
+    "error": null,
+    "latency_ms": 7023.2
+   }
+  ],
+  "network_retries": 2,
+  "note": null
+ },
+ "cost": {
+  "usage_known": true,
+  "input_tokens": 5696,
+  "output_tokens": 63,
+  "reasoning_tokens": null,
+  "cache_read_tokens": null,
+  "cache_write_tokens": null,
+  "latency_ms": 7023.9,
+  "http_attempts": 1,
+  "possibly_billed_unconfirmed": 0,
+  "prompt_digest": "7230e61d1057276e",
+  "config_digest": "d7694eefe67a8c23"
+ },
+ "task_input_digest": "7230e61d1057276eeaf8c4c92c7c2cf1fc038fd762b8a7e46c96449479e49bc9",
+ "reuse_key": "902ec9b071b49f391a531335f43ffadd9c852c36cb1627cf482ab8af724180a3",
+ "recorded_at": "2026-10-13T03:10:50Z"
+}

@@ -1,0 +1,110 @@
+{
+ "protocol": "fal-research-response/v1",
+ "experiment": {
+  "study_id": "cyber-attackmodel",
+  "unit_id": "am-017-technique_enabled.gpt-6-astra-relay.S.r1",
+  "track": "formal_model_analysis",
+  "case_id": null,
+  "case_version": null,
+  "task_id": "am-017-technique_enabled",
+  "task_digest": "6f506961e0c5da6fe593eeec7b2f1b7661ed0281527fc12133b6d4a1ebf18418",
+  "representation_id": "attackmodel",
+  "replicate_id": 1,
+  "assistance_mode": "STATIC_UNASSISTED",
+  "sampling_id": "am-017-technique_enabled.gpt-6-astra-relay.S.r1#0"
+ },
+ "call": {
+  "provider": "openai",
+  "provider_config_id": "gpt-6-astra-relay",
+  "api": "openai.chat.completions",
+  "api_version": "v1",
+  "endpoint": "https://api.uheapi.com/v1/chat/completions",
+  "route": "COMPATIBLE_RELAY",
+  "endpoint_kind": "PROVIDER",
+  "model_requested": "gpt-6-astra",
+  "model_returned": "gpt-6-astra",
+  "model_switched": false,
+  "model_identity": "RELAY_REPORTED",
+  "response_id": "resp_0194511c60b43c60016acd9c50c62887d1b06b15465ff0ee5a",
+  "request_id": "d5fe6876-297d-4090-ac24-c3e5acde7df8, 401f2a80-2b27-4545-bd06-7b1eba06d7e0, f0aa9e28-8440-410e-954f-90ab5093af98, 400e3b73-7738-4357-a057-2bc1f3c58155",
+  "started_at": "2026-10-13T02:49:52Z",
+  "finished_at": "2026-10-13T02:49:56Z",
+  "params": {
+   "max_completion_tokens": 3500
+  },
+  "params_digest": "21ab5eec91a87948"
+ },
+ "raw": {
+  "body": {
+   "id": "resp_0194511c60b43c60016acd9c50c62887d1b06b15465ff0ee5a",
+   "object": "chat.completion",
+   "created": 1791859796,
+   "model": "gpt-6-astra",
+   "choices": [
+    {
+     "index": 0,
+     "message": {
+      "role": "assistant",
+      "content": "{\"enabled\":false,\"rationale\":\"escalate_backup requires foothold_backup AND (admin_dc OR admin_adfs OR stolen_dbadmin). Although foothold_backup is true, admin_dc, admin_adfs, and stolen_dbadmin are all false. foothold_dc and stolen_admin do not satisfy that requirement.\"}"
+     },
+     "finish_reason": "stop"
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 5622,
+    "completion_tokens": 68,
+    "total_tokens": 5690,
+    "prompt_tokens_details": {
+     "cached_tokens": 5504
+    }
+   },
+   "service_tier": "default"
+  },
+  "body_text": null,
+  "visible_text": "{\"enabled\":false,\"rationale\":\"escalate_backup requires foothold_backup AND (admin_dc OR admin_adfs OR stolen_dbadmin). Although foothold_backup is true, admin_dc, admin_adfs, and stolen_dbadmin are all false. foothold_dc and stolen_admin do not satisfy that requirement.\"}",
+  "finish_reason": "stop",
+  "finish_class": "STOP",
+  "refusal": null,
+  "truncated": false,
+  "tool_calls": [],
+  "reasoning": "NOT_EXPOSED"
+ },
+ "status": {
+  "outcome": "ANSWERED",
+  "transport_ok": true,
+  "http_status": 200,
+  "provider_error_type": null,
+  "provider_error": null,
+  "model_switched": false,
+  "attempts": [
+   {
+    "attempt_no": 1,
+    "attempt_id": "att_59171f4f37c0",
+    "sent": true,
+    "confirmed": true,
+    "http_status": 200,
+    "error_class": null,
+    "error": null,
+    "latency_ms": 4051.8
+   }
+  ],
+  "network_retries": 2,
+  "note": null
+ },
+ "cost": {
+  "usage_known": true,
+  "input_tokens": 5622,
+  "output_tokens": 68,
+  "reasoning_tokens": null,
+  "cache_read_tokens": 5504,
+  "cache_write_tokens": null,
+  "latency_ms": 4052.0,
+  "http_attempts": 1,
+  "possibly_billed_unconfirmed": 0,
+  "prompt_digest": "adae7f217d5fc314",
+  "config_digest": "d7694eefe67a8c23"
+ },
+ "task_input_digest": "adae7f217d5fc314b816872ecd7289347fa21156693fb4feb85e58a603fd1e30",
+ "reuse_key": "af0725284703f9f3b7ef24f0ef8b38cfa61f286a62a021d58bda2e20445eec3f",
+ "recorded_at": "2026-10-13T02:49:56Z"
+}
