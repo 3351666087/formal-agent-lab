@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""Seed the bigger, realistic enterprise attack-graph model into the security project on the running platform, with a
-red-team scenario and an executed run — so Model Workbench, Scenarios and Runs/Evidence show the improved model, not
-only the Benchmarks studies. Idempotent by model package_id. Needs the dev platform up (scripts/dev.sh up).
+"""Seed the real enterprise attack MODEL into the security project on the running platform, with a red-team scenario
+and an executed run — so Model Workbench / Scenarios / Runs / Evidence show a genuine attack model (meaningful security
+state: footholds, admin, stolen credentials, network reach, exfiltration; attack techniques as actions; defences as
+constants), not just the Benchmarks studies. Idempotent by model package_id. Needs the dev platform up.
 
-    uv run --frozen python scripts/seed_security_enterprise.py [--project prj_...] [--seed 2026] [--scale 3]
+    uv run --frozen python scripts/seed_security_enterprise.py [--project prj_...] [--scale 3]
 """
 
 from __future__ import annotations
@@ -13,25 +14,24 @@ import sys
 import time
 
 import httpx
-from formal_lab_domain_mal.analysis import generate_enterprise, package
+from formal_lab_domain_mal.attack_model import enterprise_attack_model
 from formal_lab_domain_mal.run import red_team_scenario
 
 API = "http://127.0.0.1:8000/api/v1"
-PKG_ID = "mal-enterprise-attack"
+PKG_ID = "enterprise-attack"
 
 
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--project", default="prj_c6180815d7784668b2ef")
-    ap.add_argument("--seed", type=int, default=2026)
     ap.add_argument("--scale", type=int, default=3)
     args = ap.parse_args()
     pid = args.project
 
-    ag = generate_enterprise(args.seed, scale=args.scale)
-    pkg = package(ag)  # include_defense=True; a plain red-team run ignores the harden action
-    nodes = len(ag.nodes)
-    name = f"企业攻击面攻击图（{nodes} 节点 · 多层 · AND/OR · 防御）"
+    am = enterprise_attack_model(scale=args.scale, name=PKG_ID)
+    pkg = am.package()
+    nodes = len(am.ir_dict["state"])
+    name = f"企业攻击模型（{nodes} 状态变量 · {len(am.techniques)} 攻击技术 · 真实姿态 · 含防御）"
     with httpx.Client(timeout=120) as c:
         models = c.get(f"{API}/projects/{pid}/models").json()
         existing = next((m for m in models if m.get("package_id") == PKG_ID), None)
@@ -45,16 +45,18 @@ def main() -> int:
                 "origin": "seed-security-enterprise"})
             r.raise_for_status()
             body = r.json()
-            version_id = body.get("version_id") or (body.get("versions") or [{}])[0].get("id") \
-                or body.get("latest_version_id")
+            version_id = body.get("version_id") or (body.get("versions") or [{}])[0].get("id")
+            if not version_id:  # the POST response does not always expose the version; resolve it with a GET
+                mv = c.get(f"{API}/models/{body['id']}").json()
+                version_id = (mv.get("versions") or [{}])[-1].get("id")
             print(f"created model {body.get('id')} version {version_id}: {name}")
         if not version_id:
             print("could not resolve a model version id", file=sys.stderr)
             return 1
 
-        manifest = red_team_scenario(pkg, strategy="symbolic", horizon=60,
-                                     name="企业红队：Z3 有界规划到王冠数据",
-                                     description="攻击者在 37 节点多层企业攻击图上，用 Z3 有界规划找到到达王冠数据的最短路径。")
+        manifest = red_team_scenario(pkg, goal_property="data_exfiltrated", strategy="symbolic", horizon=50,
+                                     name="企业红队：规划到数据外泄",
+                                     description="攻击者在真实企业攻击模型上，用 Z3 有界规划找到一条从边界到数据外泄的最短技术链。")
         m = manifest.model_dump(mode="json")
         scen_body = {"name": m["name"], "description": m["description"], "model_version_id": version_id,
                      "environment": m["environment"], "participants": m["participants"],
