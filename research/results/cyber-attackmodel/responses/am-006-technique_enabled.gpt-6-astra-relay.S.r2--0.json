@@ -1,0 +1,107 @@
+{
+ "protocol": "fal-research-response/v1",
+ "experiment": {
+  "study_id": "cyber-attackmodel",
+  "unit_id": "am-006-technique_enabled.gpt-6-astra-relay.S.r2",
+  "track": "formal_model_analysis",
+  "case_id": null,
+  "case_version": null,
+  "task_id": "am-006-technique_enabled",
+  "task_digest": "a977a3f0d9d0412420af4842a1f7cd8bf5d8836b17979a63970f348bfcc8ebde",
+  "representation_id": "attackmodel",
+  "replicate_id": 2,
+  "assistance_mode": "STATIC_UNASSISTED",
+  "sampling_id": "am-006-technique_enabled.gpt-6-astra-relay.S.r2#0"
+ },
+ "call": {
+  "provider": "openai",
+  "provider_config_id": "gpt-6-astra-relay",
+  "api": "openai.chat.completions",
+  "api_version": "v1",
+  "endpoint": "https://api.uheapi.com/v1/chat/completions",
+  "route": "COMPATIBLE_RELAY",
+  "endpoint_kind": "PROVIDER",
+  "model_requested": "gpt-6-astra",
+  "model_returned": "gpt-6-astra",
+  "model_switched": false,
+  "model_identity": "RELAY_REPORTED",
+  "response_id": "resp_0638d2b8c638f1c5016acd9403acc08199a5dfb8c9d9c79259",
+  "request_id": "1b386206-1515-48f0-8300-9a8905735442, 30a7cd9d-1e47-4731-8ca3-95b7a25f0583",
+  "started_at": "2026-10-13T02:14:26Z",
+  "finished_at": "2026-10-13T02:14:32Z",
+  "params": {
+   "max_completion_tokens": 3500
+  },
+  "params_digest": "21ab5eec91a87948"
+ },
+ "raw": {
+  "body": {
+   "id": "resp_0638d2b8c638f1c5016acd9403acc08199a5dfb8c9d9c79259",
+   "object": "chat.completion",
+   "created": 1791857672,
+   "model": "gpt-6-astra",
+   "choices": [
+    {
+     "index": 0,
+     "message": {
+      "role": "assistant",
+      "content": "{\"enabled\":false,\"rationale\":\"pivot_internal requires at least one foothold variable to be true. All foothold variables are currently false. With no defences deployed, NOT segmented is true, but the required foothold condition still fails; stolen_dbadmin does not satisfy it.\"}"
+     },
+     "finish_reason": "stop"
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 5048,
+    "completion_tokens": 62,
+    "total_tokens": 5110
+   },
+   "service_tier": "default"
+  },
+  "body_text": null,
+  "visible_text": "{\"enabled\":false,\"rationale\":\"pivot_internal requires at least one foothold variable to be true. All foothold variables are currently false. With no defences deployed, NOT segmented is true, but the required foothold condition still fails; stolen_dbadmin does not satisfy it.\"}",
+  "finish_reason": "stop",
+  "finish_class": "STOP",
+  "refusal": null,
+  "truncated": false,
+  "tool_calls": [],
+  "reasoning": "NOT_EXPOSED"
+ },
+ "status": {
+  "outcome": "ANSWERED",
+  "transport_ok": true,
+  "http_status": 200,
+  "provider_error_type": null,
+  "provider_error": null,
+  "model_switched": false,
+  "attempts": [
+   {
+    "attempt_no": 1,
+    "attempt_id": "att_45c41aab3e9d",
+    "sent": true,
+    "confirmed": true,
+    "http_status": 200,
+    "error_class": null,
+    "error": null,
+    "latency_ms": 5756.7
+   }
+  ],
+  "network_retries": 2,
+  "note": null
+ },
+ "cost": {
+  "usage_known": true,
+  "input_tokens": 5048,
+  "output_tokens": 62,
+  "reasoning_tokens": null,
+  "cache_read_tokens": null,
+  "cache_write_tokens": null,
+  "latency_ms": 5756.9,
+  "http_attempts": 1,
+  "possibly_billed_unconfirmed": 0,
+  "prompt_digest": "afea9318826c79f6",
+  "config_digest": "d7694eefe67a8c23"
+ },
+ "task_input_digest": "afea9318826c79f6feac521ece9c7d033921d611d071e521163df41315463fa1",
+ "reuse_key": "eafbfa8ffca27288151455c8f9e73de37f5c554fc81da7b932ed76e54288ee8c",
+ "recorded_at": "2026-10-13T02:14:32Z"
+}

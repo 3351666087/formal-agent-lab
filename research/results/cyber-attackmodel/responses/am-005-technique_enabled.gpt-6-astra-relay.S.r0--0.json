@@ -1,0 +1,107 @@
+{
+ "protocol": "fal-research-response/v1",
+ "experiment": {
+  "study_id": "cyber-attackmodel",
+  "unit_id": "am-005-technique_enabled.gpt-6-astra-relay.S.r0",
+  "track": "formal_model_analysis",
+  "case_id": null,
+  "case_version": null,
+  "task_id": "am-005-technique_enabled",
+  "task_digest": "5438a2e33cc199b1e978567f68fc8d7fd5ab967986424570d58ee8d401544556",
+  "representation_id": "attackmodel",
+  "replicate_id": 0,
+  "assistance_mode": "STATIC_UNASSISTED",
+  "sampling_id": "am-005-technique_enabled.gpt-6-astra-relay.S.r0#0"
+ },
+ "call": {
+  "provider": "openai",
+  "provider_config_id": "gpt-6-astra-relay",
+  "api": "openai.chat.completions",
+  "api_version": "v1",
+  "endpoint": "https://api.uheapi.com/v1/chat/completions",
+  "route": "COMPATIBLE_RELAY",
+  "endpoint_kind": "PROVIDER",
+  "model_requested": "gpt-6-astra",
+  "model_returned": "gpt-6-astra",
+  "model_switched": false,
+  "model_identity": "RELAY_REPORTED",
+  "response_id": "resp_0dab61feb56f336f016acd931a7b4081a0b200a32c7caf8d34",
+  "request_id": "49537aa8-4a9e-4e61-87e5-a913a47c0f25, 071f4900-12bc-45e4-8fee-a97ef717b733, 8054e32c-d494-405b-8cbb-0a81c03baeb7, 17b3aa75-ee1f-4735-92e9-cf09e008806b",
+  "started_at": "2026-10-13T02:10:31Z",
+  "finished_at": "2026-10-13T02:10:37Z",
+  "params": {
+   "max_completion_tokens": 3500
+  },
+  "params_digest": "21ab5eec91a87948"
+ },
+ "raw": {
+  "body": {
+   "id": "resp_0dab61feb56f336f016acd931a7b4081a0b200a32c7caf8d34",
+   "object": "chat.completion",
+   "created": 1791857437,
+   "model": "gpt-6-astra",
+   "choices": [
+    {
+     "index": 0,
+     "message": {
+      "role": "assistant",
+      "content": "{\"enabled\":false,\"rationale\":\"escalate_ciserver requires foothold_ciserver AND (stolen_admin OR NOT patched_ciserver). Although patched_ciserver is false because no defences are deployed, foothold_ciserver is currently false, so the technique is not applicable.\"}"
+     },
+     "finish_reason": "stop"
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 5615,
+    "completion_tokens": 67,
+    "total_tokens": 5682
+   },
+   "service_tier": "default"
+  },
+  "body_text": null,
+  "visible_text": "{\"enabled\":false,\"rationale\":\"escalate_ciserver requires foothold_ciserver AND (stolen_admin OR NOT patched_ciserver). Although patched_ciserver is false because no defences are deployed, foothold_ciserver is currently false, so the technique is not applicable.\"}",
+  "finish_reason": "stop",
+  "finish_class": "STOP",
+  "refusal": null,
+  "truncated": false,
+  "tool_calls": [],
+  "reasoning": "NOT_EXPOSED"
+ },
+ "status": {
+  "outcome": "ANSWERED",
+  "transport_ok": true,
+  "http_status": 200,
+  "provider_error_type": null,
+  "provider_error": null,
+  "model_switched": false,
+  "attempts": [
+   {
+    "attempt_no": 1,
+    "attempt_id": "att_1af45768aac3",
+    "sent": true,
+    "confirmed": true,
+    "http_status": 200,
+    "error_class": null,
+    "error": null,
+    "latency_ms": 5902.8
+   }
+  ],
+  "network_retries": 2,
+  "note": null
+ },
+ "cost": {
+  "usage_known": true,
+  "input_tokens": 5615,
+  "output_tokens": 67,
+  "reasoning_tokens": null,
+  "cache_read_tokens": null,
+  "cache_write_tokens": null,
+  "latency_ms": 5903.1,
+  "http_attempts": 1,
+  "possibly_billed_unconfirmed": 0,
+  "prompt_digest": "c125bd3f6758d662",
+  "config_digest": "d7694eefe67a8c23"
+ },
+ "task_input_digest": "c125bd3f6758d6627c309e5b1f496663ea5532fd4acd334c4cc638a504f72b88",
+ "reuse_key": "a6e8381f8fe72bb584a8fbc871d770821aaf2cd88c3669f7ab0f64c216c8edb6",
+ "recorded_at": "2026-10-13T02:10:37Z"
+}

@@ -1,0 +1,77 @@
+{
+ "red": "claude-opus-5-5",
+ "blue": "gpt-6-astra",
+ "game": 1,
+ "outcome": {
+  "winner": "blue",
+  "turns_used": 4
+ },
+ "log": [
+  {
+   "turn": 1,
+   "red": {
+    "move": {},
+    "result": "invalid"
+   },
+   "blue": {
+    "deploy": "credential_vaulting",
+    "rationale": "Block credential theft from configuration before the attacker reaches recon, then deploy edr to close the other credentials branch. This can cut both paths at c"
+   },
+   "reached": [],
+   "deployed": [
+    "credential_vaulting"
+   ]
+  },
+  {
+   "turn": 2,
+   "red": {
+    "move": {},
+    "result": "invalid"
+   },
+   "blue": {
+    "deploy": "edr",
+    "rationale": "EDR blocks dump_process_memory, completing the creds-stage cut with credential_vaulting. Since the attacker has not reached foothold, both credential paths are "
+   },
+   "reached": [],
+   "deployed": [
+    "credential_vaulting",
+    "edr"
+   ]
+  },
+  {
+   "turn": 3,
+   "red": {
+    "move": {},
+    "result": "invalid"
+   },
+   "blue": {
+    "deploy": "network_segmentation",
+    "rationale": "Credential vaulting and EDR already block both credential paths. Block SMB lateral movement now, then deploy vpn_mfa on the final turn to complete a second barr"
+   },
+   "reached": [],
+   "deployed": [
+    "credential_vaulting",
+    "edr",
+    "network_segmentation"
+   ]
+  },
+  {
+   "turn": 4,
+   "red": {
+    "move": {},
+    "result": "invalid"
+   },
+   "blue": {
+    "deploy": "vpn_mfa",
+    "rationale": "Completes the lateral-stage cut alongside network_segmentation, blocking both vpn_pivot and smb_lateral_movement. This adds a second fully blocked stage behind "
+   },
+   "reached": [],
+   "deployed": [
+    "credential_vaulting",
+    "edr",
+    "network_segmentation",
+    "vpn_mfa"
+   ]
+  }
+ ]
+}
