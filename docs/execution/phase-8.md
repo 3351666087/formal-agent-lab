@@ -1,26 +1,27 @@
-<!-- 自建扩展阶段（非下发任务书）：应用户要求——案例太少、MAL 攻击图太玩具、cyber 领域不足、希望看到上千次真实模型调用且每一步对得起模型智能。目标：以“可被验证器判定”的难题重建 cyber 领域，并做一次上千单元的真实双模型批次。复选框 P8-01 / P8-02，scripts/tick.py 记录证据。开发模型 Claude Opus 4.8 / Opus 5.5，trailer 见提交。 -->
+<!-- 自建扩展阶段（非下发任务书），由用户反馈驱动：安全/攻击领域必须是真实攻击模型，不要玩具、不要“已攻陷/已加固”的可达性抽象，要进攻也要防御，并基于一个著名大型 GitHub 项目的真实重大漏洞（修复前/后版本）建立攻击/防御形式化模型。复选框 P8-01 / P8-02，scripts/tick.py 记录。开发模型 Claude Opus 4.8，trailer 见提交。 -->
 
-# Phase 8：防御性攻击图分析与大规模真实评测
+# Phase 8：真实攻击模型（含真实 CVE）与验证器判定的实验
 
-把 cyber 领域从“三节点思维导图”升级为真正的形式攻击图分析：抽象 AND/OR 攻击图（入口立足点、中间步骤、目标），回答安全分析师真正会问的难题——最短攻击路径代价、部署一组防御后目标是否仍可达、使目标不可达的最小防御割、某派生步骤在给定状态下是否使能。每个问题的基准答案由 Z3 验证器 / 模型语义计算并交叉确认，所以答案客观对错、题目有区分度，而不是两模型都满分。
+把安全领域重做为**真实攻击模型**：状态是真实安全态势（立足点、管理员、窃取的凭据、网络可达、数据外泄），动作是带前置条件/效果的攻击技术，防御是门控技术的常量，攻击者的目标由 Z3 规划达成——不是 `compromised[step]`/`hardened[step]` 的可达性抽象。进攻与防御并重，并基于真实 CVE 建模。
 
-## 8.1 · 攻击图分析研究体（验证器判定）
+## 8.1 · 真实攻击模型与验证器判定研究
 
-- [x] **P8-01** 构建防御性攻击图分析研究体：形式 AND/OR 模型族、四类验证器判定的难题、评分器与数据隔离，并以 Z3 复核基准答案。
-  - 证据：defensive attack-graph analysis study built and checked: packages/domain-mal/analysis.py (AND/OR generator + native oracle + Z3 ground truth for shortest cost / reachability-under-defense / min-cut / step-enabled, cross-checked), scorer attackgraph.analysis@1, research/studies/cyber-attackgraph (48 graphs, 183 tasks, 1098 planned units, answers wrapped to prevent ANSWER_LEAK). cyber-attackgraph check PASS (6 assertions: validates+separated, single track, ground truth re-derived+Z3-confirmed on sampled graphs, scorer labels scripted loopback, no key leak). FORMAL_MODEL_ANALYSIS track added (contracts regen, web label). Targeted regression 334 passed.
-  - 实现：`packages/domain-mal/src/formal_lab_domain_mal/analysis.py`、`scripts/cyber_attackgraph_study.py`、`scripts/cyber_attackgraph_check.py`
+- [ ] **P8-01** 构建真实攻击模型（企业攻击模型 + Log4Shell CVE 模型），以 Z3 为基准答案，接入研究评分与数据隔离。
 
-机制：`packages/domain-mal/analysis.py`（生成器、原生可达性预言、Z3 最短代价/可达性、AND/OR 最小割、步骤使能），评分器 `attackgraph.analysis@1`（按验证器基准判对错，`program_correspondence` 记录是否与验证器一致），研究体 `research/studies/cyber-attackgraph`。答案以 `{"value": …}` 包裹，杜绝裸整数泄漏进题面（ANSWER_LEAK）。检查 `scripts/cyber_attackgraph_check.py`：研究体校验+数据隔离、抽样图基准从零重算并经 Z3 确认、评分器在协议回放上按脚本正确标注、密钥不落盘。注册 `p8`。
+- 企业攻击模型 `packages/domain-mal/attack_model.py`：`enterprise_attack_model(scale, defenses)`，scale 3 时 32 状态变量 / 33 攻击技术，两条通往 DB-admin 凭据的独立路径使最小防御集非平凡；经 Z3 规划到 `data_exfiltrated`。
+- 真实 CVE `packages/domain-mal/cve_2021_44228.py`：Log4Shell（CVE-2021-44228，Apache Log4j 2，github.com/apache/logging-log4j2）。易受攻击 2.14.1 可达 RCE，修复版 2.15/2.16/2.17 被阻断；6 步攻击链为顺序链，六个单一控制各自即可切断（纵深防御）。`test_cve_log4shell.py` 11 项断言。
+- 研究体 `research/studies/cyber-attackmodel`（四类题：最短攻击链/部署防御后可达性/最小防御数/技术可用性）；评分器 `attackgraph.analysis@1`；检查 `scripts/cyber_attackmodel_check.py`（组 `p8`）。答案以 `{"value":…}` 包裹防泄漏。
 
-## 8.2 · 大规模真实双模型批次
+## 8.2 · 真实双模型批次与平台可视化
 
-- [x] **P8-02** 在授权额度内运行一次上千单元的真实 GPT+Claude 批次，每一步都是验证器判定的难题，分模型/分题型报告正确率与一致性，并导入平台可视化。
-  - 证据：real 1098-unit dual-model batch complete (~2.2h, 1098/1098 model-produced, 0 possibly-billed-unconfirmed). Results discriminate: step_enabled is the hard kind (GPT 0.86 / Opus 0.88, real AND/OR errors), both perfect on min_defense (min-cut) and near-perfect on shortest_cost; Claude Opus 5.5 declined 22 security-framed tasks (stop_reason refusal, 16 reachability + 6 step_enabled, 97.7% on answered), GPT-6 refused none. No ranking claim (relay identity, paired diff ~0.02). report.md + evidence cyber/run.json; manifest regenerated; handoff docs/handoff/phase8.md
-  - 实现：`research/results/cyber-attackgraph/report.md`、`docs/execution/evidence/research/cyber/run.json`、`docs/handoff/phase8.md`
+- [ ] **P8-02** 在授权额度内对真实攻击模型运行双模型批次；把真实攻击模型（企业 + Log4Shell 修复前/后）落到安全项目（模型工作台/场景/实验/证据），不留任何非攻击模型。
 
-~48 图 × 4 题型 × 2 模型 × 3 重复 ≈ 1100+ 真实调用（`scripts/cyber_run.py`，可续跑：已保存答案复用）。报告分题型（最短代价/可达性/最小割/步骤使能）与分模型正确率、程序对应（与验证器一致率）、输出 token；中转身份不可核验，不做已核验的厂商对比。导入订单项目的研究评测，网页 `基准对比` 可见每个单元的原始回答与评分依据。
+- 批次：`fal research study run research/studies/cyber-attackmodel`（576 单元，gpt-6-astra + claude-opus-5-5，可续跑）。
+- 平台：`scripts/seed_security_enterprise.py`（企业攻击模型 + 红队场景 + 运行）、`scripts/seed_cve_log4shell.py`（Log4Shell 易受攻击 2.14.1 运行 SUCCEEDED → RCE；已修复 2.16.0 运行 BUDGET_EXHAUSTED → 修复成立）。安全项目 `攻击模型安全分析（防御）`。
+- 清理：删除攻击“图”抽象（analysis.py、cyber-attackgraph/cyber-enterprise 研究体与结果、相关脚本），平台与仓库均只保留真实攻击模型。
 
 ```bash
+uv run --frozen pytest packages/domain-mal/tests/test_cve_log4shell.py
 make research-check ARGS="--group p8"
-uv run --frozen python scripts/cyber_run.py        # 真实上千次批次（需 .env 中转凭据；可续跑）
+uv run --frozen python scripts/seed_cve_log4shell.py
 ```

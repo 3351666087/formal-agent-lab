@@ -1,112 +1,65 @@
-# Phase 8 handoff — defensive attack-graph analysis, at scale
+# Phase 8 handoff — real attack models in the security project
 
-A self-initiated expansion, asked for by the user: the cyber domain was too thin (a 3-node "attack graph"), the tasks
-too easy to be worthy of a frontier model, and the real-call count too small. Phase 8 answers all three.
+A self-initiated, user-driven expansion of the security domain. After several rounds of feedback the security work
+converged on **real attack models** — meaningful security state and attack techniques, verified by Z3 — and anything
+that was not a real attack model was removed from the platform and the repository.
 
-Machine-readable companion: [`phase8.manifest.json`](phase8.manifest.json). Task book:
-[`../execution/phase-8.md`](../execution/phase-8.md). Earlier closeout: [`phase7.md`](phase7.md).
+Task book: [`../execution/phase-8.md`](../execution/phase-8.md). Earlier closeout: [`phase7.md`](phase7.md).
 
-## What it is
+## What a "real attack model" is here
 
-A real formal **attack-graph analysis** domain for defence. An attack graph is an abstract AND/OR dependency model
-(entry footholds → intermediate steps → a target) — the standard object of threat-model / attack-graph analysis. The
-steps are abstract graph nodes (`reach`, `pivot`, `escalate`, `access`), not operational exploitation instructions.
-Each task is a hard question a security analyst would ask, and every answer is computed and **cross-checked by the Z3
-verifier / the model semantics**, so the ground truth is objective, not a human opinion
-(`packages/domain-mal/src/formal_lab_domain_mal/analysis.py`).
+Not a flat graph of `compromised[step]`/`hardened[step]` (a reachability abstraction), but a model whose **state is
+real security posture** and whose **actions are attack techniques** with genuine preconditions and effects. Defences
+are model constants that gate techniques. The attacker's goal is reached by a **Z3 plan**, and the ground truth for
+every question is the Z3 verifier on the model.
 
-Four question kinds (`research/studies/cyber-attackgraph`, 48 graphs, 12–20 nodes, 183 tasks):
+### 1. Enterprise attack model — `packages/domain-mal/attack_model.py`
+`enterprise_attack_model(scale, defenses)`: state is `reach_dmz`/`reach_internal`, `foothold_<host>`, `admin_<host>`,
+`stolen_<cred>`, `exfiltrated`; techniques are exploit / phish / steal-credential / authenticate / escalate /
+kerberoast / leak-CI-secrets / exfiltrate; defences (patching / MFA / segmentation) are constants. At scale 3: **32
+state variables, 33 techniques**, two independent paths to the DB-admin credential so the minimum defence set is
+non-trivial. Seeded into the security project with a red-team scenario and an executed run (`scripts/
+seed_security_enterprise.py`).
 
-| kind | question | ground truth |
-|---|---|---|
-| `shortest_cost` | minimum attack-path cost to the target (incl. the final step) | Z3 `OPTIMIZE_OBJECTIVE` |
-| `reachability` | is the target reachable with a given defence set deployed | Z3 `GOAL_REACHABILITY` |
-| `min_defense` | smallest number of defences that cut **every** path (AND/OR min-cut) | min-cut search, Z3-confirmed |
-| `step_enabled` | is a derived step enabled in a given partial state | AND/OR semantics |
+### 2. Log4Shell — a real CVE — `packages/domain-mal/cve_2021_44228.py`
+A formal attack/defence model of **CVE-2021-44228** in **Apache Log4j 2** (github.com/apache/logging-log4j2). The
+published chain as techniques — attacker input logged → JNDI lookup triggered → attacker endpoint contacted →
+malicious reference returned → remote class loaded → RCE — with the version and operator mitigations as constants.
+Z3 ground truth, confirmed by `test_cve_log4shell.py`:
+- **RCE is reachable in the vulnerable 2.14.1** and **blocked in 2.15.0 / 2.16.0 / 2.17.1** (the fix flips message
+  lookups / JNDI).
+- The 6-step chain is sequential, so **any one of six single controls** (`formatMsgNoLookups`, `disable_jndi`,
+  `remove_jndi_class`, `block_egress`, `input_validation`, `remove_gadget`) alone stops RCE — defence in depth,
+  proven, not asserted.
 
-## The real batch (P8-02)
+Seeded into the security project (`scripts/seed_cve_log4shell.py`): the **vulnerable 2.14.1** red-team run reaches RCE
+(SUCCEEDED); the **fixed 2.16.0** run cannot (BUDGET_EXHAUSTED) — the fix holds, on the platform.
 
-**1098 real dual-model calls** (183 tasks × 2 models × 3 replicates), ~2.2 h, every unit model-produced. Not volume
-for its own sake — the tasks discriminate, and the result is nuanced.
+## The LLM study (over the real model)
 
-| model | correct | answered-only | wrong | refused | notes |
-|---|---|---|---|---|---|
-| GPT-6 Astra (relay) | **0.96** | 0.96 | 21 | 0 | answered everything |
-| Claude Opus 5.5 (relay) | **0.94** | **0.977** | 12 | **22** | declined 22 security-framed tasks (`stop_reason: refusal`) |
+`research/studies/cyber-attackmodel` — hard, Z3-grounded questions over the real enterprise attack model: shortest
+attack plan to exfiltration (offence), reachability under a deployed defence set (defence), minimum defences to stop
+exfiltration (defence), technique applicability in a given state. Two strong relay models (`gpt-6-astra`,
+`claude-opus-5-5`). The scorer is `attackgraph.analysis@1`; the check is `scripts/cyber_attackmodel_check.py`
+(group `p8`): the study validates and is data-separated, a committed attack model is Z3-solvable to exfiltration, the
+Log4Shell model is faithful (vulnerable→RCE, fixed→blocked), and the scorer is loopback-verified.
 
-Per question kind (correct rate):
+## Removed (not a real attack model)
 
-| kind | GPT-6 | Opus-5.5 | hardest? |
-|---|---|---|---|
-| `min_defense` (min-cut) | 1.00 | 1.00 | both perfect — the combinatorial one did not trip them |
-| `shortest_cost` | 0.99 | 1.00 | near-perfect |
-| `reachability` | 1.00 | 0.89 | Opus refused 16 here; 0 wrong when it answered |
-| `step_enabled` | 0.86 | 0.88 | **the discriminator** — both make real AND/OR semantic errors |
+The earlier attack-**graph** work (the `compromised`/`hardened` reachability abstraction) was deleted from the
+platform (old security project dropped, recreated clean) **and** the repository: `analysis.py`, the attack-graph study
+/ check / run scripts, and the `cyber-attackgraph` / `cyber-enterprise` studies and results. Only real attack models
+remain.
 
-Findings, stated plainly:
+## Caveats (unchanged)
 
-1. **The tasks discriminate.** `step_enabled` (is this AND/OR step enabled in this state?) is where both models make
-   genuine errors (~86–88%), despite looking the simplest — precise AND-vs-OR reasoning on a specific step is harder
-   for them than the optimisation questions. The min-cut, which looks hardest, both solve perfectly.
-2. **Claude's safety layer refused 22/549 (4%)** of the defensive attack-graph tasks (`stop_reason: refusal`, empty
-   content), concentrated on `reachability` and `step_enabled`; GPT-6 never refused. This is a safety-vs-analysis
-   tension on security-framed formal tasks, not a quality gap — on the tasks Claude did answer it was near-perfect
-   (97.7%). Reported as a refusal, counted as not-correct, never hidden.
-3. **No ranking claim.** The paired difference is ~0.02 and both answer through a relay (identity relay-reported), so
-   this is a hard, discriminating, verifier-grounded experiment — not a verified GPT-vs-Claude ranking.
-
-## Checks and reproduction
-
-- `make research-check ARGS="--group p8"` — `cyber-attackgraph` check: the study validates and is data-separated
-  (answers wrapped `{value:…}` so no bare integer leaks into the task), a sample of the committed ground truths
-  **re-derive and are Z3-confirmed** (the answers are machine-checked, not asserted), and the scorer labels a scripted
-  loopback run correctly. No model call.
-- `uv run --frozen python scripts/cyber_run.py` — the real batch; resumable (saved answers reused).
-- Results: `research/results/cyber-attackgraph/report.md`; raw answers + evaluations per unit; evidence
-  `docs/execution/evidence/research/cyber/{check,run}.json`. Imported into the order project's research studies, so
-  the Web UI **基准对比** shows every unit and its raw answer.
-
-## Caveats (unchanged, stated up front)
-
-- The attack graphs are abstract formal models for defensive analysis, **not scans of a real network**;
-  `program_correspondence` here means the answer agrees with the Z3 verifier, not a program observation.
-- Relay identity is reported, not verified. A verified provider comparison needs official routes (`FAL_*` official
-  credentials).
+- The models are abstract formal models for **defensive** analysis — named conditions, not exploits.
+- The LLM study's two models answer through a relay (relay-reported identity), so it is a discriminating,
+  verifier-grounded experiment, not a verified provider ranking.
 
 ```bash
-make research-check ARGS="--group p8"
-uv run --frozen python scripts/cyber_run.py        # resumable real batch
-uv run --frozen python scripts/handoff_phase8.py   # regenerate the manifest from the committed report
+uv run --frozen pytest packages/domain-mal/tests/test_cve_log4shell.py   # the CVE model
+make research-check ARGS="--group p8"                                    # the attack-model + CVE check
+uv run --frozen python scripts/seed_security_enterprise.py               # seed the enterprise attack model + run
+uv run --frozen python scripts/seed_cve_log4shell.py                     # seed Log4Shell vulnerable + fixed + runs
 ```
-
-## Enterprise attack surface, offense + defence (added after feedback)
-
-The first graphs were too small and the questions defence-heavy. `research/studies/cyber-enterprise` uses large,
-realistic multi-tier graphs (`generate_enterprise`, ~37 nodes, 10 AND-joins, 30+ defendable steps) and balances
-attacker and defender questions. Real batch: **720 units** (20 graphs × 6 kinds × 2 strong models × 3 reps), in a
-dedicated security project **攻击图安全分析（防御）**.
-
-| model | correct | answered-only | refused |
-|---|---|---|---|
-| GPT-6 Astra | 0.97 | 0.97 | 0 |
-| Claude Opus 5.5 | 0.93 | 0.985 | 19 |
-
-Per kind (correct rate; OFF = attacker-side, DEF = defender-side):
-
-| side · kind | GPT-6 | Opus-5.5 |
-|---|---|---|
-| OFF · `shortest_cost` (min attack cost) | 1.00 | 1.00 |
-| OFF · `reach_from_entry` (reach from one foothold) | 1.00 | 0.97 |
-| DEF · `reachability` (under deployed defences) | 1.00 | 0.97 |
-| DEF · `min_defense` (min-cut) | **0.98** | **0.92** |
-| DEF · `chokepoints` (single points of failure) | 1.00 | 1.00 |
-| NEU · `step_enabled` (AND/OR enablement) | **0.83** | **0.75** |
-
-Findings on the realistic attack surface:
-1. **Scaling the graph made the defence min-cut genuinely hard** — on the small graphs both scored 1.00 on
-   `min_defense`; at ~37 nodes both make real errors (Opus 0.92, GPT 0.98). The attack surface matters.
-2. **`step_enabled` is still the hardest** (0.75–0.83) — precise AND-vs-OR reasoning on a specific step, not the
-   optimisation questions, is where frontier models slip.
-3. **Claude Opus 5.5's safety layer refused 19/360 (5%)**, concentrated on `step_enabled` (15) — a safety-vs-analysis
-   tension on security-framed formal tasks; GPT-6 refused none. On what it answered, Opus was 98.5%. Reported, not hidden.
-4. No ranking claim: relay-reported identity, paired difference small.

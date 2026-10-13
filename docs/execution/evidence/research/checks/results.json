@@ -2,14 +2,14 @@
   "format": "checks@3",
   "compatible_with": "checks@2",
   "suite": "research",
-  "generated_at": "2026-10-12T19:39:11Z",
+  "generated_at": "2026-10-13T02:00:40Z",
   "source_revision": {
-    "commit": "53fb2e31dc26e1e7258cef34f286e97aed91ce12",
+    "commit": "081eee70fc9f983ccd4a835083d784d7ebee5f02",
     "worktree": {
-      "sha256": "c4b478fab531144b678b5de9c67f63ead010e0021b0730d761df91a64cd00998",
+      "sha256": "87122b74445030d9b300642bfd9c26427e506aadea4a976bf2a24a3a77e2a70f",
       "clean": false,
-      "changed_bytes": 2148,
-      "untracked_files": 0,
+      "changed_bytes": 1950390,
+      "untracked_files": 1,
       "excluded_outputs": [
         "docs/execution/evidence/",
         "docs/handoff/",
@@ -20,16 +20,16 @@
     }
   },
   "config": {
-    "sha256": "26e6d90073b81ef068084357bee56b7a45e820f4dcca916a83408742add8c40e",
+    "sha256": "ed11db0e5b81b5ed450d16f8cc5ef7dad8a465f74680b4a9f2f8644545ca4d18",
     "parts": {
-      "checks": "ec5ad157f31fc964ba910c2171e76201b784e59e9b7894b1e3c5167e4c710dd4",
+      "checks": "27d83c66a4a84ca3c7aae045dc5c6cbaaa8f835d8242f375b35c4464ff21b7bc",
       "uv.lock": "4d3a54f797927fbc03bbb772f4386cf437468e023d39b23ec94d38c045f04ced",
       "pnpm-lock.yaml": "02d23c074a75bccfaea1ed4ff51272ba3d6cbb724e8012366c8d18e9bb0a7c3a",
       "deploy/compose/services.dev.yaml": "4c876045f15d5bd972c517e7de2d3626cd252d1842797f0152f596f7d8ea9ce0",
       "deploy/compose/docker-compose.yaml": "ff4c34cae068cc6dacd4db7f4273887ff6c2bb0b3b84938a7b8969488bfb20ff"
     }
   },
-  "command": "python scripts/check_runner.py --suite research --strict",
+  "command": "python scripts/check_runner.py --suite research --group p8",
   "environment": {
     "os": "Ubuntu 24.04.4 LTS",
     "arch": "aarch64",
@@ -46,15 +46,15 @@
     "cpus": 4,
     "memory_gib": {
       "MemTotal": 5.77,
-      "MemAvailable": 3.44
+      "MemAvailable": 3.3
     },
     "load_avg": [
-      1.01,
-      0.78,
-      0.45
+      0.4,
+      0.48,
+      0.36
     ],
     "disk_free_gib": {
-      "host (repository filesystem)": 5.7,
+      "host (repository filesystem)": 2.6,
       "docker (/var/lib/docker)": 16.9
     },
     "concurrency": 1,
@@ -64,67 +64,45 @@
     "cpus": 4,
     "memory_gib": {
       "MemTotal": 5.77,
-      "MemAvailable": 3.42
+      "MemAvailable": 3.25
     },
     "load_avg": [
-      1.26,
-      0.91,
-      0.52
+      0.4,
+      0.48,
+      0.36
     ],
     "disk_free_gib": {
-      "host (repository filesystem)": 5.7,
+      "host (repository filesystem)": 2.6,
       "docker (/var/lib/docker)": 16.9
     },
     "concurrency": 1,
     "note": "checks run one at a time; heavy checks ask disk_guard first"
   },
   "run": {
-    "started_at": "2026-10-12T19:37:58Z",
-    "finished_at": "2026-10-12T19:39:11Z",
-    "duration_s": 73.7,
-    "full": true,
+    "started_at": "2026-10-13T02:00:38Z",
+    "finished_at": "2026-10-13T02:00:40Z",
+    "duration_s": 1.9,
+    "full": false,
     "selection": {
-      "group": [],
+      "group": [
+        "p8"
+      ],
       "only": [],
       "skip": []
     },
     "checks": [
-      "p5a-unit",
-      "p5a-case",
-      "p5b-unit",
-      "p5b-case",
-      "p6a-unit",
-      "p6a-protocol",
-      "p6a-real",
-      "p6b-unit",
-      "p6b-eval",
-      "p7-unit",
-      "p7-case",
-      "p7-holdout",
-      "cyber-attackgraph"
+      "cyber-attackmodel"
     ],
-    "commit": "53fb2e31dc26e1e7258cef34f286e97aed91ce12",
-    "worktree_sha256": "c4b478fab531144b678b5de9c67f63ead010e0021b0730d761df91a64cd00998",
-    "nonce": "8b3f3af5dd064830ad61055529d614b2",
+    "commit": "081eee70fc9f983ccd4a835083d784d7ebee5f02",
+    "worktree_sha256": "87122b74445030d9b300642bfd9c26427e506aadea4a976bf2a24a3a77e2a70f",
+    "nonce": "4e501a2c36df4ea386929afdd8517265",
     "acceptance_nonce": null,
     "results": {
-      "p5a-unit": "PASS",
-      "p5a-case": "PASS",
-      "p5b-unit": "PASS",
-      "p5b-case": "PASS",
-      "p6a-unit": "PASS",
-      "p6a-protocol": "PASS",
-      "p6a-real": "PASS",
-      "p6b-unit": "PASS",
-      "p6b-eval": "PASS",
-      "p7-unit": "PASS",
-      "p7-case": "PASS",
-      "p7-holdout": "PASS",
-      "cyber-attackgraph": "PASS"
+      "cyber-attackmodel": "PASS"
     }
   },
   "summary": {
-    "PASS": 13,
+    "PASS": 1,
     "FAIL": 0,
     "BLOCKED": 0,
     "NOT_RUN": 0,
@@ -132,11 +110,11 @@
     "NOT_APPLICABLE": 0
   },
   "groups": {
-    "p5a": "PASS",
-    "p5b": "PASS",
-    "p6a": "PASS",
-    "p6b": "PASS",
-    "p7": "PASS",
+    "p5a": "NOT_SELECTED",
+    "p5b": "NOT_SELECTED",
+    "p6a": "NOT_SELECTED",
+    "p6b": "NOT_SELECTED",
+    "p7": "NOT_SELECTED",
     "p8": "PASS"
   },
   "required_groups": [
@@ -148,50 +126,23 @@
     "p8"
   ],
   "selection_status": "PASS",
-  "complete": true,
-  "mandatory_passed": true,
+  "complete": false,
+  "mandatory_passed": false,
   "selected_passed": true,
-  "overall_complete": true,
-  "unmet": [],
+  "overall_complete": false,
+  "unmet": [
+    "p5a=NOT_SELECTED",
+    "p5b=NOT_SELECTED",
+    "p6a=NOT_SELECTED",
+    "p6b=NOT_SELECTED",
+    "p7=NOT_SELECTED"
+  ],
   "aggregation": "only results produced and verified by this invocation count; a partial selection is never complete; results from another commit, work tree or configuration are inherited and ignored",
   "timing": {
-    "this_run_s": 73.7,
+    "this_run_s": 1.9,
     "last_full_run_s": 73.7,
     "last_full_run_at": "2026-10-12T19:37:58Z",
     "partial_runs": [
-      {
-        "started_at": "2026-10-12T13:24:54Z",
-        "duration_s": 1.8,
-        "selection": {
-          "group": [
-            "p5b"
-          ],
-          "only": [],
-          "skip": []
-        },
-        "results": {
-          "p5b-unit": "PASS",
-          "p5b-case": "PASS"
-        }
-      },
-      {
-        "started_at": "2026-10-12T13:25:03Z",
-        "duration_s": 3.8,
-        "selection": {
-          "group": [
-            "p5a",
-            "p5b"
-          ],
-          "only": [],
-          "skip": []
-        },
-        "results": {
-          "p5a-unit": "PASS",
-          "p5a-case": "PASS",
-          "p5b-unit": "PASS",
-          "p5b-case": "PASS"
-        }
-      },
       {
         "started_at": "2026-10-12T13:30:07Z",
         "duration_s": 4.5,
@@ -330,6 +281,34 @@
         },
         "results": {
           "cyber-attackgraph": "PASS"
+        }
+      },
+      {
+        "started_at": "2026-10-13T01:59:11Z",
+        "duration_s": 3.8,
+        "selection": {
+          "group": [
+            "p8"
+          ],
+          "only": [],
+          "skip": []
+        },
+        "results": {
+          "cyber-attackmodel": "PASS"
+        }
+      },
+      {
+        "started_at": "2026-10-13T02:00:38Z",
+        "duration_s": 1.9,
+        "selection": {
+          "group": [
+            "p8"
+          ],
+          "only": [],
+          "skip": []
+        },
+        "results": {
+          "cyber-attackmodel": "PASS"
         }
       }
     ]
@@ -804,6 +783,52 @@
         "p7-holdout": "PASS",
         "cyber-attackgraph": "PASS"
       }
+    },
+    {
+      "started_at": "2026-10-13T01:59:11Z",
+      "finished_at": "2026-10-13T01:59:14Z",
+      "duration_s": 3.8,
+      "full": false,
+      "selection": {
+        "group": [
+          "p8"
+        ],
+        "only": [],
+        "skip": []
+      },
+      "checks": [
+        "cyber-attackmodel"
+      ],
+      "commit": "081eee70fc9f983ccd4a835083d784d7ebee5f02",
+      "worktree_sha256": "876ebd663e08f990ed96a8326c74eab86dd3c1be7000b4898da93ee4a8f77d73",
+      "nonce": "56107e952a574cf389aad43b8957713f",
+      "acceptance_nonce": null,
+      "results": {
+        "cyber-attackmodel": "PASS"
+      }
+    },
+    {
+      "started_at": "2026-10-13T02:00:38Z",
+      "finished_at": "2026-10-13T02:00:40Z",
+      "duration_s": 1.9,
+      "full": false,
+      "selection": {
+        "group": [
+          "p8"
+        ],
+        "only": [],
+        "skip": []
+      },
+      "checks": [
+        "cyber-attackmodel"
+      ],
+      "commit": "081eee70fc9f983ccd4a835083d784d7ebee5f02",
+      "worktree_sha256": "87122b74445030d9b300642bfd9c26427e506aadea4a976bf2a24a3a77e2a70f",
+      "nonce": "4e501a2c36df4ea386929afdd8517265",
+      "acceptance_nonce": null,
+      "results": {
+        "cyber-attackmodel": "PASS"
+      }
     }
   ],
   "checks": [
@@ -867,8 +892,8 @@
       "evidence_files": [],
       "first_failure": null,
       "flaky": false,
-      "inherited": false,
-      "this_run": true,
+      "inherited": true,
+      "this_run": false,
       "history": [
         {
           "result": "PASS",
@@ -1039,8 +1064,8 @@
       ],
       "first_failure": null,
       "flaky": false,
-      "inherited": false,
-      "this_run": true,
+      "inherited": true,
+      "this_run": false,
       "history": [
         {
           "result": "PASS",
@@ -1160,8 +1185,8 @@
       "evidence_files": [],
       "first_failure": null,
       "flaky": false,
-      "inherited": false,
-      "this_run": true,
+      "inherited": true,
+      "this_run": false,
       "history": [
         {
           "result": "PASS",
@@ -1331,8 +1356,8 @@
       ],
       "first_failure": null,
       "flaky": false,
-      "inherited": false,
-      "this_run": true,
+      "inherited": true,
+      "this_run": false,
       "history": [
         {
           "result": "PASS",
@@ -1445,8 +1470,8 @@
       "evidence_files": [],
       "first_failure": null,
       "flaky": false,
-      "inherited": false,
-      "this_run": true,
+      "inherited": true,
+      "this_run": false,
       "history": [
         {
           "result": "PASS",
@@ -1692,8 +1717,8 @@
       ],
       "first_failure": null,
       "flaky": false,
-      "inherited": false,
-      "this_run": true,
+      "inherited": true,
+      "this_run": false,
       "history": [
         {
           "result": "PASS",
@@ -1842,8 +1867,8 @@
       ],
       "first_failure": null,
       "flaky": false,
-      "inherited": false,
-      "this_run": true,
+      "inherited": true,
+      "this_run": false,
       "history": [
         {
           "result": "PASS",
@@ -1942,8 +1967,8 @@
       "evidence_files": [],
       "first_failure": null,
       "flaky": false,
-      "inherited": false,
-      "this_run": true,
+      "inherited": true,
+      "this_run": false,
       "history": [
         {
           "result": "PASS",
@@ -2152,8 +2177,8 @@
       ],
       "first_failure": null,
       "flaky": false,
-      "inherited": false,
-      "this_run": true,
+      "inherited": true,
+      "this_run": false,
       "history": [
         {
           "result": "PASS",
@@ -2245,8 +2270,8 @@
       "evidence_files": [],
       "first_failure": null,
       "flaky": false,
-      "inherited": false,
-      "this_run": true,
+      "inherited": true,
+      "this_run": false,
       "history": [
         {
           "result": "PASS",
@@ -2375,8 +2400,8 @@
       ],
       "first_failure": null,
       "flaky": false,
-      "inherited": false,
-      "this_run": true,
+      "inherited": true,
+      "this_run": false,
       "history": [
         {
           "result": "PASS",
@@ -2541,8 +2566,8 @@
       ],
       "first_failure": null,
       "flaky": false,
-      "inherited": false,
-      "this_run": true,
+      "inherited": true,
+      "this_run": false,
       "history": [
         {
           "result": "PASS",
@@ -2568,10 +2593,10 @@
       ]
     },
     {
-      "id": "cyber-attackgraph",
+      "id": "cyber-attackmodel",
       "group": "p8",
-      "title": "防御性攻击图分析研究：研究体通过校验与数据隔离；抽样图的基准答案从零重算并经 Z3 确认（最短攻击代价、部署防御后可达性、最小防御割、步骤使能均为机器判定）；评分器在协议回放上按脚本正确标注；密钥不落盘。真实双模型批次由 scripts/cyber_run.py 单独运行",
-      "command": "uv run --frozen python scripts/cyber_attackgraph_check.py",
+      "title": "真实攻击模型研究：攻击模型研究体通过校验与数据隔离；抽样攻击模型可被 Z3 规划到数据外泄（是真实攻击模型）；Log4Shell（CVE-2021-44228）模型忠实——易受攻击版本可达 RCE、修复版本被阻断；评分器在协议回放上按脚本正确标注；密钥不落盘。真实双模型批次由 scripts/cyber_attackmodel_study.py + fal research study run 单独运行",
+      "command": "uv run --frozen python scripts/cyber_attackmodel_check.py",
       "tasks": [
         "P8-01"
       ],
@@ -2588,60 +2613,60 @@
       "assertions_from": null,
       "trigger": null,
       "result": "PASS",
-      "reason": "[cyber-attackgraph] PASS: 6 required assertion(s) hold",
-      "summary": "[cyber-attackgraph] PASS: 6 required assertion(s) hold",
+      "reason": "[cyber-attackmodel] PASS: 6 required assertion(s) hold",
+      "summary": "[cyber-attackmodel] PASS: 6 required assertion(s) hold",
       "condition": null,
-      "checked_commit": "53fb2e31dc26e1e7258cef34f286e97aed91ce12",
-      "worktree_sha256": "c4b478fab531144b678b5de9c67f63ead010e0021b0730d761df91a64cd00998",
+      "checked_commit": "081eee70fc9f983ccd4a835083d784d7ebee5f02",
+      "worktree_sha256": "87122b74445030d9b300642bfd9c26427e506aadea4a976bf2a24a3a77e2a70f",
       "worktree_clean": false,
-      "config_sha256": "26e6d90073b81ef068084357bee56b7a45e820f4dcca916a83408742add8c40e",
-      "run_nonce": "8b3f3af5dd064830ad61055529d614b2",
-      "started_at": "2026-10-12T19:38:34Z",
-      "finished_at": "2026-10-12T19:39:11Z",
-      "duration_s": 37.5,
+      "config_sha256": "ed11db0e5b81b5ed450d16f8cc5ef7dad8a465f74680b4a9f2f8644545ca4d18",
+      "run_nonce": "4e501a2c36df4ea386929afdd8517265",
+      "started_at": "2026-10-13T02:00:38Z",
+      "finished_at": "2026-10-13T02:00:40Z",
+      "duration_s": 1.9,
       "attempts": [
         {
           "attempt": 1,
-          "started_at": "2026-10-12T19:38:34Z",
-          "finished_at": "2026-10-12T19:39:11Z",
-          "duration_s": 37.5,
+          "started_at": "2026-10-13T02:00:38Z",
+          "finished_at": "2026-10-13T02:00:40Z",
+          "duration_s": 1.9,
           "exit_code": 0,
           "result": "PASS",
-          "reason": "[cyber-attackgraph] PASS: 6 required assertion(s) hold",
-          "log": "docs/execution/evidence/research/checks/logs/cyber-attackgraph/20261012T193834Z-attempt-1.log",
-          "summary": "[cyber-attackgraph] PASS: 6 required assertion(s) hold",
-          "nonce": "0e27eaba070441a589b6621984c117bb",
-          "structured_result": "docs/execution/evidence/research/checks/logs/cyber-attackgraph/20261012T193834Z-attempt-1.result.json",
+          "reason": "[cyber-attackmodel] PASS: 6 required assertion(s) hold",
+          "log": "docs/execution/evidence/research/checks/logs/cyber-attackmodel/20261013T020038Z-attempt-1.log",
+          "summary": "[cyber-attackmodel] PASS: 6 required assertion(s) hold",
+          "nonce": "47436947370e4bffa7075b69fee1536c",
+          "structured_result": "docs/execution/evidence/research/checks/logs/cyber-attackmodel/20261013T020038Z-attempt-1.result.json",
           "assertions": [
             {
               "id": "study_validates_and_separated",
               "required": true,
               "holds": true,
-              "detail": "1098 planned units, data separation (ANSWER_LEAK) enforced by load_study"
+              "detail": "576 planned units; data separation (ANSWER_LEAK) enforced by load_study"
             },
             {
               "id": "single_formal_analysis_track",
               "required": true,
               "holds": true,
-              "detail": "tracks={'formal_model_analysis'}"
+              "detail": "one track"
             },
             {
-              "id": "ground_truth_reproduces_and_z3_confirmed",
+              "id": "attack_model_is_real",
               "required": true,
               "holds": true,
-              "detail": "re-verified 6 graphs against Z3: {'ag-1000': {'ok': True, 'z3_confirmed': True, 'cost': 3, 'stored_cost': 3, 'min_cut': 2}, 'ag-1008': {'ok': True, 'z3_confirmed': True, 'cost': 3, 'stored_cost': 3, 'min_cut': 1}, 'ag-1016': {'ok': True, 'z3_confirmed': True, 'cost': 3, 'stored_cost': 3, 'min_cut': 3}, 'ag-1024': {'ok': True, 'z3_confirmed': True, 'cost': 3, 'stored_cost': 3, 'min_cut': 2}, 'ag-1032': {'ok': True, 'z3_confirmed': True, 'cost': 3, 'stored_cost': 3, 'min_cut': 2}, 'ag-1040': {'ok'"
+              "detail": "am-000: data_exfiltrated reachable by a Z3 attack plan"
+            },
+            {
+              "id": "cve_model_vulnerable_then_fixed",
+              "required": true,
+              "holds": true,
+              "detail": "CVE-2021-44228: RCE reachable in Log4j 2.14.1, blocked in 2.16.0"
             },
             {
               "id": "scorer_labels_scripted_answers",
               "required": true,
               "holds": true,
               "detail": "16/16 scored; mismatches={}"
-            },
-            {
-              "id": "correct_answers_correspond_to_verifier",
-              "required": true,
-              "holds": true,
-              "detail": "a verifier-matching answer is marked CORRESPONDS"
             },
             {
               "id": "credential_never_written",
@@ -2654,7 +2679,7 @@
             {
               "path": "docs/execution/evidence/research/cyber/check.json",
               "exists": true,
-              "sha256": "7d7f0337905d4ced05b747127c3ba7a144150edb95f5d5bd5a28e8b610a1457a",
+              "sha256": "07922d189431df6a64bbc1942d376b85f550e4085a9f4c9e79d03dddc061a575",
               "fresh": true
             }
           ],
@@ -2665,7 +2690,7 @@
         {
           "path": "docs/execution/evidence/research/cyber/check.json",
           "exists": true,
-          "sha256": "7d7f0337905d4ced05b747127c3ba7a144150edb95f5d5bd5a28e8b610a1457a",
+          "sha256": "07922d189431df6a64bbc1942d376b85f550e4085a9f4c9e79d03dddc061a575",
           "fresh": true
         }
       ],
@@ -2676,16 +2701,9 @@
       "history": [
         {
           "result": "PASS",
-          "checked_commit": "53fb2e31dc26e1e7258cef34f286e97aed91ce12",
-          "finished_at": "2026-10-12T19:37:46Z",
-          "duration_s": 32.7,
-          "attempts": 1
-        },
-        {
-          "result": "FAIL",
-          "checked_commit": "53fb2e31dc26e1e7258cef34f286e97aed91ce12",
-          "finished_at": "2026-10-12T19:35:31Z",
-          "duration_s": 31.1,
+          "checked_commit": "081eee70fc9f983ccd4a835083d784d7ebee5f02",
+          "finished_at": "2026-10-13T01:59:14Z",
+          "duration_s": 3.8,
           "attempts": 1
         }
       ]

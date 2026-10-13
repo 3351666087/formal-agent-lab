@@ -76,12 +76,12 @@ RESEARCH_CHECKS = [
           "保留案例双模型冻结批次：先协议服务脚本化确认字段/评分/成本上限/泄漏防护（2 任务 × 2 模型 × 2 重复 = 8 单元），"
           "再在授权额度内运行真实批次；缺中转凭据则 BLOCKED；密钥不落盘",
           f"{PY} scripts/p7_evidence.py", ["P7-01"], protocol=True, produces=[f"{EV}/p7/holdout.json"]),
-    # ------------------------------------------------------------------ P8 defensive attack-graph analysis (cyber)
-    Check("cyber-attackgraph", "p8",
-          "防御性攻击图分析研究：研究体通过校验与数据隔离；抽样图的基准答案从零重算并经 Z3 确认（最短攻击代价、"
-          "部署防御后可达性、最小防御割、步骤使能均为机器判定）；评分器在协议回放上按脚本正确标注；密钥不落盘。"
-          "真实双模型批次由 scripts/cyber_run.py 单独运行",
-          f"{PY} scripts/cyber_attackgraph_check.py", ["P8-01"], protocol=True, produces=[f"{EV}/cyber/check.json"]),
+    # ------------------------------------------------------------------ P8 real attack model + CVE (cyber)
+    Check("cyber-attackmodel", "p8",
+          "真实攻击模型研究：攻击模型研究体通过校验与数据隔离；抽样攻击模型可被 Z3 规划到数据外泄（是真实攻击模型）；"
+          "Log4Shell（CVE-2021-44228）模型忠实——易受攻击版本可达 RCE、修复版本被阻断；评分器在协议回放上按脚本正确标注；"
+          "密钥不落盘。真实双模型批次由 scripts/cyber_attackmodel_study.py + fal research study run 单独运行",
+          f"{PY} scripts/cyber_attackmodel_check.py", ["P8-01"], protocol=True, produces=[f"{EV}/cyber/check.json"]),
 ]
 
 # every check must live in a declared group
