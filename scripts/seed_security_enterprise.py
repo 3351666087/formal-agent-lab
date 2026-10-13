@@ -23,7 +23,7 @@ PKG_ID = "enterprise-attack"
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--project", default="prj_c6180815d7784668b2ef")
+    ap.add_argument("--project", default="prj_8874ef7acdad4e5d9f86")
     ap.add_argument("--scale", type=int, default=3)
     args = ap.parse_args()
     pid = args.project

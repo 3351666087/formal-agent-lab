@@ -1,0 +1,107 @@
+{
+ "protocol": "fal-research-response/v1",
+ "experiment": {
+  "study_id": "cyber-attackmodel",
+  "unit_id": "am-000-technique_enabled.gpt-6-astra-relay.S.r1",
+  "track": "formal_model_analysis",
+  "case_id": null,
+  "case_version": null,
+  "task_id": "am-000-technique_enabled",
+  "task_digest": "ab980a98cc5030865aa8c4683e49e17e2d9f17a33ccdb5acce2777876e2e019e",
+  "representation_id": "attackmodel",
+  "replicate_id": 1,
+  "assistance_mode": "STATIC_UNASSISTED",
+  "sampling_id": "am-000-technique_enabled.gpt-6-astra-relay.S.r1#0"
+ },
+ "call": {
+  "provider": "openai",
+  "provider_config_id": "gpt-6-astra-relay",
+  "api": "openai.chat.completions",
+  "api_version": "v1",
+  "endpoint": "https://api.uheapi.com/v1/chat/completions",
+  "route": "COMPATIBLE_RELAY",
+  "endpoint_kind": "PROVIDER",
+  "model_requested": "gpt-6-astra",
+  "model_returned": "gpt-6-astra",
+  "model_switched": false,
+  "model_identity": "RELAY_REPORTED",
+  "response_id": "resp_0c2773fce24e5df3016acd8e5c39ac819ab9d2611e7212d163",
+  "request_id": "565e0710-4974-4db6-a7ae-4ae6b3d3d906, aa18ffaa-88f1-4d64-858f-12e78042637d",
+  "started_at": "2026-10-13T01:50:19Z",
+  "finished_at": "2026-10-13T01:50:23Z",
+  "params": {
+   "max_completion_tokens": 3500
+  },
+  "params_digest": "21ab5eec91a87948"
+ },
+ "raw": {
+  "body": {
+   "id": "resp_0c2773fce24e5df3016acd8e5c39ac819ab9d2611e7212d163",
+   "object": "chat.completion",
+   "created": 1791856223,
+   "model": "gpt-6-astra",
+   "choices": [
+    {
+     "index": 0,
+     "message": {
+      "role": "assistant",
+      "content": "{\"enabled\":false,\"rationale\":\"auth_fileserver requires reach_internal AND stolen_dbadmin AND (NOT mfa_dbadmin OR admin_dc). Although reach_internal and admin_dc are true and no defences are deployed, stolen_dbadmin is false, so the required condition does not hold.\"}"
+     },
+     "finish_reason": "stop"
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 5063,
+    "completion_tokens": 63,
+    "total_tokens": 5126
+   },
+   "service_tier": "default"
+  },
+  "body_text": null,
+  "visible_text": "{\"enabled\":false,\"rationale\":\"auth_fileserver requires reach_internal AND stolen_dbadmin AND (NOT mfa_dbadmin OR admin_dc). Although reach_internal and admin_dc are true and no defences are deployed, stolen_dbadmin is false, so the required condition does not hold.\"}",
+  "finish_reason": "stop",
+  "finish_class": "STOP",
+  "refusal": null,
+  "truncated": false,
+  "tool_calls": [],
+  "reasoning": "NOT_EXPOSED"
+ },
+ "status": {
+  "outcome": "ANSWERED",
+  "transport_ok": true,
+  "http_status": 200,
+  "provider_error_type": null,
+  "provider_error": null,
+  "model_switched": false,
+  "attempts": [
+   {
+    "attempt_no": 1,
+    "attempt_id": "att_83413efec65a",
+    "sent": true,
+    "confirmed": true,
+    "http_status": 200,
+    "error_class": null,
+    "error": null,
+    "latency_ms": 3921.8
+   }
+  ],
+  "network_retries": 2,
+  "note": null
+ },
+ "cost": {
+  "usage_known": true,
+  "input_tokens": 5063,
+  "output_tokens": 63,
+  "reasoning_tokens": null,
+  "cache_read_tokens": null,
+  "cache_write_tokens": null,
+  "latency_ms": 3922.0,
+  "http_attempts": 1,
+  "possibly_billed_unconfirmed": 0,
+  "prompt_digest": "51b0b1d30b266332",
+  "config_digest": "d7694eefe67a8c23"
+ },
+ "task_input_digest": "51b0b1d30b2663322649063a917e75b377e5a1ef8101380b2e7b4d916203e21a",
+ "reuse_key": "9ba39e0fa5e366c1f25df4315a38e5850002898e7964188e4119279992552b62",
+ "recorded_at": "2026-10-13T01:50:23Z"
+}
