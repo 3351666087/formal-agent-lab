@@ -1,0 +1,2165 @@
+{
+ "name": "attackmodel-008",
+ "description": "Enterprise breach attack model: techniques over real security posture; the attacker plans a path to data exfiltration. Defences (patching/MFA/segmentation) are constants that gate techniques.",
+ "constants": [
+  {
+   "name": "segmented",
+   "type": {
+    "kind": "bool"
+   },
+   "value": {
+    "default": false
+   }
+  },
+  {
+   "name": "patched_web",
+   "type": {
+    "kind": "bool"
+   },
+   "value": {
+    "default": false
+   }
+  },
+  {
+   "name": "patched_proxy",
+   "type": {
+    "kind": "bool"
+   },
+   "value": {
+    "default": false
+   }
+  },
+  {
+   "name": "patched_vpn",
+   "type": {
+    "kind": "bool"
+   },
+   "value": {
+    "default": false
+   }
+  },
+  {
+   "name": "patched_workstation",
+   "type": {
+    "kind": "bool"
+   },
+   "value": {
+    "default": false
+   }
+  },
+  {
+   "name": "patched_laptop",
+   "type": {
+    "kind": "bool"
+   },
+   "value": {
+    "default": false
+   }
+  },
+  {
+   "name": "patched_appserver",
+   "type": {
+    "kind": "bool"
+   },
+   "value": {
+    "default": false
+   }
+  },
+  {
+   "name": "patched_apiserver",
+   "type": {
+    "kind": "bool"
+   },
+   "value": {
+    "default": false
+   }
+  },
+  {
+   "name": "patched_ciserver",
+   "type": {
+    "kind": "bool"
+   },
+   "value": {
+    "default": false
+   }
+  },
+  {
+   "name": "patched_dc",
+   "type": {
+    "kind": "bool"
+   },
+   "value": {
+    "default": false
+   }
+  },
+  {
+   "name": "patched_adfs",
+   "type": {
+    "kind": "bool"
+   },
+   "value": {
+    "default": false
+   }
+  },
+  {
+   "name": "patched_db",
+   "type": {
+    "kind": "bool"
+   },
+   "value": {
+    "default": false
+   }
+  },
+  {
+   "name": "patched_fileserver",
+   "type": {
+    "kind": "bool"
+   },
+   "value": {
+    "default": false
+   }
+  },
+  {
+   "name": "patched_backup",
+   "type": {
+    "kind": "bool"
+   },
+   "value": {
+    "default": false
+   }
+  },
+  {
+   "name": "mfa_user",
+   "type": {
+    "kind": "bool"
+   },
+   "value": {
+    "default": false
+   }
+  },
+  {
+   "name": "mfa_admin",
+   "type": {
+    "kind": "bool"
+   },
+   "value": {
+    "default": false
+   }
+  },
+  {
+   "name": "mfa_dbadmin",
+   "type": {
+    "kind": "bool"
+   },
+   "value": {
+    "default": false
+   }
+  }
+ ],
+ "state": [
+  {
+   "name": "reach_dmz",
+   "type": {
+    "kind": "bool"
+   },
+   "initial": {
+    "default": true
+   },
+   "label": "\u53ef\u8fbe DMZ"
+  },
+  {
+   "name": "reach_internal",
+   "type": {
+    "kind": "bool"
+   },
+   "initial": {
+    "default": false
+   },
+   "label": "\u53ef\u8fbe\u5185\u7f51"
+  },
+  {
+   "name": "exfiltrated",
+   "type": {
+    "kind": "bool"
+   },
+   "initial": {
+    "default": false
+   },
+   "label": "\u6570\u636e\u5df2\u5916\u6cc4"
+  },
+  {
+   "name": "foothold_web",
+   "type": {
+    "kind": "bool"
+   },
+   "initial": {
+    "default": false
+   },
+   "label": "web \u7acb\u8db3\u70b9"
+  },
+  {
+   "name": "admin_web",
+   "type": {
+    "kind": "bool"
+   },
+   "initial": {
+    "default": false
+   },
+   "label": "web \u7ba1\u7406\u5458"
+  },
+  {
+   "name": "foothold_proxy",
+   "type": {
+    "kind": "bool"
+   },
+   "initial": {
+    "default": false
+   },
+   "label": "proxy \u7acb\u8db3\u70b9"
+  },
+  {
+   "name": "admin_proxy",
+   "type": {
+    "kind": "bool"
+   },
+   "initial": {
+    "default": false
+   },
+   "label": "proxy \u7ba1\u7406\u5458"
+  },
+  {
+   "name": "foothold_vpn",
+   "type": {
+    "kind": "bool"
+   },
+   "initial": {
+    "default": false
+   },
+   "label": "vpn \u7acb\u8db3\u70b9"
+  },
+  {
+   "name": "admin_vpn",
+   "type": {
+    "kind": "bool"
+   },
+   "initial": {
+    "default": false
+   },
+   "label": "vpn \u7ba1\u7406\u5458"
+  },
+  {
+   "name": "foothold_workstation",
+   "type": {
+    "kind": "bool"
+   },
+   "initial": {
+    "default": false
+   },
+   "label": "workstation \u7acb\u8db3\u70b9"
+  },
+  {
+   "name": "admin_workstation",
+   "type": {
+    "kind": "bool"
+   },
+   "initial": {
+    "default": false
+   },
+   "label": "workstation \u7ba1\u7406\u5458"
+  },
+  {
+   "name": "foothold_laptop",
+   "type": {
+    "kind": "bool"
+   },
+   "initial": {
+    "default": false
+   },
+   "label": "laptop \u7acb\u8db3\u70b9"
+  },
+  {
+   "name": "admin_laptop",
+   "type": {
+    "kind": "bool"
+   },
+   "initial": {
+    "default": false
+   },
+   "label": "laptop \u7ba1\u7406\u5458"
+  },
+  {
+   "name": "foothold_appserver",
+   "type": {
+    "kind": "bool"
+   },
+   "initial": {
+    "default": false
+   },
+   "label": "appserver \u7acb\u8db3\u70b9"
+  },
+  {
+   "name": "admin_appserver",
+   "type": {
+    "kind": "bool"
+   },
+   "initial": {
+    "default": false
+   },
+   "label": "appserver \u7ba1\u7406\u5458"
+  },
+  {
+   "name": "foothold_apiserver",
+   "type": {
+    "kind": "bool"
+   },
+   "initial": {
+    "default": false
+   },
+   "label": "apiserver \u7acb\u8db3\u70b9"
+  },
+  {
+   "name": "admin_apiserver",
+   "type": {
+    "kind": "bool"
+   },
+   "initial": {
+    "default": false
+   },
+   "label": "apiserver \u7ba1\u7406\u5458"
+  },
+  {
+   "name": "foothold_ciserver",
+   "type": {
+    "kind": "bool"
+   },
+   "initial": {
+    "default": false
+   },
+   "label": "ciserver \u7acb\u8db3\u70b9"
+  },
+  {
+   "name": "admin_ciserver",
+   "type": {
+    "kind": "bool"
+   },
+   "initial": {
+    "default": false
+   },
+   "label": "ciserver \u7ba1\u7406\u5458"
+  },
+  {
+   "name": "foothold_dc",
+   "type": {
+    "kind": "bool"
+   },
+   "initial": {
+    "default": false
+   },
+   "label": "dc \u7acb\u8db3\u70b9"
+  },
+  {
+   "name": "admin_dc",
+   "type": {
+    "kind": "bool"
+   },
+   "initial": {
+    "default": false
+   },
+   "label": "dc \u7ba1\u7406\u5458"
+  },
+  {
+   "name": "foothold_adfs",
+   "type": {
+    "kind": "bool"
+   },
+   "initial": {
+    "default": false
+   },
+   "label": "adfs \u7acb\u8db3\u70b9"
+  },
+  {
+   "name": "admin_adfs",
+   "type": {
+    "kind": "bool"
+   },
+   "initial": {
+    "default": false
+   },
+   "label": "adfs \u7ba1\u7406\u5458"
+  },
+  {
+   "name": "foothold_db",
+   "type": {
+    "kind": "bool"
+   },
+   "initial": {
+    "default": false
+   },
+   "label": "db \u7acb\u8db3\u70b9"
+  },
+  {
+   "name": "admin_db",
+   "type": {
+    "kind": "bool"
+   },
+   "initial": {
+    "default": false
+   },
+   "label": "db \u7ba1\u7406\u5458"
+  },
+  {
+   "name": "foothold_fileserver",
+   "type": {
+    "kind": "bool"
+   },
+   "initial": {
+    "default": false
+   },
+   "label": "fileserver \u7acb\u8db3\u70b9"
+  },
+  {
+   "name": "admin_fileserver",
+   "type": {
+    "kind": "bool"
+   },
+   "initial": {
+    "default": false
+   },
+   "label": "fileserver \u7ba1\u7406\u5458"
+  },
+  {
+   "name": "foothold_backup",
+   "type": {
+    "kind": "bool"
+   },
+   "initial": {
+    "default": false
+   },
+   "label": "backup \u7acb\u8db3\u70b9"
+  },
+  {
+   "name": "admin_backup",
+   "type": {
+    "kind": "bool"
+   },
+   "initial": {
+    "default": false
+   },
+   "label": "backup \u7ba1\u7406\u5458"
+  },
+  {
+   "name": "stolen_user",
+   "type": {
+    "kind": "bool"
+   },
+   "initial": {
+    "default": false
+   },
+   "label": "\u5df2\u7a83\u53d6 user \u51ed\u636e"
+  },
+  {
+   "name": "stolen_admin",
+   "type": {
+    "kind": "bool"
+   },
+   "initial": {
+    "default": false
+   },
+   "label": "\u5df2\u7a83\u53d6 admin \u51ed\u636e"
+  },
+  {
+   "name": "stolen_dbadmin",
+   "type": {
+    "kind": "bool"
+   },
+   "initial": {
+    "default": false
+   },
+   "label": "\u5df2\u7a83\u53d6 dbadmin \u51ed\u636e"
+  }
+ ],
+ "actions": [
+  {
+   "name": "exploit_web",
+   "cost": 1,
+   "effects": [
+    {
+     "kind": "assign",
+     "target": {
+      "var": "foothold_web",
+      "index": []
+     },
+     "value": {
+      "op": "const",
+      "value": true
+     }
+    }
+   ],
+   "precondition": {
+    "op": "and",
+    "args": [
+     {
+      "op": "var",
+      "name": "reach_dmz",
+      "index": []
+     },
+     {
+      "op": "not",
+      "args": [
+       {
+        "op": "var",
+        "name": "patched_web",
+        "index": []
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "exploit_proxy",
+   "cost": 1,
+   "effects": [
+    {
+     "kind": "assign",
+     "target": {
+      "var": "foothold_proxy",
+      "index": []
+     },
+     "value": {
+      "op": "const",
+      "value": true
+     }
+    }
+   ],
+   "precondition": {
+    "op": "and",
+    "args": [
+     {
+      "op": "var",
+      "name": "reach_dmz",
+      "index": []
+     },
+     {
+      "op": "not",
+      "args": [
+       {
+        "op": "var",
+        "name": "patched_proxy",
+        "index": []
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "exploit_vpn",
+   "cost": 1,
+   "effects": [
+    {
+     "kind": "assign",
+     "target": {
+      "var": "foothold_vpn",
+      "index": []
+     },
+     "value": {
+      "op": "const",
+      "value": true
+     }
+    }
+   ],
+   "precondition": {
+    "op": "and",
+    "args": [
+     {
+      "op": "var",
+      "name": "reach_dmz",
+      "index": []
+     },
+     {
+      "op": "not",
+      "args": [
+       {
+        "op": "var",
+        "name": "patched_vpn",
+        "index": []
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "phish_workstation",
+   "cost": 1,
+   "effects": [
+    {
+     "kind": "assign",
+     "target": {
+      "var": "foothold_workstation",
+      "index": []
+     },
+     "value": {
+      "op": "const",
+      "value": true
+     }
+    },
+    {
+     "kind": "assign",
+     "target": {
+      "var": "stolen_user",
+      "index": []
+     },
+     "value": {
+      "op": "const",
+      "value": true
+     }
+    }
+   ]
+  },
+  {
+   "name": "escalate_workstation",
+   "cost": 1,
+   "effects": [
+    {
+     "kind": "assign",
+     "target": {
+      "var": "admin_workstation",
+      "index": []
+     },
+     "value": {
+      "op": "const",
+      "value": true
+     }
+    }
+   ],
+   "precondition": {
+    "op": "and",
+    "args": [
+     {
+      "op": "var",
+      "name": "foothold_workstation",
+      "index": []
+     },
+     {
+      "op": "not",
+      "args": [
+       {
+        "op": "var",
+        "name": "patched_workstation",
+        "index": []
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "phish_laptop",
+   "cost": 1,
+   "effects": [
+    {
+     "kind": "assign",
+     "target": {
+      "var": "foothold_laptop",
+      "index": []
+     },
+     "value": {
+      "op": "const",
+      "value": true
+     }
+    },
+    {
+     "kind": "assign",
+     "target": {
+      "var": "stolen_user",
+      "index": []
+     },
+     "value": {
+      "op": "const",
+      "value": true
+     }
+    }
+   ]
+  },
+  {
+   "name": "escalate_laptop",
+   "cost": 1,
+   "effects": [
+    {
+     "kind": "assign",
+     "target": {
+      "var": "admin_laptop",
+      "index": []
+     },
+     "value": {
+      "op": "const",
+      "value": true
+     }
+    }
+   ],
+   "precondition": {
+    "op": "and",
+    "args": [
+     {
+      "op": "var",
+      "name": "foothold_laptop",
+      "index": []
+     },
+     {
+      "op": "not",
+      "args": [
+       {
+        "op": "var",
+        "name": "patched_laptop",
+        "index": []
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "steal_user_cred",
+   "cost": 1,
+   "effects": [
+    {
+     "kind": "assign",
+     "target": {
+      "var": "stolen_user",
+      "index": []
+     },
+     "value": {
+      "op": "const",
+      "value": true
+     }
+    }
+   ],
+   "precondition": {
+    "op": "or",
+    "args": [
+     {
+      "op": "or",
+      "args": [
+       {
+        "op": "or",
+        "args": [
+         {
+          "op": "or",
+          "args": [
+           {
+            "op": "or",
+            "args": [
+             {
+              "op": "or",
+              "args": [
+               {
+                "op": "or",
+                "args": [
+                 {
+                  "op": "or",
+                  "args": [
+                   {
+                    "op": "or",
+                    "args": [
+                     {
+                      "op": "or",
+                      "args": [
+                       {
+                        "op": "or",
+                        "args": [
+                         {
+                          "op": "or",
+                          "args": [
+                           {
+                            "op": "var",
+                            "name": "foothold_web",
+                            "index": []
+                           },
+                           {
+                            "op": "var",
+                            "name": "foothold_proxy",
+                            "index": []
+                           }
+                          ]
+                         },
+                         {
+                          "op": "var",
+                          "name": "foothold_vpn",
+                          "index": []
+                         }
+                        ]
+                       },
+                       {
+                        "op": "var",
+                        "name": "foothold_workstation",
+                        "index": []
+                       }
+                      ]
+                     },
+                     {
+                      "op": "var",
+                      "name": "foothold_laptop",
+                      "index": []
+                     }
+                    ]
+                   },
+                   {
+                    "op": "var",
+                    "name": "foothold_appserver",
+                    "index": []
+                   }
+                  ]
+                 },
+                 {
+                  "op": "var",
+                  "name": "foothold_apiserver",
+                  "index": []
+                 }
+                ]
+               },
+               {
+                "op": "var",
+                "name": "foothold_ciserver",
+                "index": []
+               }
+              ]
+             },
+             {
+              "op": "var",
+              "name": "foothold_dc",
+              "index": []
+             }
+            ]
+           },
+           {
+            "op": "var",
+            "name": "foothold_adfs",
+            "index": []
+           }
+          ]
+         },
+         {
+          "op": "var",
+          "name": "foothold_db",
+          "index": []
+         }
+        ]
+       },
+       {
+        "op": "var",
+        "name": "foothold_fileserver",
+        "index": []
+       }
+      ]
+     },
+     {
+      "op": "var",
+      "name": "foothold_backup",
+      "index": []
+     }
+    ]
+   }
+  },
+  {
+   "name": "pivot_internal",
+   "cost": 1,
+   "effects": [
+    {
+     "kind": "assign",
+     "target": {
+      "var": "reach_internal",
+      "index": []
+     },
+     "value": {
+      "op": "const",
+      "value": true
+     }
+    }
+   ],
+   "precondition": {
+    "op": "and",
+    "args": [
+     {
+      "op": "or",
+      "args": [
+       {
+        "op": "or",
+        "args": [
+         {
+          "op": "or",
+          "args": [
+           {
+            "op": "or",
+            "args": [
+             {
+              "op": "or",
+              "args": [
+               {
+                "op": "or",
+                "args": [
+                 {
+                  "op": "or",
+                  "args": [
+                   {
+                    "op": "or",
+                    "args": [
+                     {
+                      "op": "or",
+                      "args": [
+                       {
+                        "op": "or",
+                        "args": [
+                         {
+                          "op": "or",
+                          "args": [
+                           {
+                            "op": "or",
+                            "args": [
+                             {
+                              "op": "var",
+                              "name": "foothold_web",
+                              "index": []
+                             },
+                             {
+                              "op": "var",
+                              "name": "foothold_proxy",
+                              "index": []
+                             }
+                            ]
+                           },
+                           {
+                            "op": "var",
+                            "name": "foothold_vpn",
+                            "index": []
+                           }
+                          ]
+                         },
+                         {
+                          "op": "var",
+                          "name": "foothold_workstation",
+                          "index": []
+                         }
+                        ]
+                       },
+                       {
+                        "op": "var",
+                        "name": "foothold_laptop",
+                        "index": []
+                       }
+                      ]
+                     },
+                     {
+                      "op": "var",
+                      "name": "foothold_appserver",
+                      "index": []
+                     }
+                    ]
+                   },
+                   {
+                    "op": "var",
+                    "name": "foothold_apiserver",
+                    "index": []
+                   }
+                  ]
+                 },
+                 {
+                  "op": "var",
+                  "name": "foothold_ciserver",
+                  "index": []
+                 }
+                ]
+               },
+               {
+                "op": "var",
+                "name": "foothold_dc",
+                "index": []
+               }
+              ]
+             },
+             {
+              "op": "var",
+              "name": "foothold_adfs",
+              "index": []
+             }
+            ]
+           },
+           {
+            "op": "var",
+            "name": "foothold_db",
+            "index": []
+           }
+          ]
+         },
+         {
+          "op": "var",
+          "name": "foothold_fileserver",
+          "index": []
+         }
+        ]
+       },
+       {
+        "op": "var",
+        "name": "foothold_backup",
+        "index": []
+       }
+      ]
+     },
+     {
+      "op": "or",
+      "args": [
+       {
+        "op": "not",
+        "args": [
+         {
+          "op": "var",
+          "name": "segmented",
+          "index": []
+         }
+        ]
+       },
+       {
+        "op": "or",
+        "args": [
+         {
+          "op": "or",
+          "args": [
+           {
+            "op": "or",
+            "args": [
+             {
+              "op": "or",
+              "args": [
+               {
+                "op": "var",
+                "name": "admin_appserver",
+                "index": []
+               },
+               {
+                "op": "var",
+                "name": "admin_apiserver",
+                "index": []
+               }
+              ]
+             },
+             {
+              "op": "var",
+              "name": "admin_ciserver",
+              "index": []
+             }
+            ]
+           },
+           {
+            "op": "var",
+            "name": "admin_workstation",
+            "index": []
+           }
+          ]
+         },
+         {
+          "op": "var",
+          "name": "admin_laptop",
+          "index": []
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "auth_appserver",
+   "cost": 1,
+   "effects": [
+    {
+     "kind": "assign",
+     "target": {
+      "var": "foothold_appserver",
+      "index": []
+     },
+     "value": {
+      "op": "const",
+      "value": true
+     }
+    }
+   ],
+   "precondition": {
+    "op": "and",
+    "args": [
+     {
+      "op": "var",
+      "name": "reach_internal",
+      "index": []
+     },
+     {
+      "op": "var",
+      "name": "stolen_user",
+      "index": []
+     },
+     {
+      "op": "or",
+      "args": [
+       {
+        "op": "not",
+        "args": [
+         {
+          "op": "var",
+          "name": "mfa_user",
+          "index": []
+         }
+        ]
+       },
+       {
+        "op": "or",
+        "args": [
+         {
+          "op": "var",
+          "name": "foothold_workstation",
+          "index": []
+         },
+         {
+          "op": "var",
+          "name": "foothold_laptop",
+          "index": []
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "escalate_appserver",
+   "cost": 1,
+   "effects": [
+    {
+     "kind": "assign",
+     "target": {
+      "var": "admin_appserver",
+      "index": []
+     },
+     "value": {
+      "op": "const",
+      "value": true
+     }
+    }
+   ],
+   "precondition": {
+    "op": "and",
+    "args": [
+     {
+      "op": "var",
+      "name": "foothold_appserver",
+      "index": []
+     },
+     {
+      "op": "or",
+      "args": [
+       {
+        "op": "var",
+        "name": "stolen_admin",
+        "index": []
+       },
+       {
+        "op": "not",
+        "args": [
+         {
+          "op": "var",
+          "name": "patched_appserver",
+          "index": []
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "auth_apiserver",
+   "cost": 1,
+   "effects": [
+    {
+     "kind": "assign",
+     "target": {
+      "var": "foothold_apiserver",
+      "index": []
+     },
+     "value": {
+      "op": "const",
+      "value": true
+     }
+    }
+   ],
+   "precondition": {
+    "op": "and",
+    "args": [
+     {
+      "op": "var",
+      "name": "reach_internal",
+      "index": []
+     },
+     {
+      "op": "var",
+      "name": "stolen_user",
+      "index": []
+     },
+     {
+      "op": "or",
+      "args": [
+       {
+        "op": "not",
+        "args": [
+         {
+          "op": "var",
+          "name": "mfa_user",
+          "index": []
+         }
+        ]
+       },
+       {
+        "op": "or",
+        "args": [
+         {
+          "op": "var",
+          "name": "foothold_workstation",
+          "index": []
+         },
+         {
+          "op": "var",
+          "name": "foothold_laptop",
+          "index": []
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "escalate_apiserver",
+   "cost": 1,
+   "effects": [
+    {
+     "kind": "assign",
+     "target": {
+      "var": "admin_apiserver",
+      "index": []
+     },
+     "value": {
+      "op": "const",
+      "value": true
+     }
+    }
+   ],
+   "precondition": {
+    "op": "and",
+    "args": [
+     {
+      "op": "var",
+      "name": "foothold_apiserver",
+      "index": []
+     },
+     {
+      "op": "or",
+      "args": [
+       {
+        "op": "var",
+        "name": "stolen_admin",
+        "index": []
+       },
+       {
+        "op": "not",
+        "args": [
+         {
+          "op": "var",
+          "name": "patched_apiserver",
+          "index": []
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "auth_ciserver",
+   "cost": 1,
+   "effects": [
+    {
+     "kind": "assign",
+     "target": {
+      "var": "foothold_ciserver",
+      "index": []
+     },
+     "value": {
+      "op": "const",
+      "value": true
+     }
+    }
+   ],
+   "precondition": {
+    "op": "and",
+    "args": [
+     {
+      "op": "var",
+      "name": "reach_internal",
+      "index": []
+     },
+     {
+      "op": "var",
+      "name": "stolen_user",
+      "index": []
+     },
+     {
+      "op": "or",
+      "args": [
+       {
+        "op": "not",
+        "args": [
+         {
+          "op": "var",
+          "name": "mfa_user",
+          "index": []
+         }
+        ]
+       },
+       {
+        "op": "or",
+        "args": [
+         {
+          "op": "var",
+          "name": "foothold_workstation",
+          "index": []
+         },
+         {
+          "op": "var",
+          "name": "foothold_laptop",
+          "index": []
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "escalate_ciserver",
+   "cost": 1,
+   "effects": [
+    {
+     "kind": "assign",
+     "target": {
+      "var": "admin_ciserver",
+      "index": []
+     },
+     "value": {
+      "op": "const",
+      "value": true
+     }
+    }
+   ],
+   "precondition": {
+    "op": "and",
+    "args": [
+     {
+      "op": "var",
+      "name": "foothold_ciserver",
+      "index": []
+     },
+     {
+      "op": "or",
+      "args": [
+       {
+        "op": "var",
+        "name": "stolen_admin",
+        "index": []
+       },
+       {
+        "op": "not",
+        "args": [
+         {
+          "op": "var",
+          "name": "patched_ciserver",
+          "index": []
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "leak_secrets_ciserver",
+   "cost": 1,
+   "effects": [
+    {
+     "kind": "assign",
+     "target": {
+      "var": "stolen_dbadmin",
+      "index": []
+     },
+     "value": {
+      "op": "const",
+      "value": true
+     }
+    }
+   ],
+   "precondition": {
+    "op": "var",
+    "name": "admin_ciserver",
+    "index": []
+   }
+  },
+  {
+   "name": "auth_dc",
+   "cost": 1,
+   "effects": [
+    {
+     "kind": "assign",
+     "target": {
+      "var": "foothold_dc",
+      "index": []
+     },
+     "value": {
+      "op": "const",
+      "value": true
+     }
+    }
+   ],
+   "precondition": {
+    "op": "and",
+    "args": [
+     {
+      "op": "var",
+      "name": "reach_internal",
+      "index": []
+     },
+     {
+      "op": "var",
+      "name": "stolen_admin",
+      "index": []
+     },
+     {
+      "op": "not",
+      "args": [
+       {
+        "op": "var",
+        "name": "mfa_admin",
+        "index": []
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "kerberoast_dc",
+   "cost": 1,
+   "effects": [
+    {
+     "kind": "assign",
+     "target": {
+      "var": "stolen_admin",
+      "index": []
+     },
+     "value": {
+      "op": "const",
+      "value": true
+     }
+    }
+   ],
+   "precondition": {
+    "op": "and",
+    "args": [
+     {
+      "op": "var",
+      "name": "reach_internal",
+      "index": []
+     },
+     {
+      "op": "or",
+      "args": [
+       {
+        "op": "or",
+        "args": [
+         {
+          "op": "var",
+          "name": "foothold_appserver",
+          "index": []
+         },
+         {
+          "op": "var",
+          "name": "foothold_apiserver",
+          "index": []
+         }
+        ]
+       },
+       {
+        "op": "var",
+        "name": "foothold_ciserver",
+        "index": []
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "escalate_dc",
+   "cost": 1,
+   "effects": [
+    {
+     "kind": "assign",
+     "target": {
+      "var": "admin_dc",
+      "index": []
+     },
+     "value": {
+      "op": "const",
+      "value": true
+     }
+    }
+   ],
+   "precondition": {
+    "op": "and",
+    "args": [
+     {
+      "op": "var",
+      "name": "foothold_dc",
+      "index": []
+     },
+     {
+      "op": "var",
+      "name": "stolen_admin",
+      "index": []
+     }
+    ]
+   }
+  },
+  {
+   "name": "dump_dbadmin_dc",
+   "cost": 1,
+   "effects": [
+    {
+     "kind": "assign",
+     "target": {
+      "var": "stolen_dbadmin",
+      "index": []
+     },
+     "value": {
+      "op": "const",
+      "value": true
+     }
+    }
+   ],
+   "precondition": {
+    "op": "var",
+    "name": "admin_dc",
+    "index": []
+   }
+  },
+  {
+   "name": "auth_adfs",
+   "cost": 1,
+   "effects": [
+    {
+     "kind": "assign",
+     "target": {
+      "var": "foothold_adfs",
+      "index": []
+     },
+     "value": {
+      "op": "const",
+      "value": true
+     }
+    }
+   ],
+   "precondition": {
+    "op": "and",
+    "args": [
+     {
+      "op": "var",
+      "name": "reach_internal",
+      "index": []
+     },
+     {
+      "op": "var",
+      "name": "stolen_admin",
+      "index": []
+     },
+     {
+      "op": "not",
+      "args": [
+       {
+        "op": "var",
+        "name": "mfa_admin",
+        "index": []
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "kerberoast_adfs",
+   "cost": 1,
+   "effects": [
+    {
+     "kind": "assign",
+     "target": {
+      "var": "stolen_admin",
+      "index": []
+     },
+     "value": {
+      "op": "const",
+      "value": true
+     }
+    }
+   ],
+   "precondition": {
+    "op": "and",
+    "args": [
+     {
+      "op": "var",
+      "name": "reach_internal",
+      "index": []
+     },
+     {
+      "op": "or",
+      "args": [
+       {
+        "op": "or",
+        "args": [
+         {
+          "op": "var",
+          "name": "foothold_appserver",
+          "index": []
+         },
+         {
+          "op": "var",
+          "name": "foothold_apiserver",
+          "index": []
+         }
+        ]
+       },
+       {
+        "op": "var",
+        "name": "foothold_ciserver",
+        "index": []
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "escalate_adfs",
+   "cost": 1,
+   "effects": [
+    {
+     "kind": "assign",
+     "target": {
+      "var": "admin_adfs",
+      "index": []
+     },
+     "value": {
+      "op": "const",
+      "value": true
+     }
+    }
+   ],
+   "precondition": {
+    "op": "and",
+    "args": [
+     {
+      "op": "var",
+      "name": "foothold_adfs",
+      "index": []
+     },
+     {
+      "op": "var",
+      "name": "stolen_admin",
+      "index": []
+     }
+    ]
+   }
+  },
+  {
+   "name": "dump_dbadmin_adfs",
+   "cost": 1,
+   "effects": [
+    {
+     "kind": "assign",
+     "target": {
+      "var": "stolen_dbadmin",
+      "index": []
+     },
+     "value": {
+      "op": "const",
+      "value": true
+     }
+    }
+   ],
+   "precondition": {
+    "op": "var",
+    "name": "admin_adfs",
+    "index": []
+   }
+  },
+  {
+   "name": "auth_db",
+   "cost": 1,
+   "effects": [
+    {
+     "kind": "assign",
+     "target": {
+      "var": "foothold_db",
+      "index": []
+     },
+     "value": {
+      "op": "const",
+      "value": true
+     }
+    }
+   ],
+   "precondition": {
+    "op": "and",
+    "args": [
+     {
+      "op": "var",
+      "name": "reach_internal",
+      "index": []
+     },
+     {
+      "op": "var",
+      "name": "stolen_dbadmin",
+      "index": []
+     },
+     {
+      "op": "or",
+      "args": [
+       {
+        "op": "not",
+        "args": [
+         {
+          "op": "var",
+          "name": "mfa_dbadmin",
+          "index": []
+         }
+        ]
+       },
+       {
+        "op": "or",
+        "args": [
+         {
+          "op": "var",
+          "name": "admin_dc",
+          "index": []
+         },
+         {
+          "op": "var",
+          "name": "admin_adfs",
+          "index": []
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "escalate_db",
+   "cost": 1,
+   "effects": [
+    {
+     "kind": "assign",
+     "target": {
+      "var": "admin_db",
+      "index": []
+     },
+     "value": {
+      "op": "const",
+      "value": true
+     }
+    }
+   ],
+   "precondition": {
+    "op": "and",
+    "args": [
+     {
+      "op": "var",
+      "name": "foothold_db",
+      "index": []
+     },
+     {
+      "op": "or",
+      "args": [
+       {
+        "op": "or",
+        "args": [
+         {
+          "op": "var",
+          "name": "admin_dc",
+          "index": []
+         },
+         {
+          "op": "var",
+          "name": "admin_adfs",
+          "index": []
+         }
+        ]
+       },
+       {
+        "op": "var",
+        "name": "stolen_dbadmin",
+        "index": []
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "exfiltrate_db",
+   "cost": 1,
+   "effects": [
+    {
+     "kind": "assign",
+     "target": {
+      "var": "exfiltrated",
+      "index": []
+     },
+     "value": {
+      "op": "const",
+      "value": true
+     }
+    }
+   ],
+   "precondition": {
+    "op": "var",
+    "name": "admin_db",
+    "index": []
+   }
+  },
+  {
+   "name": "auth_fileserver",
+   "cost": 1,
+   "effects": [
+    {
+     "kind": "assign",
+     "target": {
+      "var": "foothold_fileserver",
+      "index": []
+     },
+     "value": {
+      "op": "const",
+      "value": true
+     }
+    }
+   ],
+   "precondition": {
+    "op": "and",
+    "args": [
+     {
+      "op": "var",
+      "name": "reach_internal",
+      "index": []
+     },
+     {
+      "op": "var",
+      "name": "stolen_dbadmin",
+      "index": []
+     },
+     {
+      "op": "or",
+      "args": [
+       {
+        "op": "not",
+        "args": [
+         {
+          "op": "var",
+          "name": "mfa_dbadmin",
+          "index": []
+         }
+        ]
+       },
+       {
+        "op": "or",
+        "args": [
+         {
+          "op": "var",
+          "name": "admin_dc",
+          "index": []
+         },
+         {
+          "op": "var",
+          "name": "admin_adfs",
+          "index": []
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "escalate_fileserver",
+   "cost": 1,
+   "effects": [
+    {
+     "kind": "assign",
+     "target": {
+      "var": "admin_fileserver",
+      "index": []
+     },
+     "value": {
+      "op": "const",
+      "value": true
+     }
+    }
+   ],
+   "precondition": {
+    "op": "and",
+    "args": [
+     {
+      "op": "var",
+      "name": "foothold_fileserver",
+      "index": []
+     },
+     {
+      "op": "or",
+      "args": [
+       {
+        "op": "or",
+        "args": [
+         {
+          "op": "var",
+          "name": "admin_dc",
+          "index": []
+         },
+         {
+          "op": "var",
+          "name": "admin_adfs",
+          "index": []
+         }
+        ]
+       },
+       {
+        "op": "var",
+        "name": "stolen_dbadmin",
+        "index": []
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "exfiltrate_fileserver",
+   "cost": 1,
+   "effects": [
+    {
+     "kind": "assign",
+     "target": {
+      "var": "exfiltrated",
+      "index": []
+     },
+     "value": {
+      "op": "const",
+      "value": true
+     }
+    }
+   ],
+   "precondition": {
+    "op": "var",
+    "name": "admin_fileserver",
+    "index": []
+   }
+  },
+  {
+   "name": "auth_backup",
+   "cost": 1,
+   "effects": [
+    {
+     "kind": "assign",
+     "target": {
+      "var": "foothold_backup",
+      "index": []
+     },
+     "value": {
+      "op": "const",
+      "value": true
+     }
+    }
+   ],
+   "precondition": {
+    "op": "and",
+    "args": [
+     {
+      "op": "var",
+      "name": "reach_internal",
+      "index": []
+     },
+     {
+      "op": "var",
+      "name": "stolen_dbadmin",
+      "index": []
+     },
+     {
+      "op": "or",
+      "args": [
+       {
+        "op": "not",
+        "args": [
+         {
+          "op": "var",
+          "name": "mfa_dbadmin",
+          "index": []
+         }
+        ]
+       },
+       {
+        "op": "or",
+        "args": [
+         {
+          "op": "var",
+          "name": "admin_dc",
+          "index": []
+         },
+         {
+          "op": "var",
+          "name": "admin_adfs",
+          "index": []
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "escalate_backup",
+   "cost": 1,
+   "effects": [
+    {
+     "kind": "assign",
+     "target": {
+      "var": "admin_backup",
+      "index": []
+     },
+     "value": {
+      "op": "const",
+      "value": true
+     }
+    }
+   ],
+   "precondition": {
+    "op": "and",
+    "args": [
+     {
+      "op": "var",
+      "name": "foothold_backup",
+      "index": []
+     },
+     {
+      "op": "or",
+      "args": [
+       {
+        "op": "or",
+        "args": [
+         {
+          "op": "var",
+          "name": "admin_dc",
+          "index": []
+         },
+         {
+          "op": "var",
+          "name": "admin_adfs",
+          "index": []
+         }
+        ]
+       },
+       {
+        "op": "var",
+        "name": "stolen_dbadmin",
+        "index": []
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "exfiltrate_backup",
+   "cost": 1,
+   "effects": [
+    {
+     "kind": "assign",
+     "target": {
+      "var": "exfiltrated",
+      "index": []
+     },
+     "value": {
+      "op": "const",
+      "value": true
+     }
+    }
+   ],
+   "precondition": {
+    "op": "var",
+    "name": "admin_backup",
+    "index": []
+   }
+  }
+ ],
+ "properties": [
+  {
+   "id": "data_exfiltrated",
+   "kind": "goal",
+   "expr": {
+    "op": "var",
+    "name": "exfiltrated",
+    "index": []
+   },
+   "label": "\u653b\u51fb\u8005\u5916\u6cc4\u4e86\u738b\u51a0\u6570\u636e"
+  },
+  {
+   "id": "data_safe",
+   "kind": "invariant",
+   "expr": {
+    "op": "not",
+    "args": [
+     {
+      "op": "var",
+      "name": "exfiltrated",
+      "index": []
+     }
+    ]
+   },
+   "label": "\u6570\u636e\u672a\u88ab\u5916\u6cc4"
+  }
+ ],
+ "objectives": [
+  {
+   "id": "attack_cost",
+   "label": "\u653b\u51fb\u6b65\u6570",
+   "unit": "techniques",
+   "terms": [
+    {
+     "kind": "action_cost"
+    }
+   ]
+  }
+ ]
+}

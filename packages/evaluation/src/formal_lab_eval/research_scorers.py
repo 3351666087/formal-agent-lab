@@ -380,7 +380,8 @@ class AttackGraphAnalysisScorer:
         deps = {"ground_truth": sha256_bytes(json.dumps({"k": kind, "a": answer, "g": reference.get("graph_digest")},
                                                         sort_keys=True).encode())}
         fields = {"shortest_cost": "cost", "reachability": "reachable", "min_defense": "count",
-                  "step_enabled": "enabled", "reach_from_entry": "reachable", "chokepoints": "count"}
+                  "step_enabled": "enabled", "reach_from_entry": "reachable", "chokepoints": "count",
+                  "technique_enabled": "enabled"}
         key = fields[kind]
         got = parsed.get(key) if isinstance(parsed, dict) else None
         if kind in ("shortest_cost", "min_defense", "chokepoints"):
