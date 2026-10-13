@@ -1,0 +1,107 @@
+{
+ "protocol": "fal-research-response/v1",
+ "experiment": {
+  "study_id": "cyber-attackmodel",
+  "unit_id": "am-017-reachability.gpt-6-astra-relay.S.r0",
+  "track": "formal_model_analysis",
+  "case_id": null,
+  "case_version": null,
+  "task_id": "am-017-reachability",
+  "task_digest": "19ac38afc0137b35b79a7dcfd2dcd1870f10bdb07ff6f74b4a27da08e7917c05",
+  "representation_id": "attackmodel",
+  "replicate_id": 0,
+  "assistance_mode": "STATIC_UNASSISTED",
+  "sampling_id": "am-017-reachability.gpt-6-astra-relay.S.r0#0"
+ },
+ "call": {
+  "provider": "openai",
+  "provider_config_id": "gpt-6-astra-relay",
+  "api": "openai.chat.completions",
+  "api_version": "v1",
+  "endpoint": "https://api.uheapi.com/v1/chat/completions",
+  "route": "COMPATIBLE_RELAY",
+  "endpoint_kind": "PROVIDER",
+  "model_requested": "gpt-6-astra",
+  "model_returned": "gpt-6-astra",
+  "model_switched": false,
+  "model_identity": "RELAY_REPORTED",
+  "response_id": "resp_0c617434ff565131016acd9b9d20c8819da5c19970a8b8261c",
+  "request_id": "f5475ef2-0609-4c65-90d1-15729e7db863, ad04dda6-2655-40a2-b58d-055504244cd6, 17cc25da-9794-40e8-b684-abdc3b05a581",
+  "started_at": "2026-10-13T02:46:51Z",
+  "finished_at": "2026-10-13T02:46:57Z",
+  "params": {
+   "max_completion_tokens": 3500
+  },
+  "params_digest": "21ab5eec91a87948"
+ },
+ "raw": {
+  "body": {
+   "id": "resp_0c617434ff565131016acd9b9d20c8819da5c19970a8b8261c",
+   "object": "chat.completion",
+   "created": 1791859617,
+   "model": "gpt-6-astra",
+   "choices": [
+    {
+     "index": 0,
+     "message": {
+      "role": "assistant",
+      "content": "{\"reachable\":false,\"rationale\":\"With mfa_admin deployed, auth_dc and auth_adfs are blocked, so foothold_dc, foothold_adfs, admin_dc, and admin_adfs remain false. With mfa_dbadmin deployed, authentication to the database, fileserver, and backup requires admin_dc or admin_adfs, so all three authentication techniques are blocked even if the attacker obtains stolen_dbadmin from the CI server. Their footholds and administrator states therefore remain false, preventing every technique that achieves exfiltrated.\"}"
+     },
+     "finish_reason": "stop"
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 5605,
+    "completion_tokens": 113,
+    "total_tokens": 5718
+   },
+   "service_tier": "default"
+  },
+  "body_text": null,
+  "visible_text": "{\"reachable\":false,\"rationale\":\"With mfa_admin deployed, auth_dc and auth_adfs are blocked, so foothold_dc, foothold_adfs, admin_dc, and admin_adfs remain false. With mfa_dbadmin deployed, authentication to the database, fileserver, and backup requires admin_dc or admin_adfs, so all three authentication techniques are blocked even if the attacker obtains stolen_dbadmin from the CI server. Their footholds and administrator states therefore remain false, preventing every technique that achieves exfiltrated.\"}",
+  "finish_reason": "stop",
+  "finish_class": "STOP",
+  "refusal": null,
+  "truncated": false,
+  "tool_calls": [],
+  "reasoning": "NOT_EXPOSED"
+ },
+ "status": {
+  "outcome": "ANSWERED",
+  "transport_ok": true,
+  "http_status": 200,
+  "provider_error_type": null,
+  "provider_error": null,
+  "model_switched": false,
+  "attempts": [
+   {
+    "attempt_no": 1,
+    "attempt_id": "att_969ee2490f75",
+    "sent": true,
+    "confirmed": true,
+    "http_status": 200,
+    "error_class": null,
+    "error": null,
+    "latency_ms": 5748.6
+   }
+  ],
+  "network_retries": 2,
+  "note": null
+ },
+ "cost": {
+  "usage_known": true,
+  "input_tokens": 5605,
+  "output_tokens": 113,
+  "reasoning_tokens": null,
+  "cache_read_tokens": null,
+  "cache_write_tokens": null,
+  "latency_ms": 5748.8,
+  "http_attempts": 1,
+  "possibly_billed_unconfirmed": 0,
+  "prompt_digest": "c4f806bf36291a1d",
+  "config_digest": "d7694eefe67a8c23"
+ },
+ "task_input_digest": "c4f806bf36291a1dfca39f33d370e705dd7378191e860b8ca854e508d5022154",
+ "reuse_key": "f8c4b7d6dbbc73cac3eac65e5a4f4210ce8884c0323b81dc6dd36b2c4c2ee703",
+ "recorded_at": "2026-10-13T02:46:57Z"
+}

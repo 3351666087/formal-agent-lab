@@ -1,0 +1,107 @@
+{
+ "protocol": "fal-research-response/v1",
+ "experiment": {
+  "study_id": "cyber-attackmodel",
+  "unit_id": "am-012-technique_enabled.gpt-6-astra-relay.S.r1",
+  "track": "formal_model_analysis",
+  "case_id": null,
+  "case_version": null,
+  "task_id": "am-012-technique_enabled",
+  "task_digest": "6c5347c06efa9a8ca747abc8e1ebfe3616d6e812440cbdc646868cc6739c09e5",
+  "representation_id": "attackmodel",
+  "replicate_id": 1,
+  "assistance_mode": "STATIC_UNASSISTED",
+  "sampling_id": "am-012-technique_enabled.gpt-6-astra-relay.S.r1#0"
+ },
+ "call": {
+  "provider": "openai",
+  "provider_config_id": "gpt-6-astra-relay",
+  "api": "openai.chat.completions",
+  "api_version": "v1",
+  "endpoint": "https://api.uheapi.com/v1/chat/completions",
+  "route": "COMPATIBLE_RELAY",
+  "endpoint_kind": "PROVIDER",
+  "model_requested": "gpt-6-astra",
+  "model_returned": "gpt-6-astra",
+  "model_switched": false,
+  "model_identity": "RELAY_REPORTED",
+  "response_id": "resp_04d99a3053b5153a016acd988fc720819bb85d671fcd119169",
+  "request_id": "f7856b9d-ad66-4927-be76-87d002a0bf78, b58c6e5c-9cd8-4c50-9d50-e203097c1924",
+  "started_at": "2026-10-13T02:33:51Z",
+  "finished_at": "2026-10-13T02:33:54Z",
+  "params": {
+   "max_completion_tokens": 3500
+  },
+  "params_digest": "21ab5eec91a87948"
+ },
+ "raw": {
+  "body": {
+   "id": "resp_04d99a3053b5153a016acd988fc720819bb85d671fcd119169",
+   "object": "chat.completion",
+   "created": 1791858834,
+   "model": "gpt-6-astra",
+   "choices": [
+    {
+     "index": 0,
+     "message": {
+      "role": "assistant",
+      "content": "{\"enabled\":false,\"rationale\":\"auth_appserver requires reach_internal AND stolen_user AND (NOT mfa_user OR foothold_workstation). Both reach_internal and stolen_user are currently false, so the technique is not applicable.\"}"
+     },
+     "finish_reason": "stop"
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 5050,
+    "completion_tokens": 51,
+    "total_tokens": 5101
+   },
+   "service_tier": "default"
+  },
+  "body_text": null,
+  "visible_text": "{\"enabled\":false,\"rationale\":\"auth_appserver requires reach_internal AND stolen_user AND (NOT mfa_user OR foothold_workstation). Both reach_internal and stolen_user are currently false, so the technique is not applicable.\"}",
+  "finish_reason": "stop",
+  "finish_class": "STOP",
+  "refusal": null,
+  "truncated": false,
+  "tool_calls": [],
+  "reasoning": "NOT_EXPOSED"
+ },
+ "status": {
+  "outcome": "ANSWERED",
+  "transport_ok": true,
+  "http_status": 200,
+  "provider_error_type": null,
+  "provider_error": null,
+  "model_switched": false,
+  "attempts": [
+   {
+    "attempt_no": 1,
+    "attempt_id": "att_1bcad1fb76f2",
+    "sent": true,
+    "confirmed": true,
+    "http_status": 200,
+    "error_class": null,
+    "error": null,
+    "latency_ms": 3444.4
+   }
+  ],
+  "network_retries": 2,
+  "note": null
+ },
+ "cost": {
+  "usage_known": true,
+  "input_tokens": 5050,
+  "output_tokens": 51,
+  "reasoning_tokens": null,
+  "cache_read_tokens": null,
+  "cache_write_tokens": null,
+  "latency_ms": 3444.6,
+  "http_attempts": 1,
+  "possibly_billed_unconfirmed": 0,
+  "prompt_digest": "7e9b33707e681e4a",
+  "config_digest": "d7694eefe67a8c23"
+ },
+ "task_input_digest": "7e9b33707e681e4a1a118e8d5a39c1404d77f4902947e7d1103a538fd084b9c3",
+ "reuse_key": "815c66b02e2e480bb366904c481bdd960a462b872fc61c82c0d2f6174ed9f6de",
+ "recorded_at": "2026-10-13T02:33:54Z"
+}

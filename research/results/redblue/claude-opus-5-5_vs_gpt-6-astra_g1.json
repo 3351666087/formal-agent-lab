@@ -4,7 +4,7 @@
  "game": 1,
  "outcome": {
   "winner": "blue",
-  "turns_used": 4
+  "turns_used": 12
  },
  "log": [
   {
@@ -15,7 +15,7 @@
    },
    "blue": {
     "deploy": "credential_vaulting",
-    "rationale": "Block credential theft from configuration before the attacker reaches recon, then deploy edr to close the other credentials branch. This can cut both paths at c"
+    "rationale": "The attacker can reach foothold this turn, so one entry blocker cannot close both branches. Deploy credential_vaulting now and edr next turn to block both crede"
    },
    "reached": [],
    "deployed": [
@@ -30,7 +30,7 @@
    },
    "blue": {
     "deploy": "edr",
-    "rationale": "EDR blocks dump_process_memory, completing the creds-stage cut with credential_vaulting. Since the attacker has not reached foothold, both credential paths are "
+    "rationale": "Complete the creds-stage cut: credential_vaulting blocks steal_config_credentials, and edr blocks dump_process_memory. The attacker will likely attempt foothold"
    },
    "reached": [],
    "deployed": [
@@ -46,7 +46,7 @@
    },
    "blue": {
     "deploy": "network_segmentation",
-    "rationale": "Credential vaulting and EDR already block both credential paths. Block SMB lateral movement now, then deploy vpn_mfa on the final turn to complete a second barr"
+    "rationale": "Both credential branches are already blocked. Begin blocking lateral movement now, then add vpn_mfa to close its other branch before the attacker can reach it. "
    },
    "reached": [],
    "deployed": [
@@ -63,7 +63,7 @@
    },
    "blue": {
     "deploy": "vpn_mfa",
-    "rationale": "Completes the lateral-stage cut alongside network_segmentation, blocking both vpn_pivot and smb_lateral_movement. This adds a second fully blocked stage behind "
+    "rationale": "Complete the lateral-stage cut: network_segmentation blocks SMB, and vpn_mfa blocks the remaining VPN branch. With neither foothold nor credentials reached and "
    },
    "reached": [],
    "deployed": [
@@ -71,6 +71,186 @@
     "edr",
     "network_segmentation",
     "vpn_mfa"
+   ]
+  },
+  {
+   "turn": 5,
+   "red": {
+    "move": {},
+    "result": "invalid"
+   },
+   "blue": {
+    "deploy": "db_access_control",
+    "rationale": "Begin closing both db_access branches while the attacker remains before foothold. Existing controls already cut both creds and lateral branches; deploying repli"
+   },
+   "reached": [],
+   "deployed": [
+    "credential_vaulting",
+    "db_access_control",
+    "edr",
+    "network_segmentation",
+    "vpn_mfa"
+   ]
+  },
+  {
+   "turn": 6,
+   "red": {
+    "move": {},
+    "result": "invalid"
+   },
+   "blue": {
+    "deploy": "replica_isolation",
+    "rationale": "Completes the db_access cut alongside db_access_control, blocking both database branches before the attacker reaches them. This adds a third fully blocked stage"
+   },
+   "reached": [],
+   "deployed": [
+    "credential_vaulting",
+    "db_access_control",
+    "edr",
+    "network_segmentation",
+    "replica_isolation",
+    "vpn_mfa"
+   ]
+  },
+  {
+   "turn": 7,
+   "red": {
+    "move": {},
+    "result": "invalid"
+   },
+   "blue": {
+    "deploy": "dns_monitoring",
+    "rationale": "The attacker may gain foothold this turn, making a single entry blocker unreliable. Deploy dns_monitoring ahead of the final stage, then pair it with proxy_tls_"
+   },
+   "reached": [],
+   "deployed": [
+    "credential_vaulting",
+    "db_access_control",
+    "dns_monitoring",
+    "edr",
+    "network_segmentation",
+    "replica_isolation",
+    "vpn_mfa"
+   ]
+  },
+  {
+   "turn": 8,
+   "red": {
+    "move": {},
+    "result": "invalid"
+   },
+   "blue": {
+    "deploy": "proxy_tls_inspection",
+    "rationale": "Completes the exfiltration-stage cut with dns_monitoring, blocking both final branches before the attacker reaches them. A foothold control would leave the othe"
+   },
+   "reached": [],
+   "deployed": [
+    "credential_vaulting",
+    "db_access_control",
+    "dns_monitoring",
+    "edr",
+    "network_segmentation",
+    "proxy_tls_inspection",
+    "replica_isolation",
+    "vpn_mfa"
+   ]
+  },
+  {
+   "turn": 9,
+   "red": {
+    "move": {},
+    "result": "invalid"
+   },
+   "blue": {
+    "deploy": "patch_struts",
+    "rationale": "Block the Struts foothold branch before a simultaneous exploit attempt. The phishing branch remains open, but both branches at creds, lateral, db_access, and ex"
+   },
+   "reached": [],
+   "deployed": [
+    "credential_vaulting",
+    "db_access_control",
+    "dns_monitoring",
+    "edr",
+    "network_segmentation",
+    "patch_struts",
+    "proxy_tls_inspection",
+    "replica_isolation",
+    "vpn_mfa"
+   ]
+  },
+  {
+   "turn": 10,
+   "red": {
+    "move": {},
+    "result": "invalid"
+   },
+   "blue": {
+    "deploy": "email_filtering",
+    "rationale": "Blocks the remaining open foothold branch, spearphishing. Together with patch_struts, this closes both foothold branches before the attacker advances; sabotage "
+   },
+   "reached": [],
+   "deployed": [
+    "credential_vaulting",
+    "db_access_control",
+    "dns_monitoring",
+    "edr",
+    "email_filtering",
+    "network_segmentation",
+    "patch_struts",
+    "proxy_tls_inspection",
+    "replica_isolation",
+    "vpn_mfa"
+   ]
+  },
+  {
+   "turn": 11,
+   "red": {
+    "move": {},
+    "result": "invalid"
+   },
+   "blue": {
+    "deploy": "waf",
+    "rationale": "Reinforce the foothold barrier against sabotage of patch_struts. Both foothold branches are currently blocked, and with no stages reached and only two turns rem"
+   },
+   "reached": [],
+   "deployed": [
+    "credential_vaulting",
+    "db_access_control",
+    "dns_monitoring",
+    "edr",
+    "email_filtering",
+    "network_segmentation",
+    "patch_struts",
+    "proxy_tls_inspection",
+    "replica_isolation",
+    "vpn_mfa",
+    "waf"
+   ]
+  },
+  {
+   "turn": 12,
+   "red": {
+    "move": {},
+    "result": "invalid"
+   },
+   "blue": {
+    "deploy": "security_awareness",
+    "rationale": "Deploy security_awareness to block the remaining spearphishing foothold branch; the exploit foothold branch is already blocked by patch_struts and waf, so the a"
+   },
+   "reached": [],
+   "deployed": [
+    "credential_vaulting",
+    "db_access_control",
+    "dns_monitoring",
+    "edr",
+    "email_filtering",
+    "network_segmentation",
+    "patch_struts",
+    "proxy_tls_inspection",
+    "replica_isolation",
+    "security_awareness",
+    "vpn_mfa",
+    "waf"
    ]
   }
  ]
