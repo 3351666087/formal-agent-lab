@@ -82,6 +82,11 @@ RESEARCH_CHECKS = [
           "Log4Shell（CVE-2021-44228）模型忠实——易受攻击版本可达 RCE、修复版本被阻断；评分器在协议回放上按脚本正确标注；"
           "密钥不落盘。真实双模型批次由 scripts/cyber_attackmodel_study.py + fal research study run 单独运行",
           f"{PY} scripts/cyber_attackmodel_check.py", ["P8-01"], protocol=True, produces=[f"{EV}/cyber/check.json"]),
+    Check("cyber-rename", "p8",
+          "词汇中性化对照研究（cyber-rename）：研究体通过校验与数据隔离；每个参考答案由 Z3 复算一致；改名映射对已提交模型 "
+          "IR 全名覆盖且一一映射；中性化（logistics）输入不含攻击模型词汇；改名任务与其攻击词汇孪生任务共享参考答案以支持 "
+          "配对比较。真实批次由 scripts/cyber_rename_study.py + fal research study run 单独运行",
+          f"{PY} scripts/cyber_rename_check.py", ["P8-03"], protocol=True, produces=[f"{EV}/cyber/rename-check.json"]),
 ]
 
 # every check must live in a declared group

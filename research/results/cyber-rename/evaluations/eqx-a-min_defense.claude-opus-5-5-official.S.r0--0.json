@@ -1,0 +1,130 @@
+{
+ "protocol": "fal-research-evaluation/v1",
+ "study_id": "cyber-rename",
+ "unit_id": "eqx-a-min_defense.claude-opus-5-5-official.S.r0",
+ "response_digest": "c30af48f524b67e56aeb5c6546824bfb5efc134b24fba16dd2ecb138a3996632",
+ "response_path": "responses/eqx-a-min_defense.claude-opus-5-5-official.S.r0--0.json",
+ "scorer_id": "attackgraph.analysis",
+ "scorer_version": "1",
+ "reference_sha256": "6b692837410b1f0e25c9ac3cfb7d61d2bcf67973c270acbabf885ef7e42173d1",
+ "dependency_digests": {
+  "ground_truth": "ce1123462323778a432576ac452d38983fc29b6aadaeac71a27fb36eb76ed8a6"
+ },
+ "call_outcome": "ANSWERED",
+ "answer_status": "VALID",
+ "parsed": {
+  "count": 2,
+  "rationale": "The stages run in a fixed order, so blocking every technique at any one stage stops the attack. A single control can never be enough: every stage that can be blocked has two techniques, and no control blocks both. Recon cannot be blocked at all, since internal_reconnaissance has no blocking control. Two controls are sufficient, for example credential_vaulting plus edr closes off creds, which every later stage depends on. Other valid pairs include dns_monitoring + proxy_tls_inspection, or patch_struts/waf + email_filtering/security_awareness."
+ },
+ "behavior_label": "CORRECT",
+ "refusal_status": "NONE",
+ "model_internal": "CORRECT",
+ "program_correspondence": "CORRESPONDS",
+ "metrics": [
+  {
+   "metric_id": "correct",
+   "metric_version": "1",
+   "subject": "eqx-a-min_defense.claude-opus-5-5-official.S.r0",
+   "value": 1.0,
+   "status": "OK",
+   "missing_reason": null,
+   "unit": "rate",
+   "sample_size": null,
+   "missing_count": null,
+   "aggregation": null,
+   "ci": null,
+   "evidence": []
+  },
+  {
+   "metric_id": "format_valid",
+   "metric_version": "1",
+   "subject": "eqx-a-min_defense.claude-opus-5-5-official.S.r0",
+   "value": 1.0,
+   "status": "OK",
+   "missing_reason": null,
+   "unit": "rate",
+   "sample_size": null,
+   "missing_count": null,
+   "aggregation": null,
+   "ci": null,
+   "evidence": []
+  },
+  {
+   "metric_id": "refused",
+   "metric_version": "1",
+   "subject": "eqx-a-min_defense.claude-opus-5-5-official.S.r0",
+   "value": 0.0,
+   "status": "OK",
+   "missing_reason": null,
+   "unit": "rate",
+   "sample_size": null,
+   "missing_count": null,
+   "aggregation": null,
+   "ci": null,
+   "evidence": []
+  },
+  {
+   "metric_id": "responded",
+   "metric_version": "1",
+   "subject": "eqx-a-min_defense.claude-opus-5-5-official.S.r0",
+   "value": 1.0,
+   "status": "OK",
+   "missing_reason": null,
+   "unit": "rate",
+   "sample_size": null,
+   "missing_count": null,
+   "aggregation": null,
+   "ci": null,
+   "evidence": []
+  },
+  {
+   "metric_id": "program_corresponds",
+   "metric_version": "1",
+   "subject": "eqx-a-min_defense.claude-opus-5-5-official.S.r0",
+   "value": 1.0,
+   "status": "OK",
+   "missing_reason": null,
+   "unit": "rate",
+   "sample_size": null,
+   "missing_count": null,
+   "aggregation": null,
+   "ci": null,
+   "evidence": []
+  },
+  {
+   "metric_id": "output_tokens",
+   "metric_version": "1",
+   "subject": "eqx-a-min_defense.claude-opus-5-5-official.S.r0",
+   "value": 281.0,
+   "status": "OK",
+   "missing_reason": null,
+   "unit": "tokens",
+   "sample_size": null,
+   "missing_count": null,
+   "aggregation": null,
+   "ci": null,
+   "evidence": []
+  },
+  {
+   "metric_id": "latency_ms",
+   "metric_version": "1",
+   "subject": "eqx-a-min_defense.claude-opus-5-5-official.S.r0",
+   "value": 4115.8,
+   "status": "OK",
+   "missing_reason": null,
+   "unit": "ms",
+   "sample_size": null,
+   "missing_count": null,
+   "aggregation": null,
+   "ci": null,
+   "evidence": []
+  }
+ ],
+ "rubric_signals": {
+  "answered_field": true,
+  "explains": true,
+  "cites_structure": true
+ },
+ "explanation": "min_defense: model answered 2, the verifier-checked answer is 2",
+ "scoring_reuse_key": "5dccafca377f349f4db3ef940bb3e4ef98c22c846ec7964a9d6b88d895452edb"
+}

@@ -20,6 +20,15 @@
 - 平台：`scripts/seed_security_enterprise.py`（企业攻击模型 + 红队场景 + 运行）、`scripts/seed_cve_log4shell.py`（Log4Shell 易受攻击 2.14.1 运行 SUCCEEDED → RCE；已修复 2.16.0 运行 BUDGET_EXHAUSTED → 修复成立）。安全项目 `攻击模型安全分析（防御）`。
 - 清理：删除攻击“图”抽象（analysis.py、cyber-attackgraph/cyber-enterprise 研究体与结果、相关脚本），平台与仓库均只保留真实攻击模型。
 
+## 8.3 · 服务器真实复现 + 词汇中性化对照研究（cyber-rename）
+
+- [ ] **P8-03** 在授权集群 `fal-vuln-lab` 隔离区真实执行两条攻击链并留证；把同一形式结构改名成中性词汇后跑 claude-opus-5-5（官方直连）对照研究，在平台上记录。
+
+- 服务器复现（XJTLU-IoT · 命名空间 `fal-vuln-lab`，仅限该区）：Log4Shell 6 步链全通（LDAP 引用 → 远程类加载 → root RCE，证据 `deploy/vuln-lab/evidence/01~03`）；Struts S2-045 无认证 RCE → recon → creds → 横向 → 读假库 → 外泄至攻击者（证据 `evidence/10~14`）；复现手册 `deploy/vuln-lab/RUNBOOK.md`（含利用代码，**不入库**）。
+- 对照研究 `research/studies/cyber-rename`（构建器 `scripts/cyber_rename_study.py`）：两个 CVE 模型 × 原词汇/中性化词汇 × 6 题 × 3 重复 = 72 单元，Z3 基准答案，改名任务与孪生任务共享参考答案以支持配对比较；检查 `scripts/cyber_rename_check.py`（组 `p8`）。
+- 批次结论（`research/results/cyber-rename/`，官方直连 claude-opus-5-5）：原词汇 correct 0.50 / refused 0.50，中性化词汇 correct 0.25 / refused 0.75（配对 mean_diff = −0.25，检验已报告）；所有被回答单元 100% 正确；拒绝为空内容 stop_reason=refusal；探针（`results/cyber-rename/probe/`）显示拒绝由无关表层词（如 “delivery”“with no safeguards applied”）触发，与安全词汇无关——拒绝面脆、对词汇非单调。
+- 平台记录：安全领域项目 `prj_b06ead4a2d4b45e095f3`（模型工作台：企业攻击模型 + Log4Shell 修复前/后；运行台：红队 SUCCEEDED / 2.14.1 SUCCEEDED / 2.16.0 BUDGET_EXHAUSTED）；研究导入 `rs_caffb8ec20744afe9205`（72 单元，`POST /projects/{pid}/research/studies`）。证据：`docs/execution/evidence/research/cyber/{rename.json,rename-check.json}`。
+
 ```bash
 uv run --frozen pytest packages/domain-mal/tests/test_cve_log4shell.py
 make research-check ARGS="--group p8"

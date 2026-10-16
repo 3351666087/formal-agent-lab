@@ -1,0 +1,619 @@
+{
+ "name": "office-relocation-workflow",
+ "description": "Formal workflow model of a six-phase office relocation project. Structure-identical to the Struts/Equifax (CVE-2017-5638) attack model with every noun renamed; policies block the tasks that complete each phase.",
+ "constants": [
+  {
+   "name": "registry_locked",
+   "type": {
+    "kind": "bool"
+   },
+   "value": {
+    "default": false
+   }
+  },
+  {
+   "name": "archive_approval",
+   "type": {
+    "kind": "bool"
+   },
+   "value": {
+    "default": false
+   }
+  },
+  {
+   "name": "courier_a_tracking",
+   "type": {
+    "kind": "bool"
+   },
+   "value": {
+    "default": false
+   }
+  },
+  {
+   "name": "visitor_log_off",
+   "type": {
+    "kind": "bool"
+   },
+   "value": {
+    "default": false
+   }
+  },
+  {
+   "name": "mail_scanning",
+   "type": {
+    "kind": "bool"
+   },
+   "value": {
+    "default": false
+   }
+  },
+  {
+   "name": "corridor_partition",
+   "type": {
+    "kind": "bool"
+   },
+   "value": {
+    "default": false
+   }
+  },
+  {
+   "name": "terminal_maintenance",
+   "type": {
+    "kind": "bool"
+   },
+   "value": {
+    "default": false
+   }
+  },
+  {
+   "name": "courier_b_inspection",
+   "type": {
+    "kind": "bool"
+   },
+   "value": {
+    "default": false
+   }
+  },
+  {
+   "name": "backup_isolated",
+   "type": {
+    "kind": "bool"
+   },
+   "value": {
+    "default": false
+   }
+  },
+  {
+   "name": "staff_training",
+   "type": {
+    "kind": "bool"
+   },
+   "value": {
+    "default": false
+   }
+  },
+  {
+   "name": "remote_pass_mfa",
+   "type": {
+    "kind": "bool"
+   },
+   "value": {
+    "default": false
+   }
+  },
+  {
+   "name": "gate_inspection",
+   "type": {
+    "kind": "bool"
+   },
+   "value": {
+    "default": false
+   }
+  }
+ ],
+ "state": [
+  {
+   "name": "project_kickoff",
+   "type": {
+    "kind": "bool"
+   },
+   "initial": {
+    "default": false
+   },
+   "label": "project_kickoff"
+  },
+  {
+   "name": "site_survey",
+   "type": {
+    "kind": "bool"
+   },
+   "initial": {
+    "default": false
+   },
+   "label": "site_survey"
+  },
+  {
+   "name": "access_badges",
+   "type": {
+    "kind": "bool"
+   },
+   "initial": {
+    "default": false
+   },
+   "label": "access_badges"
+  },
+  {
+   "name": "floor_access",
+   "type": {
+    "kind": "bool"
+   },
+   "initial": {
+    "default": false
+   },
+   "label": "floor_access"
+  },
+  {
+   "name": "archive_access",
+   "type": {
+    "kind": "bool"
+   },
+   "initial": {
+    "default": false
+   },
+   "label": "archive_access"
+  },
+  {
+   "name": "records_shipped",
+   "type": {
+    "kind": "bool"
+   },
+   "initial": {
+    "default": false
+   },
+   "label": "records_shipped"
+  }
+ ],
+ "actions": [
+  {
+   "name": "reuse_legacy_terminal",
+   "cost": 1,
+   "effects": [
+    {
+     "kind": "assign",
+     "target": {
+      "var": "project_kickoff",
+      "index": []
+     },
+     "value": {
+      "op": "const",
+      "value": true
+     }
+    }
+   ],
+   "precondition": {
+    "op": "and",
+    "args": [
+     {
+      "op": "not",
+      "args": [
+       {
+        "op": "var",
+        "name": "terminal_maintenance",
+        "index": []
+       }
+      ]
+     },
+     {
+      "op": "not",
+      "args": [
+       {
+        "op": "var",
+        "name": "gate_inspection",
+        "index": []
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "invite_contractor",
+   "cost": 1,
+   "effects": [
+    {
+     "kind": "assign",
+     "target": {
+      "var": "project_kickoff",
+      "index": []
+     },
+     "value": {
+      "op": "const",
+      "value": true
+     }
+    }
+   ],
+   "precondition": {
+    "op": "and",
+    "args": [
+     {
+      "op": "not",
+      "args": [
+       {
+        "op": "var",
+        "name": "mail_scanning",
+        "index": []
+       }
+      ]
+     },
+     {
+      "op": "not",
+      "args": [
+       {
+        "op": "var",
+        "name": "staff_training",
+        "index": []
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "walkthrough_survey",
+   "cost": 1,
+   "effects": [
+    {
+     "kind": "assign",
+     "target": {
+      "var": "site_survey",
+      "index": []
+     },
+     "value": {
+      "op": "const",
+      "value": true
+     }
+    }
+   ],
+   "precondition": {
+    "op": "var",
+    "name": "project_kickoff",
+    "index": []
+   }
+  },
+  {
+   "name": "copy_from_registry",
+   "cost": 1,
+   "effects": [
+    {
+     "kind": "assign",
+     "target": {
+      "var": "access_badges",
+      "index": []
+     },
+     "value": {
+      "op": "const",
+      "value": true
+     }
+    }
+   ],
+   "precondition": {
+    "op": "and",
+    "args": [
+     {
+      "op": "var",
+      "name": "site_survey",
+      "index": []
+     },
+     {
+      "op": "not",
+      "args": [
+       {
+        "op": "var",
+        "name": "registry_locked",
+        "index": []
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "review_visitor_log",
+   "cost": 1,
+   "effects": [
+    {
+     "kind": "assign",
+     "target": {
+      "var": "access_badges",
+      "index": []
+     },
+     "value": {
+      "op": "const",
+      "value": true
+     }
+    }
+   ],
+   "precondition": {
+    "op": "and",
+    "args": [
+     {
+      "op": "var",
+      "name": "site_survey",
+      "index": []
+     },
+     {
+      "op": "not",
+      "args": [
+       {
+        "op": "var",
+        "name": "visitor_log_off",
+        "index": []
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "use_service_corridor",
+   "cost": 1,
+   "effects": [
+    {
+     "kind": "assign",
+     "target": {
+      "var": "floor_access",
+      "index": []
+     },
+     "value": {
+      "op": "const",
+      "value": true
+     }
+    }
+   ],
+   "precondition": {
+    "op": "and",
+    "args": [
+     {
+      "op": "var",
+      "name": "access_badges",
+      "index": []
+     },
+     {
+      "op": "not",
+      "args": [
+       {
+        "op": "var",
+        "name": "corridor_partition",
+        "index": []
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "use_remote_pass",
+   "cost": 1,
+   "effects": [
+    {
+     "kind": "assign",
+     "target": {
+      "var": "floor_access",
+      "index": []
+     },
+     "value": {
+      "op": "const",
+      "value": true
+     }
+    }
+   ],
+   "precondition": {
+    "op": "and",
+    "args": [
+     {
+      "op": "var",
+      "name": "access_badges",
+      "index": []
+     },
+     {
+      "op": "not",
+      "args": [
+       {
+        "op": "var",
+        "name": "remote_pass_mfa",
+        "index": []
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "query_archive_index",
+   "cost": 1,
+   "effects": [
+    {
+     "kind": "assign",
+     "target": {
+      "var": "archive_access",
+      "index": []
+     },
+     "value": {
+      "op": "const",
+      "value": true
+     }
+    }
+   ],
+   "precondition": {
+    "op": "and",
+    "args": [
+     {
+      "op": "var",
+      "name": "floor_access",
+      "index": []
+     },
+     {
+      "op": "not",
+      "args": [
+       {
+        "op": "var",
+        "name": "archive_approval",
+        "index": []
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "read_backup_copy",
+   "cost": 1,
+   "effects": [
+    {
+     "kind": "assign",
+     "target": {
+      "var": "archive_access",
+      "index": []
+     },
+     "value": {
+      "op": "const",
+      "value": true
+     }
+    }
+   ],
+   "precondition": {
+    "op": "and",
+    "args": [
+     {
+      "op": "var",
+      "name": "floor_access",
+      "index": []
+     },
+     {
+      "op": "not",
+      "args": [
+       {
+        "op": "var",
+        "name": "backup_isolated",
+        "index": []
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "ship_via_courier_a",
+   "cost": 1,
+   "effects": [
+    {
+     "kind": "assign",
+     "target": {
+      "var": "records_shipped",
+      "index": []
+     },
+     "value": {
+      "op": "const",
+      "value": true
+     }
+    }
+   ],
+   "precondition": {
+    "op": "and",
+    "args": [
+     {
+      "op": "var",
+      "name": "archive_access",
+      "index": []
+     },
+     {
+      "op": "not",
+      "args": [
+       {
+        "op": "var",
+        "name": "courier_a_tracking",
+        "index": []
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "ship_via_courier_b",
+   "cost": 1,
+   "effects": [
+    {
+     "kind": "assign",
+     "target": {
+      "var": "records_shipped",
+      "index": []
+     },
+     "value": {
+      "op": "const",
+      "value": true
+     }
+    }
+   ],
+   "precondition": {
+    "op": "and",
+    "args": [
+     {
+      "op": "var",
+      "name": "archive_access",
+      "index": []
+     },
+     {
+      "op": "not",
+      "args": [
+       {
+        "op": "var",
+        "name": "courier_b_inspection",
+        "index": []
+       }
+      ]
+     }
+    ]
+   }
+  }
+ ],
+ "properties": [
+  {
+   "id": "data_exfiltrated",
+   "kind": "goal",
+   "expr": {
+    "op": "var",
+    "name": "records_shipped",
+    "index": []
+   },
+   "label": "\u6863\u6848\u5df2\u8fd0\u51fa"
+  },
+  {
+   "id": "breach_prevented",
+   "kind": "invariant",
+   "expr": {
+    "op": "not",
+    "args": [
+     {
+      "op": "var",
+      "name": "records_shipped",
+      "index": []
+     }
+    ]
+   },
+   "label": "\u6863\u6848\u672a\u8fd0\u51fa"
+  }
+ ],
+ "objectives": [
+  {
+   "id": "attack_cost",
+   "label": "\u4efb\u52a1\u6570",
+   "unit": "stages",
+   "terms": [
+    {
+     "kind": "action_cost"
+    }
+   ]
+  }
+ ]
+}

@@ -2,14 +2,14 @@
   "format": "checks@3",
   "compatible_with": "checks@2",
   "suite": "research",
-  "generated_at": "2026-10-13T02:00:40Z",
+  "generated_at": "2026-10-16T13:02:12Z",
   "source_revision": {
-    "commit": "081eee70fc9f983ccd4a835083d784d7ebee5f02",
+    "commit": "cb0f43adc0b94a4b92e08a47600d02fdeca8786c",
     "worktree": {
-      "sha256": "87122b74445030d9b300642bfd9c26427e506aadea4a976bf2a24a3a77e2a70f",
+      "sha256": "05c4badeb5949e60ca2d022fc5af036c693d5bf279535eb9565042e65c8a7f63",
       "clean": false,
-      "changed_bytes": 1950390,
-      "untracked_files": 1,
+      "changed_bytes": 5240,
+      "untracked_files": 45,
       "excluded_outputs": [
         "docs/execution/evidence/",
         "docs/handoff/",
@@ -20,9 +20,9 @@
     }
   },
   "config": {
-    "sha256": "ed11db0e5b81b5ed450d16f8cc5ef7dad8a465f74680b4a9f2f8644545ca4d18",
+    "sha256": "afa9f9e7ab8bd0c320a94d2731de3f8e0037ad3588f423eef1fed1f35f0c335a",
     "parts": {
-      "checks": "27d83c66a4a84ca3c7aae045dc5c6cbaaa8f835d8242f375b35c4464ff21b7bc",
+      "checks": "ea31310d77a7979ed4a5a5ab772dcf2433d51729e58e3ed1e1f9198a755a0999",
       "uv.lock": "4d3a54f797927fbc03bbb772f4386cf437468e023d39b23ec94d38c045f04ced",
       "pnpm-lock.yaml": "02d23c074a75bccfaea1ed4ff51272ba3d6cbb724e8012366c8d18e9bb0a7c3a",
       "deploy/compose/services.dev.yaml": "4c876045f15d5bd972c517e7de2d3626cd252d1842797f0152f596f7d8ea9ce0",
@@ -31,57 +31,51 @@
   },
   "command": "python scripts/check_runner.py --suite research --group p8",
   "environment": {
-    "os": "Ubuntu 24.04.4 LTS",
-    "arch": "aarch64",
-    "kernel": "6.8.0-117-generic",
-    "python": "3.12.3",
-    "uv": "uv 0.12.19 (aarch64-unknown-linux-gnu)",
-    "node": "v24.21.0",
-    "pnpm": "12.6.0",
+    "os": "/bin/sh: /etc/os-release: No such file or directory",
+    "arch": "arm64",
+    "kernel": "25.6.0",
+    "python": "3.12.13",
+    "uv": "uv shim: unsupported invocation: --version",
+    "node": "v22.23.1",
+    "pnpm": "/bin/sh: pnpm: command not found",
     "docker": "29.5.2",
     "z3": "5.1.0",
     "temporalio": "1.33.0"
   },
   "resources_before": {
-    "cpus": 4,
-    "memory_gib": {
-      "MemTotal": 5.77,
-      "MemAvailable": 3.3
-    },
+    "cpus": 10,
+    "memory_gib": {},
     "load_avg": [
-      0.4,
-      0.48,
-      0.36
+      4.11,
+      3.96,
+      4.02
     ],
     "disk_free_gib": {
-      "host (repository filesystem)": 2.6,
-      "docker (/var/lib/docker)": 16.9
+      "host (repository filesystem)": 10.4,
+      "docker (/var/lib/docker)": null
     },
     "concurrency": 1,
     "note": "checks run one at a time; heavy checks ask disk_guard first"
   },
   "resources_after": {
-    "cpus": 4,
-    "memory_gib": {
-      "MemTotal": 5.77,
-      "MemAvailable": 3.25
-    },
+    "cpus": 10,
+    "memory_gib": {},
     "load_avg": [
-      0.4,
-      0.48,
-      0.36
+      4.1,
+      3.96,
+      4.02
     ],
     "disk_free_gib": {
-      "host (repository filesystem)": 2.6,
-      "docker (/var/lib/docker)": 16.9
+      "host (repository filesystem)": 10.4,
+      "docker (/var/lib/docker)": null
     },
     "concurrency": 1,
     "note": "checks run one at a time; heavy checks ask disk_guard first"
   },
   "run": {
-    "started_at": "2026-10-13T02:00:38Z",
-    "finished_at": "2026-10-13T02:00:40Z",
-    "duration_s": 1.9,
+    "started_at": "2026-10-16T13:02:11Z",
+    "finished_at": "2026-10-16T13:02:12Z",
+    "duration_s": 1.4,
     "full": false,
     "selection": {
       "group": [
@@ -91,18 +85,20 @@
       "skip": []
     },
     "checks": [
-      "cyber-attackmodel"
+      "cyber-attackmodel",
+      "cyber-rename"
     ],
-    "commit": "081eee70fc9f983ccd4a835083d784d7ebee5f02",
-    "worktree_sha256": "87122b74445030d9b300642bfd9c26427e506aadea4a976bf2a24a3a77e2a70f",
-    "nonce": "4e501a2c36df4ea386929afdd8517265",
+    "commit": "cb0f43adc0b94a4b92e08a47600d02fdeca8786c",
+    "worktree_sha256": "05c4badeb5949e60ca2d022fc5af036c693d5bf279535eb9565042e65c8a7f63",
+    "nonce": "f3d3f34fee35489083703f0fecd8bb45",
     "acceptance_nonce": null,
     "results": {
-      "cyber-attackmodel": "PASS"
+      "cyber-attackmodel": "PASS",
+      "cyber-rename": "PASS"
     }
   },
   "summary": {
-    "PASS": 1,
+    "PASS": 2,
     "FAIL": 0,
     "BLOCKED": 0,
     "NOT_RUN": 0,
@@ -139,44 +135,10 @@
   ],
   "aggregation": "only results produced and verified by this invocation count; a partial selection is never complete; results from another commit, work tree or configuration are inherited and ignored",
   "timing": {
-    "this_run_s": 1.9,
+    "this_run_s": 1.4,
     "last_full_run_s": 73.7,
     "last_full_run_at": "2026-10-12T19:37:58Z",
     "partial_runs": [
-      {
-        "started_at": "2026-10-12T13:30:07Z",
-        "duration_s": 4.5,
-        "selection": {
-          "group": [
-            "p5a",
-            "p5b"
-          ],
-          "only": [],
-          "skip": []
-        },
-        "results": {
-          "p5a-unit": "PASS",
-          "p5a-case": "PASS",
-          "p5b-unit": "PASS",
-          "p5b-case": "PASS"
-        }
-      },
-      {
-        "started_at": "2026-10-12T14:10:33Z",
-        "duration_s": 56.4,
-        "selection": {
-          "group": [
-            "p6a"
-          ],
-          "only": [],
-          "skip": []
-        },
-        "results": {
-          "p6a-unit": "PASS",
-          "p6a-protocol": "PASS",
-          "p6a-real": "PASS"
-        }
-      },
       {
         "started_at": "2026-10-12T14:32:47Z",
         "duration_s": 60.9,
@@ -309,6 +271,36 @@
         },
         "results": {
           "cyber-attackmodel": "PASS"
+        }
+      },
+      {
+        "started_at": "2026-10-16T13:02:00Z",
+        "duration_s": 0.0,
+        "selection": {
+          "group": [
+            "p8"
+          ],
+          "only": [],
+          "skip": []
+        },
+        "results": {
+          "cyber-attackmodel": "FAIL",
+          "cyber-rename": "FAIL"
+        }
+      },
+      {
+        "started_at": "2026-10-16T13:02:11Z",
+        "duration_s": 1.4,
+        "selection": {
+          "group": [
+            "p8"
+          ],
+          "only": [],
+          "skip": []
+        },
+        "results": {
+          "cyber-attackmodel": "PASS",
+          "cyber-rename": "PASS"
         }
       }
     ]
@@ -828,6 +820,56 @@
       "acceptance_nonce": null,
       "results": {
         "cyber-attackmodel": "PASS"
+      }
+    },
+    {
+      "started_at": "2026-10-16T13:02:00Z",
+      "finished_at": "2026-10-16T13:02:00Z",
+      "duration_s": 0.0,
+      "full": false,
+      "selection": {
+        "group": [
+          "p8"
+        ],
+        "only": [],
+        "skip": []
+      },
+      "checks": [
+        "cyber-attackmodel",
+        "cyber-rename"
+      ],
+      "commit": "cb0f43adc0b94a4b92e08a47600d02fdeca8786c",
+      "worktree_sha256": "05c4badeb5949e60ca2d022fc5af036c693d5bf279535eb9565042e65c8a7f63",
+      "nonce": "5acc219b873e44fcabee808cb0cd9c34",
+      "acceptance_nonce": null,
+      "results": {
+        "cyber-attackmodel": "FAIL",
+        "cyber-rename": "FAIL"
+      }
+    },
+    {
+      "started_at": "2026-10-16T13:02:11Z",
+      "finished_at": "2026-10-16T13:02:12Z",
+      "duration_s": 1.4,
+      "full": false,
+      "selection": {
+        "group": [
+          "p8"
+        ],
+        "only": [],
+        "skip": []
+      },
+      "checks": [
+        "cyber-attackmodel",
+        "cyber-rename"
+      ],
+      "commit": "cb0f43adc0b94a4b92e08a47600d02fdeca8786c",
+      "worktree_sha256": "05c4badeb5949e60ca2d022fc5af036c693d5bf279535eb9565042e65c8a7f63",
+      "nonce": "f3d3f34fee35489083703f0fecd8bb45",
+      "acceptance_nonce": null,
+      "results": {
+        "cyber-attackmodel": "PASS",
+        "cyber-rename": "PASS"
       }
     }
   ],
@@ -2616,27 +2658,27 @@
       "reason": "[cyber-attackmodel] PASS: 6 required assertion(s) hold",
       "summary": "[cyber-attackmodel] PASS: 6 required assertion(s) hold",
       "condition": null,
-      "checked_commit": "081eee70fc9f983ccd4a835083d784d7ebee5f02",
-      "worktree_sha256": "87122b74445030d9b300642bfd9c26427e506aadea4a976bf2a24a3a77e2a70f",
+      "checked_commit": "cb0f43adc0b94a4b92e08a47600d02fdeca8786c",
+      "worktree_sha256": "05c4badeb5949e60ca2d022fc5af036c693d5bf279535eb9565042e65c8a7f63",
       "worktree_clean": false,
-      "config_sha256": "ed11db0e5b81b5ed450d16f8cc5ef7dad8a465f74680b4a9f2f8644545ca4d18",
-      "run_nonce": "4e501a2c36df4ea386929afdd8517265",
-      "started_at": "2026-10-13T02:00:38Z",
-      "finished_at": "2026-10-13T02:00:40Z",
-      "duration_s": 1.9,
+      "config_sha256": "afa9f9e7ab8bd0c320a94d2731de3f8e0037ad3588f423eef1fed1f35f0c335a",
+      "run_nonce": "f3d3f34fee35489083703f0fecd8bb45",
+      "started_at": "2026-10-16T13:02:11Z",
+      "finished_at": "2026-10-16T13:02:12Z",
+      "duration_s": 1.1,
       "attempts": [
         {
           "attempt": 1,
-          "started_at": "2026-10-13T02:00:38Z",
-          "finished_at": "2026-10-13T02:00:40Z",
-          "duration_s": 1.9,
+          "started_at": "2026-10-16T13:02:11Z",
+          "finished_at": "2026-10-16T13:02:12Z",
+          "duration_s": 1.1,
           "exit_code": 0,
           "result": "PASS",
           "reason": "[cyber-attackmodel] PASS: 6 required assertion(s) hold",
-          "log": "docs/execution/evidence/research/checks/logs/cyber-attackmodel/20261013T020038Z-attempt-1.log",
+          "log": "docs/execution/evidence/research/checks/logs/cyber-attackmodel/20261016T130211Z-attempt-1.log",
           "summary": "[cyber-attackmodel] PASS: 6 required assertion(s) hold",
-          "nonce": "47436947370e4bffa7075b69fee1536c",
-          "structured_result": "docs/execution/evidence/research/checks/logs/cyber-attackmodel/20261013T020038Z-attempt-1.result.json",
+          "nonce": "6fb99997c4cd47f5b93e72c85bebad9b",
+          "structured_result": "docs/execution/evidence/research/checks/logs/cyber-attackmodel/20261016T130211Z-attempt-1.result.json",
           "assertions": [
             {
               "id": "study_validates_and_separated",
@@ -2679,7 +2721,7 @@
             {
               "path": "docs/execution/evidence/research/cyber/check.json",
               "exists": true,
-              "sha256": "07922d189431df6a64bbc1942d376b85f550e4085a9f4c9e79d03dddc061a575",
+              "sha256": "2af148893412e39d25f1646147d85cbaf7f2a9569804e54258dc30a02b04a11a",
               "fresh": true
             }
           ],
@@ -2690,7 +2732,7 @@
         {
           "path": "docs/execution/evidence/research/cyber/check.json",
           "exists": true,
-          "sha256": "07922d189431df6a64bbc1942d376b85f550e4085a9f4c9e79d03dddc061a575",
+          "sha256": "2af148893412e39d25f1646147d85cbaf7f2a9569804e54258dc30a02b04a11a",
           "fresh": true
         }
       ],
@@ -2700,10 +2742,140 @@
       "this_run": true,
       "history": [
         {
+          "result": "FAIL",
+          "checked_commit": "cb0f43adc0b94a4b92e08a47600d02fdeca8786c",
+          "finished_at": "2026-10-16T13:02:00Z",
+          "duration_s": 0.0,
+          "attempts": 1
+        },
+        {
+          "result": "PASS",
+          "checked_commit": "081eee70fc9f983ccd4a835083d784d7ebee5f02",
+          "finished_at": "2026-10-13T02:00:40Z",
+          "duration_s": 1.9,
+          "attempts": 1
+        },
+        {
           "result": "PASS",
           "checked_commit": "081eee70fc9f983ccd4a835083d784d7ebee5f02",
           "finished_at": "2026-10-13T01:59:14Z",
           "duration_s": 3.8,
+          "attempts": 1
+        }
+      ]
+    },
+    {
+      "id": "cyber-rename",
+      "group": "p8",
+      "title": "词汇中性化对照研究（cyber-rename）：研究体通过校验与数据隔离；每个参考答案由 Z3 复算一致；改名映射对已提交模型 IR 全名覆盖且一一映射；中性化（logistics）输入不含攻击模型词汇；改名任务与其攻击词汇孪生任务共享参考答案以支持 配对比较。真实批次由 scripts/cyber_rename_study.py + fal research study run 单独运行",
+      "command": "uv run --frozen python scripts/cyber_rename_check.py",
+      "tasks": [
+        "P8-03"
+      ],
+      "evidence": [],
+      "requires": null,
+      "profile": "local-lite",
+      "kind": "mandatory",
+      "retries": 0,
+      "heavy_gib": 0.0,
+      "produces": [
+        "docs/execution/evidence/research/cyber/rename-check.json"
+      ],
+      "protocol": true,
+      "assertions_from": null,
+      "trigger": null,
+      "result": "PASS",
+      "reason": "[cyber-rename] PASS: 6 required assertion(s) hold",
+      "summary": "[cyber-rename] PASS: 6 required assertion(s) hold",
+      "condition": null,
+      "checked_commit": "cb0f43adc0b94a4b92e08a47600d02fdeca8786c",
+      "worktree_sha256": "05c4badeb5949e60ca2d022fc5af036c693d5bf279535eb9565042e65c8a7f63",
+      "worktree_clean": false,
+      "config_sha256": "afa9f9e7ab8bd0c320a94d2731de3f8e0037ad3588f423eef1fed1f35f0c335a",
+      "run_nonce": "f3d3f34fee35489083703f0fecd8bb45",
+      "started_at": "2026-10-16T13:02:12Z",
+      "finished_at": "2026-10-16T13:02:12Z",
+      "duration_s": 0.3,
+      "attempts": [
+        {
+          "attempt": 1,
+          "started_at": "2026-10-16T13:02:12Z",
+          "finished_at": "2026-10-16T13:02:12Z",
+          "duration_s": 0.3,
+          "exit_code": 0,
+          "result": "PASS",
+          "reason": "[cyber-rename] PASS: 6 required assertion(s) hold",
+          "log": "docs/execution/evidence/research/checks/logs/cyber-rename/20261016T130212Z-attempt-1.log",
+          "summary": "[cyber-rename] PASS: 6 required assertion(s) hold",
+          "nonce": "21151e99a3ea49c5b84d50a676adea1f",
+          "structured_result": "docs/execution/evidence/research/checks/logs/cyber-rename/20261016T130212Z-attempt-1.result.json",
+          "assertions": [
+            {
+              "id": "study_validates_and_separated",
+              "required": true,
+              "holds": true,
+              "detail": "72 planned units; data separation (ANSWER_LEAK) enforced by load_study"
+            },
+            {
+              "id": "both_representations",
+              "required": true,
+              "holds": true,
+              "detail": "representations: ['attackmodel', 'logistics']"
+            },
+            {
+              "id": "references_z3_reproducible",
+              "required": true,
+              "holds": true,
+              "detail": "0 bad: []"
+            },
+            {
+              "id": "rename_map_total_and_injective",
+              "required": true,
+              "holds": true,
+              "detail": "every IR name has exactly one renamed form"
+            },
+            {
+              "id": "no_attack_vocabulary_in_logistics",
+              "required": true,
+              "holds": true,
+              "detail": "leaks: []"
+            },
+            {
+              "id": "paired_references_shared",
+              "required": true,
+              "holds": true,
+              "detail": "each logistics task pairs with its attackmodel twin's reference"
+            }
+          ],
+          "produced": [
+            {
+              "path": "docs/execution/evidence/research/cyber/rename-check.json",
+              "exists": true,
+              "sha256": "f9e1ded168cca5ed8f7a6e84817557023533ca9965e210d41a90a10e885eead1",
+              "fresh": true
+            }
+          ],
+          "pytest": null
+        }
+      ],
+      "evidence_files": [
+        {
+          "path": "docs/execution/evidence/research/cyber/rename-check.json",
+          "exists": true,
+          "sha256": "f9e1ded168cca5ed8f7a6e84817557023533ca9965e210d41a90a10e885eead1",
+          "fresh": true
+        }
+      ],
+      "first_failure": null,
+      "flaky": false,
+      "inherited": false,
+      "this_run": true,
+      "history": [
+        {
+          "result": "FAIL",
+          "checked_commit": "cb0f43adc0b94a4b92e08a47600d02fdeca8786c",
+          "finished_at": "2026-10-16T13:02:00Z",
+          "duration_s": 0.0,
           "attempts": 1
         }
       ]

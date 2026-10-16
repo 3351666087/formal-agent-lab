@@ -1,0 +1,619 @@
+{
+ "name": "cve-2017-5638-equifax",
+ "description": "Multi-stage attack/defence model grounded in CVE-2017-5638 (Apache Struts, github.com/apache/struts) and the 2017 Equifax breach: Struts RCE \u2192 recon \u2192 credential access \u2192 lateral movement \u2192 database access \u2192 exfiltration. Controls block techniques; the goal is exfiltration of the customer database.",
+ "constants": [
+  {
+   "name": "credential_vaulting",
+   "type": {
+    "kind": "bool"
+   },
+   "value": {
+    "default": false
+   }
+  },
+  {
+   "name": "db_access_control",
+   "type": {
+    "kind": "bool"
+   },
+   "value": {
+    "default": false
+   }
+  },
+  {
+   "name": "dns_monitoring",
+   "type": {
+    "kind": "bool"
+   },
+   "value": {
+    "default": false
+   }
+  },
+  {
+   "name": "edr",
+   "type": {
+    "kind": "bool"
+   },
+   "value": {
+    "default": false
+   }
+  },
+  {
+   "name": "email_filtering",
+   "type": {
+    "kind": "bool"
+   },
+   "value": {
+    "default": false
+   }
+  },
+  {
+   "name": "network_segmentation",
+   "type": {
+    "kind": "bool"
+   },
+   "value": {
+    "default": false
+   }
+  },
+  {
+   "name": "patch_struts",
+   "type": {
+    "kind": "bool"
+   },
+   "value": {
+    "default": false
+   }
+  },
+  {
+   "name": "proxy_tls_inspection",
+   "type": {
+    "kind": "bool"
+   },
+   "value": {
+    "default": false
+   }
+  },
+  {
+   "name": "replica_isolation",
+   "type": {
+    "kind": "bool"
+   },
+   "value": {
+    "default": false
+   }
+  },
+  {
+   "name": "security_awareness",
+   "type": {
+    "kind": "bool"
+   },
+   "value": {
+    "default": false
+   }
+  },
+  {
+   "name": "vpn_mfa",
+   "type": {
+    "kind": "bool"
+   },
+   "value": {
+    "default": false
+   }
+  },
+  {
+   "name": "waf",
+   "type": {
+    "kind": "bool"
+   },
+   "value": {
+    "default": false
+   }
+  }
+ ],
+ "state": [
+  {
+   "name": "foothold",
+   "type": {
+    "kind": "bool"
+   },
+   "initial": {
+    "default": false
+   },
+   "label": "foothold"
+  },
+  {
+   "name": "recon",
+   "type": {
+    "kind": "bool"
+   },
+   "initial": {
+    "default": false
+   },
+   "label": "recon"
+  },
+  {
+   "name": "creds",
+   "type": {
+    "kind": "bool"
+   },
+   "initial": {
+    "default": false
+   },
+   "label": "creds"
+  },
+  {
+   "name": "lateral",
+   "type": {
+    "kind": "bool"
+   },
+   "initial": {
+    "default": false
+   },
+   "label": "lateral"
+  },
+  {
+   "name": "db_access",
+   "type": {
+    "kind": "bool"
+   },
+   "initial": {
+    "default": false
+   },
+   "label": "db_access"
+  },
+  {
+   "name": "exfiltrated",
+   "type": {
+    "kind": "bool"
+   },
+   "initial": {
+    "default": false
+   },
+   "label": "exfiltrated"
+  }
+ ],
+ "actions": [
+  {
+   "name": "exploit_struts_cve_2017_5638",
+   "cost": 1,
+   "effects": [
+    {
+     "kind": "assign",
+     "target": {
+      "var": "foothold",
+      "index": []
+     },
+     "value": {
+      "op": "const",
+      "value": true
+     }
+    }
+   ],
+   "precondition": {
+    "op": "and",
+    "args": [
+     {
+      "op": "not",
+      "args": [
+       {
+        "op": "var",
+        "name": "patch_struts",
+        "index": []
+       }
+      ]
+     },
+     {
+      "op": "not",
+      "args": [
+       {
+        "op": "var",
+        "name": "waf",
+        "index": []
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "spearphish_employee",
+   "cost": 1,
+   "effects": [
+    {
+     "kind": "assign",
+     "target": {
+      "var": "foothold",
+      "index": []
+     },
+     "value": {
+      "op": "const",
+      "value": true
+     }
+    }
+   ],
+   "precondition": {
+    "op": "and",
+    "args": [
+     {
+      "op": "not",
+      "args": [
+       {
+        "op": "var",
+        "name": "email_filtering",
+        "index": []
+       }
+      ]
+     },
+     {
+      "op": "not",
+      "args": [
+       {
+        "op": "var",
+        "name": "security_awareness",
+        "index": []
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "internal_reconnaissance",
+   "cost": 1,
+   "effects": [
+    {
+     "kind": "assign",
+     "target": {
+      "var": "recon",
+      "index": []
+     },
+     "value": {
+      "op": "const",
+      "value": true
+     }
+    }
+   ],
+   "precondition": {
+    "op": "var",
+    "name": "foothold",
+    "index": []
+   }
+  },
+  {
+   "name": "steal_config_credentials",
+   "cost": 1,
+   "effects": [
+    {
+     "kind": "assign",
+     "target": {
+      "var": "creds",
+      "index": []
+     },
+     "value": {
+      "op": "const",
+      "value": true
+     }
+    }
+   ],
+   "precondition": {
+    "op": "and",
+    "args": [
+     {
+      "op": "var",
+      "name": "recon",
+      "index": []
+     },
+     {
+      "op": "not",
+      "args": [
+       {
+        "op": "var",
+        "name": "credential_vaulting",
+        "index": []
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "dump_process_memory",
+   "cost": 1,
+   "effects": [
+    {
+     "kind": "assign",
+     "target": {
+      "var": "creds",
+      "index": []
+     },
+     "value": {
+      "op": "const",
+      "value": true
+     }
+    }
+   ],
+   "precondition": {
+    "op": "and",
+    "args": [
+     {
+      "op": "var",
+      "name": "recon",
+      "index": []
+     },
+     {
+      "op": "not",
+      "args": [
+       {
+        "op": "var",
+        "name": "edr",
+        "index": []
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "smb_lateral_movement",
+   "cost": 1,
+   "effects": [
+    {
+     "kind": "assign",
+     "target": {
+      "var": "lateral",
+      "index": []
+     },
+     "value": {
+      "op": "const",
+      "value": true
+     }
+    }
+   ],
+   "precondition": {
+    "op": "and",
+    "args": [
+     {
+      "op": "var",
+      "name": "creds",
+      "index": []
+     },
+     {
+      "op": "not",
+      "args": [
+       {
+        "op": "var",
+        "name": "network_segmentation",
+        "index": []
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "vpn_pivot",
+   "cost": 1,
+   "effects": [
+    {
+     "kind": "assign",
+     "target": {
+      "var": "lateral",
+      "index": []
+     },
+     "value": {
+      "op": "const",
+      "value": true
+     }
+    }
+   ],
+   "precondition": {
+    "op": "and",
+    "args": [
+     {
+      "op": "var",
+      "name": "creds",
+      "index": []
+     },
+     {
+      "op": "not",
+      "args": [
+       {
+        "op": "var",
+        "name": "vpn_mfa",
+        "index": []
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "query_pii_database",
+   "cost": 1,
+   "effects": [
+    {
+     "kind": "assign",
+     "target": {
+      "var": "db_access",
+      "index": []
+     },
+     "value": {
+      "op": "const",
+      "value": true
+     }
+    }
+   ],
+   "precondition": {
+    "op": "and",
+    "args": [
+     {
+      "op": "var",
+      "name": "lateral",
+      "index": []
+     },
+     {
+      "op": "not",
+      "args": [
+       {
+        "op": "var",
+        "name": "db_access_control",
+        "index": []
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "read_database_replica",
+   "cost": 1,
+   "effects": [
+    {
+     "kind": "assign",
+     "target": {
+      "var": "db_access",
+      "index": []
+     },
+     "value": {
+      "op": "const",
+      "value": true
+     }
+    }
+   ],
+   "precondition": {
+    "op": "and",
+    "args": [
+     {
+      "op": "var",
+      "name": "lateral",
+      "index": []
+     },
+     {
+      "op": "not",
+      "args": [
+       {
+        "op": "var",
+        "name": "replica_isolation",
+        "index": []
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "exfiltrate_over_dns",
+   "cost": 1,
+   "effects": [
+    {
+     "kind": "assign",
+     "target": {
+      "var": "exfiltrated",
+      "index": []
+     },
+     "value": {
+      "op": "const",
+      "value": true
+     }
+    }
+   ],
+   "precondition": {
+    "op": "and",
+    "args": [
+     {
+      "op": "var",
+      "name": "db_access",
+      "index": []
+     },
+     {
+      "op": "not",
+      "args": [
+       {
+        "op": "var",
+        "name": "dns_monitoring",
+        "index": []
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "exfiltrate_over_https",
+   "cost": 1,
+   "effects": [
+    {
+     "kind": "assign",
+     "target": {
+      "var": "exfiltrated",
+      "index": []
+     },
+     "value": {
+      "op": "const",
+      "value": true
+     }
+    }
+   ],
+   "precondition": {
+    "op": "and",
+    "args": [
+     {
+      "op": "var",
+      "name": "db_access",
+      "index": []
+     },
+     {
+      "op": "not",
+      "args": [
+       {
+        "op": "var",
+        "name": "proxy_tls_inspection",
+        "index": []
+       }
+      ]
+     }
+    ]
+   }
+  }
+ ],
+ "properties": [
+  {
+   "id": "data_exfiltrated",
+   "kind": "goal",
+   "expr": {
+    "op": "var",
+    "name": "exfiltrated",
+    "index": []
+   },
+   "label": "\u5ba2\u6237\u6570\u636e\u5e93\u88ab\u5916\u6cc4\uff08\u22481.43 \u4ebf\u6761\uff09"
+  },
+  {
+   "id": "breach_prevented",
+   "kind": "invariant",
+   "expr": {
+    "op": "not",
+    "args": [
+     {
+      "op": "var",
+      "name": "exfiltrated",
+      "index": []
+     }
+    ]
+   },
+   "label": "\u6cc4\u9732\u88ab\u963b\u6b62"
+  }
+ ],
+ "objectives": [
+  {
+   "id": "attack_cost",
+   "label": "\u653b\u51fb\u6b65\u6570",
+   "unit": "stages",
+   "terms": [
+    {
+     "kind": "action_cost"
+    }
+   ]
+  }
+ ]
+}

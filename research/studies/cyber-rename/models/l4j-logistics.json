@@ -1,0 +1,381 @@
+{
+ "name": "delivery-routing-line-v14",
+ "description": "Formal workflow model of a six-step package delivery routing line (sorting line v1.4). Structure-identical to the CVE-2021-44228 attack model with every noun renamed; safeguards flip the switches that gate the actions.",
+ "constants": [
+  {
+   "name": "template_processing",
+   "type": {
+    "kind": "bool"
+   },
+   "value": {
+    "default": true
+   }
+  },
+  {
+   "name": "remote_ordering",
+   "type": {
+    "kind": "bool"
+   },
+   "value": {
+    "default": true
+   }
+  },
+  {
+   "name": "carrier_directory",
+   "type": {
+    "kind": "bool"
+   },
+   "value": {
+    "default": true
+   }
+  },
+  {
+   "name": "outbound_permitted",
+   "type": {
+    "kind": "bool"
+   },
+   "value": {
+    "default": true
+   }
+  },
+  {
+   "name": "order_validated",
+   "type": {
+    "kind": "bool"
+   },
+   "value": {
+    "default": false
+   }
+  },
+  {
+   "name": "external_loader_trusted",
+   "type": {
+    "kind": "bool"
+   },
+   "value": {
+    "default": false
+   }
+  },
+  {
+   "name": "local_plugin",
+   "type": {
+    "kind": "bool"
+   },
+   "value": {
+    "default": true
+   }
+  }
+ ],
+ "state": [
+  {
+   "name": "order_received",
+   "type": {
+    "kind": "bool"
+   },
+   "initial": {
+    "default": false
+   },
+   "label": "order_received"
+  },
+  {
+   "name": "template_expanded",
+   "type": {
+    "kind": "bool"
+   },
+   "initial": {
+    "default": false
+   },
+   "label": "template_expanded"
+  },
+  {
+   "name": "carrier_contacted",
+   "type": {
+    "kind": "bool"
+   },
+   "initial": {
+    "default": false
+   },
+   "label": "carrier_contacted"
+  },
+  {
+   "name": "manifest_returned",
+   "type": {
+    "kind": "bool"
+   },
+   "initial": {
+    "default": false
+   },
+   "label": "manifest_returned"
+  },
+  {
+   "name": "package_loaded",
+   "type": {
+    "kind": "bool"
+   },
+   "initial": {
+    "default": false
+   },
+   "label": "package_loaded"
+  },
+  {
+   "name": "delivery_completed",
+   "type": {
+    "kind": "bool"
+   },
+   "initial": {
+    "default": false
+   },
+   "label": "delivery_completed"
+  }
+ ],
+ "actions": [
+  {
+   "name": "submit_order",
+   "cost": 1,
+   "precondition": {
+    "op": "not",
+    "args": [
+     {
+      "op": "var",
+      "name": "order_validated",
+      "index": []
+     }
+    ]
+   },
+   "effects": [
+    {
+     "kind": "assign",
+     "target": {
+      "var": "order_received",
+      "index": []
+     },
+     "value": {
+      "op": "const",
+      "value": true
+     }
+    }
+   ]
+  },
+  {
+   "name": "expand_template",
+   "cost": 1,
+   "precondition": {
+    "op": "and",
+    "args": [
+     {
+      "op": "var",
+      "name": "order_received",
+      "index": []
+     },
+     {
+      "op": "var",
+      "name": "template_processing",
+      "index": []
+     },
+     {
+      "op": "var",
+      "name": "carrier_directory",
+      "index": []
+     }
+    ]
+   },
+   "effects": [
+    {
+     "kind": "assign",
+     "target": {
+      "var": "template_expanded",
+      "index": []
+     },
+     "value": {
+      "op": "const",
+      "value": true
+     }
+    }
+   ]
+  },
+  {
+   "name": "contact_carrier",
+   "cost": 1,
+   "precondition": {
+    "op": "and",
+    "args": [
+     {
+      "op": "var",
+      "name": "template_expanded",
+      "index": []
+     },
+     {
+      "op": "var",
+      "name": "remote_ordering",
+      "index": []
+     },
+     {
+      "op": "var",
+      "name": "outbound_permitted",
+      "index": []
+     }
+    ]
+   },
+   "effects": [
+    {
+     "kind": "assign",
+     "target": {
+      "var": "carrier_contacted",
+      "index": []
+     },
+     "value": {
+      "op": "const",
+      "value": true
+     }
+    }
+   ]
+  },
+  {
+   "name": "return_manifest",
+   "cost": 1,
+   "precondition": {
+    "op": "var",
+    "name": "carrier_contacted",
+    "index": []
+   },
+   "effects": [
+    {
+     "kind": "assign",
+     "target": {
+      "var": "manifest_returned",
+      "index": []
+     },
+     "value": {
+      "op": "const",
+      "value": true
+     }
+    }
+   ]
+  },
+  {
+   "name": "load_package_external",
+   "cost": 1,
+   "precondition": {
+    "op": "and",
+    "args": [
+     {
+      "op": "var",
+      "name": "manifest_returned",
+      "index": []
+     },
+     {
+      "op": "var",
+      "name": "external_loader_trusted",
+      "index": []
+     }
+    ]
+   },
+   "effects": [
+    {
+     "kind": "assign",
+     "target": {
+      "var": "package_loaded",
+      "index": []
+     },
+     "value": {
+      "op": "const",
+      "value": true
+     }
+    }
+   ]
+  },
+  {
+   "name": "load_package_local",
+   "cost": 1,
+   "precondition": {
+    "op": "and",
+    "args": [
+     {
+      "op": "var",
+      "name": "manifest_returned",
+      "index": []
+     },
+     {
+      "op": "var",
+      "name": "local_plugin",
+      "index": []
+     }
+    ]
+   },
+   "effects": [
+    {
+     "kind": "assign",
+     "target": {
+      "var": "package_loaded",
+      "index": []
+     },
+     "value": {
+      "op": "const",
+      "value": true
+     }
+    }
+   ]
+  },
+  {
+   "name": "complete_delivery",
+   "cost": 1,
+   "precondition": {
+    "op": "var",
+    "name": "package_loaded",
+    "index": []
+   },
+   "effects": [
+    {
+     "kind": "assign",
+     "target": {
+      "var": "delivery_completed",
+      "index": []
+     },
+     "value": {
+      "op": "const",
+      "value": true
+     }
+    }
+   ]
+  }
+ ],
+ "properties": [
+  {
+   "id": "rce_achieved",
+   "kind": "goal",
+   "expr": {
+    "op": "var",
+    "name": "delivery_completed",
+    "index": []
+   },
+   "label": "\u6d3e\u9001\u5b8c\u6210"
+  },
+  {
+   "id": "no_rce",
+   "kind": "invariant",
+   "expr": {
+    "op": "not",
+    "args": [
+     {
+      "op": "var",
+      "name": "delivery_completed",
+      "index": []
+     }
+    ]
+   },
+   "label": "\u6d3e\u9001\u672a\u5b8c\u6210"
+  }
+ ],
+ "objectives": [
+  {
+   "id": "attack_cost",
+   "label": "\u52a8\u4f5c\u6570",
+   "unit": "steps",
+   "terms": [
+    {
+     "kind": "action_cost"
+    }
+   ]
+  }
+ ]
+}

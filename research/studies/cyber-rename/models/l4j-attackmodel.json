@@ -1,0 +1,381 @@
+{
+ "name": "cve-2021-44228-log4shell",
+ "description": "Formal attack/defence model of CVE-2021-44228 (Log4Shell) in Apache Log4j 2 (github.com/apache/logging-log4j2), version 2.14.1. The goal rce_achieved is reachable only when the configuration leaves the chain open; the fix / mitigations flip the constants that gate it.",
+ "constants": [
+  {
+   "name": "message_lookups",
+   "type": {
+    "kind": "bool"
+   },
+   "value": {
+    "default": true
+   }
+  },
+  {
+   "name": "jndi_enabled",
+   "type": {
+    "kind": "bool"
+   },
+   "value": {
+    "default": true
+   }
+  },
+  {
+   "name": "jndi_class_present",
+   "type": {
+    "kind": "bool"
+   },
+   "value": {
+    "default": true
+   }
+  },
+  {
+   "name": "egress_allowed",
+   "type": {
+    "kind": "bool"
+   },
+   "value": {
+    "default": true
+   }
+  },
+  {
+   "name": "input_sanitized",
+   "type": {
+    "kind": "bool"
+   },
+   "value": {
+    "default": false
+   }
+  },
+  {
+   "name": "trust_url_codebase",
+   "type": {
+    "kind": "bool"
+   },
+   "value": {
+    "default": false
+   }
+  },
+  {
+   "name": "gadget_present",
+   "type": {
+    "kind": "bool"
+   },
+   "value": {
+    "default": true
+   }
+  }
+ ],
+ "state": [
+  {
+   "name": "attacker_input_logged",
+   "type": {
+    "kind": "bool"
+   },
+   "initial": {
+    "default": false
+   },
+   "label": "attacker_input_logged"
+  },
+  {
+   "name": "jndi_lookup_triggered",
+   "type": {
+    "kind": "bool"
+   },
+   "initial": {
+    "default": false
+   },
+   "label": "jndi_lookup_triggered"
+  },
+  {
+   "name": "attacker_endpoint_contacted",
+   "type": {
+    "kind": "bool"
+   },
+   "initial": {
+    "default": false
+   },
+   "label": "attacker_endpoint_contacted"
+  },
+  {
+   "name": "malicious_reference_returned",
+   "type": {
+    "kind": "bool"
+   },
+   "initial": {
+    "default": false
+   },
+   "label": "malicious_reference_returned"
+  },
+  {
+   "name": "remote_class_loaded",
+   "type": {
+    "kind": "bool"
+   },
+   "initial": {
+    "default": false
+   },
+   "label": "remote_class_loaded"
+  },
+  {
+   "name": "rce_achieved",
+   "type": {
+    "kind": "bool"
+   },
+   "initial": {
+    "default": false
+   },
+   "label": "rce_achieved"
+  }
+ ],
+ "actions": [
+  {
+   "name": "inject_jndi_string",
+   "cost": 1,
+   "precondition": {
+    "op": "not",
+    "args": [
+     {
+      "op": "var",
+      "name": "input_sanitized",
+      "index": []
+     }
+    ]
+   },
+   "effects": [
+    {
+     "kind": "assign",
+     "target": {
+      "var": "attacker_input_logged",
+      "index": []
+     },
+     "value": {
+      "op": "const",
+      "value": true
+     }
+    }
+   ]
+  },
+  {
+   "name": "trigger_jndi_lookup",
+   "cost": 1,
+   "precondition": {
+    "op": "and",
+    "args": [
+     {
+      "op": "var",
+      "name": "attacker_input_logged",
+      "index": []
+     },
+     {
+      "op": "var",
+      "name": "message_lookups",
+      "index": []
+     },
+     {
+      "op": "var",
+      "name": "jndi_class_present",
+      "index": []
+     }
+    ]
+   },
+   "effects": [
+    {
+     "kind": "assign",
+     "target": {
+      "var": "jndi_lookup_triggered",
+      "index": []
+     },
+     "value": {
+      "op": "const",
+      "value": true
+     }
+    }
+   ]
+  },
+  {
+   "name": "resolve_to_attacker",
+   "cost": 1,
+   "precondition": {
+    "op": "and",
+    "args": [
+     {
+      "op": "var",
+      "name": "jndi_lookup_triggered",
+      "index": []
+     },
+     {
+      "op": "var",
+      "name": "jndi_enabled",
+      "index": []
+     },
+     {
+      "op": "var",
+      "name": "egress_allowed",
+      "index": []
+     }
+    ]
+   },
+   "effects": [
+    {
+     "kind": "assign",
+     "target": {
+      "var": "attacker_endpoint_contacted",
+      "index": []
+     },
+     "value": {
+      "op": "const",
+      "value": true
+     }
+    }
+   ]
+  },
+  {
+   "name": "return_malicious_reference",
+   "cost": 1,
+   "precondition": {
+    "op": "var",
+    "name": "attacker_endpoint_contacted",
+    "index": []
+   },
+   "effects": [
+    {
+     "kind": "assign",
+     "target": {
+      "var": "malicious_reference_returned",
+      "index": []
+     },
+     "value": {
+      "op": "const",
+      "value": true
+     }
+    }
+   ]
+  },
+  {
+   "name": "load_class_via_reference",
+   "cost": 1,
+   "precondition": {
+    "op": "and",
+    "args": [
+     {
+      "op": "var",
+      "name": "malicious_reference_returned",
+      "index": []
+     },
+     {
+      "op": "var",
+      "name": "trust_url_codebase",
+      "index": []
+     }
+    ]
+   },
+   "effects": [
+    {
+     "kind": "assign",
+     "target": {
+      "var": "remote_class_loaded",
+      "index": []
+     },
+     "value": {
+      "op": "const",
+      "value": true
+     }
+    }
+   ]
+  },
+  {
+   "name": "load_class_via_gadget",
+   "cost": 1,
+   "precondition": {
+    "op": "and",
+    "args": [
+     {
+      "op": "var",
+      "name": "malicious_reference_returned",
+      "index": []
+     },
+     {
+      "op": "var",
+      "name": "gadget_present",
+      "index": []
+     }
+    ]
+   },
+   "effects": [
+    {
+     "kind": "assign",
+     "target": {
+      "var": "remote_class_loaded",
+      "index": []
+     },
+     "value": {
+      "op": "const",
+      "value": true
+     }
+    }
+   ]
+  },
+  {
+   "name": "execute_payload",
+   "cost": 1,
+   "precondition": {
+    "op": "var",
+    "name": "remote_class_loaded",
+    "index": []
+   },
+   "effects": [
+    {
+     "kind": "assign",
+     "target": {
+      "var": "rce_achieved",
+      "index": []
+     },
+     "value": {
+      "op": "const",
+      "value": true
+     }
+    }
+   ]
+  }
+ ],
+ "properties": [
+  {
+   "id": "rce_achieved",
+   "kind": "goal",
+   "expr": {
+    "op": "var",
+    "name": "rce_achieved",
+    "index": []
+   },
+   "label": "\u653b\u51fb\u8005\u8fbe\u6210\u8fdc\u7a0b\u4ee3\u7801\u6267\u884c\uff08RCE\uff09"
+  },
+  {
+   "id": "no_rce",
+   "kind": "invariant",
+   "expr": {
+    "op": "not",
+    "args": [
+     {
+      "op": "var",
+      "name": "rce_achieved",
+      "index": []
+     }
+    ]
+   },
+   "label": "\u4e0d\u53d1\u751f RCE"
+  }
+ ],
+ "objectives": [
+  {
+   "id": "attack_cost",
+   "label": "\u653b\u51fb\u6b65\u6570",
+   "unit": "steps",
+   "terms": [
+    {
+     "kind": "action_cost"
+    }
+   ]
+  }
+ ]
+}

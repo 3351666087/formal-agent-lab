@@ -499,7 +499,13 @@ class AnthropicMessagesAdapter(_ResearchAdapter):
         return f"{self.base_url}/messages" if self.base_url.endswith("/v1") else f"{self.base_url}/v1/messages"
 
     def auth_headers(self, key: str) -> dict[str, str]:
-        return {"x-api-key": key, "anthropic-version": ANTHROPIC_VERSION}
+        h = {"x-api-key": key, "anthropic-version": ANTHROPIC_VERSION}
+        # user-scoped keys (sk-ant-usr-…) are not bound to a workspace: the Messages API then requires the
+        # anthropic-workspace-id header. Kept out of ProviderConfig (credential-adjacent) and read from settings.
+        ws = read_setting("FAL_RESEARCH_ANTHROPIC_WORKSPACE_ID")
+        if ws:
+            h["anthropic-workspace-id"] = ws
+        return h
 
     def body(self, req: ResearchRequest) -> dict[str, Any]:
         body: dict[str, Any] = {"model": self.model, "messages": [{"role": "user", "content": req.user}],

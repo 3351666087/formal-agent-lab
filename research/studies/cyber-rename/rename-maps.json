@@ -1,0 +1,76 @@
+{
+ "log4shell": {
+  "state": {
+   "attacker_input_logged": "order_received",
+   "jndi_lookup_triggered": "template_expanded",
+   "attacker_endpoint_contacted": "carrier_contacted",
+   "malicious_reference_returned": "manifest_returned",
+   "remote_class_loaded": "package_loaded",
+   "rce_achieved": "delivery_completed"
+  },
+  "constants": {
+   "message_lookups": "template_processing",
+   "jndi_enabled": "remote_ordering",
+   "jndi_class_present": "carrier_directory",
+   "egress_allowed": "outbound_permitted",
+   "input_sanitized": "order_validated",
+   "trust_url_codebase": "external_loader_trusted",
+   "gadget_present": "local_plugin"
+  },
+  "actions": {
+   "inject_jndi_string": "submit_order",
+   "trigger_jndi_lookup": "expand_template",
+   "resolve_to_attacker": "contact_carrier",
+   "return_malicious_reference": "return_manifest",
+   "load_class_via_reference": "load_package_external",
+   "load_class_via_gadget": "load_package_local",
+   "execute_payload": "complete_delivery"
+  },
+  "mitigations": {
+   "formatMsgNoLookups": "switch_off_template_processing",
+   "disable_jndi": "switch_off_remote_ordering",
+   "remove_jndi_class": "uninstall_carrier_directory",
+   "block_egress": "seal_outbound_line",
+   "input_validation": "enable_order_validation",
+   "remove_gadget": "uninstall_local_plugin",
+   "trust_url_codebase_false": "distrust_external_loader"
+  }
+ },
+ "equifax": {
+  "stages": {
+   "foothold": "project_kickoff",
+   "recon": "site_survey",
+   "creds": "access_badges",
+   "lateral": "floor_access",
+   "db_access": "archive_access",
+   "exfiltrated": "records_shipped"
+  },
+  "techniques": {
+   "exploit_struts_cve_2017_5638": "reuse_legacy_terminal",
+   "spearphish_employee": "invite_contractor",
+   "internal_reconnaissance": "walkthrough_survey",
+   "steal_config_credentials": "copy_from_registry",
+   "dump_process_memory": "review_visitor_log",
+   "smb_lateral_movement": "use_service_corridor",
+   "vpn_pivot": "use_remote_pass",
+   "query_pii_database": "query_archive_index",
+   "read_database_replica": "read_backup_copy",
+   "exfiltrate_over_dns": "ship_via_courier_a",
+   "exfiltrate_over_https": "ship_via_courier_b"
+  },
+  "controls": {
+   "patch_struts": "terminal_maintenance",
+   "waf": "gate_inspection",
+   "email_filtering": "mail_scanning",
+   "security_awareness": "staff_training",
+   "credential_vaulting": "registry_locked",
+   "edr": "visitor_log_off",
+   "network_segmentation": "corridor_partition",
+   "vpn_mfa": "remote_pass_mfa",
+   "db_access_control": "archive_approval",
+   "replica_isolation": "backup_isolated",
+   "dns_monitoring": "courier_a_tracking",
+   "proxy_tls_inspection": "courier_b_inspection"
+  }
+ }
+}
