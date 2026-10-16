@@ -21,6 +21,7 @@ jobs:
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }   # research-case validation checks software.revision against git history
       - uses: astral-sh/setup-uv@v6
         with: { version: "${{ env.UV_VERSION }}" }
       - uses: pnpm/action-setup@v4
@@ -48,6 +49,7 @@ jobs:
     needs: contracts-and-unit
     steps:
       - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }   # integration replay/case checks also read git history
       - uses: astral-sh/setup-uv@v6
         with: { version: "${{ env.UV_VERSION }}" }
       - name: install locked dependencies
