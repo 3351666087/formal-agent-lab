@@ -33,11 +33,10 @@ def _tokens(md: str) -> set[str]:
 
 
 def main() -> int:
-    from formal_lab_contracts import CheckQuery, ModelIR, ModelSource
-    from formal_lab_domain_mal.cve_2021_44228 import log4shell_model
+    from formal_lab_contracts import CheckQuery
     from formal_lab_domain_mal.cve_2017_5638 import equifax_model
+    from formal_lab_domain_mal.cve_2021_44228 import log4shell_model
     from formal_lab_eval.research import load_study, plan_units
-    from formal_lab_model import build_package
     from formal_lab_solver_z3.verifier import Z3Verifier
 
     r = CheckResult("cyber-rename")
@@ -53,11 +52,9 @@ def main() -> int:
             f"representations: {sorted(reps)} (attackmodel = CVE-named, logistics = disguised, abstract = control, "
             "anchored = abstract + defensive-framing paragraph)")
 
-    # every attackmodel reference is reproduced by the Z3 verifier
+    # every attackmodel reference is reproduced by the Z3 verifier (models rebuilt per-reference in the loop below)
     z = Z3Verifier()
     BOUND = {"max_steps": 25, "timeout_ms": 15000}
-    l4j = log4shell_model(version="2.14.1", name="cve-2021-44228-log4shell")
-    eqx = equifax_model(deployed=frozenset(), name="cve-2017-5638-equifax")
 
     def reach(pkg, goal) -> bool:
         out = z.check(pkg, CheckQuery(kind="GOAL_REACHABILITY", property_id=goal, bound=BOUND))

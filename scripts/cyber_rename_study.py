@@ -16,8 +16,8 @@ from itertools import combinations
 from pathlib import Path
 
 from formal_lab_contracts import CheckQuery, ObjectiveSpec
-from formal_lab_domain_mal.cve_2021_44228 import MITIGATIONS, log4shell_model
 from formal_lab_domain_mal.cve_2017_5638 import GAME_SPEC, all_controls, equifax_model
+from formal_lab_domain_mal.cve_2021_44228 import MITIGATIONS, log4shell_model
 from formal_lab_solver_z3.verifier import Z3Verifier
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -404,9 +404,7 @@ def build() -> None:
     l4j_pkg, eqx_pkg = l4j.package(), eqx.package()
     l4j_goal, eqx_goal = "rce_achieved", "data_exfiltrated"
     l4j_consts = {c["name"]: c["value"]["default"] for c in l4j.ir_dict["constants"]}
-    l4j_states = [s["name"] for s in l4j.ir_dict["state"]]
     l4j_act = l4j.ir_dict["actions"]
-    eqx_states = [s for s, _, _ in GAME_SPEC]
 
     def add(tid: str, rep: str, kind: str, purpose: str, md: str, question: str, answer, note: str,
             shared_ref: str | None = None) -> None:
@@ -603,7 +601,7 @@ def _map_expr(e: dict, state_map: dict, const_map: dict) -> dict:
 
 
 def _rename_l4j_ir(ir: dict) -> dict:
-    S, K, A, M = L4J_RENAME["state"], L4J_RENAME["constants"], L4J_RENAME["actions"], L4J_RENAME["mitigations"]
+    S, K, A = L4J_RENAME["state"], L4J_RENAME["constants"], L4J_RENAME["actions"]
     out = json.loads(json.dumps(ir))
     out["name"] = "delivery-routing-line-v14"
     out["description"] = ("Formal workflow model of a six-step package delivery routing line (sorting line v1.4). "

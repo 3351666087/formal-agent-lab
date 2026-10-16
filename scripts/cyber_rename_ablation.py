@@ -24,12 +24,10 @@ import time
 from pathlib import Path
 
 import httpx
+from cyber_rename_study import l4j_prompt  # sibling script in scripts/ — the exact abstract-body builder
+from formal_lab_domain_mal.cve_2021_44228 import log4shell_model
 from formal_lab_eval.research import FORMAT_JSON, SYSTEM_PROMPT
 from formal_lab_strategies.model_clients import read_setting
-
-sys.path.insert(0, str(Path(__file__).resolve().parent))
-from cyber_rename_study import l4j_prompt  # noqa: E402  (the exact abstract-body builder)
-from formal_lab_domain_mal.cve_2021_44228 import log4shell_model  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "research" / "results" / "cyber-rename" / "ablation"
