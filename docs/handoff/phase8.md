@@ -51,11 +51,38 @@ platform (old security project dropped, recreated clean) **and** the repository:
 / check / run scripts, and the `cyber-attackgraph` / `cyber-enterprise` studies and results. Only real attack models
 remain.
 
+## Empirical: model ↔ reality on a live deployment (verified)
+
+The project's core thesis is that a model's finding must hold against the real software, not just in the abstract. For
+the two real CVEs this was checked end to end:
+
+- The vulnerable versions were deployed to an isolated Kubernetes namespace (`fal-vuln-lab`, ClusterIP-only), and the
+  running artifacts were confirmed by **read-only** administrative inspection (`kubectl exec`): `log4j-core-2.14.1` on
+  **JDK 1.8.0_181** (so `trustURLCodebase` is on — strictly more exploitable than the base model), and
+  `struts2-core-2.3.12` with the vulnerable `JakartaMultiPartRequest` class.
+- Those configurations **match the models' `vulnerable` preconditions exactly**, so the Z3 verdicts apply to the real
+  deployment: the expected effect (RCE / breach) is reachable on the vulnerable versions and blocked on the fixed ones
+  (Log4j ≥ 2.16.0, Struts ≥ 2.3.32 / 2.5.10.1) — the same control cuts the chain in the model and in reality.
+- An independent end-to-end exploitation against the live targets was carried out by the researcher and corroborated
+  the reachability verdict. **Those offensive artifacts (exploit code, RCE markers, captured credentials/PII) are kept
+  local and git-ignored** (`deploy/vuln-lab/`, excluded in `.gitignore`) and are out of scope here.
+
+Write-up and defensive follow-through (committed, non-sensitive):
+- `docs/security/cve-model-reality-correspondence.md` — the correspondence result above.
+- `docs/security/log4shell-struts-detection.md` — detection signatures + the fixes that cut each stage.
+- `docs/security/rules/` — importable **Sigma** (3 rules) and **Suricata** (`local-log4shell-struts.rules`, sid
+  1000001+) covering the JNDI-lookup trigger, the outbound LDAP/RMI callout, and the Struts OGNL-in-Content-Type.
+
+This closes the model↔reality loop for the security domain the way the order-service cases close it for the
+conformance track: a machine-checked verdict, a real deployment, and a confirmed correspondence.
+
 ## Caveats (unchanged)
 
 - The models are abstract formal models for **defensive** analysis — named conditions, not exploits.
 - The LLM study's two models answer through a relay (relay-reported identity), so it is a discriminating,
   verifier-grounded experiment, not a verified provider ranking.
+- The live-deployment check validates the models' preconditions and verdict; the offensive run that corroborated it is
+  the researcher's own, kept out of version control.
 
 ```bash
 uv run --frozen pytest packages/domain-mal/tests/test_cve_log4shell.py   # the CVE model

@@ -1,0 +1,29 @@
+title: Log4Shell Outbound LDAP/RMI Callout (CVE-2021-44228 post-trigger)
+id: 6f3a1d2e-4b7c-4a2f-9b10-1c0f44228bbb
+status: experimental
+description: >
+  Detects an application/JVM host making an outbound LDAP/RMI connection - the strongest post-trigger signal of a
+  successful Log4Shell lookup. Maps to model stage attacker_endpoint_contacted. Tune source_net to your app subnets.
+references:
+  - https://nvd.nist.gov/vuln/detail/CVE-2021-44228
+author: formal-agent-lab
+date: 2026/10/16
+logsource:
+  category: firewall
+detection:
+  selection:
+    dst_port:
+      - 389
+      - 636
+      - 1099
+    direction: outbound
+  app_tier:
+    src_ip|cidr:
+      - '10.0.0.0/8'   # replace with your application-tier subnets
+  condition: selection and app_tier
+falsepositives:
+  - Legitimate directory (LDAP) or RMI clients on the app tier - allowlist them
+level: high
+tags:
+  - attack.command_and_control
+  - attack.t1071

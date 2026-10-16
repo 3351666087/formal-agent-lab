@@ -1,0 +1,16 @@
+# Local Suricata signatures for the formal-agent-lab CVE models.
+# Private sid range 1000001+. Tested keywords: http.header, http.uri, http.request_body, http.content_type (Suricata 5+).
+# Deploy: copy into your rules/ dir, add to suricata.yaml rule-files, run `suricata-update` or reload.
+
+# ---- CVE-2021-44228 Log4Shell: JNDI lookup trigger (inbound) ----
+alert http any any -> any any (msg:"LOCAL CVE-2021-44228 Log4Shell JNDI lookup in HTTP header"; flow:established,to_server; http.header; content:"|24 7b|jndi|3a|"; nocase; reference:cve,2021-44228; classtype:attempted-admin; metadata:cve CVE_2021_44228, stage trigger; sid:1000001; rev:1;)
+alert http any any -> any any (msg:"LOCAL CVE-2021-44228 Log4Shell JNDI lookup in URI"; flow:established,to_server; http.uri; content:"|24 7b|jndi|3a|"; nocase; reference:cve,2021-44228; classtype:attempted-admin; sid:1000002; rev:1;)
+alert http any any -> any any (msg:"LOCAL CVE-2021-44228 Log4Shell JNDI lookup in body"; flow:established,to_server; http.request_body; content:"|24 7b|jndi|3a|"; nocase; reference:cve,2021-44228; classtype:attempted-admin; sid:1000003; rev:1;)
+alert http any any -> any any (msg:"LOCAL CVE-2021-44228 Log4Shell obfuscated JNDI lookup"; flow:established,to_server; http.header; content:"|24 7b 24 7b|"; pcre:"/\$\{\$\{(lower|upper|env|sys|date|::-)[^}]*\}[^}]*jndi/i"; nocase; reference:cve,2021-44228; classtype:attempted-admin; metadata:stage trigger-obfuscated; sid:1000004; rev:1;)
+
+# ---- CVE-2021-44228 Log4Shell: outbound LDAP/RMI callout (post-trigger, strongest signal) ----
+alert tcp $HOME_NET any -> $EXTERNAL_NET [389,636,1099] (msg:"LOCAL CVE-2021-44228 Log4Shell outbound LDAP/RMI callout"; flow:established,to_server; reference:cve,2021-44228; classtype:trojan-activity; metadata:stage callout; sid:1000005; rev:1;)
+
+# ---- CVE-2017-5638 Struts S2-045: OGNL in Content-Type ----
+alert http any any -> any any (msg:"LOCAL CVE-2017-5638 Struts2 S2-045 OGNL in Content-Type"; flow:established,to_server; http.content_type; content:"%{"; nocase; pcre:"/(%|\$)\{.*(#_?memberAccess|\@java\.lang\.Runtime\@|\@java\.lang\.ProcessBuilder\@|#cmd|ognl)/i"; reference:cve,2017-5638; classtype:attempted-admin; metadata:cve CVE_2017_5638, stage foothold; sid:1000006; rev:1;)
+alert http any any -> any any (msg:"LOCAL CVE-2017-5638 Struts2 S2-045 OGNL multipart marker"; flow:established,to_server; http.header; content:"multipart"; nocase; content:"%{"; distance:0; reference:cve,2017-5638; classtype:attempted-admin; sid:1000007; rev:1;)

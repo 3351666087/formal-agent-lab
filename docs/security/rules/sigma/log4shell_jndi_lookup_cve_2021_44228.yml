@@ -1,0 +1,37 @@
+title: Log4Shell JNDI Lookup Attempt (CVE-2021-44228)
+id: 6f3a1d2e-4b7c-4a2f-9b10-1c0f44228aaa
+status: experimental
+description: >
+  Detects the Log4Shell JNDI-lookup trigger in attacker-controllable HTTP request fields (headers, URI, body),
+  including common obfuscations. Maps to model stage attacker_input_logged -> jndi_lookup_triggered in
+  packages/domain-mal/cve_2021_44228.py.
+references:
+  - https://nvd.nist.gov/vuln/detail/CVE-2021-44228
+  - https://logging.apache.org/log4j/2.x/security.html
+author: formal-agent-lab
+date: 2026/10/16
+logsource:
+  category: webserver
+detection:
+  keywords:
+    - '${jndi:'
+    - '${jndi:ldap'
+    - '${jndi:ldaps'
+    - '${jndi:rmi'
+    - '${jndi:dns'
+    - '${jndi:nis'
+    - '${jndi:iiop'
+    - '${${lower:j}ndi'
+    - '${${upper:j}ndi'
+    - '${${::-j}${::-n}${::-d}${::-i}'
+    - '${${env:BARFOO:-j}ndi'
+  condition: keywords
+falsepositives:
+  - Security scanners and WAF test traffic
+  - Legitimate payloads that quote these strings (rare)
+level: high
+tags:
+  - attack.initial_access
+  - attack.t1190
+  - attack.execution
+  - attack.t1203

@@ -1,0 +1,36 @@
+title: Apache Struts S2-045 OGNL Injection in Content-Type (CVE-2017-5638)
+id: 6f3a1d2e-4b7c-4a2f-9b10-1c0f05638ccc
+status: experimental
+description: >
+  Detects an OGNL expression carried in the Content-Type (or Content-Disposition/Content-Length) header - the
+  CVE-2017-5638 trigger that the Jakarta Multipart parser evaluates. Maps to model stage foothold in
+  packages/domain-mal/cve_2017_5638.py.
+references:
+  - https://nvd.nist.gov/vuln/detail/CVE-2017-5638
+  - https://cwiki.apache.org/confluence/display/WW/S2-045
+author: formal-agent-lab
+date: 2026/10/16
+logsource:
+  category: webserver
+detection:
+  content_type_ognl:
+    cs-content-type|contains:
+      - '%{'
+      - '${'
+  ognl_tokens:
+    '|all':
+      - '(#_memberAccess'
+  rce_tokens:
+    cs-content-type|contains:
+      - '@java.lang.Runtime@'
+      - '@java.lang.ProcessBuilder@'
+      - '#cmd='
+      - 'getRuntime().exec'
+  condition: content_type_ognl and (ognl_tokens or rce_tokens)
+falsepositives:
+  - Rare legitimate Content-Type values containing %{ or ${
+level: high
+tags:
+  - attack.initial_access
+  - attack.t1190
+  - attack.execution
