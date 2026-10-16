@@ -18,7 +18,7 @@ The relocation advances through six ordered phases; the project succeeds when `r
 - remote_pass_mfa: use_remote_pass
 - gate_inspection: reuse_legacy_terminal
 
-**Policies in force**: staff_training, mail_scanning
+**Policies in force**: mail_scanning, staff_training
 
 **Tasks**:
 - `reuse_legacy_terminal` — completes project_kickoff (after start); blocked by terminal_maintenance, gate_inspection

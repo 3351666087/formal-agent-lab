@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Phase-8 check for the cyber-rename study: the study validates and keeps data separation; every reference answer
 is reproduced by the Z3 verifier; each logistics task is structure-identical to its attackmodel twin modulo the
-committed rename map; and no attack-model vocabulary leaks into the logistics inputs. No model call. Writes
+committed rename map; and no attack-model vocabulary leaks into the logistics OR the abstract-control inputs. The
+study carries three representations (attackmodel / logistics / abstract). No model call. Writes
 docs/execution/evidence/research/cyber/rename-check.json.
 
     uv run --frozen python scripts/cyber_rename_check.py
@@ -48,7 +49,8 @@ def main() -> int:
             f"{len(units)} planned units; data separation (ANSWER_LEAK) enforced by load_study")
 
     reps = {t.representation_id for t in study.tasks}
-    r.check("both_representations", {"attackmodel", "logistics"} <= reps, f"representations: {sorted(reps)}")
+    r.check("representations_present", {"attackmodel", "logistics", "abstract"} <= reps,
+            f"representations: {sorted(reps)} (attackmodel = CVE-named, logistics = disguised, abstract = control)")
 
     # every attackmodel reference is reproduced by the Z3 verifier
     z = Z3Verifier()
@@ -118,6 +120,15 @@ def main() -> int:
         missing += [n for n in renamed if n in toks and n not in md]
     r.check("no_attack_vocabulary_in_logistics", not leaks, f"leaks: {sorted(set(leaks))[:5]}")
 
+    # the abstract control arm must also carry no attack vocabulary (semantically-empty names only)
+    abstract_leaks = []
+    for t in study.tasks:
+        if t.representation_id != "abstract":
+            continue
+        toks = _tokens((STUDY / t.inputs[0]).read_text())
+        abstract_leaks += [w for w in ATTACK_VOCAB if any(tok.lower().startswith(w) for tok in toks)]
+    r.check("no_attack_vocabulary_in_abstract", not abstract_leaks, f"leaks: {sorted(set(abstract_leaks))[:5]}")
+
     # shared reference pairing: logistics twins point at the attackmodel reference (same ground truth)
     shared = all(t.reference == f"reference/{t.task_id.replace('-l-', '-a-')}.json"
                  for t in study.tasks if t.representation_id == "logistics")
@@ -128,8 +139,9 @@ def main() -> int:
                                      "conclusion": {"study_validates": bool(units),
                                                     "references_z3_reproducible": not bad,
                                                     "rename_map_total": l4j_ok and eqx_ok,
-                                                    "no_vocabulary_leak": not leaks,
-                                                    "mechanism": "same formal structure, renamed nouns, shared Z3 "
+                                                    "no_vocabulary_leak": not leaks and not abstract_leaks,
+                                                    "mechanism": "same formal structure, three vocabularies "
+                                                                 "(attackmodel / logistics / abstract), shared Z3 "
                                                                  "ground truth"}})
     r.evidence(EV / "rename-check.json")
     return r.finish()

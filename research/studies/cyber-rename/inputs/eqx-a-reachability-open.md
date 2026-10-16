@@ -18,7 +18,7 @@ The breach advances through six ordered stages; the attacker wins when `exfiltra
 - vpn_mfa: vpn_pivot
 - waf: exploit_struts_cve_2017_5638
 
-**Deployed controls**: security_awareness, email_filtering
+**Deployed controls**: email_filtering, security_awareness
 
 **Techniques**:
 - `exploit_struts_cve_2017_5638` — crosses foothold (after start); blocked by patch_struts, waf
