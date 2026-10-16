@@ -65,22 +65,43 @@
 
 深色模式与窄屏：[run-batch-dark.png](docs/assets/screens/run-batch-dark.png) · [landing-dark.png](docs/assets/screens/landing-dark.png) · [run-narrow.png](docs/assets/screens/run-narrow.png)。
 
-## 安全领域：攻击图、准入 Broker、红蓝对抗
+## 安全领域：真实攻击模型、真实 CVE、红蓝对抗与拒答敏感性
 
-同一条回路也用在安全领域：导入一张 coreLang 攻击图作为形式模型，有界验证器给出到目标步骤的可达见证，一个**逐动作的准入 Broker** 在每次发送前按当时的状态判定，红蓝对抗中攻击方只看到自己视图内的位置，整个运行同样导出成可离线阅读的回放包。领域能力全部通过平台的公开插件接口接入（模型前端、执行门控、策略、环境），核心引擎不含任何领域专有逻辑。下面四张图来自同一次真实运行（`tests/integration/test_product_flow_b3.py`，MAL net-app-data 攻击图）。
+同一条回路也用在安全领域——而且是**真实攻击模型**，不是攻击图抽象：状态是真实安全态势（立足点、管理员、窃得的凭据、网络可达、数据外泄），动作是攻击技术（带真实前提与效果），防御是模型常量，攻击目标由 **Z3 规划**到达；每个问题的基准答案都是 Z3 验证器。两个案例直接取自知名项目真实重大漏洞的 commit，做易受攻击版本 → 修复版本的对照：
 
-<table>
-<tr>
-<td width="50%"><img src="docs/assets/screens/b3-model-import.png" alt="模型工作台：导入 MAL 攻击图"><br><sub><b>导入攻击图</b>：coreLang 攻击图经模型前端（<code>mal-attack-graph/v1</code>）编译为确定性有限模型，保留原始攻击图扩展；结构图呈现攻击步骤 → <code>compromise</code> 动作 → 到达 <code>secret:read</code>。</sub></td>
-<td width="50%"><img src="docs/assets/screens/b3-scenario-gates.png" alt="场景：执行前门控"><br><sub><b>执行前门控</b>：场景表单按顺序配置两个门控——凭据签发（逐动作检查）与准入 Broker（LabPolicy / TargetSecurity 分离）；保存后固定在场景快照里。</sub></td>
-</tr>
-<tr>
-<td><img src="docs/assets/screens/b3-step-broker-decisions.png" alt="步骤详情：Broker 判定"><br><sub><b>每次发送前的判定</b>：签发方按当时的状态修订检查该攻击步骤的前提与目标可达性（Z3），再由 Broker 依凭据放行；步骤详情完整列出两条执行前决策。</sub></td>
-<td><img src="docs/assets/screens/b3-red-denied-step.png" alt="红蓝对抗：攻击方视角"><br><sub><b>红蓝对抗（攻击方视角）</b>：攻击方视图隐藏了加固位置；对一个已被防守方加固的步骤，签发方在当时修订上判定前提不成立 → <code>DENY</code> → 动作 <code>REJECTED</code>，从不发送（零副作用）。</sub></td>
-</tr>
-</table>
+- **Log4Shell（CVE-2021-44228 · Apache Log4j 2）**：发布链逐步建模（输入被记录 → 触发 JNDI 查找 → 连到攻击端点 → 返回恶意引用 → 远程类加载 → RCE）。Z3 判定 **2.14.1 可达 RCE、2.16.0 被阻断**；六步顺序链任一单一控制即可切断——纵深防御被证明而非断言。
+- **Struts/Equifax（CVE-2017-5638）**：S2-045 无认证 RCE 作为 2017 Equifax 泄露的初始访问，后续多阶段链（侦察 → 凭据 → 横向 → 读库 → 外泄 ≈1.43 亿条）；12 个控制、每阶段两条分支，阻断泄露的**最小控制集为 2**。
+- **实时红蓝对抗**：两个前沿模型在 Struts/Equifax 模型上实时规划攻防、彼此换边，形式模型当裁判（技术只在阶段前提成立且无阻断控制时生效）。结果如实记录，含拒答与弃权。
 
-准入与红蓝的边界说明见 [assurance-scope.md](docs/assurance-scope.md)（§1 模型内结论 / §2 实测结论分列）；基准页的红队策略配对比较见 [b3-benchmark.png](docs/assets/screens/b3-benchmark.png)，证据回放见 [b3-evidence-replay.png](docs/assets/screens/b3-evidence-replay.png)。这是一个面向防御研究与可复核性的实验台：攻击步骤是抽象攻击图上的节点选择，在模拟器内进行，不针对任何真实系统。
+```mermaid
+flowchart LR
+  subgraph M["真实攻击 / 防御模型"]
+    L["Log4Shell · CVE-2021-44228"]
+    E["Struts/Equifax · CVE-2017-5638"]
+    A["企业攻击模型"]
+  end
+  M --> Z{{"Z3 验证器 · 基准真值"}}
+  Z --> S["LLM 研究批次"]
+  Z --> R["实时红蓝对抗 · Opus 5.5 ↔ GPT"]
+  Z --> C["cyber-rename · 拒答敏感性（四臂）"]
+  M --> K["模型 ↔ 现实 · 隔离 K8s 部署 · 只读核实"]
+  K --> D["检测规则 · Sigma / Suricata"]
+```
+
+**模型 ↔ 现实（已验证）**：把两个易受攻击版本部署到一个隔离的 Kubernetes 命名空间（经授权的实验区），以**只读**管理员检查确认运行态与模型的 `vulnerable` 前提逐项吻合，于是 Z3 结论适用于真实部署——同一个控制在模型里和现实里切断同一条链。防御侧产出已入库（[模型↔现实对应](docs/security/cve-model-reality-correspondence.md)、[检测规则](docs/security/rules/)）；进攻侧产物（利用代码、RCE 标记、窃取的凭据/PII）保持本地、git 忽略，不入版本库。
+
+**拒答对措辞的敏感性（`cyber-rename`）**：同样两个 CVE 模型，结构完全相同、Z3 真值共享，用四套词汇各问一遍，走**官方** claude-opus-5-5——结果反直觉：
+
+| 词汇（框架） | 拒答率 |
+|---|---|
+| attackmodel（具名真实 CVE） | 0.50 |
+| abstract（语义空，无框架） | 0.67 |
+| logistics（中性物流伪装） | 0.75 |
+| anchored（中性 + 一句“防御演练”前言） | **1.00** |
+
+伪装成物流、或贴一句“这是防御安全演练”都**提高**了拒答（后者直接到 100%——自称防御正是越狱洗白的典型句式）；唯一压低拒答的是锚定在真实具名 CVE 上。凡被回答的单元 39/39 全部 Z3 正确。这是**稳健性 / 误拒**结论，不是越狱。详见 [refusal-sensitivity-cyber-rename.md](docs/security/refusal-sensitivity-cyber-rename.md)。
+
+领域能力全部通过平台的公开插件接口接入，核心引擎不含领域专有逻辑；边界说明见 [assurance-scope.md](docs/assurance-scope.md)（§1 模型内结论 / §2 实测结论分列）。攻击模型是抽象的命名条件，面向防御研究与可复核性，不是可操作的利用步骤。
 
 ## 功能地图
 
@@ -92,7 +113,7 @@
 | 实验运行台 | Temporal 持久运行：暂停 / 继续 / 取消 / 重跑，Worker 被杀后按步恢复；操作账本、对账与人工复核；批次轮次 | Web · `fal run` · `fal ops` |
 | 证据与回放 | 事件因果链、按步回放、效果差异与修订建议、回归案例、导出回放包并离线阅读 | Web · `fal export` · `fal replay` |
 | 基准对比 | 矩阵队列（失败可重跑、增量合并）、配对比较与区间、消融；复用键覆盖模型、插件、规则、视图、场景、种子、预算与扩展配置 | Web · `fal matrix` |
-| 安全领域（MAL / CAGE） | 导入 coreLang 攻击图→确定性可达性（原生模拟器/参考解释器/Z3 三引擎一致）；红蓝策略（规则/符号/混合、最小代价割）；准入 Broker（验证凭据、拒绝零副作用、LabPolicy/TargetSecurity/BusinessSLO 分离）；受控订单服务领域实验；CAGE 4 官方基线与配对评测 | `packages/domain-mal` · `packages/domain-broker` · `packages/environment-{mal,cage}` |
+| 安全领域（MAL / CAGE） | 真实攻击模型（状态=安全态势、技术=动作、Z3 规划到数据外泄）与真实 CVE 形式模型（Log4Shell、Struts/Equifax，易受攻击/修复版对照）；实时红蓝对抗；`cyber-rename` 拒答敏感性研究（官方模型）；准入 Broker（验证凭据、拒绝零副作用、LabPolicy/TargetSecurity 分离）；CAGE 4 官方基线与配对评测 | `packages/domain-mal` · `packages/domain-broker` · `packages/environment-{mal,cage}` |
 
 ## 快速开始（Ubuntu 24.04，或 macOS 上的 Colima 虚拟机）
 
@@ -113,6 +134,17 @@ fal export <run_id> -o wh.replay.zip        # 自包含回放包
 fal replay verify wh.replay.zip && fal replay batches wh.replay.zip   # 离线读取
 ```
 
+## 发布与镜像
+
+每个版本标签（`vX.Y.Z`）由 [`.github/workflows/release.yml`](.github/workflows/release.yml) 自动发布：四个 OCI 镜像（`api` · `worker` · `web` · `orders`）推到 GitHub Packages，并创建带全部 wheel 的 GitHub Release；镜像路径与 Helm chart 的 `image.registry` + `repository`（[`deploy/helm/.../values.yaml`](deploy/helm/formal-agent-lab/values.yaml)）对齐。
+
+```bash
+docker pull ghcr.io/3351666087/formal-agent-lab/api:0.5.0          # 另有 worker · web · orders；标签 0.5.0 / 0.5 / latest
+pip install --find-links <release-wheels-dir> formal-lab-sdk[offline]   # CLI + 离线回放
+```
+
+最新发布见 [Releases](https://github.com/3351666087/formal-agent-lab/releases/latest)，镜像与摘要见仓库的 [Packages](https://github.com/3351666087/formal-agent-lab/pkgs/container/formal-agent-lab%2Fapi)。
+
 ## 架构与运行流程
 
 <p align="center"><img src="docs/assets/architecture.svg" alt="架构：Web / CLI / SDK → FastAPI → PostgreSQL、Temporal、产物存储 → 轮次内核 → 插件" width="100%"></p>
@@ -121,6 +153,7 @@ fal replay verify wh.replay.zip && fal replay batches wh.replay.zip   # 离线�
 
 ## 文档
 
+- **研究轨与安全领域（阶段 5–8）**：模型↔程序对应与研究用例（5A/5B）· 真实端点调用与双模型评测（6A/6B，[phase6](docs/handoff/phase6.md)）· 保留案例与缺口关闭 K01–K03（[phase7](docs/handoff/phase7.md)）· 安全领域真实攻击模型 + 真实 CVE + 实时红蓝 + 模型↔现实（[phase8 交接](docs/handoff/phase8.md)）· 拒答敏感性研究 [refusal-sensitivity-cyber-rename.md](docs/security/refusal-sensitivity-cyber-rename.md) · 模型↔现实对应 [cve-model-reality-correspondence.md](docs/security/cve-model-reality-correspondence.md) · 检测规则 [docs/security/rules/](docs/security/rules/) · 检查 `make research-check`
 - **阶段四交接**：平台修复（A1–A5）[docs/execution/phase-4a.md](docs/execution/phase-4a.md) · 领域收口（B1–B3）[docs/execution/phase-4b.md](docs/execution/phase-4b.md) · 交接 [docs/handoff/phase4.md](docs/handoff/phase4.md) · 检查 `make phase4-check` / `make acceptance-local`
 - **阶段三交接**：通用平台与视觉（G1–G6）[docs/execution/phase-3a.md](docs/execution/phase-3a.md) · 领域集成（D1–D6）[docs/execution/phase-3b.md](docs/execution/phase-3b.md) · 交接 [docs/handoff/phase3.md](docs/handoff/phase3.md) · 保证范围 [docs/assurance-scope.md](docs/assurance-scope.md) · 验收 [docs/acceptance-phase3.md](docs/acceptance-phase3.md) · 研究读数 [docs/research-readout.md](docs/research-readout.md) · 检查 `make phase3-check` / `make acceptance-local` → [docs/execution/evidence/phase3/checks/](docs/execution/evidence/phase3/checks/results.json)
 - **设计系统**：[docs/design-system.md](docs/design-system.md)（tokens、组件、图表、页面、媒体生成命令、基准截图）· [Figma 设计文件](https://www.figma.com/design/uuV6JeilZQkhnIQcJYEUET)

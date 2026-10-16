@@ -78,7 +78,7 @@ jobs:
           TAG: ${{ github.ref_name }}
         run: |
           version="${TAG#v}"
-          notes="var/release-notes-${version}.md"
+          notes="docs/releases/${version}.md"
           if [ -f "$notes" ]; then
             gh release create "$TAG" dist/*.whl --title "$TAG" --notes-file "$notes" --verify-tag
           else
