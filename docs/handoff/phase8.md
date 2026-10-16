@@ -72,6 +72,9 @@ Write-up and defensive follow-through (committed, non-sensitive):
 - `docs/security/log4shell-struts-detection.md` — detection signatures + the fixes that cut each stage.
 - `docs/security/rules/` — importable **Sigma** (3 rules) and **Suricata** (`local-log4shell-struts.rules`, sid
   1000001+) covering the JNDI-lookup trigger, the outbound LDAP/RMI callout, and the Struts OGNL-in-Content-Type.
+- `docs/security/refusal-sensitivity-cyber-rename.md` — the four-arm + per-cue refusal-sensitivity study
+  (`attackmodel 0.50 < abstract 0.67 < logistics 0.75 < anchored 1.00`; coarse framing effect, brittle single-prompt
+  boundary), a verifier-grounded robustness/false-refusal result on the official `claude-opus-5-5`.
 
 This closes the model↔reality loop for the security domain the way the order-service cases close it for the
 conformance track: a machine-checked verdict, a real deployment, and a confirmed correspondence.
