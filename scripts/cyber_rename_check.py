@@ -49,8 +49,9 @@ def main() -> int:
             f"{len(units)} planned units; data separation (ANSWER_LEAK) enforced by load_study")
 
     reps = {t.representation_id for t in study.tasks}
-    r.check("representations_present", {"attackmodel", "logistics", "abstract"} <= reps,
-            f"representations: {sorted(reps)} (attackmodel = CVE-named, logistics = disguised, abstract = control)")
+    r.check("representations_present", {"attackmodel", "logistics", "abstract", "anchored"} <= reps,
+            f"representations: {sorted(reps)} (attackmodel = CVE-named, logistics = disguised, abstract = control, "
+            "anchored = abstract + defensive-framing paragraph)")
 
     # every attackmodel reference is reproduced by the Z3 verifier
     z = Z3Verifier()
@@ -140,9 +141,9 @@ def main() -> int:
                                                     "references_z3_reproducible": not bad,
                                                     "rename_map_total": l4j_ok and eqx_ok,
                                                     "no_vocabulary_leak": not leaks and not abstract_leaks,
-                                                    "mechanism": "same formal structure, three vocabularies "
-                                                                 "(attackmodel / logistics / abstract), shared Z3 "
-                                                                 "ground truth"}})
+                                                    "mechanism": "same formal structure, four vocabularies "
+                                                                 "(attackmodel / logistics / abstract / anchored), "
+                                                                 "shared Z3 ground truth"}})
     r.evidence(EV / "rename-check.json")
     return r.finish()
 
