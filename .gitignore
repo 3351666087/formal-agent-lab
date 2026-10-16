@@ -29,3 +29,20 @@ out/
 .DS_Store
 .idea/
 .vscode/
+
+# ---------------------------------------------------------------------------
+# Security lab (local only — NEVER commit)
+# The intentionally-vulnerable targets, the exploit code, the attacker/DB
+# manifests, the runbook and the captured evidence (RCE markers, stolen
+# credentials, exfiltrated PII) live under deploy/vuln-lab/. They stay on the
+# local machine for the researcher's own use and must never enter git history.
+deploy/vuln-lab/
+
+# Cluster credentials / kubeconfigs, wherever they land in the tree
+*kubeconfig*
+*.kubeconfig
+kube.config
+# Loose exploit / captured-evidence artifacts if ever created outside the lab dir
+# (scoped so it never touches the legitimate docs/execution/evidence research tree)
+/exploit/
+/evidence/
