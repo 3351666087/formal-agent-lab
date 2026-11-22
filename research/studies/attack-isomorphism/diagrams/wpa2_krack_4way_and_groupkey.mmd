@@ -1,0 +1,16 @@
+stateDiagram-v2
+    %% wpa2_krack_4way_and_groupkey — wireless key agreement (WPA2 4-way + group-key handshakes, 802.11)
+    [*] --> ptk_init
+    ptk_init --> ptk_start: msg1_received
+    ptk_start --> ptk_negotiating: msg3_received_mic_ok
+    ptk_negotiating --> ptk_done: unconditional_install
+    ptk_done --> gtk_rekeying: group_msg1_received
+    gtk_rekeying --> gtk_done: unconditional_gtk_install
+    ptk_start --> ptk_start: msg1_received
+    ptk_done --> ptk_start: msg1_received
+    gtk_done --> ptk_start: msg1_received
+    ptk_done --> key_reinstalled: replay_msg3
+    gtk_done --> key_reinstalled: replay_group_msg1
+    key_reinstalled --> [*]
+    class key_reinstalled bad
+    classDef bad fill:#d7263d,color:#fff,stroke:#8b0000;

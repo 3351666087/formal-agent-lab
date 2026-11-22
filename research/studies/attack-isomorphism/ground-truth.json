@@ -1,0 +1,259 @@
+{
+  "schema": "attack-isomorphism-groundtruth/v1",
+  "items": [
+    {
+      "key": "A_tcp_halfopen",
+      "attack": {
+        "name": "tcp_rfc793_half_open_attack",
+        "domain": "network transport protocol (TCP connection, RFC 793)",
+        "bad": [
+          "aborted"
+        ],
+        "shortest_path": {
+          "actions": [
+            "active_open_send_syn",
+            "inject_rst"
+          ],
+          "states": [
+            "closed",
+            "syn_sent",
+            "aborted"
+          ],
+          "length": 2
+        },
+        "minimal_defence": {
+          "size": 2,
+          "sets": [
+            [
+              "inject_rst",
+              "inject_in_window_syn"
+            ]
+          ],
+          "intended_controls": [
+            "inject_in_window_syn",
+            "inject_rst"
+          ],
+          "control_names": {
+            "inject_in_window_syn": "validate_in_window_syn",
+            "inject_rst": "authenticate_rst"
+          },
+          "success_state": [
+            "established"
+          ]
+        }
+      },
+      "real": {
+        "name": "tenancy_lease_lifecycle",
+        "domain": "residential tenancy / lease lifecycle (property management)",
+        "bad": [
+          "party_left_exposed"
+        ],
+        "shortest_path": {
+          "actions": [
+            "submit_application",
+            "abrupt_abandonment"
+          ],
+          "states": [
+            "vacant",
+            "application_submitted",
+            "party_left_exposed"
+          ],
+          "length": 2
+        },
+        "minimal_defence": {
+          "size": 2,
+          "sets": [
+            [
+              "abrupt_abandonment",
+              "unlawful_lockout"
+            ]
+          ],
+          "intended_controls": [
+            "abrupt_abandonment",
+            "unlawful_lockout"
+          ],
+          "control_names": {
+            "abrupt_abandonment": "require_formal_notice",
+            "unlawful_lockout": "escrow_deposit_and_access"
+          },
+          "success_state": [
+            "tenancy_active"
+          ]
+        }
+      },
+      "answers_correspond": true
+    },
+    {
+      "key": "B_tls_freak",
+      "attack": {
+        "name": "tls12_composite_handshake_flaws",
+        "domain": "transport security handshake (TLS 1.2, composite state machine)",
+        "bad": [
+          "weak_channel"
+        ],
+        "shortest_path": {
+          "actions": [
+            "client_hello_server_hello",
+            "skip_cert_accept_data"
+          ],
+          "states": [
+            "start",
+            "hello_exchanged",
+            "weak_channel"
+          ],
+          "length": 2
+        },
+        "minimal_defence": {
+          "size": 2,
+          "sets": [
+            [
+              "accept_export_grade_key",
+              "skip_cert_accept_data"
+            ]
+          ],
+          "intended_controls": [
+            "accept_export_grade_key",
+            "skip_cert_accept_data"
+          ],
+          "control_names": {
+            "accept_export_grade_key": "enforce_strong_ciphersuite",
+            "skip_cert_accept_data": "require_cert_before_data"
+          },
+          "success_state": [
+            "data_transfer"
+          ]
+        }
+      },
+      "real": {
+        "name": "loan_underwriting_pipeline",
+        "domain": "consumer loan underwriting & disbursement pipeline (lending risk / AML)",
+        "bad": [
+          "funded_without_verification"
+        ],
+        "shortest_path": {
+          "actions": [
+            "open_application",
+            "skip_identity_verification"
+          ],
+          "states": [
+            "prospect",
+            "application_received",
+            "funded_without_verification"
+          ],
+          "length": 2
+        },
+        "minimal_defence": {
+          "size": 2,
+          "sets": [
+            [
+              "accept_forged_income_proof",
+              "skip_identity_verification"
+            ]
+          ],
+          "intended_controls": [
+            "accept_forged_income_proof",
+            "skip_identity_verification"
+          ],
+          "control_names": {
+            "accept_forged_income_proof": "independent_income_verification",
+            "skip_identity_verification": "mandatory_identity_check"
+          },
+          "success_state": [
+            "funds_disbursed"
+          ]
+        }
+      },
+      "answers_correspond": true
+    },
+    {
+      "key": "C_wpa2_krack",
+      "attack": {
+        "name": "wpa2_krack_4way_and_groupkey",
+        "domain": "wireless key agreement (WPA2 4-way + group-key handshakes, 802.11)",
+        "bad": [
+          "key_reinstalled"
+        ],
+        "shortest_path": {
+          "actions": [
+            "msg1_received",
+            "msg3_received_mic_ok",
+            "unconditional_install",
+            "replay_msg3"
+          ],
+          "states": [
+            "ptk_init",
+            "ptk_start",
+            "ptk_negotiating",
+            "ptk_done",
+            "key_reinstalled"
+          ],
+          "length": 4
+        },
+        "minimal_defence": {
+          "size": 2,
+          "sets": [
+            [
+              "replay_msg3",
+              "replay_group_msg1"
+            ]
+          ],
+          "intended_controls": [
+            "replay_group_msg1",
+            "replay_msg3"
+          ],
+          "control_names": {
+            "replay_group_msg1": "gtk_replay_counter",
+            "replay_msg3": "ptk_replay_counter"
+          },
+          "success_state": [
+            "gtk_done"
+          ]
+        }
+      },
+      "real": {
+        "name": "credential_issuance_rotation",
+        "domain": "one-time credential issuance & periodic rotation (replay / idempotency)",
+        "bad": [
+          "credential_counter_reset"
+        ],
+        "shortest_path": {
+          "actions": [
+            "receive_request",
+            "receive_valid_proof",
+            "activate_credential",
+            "replay_issuance_proof"
+          ],
+          "states": [
+            "no_credential",
+            "request_pending",
+            "credential_minted",
+            "credential_active",
+            "credential_counter_reset"
+          ],
+          "length": 4
+        },
+        "minimal_defence": {
+          "size": 2,
+          "sets": [
+            [
+              "replay_issuance_proof",
+              "replay_rotation_request"
+            ]
+          ],
+          "intended_controls": [
+            "replay_issuance_proof",
+            "replay_rotation_request"
+          ],
+          "control_names": {
+            "replay_issuance_proof": "issuance_replay_check",
+            "replay_rotation_request": "rotation_replay_check"
+          },
+          "success_state": [
+            "rotation_active"
+          ]
+        }
+      },
+      "answers_correspond": true
+    }
+  ]
+}

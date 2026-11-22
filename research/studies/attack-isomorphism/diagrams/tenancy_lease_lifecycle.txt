@@ -1,0 +1,25 @@
+States: vacant, listed, application_submitted, application_under_review, tenancy_active, we_gave_notice, our_notice_acknowledged, they_gave_notice, mutual_notice, awaiting_handover, deposit_holding_period, party_left_exposed
+Initial state: vacant
+Designated state of interest: party_left_exposed
+Transitions (source --action--> destination):
+  vacant --list_unit--> listed
+  vacant --submit_application--> application_submitted
+  listed --receive_application_offer_terms--> application_under_review
+  application_submitted --receive_crossing_application--> application_under_review
+  application_submitted --accept_offered_terms--> tenancy_active
+  application_under_review --receive_signed_acceptance--> tenancy_active
+  application_under_review --give_move_out_notice--> we_gave_notice
+  tenancy_active --give_move_out_notice--> we_gave_notice
+  tenancy_active --acknowledge_their_notice--> they_gave_notice
+  we_gave_notice --receive_signed_acceptance--> our_notice_acknowledged
+  we_gave_notice --acknowledge_their_notice--> mutual_notice
+  we_gave_notice --receive_notice_and_acknowledge--> deposit_holding_period
+  our_notice_acknowledged --acknowledge_their_notice--> deposit_holding_period
+  they_gave_notice --give_move_out_notice--> awaiting_handover
+  mutual_notice --receive_signed_acceptance--> deposit_holding_period
+  awaiting_handover --receive_signed_acceptance--> vacant
+  deposit_holding_period --deposit_window_elapses--> vacant
+  application_submitted --abrupt_abandonment--> party_left_exposed
+  application_under_review --abrupt_abandonment--> party_left_exposed
+  tenancy_active --abrupt_abandonment--> party_left_exposed
+  tenancy_active --unlawful_lockout--> party_left_exposed

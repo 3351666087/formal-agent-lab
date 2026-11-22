@@ -1,0 +1,17 @@
+States: prospect, application_received, identity_documents_submitted, income_verification, underwriting_complete, applicant_signs, terms_locked, applicant_commits, loan_approved, funds_disbursed, funded_without_verification
+Initial state: prospect
+Designated state of interest: funded_without_verification
+Transitions (source --action--> destination):
+  prospect --open_application--> application_received
+  application_received --submit_identity_documents--> identity_documents_submitted
+  identity_documents_submitted --run_income_verification--> income_verification
+  income_verification --complete_underwriting_with_income--> underwriting_complete
+  identity_documents_submitted --complete_underwriting_fasttrack--> underwriting_complete
+  underwriting_complete --applicant_countersigns--> applicant_signs
+  applicant_signs --lock_terms--> terms_locked
+  terms_locked --applicant_commit--> applicant_commits
+  applicant_commits --lender_approve--> loan_approved
+  loan_approved --disburse_funds--> funds_disbursed
+  funds_disbursed --disburse_funds--> funds_disbursed
+  identity_documents_submitted --accept_forged_income_proof--> funded_without_verification
+  application_received --skip_identity_verification--> funded_without_verification

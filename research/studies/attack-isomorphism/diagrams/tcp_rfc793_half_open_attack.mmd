@@ -1,0 +1,27 @@
+stateDiagram-v2
+    %% tcp_rfc793_half_open_attack — network transport protocol (TCP connection, RFC 793)
+    [*] --> closed
+    closed --> listen: passive_open
+    closed --> syn_sent: active_open_send_syn
+    listen --> syn_received: recv_syn_send_synack
+    syn_sent --> syn_received: recv_syn_send_ack
+    syn_sent --> established: recv_synack_send_ack
+    syn_received --> established: recv_ack
+    syn_received --> fin_wait_1: close_send_fin
+    established --> fin_wait_1: close_send_fin
+    established --> close_wait: recv_fin_send_ack
+    fin_wait_1 --> fin_wait_2: recv_ack
+    fin_wait_1 --> closing: recv_fin_send_ack
+    fin_wait_1 --> time_wait: recv_finack_send_ack
+    fin_wait_2 --> time_wait: recv_fin_send_ack
+    close_wait --> last_ack: close_send_fin
+    closing --> time_wait: recv_ack
+    last_ack --> closed: recv_ack
+    time_wait --> closed: timeout_2msl
+    syn_sent --> aborted: inject_rst
+    syn_received --> aborted: inject_rst
+    established --> aborted: inject_rst
+    established --> aborted: inject_in_window_syn
+    aborted --> [*]
+    class aborted bad
+    classDef bad fill:#d7263d,color:#fff,stroke:#8b0000;

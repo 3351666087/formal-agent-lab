@@ -1,0 +1,14 @@
+States: ptk_init, ptk_start, ptk_negotiating, ptk_done, gtk_rekeying, gtk_done, key_reinstalled
+Initial state: ptk_init
+Designated state of interest: key_reinstalled
+Transitions (source --action--> destination):
+  ptk_init --msg1_received--> ptk_start
+  ptk_start --msg3_received_mic_ok--> ptk_negotiating
+  ptk_negotiating --unconditional_install--> ptk_done
+  ptk_done --group_msg1_received--> gtk_rekeying
+  gtk_rekeying --unconditional_gtk_install--> gtk_done
+  ptk_start --msg1_received--> ptk_start
+  ptk_done --msg1_received--> ptk_start
+  gtk_done --msg1_received--> ptk_start
+  ptk_done --replay_msg3--> key_reinstalled
+  gtk_done --replay_group_msg1--> key_reinstalled

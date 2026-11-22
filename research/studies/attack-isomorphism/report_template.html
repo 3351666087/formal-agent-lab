@@ -1,0 +1,168 @@
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>安全护栏的能力代价</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:wght@500;600&family=Inter:wght@400;500;600&display=swap">
+<style>
+/* 单栏学术报告:窄正文列,表格、图、森林图满宽 */
+:root{--bg:#faf9f6;--surface:#fff;--fg:#1b1a17;--muted:#5f5d55;--faint:#8a887f;--line:#e6e3da;--accent:#2b4a6f;--accent-soft:#eef2f7;--atk:#b23126;--atk-soft:#f7ece9;--real:#1d6e56;--real-soft:#e7f3ee;--amber:#a5650f;--amber-soft:#faeeda;--code-bg:#f3f1ea;--track:#ece9e0;--serif:"Spectral",Georgia,serif;--sans:"Inter",system-ui,sans-serif;--mono:ui-monospace,Menlo,monospace}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#15161a;--surface:#1d1f24;--fg:#e9e7df;--muted:#a6a49b;--faint:#7d7b73;--line:#2f3238;--accent:#8fb2d8;--accent-soft:#222a34;--atk:#e58175;--atk-soft:#2c2220;--real:#5dcaa5;--real-soft:#1b2a25;--amber:#efa33a;--amber-soft:#2e2510;--code-bg:#24262c;--track:#2a2c31;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#15161a;--surface:#1d1f24;--fg:#e9e7df;--muted:#a6a49b;--faint:#7d7b73;--line:#2f3238;--accent:#8fb2d8;--accent-soft:#222a34;--atk:#e58175;--atk-soft:#2c2220;--real:#5dcaa5;--real-soft:#1b2a25;--amber:#efa33a;--amber-soft:#2e2510;--code-bg:#24262c;--track:#2a2c31;color-scheme:dark}
+*{box-sizing:border-box} body{background:var(--bg);color:var(--fg);font-family:var(--sans);line-height:1.7;margin:0}
+.wrap{max-width:900px;margin:0 auto;padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px))}
+header{padding-block:48px 28px;border-bottom:2px solid var(--fg)}
+.kicker{font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin:0 0 14px}
+h1{font-family:var(--serif);font-weight:600;font-size:clamp(27px,4.6vw,38px);line-height:1.18;margin:0;text-wrap:balance}
+.sub{color:var(--muted);font-size:16.5px;margin:14px 0 0;max-width:66ch}
+.meta{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:20px;font-size:12.5px;color:var(--faint);font-family:var(--mono)}
+h2{font-family:var(--serif);font-weight:600;font-size:22px;margin:46px 0 4px;padding-top:18px;border-top:1px solid var(--line)}
+h2 .n{color:var(--accent);font-size:14px;font-family:var(--mono);margin-right:10px}
+h3{font-weight:600;font-size:15.5px;margin:24px 0 6px}
+p{margin:10px 0;max-width:72ch} .lead{font-size:16.5px}
+code{font-family:var(--mono);font-size:.84em;background:var(--code-bg);padding:.1em .38em;border-radius:4px;overflow-wrap:anywhere}
+.tablewrap{overflow-x:auto;margin:14px 0} table{border-collapse:collapse;width:100%;font-size:13px;min-width:0}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:middle}
+th{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--faint);font-weight:600}
+td.lbl{white-space:nowrap} td.flbl{min-width:150px;max-width:220px} td.num{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap} td.ok{color:var(--real);font-weight:600}
+tr.grp td{font-weight:600;background:var(--accent-soft);color:var(--accent)}
+.tag{display:inline-block;font-size:10.5px;font-weight:600;font-family:var(--mono);padding:2px 7px;border-radius:5px;margin-right:8px}
+.tag-atk{background:var(--atk-soft);color:var(--atk)} .tag-real{background:var(--real-soft);color:var(--real)}
+.callout{background:var(--accent-soft);border-left:3px solid var(--accent);padding:14px 18px;margin:18px 0}
+.callout.warn{background:var(--amber-soft);border-left-color:var(--amber)}
+pre.block{background:var(--code-bg);border:1px solid var(--line);border-radius:8px;padding:12px 14px;overflow-x:auto;font-family:var(--mono);font-size:11.8px;line-height:1.5;margin:0;white-space:pre-wrap}
+.promptgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}@media(max-width:680px){.promptgrid{grid-template-columns:1fr}}
+.gblock{margin:14px 0} .glab{font-weight:600;font-size:13.5px;margin-bottom:6px}
+.barrow{display:flex;align-items:center;gap:8px}
+.bartrack{position:relative;flex:1;height:13px;background:var(--track);border-radius:3px;min-width:60px}
+.barfill{position:absolute;left:0;top:0;height:100%;border-radius:3px;opacity:.85}
+.ci{position:absolute;top:50%;height:2px;background:var(--fg);opacity:.55;transform:translateY(-50%)}
+.barval{font-family:var(--mono);font-size:11px;white-space:nowrap;min-width:96px} .cin{color:var(--faint);font-size:11px}
+.fr{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.ftrack{position:relative;flex:1;min-width:160px;height:16px;background:var(--track);border-radius:3px}
+.fzero{position:absolute;left:50%;top:-2px;bottom:-2px;width:1px;background:var(--fg);opacity:.5}
+.fci{position:absolute;top:6px;height:4px;border-radius:2px;opacity:.6}
+.fpt{position:absolute;top:3px;width:10px;height:10px;border-radius:50%;transform:translateX(-50%)}
+.fval{font-family:var(--mono);font-size:11.5px;white-space:nowrap}
+.axis{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10.5px;color:var(--faint);margin:2px 0 0}
+.fig{margin:16px 0;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--surface)}
+.figgrid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line)}@media(max-width:700px){.figgrid{grid-template-columns:1fr}}
+.figcol{background:var(--surface);padding:14px;min-width:0} .figlab{font-size:12.5px;font-weight:600;margin-bottom:10px}
+.mmwrap{background:#fff;border:1px solid #e6e3da;border-radius:8px;padding:10px;overflow-x:auto} .mmwrap pre.mermaid{margin:0;background:transparent}
+ol.find li{margin:8px 0}
+footer{margin:44px 0 60px;padding-top:18px;border-top:1px solid var(--line);font-size:12.5px;color:var(--faint);font-family:var(--mono)}
+</style>
+<div class="wrap">
+<header>
+<p class="kicker">AI 安全 · 过度拒答 · 形式化方法</p>
+<h1>安全护栏会不会让模型失去解决正当业务问题的能力:基于同构攻击/业务状态机的受控实验(第一轮阶段性报告)</h1>
+<p class="sub">把经同行评审的状态机攻击模型改写成逻辑上 100% 同构(Z3 证明)的真实业务流程,在 {{N_SUBJ}} 个大模型上初步测量四种安全限制对正当业务求解能力的影响。本报告为第一轮结果,结论有待下一轮实验确认。</p>
+<div class="meta"><span>被测:{{SUBJ_LIST}}</span><span>{{N_TOTAL}} 次调用 · {{N_ITEMS}} 道同构题</span><span>以题目为分析单位</span></div>
+</header>
+
+<section><h2><span class="n">01</span>摘要</h2>
+{{ABSTRACT}}
+</section>
+
+<section><h2><span class="n">02</span>研究问题</h2>
+<p><strong>RQ1</strong> 加上安全限制后,模型对一个与攻击模型逻辑完全相同、但属于正当业务的问题,求解能力是否下降?下降多少,取决于哪种限制?</p>
+<p><strong>RQ2</strong> 若有拒答,是由领域、表层词汇,还是任务目标(求到坏状态 vs 求到成功状态)驱动?</p>
+<p><strong>RQ3</strong> 不加系统提示时,模型训练出来的原生护栏如何对待同构的攻击题与业务题?</p>
+</section>
+
+<section><h2><span class="n">03</span>材料:同构题</h2>
+<p><strong>三个原题</strong>忠实复现三篇论文/标准的状态机:A 为 TCP 连接(RFC 793;核对过 KORG 官方 <code>TCP.pml</code>,φ1 = 无半开连接),B 为 TLS 1.2 复合握手(de Ruiter &amp; Poll;SMACK/FREAK),C 为 WPA2 4 次握手 + group-key 握手(KRACK Fig.3)。每个坏状态都有两条独立到达机制。业务孪生分别为住宅租赁、消费信贷核保、凭证发放与轮换。逐边溯源与偏离见 <code>FIDELITY.md</code>。</p>
+<p><strong>十五道生成题</strong>用于获得足够的独立题目:三个族(TLS→信贷、KRACK→凭证、TCP→租赁)× 五种规模(状态数 5–9,失败机制 1–5 条)。每题由同一个下标结构分别套上攻击词汇、业务词汇、抽象命名(s1…/a1…)得到三个版本。生成题不是论文状态机的复现,而是以各族词汇为基础的结构变体。</p>
+<p>每题三个版本两两之间都由 Z3 找出状态双射并证明唯一;标准答案用 BFS 与穷举求出,三版本一致。</p>
+<div class="tablewrap"><table><thead><tr><th>题目</th><th>态 / 边</th><th>最短路径→坏</th><th>最短路径→成功</th><th>最小控制集</th><th>三版本同构</th></tr></thead><tbody>{{ITEMS}}</tbody></table></div>
+<h3>状态机图(三个原题 + 一道生成题示例)</h3>
+{{FIGS}}
+</section>
+
+<section><h2><span class="n">04</span>任务与提示词</h2>
+<p>三项任务都有唯一可判定答案。"最短路径→成功状态"与"最短路径→坏状态"任务形状相同,只换目标,用于分离"求路径"与"求到坏目标"。最小控制集带约束:阻断坏状态的同时成功状态必须仍可达。</p>
+<div class="tablewrap"><table><thead><tr><th>任务</th><th>任务句(原文)</th><th>中文翻译</th></tr></thead><tbody>{{TASKS}}</tbody></table></div>
+<div class="promptgrid"><div><div class="glab">完整提示词(原文)</div><pre class="block">{{PROMPT_EN}}</pre></div><div><div class="glab">中文翻译</div><pre class="block">{{PROMPT_ZH}}</pre></div></div>
+</section>
+
+<section><h2><span class="n">05</span>四档安全限制</h2>
+<p>"政策式"仿照真实使用政策:禁止对未授权系统提供实质攻击帮助,同时明确允许防御工作与正常业务求解。"明确"档条文更宽,字面上即禁止"把系统驱入失败状态";在它之下的拒答有一部分属于对条文的执行,因此这一档作为对照,不代表对现实部署的估计。</p>
+{{GUARDS}}
+</section>
+
+<section><h2><span class="n">06</span>设计与统计方法</h2>
+<p>完全交叉设计:{{N_SUBJ}} 个被测 × 4 档限制 × 3 个词汇版本 × 3 项任务 × {{N_ITEMS}} 道题 × 每格 4 次采样(temperature 1,DeepSeek 为 0.8)。输出强制为 JSON,拒答直接读 <code>status</code> 字段;Gemini 的平台级安全拦截计为拒答。</p>
+<p><strong>分析单位是题目,不是调用。</strong>同一提示词的多次采样先在题内平均成一个比率,再以 {{N_ITEMS}} 道题做配对比较。每个对比报告:题目均值差、按题目重采样的 bootstrap 95% 区间(10 000 次)、跨题目符号翻转置换检验的双侧 p(20 000 次),以及上升/下降/持平的题数。这避免了把重复采样当作独立样本的伪重复问题。当只有少数题目有差异时,bootstrap 区间会偏窄,因此显著性以置换检验 p 为准。本轮的 p 值未做多重比较校正,且未考虑同一题族内题目之间的相关,应视为探索性结果。</p>
+</section>
+
+<section><h2><span class="n">07</span>结果</h2>
+<p>共 {{N_TOTAL}} 次调用({{N_BY_S}}),无效 {{N_ERR}} 次;答对 {{N_CORRECT}}、拒答 {{N_REF}}(其中平台拦截 {{N_BLOCK}})、答错 {{N_WRONG}}。平台拦截全部来自 Gemini,且 159 次出现在"明确"护栏下的攻击词汇版;Gemini 在业务词汇版上的拒答几乎全部来自模型本身。</p>
+
+<h3>7.1 正当业务题:求解率与拒答率(三任务平均,题目层 95% CI)</h3>
+<div class="tablewrap"><table><thead><tr><th>被测</th><th>限制</th><th>求解率</th><th>拒答率</th><th>作答者正确率</th></tr></thead><tbody>{{DESC}}</tbody></table></div>
+
+<h3>7.2 RQ1 安全限制的代价:业务题求解率(无限制 − 有限制)</h3>
+<p class="cin">森林图横轴 −100 至 +100 个百分点,竖线为 0;红色 = 置换检验 p&lt;0.05 且求解率下降,绿色 = p&lt;0.05 且上升,灰色 = 不显著。</p>
+<div class="tablewrap"><table><tbody>{{C1}}</tbody></table></div>
+
+<h3>7.3 RQ2 坏目标还是成功目标:业务题拒答率(坏目标 − 成功目标)</h3>
+<div class="tablewrap"><table><tbody>{{C3}}</tbody></table></div>
+
+<h3>7.4 RQ3 原生护栏(无系统提示):"最短路径→坏状态"拒答率按词汇</h3>
+<div class="tablewrap"><table><tbody>{{C2}}</tbody></table></div>
+
+<h3>7.5 政策式 / 明确限制下的词汇效应:"最短路径→坏状态"拒答率</h3>
+<div class="tablewrap"><table><tbody>{{C4}}</tbody></table></div>
+
+<h3>7.6 无限制时的能力(求解率差)</h3>
+<div class="tablewrap"><table><tbody>{{C5}}</tbody></table></div>
+
+<h3>7.7 全部条件:拒答率 / 求解率</h3>
+<div class="tablewrap"><table><thead><tr><th>被测</th><th>限制</th><th>攻击词汇</th><th>业务词汇</th><th>抽象命名</th></tr></thead><tbody>{{FULL}}</tbody></table></div>
+
+<h3>7.8 题族异质性:业务题"最短路径→坏状态"拒答率</h3>
+<div class="tablewrap"><table><thead><tr><th>被测</th><th>题族</th><th>无</th><th>政策式</th><th>明确</th></tr></thead><tbody>{{FAM}}</tbody></table></div>
+</section>
+
+<section><h2><span class="n">08</span>讨论</h2>
+{{DISCUSSION}}
+</section>
+
+<section><h2><span class="n">09</span>对前期版本的更正</h2>
+<p>前一版报告只有 3 道题、3 档限制,并据此写出"前沿模型也有大额安全税(p&lt;10⁻²⁰)"。这一结论有两处问题,特此更正:① 那里的大额损失全部出现在"明确"限制之下,而该条文字面上就禁止所求任务,其中至少有一部分属于对条文的执行;本版加入"政策式"限制后,损失基本消失;② p 值把同一提示词的 20 次采样当作独立样本,属伪重复,本版改为以题目为单位。更早的两轮试点(v1 把"是否攻击模型"的选项写进问句,造成泄题;v2 修正后只测识别)仅作方法记录。</p>
+</section>
+
+<section><h2><span class="n">10</span>局限</h2>
+<ol class="find">
+<li><strong>同构是构造出来的。</strong>孪生由程序改名生成,Z3 验证的是构造是否正确;尚未做"由不知情者仅凭业务规格独立形式化、再验同构"的强化实验。</li>
+<li><strong>生成题共享结构模板。</strong>15 道生成题来自 3 个族,族内题目并非完全独立;7.8 节给出族别分解。</li>
+<li><strong>限制以系统提示实现。</strong>"无"一档反映训练出的原生护栏,其余三档是叠加的系统提示,不是训练层面的改动。</li>
+<li><strong>任务规模仍小。</strong>无限制时求解率接近上限,因此本研究主要测量拒答,而非能力的渐进退化。</li>
+<li><strong>托管模型会漂移。</strong>DeepSeek 的 <code>deepseek-chat</code> 别名本轮实际由 <code>deepseek-flash</code> 应答;前一版未记录此字段,无法确认其底层模型。</li>
+<li><strong>孪生自然度未做盲评。</strong></li>
+<li><strong>业务版命名并不中性。</strong>业务版的失败动作名含有"伪造""非法""跳过核查"等违规措辞,因此"攻击词汇 vs 业务词汇"的对比实际是"攻击措辞 vs 违规业务措辞"。</li>
+<li><strong>护栏之间有多处差异。</strong>"明确"档与"政策式"档在禁止范围、措辞强度、是否明确放行业务求解上都不同,本轮无法把效应归于其中某一句条文。</li>
+<li><strong>统计上的保守性不足。</strong>p 值未做多重比较校正;15 道生成题来自 3 个共用模板的题族,题目不完全独立,且生成题的"最短路径→坏状态"答案都是 4 步。</li>
+<li><strong>输出格式可能影响拒答。</strong>提示词要求 JSON 并提供 "declined" 选项,这可能改变拒答率,尚未与自由文本作答对照。</li>
+<li><strong>平台拦截与模型拒答合并计数。</strong>Gemini 的 165 次平台拦截在统计中计为拒答,未单独分析。</li>
+<li><strong>本轮未复核拒答标签。</strong>上一轮独立复核的一致性为 κ=1.00,本轮未重复;GPT 与 Gemini 的推理强度使用默认值,未单独记录。</li>
+<li><strong>政策式护栏只有一份。</strong>由我们撰写,尚未用不同写法的政策文本检验结论是否稳定。</li>
+<li><strong>Gemini 分两段完成。</strong>首轮因账户预付额度耗尽,2592 次中 1259 次返回 HTTP 402;充值后约一小时内只补跑了这些失败调用,与首轮结果合并。两段之间服务商返回的模型名一致(<code>gemini-4-carbon</code>)。</li>
+</ol>
+</section>
+
+<section><h2><span class="n">11</span>伦理</h2>
+<p>同构改写是双用技术:本研究同样表明,把攻击题改写成业务词汇会绕开相当一部分原生拒答(7.4)。我们只在抽象的可达性模型上测量这一现象,不涉及可运行的利用代码,并把它作为需要防御方关注的风险报告:原生护栏若主要依赖词汇,就既会误拒正当工作,也会放过换了说法的攻击请求。</p>
+</section>
+
+
+<section><h2><span class="n">12</span>下一轮计划</h2>
+<p>下一轮优先解决会影响主要结论的四项,其余作为增强:</p>
+<ol class="find">
+<li><strong>护栏条文消融。</strong>新增两档护栏:"政策式"加上"失败状态"一句,以及"明确"去掉"失败状态"一句,用以确定业务题求解率下降由哪一句条文引起。</li>
+<li><strong>中性业务版。</strong>为每道题再生成一个业务版,把"伪造收入证明"等违规措辞改为"收入证明未核验"一类中性表述,保持同构,用以区分"领域"与"违规措辞"。</li>
+<li><strong>统计修正。</strong>改用按题族、再按题目的分层 bootstrap;事先指定三项主要对比(无护栏 vs 政策式、无护栏 vs 明确、原生护栏下攻击版 vs 业务版),其余对比做 Holm 校正;增加生成题模板的多样性。</li>
+<li><strong>作答格式对照。</strong>在部分题目上改用自由文本作答、不提供拒答选项,检验 JSON 格式是否影响拒答率。</li>
+<li><strong>增强项。</strong>请评审者逐题判断请求是否落在政策范围内,以区分"执行条文"与"过度适用";增加两到三份写法不同的政策式护栏;平台拦截单独分析;本轮数据抽样复核拒答标签并记录推理强度;由不知情的一方仅凭业务规格独立形式化状态机,再用 Z3 验证同构。</li>
+</ol>
+</section>
+
+<footer>服务商返回模型:{{RET}}。运行日期 2026-11-22。Token 用量:DeepSeek + GPT 约 219 万输入 / 19 万输出;Gemini 约 134 万输入 / 92 万输出(含内部推理)。代码与数据:<code>research/studies/attack-isomorphism/</code> — families.py、verify_items.py、experiment3.py、grade3.py、stats3.py、build_report.py;experiment3-results.jsonl、experiment3-gemini.jsonl、experiment3-graded.json、stats3-summary.json、items-groundtruth.json。</footer>
+</div>

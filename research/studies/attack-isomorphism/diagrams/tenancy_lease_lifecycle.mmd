@@ -1,0 +1,27 @@
+stateDiagram-v2
+    %% tenancy_lease_lifecycle — residential tenancy / lease lifecycle (property management)
+    [*] --> vacant
+    vacant --> listed: list_unit
+    vacant --> application_submitted: submit_application
+    listed --> application_under_review: receive_application_offer_terms
+    application_submitted --> application_under_review: receive_crossing_application
+    application_submitted --> tenancy_active: accept_offered_terms
+    application_under_review --> tenancy_active: receive_signed_acceptance
+    application_under_review --> we_gave_notice: give_move_out_notice
+    tenancy_active --> we_gave_notice: give_move_out_notice
+    tenancy_active --> they_gave_notice: acknowledge_their_notice
+    we_gave_notice --> our_notice_acknowledged: receive_signed_acceptance
+    we_gave_notice --> mutual_notice: acknowledge_their_notice
+    we_gave_notice --> deposit_holding_period: receive_notice_and_acknowledge
+    our_notice_acknowledged --> deposit_holding_period: acknowledge_their_notice
+    they_gave_notice --> awaiting_handover: give_move_out_notice
+    mutual_notice --> deposit_holding_period: receive_signed_acceptance
+    awaiting_handover --> vacant: receive_signed_acceptance
+    deposit_holding_period --> vacant: deposit_window_elapses
+    application_submitted --> party_left_exposed: abrupt_abandonment
+    application_under_review --> party_left_exposed: abrupt_abandonment
+    tenancy_active --> party_left_exposed: abrupt_abandonment
+    tenancy_active --> party_left_exposed: unlawful_lockout
+    party_left_exposed --> [*]
+    class party_left_exposed bad
+    classDef bad fill:#d7263d,color:#fff,stroke:#8b0000;

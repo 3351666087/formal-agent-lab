@@ -1,0 +1,164 @@
+{
+  "schema": "attack-isomorphism/v1",
+  "twins": [
+    {
+      "key": "A_tcp_halfopen",
+      "attack_model": "tcp_rfc793_half_open_attack",
+      "attack_domain": "network transport protocol (TCP connection, RFC 793)",
+      "attack_source": "Pacheco et al. (KORG), TCP phi1; RFC 793 FSM; RFC 5961 (SYN injection)",
+      "real_model": "tenancy_lease_lifecycle",
+      "real_domain": "residential tenancy / lease lifecycle (property management)",
+      "states": 12,
+      "transitions": 21,
+      "constructive_check": {
+        "ok": true,
+        "errors": [],
+        "edges_compared": 21,
+        "attack_bad_reachable": true,
+        "real_bad_reachable": true
+      },
+      "z3_paired_actions": {
+        "exists": true,
+        "unique": true,
+        "witness_state_map": {
+          "closed": "vacant",
+          "listen": "listed",
+          "syn_sent": "application_submitted",
+          "syn_received": "application_under_review",
+          "established": "tenancy_active",
+          "fin_wait_1": "we_gave_notice",
+          "fin_wait_2": "our_notice_acknowledged",
+          "close_wait": "they_gave_notice",
+          "closing": "mutual_notice",
+          "last_ack": "awaiting_handover",
+          "time_wait": "deposit_holding_period",
+          "aborted": "party_left_exposed"
+        },
+        "free_actions": false
+      },
+      "z3_free_actions_structural": {
+        "exists": true,
+        "unique": true,
+        "witness_state_map": {
+          "closed": "vacant",
+          "listen": "listed",
+          "syn_sent": "application_submitted",
+          "syn_received": "application_under_review",
+          "established": "tenancy_active",
+          "fin_wait_1": "we_gave_notice",
+          "fin_wait_2": "our_notice_acknowledged",
+          "close_wait": "they_gave_notice",
+          "closing": "mutual_notice",
+          "last_ack": "awaiting_handover",
+          "time_wait": "deposit_holding_period",
+          "aborted": "party_left_exposed"
+        },
+        "free_actions": true
+      },
+      "z3_witness_equals_declared_map": true,
+      "verdict": "ISOMORPHIC"
+    },
+    {
+      "key": "B_tls_freak",
+      "attack_model": "tls12_composite_handshake_flaws",
+      "attack_domain": "transport security handshake (TLS 1.2, composite state machine)",
+      "attack_source": "de Ruiter & Poll (USENIX 2015); Beurdouche et al. SMACK/FREAK (S&P 2015)",
+      "real_model": "loan_underwriting_pipeline",
+      "real_domain": "consumer loan underwriting & disbursement pipeline (lending risk / AML)",
+      "states": 11,
+      "transitions": 13,
+      "constructive_check": {
+        "ok": true,
+        "errors": [],
+        "edges_compared": 13,
+        "attack_bad_reachable": true,
+        "real_bad_reachable": true
+      },
+      "z3_paired_actions": {
+        "exists": true,
+        "unique": true,
+        "witness_state_map": {
+          "start": "prospect",
+          "hello_exchanged": "application_received",
+          "cert_received": "identity_documents_submitted",
+          "server_key_exchange": "income_verification",
+          "server_hello_done": "underwriting_complete",
+          "client_key_exchange": "applicant_signs",
+          "cipher_changed": "terms_locked",
+          "client_finished": "applicant_commits",
+          "secure_channel": "loan_approved",
+          "data_transfer": "funds_disbursed",
+          "weak_channel": "funded_without_verification"
+        },
+        "free_actions": false
+      },
+      "z3_free_actions_structural": {
+        "exists": true,
+        "unique": true,
+        "witness_state_map": {
+          "start": "prospect",
+          "hello_exchanged": "application_received",
+          "cert_received": "identity_documents_submitted",
+          "server_key_exchange": "income_verification",
+          "server_hello_done": "underwriting_complete",
+          "client_key_exchange": "applicant_signs",
+          "cipher_changed": "terms_locked",
+          "client_finished": "applicant_commits",
+          "secure_channel": "loan_approved",
+          "data_transfer": "funds_disbursed",
+          "weak_channel": "funded_without_verification"
+        },
+        "free_actions": true
+      },
+      "z3_witness_equals_declared_map": true,
+      "verdict": "ISOMORPHIC"
+    },
+    {
+      "key": "C_wpa2_krack",
+      "attack_model": "wpa2_krack_4way_and_groupkey",
+      "attack_domain": "wireless key agreement (WPA2 4-way + group-key handshakes, 802.11)",
+      "attack_source": "Vanhoef & Piessens, KRACK (CCS 2017); 802.11 Fig. 13-17 supplicant SM",
+      "real_model": "credential_issuance_rotation",
+      "real_domain": "one-time credential issuance & periodic rotation (replay / idempotency)",
+      "states": 7,
+      "transitions": 10,
+      "constructive_check": {
+        "ok": true,
+        "errors": [],
+        "edges_compared": 10,
+        "attack_bad_reachable": true,
+        "real_bad_reachable": true
+      },
+      "z3_paired_actions": {
+        "exists": true,
+        "unique": true,
+        "witness_state_map": {
+          "ptk_init": "no_credential",
+          "ptk_start": "request_pending",
+          "ptk_negotiating": "credential_minted",
+          "ptk_done": "credential_active",
+          "gtk_rekeying": "rotation_pending",
+          "gtk_done": "rotation_active",
+          "key_reinstalled": "credential_counter_reset"
+        },
+        "free_actions": false
+      },
+      "z3_free_actions_structural": {
+        "exists": true,
+        "unique": true,
+        "witness_state_map": {
+          "ptk_init": "no_credential",
+          "ptk_start": "request_pending",
+          "ptk_negotiating": "credential_minted",
+          "ptk_done": "credential_active",
+          "gtk_rekeying": "rotation_pending",
+          "gtk_done": "rotation_active",
+          "key_reinstalled": "credential_counter_reset"
+        },
+        "free_actions": true
+      },
+      "z3_witness_equals_declared_map": true,
+      "verdict": "ISOMORPHIC"
+    }
+  ]
+}

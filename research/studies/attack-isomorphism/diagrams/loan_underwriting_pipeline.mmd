@@ -1,0 +1,19 @@
+stateDiagram-v2
+    %% loan_underwriting_pipeline — consumer loan underwriting & disbursement pipeline (lending risk / AML)
+    [*] --> prospect
+    prospect --> application_received: open_application
+    application_received --> identity_documents_submitted: submit_identity_documents
+    identity_documents_submitted --> income_verification: run_income_verification
+    income_verification --> underwriting_complete: complete_underwriting_with_income
+    identity_documents_submitted --> underwriting_complete: complete_underwriting_fasttrack
+    underwriting_complete --> applicant_signs: applicant_countersigns
+    applicant_signs --> terms_locked: lock_terms
+    terms_locked --> applicant_commits: applicant_commit
+    applicant_commits --> loan_approved: lender_approve
+    loan_approved --> funds_disbursed: disburse_funds
+    funds_disbursed --> funds_disbursed: disburse_funds
+    identity_documents_submitted --> funded_without_verification: accept_forged_income_proof
+    application_received --> funded_without_verification: skip_identity_verification
+    funded_without_verification --> [*]
+    class funded_without_verification bad
+    classDef bad fill:#d7263d,color:#fff,stroke:#8b0000;

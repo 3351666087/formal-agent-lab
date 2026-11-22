@@ -1,0 +1,19 @@
+stateDiagram-v2
+    %% tls12_composite_handshake_flaws — transport security handshake (TLS 1.2, composite state machine)
+    [*] --> start
+    start --> hello_exchanged: client_hello_server_hello
+    hello_exchanged --> cert_received: server_certificate
+    cert_received --> server_key_exchange: server_key_exchange_dhe
+    server_key_exchange --> server_hello_done: server_hello_done_dhe
+    cert_received --> server_hello_done: server_hello_done_rsa
+    server_hello_done --> client_key_exchange: client_key_exchange_msg
+    client_key_exchange --> cipher_changed: change_cipher_spec
+    cipher_changed --> client_finished: client_finished_msg
+    client_finished --> secure_channel: server_change_cipher_finished
+    secure_channel --> data_transfer: application_data
+    data_transfer --> data_transfer: application_data
+    cert_received --> weak_channel: accept_export_grade_key
+    hello_exchanged --> weak_channel: skip_cert_accept_data
+    weak_channel --> [*]
+    class weak_channel bad
+    classDef bad fill:#d7263d,color:#fff,stroke:#8b0000;

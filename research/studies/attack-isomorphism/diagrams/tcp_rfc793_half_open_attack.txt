@@ -1,0 +1,25 @@
+States: closed, listen, syn_sent, syn_received, established, fin_wait_1, fin_wait_2, close_wait, closing, last_ack, time_wait, aborted
+Initial state: closed
+Designated state of interest: aborted
+Transitions (source --action--> destination):
+  closed --passive_open--> listen
+  closed --active_open_send_syn--> syn_sent
+  listen --recv_syn_send_synack--> syn_received
+  syn_sent --recv_syn_send_ack--> syn_received
+  syn_sent --recv_synack_send_ack--> established
+  syn_received --recv_ack--> established
+  syn_received --close_send_fin--> fin_wait_1
+  established --close_send_fin--> fin_wait_1
+  established --recv_fin_send_ack--> close_wait
+  fin_wait_1 --recv_ack--> fin_wait_2
+  fin_wait_1 --recv_fin_send_ack--> closing
+  fin_wait_1 --recv_finack_send_ack--> time_wait
+  fin_wait_2 --recv_fin_send_ack--> time_wait
+  close_wait --close_send_fin--> last_ack
+  closing --recv_ack--> time_wait
+  last_ack --recv_ack--> closed
+  time_wait --timeout_2msl--> closed
+  syn_sent --inject_rst--> aborted
+  syn_received --inject_rst--> aborted
+  established --inject_rst--> aborted
+  established --inject_in_window_syn--> aborted
